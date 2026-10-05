@@ -1,0 +1,8174 @@
+{
+ "candidateClassCounts": {
+  "code_exact_name_mismatch": 3611,
+  "code_name_exact_unique": 5,
+  "name_exact_ambiguous": 23,
+  "name_exact_code_mismatch": 169,
+  "name_unavailable": 475,
+  "no_exact_match": 274,
+  "special_account_not_evaluated": 698
+ },
+ "distanceByMof": [
+  {
+   "amountPatternsAllRows": {
+    "PRD": 59
+   },
+   "amountPatternsExactRows": {},
+   "bucket01": "1.7",
+   "candidateRows": 59,
+   "codeNameExactRows": 0,
+   "distinctMofItems": 0,
+   "distinctMofItemsFromUniqueRows": 0,
+   "exactOverlapShare": 0,
+   "generalClassCounts": {
+    "code_exact_name_mismatch": 50,
+    "name_exact_code_mismatch": 9
+   },
+   "generalRows": 59,
+   "ministries": 21,
+   "pdfs": 22
+  },
+  {
+   "amountPatternsAllRows": {
+    "PRD": 210
+   },
+   "amountPatternsExactRows": {
+    "PRD": 4
+   },
+   "bucket01": "8.6",
+   "candidateRows": 210,
+   "codeNameExactRows": 4,
+   "distinctMofItems": 4,
+   "distinctMofItemsFromUniqueRows": 4,
+   "exactOverlapShare": 0.005102,
+   "generalClassCounts": {
+    "code_name_exact_unique": 4,
+    "name_exact_ambiguous": 21,
+    "name_exact_code_mismatch": 149,
+    "name_unavailable": 1,
+    "no_exact_match": 1
+   },
+   "generalRows": 176,
+   "ministries": 27,
+   "pdfs": 44
+  },
+  {
+   "amountPatternsAllRows": {
+    "PRD": 9
+   },
+   "amountPatternsExactRows": {},
+   "bucket01": "15.5",
+   "candidateRows": 9,
+   "codeNameExactRows": 0,
+   "distinctMofItems": 0,
+   "distinctMofItemsFromUniqueRows": 0,
+   "exactOverlapShare": 0,
+   "generalClassCounts": {},
+   "generalRows": 0,
+   "ministries": 8,
+   "pdfs": 8
+  },
+  {
+   "amountPatternsAllRows": {
+    "-RD": 11,
+    "P-D": 28,
+    "PRD": 2038
+   },
+   "amountPatternsExactRows": {},
+   "bucket01": "22.4",
+   "candidateRows": 2077,
+   "codeNameExactRows": 0,
+   "distinctMofItems": 0,
+   "distinctMofItemsFromUniqueRows": 0,
+   "exactOverlapShare": 0,
+   "generalClassCounts": {
+    "code_exact_name_mismatch": 1526,
+    "name_exact_ambiguous": 2,
+    "name_exact_code_mismatch": 7,
+    "name_unavailable": 152,
+    "no_exact_match": 170
+   },
+   "generalRows": 1857,
+   "ministries": 28,
+   "pdfs": 56
+  },
+  {
+   "amountPatternsAllRows": {
+    "-RD": 30,
+    "P-D": 60,
+    "PRD": 2709
+   },
+   "amountPatternsExactRows": {
+    "PRD": 1
+   },
+   "bucket01": "29.3",
+   "candidateRows": 2799,
+   "codeNameExactRows": 1,
+   "distinctMofItems": 1,
+   "distinctMofItemsFromUniqueRows": 1,
+   "exactOverlapShare": 0.001276,
+   "generalClassCounts": {
+    "code_exact_name_mismatch": 2035,
+    "code_name_exact_unique": 1,
+    "name_exact_code_mismatch": 4,
+    "name_unavailable": 322,
+    "no_exact_match": 103
+   },
+   "generalRows": 2465,
+   "ministries": 28,
+   "pdfs": 49
+  },
+  {
+   "amountPatternsAllRows": {
+    "PRD": 78
+   },
+   "amountPatternsExactRows": {},
+   "bucket01": "36.2",
+   "candidateRows": 78,
+   "codeNameExactRows": 0,
+   "distinctMofItems": 0,
+   "distinctMofItemsFromUniqueRows": 0,
+   "exactOverlapShare": 0,
+   "generalClassCounts": {},
+   "generalRows": 0,
+   "ministries": 8,
+   "pdfs": 8
+  },
+  {
+   "amountPatternsAllRows": {
+    "PRD": 23
+   },
+   "amountPatternsExactRows": {},
+   "bucket01": "43.1",
+   "candidateRows": 23,
+   "codeNameExactRows": 0,
+   "distinctMofItems": 0,
+   "distinctMofItemsFromUniqueRows": 0,
+   "exactOverlapShare": 0,
+   "generalClassCounts": {},
+   "generalRows": 0,
+   "ministries": 7,
+   "pdfs": 7
+  }
+ ],
+ "distinctMofExactOverlap": {
+  "anyUniqueOrAmbiguous": 5,
+  "denominator": 784,
+  "uniqueRowsOnly": 5
+ },
+ "frozen": {
+  "data/normalized/mof/fy2024/budget-jikou.jsonl": "a63f50504c821ad7aff9fe1c96c80635dda978ea0870976d15f9bc9735d3ef7e",
+  "docs/tasks/20261005_1930_Budget_Request_RuleLine_Item_Population_Inventory_Protocol.md": "3b04ce00a8f1d991077d94fe740efff06c0d03819e24ac1a1e528e4f4ff9f0c0",
+  "scripts/pipeline-v2/lib/budget-request-mof-reconciliation.ts": "da08b37713ecee53b642f74a0098a129de6a1e1e7ccebfb822228309acb8c19a",
+  "tests/fixtures/budget-request-full-corpus-baseline/2024/corpus-manifest.json": "4a2a10ec46d75cf90d11b441a7a162654daefb008bb92edf3d264f8d118dde7a",
+  "tests/fixtures/budget-request-pdf-item-candidate-count/2024/candidate-count.json": "35ffc096496ff9af7ab62ac5848b2ddef19ae0211f441193bf05598e7990d508",
+  "tests/fixtures/budget-request-pdf-item-candidate-count/2024/mof-exact-name-diagnostic.json": "3a731169b4e826faab10d0110c622e95fa5942c06181c9c5cda2dd18a296855d",
+  "tests/fixtures/mof-jikou-normalized/2024/202411001-integration-evaluation.json": "066dc9cd35e7ab301b409491206c48b4de9a582bb72a0c48c045e65a7cf2973e"
+ },
+ "generalCandidates": 4557,
+ "mof": {
+  "distinctCodes": 259,
+  "distinctNormalizedNames": 750,
+  "generalSections": 784
+ },
+ "mofSideInventory": {
+  "code_exact_only": 490,
+  "code_name_exact_candidate": 5,
+  "name_exact_only": 183,
+  "no_candidate_in_universe": 106
+ },
+ "mofSideRows": [
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "024",
+   "id": "mofsec_00bc35fba0b17b48e893",
+   "matchedBuckets": [],
+   "ministry": "防衛省",
+   "name": "令和5年度潜水艦建造費",
+   "organization": "防衛本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "002",
+   "id": "mofsec_01cccb8dd95bd75f7441",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "文部科学本省施設費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "009",
+   "id": "mofsec_024bf044817d49461749",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "貨幣製造及信用秩序制度等企画立案費",
+   "organization": "財務本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "112",
+   "id": "mofsec_02c041785169d1e224e1",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "国立ハンセン病療養所施設費",
+   "organization": "国立ハンセン病療養所"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "223",
+   "id": "mofsec_03f24d666dce7d65af9f",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "独立行政法人国際観光振興機構運営費",
+   "organization": "観光庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "084",
+   "id": "mofsec_041f3f8f6f2f9c4ef96f",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "農業農村整備事業工事諸費",
+   "organization": "地方農政局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "016",
+   "id": "mofsec_0456984a2f57998b08f9",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "特定国有財産整備諸費",
+   "organization": "財務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "010",
+   "id": "mofsec_0457ff06e8b7fcb4d0b6",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "関税制度等企画立案費",
+   "organization": "財務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "136",
+   "id": "mofsec_04dd869dfaf7e2d10785",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "交通警察費",
+   "organization": "警察庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "017",
+   "id": "mofsec_0589d0cdb81f97717744",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "下水道事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "170",
+   "id": "mofsec_058d29886f9fb6570c6a",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "都市環境整備事業工事諸費",
+   "organization": "地方整備局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "002",
+   "id": "mofsec_05a2968cc56771da09c1",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "農林水産本省施設費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "311",
+   "id": "mofsec_05fcbb11e06ceb14b718",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "こども家庭庁共通費",
+   "organization": "こども家庭庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "014",
+   "id": "mofsec_06267e5b23c529da607e",
+   "matchedBuckets": [],
+   "ministry": "防衛省",
+   "name": "令和3年度甲Ⅴ型警備艦建造費",
+   "organization": "防衛本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "014",
+   "id": "mofsec_065b8778d42c65117a1e",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "産業保安確保費",
+   "organization": "経済産業本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "004",
+   "id": "mofsec_06ad1a564fb2da746564",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "医療従事者等確保対策費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "354",
+   "id": "mofsec_06d6ba7f159add45510b",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "多目的ダム建設事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "003",
+   "id": "mofsec_06dd56eab5bdb81fdd56",
+   "matchedBuckets": [],
+   "ministry": "内閣",
+   "name": "情報収集衛星業務費",
+   "organization": "内閣官房"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "085",
+   "id": "mofsec_06f44082b8d43fe0662c",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "農業施設災害復旧事業等工事諸費",
+   "organization": "地方農政局"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "142",
+   "id": "mofsec_077b42beb54fc4c309af",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "保険医療機関等指導監督等実施費",
+   "organization": "地方厚生局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "014",
+   "id": "mofsec_07c896b306cca8609f18",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "環境・経済・社会の統合的向上費",
+   "organization": "環境本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "001",
+   "id": "mofsec_0805db3326c0092af8f9",
+   "matchedBuckets": [],
+   "ministry": "防衛省",
+   "name": "防衛本省共通費",
+   "organization": "防衛本省"
+  },
+  {
+   "account": "general",
+   "class": "code_name_exact_candidate",
+   "code": "374",
+   "id": "mofsec_08275c3907b3f0d82137",
+   "matchedBuckets": [
+    "8.6"
+   ],
+   "ministry": "国土交通省",
+   "name": "附帯・受託工事費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "058",
+   "id": "mofsec_082865817be54d47ded4",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "鉄道網整備推進費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "066",
+   "id": "mofsec_083f0591c324c7d36140",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "防衛力強化のための資金へ繰入",
+   "organization": "財務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "089",
+   "id": "mofsec_0892dd7e16f5d2cc4a9b",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "北海道特定特別総合開発事業推進費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "111",
+   "id": "mofsec_08a3f9cf6651965bb5c2",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "林業振興対策費",
+   "organization": "林野庁"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "007",
+   "id": "mofsec_08ca2f37b5a384a96122",
+   "matchedBuckets": [],
+   "ministry": "外務省",
+   "name": "領事政策費",
+   "organization": "外務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "022",
+   "id": "mofsec_08fc1320c8a64ec1769e",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "脱炭素成長型経済構造移行推進エネルギー対策特別会計へ繰入",
+   "organization": "環境本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "058",
+   "id": "mofsec_091f7925a8eb19df50af",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "国際交流・協力推進費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "code_name_exact_candidate",
+   "code": "500",
+   "id": "mofsec_0962a98bfa97402ea939",
+   "matchedBuckets": [
+    "8.6"
+   ],
+   "ministry": "防衛省",
+   "name": "防衛装備庁共通費",
+   "organization": "防衛装備庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "098",
+   "id": "mofsec_0a016312f5f0777426d7",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "独立行政法人国立科学博物館施設整備費",
+   "organization": "文化庁"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "031",
+   "id": "mofsec_0a30ffe9935febc400c3",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "健康増進対策費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "141",
+   "id": "mofsec_0a3a9b7580760c78f1d7",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "地方厚生局共通費",
+   "organization": "地方厚生局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "017",
+   "id": "mofsec_0a98bc18926fbc5e642f",
+   "matchedBuckets": [],
+   "ministry": "防衛省",
+   "name": "令和4年度潜水艦建造費",
+   "organization": "防衛本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "368",
+   "id": "mofsec_0b547d7cc1f1fa2a1512",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "鉄道施設災害復旧事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "031",
+   "id": "mofsec_0c7b0fb0d17987fbc6ec",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "地方環境事務所共通費",
+   "organization": "地方環境事務所"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "034",
+   "id": "mofsec_0c9467f7350a35d4c1a0",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "船舶建造費",
+   "organization": "税関"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "197",
+   "id": "mofsec_0c9c3dd26fb7af2c1d22",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "特定石綿被害建設業務労働者等給付金等支給諸費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "004",
+   "id": "mofsec_0ce5ba79d82057f445a9",
+   "matchedBuckets": [],
+   "ministry": "内閣",
+   "name": "情報収集衛星施設費",
+   "organization": "内閣官房"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "314",
+   "id": "mofsec_0d5be75e595f1652833b",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "子ども・子育て支援年金特別会計へ繰入",
+   "organization": "こども家庭庁"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "085",
+   "id": "mofsec_0db8945b47019434802f",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "国際機関活動推進費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "171",
+   "id": "mofsec_0df3ed738944565bef7e",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "北海道開発局共通費",
+   "organization": "北海道開発局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "004",
+   "id": "mofsec_0e0601b3481b73888ea3",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "独立行政法人経済産業研究所運営費",
+   "organization": "経済産業本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "064",
+   "id": "mofsec_0e6834fe5c1ef7c29912",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "生活保護等対策費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "013",
+   "id": "mofsec_0ec13713707ad2e770a1",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "緑地環境対策費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "042",
+   "id": "mofsec_0f1454c6b4c7103f8e77",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "行政評価等実施費",
+   "organization": "管区行政評価局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "009",
+   "id": "mofsec_0f6fa5ce1188a7250dc3",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "国立研究開発法人産業技術総合研究所運営費",
+   "organization": "経済産業本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "255",
+   "id": "mofsec_1050860685d58687ae71",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "船舶交通安全基盤整備事業費",
+   "organization": "海上保安庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "004",
+   "id": "mofsec_10b1cbbd015b134c6e36",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "住宅対策諸費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "152",
+   "id": "mofsec_10cee5a2b9a1f55b3e3a",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "金融政策費",
+   "organization": "金融庁"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "027",
+   "id": "mofsec_122c0215173154dc7b64",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "研究振興費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "104",
+   "id": "mofsec_12313ceeadb9c60ac737",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "スポーツ振興費",
+   "organization": "スポーツ庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "021",
+   "id": "mofsec_124bfbafb3b2eccfd42c",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "市街地防災事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "043",
+   "id": "mofsec_1287a8b8fa1bcc6d48c1",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "税務業務費",
+   "organization": "国税庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "187",
+   "id": "mofsec_129cfd44d5c9f6f45242",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "沖縄振興交付金事業推進費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "226",
+   "id": "mofsec_134c241d9fd234f273ca",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "国際観光旅客税財源独立行政法人国際観光振興機構運営費",
+   "organization": "観光庁"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "049",
+   "id": "mofsec_13dca9be55926daad4f5",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "失業等給付費等労働保険特別会計へ繰入",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "361",
+   "id": "mofsec_13fb927a85f1ebd3742f",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "道路交通円滑化事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "004",
+   "id": "mofsec_149fee6a1940491fb36e",
+   "matchedBuckets": [],
+   "ministry": "防衛省",
+   "name": "武器車両等整備費",
+   "organization": "防衛本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "197",
+   "id": "mofsec_14b8743ab1dcdbfbbbf6",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "沖縄国立大学法人施設整備費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "287",
+   "id": "mofsec_15382a9ba75787486bee",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "物価高騰対応地方創生推進費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "001",
+   "id": "mofsec_15aa6fe9c6c5bce984fa",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "総務本省共通費",
+   "organization": "総務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "034",
+   "id": "mofsec_15dc8eac0be9fe919a39",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "男女共同参画社会形成促進費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "225",
+   "id": "mofsec_15f436597854a491a19e",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "国際観光旅客税財源観光振興費",
+   "organization": "観光庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "104",
+   "id": "mofsec_161b3dc2e2506578a2ed",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "沖縄港湾空港整備事業工事諸費",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "104",
+   "id": "mofsec_169a45530c86aa098d5d",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "国立研究開発法人森林研究・整備機構施設整備費",
+   "organization": "林野庁"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "027",
+   "id": "mofsec_16a740add90d04c8d645",
+   "matchedBuckets": [],
+   "ministry": "外務省",
+   "name": "経済協力費",
+   "organization": "在外公館"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "003",
+   "id": "mofsec_16c208ae23704c016431",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "医療提供体制確保対策費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "109",
+   "id": "mofsec_176f2f1b50bbb3e54890",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "借入金利子国有林野事業債務管理特別会計へ繰入",
+   "organization": "林野庁"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "232",
+   "id": "mofsec_17fa59b2e8b54427e95e",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "総合特区推進調整費",
+   "organization": "地方創生推進事務局"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "051",
+   "id": "mofsec_18b18828b69730017ea1",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "農林水産本省検査指導所",
+   "organization": "農林水産本省検査指導機関"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "075",
+   "id": "mofsec_193fb4c527010152af99",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "独立行政法人海技教育機構施設整備費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "021",
+   "id": "mofsec_19d59035c9d9ecc5b392",
+   "matchedBuckets": [],
+   "ministry": "防衛省",
+   "name": "防衛力基盤強化推進費",
+   "organization": "防衛本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "019",
+   "id": "mofsec_19eb0a2ef19f954496d4",
+   "matchedBuckets": [],
+   "ministry": "国会",
+   "name": "参議院予備経費",
+   "organization": "参議院"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "050",
+   "id": "mofsec_1a3322d066d5cfeb783f",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "アイヌ政策推進費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "009",
+   "id": "mofsec_1a5b7ec46d7db5ca092e",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "食料安全保障確立対策費食料安定供給特別会計へ繰入",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "013",
+   "id": "mofsec_1a85306c31536d093c41",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "独立行政法人情報処理推進機構運営費",
+   "organization": "経済産業本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "002",
+   "id": "mofsec_1a8556e79d7e4dc08e3c",
+   "matchedBuckets": [],
+   "ministry": "国会",
+   "name": "衆議院施設費",
+   "organization": "衆議院"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "015",
+   "id": "mofsec_1ac1e2f8b5f0d4debf4b",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "国立研究開発法人情報通信研究機構運営費",
+   "organization": "総務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "022",
+   "id": "mofsec_1b087d4921ad3c915296",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "情報通信国際戦略推進費",
+   "organization": "総務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "038",
+   "id": "mofsec_1b08bb23cb7e8f8f6d11",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "海岸事業調査諸費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "023",
+   "id": "mofsec_1b19085d25bee5d2c647",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "独立行政法人家畜改良センター施設整備費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "020",
+   "id": "mofsec_1b39908b134fa64365fb",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "国立研究開発法人農業・食品産業技術総合研究機構運営費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "008",
+   "id": "mofsec_1be55443075437f4f45f",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "食料安全保障確立対策費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "317",
+   "id": "mofsec_1c90e0521c82cf570721",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "国立児童自立支援施設",
+   "organization": "こども家庭庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "008",
+   "id": "mofsec_1c9944b741a17e470144",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "債権管理回収業審査監督費",
+   "organization": "法務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "008",
+   "id": "mofsec_1cd11d53f3e1fb5f8cb8",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "生物多様性保全等推進費",
+   "organization": "環境本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "003",
+   "id": "mofsec_1d4d96f87d41e353f4a7",
+   "matchedBuckets": [],
+   "ministry": "防衛省",
+   "name": "自衛官給与費",
+   "organization": "防衛本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "011",
+   "id": "mofsec_1d581497c188c8ddffda",
+   "matchedBuckets": [],
+   "ministry": "防衛省",
+   "name": "令和元年度潜水艦建造費",
+   "organization": "防衛本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "004",
+   "id": "mofsec_1d8bb54e3ce8799de456",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "独立行政法人国立公文書館運営費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "100",
+   "id": "mofsec_1e66f7b4f886d3358389",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "国立研究開発法人海上・港湾・航空技術研究所施設整備費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "162",
+   "id": "mofsec_1ea0a44ce4401fc3a844",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "労使関係等安定形成促進費",
+   "organization": "中央労働委員会"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "008",
+   "id": "mofsec_1ef0567fe557217950f7",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "国債費",
+   "organization": "財務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "089",
+   "id": "mofsec_1faa4f03c6f613a92779",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "国立研究開発法人医薬基盤・健康・栄養研究所運営費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "131",
+   "id": "mofsec_1faf94f9c0a6b7b41b8b",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "国土技術政策総合研究所共通費",
+   "organization": "国土技術政策総合研究所"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "103",
+   "id": "mofsec_20768216a29faff4cb2b",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "沖縄災害復旧事業工事諸費",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "036",
+   "id": "mofsec_207e1822e59d2604325e",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "鉄道安全対策事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "083",
+   "id": "mofsec_2122ed6964bc20a5abe0",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "海岸事業工事諸費",
+   "organization": "地方農政局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "031",
+   "id": "mofsec_21d6ac7d31c19c91770b",
+   "matchedBuckets": [],
+   "ministry": "国会",
+   "name": "裁判官訴追委員会",
+   "organization": "裁判官訴追委員会"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "097",
+   "id": "mofsec_21da10590adde7af5732",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "独立行政法人国立科学博物館運営費",
+   "organization": "文化庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "061",
+   "id": "mofsec_220414d472f65ac87dd4",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "法務局共通費",
+   "organization": "法務局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "179",
+   "id": "mofsec_2204bf351e75b743efbb",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "北海道国営公園等事業工事諸費",
+   "organization": "北海道開発局"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "002",
+   "id": "mofsec_22515473a00655200d3e",
+   "matchedBuckets": [],
+   "ministry": "裁判所",
+   "name": "下級裁判所",
+   "organization": "裁判所"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "069",
+   "id": "mofsec_23002052c8225f7264f0",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "国土交通統計調査費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "134",
+   "id": "mofsec_238c93d79d7c18fe900e",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "国立障害者リハビリテーションセンター運営費",
+   "organization": "国立障害者リハビリテーションセンター"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "037",
+   "id": "mofsec_23ad9ab80dc355685361",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "道路交通安全対策費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "023",
+   "id": "mofsec_24631299b073226f9b03",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "都市公園防災事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "003",
+   "id": "mofsec_24f2a19d4729877a1731",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "財政健全化推進費",
+   "organization": "財務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "038",
+   "id": "mofsec_251d351fd9cb2b4cd4f7",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "総合的物流体系整備推進費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "037",
+   "id": "mofsec_25822788edcf6a82625f",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "国立研究開発法人海洋研究開発機構施設整備費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "235",
+   "id": "mofsec_25cb6f5791e2a21e94ac",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "特定地域づくり事業推進費",
+   "organization": "地方創生推進事務局"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "375",
+   "id": "mofsec_25e00e84fbad471c5816",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "防災・減災対策等強化事業推進費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "088",
+   "id": "mofsec_267ae501d006cbf912ae",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "文化財保存事業費",
+   "organization": "文化庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "043",
+   "id": "mofsec_276a201fbcf3a040e7a7",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "矯正収容費",
+   "organization": "矯正官署"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "053",
+   "id": "mofsec_27a1dac387b1a88bdfa0",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "航空機燃料税財源空港整備事業費自動車安全特別会計へ繰入",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "030",
+   "id": "mofsec_281534d1f100a0832b28",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "農村整備推進対策費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "032",
+   "id": "mofsec_2858be7c7b44f9f86ef7",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "検察費",
+   "organization": "検察庁"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "033",
+   "id": "mofsec_28977df8c1bc0b9f62d9",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "農山漁村活性化対策費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "359",
+   "id": "mofsec_28e208a57adda94d573c",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "地域連携道路事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "083",
+   "id": "mofsec_28e8ed2188c51fcc54d1",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "石油石炭税財源燃料安定供給対策及エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入",
+   "organization": "資源エネルギー庁"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "012",
+   "id": "mofsec_28e9f7ac096c42b39963",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "情報処理・サービス・製造産業振興費",
+   "organization": "経済産業本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "173",
+   "id": "mofsec_2921699a4ac394b94b6c",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "国立研究開発法人国立循環器病研究センター運営費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "003",
+   "id": "mofsec_298937fe4423fb73a5d8",
+   "matchedBuckets": [],
+   "ministry": "デジタル庁",
+   "name": "情報通信技術調達等適正・効率化推進費",
+   "organization": "デジタル庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "021",
+   "id": "mofsec_29a92c7277ec909d332c",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "財務局共通費",
+   "organization": "財務局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "191",
+   "id": "mofsec_2a148145ba1d009966d1",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "原子力災害対策費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "018",
+   "id": "mofsec_2aaaa7696eed876177c0",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "地球温暖化防止等対策費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "108",
+   "id": "mofsec_2b5c3d94cab2dd0fb035",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "沖縄海岸事業調査諸費",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "084",
+   "id": "mofsec_2baa7acb1fffbd033602",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ繰入",
+   "organization": "資源エネルギー庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "063",
+   "id": "mofsec_2bd52ded2419631784f3",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "農林水産業イノベーション創出・技術開発推進費",
+   "organization": "農林水産技術会議"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "016",
+   "id": "mofsec_2c6ed7b25ff6c84c028d",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "国立研究開発法人情報通信研究機構施設整備費",
+   "organization": "総務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "061",
+   "id": "mofsec_2c763c2d71fbacef99db",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "北方対策本部",
+   "organization": "北方対策本部"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "123",
+   "id": "mofsec_2cb06e417169ba8a6453",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "血清等製造及検定費",
+   "organization": "厚生労働本省試験研究機関"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "033",
+   "id": "mofsec_2cc45d0b88f35de91a57",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "公共交通等安全対策費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "041",
+   "id": "mofsec_2d0af0e958ad1208435e",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "矯正官署共通費",
+   "organization": "矯正官署"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "016",
+   "id": "mofsec_2d1f58ceb7e4cb7aaa97",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "都市水環境整備事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "049",
+   "id": "mofsec_2d3cc3e7e80bd930bbaa",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "整備新幹線整備事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "113",
+   "id": "mofsec_2d7fee125588b5650b2e",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "国立ハンセン病療養所運営費",
+   "organization": "国立ハンセン病療養所"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "023",
+   "id": "mofsec_2da2a91af691a927ad79",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "郵政行政推進費",
+   "organization": "総務本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "021",
+   "id": "mofsec_2dcfab405e5b39667ff9",
+   "matchedBuckets": [],
+   "ministry": "内閣",
+   "name": "人事院",
+   "organization": "人事院"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "005",
+   "id": "mofsec_2e09925321fce3fa54da",
+   "matchedBuckets": [],
+   "ministry": "裁判所",
+   "name": "裁判所施設費",
+   "organization": "裁判所"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "084",
+   "id": "mofsec_2e3f07485032b31202d4",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "業務取扱費年金特別会計へ繰入",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "009",
+   "id": "mofsec_2eb4f34ec15ffbd113d3",
+   "matchedBuckets": [],
+   "ministry": "外務省",
+   "name": "独立行政法人国際協力機構運営費",
+   "organization": "外務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "039",
+   "id": "mofsec_2ecda523161845702c59",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "農業農村整備事業調査諸費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "138",
+   "id": "mofsec_2ef68e3efed0d5a165f6",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "港湾空港整備事業工事諸費",
+   "organization": "国土技術政策総合研究所"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "064",
+   "id": "mofsec_2f492d4203aa9a32ecee",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "復興事業費等東日本大震災復興特別会計へ繰入",
+   "organization": "財務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "138",
+   "id": "mofsec_2f7d7b60eaf419724a11",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "保険料国庫負担金等食料安定供給特別会計へ繰入",
+   "organization": "水産庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "018",
+   "id": "mofsec_2f831f359ae19f1674d1",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "医薬品適正使用推進費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "173",
+   "id": "mofsec_2fb71b24b21fd28183ca",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "北海道開発行政推進費",
+   "organization": "北海道開発局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "106",
+   "id": "mofsec_2fd489ff96ed19ba1e23",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "国際協力費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "183",
+   "id": "mofsec_2fe322b949e6deaaacbb",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "国立研究開発法人国立長寿医療研究センター施設整備費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "003",
+   "id": "mofsec_2ff124263ca0a05488b1",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "教育政策推進費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "285",
+   "id": "mofsec_3040bed673a16cbdd2a6",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "孤独・孤立対策推進費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "288",
+   "id": "mofsec_307a53794f1f268b498e",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "地方創生地域産業基盤整備事業推進費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "008",
+   "id": "mofsec_307bddac2ddb97ea8dc6",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "登録免許税納付確認等事務費特許特別会計へ繰入",
+   "organization": "経済産業本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "052",
+   "id": "mofsec_31f6d9c946ba5053be13",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "国立研究開発法人防災科学技術研究所施設整備費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "002",
+   "id": "mofsec_3218b51a81c0883d997c",
+   "matchedBuckets": [],
+   "ministry": "内閣",
+   "name": "内閣官房施設費",
+   "organization": "内閣官房"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "076",
+   "id": "mofsec_3295dd37526e8617e009",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "国土形成推進費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "164",
+   "id": "mofsec_32f0bed17034776ed799",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "食品衛生基準政策費",
+   "organization": "消費者庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "136",
+   "id": "mofsec_3336436d84eda965fa8e",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "治水海岸事業工事諸費",
+   "organization": "国土技術政策総合研究所"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "019",
+   "id": "mofsec_339823e4fa6247732d66",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "国立研究開発法人国立環境研究所運営費",
+   "organization": "環境本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "283",
+   "id": "mofsec_3405dc63d98278b1bd08",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "水資源開発施設災害復旧事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "012",
+   "id": "mofsec_346b50cdb80f5371998d",
+   "matchedBuckets": [],
+   "ministry": "防衛省",
+   "name": "令和2年度甲Ⅴ型警備艦建造費",
+   "organization": "防衛本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "277",
+   "id": "mofsec_34fe771b9761716a8dd6",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "国営公園等事業調査諸費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "358",
+   "id": "mofsec_351f5c1419f2f80dd05f",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "エネルギー・鉄鋼港湾施設工事費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "026",
+   "id": "mofsec_35a929bcb8be88a4ff53",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "農業・食品産業強化対策費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "096",
+   "id": "mofsec_3627d5e92ebe146452db",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "独立行政法人鉄道建設・運輸施設整備支援機構運営費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "052",
+   "id": "mofsec_367369fcd252884837b4",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "更生保護活動費",
+   "organization": "更生保護官署"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "112",
+   "id": "mofsec_3707284ed8c38e79f37e",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "自動車重量税業務取扱費自動車安全特別会計へ繰入",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "014",
+   "id": "mofsec_3724476c27db65331f9e",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "農地集積・集約化等対策費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "009",
+   "id": "mofsec_373265874bfe7743f52a",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "独立行政法人教職員支援機構運営費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "276",
+   "id": "mofsec_379c995832693a374ac0",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "住宅建設事業調査諸費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "137",
+   "id": "mofsec_380ffbe518101ddaeecc",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "道路整備事業工事諸費",
+   "organization": "国土技術政策総合研究所"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "084",
+   "id": "mofsec_381daa9fd559762fac9c",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "独立行政法人国立美術館運営費",
+   "organization": "文化庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "137",
+   "id": "mofsec_383c540446aa07fdbbdd",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "警備警察費",
+   "organization": "警察庁"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "178",
+   "id": "mofsec_3844b16c0501a850520e",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "国立研究開発法人国立成育医療研究センター運営費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "352",
+   "id": "mofsec_3869f8c17d4b9b881773",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "道路環境改善事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "092",
+   "id": "mofsec_387e2ebe63a52e999703",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "職務上年金給付費年金特別会計へ繰入",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "008",
+   "id": "mofsec_393c11b3c7bd77f977b7",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "独立行政法人国立青少年教育振興機構施設整備費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "135",
+   "id": "mofsec_394b11656cb5268bc32c",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "組織犯罪対策費",
+   "organization": "警察庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "007",
+   "id": "mofsec_395b4bc07723a7b10ab9",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "更生保護企画調整推進費",
+   "organization": "法務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "009",
+   "id": "mofsec_39613695a0eb0caf2be3",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "地方交付税交付金",
+   "organization": "総務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "041",
+   "id": "mofsec_3968bd844af934701cb9",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "管区行政評価局共通費",
+   "organization": "管区行政評価局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "048",
+   "id": "mofsec_39734c467e2aa026ec69",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "整備新幹線建設推進高度化等事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "103",
+   "id": "mofsec_39877eddd144206ce0cf",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "検疫業務等実施費",
+   "organization": "検疫所"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "008",
+   "id": "mofsec_39f8e8f3ffe244a8d0b8",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "海洋環境対策費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "071",
+   "id": "mofsec_3a68c7929dfbd3b60ed7",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "恩給進達等実施費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "011",
+   "id": "mofsec_3a7607105bd14c6eba87",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "水資源対策費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "028",
+   "id": "mofsec_3b633fbf2a088aae13df",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "環境本省施設費",
+   "organization": "環境本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "051",
+   "id": "mofsec_3b83e13d028529e55313",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "国立研究開発法人防災科学技術研究所運営費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "042",
+   "id": "mofsec_3b8c08fef105eac423e9",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "国立研究開発法人量子科学技術研究開発機構運営費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "014",
+   "id": "mofsec_3b9bbc9186981e0a22b6",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "情報通信技術研究開発推進費",
+   "organization": "総務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "007",
+   "id": "mofsec_3bb565d1690b23adc61d",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "独立行政法人国立青少年教育振興機構運営費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "055",
+   "id": "mofsec_3bbba6c5dc40d7476b27",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "独立行政法人高齢・障害・求職者雇用支援機構運営費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "081",
+   "id": "mofsec_3bce895910547a75af32",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "文化庁共通費",
+   "organization": "文化庁"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "132",
+   "id": "mofsec_3d0fe343633a35dd873f",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "警察庁施設費",
+   "organization": "警察庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "033",
+   "id": "mofsec_3d1197c5dde27ff04bbf",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "栄典行政費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "023",
+   "id": "mofsec_3d8c17f24ebde3b2df02",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "財務局業務費",
+   "organization": "財務局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "183",
+   "id": "mofsec_3dbd40f244393cc3a446",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "北海道道路整備事業工事諸費",
+   "organization": "北海道開発局"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "021",
+   "id": "mofsec_3ebec2f970d81723f34b",
+   "matchedBuckets": [],
+   "ministry": "外務省",
+   "name": "在外公館共通費",
+   "organization": "在外公館"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "085",
+   "id": "mofsec_3f480016e51af92fac7c",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "独立行政法人国立美術館施設整備費",
+   "organization": "文化庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "056",
+   "id": "mofsec_3fee7125211ae09d0ded",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "都市・地域づくり推進費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "124",
+   "id": "mofsec_40a61eff2142ab73dded",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "厚生労働本省試験研究所試験研究費",
+   "organization": "厚生労働本省試験研究機関"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "177",
+   "id": "mofsec_40aae2635ba8c018c371",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "国立研究開発法人国立国際医療研究センター施設整備費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "011",
+   "id": "mofsec_40c3284abb3a77dc60e9",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "独立行政法人国立特別支援教育総合研究所運営費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "042",
+   "id": "mofsec_415ed03e8483c221a1f3",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "矯正管理業務費",
+   "organization": "矯正官署"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "357",
+   "id": "mofsec_416345936c712f128c51",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "道路交通安全対策事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "044",
+   "id": "mofsec_41cbedd42865fd5f6e68",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "国税不服審判所",
+   "organization": "国税庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "066",
+   "id": "mofsec_41ecd86537f3a94f0401",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "社会資本整備・管理効率化推進費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "145",
+   "id": "mofsec_42430b9fd567158a1767",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "交通反則者納金財源交通安全対策特別交付金等交付税及び譲与税配付金特別会計へ繰入",
+   "organization": "警察庁"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "172",
+   "id": "mofsec_42437c695fb2c531fc2a",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "北海道開発局施設費",
+   "organization": "北海道開発局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "014",
+   "id": "mofsec_4266234d74f73f1a0b29",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "国営公園等事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "019",
+   "id": "mofsec_429a9a1129616c67bead",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "独立行政法人農畜産業振興機構運営費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "077",
+   "id": "mofsec_42a59573a2edb9bea521",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "独立行政法人福祉医療機構運営費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "122",
+   "id": "mofsec_42b1608056083f557dc4",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "厚生労働本省試験研究所施設費",
+   "organization": "厚生労働本省試験研究機関"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "073",
+   "id": "mofsec_43591b9f8345bd796f26",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "日本学士院",
+   "organization": "文部科学本省所轄機関"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "070",
+   "id": "mofsec_43656727ff964d6122f4",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "中国残留邦人等支援事業費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "010",
+   "id": "mofsec_43bffa660fdacaf022df",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "自然公園等事業費",
+   "organization": "環境本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "001",
+   "id": "mofsec_445adfca52b4ec781190",
+   "matchedBuckets": [],
+   "ministry": "国会",
+   "name": "衆議院",
+   "organization": "衆議院"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "014",
+   "id": "mofsec_44607d7d1c3ce060a404",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "特定国有財産整備費",
+   "organization": "財務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "046",
+   "id": "mofsec_44a80f1a7e23c4283e41",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "国立研究開発法人日本原子力研究開発機構施設整備費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "012",
+   "id": "mofsec_44e79a56dfcddaa4d5b0",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "独立行政法人国立特別支援教育総合研究所施設整備費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "105",
+   "id": "mofsec_45857963565499e7d277",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "情報化推進費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "001",
+   "id": "mofsec_46ba4d934e5aa9652bca",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "内閣本府共通費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "020",
+   "id": "mofsec_46c51bbf2999b57badf8",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "独立行政法人国立高等専門学校機構施設整備費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "025",
+   "id": "mofsec_47775edf61ec701135aa",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "農林水産政策研究所",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "068",
+   "id": "mofsec_47eaa6e13568464e0492",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "遺族及留守家族等援護費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "002",
+   "id": "mofsec_483f613b8b8cbe2d9b4d",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "総務本省施設費",
+   "organization": "総務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "015",
+   "id": "mofsec_48a23a309e870695dcd8",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "地域経済政策推進費",
+   "organization": "経済産業本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "003",
+   "id": "mofsec_49d3168ed878c91ec0fa",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "司法制度改革推進費",
+   "organization": "法務本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "071",
+   "id": "mofsec_4a0ccb9aea207ad0ab99",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "国立教育政策研究所",
+   "organization": "文部科学本省所轄機関"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "001",
+   "id": "mofsec_4a4341b7172a28900d29",
+   "matchedBuckets": [],
+   "ministry": "裁判所",
+   "name": "最高裁判所",
+   "organization": "裁判所"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "072",
+   "id": "mofsec_4a7d38fa14bddc4332b1",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "障害保健福祉費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "066",
+   "id": "mofsec_4a834373da4408dfd6c1",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "国立研究開発法人国際農林水産業研究センター運営費",
+   "organization": "農林水産技術会議"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "062",
+   "id": "mofsec_4b10d5e32cfd526f4029",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "独立行政法人北方領土問題対策協会運営費",
+   "organization": "北方対策本部"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "318",
+   "id": "mofsec_4b97daabe566106b734c",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "国立児童自立支援施設整備費",
+   "organization": "こども家庭庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "188",
+   "id": "mofsec_4bba09e39bda0efa3524",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "沖縄北部連携促進特別振興事業費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "code_name_exact_candidate",
+   "code": "001",
+   "id": "mofsec_4bd504bbb3e4459270da",
+   "matchedBuckets": [
+    "29.3"
+   ],
+   "ministry": "デジタル庁",
+   "name": "デジタル庁共通費",
+   "organization": "デジタル庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "017",
+   "id": "mofsec_4be44e65baa35a6b92f9",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "情報通信技術高度利活用推進費",
+   "organization": "総務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "062",
+   "id": "mofsec_4c3d6f6ba69adff1b0d9",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "道路交通円滑化推進費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "234",
+   "id": "mofsec_4c855bdcc27be73ca4ea",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "気象研究所",
+   "organization": "気象庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "016",
+   "id": "mofsec_4cd20ae720864bab6dc5",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "海岸事業費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "011",
+   "id": "mofsec_4d3642db319587903dcf",
+   "matchedBuckets": [],
+   "ministry": "内閣",
+   "name": "内閣法制局",
+   "organization": "内閣法制局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "061",
+   "id": "mofsec_4d9685649ad6039a3e65",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "都市・地域交通整備事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "005",
+   "id": "mofsec_4d9e574dd646bd422244",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "資産債務管理費",
+   "organization": "財務本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "137",
+   "id": "mofsec_4dd8ebb4966fbe99178c",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "水産業振興対策費",
+   "organization": "水産庁"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "164",
+   "id": "mofsec_4df6c13cbb4aaec1da37",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "国営公園等事業工事諸費",
+   "organization": "地方整備局"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "032",
+   "id": "mofsec_4e26a5402a85bd1f29d4",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "地方環境事務所施設費",
+   "organization": "地方環境事務所"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "041",
+   "id": "mofsec_4e327ae54cf7840d34ea",
+   "matchedBuckets": [],
+   "ministry": "国会",
+   "name": "裁判官弾劾裁判所",
+   "organization": "裁判官弾劾裁判所"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "017",
+   "id": "mofsec_4ed737e068c908a918d6",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "医薬品安全対策等推進費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "257",
+   "id": "mofsec_4f340cb0609a31131fa1",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "船舶交通安全基盤災害復旧事業費",
+   "organization": "海上保安庁"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "254",
+   "id": "mofsec_4f575767f388bad30c4c",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "船舶建造費",
+   "organization": "海上保安庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "022",
+   "id": "mofsec_4f6ad278dd8fbaaeb760",
+   "matchedBuckets": [],
+   "ministry": "国会",
+   "name": "国立国会図書館施設費",
+   "organization": "国立国会図書館"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "074",
+   "id": "mofsec_4f72f7e35465932a04d6",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "独立行政法人海技教育機構運営費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "030",
+   "id": "mofsec_4f746e870a811138b1a2",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "国有提供施設等所在市町村助成交付金",
+   "organization": "総務本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "163",
+   "id": "mofsec_4fc32e0c4cff1ce8cc91",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "独立行政法人国民生活センター運営費",
+   "organization": "消費者庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "086",
+   "id": "mofsec_4fc5aa16fa4365f4accf",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "国際協力費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "057",
+   "id": "mofsec_4ffb52e1292ace891ce9",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "文化振興費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "320",
+   "id": "mofsec_50cd8b014319aae506aa",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "障害児支援等対策費",
+   "organization": "こども家庭庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "151",
+   "id": "mofsec_51444d6367f9ed66f165",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "金融庁共通費",
+   "organization": "金融庁"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "064",
+   "id": "mofsec_5170f76a319d6bc02e14",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "国立研究開発法人農業・食品産業技術総合研究機構運営費",
+   "organization": "農林水産技術会議"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "174",
+   "id": "mofsec_5257d7dfb1e895ba3e51",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "北海道治水海岸事業工事諸費",
+   "organization": "北海道開発局"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "284",
+   "id": "mofsec_52e09df4afa85b8d4fd1",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "工業所有権事務費特許特別会計へ繰入",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "110",
+   "id": "mofsec_530c9cd933389ad9e2ff",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "河川等災害関連事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "009",
+   "id": "mofsec_5406be34c3c2668465b7",
+   "matchedBuckets": [],
+   "ministry": "防衛省",
+   "name": "令和6年度甲Ⅵ型警備艦建造費",
+   "organization": "防衛本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "024",
+   "id": "mofsec_541f838454f46e414ea5",
+   "matchedBuckets": [],
+   "ministry": "外務省",
+   "name": "分野別外交費",
+   "organization": "在外公館"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "011",
+   "id": "mofsec_54374db7000d207204d2",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "地方税制度整備費",
+   "organization": "総務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "002",
+   "id": "mofsec_543e09c3efa3f2634990",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "経済産業本省施設費",
+   "organization": "経済産業本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "059",
+   "id": "mofsec_55073e582491ef637724",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "鉄道網整備事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "221",
+   "id": "mofsec_5555bed8d75aa19e13b4",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "観光庁共通費",
+   "organization": "観光庁"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "061",
+   "id": "mofsec_557d7cb857c94d99aefd",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "経済産業局",
+   "organization": "経済産業局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "053",
+   "id": "mofsec_561a3336e04e21a80dbe",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "電源開発促進税財源電源利用対策及原子力安全規制対策費エネルギー対策特別会計へ繰入",
+   "organization": "原子力規制委員会"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "081",
+   "id": "mofsec_56c25c7e8dd04adca8a3",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "公安審査委員会",
+   "organization": "公安審査委員会"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "021",
+   "id": "mofsec_570198b68d7ce36fdb20",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "医療技術実用化等推進費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "013",
+   "id": "mofsec_57807c34a519d3a3aae8",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "特定疾患等対策費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "283",
+   "id": "mofsec_579c9a682149804f1f9a",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "経済安全保障確保推進費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "006",
+   "id": "mofsec_58614d2e71e46dfb4dd9",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "初等中等教育振興費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "231",
+   "id": "mofsec_58b451894a01dc9e76ed",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "地方創生推進事務局",
+   "organization": "地方創生推進事務局"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "282",
+   "id": "mofsec_59090c9955eecb71b954",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "官民連携基盤整備推進調査費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "063",
+   "id": "mofsec_59569e598c5ffde678f0",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "独立行政法人日本学生支援機構施設整備費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "067",
+   "id": "mofsec_5a0dae2cee8c91f9e6e2",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "国立研究開発法人国際農林水産業研究センター施設整備費",
+   "organization": "農林水産技術会議"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "012",
+   "id": "mofsec_5a3574c4cb051c3fb506",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "農業経営安定事業費等食料安定供給特別会計へ繰入",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "171",
+   "id": "mofsec_5a59665f8d44b3cf3c86",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "国立研究開発法人国立がん研究センター運営費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "022",
+   "id": "mofsec_5b44499481d4f6d1d78a",
+   "matchedBuckets": [],
+   "ministry": "防衛省",
+   "name": "防衛力基盤強化施設整備費",
+   "organization": "防衛本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "022",
+   "id": "mofsec_5c25199892b9242d336d",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "財務局施設費",
+   "organization": "財務局"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "054",
+   "id": "mofsec_5c27bb7e1c7c6eda7a7f",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "障害者等職業能力開発支援費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "052",
+   "id": "mofsec_5c3bf9b5f19c7bddf050",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "原子力安全確保費",
+   "organization": "原子力規制委員会"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "153",
+   "id": "mofsec_5c8314a595e586974c7e",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "労働条件確保・改善対策費",
+   "organization": "都道府県労働局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "092",
+   "id": "mofsec_5c857b62a4da2d31af4c",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "破壊的団体等調査費",
+   "organization": "公安調査庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "051",
+   "id": "mofsec_5c8692d507a3cf035cac",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "更生保護官署共通費",
+   "organization": "更生保護官署"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "103",
+   "id": "mofsec_5ca0617a0b6f73de0720",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "出入国管理業務費",
+   "organization": "出入国在留管理庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "107",
+   "id": "mofsec_5cb9d20858a31cefeb2a",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "独立行政法人日本スポーツ振興センター運営費",
+   "organization": "スポーツ庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "019",
+   "id": "mofsec_5d6f5fdb974a7351a49a",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "予備費",
+   "organization": "財務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "023",
+   "id": "mofsec_5df7b3f168a29c52224e",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "国際協力推進費",
+   "organization": "法務総合研究所"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "169",
+   "id": "mofsec_5e24b77656b08d71cf45",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "港湾空港整備事業工事諸費",
+   "organization": "地方整備局"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "032",
+   "id": "mofsec_5e8779c6a491770ec3f5",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "税関施設費",
+   "organization": "税関"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "145",
+   "id": "mofsec_5ed3fb4f8aae169c71e9",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "医療観察等実施費",
+   "organization": "地方厚生局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "054",
+   "id": "mofsec_5eecf5ffed13c63c31a7",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "公立文教施設整備費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "006",
+   "id": "mofsec_5f5dd0e07ffa164c5f29",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "独立行政法人日本貿易振興機構運営費",
+   "organization": "経済産業本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "006",
+   "id": "mofsec_5f8b2ef891134a5d49ef",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "総合的バリアフリー推進費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "072",
+   "id": "mofsec_5f906271e9c4b6fb7daa",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "消防防災体制等整備費",
+   "organization": "消防庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "002",
+   "id": "mofsec_5fb1b51a3246efb2c031",
+   "matchedBuckets": [],
+   "ministry": "防衛省",
+   "name": "防衛本省施設費",
+   "organization": "防衛本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "010",
+   "id": "mofsec_6036b24bd0904f4fbf8b",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "国立研究開発法人新エネルギー・産業技術総合開発機構運営費",
+   "organization": "経済産業本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "251",
+   "id": "mofsec_607b6ceff2806f98e639",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "海上保安官署共通費",
+   "organization": "海上保安庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "021",
+   "id": "mofsec_6093e038fc818b3544ca",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "地球環境保全等試験研究費",
+   "organization": "環境本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "040",
+   "id": "mofsec_60d74829a2914d08b470",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "農業施設災害復旧事業費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "089",
+   "id": "mofsec_60e80d66f31a6acd3a3c",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "文化財保存施設整備費",
+   "organization": "文化庁"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "061",
+   "id": "mofsec_61455a118b0a9102ffa5",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "公害等調整委員会",
+   "organization": "公害等調整委員会"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "017",
+   "id": "mofsec_616667f038b3834487e3",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "国産農産物生産基盤強化等対策費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "005",
+   "id": "mofsec_616e3ac03d13f0be337c",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "検察企画調整費",
+   "organization": "法務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "132",
+   "id": "mofsec_61c7dd502ce8ac16c714",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "食料安全保障確立対策費",
+   "organization": "水産庁"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "006",
+   "id": "mofsec_6287476adb1809bede79",
+   "matchedBuckets": [],
+   "ministry": "防衛省",
+   "name": "航空機整備費",
+   "organization": "防衛本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "076",
+   "id": "mofsec_628d6cad8de2d0153828",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "科学技術・学術政策研究所",
+   "organization": "文部科学本省所轄機関"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "025",
+   "id": "mofsec_62e41ef34a3f19b22836",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "廃棄物処理施設整備事業調査諸費",
+   "organization": "環境本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "028",
+   "id": "mofsec_6321527c4e1e03492256",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "国立大学法人施設整備費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "091",
+   "id": "mofsec_639ae12102552ba86e74",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "北海道農政事務所",
+   "organization": "北海道農政事務所"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "003",
+   "id": "mofsec_648a5dea6e9f143dcf0d",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "農林水産物・食品輸出促進対策費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "086",
+   "id": "mofsec_648c32b9f2abc2a830f2",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "独立行政法人日本芸術文化振興会運営費",
+   "organization": "文化庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "190",
+   "id": "mofsec_64fb330fd22dd1f975f2",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "沖縄北部連携促進特別振興対策特定開発事業推進費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "201",
+   "id": "mofsec_655756fb24a7afa7e3e9",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "地方航空局共通費",
+   "organization": "地方航空局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "010",
+   "id": "mofsec_655ef6bfbe2255693005",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "担い手育成・確保等対策費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "146",
+   "id": "mofsec_65806e2142c6e2cace0c",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "漁港施設災害関連事業費",
+   "organization": "水産庁"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "112",
+   "id": "mofsec_65df397b014c26915f0e",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "林産物供給等振興対策費",
+   "organization": "林野庁"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "177",
+   "id": "mofsec_6635803029b82016ffd5",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "北海道都市環境整備事業工事諸費",
+   "organization": "北海道開発局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "241",
+   "id": "mofsec_669eecf7036d774b2e63",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "知的財産戦略推進事務局",
+   "organization": "知的財産戦略推進事務局"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "278",
+   "id": "mofsec_670434e9de5cb5a40bbf",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "下水道事業調査諸費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "001",
+   "id": "mofsec_67112a7192433927769e",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "財務本省共通費",
+   "organization": "財務本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "031",
+   "id": "mofsec_6711897d4d979e040df8",
+   "matchedBuckets": [],
+   "ministry": "防衛省",
+   "name": "地方防衛局",
+   "organization": "地方防衛局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "036",
+   "id": "mofsec_6743e4776cdd9b9ee0a7",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "風水害等対策費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "261",
+   "id": "mofsec_67ec58f05f8509fccdb0",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "総合海洋政策推進事務局",
+   "organization": "総合海洋政策推進事務局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "180",
+   "id": "mofsec_6884a64f5ed33f50c617",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "北海道農業農村整備事業等工事諸費",
+   "organization": "北海道開発局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "115",
+   "id": "mofsec_6888ce0aaf2074b311e6",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "沖縄水産基盤整備事業調査諸費",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "004",
+   "id": "mofsec_69b6179b43e72851c45c",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "消費者・食農連携深化対策費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "002",
+   "id": "mofsec_6a30da3ae12f78a2d66e",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "国土交通本省施設費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "101",
+   "id": "mofsec_6a576f03849b4090ef83",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "沖縄総合事務局",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "011",
+   "id": "mofsec_6aa32ca4857c9a40ece1",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "独立行政法人農業者年金基金運営費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "108",
+   "id": "mofsec_6ab991efc0b131ad1583",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "森林整備事業費",
+   "organization": "林野庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "003",
+   "id": "mofsec_6ac03419524ec28ba8dc",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "公文書等管理政策費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "004",
+   "id": "mofsec_6acfb762ac63a45f84d8",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "行政管理実施費",
+   "organization": "総務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "087",
+   "id": "mofsec_6b3da73dddd24d1dff01",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "独立行政法人日本芸術文化振興会施設整備費",
+   "organization": "文化庁"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "174",
+   "id": "mofsec_6b699caa92830bb4b616",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "国立研究開発法人国立精神・神経医療研究センター運営費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "002",
+   "id": "mofsec_6b88743f72ec0b40f92a",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "厚生労働本省施設費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "013",
+   "id": "mofsec_6c02e21ec3a7a0e3fcbf",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "義務教育費国庫負担金",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "130",
+   "id": "mofsec_6c1088bb1cf20d3cc0fa",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "自動車運送業市場環境整備推進費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "006",
+   "id": "mofsec_6c2361bf61416c11c262",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "遺棄化学兵器廃棄処理事業費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "101",
+   "id": "mofsec_6cca3be28021187b8631",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "中小企業庁共通費",
+   "organization": "中小企業庁"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "001",
+   "id": "mofsec_6ce41baadddc24eda84d",
+   "matchedBuckets": [],
+   "ministry": "会計検査院",
+   "name": "会計検査院",
+   "organization": "会計検査院"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "025",
+   "id": "mofsec_6cf5b7236895239b2783",
+   "matchedBuckets": [],
+   "ministry": "外務省",
+   "name": "広報文化交流及報道対策費",
+   "organization": "在外公館"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "016",
+   "id": "mofsec_6d3b50a7722abfece159",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "医薬品承認審査等推進費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "007",
+   "id": "mofsec_6e4d8cc0e725837e4022",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "医療安全確保推進費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "373",
+   "id": "mofsec_6e6697463ba995f9f32e",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "独立行政法人自動車技術総合機構施設整備費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "018",
+   "id": "mofsec_6ea2b5844cf35c8ab48b",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "独立行政法人国立高等専門学校機構船舶建造費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "273",
+   "id": "mofsec_6ee5cdfc0916f29d0ac0",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "治水海岸事業調査諸費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "369",
+   "id": "mofsec_70a539179db29e9f0144",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "自動車安全特別会計へ繰入",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "233",
+   "id": "mofsec_70f0047ad4ce3c838005",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "地方創生推進費",
+   "organization": "地方創生推進事務局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "116",
+   "id": "mofsec_711327739d4105baafb4",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "山林施設災害復旧事業費",
+   "organization": "林野庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "039",
+   "id": "mofsec_7209ec9168a321d9d91e",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "国立研究開発法人物質・材料研究機構運営費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "001",
+   "id": "mofsec_7242a2d76044ce1757c0",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "国土交通本省共通費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "025",
+   "id": "mofsec_72b4fd75c770a22ee690",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "水害・土砂災害対策費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "004",
+   "id": "mofsec_72c52b8b8519bc7f0070",
+   "matchedBuckets": [],
+   "ministry": "外務省",
+   "name": "分野別外交費",
+   "organization": "外務本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "048",
+   "id": "mofsec_72e2e8887d3b3a09d2dc",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "高齢者等雇用安定・促進費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "003",
+   "id": "mofsec_72f32133d8d3081b8353",
+   "matchedBuckets": [],
+   "ministry": "外務省",
+   "name": "地域別外交費",
+   "organization": "外務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "015",
+   "id": "mofsec_732fbd2a53a9cc91f716",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "独立行政法人大学改革支援・学位授与機構運営費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "117",
+   "id": "mofsec_738af251dce42deabba0",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "山林施設災害関連事業費",
+   "organization": "林野庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "076",
+   "id": "mofsec_739411ea5293432948b4",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "社会福祉施設整備費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "379",
+   "id": "mofsec_73c51683e6a31b082162",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "水道施設整備事業調査諸費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "053",
+   "id": "mofsec_746f736649aced094d89",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "電波利用料財源電波監視等実施費",
+   "organization": "総合通信局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "035",
+   "id": "mofsec_7584c21122aa4d349631",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "独立行政法人航空大学校施設整備費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "133",
+   "id": "mofsec_75d916394c6d77abfa78",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "生活安全警察費",
+   "organization": "警察庁"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "032",
+   "id": "mofsec_760c37fe051d1693b1e4",
+   "matchedBuckets": [],
+   "ministry": "防衛省",
+   "name": "地方防衛局施設費",
+   "organization": "地方防衛局"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "020",
+   "id": "mofsec_763951a3db0666d197fe",
+   "matchedBuckets": [],
+   "ministry": "防衛省",
+   "name": "安全保障協力推進費",
+   "organization": "防衛本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "179",
+   "id": "mofsec_7648601d4c0598ccd915",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "国立研究開発法人国立長寿医療研究センター運営費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "022",
+   "id": "mofsec_76649fdd9d2265d1570c",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "独立行政法人家畜改良センター運営費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "006",
+   "id": "mofsec_766f44cb651bfef63012",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "独立行政法人農林水産消費安全技術センター運営費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "055",
+   "id": "mofsec_767f9e4e4fc23bd485b9",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "航空機燃料税財源離島空港整備事業費自動車安全特別会計へ繰入",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "082",
+   "id": "mofsec_76cc48f8e98ef2c8ed1f",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "鉱物資源安定供給確保費",
+   "organization": "資源エネルギー庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "021",
+   "id": "mofsec_76e7306847e1d88ee316",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "法務総合研究所共通費",
+   "organization": "法務総合研究所"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "022",
+   "id": "mofsec_77129df5af20798ea1e1",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "住宅防災事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "042",
+   "id": "mofsec_777be8437cfc561b4959",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "国税庁施設費",
+   "organization": "国税庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "059",
+   "id": "mofsec_77b1b1721c6f736db154",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "独立行政法人日本学生支援機構運営費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "144",
+   "id": "mofsec_77f5b7d91b5f0cc4405e",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "水産基盤整備事業工事諸費",
+   "organization": "水産庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "024",
+   "id": "mofsec_78281e33671763c5a6fd",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "自然公園等事業工事諸費",
+   "organization": "環境本省"
+  },
+  {
+   "account": "general",
+   "class": "code_name_exact_candidate",
+   "code": "001",
+   "id": "mofsec_7858d9af77e5df5ff541",
+   "matchedBuckets": [
+    "8.6"
+   ],
+   "ministry": "厚生労働省",
+   "name": "厚生労働本省共通費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "014",
+   "id": "mofsec_793959a635455c9527eb",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "高等教育振興費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "202",
+   "id": "mofsec_795c83d097dfa4deaf5b",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "地方航空行政推進費",
+   "organization": "地方航空局"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "002",
+   "id": "mofsec_799cfeb7fa4b62380fc5",
+   "matchedBuckets": [],
+   "ministry": "皇室費",
+   "name": "宮廷費",
+   "organization": "皇室費"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "093",
+   "id": "mofsec_79fea02bd60ef1369697",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "文化振興基盤整備費",
+   "organization": "文化庁"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "353",
+   "id": "mofsec_7a15795784e4ca2ac3dc",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "河川整備事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "002",
+   "id": "mofsec_7a39aa50e1bd46294d39",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "地球温暖化対策推進費",
+   "organization": "環境本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "365",
+   "id": "mofsec_7ac7870de9797484c0dc",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "港湾事業調査諸費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "015",
+   "id": "mofsec_7af107eddbfc8c3c3931",
+   "matchedBuckets": [],
+   "ministry": "防衛省",
+   "name": "令和3年度潜水艦建造費",
+   "organization": "防衛本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "044",
+   "id": "mofsec_7b0da8b44956d4d29ee0",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "矯正施設民間開放推進費",
+   "organization": "矯正官署"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "032",
+   "id": "mofsec_7c1ad4d23db03faaaab3",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "共生社会政策費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "012",
+   "id": "mofsec_7c44c7640a7aaf2f8a7f",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "環境保健対策推進費",
+   "organization": "環境本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "161",
+   "id": "mofsec_7cd698117efb50376da6",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "中央労働委員会共通費",
+   "organization": "中央労働委員会"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "085",
+   "id": "mofsec_7ce0415939c8b057cdec",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "独立行政法人エネルギー・金属鉱物資源機構運営費",
+   "organization": "資源エネルギー庁"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "131",
+   "id": "mofsec_7d8cace3c051bba6b005",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "水産庁共通費",
+   "organization": "水産庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "003",
+   "id": "mofsec_7db8139adaf4fad0b88f",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "住宅対策事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "095",
+   "id": "mofsec_7e17c7919615ea5c831f",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "国立研究開発法人建築研究所施設整備費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "047",
+   "id": "mofsec_7e5377de032cf6c911a4",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "国立研究開発法人宇宙航空研究開発機構運営費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "031",
+   "id": "mofsec_7ea9560ee6dc9b91ae28",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "検察官署共通費",
+   "organization": "検察庁"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "032",
+   "id": "mofsec_7ed4af5a08142eccd062",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "研究開発推進費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "115",
+   "id": "mofsec_7f8ebafffa2e0afcb0c7",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "森林整備事業工事諸費",
+   "organization": "林野庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "051",
+   "id": "mofsec_801055190abfe4626554",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "総合通信局共通費",
+   "organization": "総合通信局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "088",
+   "id": "mofsec_80300d9ad77824cf87f6",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "エネルギー需給構造高度化対策費",
+   "organization": "資源エネルギー庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "096",
+   "id": "mofsec_803996728275e62eec39",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "中小企業最低賃金引上げ支援対策費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "091",
+   "id": "mofsec_8049bc5a6e8ac846dce5",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "技術研究開発推進費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "161",
+   "id": "mofsec_808984e7b498458c6eb7",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "地方整備局共通費",
+   "organization": "地方整備局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "005",
+   "id": "mofsec_81058d5b0b2e001121f3",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "食品の安全・消費者の信頼確保対策費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "301",
+   "id": "mofsec_812c136aec462053c122",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "健康・医療戦略推進事務局",
+   "organization": "健康・医療戦略推進事務局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "015",
+   "id": "mofsec_81499aacfb4d3e5280bb",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "沖縄政策費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "083",
+   "id": "mofsec_816ac40c178028ffc509",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "離島振興事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "142",
+   "id": "mofsec_829443e91042541e0728",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "水産業強化対策費",
+   "organization": "水産庁"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "221",
+   "id": "mofsec_82c78a8ba111db7ef535",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "個人情報保護委員会",
+   "organization": "個人情報保護委員会"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "151",
+   "id": "mofsec_83a53bd3960e91f09edb",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "都道府県労働局共通費",
+   "organization": "都道府県労働局"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "021",
+   "id": "mofsec_8420ec72238fb3ba2ba9",
+   "matchedBuckets": [],
+   "ministry": "国会",
+   "name": "国立国会図書館",
+   "organization": "国立国会図書館"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "050",
+   "id": "mofsec_85045c430659e80e0312",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "独立行政法人酒類総合研究所施設整備費",
+   "organization": "国税庁"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "052",
+   "id": "mofsec_8519e62fa3db727bf9a2",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "情報通信技術高度利活用等推進費",
+   "organization": "総合通信局"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "131",
+   "id": "mofsec_866c5775f138b4dd88f1",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "国立障害者リハビリテーションセンター共通費",
+   "organization": "国立障害者リハビリテーションセンター"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "004",
+   "id": "mofsec_8696800dbfc705ae41be",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "日本司法支援センター運営費",
+   "organization": "法務本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "006",
+   "id": "mofsec_870c6616c6b1977282d5",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "医療情報化等推進費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "027",
+   "id": "mofsec_8711215f7d98260a2d13",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "急傾斜地崩壊対策等事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "019",
+   "id": "mofsec_8732686b75e2a1b1fb03",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "災害情報整備推進費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "001",
+   "id": "mofsec_8763f5464dffb78dc55f",
+   "matchedBuckets": [],
+   "ministry": "内閣",
+   "name": "内閣官房共通費",
+   "organization": "内閣官房"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "034",
+   "id": "mofsec_878a1e617524a22ee0db",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "南極地域観測事業費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "020",
+   "id": "mofsec_881be608b72ebc9a2c42",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "住宅・市街地防災対策費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "016",
+   "id": "mofsec_891c867f39b3ae13b87f",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "工業用水道事業費",
+   "organization": "経済産業本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "011",
+   "id": "mofsec_894049e0460c15ac31e8",
+   "matchedBuckets": [],
+   "ministry": "外務省",
+   "name": "独立行政法人国際交流基金施設整備費",
+   "organization": "外務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "176",
+   "id": "mofsec_89501c282b8bf1aae4ff",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "北海道港湾空港整備事業工事諸費",
+   "organization": "北海道開発局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "107",
+   "id": "mofsec_8993789e382331d21965",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "沖縄農業農村整備事業工事諸費",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "085",
+   "id": "mofsec_8a9227be2d0d6800036e",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "北海道総合開発推進費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "021",
+   "id": "mofsec_8ab8b60bb3e2aa05a8dc",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "国立研究開発法人農業・食品産業技術総合研究機構施設整備費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "143",
+   "id": "mofsec_8ac6b6895eef9b47f80c",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "警察活動基盤整備費",
+   "organization": "警察庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "023",
+   "id": "mofsec_8af90dd6cddc473dd837",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "沖縄保健衛生諸費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "012",
+   "id": "mofsec_8b3a1bca96da6e703ae9",
+   "matchedBuckets": [],
+   "ministry": "外務省",
+   "name": "独立行政法人国際協力機構施設整備費",
+   "organization": "外務本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "315",
+   "id": "mofsec_8bda46a0a012a2ebebf6",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "こども安全対策費",
+   "organization": "こども家庭庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "090",
+   "id": "mofsec_8bf9da2dd5703f3f6f2c",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "国立研究開発法人医薬基盤・健康・栄養研究所施設整備費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "040",
+   "id": "mofsec_8c77a170f9100b114ef4",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "港湾事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "110",
+   "id": "mofsec_8c9ba7f02f61ae376006",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "国有林野事業収入財源借入金債務処理費国有林野事業債務管理特別会計へ繰入",
+   "organization": "林野庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "142",
+   "id": "mofsec_8d58f62054dd1052a002",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "国土地理院施設費",
+   "organization": "国土地理院"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "019",
+   "id": "mofsec_8dd41f6d424d44f2484a",
+   "matchedBuckets": [],
+   "ministry": "防衛省",
+   "name": "独立行政法人駐留軍等労働者労務管理機構運営費",
+   "organization": "防衛本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "191",
+   "id": "mofsec_8de4b46de6663fe89d62",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "地方運輸局共通費",
+   "organization": "地方運輸局"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "109",
+   "id": "mofsec_8e68afd22d24cf0865b9",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "沖縄道路整備事業工事諸費",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "005",
+   "id": "mofsec_8e8c9b9e97f98eec8bb1",
+   "matchedBuckets": [],
+   "ministry": "外務省",
+   "name": "広報文化交流及報道対策費",
+   "organization": "外務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "015",
+   "id": "mofsec_8ec6c4a4ddfee5582bcb",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "水環境対策費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "001",
+   "id": "mofsec_8f8ac31b90dc835245d8",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "経済産業本省共通費",
+   "organization": "経済産業本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "114",
+   "id": "mofsec_8f8fdac1dc8c8433eef7",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "治山事業工事諸費",
+   "organization": "林野庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "011",
+   "id": "mofsec_901baad15d542f03d32f",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "化学物質対策推進費",
+   "organization": "環境本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "102",
+   "id": "mofsec_902fad3f93e08fa5c4aa",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "沖縄治水事業工事諸費",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "001",
+   "id": "mofsec_903a8d3234462ea57947",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "法務本省共通費",
+   "organization": "法務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "007",
+   "id": "mofsec_90aa5d0d3275c5f5af0b",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "公務員宿舎施設費",
+   "organization": "財務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "003",
+   "id": "mofsec_91370e50c8eb02ede5e5",
+   "matchedBuckets": [],
+   "ministry": "裁判所",
+   "name": "検察審査費",
+   "organization": "裁判所"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "023",
+   "id": "mofsec_9166fdbfbe47905538d6",
+   "matchedBuckets": [],
+   "ministry": "防衛省",
+   "name": "艦船建造費",
+   "organization": "防衛本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "155",
+   "id": "mofsec_9284171dbf7a7a290b09",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "個別労働紛争対策費",
+   "organization": "都道府県労働局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "005",
+   "id": "mofsec_92b4e99edca4a9963d07",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "独立行政法人国立女性教育会館運営費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "134",
+   "id": "mofsec_92c198a033e762300b87",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "刑事警察費",
+   "organization": "警察庁"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "152",
+   "id": "mofsec_92dfcb6f0d222ea129cb",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "海難審判費",
+   "organization": "海難審判所"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "011",
+   "id": "mofsec_93773361a3295930e894",
+   "matchedBuckets": [],
+   "ministry": "国会",
+   "name": "参議院",
+   "organization": "参議院"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "002",
+   "id": "mofsec_93beb3da46bc3e05af7c",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "財務本省施設費",
+   "organization": "財務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "015",
+   "id": "mofsec_9410840bdc0f81bea2ab",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "再犯防止等企画調整推進費",
+   "organization": "法務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "013",
+   "id": "mofsec_94ab36f5b2d9288afdc7",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "防災政策費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "065",
+   "id": "mofsec_956eae3cff007e27507f",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "貨幣回収準備資金へ繰入",
+   "organization": "財務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "139",
+   "id": "mofsec_95d2f16debcf693f1dcb",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "漁村活性化対策費",
+   "organization": "水産庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "034",
+   "id": "mofsec_96390ccac85c21f550de",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "独立行政法人航空大学校運営費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "141",
+   "id": "mofsec_96b0726275794803c085",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "水産基盤整備費",
+   "organization": "水産庁"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "005",
+   "id": "mofsec_98058228aaed0df13bad",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "行政評価等実施費",
+   "organization": "総務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "002",
+   "id": "mofsec_983e71a9c21fa4a8dd3d",
+   "matchedBuckets": [],
+   "ministry": "外務省",
+   "name": "外務本省施設費",
+   "organization": "外務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "151",
+   "id": "mofsec_98450b3ea9aeda004098",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "海難審判所共通費",
+   "organization": "海難審判所"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "013",
+   "id": "mofsec_984db412d51f83c8d22b",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "共済掛金国庫負担金等食料安定供給特別会計へ繰入",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "262",
+   "id": "mofsec_984ff1a1779f4f609870",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "有人国境離島政策推進費",
+   "organization": "総合海洋政策推進事務局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "104",
+   "id": "mofsec_989afceb817c973c4cf0",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "独立行政法人中小企業基盤整備機構出資",
+   "organization": "中小企業庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "017",
+   "id": "mofsec_989ef4ebe798bcd8f274",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "ウクライナ情勢経済緊急対応予備費",
+   "organization": "財務本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "033",
+   "id": "mofsec_98cfb024b5e73836979a",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "地方環境対策費",
+   "organization": "地方環境事務所"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "029",
+   "id": "mofsec_9909cbdb09e0fe501914",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "地域保健対策費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "041",
+   "id": "mofsec_990edf831e840b8ed29a",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "経済社会総合研究所",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "011",
+   "id": "mofsec_99d4fc1ab2e3abb8b221",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "独立行政法人製品評価技術基盤機構運営費",
+   "organization": "経済産業本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "251",
+   "id": "mofsec_9a064b0d89b3f2ad7f02",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "宇宙開発戦略推進事務局",
+   "organization": "宇宙開発戦略推進事務局"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "272",
+   "id": "mofsec_9a41d6f8f64beaea4392",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "水資源開発事業調査諸費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "079",
+   "id": "mofsec_9a50367a7f37e828ef99",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "基礎年金拠出金等年金特別会計へ繰入",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "271",
+   "id": "mofsec_9a6c74a884a570938d60",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "カジノ管理委員会",
+   "organization": "カジノ管理委員会"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "054",
+   "id": "mofsec_9b33e43abd727783448d",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "放射能調査研究費",
+   "organization": "原子力規制委員会"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "008",
+   "id": "mofsec_9bc266ffdd95042de626",
+   "matchedBuckets": [],
+   "ministry": "防衛省",
+   "name": "令和6年度甲Ⅴ型警備艦建造費",
+   "organization": "防衛本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "001",
+   "id": "mofsec_9be70e1acdd94b3fa224",
+   "matchedBuckets": [],
+   "ministry": "皇室費",
+   "name": "内廷費",
+   "organization": "皇室費"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "013",
+   "id": "mofsec_9c1b150e9cba13d0e259",
+   "matchedBuckets": [],
+   "ministry": "防衛省",
+   "name": "令和2年度潜水艦建造費",
+   "organization": "防衛本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "144",
+   "id": "mofsec_9c27db81153e5faa23c2",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "麻薬・覚醒剤等対策費",
+   "organization": "地方厚生局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "037",
+   "id": "mofsec_9c38e1b5f75cda48cd6a",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "化学物質安全対策費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "175",
+   "id": "mofsec_9c58ef9b9a2da554ed06",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "国立研究開発法人国立精神・神経医療研究センター施設整備費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "103",
+   "id": "mofsec_9c762bbd7c450d8ffaa7",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "私立学校振興費",
+   "organization": "スポーツ庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "010",
+   "id": "mofsec_9cca9a46aaf95a92bcc6",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "訟務費",
+   "organization": "法務本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "256",
+   "id": "mofsec_9cd7998aaf8009da2889",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "船舶交通安全基盤整備事業工事諸費",
+   "organization": "海上保安庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "106",
+   "id": "mofsec_9cdbbcfb08d2627258f5",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "沖縄国営公園事業工事諸費",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "091",
+   "id": "mofsec_9ce67d17b5341d08acc3",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "独立行政法人国立文化財機構施設整備費",
+   "organization": "文化庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "029",
+   "id": "mofsec_9d13a68b687f3296bebe",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "政党助成費",
+   "organization": "総務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "007",
+   "id": "mofsec_9d851e5529adf78b0aca",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "経済財政政策費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "087",
+   "id": "mofsec_9d9e56df57d4f82fa9eb",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "厚生労働調査研究等推進費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "132",
+   "id": "mofsec_9e437b019c59f023094d",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "国立障害者リハビリテーションセンター施設費",
+   "organization": "国立障害者リハビリテーションセンター"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "102",
+   "id": "mofsec_9e83a703cc4d93f4cf56",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "初等中等教育振興費",
+   "organization": "スポーツ庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "035",
+   "id": "mofsec_9ebfd812803344444372",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "農林水産統計調査費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "002",
+   "id": "mofsec_9ef2ff20a93b0d5fa3e2",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "基本法制整備費",
+   "organization": "法務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "012",
+   "id": "mofsec_9f4c80c5e4764044c1f5",
+   "matchedBuckets": [],
+   "ministry": "国会",
+   "name": "参議院施設費",
+   "organization": "参議院"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "010",
+   "id": "mofsec_9f705132158c6b80da4c",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "地方特例交付金",
+   "organization": "総務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "103",
+   "id": "mofsec_9fbf976229d4d7cf40be",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "独立行政法人中小企業基盤整備機構運営費",
+   "organization": "中小企業庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "010",
+   "id": "mofsec_9ffdf9616b66a75105bb",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "独立行政法人教職員支援機構施設整備費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "139",
+   "id": "mofsec_a0098503d3f6ced3234a",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "サイバー警察費",
+   "organization": "警察庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "013",
+   "id": "mofsec_a04d198afe399074aca8",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "自動車重量税財源公害健康被害補償費",
+   "organization": "環境本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "118",
+   "id": "mofsec_a09e53ed30cbd4f25709",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "山林施設災害復旧事業等工事諸費",
+   "organization": "林野庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "068",
+   "id": "mofsec_a0e9b0e4620936632650",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "建設市場整備推進費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "009",
+   "id": "mofsec_a11dade662522afd1838",
+   "matchedBuckets": [],
+   "ministry": "裁判所",
+   "name": "裁判所予備経費",
+   "organization": "裁判所"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "071",
+   "id": "mofsec_a203e2d7fd6c7b72d3a6",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "国際平和協力本部",
+   "organization": "国際平和協力本部"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "008",
+   "id": "mofsec_a22a6916db5e9047b6c0",
+   "matchedBuckets": [],
+   "ministry": "外務省",
+   "name": "経済協力費",
+   "organization": "外務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "031",
+   "id": "mofsec_a23722170a879d204458",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "独立行政法人日本学術振興会運営費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "131",
+   "id": "mofsec_a25a406cde358d2fccf1",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "警察庁共通費",
+   "organization": "警察庁"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "016",
+   "id": "mofsec_a2a2b400ec392b105ae2",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "環境調査研修所",
+   "organization": "環境本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "097",
+   "id": "mofsec_a2f23fce9c7007d7d091",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "就職支援法事業費労働保険特別会計へ繰入",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "104",
+   "id": "mofsec_a32b95db566232884821",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "輸入食品検査業務実施費",
+   "organization": "検疫所"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "046",
+   "id": "mofsec_a341c97104f89c8d9e2c",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "景観形成推進費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "042",
+   "id": "mofsec_a3a0efdeb0203b5213dc",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "迎賓施設運営費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "231",
+   "id": "mofsec_a445d662cb79de3d1516",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "気象官署共通費",
+   "organization": "気象庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "023",
+   "id": "mofsec_a46fb2109aab2cde25e2",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "科学技術・学術政策推進費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "060",
+   "id": "mofsec_a540525586b113b42e18",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "地域公共交通維持・活性化推進費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "073",
+   "id": "mofsec_a5f2a4977d72235a8e38",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "消防庁施設費",
+   "organization": "消防庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "313",
+   "id": "mofsec_a5f828b7af49ceb13a23",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "保育対策費",
+   "organization": "こども家庭庁"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "159",
+   "id": "mofsec_a61f0fb2eea261a2a5de",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "若年者等職業能力開発支援費",
+   "organization": "都道府県労働局"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "081",
+   "id": "mofsec_a68cbb8422f53ffe490b",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "資源エネルギー庁共通費",
+   "organization": "資源エネルギー庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "049",
+   "id": "mofsec_a6d9002ed55676deebcf",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "航空機燃料税財源沖縄空港整備事業費自動車安全特別会計へ繰入",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "042",
+   "id": "mofsec_a7f3e480be7656146773",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "新市場創出対策費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "105",
+   "id": "mofsec_a80969f2ca2122f6b86c",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "森林整備・保全費",
+   "organization": "林野庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "145",
+   "id": "mofsec_a81042ec171e62e929be",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "漁港施設災害復旧事業費",
+   "organization": "水産庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "006",
+   "id": "mofsec_a87c656c92591aef3861",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "矯正企画調整費",
+   "organization": "法務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "024",
+   "id": "mofsec_a880c5639f12dbff4d9a",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "下水道防災事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "172",
+   "id": "mofsec_a9772ab9161f7752c1fc",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "国立研究開発法人国立がん研究センター施設整備費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "111",
+   "id": "mofsec_a983b54757b24bc7708d",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "宮内庁",
+   "organization": "宮内庁"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "291",
+   "id": "mofsec_a9acc8d93fb36bf32f2d",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "科学技術・イノベーション推進事務局",
+   "organization": "科学技術・イノベーション推進事務局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "167",
+   "id": "mofsec_a9b7bdd0937f47361f76",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "治水海岸事業工事諸費",
+   "organization": "地方整備局"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "032",
+   "id": "mofsec_a9d63e9c6bf6174f511d",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "健康危機管理推進費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "007",
+   "id": "mofsec_aa455fe4add9cae38d74",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "産業技術・環境・産業標準政策推進費",
+   "organization": "経済産業本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "026",
+   "id": "mofsec_aae0fcd9aafa3bd01255",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "河川管理施設整備費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "165",
+   "id": "mofsec_ab7a21efb896a8198082",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "河川等災害復旧事業等工事諸費",
+   "organization": "地方整備局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "082",
+   "id": "mofsec_abcbcb9ddbd4b018356c",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "地方農政局施設費",
+   "organization": "地方農政局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "019",
+   "id": "mofsec_abf51ebd06df7aed9f94",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "国立研究開発法人日本原子力研究開発機構出資",
+   "organization": "経済産業本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "023",
+   "id": "mofsec_ac2a37b024ac680c122a",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "独立行政法人医薬品医療機器総合機構運営費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "092",
+   "id": "mofsec_ac76fce79d4094fa09ba",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "北海道農政事務所施設費",
+   "organization": "北海道農政事務所"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "055",
+   "id": "mofsec_ac87321cf3b7b44e7e31",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "原子力規制委員会施設費",
+   "organization": "原子力規制委員会"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "003",
+   "id": "mofsec_ad725987a35f68f7808b",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "経済構造改革推進費",
+   "organization": "経済産業本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "081",
+   "id": "mofsec_ae06f02855cbd775c3af",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "日本学術会議",
+   "organization": "日本学術会議"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "006",
+   "id": "mofsec_ae58a874875de3cb09b8",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "地方行政制度整備費",
+   "organization": "総務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "030",
+   "id": "mofsec_aea99e94d5a25178d4c3",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "国立大学法人運営費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "176",
+   "id": "mofsec_af2026bc739cdb91a41a",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "国立研究開発法人国立国際医療研究センター運営費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "017",
+   "id": "mofsec_afb43dae4b471c806d4e",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "独立行政法人国立高等専門学校機構運営費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "052",
+   "id": "mofsec_afb6b13ffadf9521e19d",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "職業能力開発強化費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "017",
+   "id": "mofsec_afdf5a6f64ae41263640",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "独立行政法人製品評価技術基盤機構施設整備費",
+   "organization": "経済産業本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "009",
+   "id": "mofsec_b02a7af66b784e97a2dd",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "地方創生支援費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "001",
+   "id": "mofsec_b0301b1339ceea793352",
+   "matchedBuckets": [],
+   "ministry": "外務省",
+   "name": "外務本省共通費",
+   "organization": "外務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "015",
+   "id": "mofsec_b07430d467dd37255b36",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "農業生産基盤整備推進費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "053",
+   "id": "mofsec_b0a1c1c5a89b9fa85c16",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "若年者等職業能力開発支援費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "031",
+   "id": "mofsec_b0de0c63d961b9f8cc56",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "農業農村整備事業費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "038",
+   "id": "mofsec_b13802eb4af0c2cebd52",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "食品安全政策費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "020",
+   "id": "mofsec_b16b723005a09d909cf2",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "国立研究開発法人国立環境研究所施設整備費",
+   "organization": "環境本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "222",
+   "id": "mofsec_b17b3c0971a8236829f4",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "観光振興費",
+   "organization": "観光庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "056",
+   "id": "mofsec_b1f3991b1a3e90d11c76",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "男女均等雇用対策費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "086",
+   "id": "mofsec_b201aa24eb43218b0636",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "北海道開発事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "133",
+   "id": "mofsec_b2bb69b1a57f5d311c11",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "技術研究開発推進費",
+   "organization": "国土技術政策総合研究所"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "061",
+   "id": "mofsec_b33961513893f14c0962",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "農林水産技術会議共通費",
+   "organization": "農林水産技術会議"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "184",
+   "id": "mofsec_b346d853d5611f0428d7",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "国立研究開発法人国立成育医療研究センター施設整備費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "092",
+   "id": "mofsec_b3ae41275ca559d06bfa",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "国立研究開発法人土木研究所運営費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "102",
+   "id": "mofsec_b4a87b658bbf71e05b5a",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "林野庁施設費",
+   "organization": "林野庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "121",
+   "id": "mofsec_b4b92a1665e9fb8408e8",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "公正取引委員会",
+   "organization": "公正取引委員会"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "005",
+   "id": "mofsec_b4bb2a664282cef34511",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "住宅市場整備推進費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "031",
+   "id": "mofsec_b51b5a469faaf997a9e3",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "税関共通費",
+   "organization": "税関"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "136",
+   "id": "mofsec_b523991bd05d5b39260a",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "船舶建造費",
+   "organization": "水産庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "054",
+   "id": "mofsec_b545e3fee0e53de3c0f6",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "航空機燃料税財源北海道空港整備事業費自動車安全特別会計へ繰入",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "102",
+   "id": "mofsec_b58d2e281cc91f038e93",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "出入国管理企画調整推進費",
+   "organization": "出入国在留管理庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "022",
+   "id": "mofsec_b6046e67b68611e6f8e7",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "法務調査研究費",
+   "organization": "法務総合研究所"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "028",
+   "id": "mofsec_b64543663914851f5f84",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "沖縄開発事業費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "091",
+   "id": "mofsec_b65999bdbbb97b90eaec",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "公安調査庁共通費",
+   "organization": "公安調査庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "027",
+   "id": "mofsec_b659b01539d7edb824a9",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "統計調査費",
+   "organization": "総務本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "322",
+   "id": "mofsec_b689911d3f6ef12a3125",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "児童福祉施設等整備費",
+   "organization": "こども家庭庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "050",
+   "id": "mofsec_b7080752f270daa37d54",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "国立研究開発法人理化学研究所施設整備費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "015",
+   "id": "mofsec_b75e05237874ebd6ae03",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "原爆被爆者等援護対策費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "006",
+   "id": "mofsec_b8327483cdd79c2d76f9",
+   "matchedBuckets": [],
+   "ministry": "外務省",
+   "name": "独立行政法人国際交流基金運営費",
+   "organization": "外務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "071",
+   "id": "mofsec_b88fa3dcca0816230a73",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "産業保安監督官署",
+   "organization": "産業保安監督官署"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "041",
+   "id": "mofsec_b8c5c53d16e7a713c50e",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "農業施設災害関連事業費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "081",
+   "id": "mofsec_b8dc2d39c74ac5dccda3",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "離島振興費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "041",
+   "id": "mofsec_b8dc87b87dc32ecf614f",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "国立研究開発法人日本医療研究開発機構運営費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "252",
+   "id": "mofsec_b98e0702bf0cc90f2375",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "海上保安官署施設費",
+   "organization": "海上保安庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "033",
+   "id": "mofsec_b99ef2d0d7c2159527f4",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "国立研究開発法人科学技術振興機構運営費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "012",
+   "id": "mofsec_ba3df3a8e656f5192706",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "政策金融費",
+   "organization": "財務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "133",
+   "id": "mofsec_ba882aace34d26205c34",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "国立研究開発法人水産研究・教育機構運営費",
+   "organization": "水産庁"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "192",
+   "id": "mofsec_ba8ce4a91c880161c017",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "ハンセン病資料館施設費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "144",
+   "id": "mofsec_bb45cbe5f5be9dd9b826",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "地理空間情報整備・活用等推進費",
+   "organization": "国土地理院"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "082",
+   "id": "mofsec_bb578e240370194de32b",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "介護保険制度運営推進費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "008",
+   "id": "mofsec_bb5c512a4efe44754a05",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "地方財政制度整備費",
+   "organization": "総務本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "026",
+   "id": "mofsec_bc146b1910509733867d",
+   "matchedBuckets": [],
+   "ministry": "外務省",
+   "name": "領事政策費",
+   "organization": "在外公館"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "145",
+   "id": "mofsec_bc28a750e816b5a1e40f",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "技術研究開発推進費",
+   "organization": "国土地理院"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "037",
+   "id": "mofsec_bcff71d28bfe7f139781",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "受託工事等実施費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "001",
+   "id": "mofsec_be0a83a1acf74c9c5c01",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "農林水産本省共通費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "045",
+   "id": "mofsec_be26eb8eb54ed351306a",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "独立行政法人労働政策研究・研修機構運営費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "163",
+   "id": "mofsec_be2b15b89c2145784b92",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "地方整備推進費",
+   "organization": "地方整備局"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "101",
+   "id": "mofsec_be4168252d8f09b2a807",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "検疫所共通費",
+   "organization": "検疫所"
+  },
+  {
+   "account": "general",
+   "class": "code_name_exact_candidate",
+   "code": "550",
+   "id": "mofsec_beae7e3e4ab7728b297a",
+   "matchedBuckets": [
+    "8.6"
+   ],
+   "ministry": "防衛省",
+   "name": "防衛力基盤強化推進費",
+   "organization": "防衛装備庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "030",
+   "id": "mofsec_becf99466a042c3b5ee1",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "保健衛生施設整備費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "321",
+   "id": "mofsec_bed48757f23057e36303",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "こども政策推進費",
+   "organization": "こども家庭庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "041",
+   "id": "mofsec_bed6050e2ac1d09ee19c",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "労働者災害補償保険保険給付費労働保険特別会計へ繰入",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "023",
+   "id": "mofsec_bf1a9620a2106f874ce0",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "石綿健康被害救済事務費労働保険特別会計へ繰入",
+   "organization": "環境本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "106",
+   "id": "mofsec_bf3cd878136ec8bfe7c8",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "国有林野産物等売払及管理処分業務費",
+   "organization": "林野庁"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "162",
+   "id": "mofsec_bf3fbc86a1d320ab21c1",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "消費者政策費",
+   "organization": "消費者庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "052",
+   "id": "mofsec_bf53ea2d056eb4ea9777",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "農林水産本省検査指導所施設費",
+   "organization": "農林水産本省検査指導機関"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "319",
+   "id": "mofsec_bf83a64e5481bc3623e7",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "母子家庭等対策費",
+   "organization": "こども家庭庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "055",
+   "id": "mofsec_bff814a4a20fc0c5fd10",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "沖縄振興特定事業推進費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "156",
+   "id": "mofsec_c0328cc12d02e90b3db7",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "職業紹介事業等実施費",
+   "organization": "都道府県労働局"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "142",
+   "id": "mofsec_c07d9bf82a53fa4e7e77",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "科学警察研究所",
+   "organization": "警察庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "143",
+   "id": "mofsec_c081a624e13622a2b60e",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "海岸事業調査諸費",
+   "organization": "水産庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "376",
+   "id": "mofsec_c13869f34e6c8e7ba8e7",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "社会資本整備円滑化地籍整備事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "001",
+   "id": "mofsec_c16ec4ac2d38a55341d6",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "環境本省共通費",
+   "organization": "環境本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "196",
+   "id": "mofsec_c1b855dd43a6a602ac2d",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "自殺対策費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "138",
+   "id": "mofsec_c1f3599fc98c201bc66a",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "皇宮警察本部",
+   "organization": "警察庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "057",
+   "id": "mofsec_c220dc073d78bb4cff4e",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "都市再生・地域再生整備事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "071",
+   "id": "mofsec_c2474a593f55e011930d",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "消防庁共通費",
+   "organization": "消防庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "044",
+   "id": "mofsec_c388364de21b6d8034cd",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ繰入",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "073",
+   "id": "mofsec_c397c6e36a6fc0ac66eb",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "独立行政法人国立重度知的障害者総合施設のぞみの園運営費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "113",
+   "id": "mofsec_c3dac68b2b365bf39669",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "森林整備・林業等振興対策費",
+   "organization": "林野庁"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "036",
+   "id": "mofsec_c3f2822c5fc44d2afd8a",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "麻薬・覚醒剤等対策費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "062",
+   "id": "mofsec_c3fb749a43bdd7ab8769",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "経済産業局施設費",
+   "organization": "経済産業局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "009",
+   "id": "mofsec_c413b9ce2f7817b3689e",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "人権擁護推進費",
+   "organization": "法務本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "012",
+   "id": "mofsec_c435e78a71c46bb6a857",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "水資源開発事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "147",
+   "id": "mofsec_c516478d9dc5949424c1",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "国立研究開発法人水産研究・教育機構船舶建造費",
+   "organization": "水産庁"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "071",
+   "id": "mofsec_c51de80ec4a1fda6e2a4",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "海事産業市場整備等推進費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "078",
+   "id": "mofsec_c650755bbfb614c7a931",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "公的年金制度等運営諸費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "034",
+   "id": "mofsec_c66831d9a92c42dd5387",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "農山漁村地域整備事業費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "189",
+   "id": "mofsec_c6687c37ea1f87b4eda9",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "沖縄振興推進調査費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "312",
+   "id": "mofsec_c6765e0e30c9639f8471",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "母子保健衛生対策費",
+   "organization": "こども家庭庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "107",
+   "id": "mofsec_c6bfb7e32fdde9332b28",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "官庁施設保全等推進費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "355",
+   "id": "mofsec_c8d7bfdf431d156333e2",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "総合流域防災事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "140",
+   "id": "mofsec_c99c41dd8e064e926ba4",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "犯罪被害給付費",
+   "organization": "警察庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "020",
+   "id": "mofsec_ca7aa2f3785ac4c00ead",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "情報通信技術利用環境整備費",
+   "organization": "総務本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "067",
+   "id": "mofsec_cab975ff108e8cca1638",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "社会福祉諸費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "003",
+   "id": "mofsec_caeed23fbe409789fb93",
+   "matchedBuckets": [],
+   "ministry": "皇室費",
+   "name": "皇族費",
+   "organization": "皇室費"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "012",
+   "id": "mofsec_cb25efcb4dd00207ef95",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "感染症対策費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "012",
+   "id": "mofsec_cb6623dc8bde0f44b4bf",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "選挙制度等整備費",
+   "organization": "総務本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "378",
+   "id": "mofsec_cb7b0501c9dc03c13ae2",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "水道施設整備費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "062",
+   "id": "mofsec_cbb3cac8059399445ac7",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "国籍等事務処理費",
+   "organization": "法務局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "010",
+   "id": "mofsec_cbc6727fdb416baec0f9",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "道路環境等対策費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "045",
+   "id": "mofsec_cbee71aea9a0104b3448",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "独立行政法人酒類総合研究所運営費",
+   "organization": "国税庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "143",
+   "id": "mofsec_cc628728c108d8fefff6",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "災害情報整備推進費",
+   "organization": "国土地理院"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "161",
+   "id": "mofsec_ccb6604a54c54cdea5e5",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "消費者庁共通費",
+   "organization": "消費者庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "009",
+   "id": "mofsec_cce8ef103641fa79dd8d",
+   "matchedBuckets": [],
+   "ministry": "国会",
+   "name": "衆議院予備経費",
+   "organization": "衆議院"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "140",
+   "id": "mofsec_cda41c5e0c6cb0db0050",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "海岸事業費",
+   "organization": "水産庁"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "021",
+   "id": "mofsec_ce82eec91089465dad27",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "電波利用料財源電波監視等実施費",
+   "organization": "総務本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "064",
+   "id": "mofsec_ce9cf43a90399f549b32",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "国立研究開発法人科学技術振興機構施設整備費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "107",
+   "id": "mofsec_ceac4577aaf97603c194",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "治山事業費",
+   "organization": "林野庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "103",
+   "id": "mofsec_cecf2b36bd3cf0a22dfd",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "国立研究開発法人森林研究・整備機構運営費",
+   "organization": "林野庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "048",
+   "id": "mofsec_ced02468ed6d61a20926",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "国立研究開発法人宇宙航空研究開発機構施設整備費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "233",
+   "id": "mofsec_cedffad604d17f79ae92",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "観測予報等業務費",
+   "organization": "気象庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "005",
+   "id": "mofsec_cf09edf71acfea804859",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "大気・水・土壌環境等保全費",
+   "organization": "環境本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "022",
+   "id": "mofsec_cfefe9701468198a5298",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "沖縄教育振興事業費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "041",
+   "id": "mofsec_d01b5f74686d3aebb9b3",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "国税庁共通費",
+   "organization": "国税庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "005",
+   "id": "mofsec_d14250d23e01c8ebc0db",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "政府広報費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "031",
+   "id": "mofsec_d15e50d945c610b47e9e",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "施設等所在市町村調整交付金",
+   "organization": "総務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "021",
+   "id": "mofsec_d1b595a6ae6c95a35a87",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "育英事業費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "367",
+   "id": "mofsec_d1ec06eb5f2ac6b67062",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "独立行政法人自動車技術総合機構運営費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "010",
+   "id": "mofsec_d2784f89de5c667ba145",
+   "matchedBuckets": [],
+   "ministry": "防衛省",
+   "name": "令和6年度潜水艦建造費",
+   "organization": "防衛本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "093",
+   "id": "mofsec_d28de003899773439555",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "国立研究開発法人土木研究所施設整備費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "070",
+   "id": "mofsec_d2e661e6a25cc29ca0e9",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "国土調査費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "022",
+   "id": "mofsec_d359195023a4f72f58aa",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "医療提供体制基盤整備費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "025",
+   "id": "mofsec_d3701a768cf01939d177",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "健康保険事業借入金諸費年金特別会計へ繰入",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "081",
+   "id": "mofsec_d3d9cc1d82a6ba116267",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "地方農政局",
+   "organization": "地方農政局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "049",
+   "id": "mofsec_d409a1337d97af941d23",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "国立研究開発法人理化学研究所運営費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "004",
+   "id": "mofsec_d43b00d08311069f8c44",
+   "matchedBuckets": [],
+   "ministry": "裁判所",
+   "name": "裁判費",
+   "organization": "裁判所"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "007",
+   "id": "mofsec_d443fd6113418d6086dc",
+   "matchedBuckets": [],
+   "ministry": "防衛省",
+   "name": "令和5年度甲Ⅴ型警備艦建造費",
+   "organization": "防衛本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "023",
+   "id": "mofsec_d4eee6d01a8a7e4d31dd",
+   "matchedBuckets": [],
+   "ministry": "外務省",
+   "name": "地域別外交費",
+   "organization": "在外公館"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "033",
+   "id": "mofsec_d5374094731128df0098",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "検察運営費",
+   "organization": "検察庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "039",
+   "id": "mofsec_d5b297c65e3c343ca288",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "労働条件確保・改善対策費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "024",
+   "id": "mofsec_d5fbe2f07b6565f45c28",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "医療保険給付諸費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "005",
+   "id": "mofsec_d62b96601c96165adcc7",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "対外経済政策推進費",
+   "organization": "経済産業本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "083",
+   "id": "mofsec_d64a4255c38e0c0a0b90",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "日本芸術院",
+   "organization": "文化庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "026",
+   "id": "mofsec_d685018c8224f3b119e2",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "医療費適正化推進費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "028",
+   "id": "mofsec_d75fd1bd1684f012993c",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "独立行政法人統計センター運営費",
+   "organization": "総務本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "157",
+   "id": "mofsec_d7c635fd3ab9b7db136f",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "高齢者等雇用安定・促進費",
+   "organization": "都道府県労働局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "013",
+   "id": "mofsec_d824d727a99ddb432764",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "国家公務員共済組合連合会等助成費",
+   "organization": "財務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "040",
+   "id": "mofsec_d8f37119adee8d939165",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "国立研究開発法人物質・材料研究機構施設整備費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "011",
+   "id": "mofsec_d998a118f8341998dff2",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "経済協力費",
+   "organization": "財務本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "292",
+   "id": "mofsec_d9fc6d8df248e11939aa",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "科学技術イノベーション創造推進費",
+   "organization": "科学技術・イノベーション推進事務局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "003",
+   "id": "mofsec_da00e4d8db9cb8d0ed84",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "石油石炭税財源エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入",
+   "organization": "環境本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "134",
+   "id": "mofsec_da16054c3025cd85780c",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "国立研究開発法人水産研究・教育機構施設整備費",
+   "organization": "水産庁"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "101",
+   "id": "mofsec_da21d9726194ce52fb11",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "林野庁共通費",
+   "organization": "林野庁"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "364",
+   "id": "mofsec_da7d73d4a4ad5b482439",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "道路整備事業調査諸費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "146",
+   "id": "mofsec_db24b4ffa9b282ba6d41",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "地方厚生局施設費",
+   "organization": "地方厚生局"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "026",
+   "id": "mofsec_db4f64ca14e9d8c008a0",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "恩給費",
+   "organization": "総務本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "152",
+   "id": "mofsec_db75c31a30ef6842c352",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "都道府県労働局施設費",
+   "organization": "都道府県労働局"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "143",
+   "id": "mofsec_dbcce241a2acf8efe03f",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "医師等国家試験実施費",
+   "organization": "地方厚生局"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "316",
+   "id": "mofsec_dc84fdc2015bc5beaaa2",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "児童虐待防止等対策費",
+   "organization": "こども家庭庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "099",
+   "id": "mofsec_dced131523ca50b61957",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "国立研究開発法人海上・港湾・航空技術研究所運営費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "110",
+   "id": "mofsec_de3afca90717c291cb1e",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "沖縄道路環境整備事業工事諸費",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "016",
+   "id": "mofsec_dea292510a5da49a1164",
+   "matchedBuckets": [],
+   "ministry": "防衛省",
+   "name": "令和4年度甲Ⅴ型警備艦建造費",
+   "organization": "防衛本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "141",
+   "id": "mofsec_decc0fb698467f6dd598",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "警察情報通信基盤費",
+   "organization": "警察庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "162",
+   "id": "mofsec_df1170189d202b22f7c4",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "地方整備局施設費",
+   "organization": "地方整備局"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "022",
+   "id": "mofsec_df95f7615dce38513677",
+   "matchedBuckets": [],
+   "ministry": "外務省",
+   "name": "在外公館施設費",
+   "organization": "在外公館"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "074",
+   "id": "mofsec_dfb8f05651dc500ba05a",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "独立行政法人国立重度知的障害者総合施設のぞみの園施設整備費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "141",
+   "id": "mofsec_dfc391eb3b7825a61132",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "国土地理院共通費",
+   "organization": "国土地理院"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "285",
+   "id": "mofsec_dffb1a0e5b7e1d0cb13a",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "住宅施設災害復旧事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "002",
+   "id": "mofsec_e03a0d64707675c275bb",
+   "matchedBuckets": [],
+   "ministry": "デジタル庁",
+   "name": "デジタル社会形成推進費",
+   "organization": "デジタル庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "043",
+   "id": "mofsec_e0f55105fef1b8d9f166",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "国立研究開発法人量子科学技術研究開発機構施設整備費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "132",
+   "id": "mofsec_e1a7875cebd70438454b",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "国土技術政策総合研究所施設費",
+   "organization": "国土技術政策総合研究所"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "158",
+   "id": "mofsec_e1bda5ddb8ac254f3b43",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "男女均等雇用対策費",
+   "organization": "都道府県労働局"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "377",
+   "id": "mofsec_e218f0142967c6056c6e",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "上下水道一体効率化・基盤強化推進事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "064",
+   "id": "mofsec_e22646fe4acd7014d83c",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "登記事務処理費",
+   "organization": "法務局"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "121",
+   "id": "mofsec_e25f21cdcb99e5ba5c64",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "厚生労働本省試験研究所共通費",
+   "organization": "厚生労働本省試験研究機関"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "045",
+   "id": "mofsec_e2ff5239caabf23c8499",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "国立研究開発法人日本原子力研究開発機構運営費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "036",
+   "id": "mofsec_e351078709c7eb434b2c",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "国立研究開発法人海洋研究開発機構運営費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "232",
+   "id": "mofsec_e3791d004ec88d55240e",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "気象官署施設費",
+   "organization": "気象庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "108",
+   "id": "mofsec_e46b591bc794302a47e7",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "官庁営繕費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "193",
+   "id": "mofsec_e4945f2746e0203544b4",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "電源開発促進税財源原子力安全規制対策費エネルギー対策特別会計へ繰入",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "323",
+   "id": "mofsec_e4df913750cff82f56c7",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "大学等修学支援費",
+   "organization": "こども家庭庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "024",
+   "id": "mofsec_e58bc138c52860b9bc6a",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "一般戦災死没者追悼等事業費",
+   "organization": "総務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "082",
+   "id": "mofsec_e6dd3961d1012ed6bb91",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "文化振興費",
+   "organization": "文化庁"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "275",
+   "id": "mofsec_e6e7c47744a8a761e907",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "都市開発事業調査諸費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "032",
+   "id": "mofsec_e72fbd1fb28cfbdc549a",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "海岸事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "356",
+   "id": "mofsec_e734b47eb94b387790b2",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "砂防事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "018",
+   "id": "mofsec_e768a0a04e26dea2d303",
+   "matchedBuckets": [],
+   "ministry": "防衛省",
+   "name": "在日米軍等駐留関連諸費",
+   "organization": "防衛本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "033",
+   "id": "mofsec_e7b1583a94f3645ba7de",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "税関業務費",
+   "organization": "税関"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "241",
+   "id": "mofsec_e7b27b6013c822dfa01b",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "運輸安全委員会",
+   "organization": "運輸安全委員会"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "018",
+   "id": "mofsec_e7c352ae5c1a4d3c08d3",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "独立行政法人環境再生保全機構運営費",
+   "organization": "環境本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "032",
+   "id": "mofsec_e8118479bfbadce0801b",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "農業農村整備事業費食料安定供給特別会計へ繰入",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "038",
+   "id": "mofsec_e845a58162868aee1be1",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "国立研究開発法人海洋研究開発機構船舶建造費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "111",
+   "id": "mofsec_e8857f01bce57247aec5",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "国立ハンセン病療養所共通費",
+   "organization": "国立ハンセン病療養所"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "198",
+   "id": "mofsec_e9844cb8a024e4488833",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "昭和館施設費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "600",
+   "id": "mofsec_ea4c923989a9f288529d",
+   "matchedBuckets": [],
+   "ministry": "防衛省",
+   "name": "防衛力基盤強化施設整備費",
+   "organization": "防衛装備庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "108",
+   "id": "mofsec_ea99ca99415d94ce3fb6",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "独立行政法人日本スポーツ振興センター施設整備費",
+   "organization": "スポーツ庁"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "051",
+   "id": "mofsec_ead098d824d65b81d71f",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "原子力規制委員会共通費",
+   "organization": "原子力規制委員会"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "194",
+   "id": "mofsec_ebf02e305c322231599d",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "社会保障・税番号活用推進費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "109",
+   "id": "mofsec_ede2eb53ead269f81afd",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "河川等災害復旧事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "019",
+   "id": "mofsec_ee023bf89498516336c6",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "血液製剤対策費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "102",
+   "id": "mofsec_ee0268118bfb44ba968b",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "検疫所施設費",
+   "organization": "検疫所"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "040",
+   "id": "mofsec_eed48c38669abf079ae2",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "公益法人制度適正運営推進費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "022",
+   "id": "mofsec_ef4127df50aea233d27b",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "私立学校振興費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "038",
+   "id": "mofsec_ef899c4c19f6164eec6b",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "生活衛生対策費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "005",
+   "id": "mofsec_f0190deb2da722daec2d",
+   "matchedBuckets": [],
+   "ministry": "防衛省",
+   "name": "艦船整備費",
+   "organization": "防衛本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "280",
+   "id": "mofsec_f05b3fd93f408e1a2eba",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "社会資本総合整備事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "069",
+   "id": "mofsec_f0d35f6018843651dda7",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "戦没者慰霊事業費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "067",
+   "id": "mofsec_f253c597c013119a5b65",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "不動産市場整備等推進費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "014",
+   "id": "mofsec_f275fac274ed64cec3f0",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "移植医療推進費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "027",
+   "id": "mofsec_f2ad1f83ea55ab124992",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "農林水産業環境政策推進費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "005",
+   "id": "mofsec_f2f3bc10e119f8738bbe",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "医療従事者資質向上対策費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "101",
+   "id": "mofsec_f50072762ca44c8aa2aa",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "スポーツ庁共通費",
+   "organization": "スポーツ庁"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "366",
+   "id": "mofsec_f5471c23b1e6c3e4442c",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "都市水環境整備事業調査諸費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "080",
+   "id": "mofsec_f55230d62de797ea18b7",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "地理空間情報整備・活用推進費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "253",
+   "id": "mofsec_f5638ccda4f292614d03",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "船舶交通安全及海上治安対策費",
+   "organization": "海上保安庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "020",
+   "id": "mofsec_f5893e7e2295d1cddebf",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "国立研究開発法人産業技術総合研究所施設整備費",
+   "organization": "経済産業本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "252",
+   "id": "mofsec_f5a49b875b4085d259d9",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "宇宙開発利用推進費",
+   "organization": "宇宙開発戦略推進事務局"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "001",
+   "id": "mofsec_f5dcd7468d66a70de0e8",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "文部科学本省共通費",
+   "organization": "文部科学本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "002",
+   "id": "mofsec_f60d6a2b8b03bbe38f4f",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "内閣本府施設費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "033",
+   "id": "mofsec_f6b7b18bf53b03ee9a20",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "食品等安全確保対策費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "135",
+   "id": "mofsec_f7255aff0822fb53e187",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "水産資源管理対策費",
+   "organization": "水産庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "101",
+   "id": "mofsec_f7305de8683aa80a2920",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "出入国在留管理庁共通費",
+   "organization": "出入国在留管理庁"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "182",
+   "id": "mofsec_f761720008a875567cac",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "北海道災害復旧事業等工事諸費",
+   "organization": "北海道開発局"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "168",
+   "id": "mofsec_f769a4faec203d1696ea",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "道路整備事業工事諸費",
+   "organization": "地方整備局"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "234",
+   "id": "mofsec_f78c1612b99ad5e26a5c",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "地方創生基盤整備事業推進費",
+   "organization": "地方創生推進事務局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "012",
+   "id": "mofsec_f7eb74792960a97bfcde",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "法務省施設費",
+   "organization": "法務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "006",
+   "id": "mofsec_f84c7ecba816d6f7e136",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "資源循環政策推進費",
+   "organization": "環境本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "075",
+   "id": "mofsec_f85ac9f031e4a606e7c8",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "特別障害給付金給付費年金特別会計へ繰入",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "090",
+   "id": "mofsec_f8d4c95db18bd2d605ff",
+   "matchedBuckets": [],
+   "ministry": "文部科学省",
+   "name": "独立行政法人国立文化財機構運営費",
+   "organization": "文化庁"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "062",
+   "id": "mofsec_f8e6e7d1b79d39a76fe7",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "農林水産技術会議施設費",
+   "organization": "農林水産技術会議"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "009",
+   "id": "mofsec_f8e85428ba26fe4210ae",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "環境保全施設整備費",
+   "organization": "環境本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "018",
+   "id": "mofsec_f9b994d5e6d62fcbd1bc",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "原油価格・物価高騰対策及び賃上げ促進環境整備対応予備費",
+   "organization": "財務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "007",
+   "id": "mofsec_fb36e4188b0b0554e445",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "地域振興費",
+   "organization": "総務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "026",
+   "id": "mofsec_fb557e858a35b69c1b3f",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "廃棄物処理施設災害復旧事業費",
+   "organization": "環境本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "065",
+   "id": "mofsec_fb8869ba2a9b6102fd7a",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "国立研究開発法人農業・食品産業技術総合研究機構施設整備費",
+   "organization": "農林水産技術会議"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "063",
+   "id": "mofsec_fba0e9c5f3d2a85c1a69",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "人権擁護活動費",
+   "organization": "法務局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "013",
+   "id": "mofsec_fbaafff0208ab03a63ec",
+   "matchedBuckets": [],
+   "ministry": "法務省",
+   "name": "法務行政情報化推進費",
+   "organization": "法務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "094",
+   "id": "mofsec_fbb54f6fa0f1e27c1f22",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "国立研究開発法人建築研究所運営費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "192",
+   "id": "mofsec_fbcbc354b09833907e89",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "地方運輸行政推進費",
+   "organization": "地方運輸局"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "004",
+   "id": "mofsec_fbee7f9ead19d92975c2",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "地球環境保全費",
+   "organization": "環境本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "080",
+   "id": "mofsec_fc26618e1b8ee4ff3588",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "私的年金制度整備運営費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "091",
+   "id": "mofsec_fc41a9d4c691ad37fc7e",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "官民人材交流センター",
+   "organization": "官民人材交流センター"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "013",
+   "id": "mofsec_fcb508813a1cecdf16c5",
+   "matchedBuckets": [],
+   "ministry": "総務省",
+   "name": "電子政府・電子自治体推進費",
+   "organization": "総務本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "018",
+   "id": "mofsec_fcf62cb1724edc41b583",
+   "matchedBuckets": [],
+   "ministry": "農林水産省",
+   "name": "牛肉等関税財源国産畜産物生産基盤強化等対策費",
+   "organization": "農林水産本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "004",
+   "id": "mofsec_fd027ed30728ab22a162",
+   "matchedBuckets": [],
+   "ministry": "財務省",
+   "name": "税制企画立案費",
+   "organization": "財務本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "007",
+   "id": "mofsec_fd155bccae93107b86a6",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "廃棄物処理施設整備費",
+   "organization": "環境本省"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "351",
+   "id": "mofsec_fd3a977230e793c45ac2",
+   "matchedBuckets": [],
+   "ministry": "国土交通省",
+   "name": "港湾環境整備事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "102",
+   "id": "mofsec_fdc3832775b31271c1d7",
+   "matchedBuckets": [],
+   "ministry": "経済産業省",
+   "name": "中小企業政策推進費",
+   "organization": "中小企業庁"
+  },
+  {
+   "account": "general",
+   "class": "no_candidate_in_universe",
+   "code": "282",
+   "id": "mofsec_fe4eb6d4a22d9ea2ebac",
+   "matchedBuckets": [],
+   "ministry": "内閣府",
+   "name": "重要土地等調査費",
+   "organization": "内閣本府"
+  },
+  {
+   "account": "general",
+   "class": "code_exact_only",
+   "code": "030",
+   "id": "mofsec_ff55029895458734721e",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "地域脱炭素推進費",
+   "organization": "環境本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "015",
+   "id": "mofsec_ff745855ede5b8bb30a3",
+   "matchedBuckets": [],
+   "ministry": "環境省",
+   "name": "環境政策基盤整備費",
+   "organization": "環境本省"
+  },
+  {
+   "account": "general",
+   "class": "name_exact_only",
+   "code": "081",
+   "id": "mofsec_ffe1dcbf5c6403f70cfc",
+   "matchedBuckets": [],
+   "ministry": "厚生労働省",
+   "name": "高齢者日常生活支援等推進費",
+   "organization": "厚生労働本省"
+  }
+ ],
+ "note": "Phase A freeze 後の MOF diagnostic。MOF は candidate 生成・distance bucket・rule 選択に使っていない。recall ではなく distinct MOF item exact-overlap count / 784",
+ "phaseAFreeze": {
+  "scripts/pipeline-v2/lib/budget-request-rule-line-item-population.ts": "d0ef587ffc9c76e7e8785c63fe93e3a7ee73b17736ebf17e073e714e14fbe247",
+  "scripts/pipeline-v2/run-budget-request-rule-line-item-phase-a.ts": "39ad517f471a15c8897c352877d9f0faaaa9b7ad66d1419a2fd6ba7e9927fd2a",
+  "tests/fixtures/budget-request-rule-line-item-population/2024/phaseA-candidates.jsonl.gz": "f5e36b1664fc50d8069093859e27849fb7b7d3e1aea5a339a926b0c38af42156",
+  "tests/fixtures/budget-request-rule-line-item-population/2024/phaseA-summary.json": "410e9383f48d0876c21832fdcd6815980859c3cb13887edd5a10fdb9a1332a5f"
+ },
+ "schema": "budget-request-rule-line-item-population-phaseB/v0",
+ "secondary": {
+  "existingItem97": {
+   "both": 28,
+   "bothByDistance": {
+    "22.4": 6,
+    "8.6": 22
+   },
+   "name": "existing_hierarchy_item_97",
+   "newOnly": 5227,
+   "newOnlyByDistance": {
+    "1.7": 59,
+    "15.5": 9,
+    "22.4": 2071,
+    "29.3": 2799,
+    "36.2": 78,
+    "43.1": 23,
+    "8.6": 188
+   },
+   "newOnlyMofClass": {
+    "code_exact_name_mismatch": 3611,
+    "code_name_exact_unique": 5,
+    "name_exact_ambiguous": 20,
+    "name_exact_code_mismatch": 150,
+    "name_unavailable": 475,
+    "no_exact_match": 274,
+    "special_account_not_evaluated": 692
+   },
+   "oldOnly": 69,
+   "oldOnlyIds": [
+    "data/download/env.go.jp/content/000157010.pdf|p33|r13",
+    "data/download/env.go.jp/content/000157010.pdf|p39|r19",
+    "data/download/env.go.jp/content/000157010.pdf|p39|r23",
+    "data/download/env.go.jp/content/000157010.pdf|p40|r5",
+    "data/download/env.go.jp/content/000157010.pdf|p44|r28"
+   ],
+   "oldTotal": 97
+  },
+  "existingItem97NotInUniverseReasons": {
+   "no_amount_evidence": 69
+  },
+  "previousCandidatesAll": {
+   "both": 195,
+   "bothByDistance": {
+    "22.4": 19,
+    "8.6": 176
+   },
+   "name": "previous_candidates_all",
+   "newOnly": 5060,
+   "newOnlyByDistance": {
+    "1.7": 59,
+    "15.5": 9,
+    "22.4": 2058,
+    "29.3": 2799,
+    "36.2": 78,
+    "43.1": 23,
+    "8.6": 34
+   },
+   "newOnlyMofClass": {
+    "code_exact_name_mismatch": 3611,
+    "code_name_exact_unique": 1,
+    "name_exact_ambiguous": 2,
+    "name_exact_code_mismatch": 41,
+    "name_unavailable": 474,
+    "no_exact_match": 273,
+    "special_account_not_evaluated": 658
+   },
+   "oldOnly": 734,
+   "oldOnlyIds": [
+    "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf|p2|r11",
+    "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf|p7|r11",
+    "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf|p9|r11",
+    "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf|p11|r11",
+    "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf|p13|r11"
+   ],
+   "oldTotal": 929
+  },
+  "previousCandidatesGeneral": {
+   "both": 155,
+   "bothByDistance": {
+    "8.6": 155
+   },
+   "name": "previous_candidates_general",
+   "newOnly": 5100,
+   "newOnlyByDistance": {
+    "1.7": 59,
+    "15.5": 9,
+    "22.4": 2077,
+    "29.3": 2799,
+    "36.2": 78,
+    "43.1": 23,
+    "8.6": 55
+   },
+   "newOnlyMofClass": {
+    "code_exact_name_mismatch": 3611,
+    "code_name_exact_unique": 1,
+    "name_exact_ambiguous": 2,
+    "name_exact_code_mismatch": 41,
+    "name_unavailable": 474,
+    "no_exact_match": 273,
+    "special_account_not_evaluated": 698
+   },
+   "oldOnly": 486,
+   "oldOnlyIds": [
+    "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf|p2|r11",
+    "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf|p7|r11",
+    "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf|p9|r11",
+    "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf|p11|r11",
+    "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf|p13|r11"
+   ],
+   "oldTotal": 641
+  },
+  "previousMofExactNameDiagnosticGeneral": {
+   "all": {
+    "ambiguous_exact_name": 63,
+    "no_exact_name": 21,
+    "rowsWithName": 618,
+    "unique_exact_name": 534
+   },
+   "candidateRows": 641,
+   "hierarchyContractPdfs": {
+    "ambiguous_exact_name": 23,
+    "no_exact_name": 9,
+    "rowsWithName": 289,
+    "unique_exact_name": 257
+   },
+   "hierarchyLessPdfs": {
+    "ambiguous_exact_name": 40,
+    "no_exact_name": 12,
+    "rowsWithName": 329,
+    "unique_exact_name": 277
+   }
+  }
+ },
+ "specialCandidates": 698
+}
