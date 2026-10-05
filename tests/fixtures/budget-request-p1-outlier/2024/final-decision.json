@@ -1,0 +1,183 @@
+{
+ "schema": "budget-request-p1-outlier-final-decision/v0",
+ "note": "P1 は human GT ではない。P2 を誤検出と仮定しない。MOF・manual contract は未使用。predicate・threshold・production は未変更。結果を見て閾値を調整していない",
+ "frozen": {
+  "populationFreezeSha256": "db22a783aa02a0b6c35f0962f270fccfad5256a14027136c09306d72a9aade5a",
+  "sourceEvidencePacketSha256": "de126ad5cc897f7298d586b079286392aed2b1fa696dd9f45eff7c63309733a8",
+  "visualEvidenceSha256": "86c27c452cbfd37e6847a690a8b0d61fc07b8205b0625136802d6808cf0d361a"
+ },
+ "population": {
+  "p1DominantRows": 2530,
+  "outlierRows": 2
+ },
+ "outcomes": [
+  {
+   "id": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf|66|4",
+   "source": "SOURCE_BODY_OR_TABLE_POSITION_SUPPORTED",
+   "visual": "VISUAL_BODY_OR_TABLE_POSITION_SUPPORTED",
+   "final": "body"
+  },
+  {
+   "id": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf|18|6",
+   "source": "SOURCE_BODY_OR_TABLE_POSITION_SUPPORTED",
+   "visual": "VISUAL_BODY_OR_TABLE_POSITION_SUPPORTED",
+   "final": "body"
+  }
+ ],
+ "decision": "P1_OUTLIERS_BODY_TABLE_SUPPORTED",
+ "rule": 1,
+ "controlComparison": {
+  "control": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|104|0",
+  "outliers": [
+   {
+    "id": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf|66|4",
+    "top": {
+     "yMin": 55.6,
+     "yMax": 69.4,
+     "topBin": "0.08"
+    },
+    "xExtent": {
+     "xMin": 86.3,
+     "xMax": 183.4
+    },
+    "width": 97.10000000000001,
+    "firstCodeRelation": "same_as_first_code",
+    "tableRuleRelation": {
+     "frame": {
+      "bottom": 555.498,
+      "left": 31.06,
+      "right": 797.18,
+      "top": 27.775
+     },
+     "nearestHorizontalRuleAbove": 48.606,
+     "nearestHorizontalRuleBelow": 555.498
+    },
+    "precedingRows": [
+     "事 項 備 考",
+     "番号 予 算 額 概 算 要 求 額 比 較 増 △ 減"
+    ],
+    "followingRows": [
+     "005 国民健康保険助成に必要 な経費（社会福祉費）",
+     "06081- 715-16-0081 国民健康保険災 55, 950 52, 448 △ 3, 502 (要 求 要 旨) 東京電力福島第一原子力発電所事故によ"
+    ],
+    "adjacentPageTitleStructure": {
+     "0": {
+      "currentTitle": "60",
+      "alternativeTitle": "015 国民健康保険助成費（社 会福祉費）",
+      "basis": "label_on_first_code_row"
+     },
+     "1": {
+      "currentTitle": "61",
+      "alternativeTitle": "61",
+      "basis": null
+     },
+     "-1": {
+      "currentTitle": "59",
+      "alternativeTitle": "59",
+      "basis": null
+     }
+    },
+    "sourceOnlyClassification": "SOURCE_BODY_OR_TABLE_POSITION_SUPPORTED",
+    "visualClassification": "VISUAL_BODY_OR_TABLE_POSITION_SUPPORTED"
+   },
+   {
+    "id": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf|18|6",
+    "top": {
+     "yMin": 90.3,
+     "yMax": 97.2,
+     "topBin": "0.14"
+    },
+    "xExtent": {
+     "xMin": 72.5,
+     "xMax": 514.5
+    },
+    "width": 442,
+    "firstCodeRelation": "same_as_first_code",
+    "tableRuleRelation": {
+     "frame": {
+      "bottom": 555.498,
+      "left": 31.06,
+      "right": 797.18,
+      "top": 27.775
+     },
+     "nearestHorizontalRuleAbove": 48.606,
+     "nearestHorizontalRuleBelow": 555.498
+    },
+    "precedingRows": [
+     "95012-2111-04-0100 超 過 勤 務 手 当 0 △ 8, 718 △ 8, 718",
+     "95012-2115-16-7500 国家公務員共済 0 △ 9, 929 △ 9, 929 組合負担金"
+    ],
+    "followingRows": [
+     "行政職給料表（一） 5級 3人 行政職給料表（一） 3級 3人 行政職給料表（一） 2級 8人 行政職給料表（一） 1級 3人",
+     "計 17人"
+    ],
+    "adjacentPageTitleStructure": {
+     "0": {
+      "currentTitle": "14",
+      "alternativeTitle": "016 増 員 要 求 に 伴 う 経 費 （新規増員）",
+      "basis": "label_on_first_code_row"
+     },
+     "1": {
+      "currentTitle": "15",
+      "alternativeTitle": "15",
+      "basis": null
+     },
+     "-1": {
+      "currentTitle": "13",
+      "alternativeTitle": "13",
+      "basis": null
+     }
+    },
+    "sourceOnlyClassification": "SOURCE_BODY_OR_TABLE_POSITION_SUPPORTED",
+    "visualClassification": "VISUAL_BODY_OR_TABLE_POSITION_SUPPORTED"
+   }
+  ],
+  "controlRow": {
+   "top": {
+    "yMin": 20.8,
+    "yMax": 27.8,
+    "topBin": "0.02"
+   },
+   "xExtent": {
+    "xMin": 38,
+    "xMax": 83
+   },
+   "width": 45,
+   "firstCodeRelation": "same_as_first_code",
+   "tableRuleRelation": {
+    "frame": {
+     "bottom": 555.498,
+     "left": 31.06,
+     "right": 797.18,
+     "top": 27.775
+    },
+    "nearestHorizontalRuleAbove": null,
+    "nearestHorizontalRuleBelow": 27.775
+   },
+   "precedingRows": [],
+   "followingRows": [
+    "要求 前 年 度 ６ 年 度 対 前 年 度",
+    "事 項 備 考"
+   ],
+   "adjacentPageTitleStructure": {
+    "0": {
+     "currentTitle": null,
+     "alternativeTitle": "100 内（消）",
+     "basis": "label_on_first_code_row"
+    },
+    "1": {
+     "currentTitle": "内（消） 101",
+     "alternativeTitle": "内（消） 101",
+     "basis": "before_first_code_row"
+    },
+    "-1": {
+     "currentTitle": "内（消） 99",
+     "alternativeTitle": "内（消） 99",
+     "basis": "before_first_code_row"
+    }
+   },
+   "sourceOnlyClassification": "SOURCE_HEADER_POSITION_SUPPORTED",
+   "visualClassification": "VISUAL_HEADER_POSITION_SUPPORTED"
+  }
+ }
+}

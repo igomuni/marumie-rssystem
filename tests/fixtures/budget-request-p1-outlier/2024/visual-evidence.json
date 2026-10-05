@@ -1,0 +1,37 @@
+{
+  "schema": "budget-request-p1-outlier-visual-evidence/v0",
+  "note": "Phase B（visual inspection）。source-only 分類（Commit B `57b0ebc`）の後に実施。実ページを pdftoppm（poppler）で render して確認した。見えない文字・境界・罫線は推測していない。抽出 text だけを visual evidence としていない。P1 は human GT ではない。",
+  "render": { "tool": "pdftoppm", "resolution": "100 dpi", "format": "png", "pdfPagesRendered": "page 全体（1 page）", "images": "commit しない（再生成可能: pdftoppm -f <page> -l <page> -r 100 -png <pdf> <prefix>）" },
+  "inspections": [
+    {
+      "role": "outlier", "id": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf|66|4", "localPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf", "page": 66,
+      "answers": {
+        "q1_independent_in_header_region": "いいえ。page 上端の表の外側（罫線の枠より上）には数字 `60` のみが見え、candidate の文字列は上端の header 領域にはない。",
+        "q2_inside_table_rules_columns_body_rows": "はい。candidate は列見出し（要求番号・事項・前年度予算額…）の下の表本体の「事項」列に、`015` の番号とともに、他の本文 row（`005`、`06081-…`、`020` など）と同じ列・同じ字下げの並びで表示されている。",
+        "q3_visual_boundary_between_candidate_and_body": "ない。candidate と表本体の row の間に罫線等の視覚的境界は見えない（candidate 自身が表本体の row）。",
+        "q4_same_position_and_role_as_adjacent_page_header": "いいえ。前後 page の上端には、この page と同様に数字だけが印字されており、candidate と同じ位置・役割の表示ではない（補助 evidence。前後 page から文字列は補完していない）。"
+      },
+      "visualClassification": "VISUAL_BODY_OR_TABLE_POSITION_SUPPORTED"
+    },
+    {
+      "role": "outlier", "id": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf|18|6", "localPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf", "page": 18,
+      "answers": {
+        "q1_independent_in_header_region": "いいえ。page 上端の表の外側には数字 `14` のみが見える。",
+        "q2_inside_table_rules_columns_body_rows": "はい。candidate は表の「事項」列の、列見出しの下の本文 row（`95012-…` の row の下、`001` の row の上）として、表の罫線の内側に表示されている。",
+        "q3_visual_boundary_between_candidate_and_body": "ない。candidate の上下に表本体の row が連続している。",
+        "q4_same_position_and_role_as_adjacent_page_header": "いいえ。前後 page の上端は数字のみ（補助 evidence。文字列は補完していない）。"
+      },
+      "visualClassification": "VISUAL_BODY_OR_TABLE_POSITION_SUPPORTED"
+    },
+    {
+      "role": "control", "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|104|0", "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf", "page": 104,
+      "answers": {
+        "q1_independent_in_header_region": "はい。candidate の文字列は page 左上、表の枠の上側（枠の外）に独立して表示されている。",
+        "q2_inside_table_rules_columns_body_rows": "いいえ。表の罫線・列・本文 row の内部ではない。",
+        "q3_visual_boundary_between_candidate_and_body": "ある。candidate と表（列見出し行を含む枠）の間に表の上端の罫線が視覚的な境界として見える。",
+        "q4_same_position_and_role_as_adjacent_page_header": "補助。source-only packet では、前後 page（103・105）の先頭の logical row にも同じ位置に同種の文字列が印字されている（`内（消） 99`・`内（消） 101`）。本 page の render は 1 page のみ確認した。"
+      },
+      "visualClassification": "VISUAL_HEADER_POSITION_SUPPORTED"
+    }
+  ]
+}
