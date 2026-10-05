@@ -3,7 +3,24 @@
 直前研究（cluster provenance、D1、`6f5d6b8`）の続き。source-only の evidence class を 1 つだけ（table-frame relation）追加し、level frame の x-cluster を構成する **support node だけ**を body / table position と判定できる node に限定する counterfactual（T4）を行う。node 自体は削除しない。C0・manual contract・MOF・header label の文字列は frame 構築に使わず、C0 に近づくことを成功条件にしない。
 
 ## 1. 依存 artifact（実行時に hash guard）
-- `tests/fixtures/budget-request-level-frame-cluster-provenance/2024/phaseA-cluster-inventory.json tests/fixtures/budget-request-level-frame-cluster-provenance/2024/phaseA-support-nodes.jsonl.gz tests/fixtures/budget-request-level-frame-cluster-provenance/2024/phaseB-diagnostic.json tests/fixtures/budget-request-level-frame-cluster-provenance/2024/phaseB-prior-change-join.json.gz tests/fixtures/budget-request-hierarchy-level-frame/2024/evaluation.json tests/fixtures/budget-request-hierarchy-stack-reset/2024/evaluation.json tests/fixtures/budget-request-source-range-hierarchy/2024/range-manifest.json tests/fixtures/budget-request-source-range-hierarchy/2024/phaseA-evaluation.json scripts/pipeline-v2/lib/budget-request-p1-outlier.ts scripts/pipeline-v2/lib/budget-request-table-frame-eligibility.ts scripts/pipeline-v2/lib/budget-request-drawing-primitives.ts scripts/pipeline-v2/lib/budget-request-rule-line-anchor.ts scripts/pipeline-v2/lib/budget-request-level-frame-counterfactual.ts scripts/pipeline-v2/lib/budget-request-stack-reset-counterfactual.ts scripts/pipeline-v2/lib/budget-request-document-hierarchy-v2.ts scripts/pipeline-v2/lib/budget-request-field-resolver.ts scripts/pipeline-v2/lib/budget-request-field-resolver-runs.ts docs/tasks/20261005_1720_Budget_Request_Level_Frame_Cluster_Provenance_Result.md`: ``
+- `tests/fixtures/budget-request-level-frame-cluster-provenance/2024/phaseA-cluster-inventory.json`: `2bb3e5929fcb9539b78018f740c112222956fd70a776796322e5900d46b672e5`
+- `tests/fixtures/budget-request-level-frame-cluster-provenance/2024/phaseA-support-nodes.jsonl.gz`: `fef26771118722adf35d9f367b4bdab03c0897c8f5f8efeecb9fdc3b4ee34b6e`
+- `tests/fixtures/budget-request-level-frame-cluster-provenance/2024/phaseB-diagnostic.json`: `60dea6388658118a1aeb6aafd50633f88fd9679467f0cff03e41d13e40b5b3f6`
+- `tests/fixtures/budget-request-level-frame-cluster-provenance/2024/phaseB-prior-change-join.json.gz`: `3d113009861b8f607157dc152de688078b64fb6853430e521786647d48a58999`
+- `tests/fixtures/budget-request-hierarchy-level-frame/2024/evaluation.json`: `cb3c75bf9bb2dc2ffef9cff7adbd899d3020b68eb8ab42a6ee21a0a68186641a`
+- `tests/fixtures/budget-request-hierarchy-stack-reset/2024/evaluation.json`: `e31d2cadecd30ef401b5fc2a77f2b930c1eacd38c7bb15a35f6988a87a0d0128`
+- `tests/fixtures/budget-request-source-range-hierarchy/2024/range-manifest.json`: `3e00df693627e1bb22274c291694ac1aed2c079daf758ceda5af084da217201e`
+- `tests/fixtures/budget-request-source-range-hierarchy/2024/phaseA-evaluation.json`: `72ad477e5953316e8774919c7f3da2491b22af25332c95d52b65f981e90b67b6`
+- `scripts/pipeline-v2/lib/budget-request-p1-outlier.ts`: `9cb749d2a3b80f1e71ff3993f9db77e57c723f552c56e1ea5d3a88a11637e5d4`
+- `scripts/pipeline-v2/lib/budget-request-table-frame-eligibility.ts`: `b43eab8b5e129b5755619c9ea3f037682a2d843dae8c4fbfb39535ab5bfffdf2`
+- `scripts/pipeline-v2/lib/budget-request-drawing-primitives.ts`: `50f62f5c1e227452f1e6de4c72821ced6b6402835a048d53fb497909fb675cc7`
+- `scripts/pipeline-v2/lib/budget-request-rule-line-anchor.ts`: `39454c20ea706dfd2a61eb1b455dec656383696fe2a538165fb94c535725e262`
+- `scripts/pipeline-v2/lib/budget-request-level-frame-counterfactual.ts`: `07912b03fd9bf1353b8e7f3f826f3678b7fa1580f9fa23595047049776e4314e`
+- `scripts/pipeline-v2/lib/budget-request-stack-reset-counterfactual.ts`: `b0f940c99ec27a1ca4a185b811f944b8beda093862b0230912a5133999889c61`
+- `scripts/pipeline-v2/lib/budget-request-document-hierarchy-v2.ts`: `4372d9ff13e127c69976f1018bb1f41c1cf691ad5eee8b6cdef439ea311eea1d`
+- `scripts/pipeline-v2/lib/budget-request-field-resolver.ts`: `758eb8f6afdf45bd39c9853623201a4afbac8e8d6883626149d889335c2bb224`
+- `scripts/pipeline-v2/lib/budget-request-field-resolver-runs.ts`: `d2686cf42660c0ea8593045e40cf8ae3d618a7740b882820eb86c7c4b7a392b5`
+- `docs/tasks/20261005_1720_Budget_Request_Level_Frame_Cluster_Provenance_Result.md`: `324b0fa41c60f60f74b8cef4c94164972941ff189dd28807787105091ae75d9f`
 - table-frame の既存 rule: `frameOf`・`classifyPosition`（FRAME_TOLERANCE = 0.5、`budget-request-p1-outlier.ts`）・`relationOf`（`budget-request-table-frame-eligibility.ts`）・long vertical rule の取得（`extractDrawingPrimitives` → `mergeVerticalRules` → `longRules`）を変更せず再利用する。
 
 ## 2. Population
