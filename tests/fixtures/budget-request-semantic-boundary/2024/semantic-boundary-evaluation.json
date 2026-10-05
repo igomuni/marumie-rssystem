@@ -1,0 +1,362 @@
+{
+ "basisByKind": {
+  "detail_line": {
+   "code-only row nested under a request in the observed hierarchy": 613
+  },
+  "item": {
+   "child of a hierarchy root (organization)": 97
+  },
+  "organization": {
+   "hierarchy root: no parent candidate (edge unresolved)": 7
+  },
+  "unclassified": {
+   "hierarchy edge level_gap: kind not determined": 157,
+   "parent kind not determined": 10,
+   "strong header-collision evidence on this node": 3
+  }
+ },
+ "decision": {
+  "decision": "SEMANTIC_BOUNDARY_DETERMINISTIC_BUT_CONTRACT_DEPENDENT",
+  "rule": 5
+ },
+ "facts": {
+  "itemVsDetailSeparable": true,
+  "m3Rows": 7,
+  "orgMechanismIdentified": true,
+  "populationReproduced": true
+ },
+ "frozen": {
+  "hashes": {
+   "tests/fixtures/budget-request-hierarchy-failure-isolation/2024/paired-manifest.json": "4fb70f3ab49c6a823cd45dad8c05d6b395f6fffb8ab9ca8009b196445616d5e1",
+   "tests/fixtures/budget-request-range-local-item-extraction/2024/full-evaluation.json": "421dbf8b3165057926ba21c84a7debb549a31941dfc8c62df2e39df651c9519d",
+   "tests/fixtures/budget-request-rule-line-geometry/2024/rule-line-decision.json": "ab1f802877bef2164894b4d5d9e2bcd7921897457f198b315643af57b9fbcbd0",
+   "tests/fixtures/budget-request-rule-line-geometry/2024/rule-line-thin-anchor-development.json": "a45951b54bd814c575ebd821d8edd2f7c13424ca1ed8503327500e887ec7ae86"
+  },
+  "population": "24f4803bb3fefd756ccb85f313404879529588792d7ae88352b30beab34c1aee",
+  "protocol": "6b84046bd8831dac58be20f1be4d15ef1d101d39709a9a1e606654d642425408"
+ },
+ "itemVsDetailLine": {
+  "anchorOffsetByKind": {
+   "detail_line": {
+    "22.4": 613
+   },
+   "item": {
+    "22.4": 16,
+    "8.6": 81
+   },
+   "organization": {
+    "8.6": 7
+   },
+   "unclassified": {
+    "22.4": 116,
+    "8.6": 54
+   }
+  },
+  "anchorOffsetKindMix": {
+   "22.4": {
+    "detail_line": 613,
+    "item": 16,
+    "unclassified": 116
+   },
+   "8.6": {
+    "item": 81,
+    "organization": 7,
+    "unclassified": 54
+   }
+  },
+  "band": [
+   -7.9,
+   -5.9
+  ],
+  "bandCounts": {
+   "detail_line": {
+    "inBand": 0,
+    "rows": 613
+   },
+   "item": {
+    "inBand": 97,
+    "rows": 97
+   },
+   "organization": {
+    "inBand": 7,
+    "rows": 7
+   },
+   "unclassified": {
+    "inBand": 54,
+    "rows": 170
+   }
+  },
+  "cellsByPdfVariantAnchorOffset": {
+   "000157010.pdf|66|22.4": {
+    "detail_line": 116,
+    "unclassified": 32
+   },
+   "000157010.pdf|66|8.6": {
+    "item": 17,
+    "unclassified": 18
+   },
+   "001630395.pdf|79|22.4": {
+    "item": 8
+   },
+   "05-1b-01.pdf|66|22.4": {
+    "detail_line": 86
+   },
+   "05-1b-01.pdf|66|8.6": {
+    "item": 14
+   },
+   "20230907_policies_budget_04.pdf|66|22.4": {
+    "detail_line": 78,
+    "unclassified": 9
+   },
+   "20230907_policies_budget_04.pdf|66|8.6": {
+    "organization": 7,
+    "unclassified": 6
+   },
+   "20230914-mxt_kaikesou01-000031817_03.pdf|66|22.4": {
+    "detail_line": 55
+   },
+   "20230914-mxt_kaikesou01-000031817_03.pdf|66|8.6": {
+    "item": 19
+   },
+   "230901-4.pdf|79|22.4": {
+    "item": 8
+   },
+   "gaisanyoukyu.pdf|66|22.4": {
+    "detail_line": 80,
+    "unclassified": 68
+   },
+   "gaisanyoukyu.pdf|66|8.6": {
+    "item": 1,
+    "unclassified": 28
+   },
+   "ippan_o.pdf|66|22.4": {
+    "detail_line": 198,
+    "unclassified": 7
+   },
+   "ippan_o.pdf|66|8.6": {
+    "item": 30,
+    "unclassified": 2
+   }
+  },
+  "requestRelativeOffsetByKind": {
+   "detail_line": {
+    "6.9": 613
+   },
+   "item": {
+    "-6.9": 97
+   },
+   "organization": {
+    "-6.9": 7
+   },
+   "unclassified": {
+    "-6.9": 54,
+    "6.9": 116
+   }
+  }
+ },
+ "itemVsOrganization": {
+  "geometrySeparable": false,
+  "itemBasisAllChildOfRoot": true,
+  "itemRowsInBand": 97,
+  "orgBasisAllRoot": true,
+  "organizationPdfs": [
+   "20230907_policies_budget_04.pdf"
+  ],
+  "organizationRows": 7,
+  "organizationRowsInRequestRelativeBand": 7,
+  "rowLocalFeatureDisjointness": {
+   "codeClass": {
+    "disjoint": false,
+    "item": [
+     "plain3"
+    ],
+    "organization": [
+     "plain3"
+    ]
+   },
+   "codeDigits": {
+    "disjoint": false,
+    "item": [
+     "3"
+    ],
+    "organization": [
+     "3"
+    ]
+   },
+   "headerPresent": {
+    "disjoint": false,
+    "item": [
+     "true"
+    ],
+    "organization": [
+     "true"
+    ]
+   },
+   "layoutVariant": {
+    "disjoint": false,
+    "item": [
+     "66",
+     "79"
+    ],
+    "organization": [
+     "66"
+    ]
+   },
+   "nameResolved": {
+    "disjoint": false,
+    "item": [
+     "false",
+     "true"
+    ],
+    "organization": [
+     "false",
+     "true"
+    ]
+   },
+   "nameStatusReason": {
+    "disjoint": false,
+    "item": [
+     "ambiguous/continuation_ambiguous",
+     "resolved/null"
+    ],
+    "organization": [
+     "ambiguous/continuation_ambiguous",
+     "resolved/null"
+    ]
+   }
+  }
+ },
+ "limitation": "existing ON kind は human GT ではない。既存 DocumentHierarchy が同じ geometry population をどう分けているかを説明する control label に限る。MOF は使わない。",
+ "mechanismByKind": {
+  "detail_line": {
+   "M2_sequence_state": 613
+  },
+  "item": {
+   "M2_sequence_state": 97
+  },
+  "organization": {
+   "M3_contract_dependent": 7
+  },
+  "unclassified": {
+   "M2_sequence_state": 170
+  }
+ },
+ "mechanismCountsItemDetailOrganization": {
+  "M2_sequence_state": 710,
+  "M3_contract_dependent": 7
+ },
+ "population": {
+  "byKind": {
+   "detail_line": 613,
+   "item": 97,
+   "organization": 7,
+   "unclassified": 170
+  },
+  "total": 887
+ },
+ "portability": {
+  "activationRange": "node 候補・x クラスタ（支持 2 行以上）・stack は A2_EXPERIMENTS の手書き page 範囲を入力にして作られる。root は「入力 range 内で自分より浅い見出しが先行しない行」",
+  "boundaryRule": "kind は hierarchy node の x-level（range 内の x クラスタの順位）と文書順 stack の親子で決まる（FieldResolver.kindFromHierarchy）: 親が無い root→organization、root の子→item、request/それ以外の子→detail_line、level_gap・unplaced・strong header collision→unclassified。コード値・名称・外部辞書は使わない",
+  "coordinateFrame": "x-level は入力 range 内の x クラスタの相対順位。layout variant（request x 66 / 79）を絶対 x では持たない。request 基準 offset（−6.9）は別の range-local frame"
+ },
+ "schema": "budget-request-semantic-boundary-evaluation/v0",
+ "sequence": {
+  "detail_line": {
+   "firstInPage": 84,
+   "firstInRange": 0,
+   "next1": {
+    "detail_line": 603,
+    "item": 1,
+    "unclassified": 9
+   },
+   "prev1": {
+    "detail_line": 376,
+    "request": 193,
+    "unclassified": 44
+   },
+   "rows": 613,
+   "withRequestWithin3Before": 214
+  },
+  "item": {
+   "firstInPage": 29,
+   "firstInRange": 0,
+   "next1": {
+    "request": 85,
+    "unclassified": 12
+   },
+   "prev1": {
+    "detail_line": 69,
+    "organization": 12,
+    "request": 6,
+    "unclassified": 10
+   },
+   "rows": 97,
+   "withRequestWithin3Before": 37
+  },
+  "organization": {
+   "firstInPage": 1,
+   "firstInRange": 0,
+   "next1": {
+    "request": 7
+   },
+   "prev1": {
+    "detail_line": 6,
+    "unclassified": 1
+   },
+   "rows": 7,
+   "withRequestWithin3Before": 2
+  },
+  "unclassified": {
+   "firstInPage": 15,
+   "firstInRange": 0,
+   "next1": {
+    "detail_line": 19,
+    "request": 53,
+    "unclassified": 98
+   },
+   "prev1": {
+    "detail_line": 127,
+    "request": 3,
+    "unclassified": 40
+   },
+   "rows": 170,
+   "withRequestWithin3Before": 13
+  }
+ },
+ "unclassified": {
+  "byAnchorOffset": {
+   "22.4": {
+    "level_gap": 113,
+    "strong_header_collision": 3
+   },
+   "8.6": {
+    "level_gap": 44,
+    "parent_kind_not_determined": 10
+   }
+  },
+  "byClass": {
+   "level_gap": 157,
+   "parent_kind_not_determined": 10,
+   "strong_header_collision": 3
+  },
+  "byPdf": {
+   "000157010.pdf": {
+    "level_gap": 48,
+    "parent_kind_not_determined": 2
+   },
+   "20230907_policies_budget_04.pdf": {
+    "level_gap": 9,
+    "parent_kind_not_determined": 6
+   },
+   "gaisanyoukyu.pdf": {
+    "level_gap": 91,
+    "parent_kind_not_determined": 2,
+    "strong_header_collision": 3
+   },
+   "ippan_o.pdf": {
+    "level_gap": 9
+   }
+  },
+  "total": 170
+ }
+}
