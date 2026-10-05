@@ -1,0 +1,614 @@
+{
+ "schema": "budget-request-table-frame-examples/v0",
+ "note": "post-freeze。(population, relation) ごとの id 辞書順の先頭 3 件。人間判断・visual は primary oracle ではない",
+ "examples": {
+  "P1_dominant|header_position_supported": {
+   "count": 2529,
+   "first3": [
+    {
+     "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|104|0",
+     "raw": "100 内（消）",
+     "bounds": {
+      "xMax": 83,
+      "xMin": 38,
+      "yMax": 27.8,
+      "yMin": 20.8
+     },
+     "relation": "header_position_supported",
+     "reason": "candidate yMax 27.8 ≤ frameTop 27.775 + 0.5"
+    },
+    {
+     "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|106|0",
+     "raw": "102 内（消）",
+     "bounds": {
+      "xMax": 83,
+      "xMin": 38,
+      "yMax": 27.8,
+      "yMin": 20.8
+     },
+     "relation": "header_position_supported",
+     "reason": "candidate yMax 27.8 ≤ frameTop 27.775 + 0.5"
+    },
+    {
+     "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|108|0",
+     "raw": "104 内（消）",
+     "bounds": {
+      "xMax": 83,
+      "xMin": 38,
+      "yMax": 27.8,
+      "yMin": 20.8
+     },
+     "relation": "header_position_supported",
+     "reason": "candidate yMax 27.8 ≤ frameTop 27.775 + 0.5"
+    }
+   ]
+  },
+  "P1_dominant|unavailable": {
+   "count": 1,
+   "first3": [
+    {
+     "id": "data/download/jftc.go.jp/soshiki/kyotsukoukai/yosan/yosankessan/r6/r6sandanhyou.pdf|140|0",
+     "raw": "136 内（取）",
+     "bounds": {
+      "xMax": 88.6,
+      "xMin": 36.6,
+      "yMax": 29.8,
+      "yMin": 21.8
+     },
+     "relation": "unavailable",
+     "reason": "frame_unavailable"
+    }
+   ]
+  },
+  "P1_outlier|body_or_table_position_supported": {
+   "count": 2,
+   "first3": [
+    {
+     "id": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf|66|4",
+     "raw": "015 国民健康保険助成費（社 会福祉費）",
+     "bounds": {
+      "xMax": 183.4,
+      "xMin": 86.3,
+      "yMax": 69.4,
+      "yMin": 55.6
+     },
+     "relation": "body_or_table_position_supported",
+     "reason": "candidate bbox が frame [x 31.06–797.18, y 27.775–555.498] の内側"
+    },
+    {
+     "id": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf|18|6",
+     "raw": "016 増 員 要 求 に 伴 う 経 費 （新規増員）",
+     "bounds": {
+      "xMax": 514.5,
+      "xMin": 72.5,
+      "yMax": 97.2,
+      "yMin": 90.3
+     },
+     "relation": "body_or_table_position_supported",
+     "reason": "candidate bbox が frame [x 31.06–797.18, y 27.775–555.498] の内側"
+    }
+   ]
+  },
+  "P2|ambiguous": {
+   "count": 350,
+   "first3": [
+    {
+     "id": "data/download/env.go.jp/content/000157010.pdf|110|4",
+     "raw": "３ 化学物質審査規制法の優先評価化学物質に係る環境調査事業 40,016( 41,067)",
+     "bounds": {
+      "xMax": 799.2,
+      "xMin": 469.3,
+      "yMax": 69.4,
+      "yMin": 62.5
+     },
+     "relation": "ambiguous",
+     "reason": "candidate bbox [x 469.3–799.2, y 62.5–69.4] が frame [x 31.06–797.18, y 27.775–55"
+    },
+    {
+     "id": "data/download/env.go.jp/content/000157010.pdf|110|7",
+     "raw": "計 332,672( 321,000)",
+     "bounds": {
+      "xMax": 799.2,
+      "xMin": 531.8,
+      "yMax": 111.1,
+      "yMin": 104.2
+     },
+     "relation": "ambiguous",
+     "reason": "candidate bbox [x 531.8–799.2, y 104.2–111.1] が frame [x 31.06–797.18, y 27.775–"
+    },
+    {
+     "id": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf|222|7",
+     "raw": "１ 検疫事業費 622,434( 664,615）",
+     "bounds": {
+      "xMax": 799.2,
+      "xMin": 469.3,
+      "yMax": 104.2,
+      "yMin": 97.2
+     },
+     "relation": "ambiguous",
+     "reason": "candidate bbox [x 469.3–799.2, y 97.2–104.2] が frame [x 31.06–797.18, y 27.775–5"
+    }
+   ]
+  },
+  "P2|body_or_table_position_supported": {
+   "count": 1436,
+   "first3": [
+    {
+     "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|106|5",
+     "raw": "計 44, 084 ( 50, 695 )",
+     "bounds": {
+      "xMax": 797.2,
+      "xMin": 469.3,
+      "yMax": 83.3,
+      "yMin": 76.4
+     },
+     "relation": "body_or_table_position_supported",
+     "reason": "candidate bbox が frame [x 31.06–797.18, y 27.775–555.498] の内側"
+    },
+    {
+     "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|110|4",
+     "raw": "①１０～７級（全国平均 日帰り）",
+     "bounds": {
+      "xMax": 587.3,
+      "xMin": 476.2,
+      "yMax": 62.5,
+      "yMin": 55.5
+     },
+     "relation": "body_or_table_position_supported",
+     "reason": "candidate bbox が frame [x 31.06–797.18, y 27.775–555.498] の内側"
+    },
+    {
+     "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|110|7",
+     "raw": "②６～３級（全国平均 日帰り）",
+     "bounds": {
+      "xMax": 580.4,
+      "xMin": 476.2,
+      "yMax": 97.2,
+      "yMin": 90.3
+     },
+     "relation": "body_or_table_position_supported",
+     "reason": "candidate bbox が frame [x 31.06–797.18, y 27.775–555.498] の内側"
+    }
+   ]
+  },
+  "P3|ambiguous": {
+   "count": 127,
+   "first3": [
+    {
+     "id": "data/download/env.go.jp/content/000157010.pdf|111|7",
+     "raw": "環境中の多様な因子による健康影響に関する基礎調査費 20,828( 15,204)",
+     "bounds": {
+      "xMax": 799.2,
+      "xMin": 476.3,
+      "yMax": 104.2,
+      "yMin": 97.2
+     },
+     "relation": "ambiguous",
+     "reason": "candidate bbox [x 476.3–799.2, y 97.2–104.2] が frame [x 31.06–797.18, y 27.775–5"
+    },
+    {
+     "id": "data/download/env.go.jp/content/000157010.pdf|111|8",
+     "raw": "１ 花粉に関する影響評価事業 20,828( 8,994)",
+     "bounds": {
+      "xMax": 799.2,
+      "xMin": 483.2,
+      "yMax": 118,
+      "yMin": 111.1
+     },
+     "relation": "ambiguous",
+     "reason": "candidate bbox [x 483.2–799.2, y 111.1–118] が frame [x 31.06–797.18, y 27.775–55"
+    },
+    {
+     "id": "data/download/jcrc.go.jp/content/000001746.pdf|11|5",
+     "raw": "95016-2111-05-0200 委 員 手 当 2, 948 2, 948 0 非常勤委員 2, 948 ( 2, 948 )",
+     "bounds": {
+      "xMax": 797.2,
+      "xMin": 86.3,
+      "yMax": 76.4,
+      "yMin": 69.4
+     },
+     "relation": "ambiguous",
+     "reason": "candidate bbox [x 86.3–797.2, y 69.4–76.4] が frame [x 50.04–462.43, y 27.775–555"
+    }
+   ]
+  },
+  "P3|body_or_table_position_supported": {
+   "count": 405,
+   "first3": [
+    {
+     "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|105|6",
+     "raw": "⑧通信運搬費（ゆうパック８０サイズ都内）",
+     "bounds": {
+      "xMax": 615.1,
+      "xMin": 476.2,
+      "yMax": 90.3,
+      "yMin": 83.3
+     },
+     "relation": "body_or_table_position_supported",
+     "reason": "candidate bbox が frame [x 31.06–797.18, y 27.775–555.498] の内側"
+    },
+    {
+     "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|12|8",
+     "raw": "95016-2129-06-0110 諸 謝 金 136 136 0 障害者雇用に要する諸謝金（理解促進のための講演会）",
+     "bounds": {
+      "xMax": 642.9,
+      "xMin": 86.3,
+      "yMax": 111.1,
+      "yMin": 104.2
+     },
+     "relation": "body_or_table_position_supported",
+     "reason": "candidate bbox が frame [x 31.06–797.18, y 27.775–555.498] の内側"
+    },
+    {
+     "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|43|8",
+     "raw": "等経費 （要求要旨）",
+     "bounds": {
+      "xMax": 511,
+      "xMin": 96.6,
+      "yMax": 104.2,
+      "yMin": 97.2
+     },
+     "relation": "body_or_table_position_supported",
+     "reason": "candidate bbox が frame [x 31.06–797.18, y 27.775–555.498] の内側"
+    }
+   ]
+  },
+  "P3|unavailable": {
+   "count": 2,
+   "first3": [
+    {
+     "id": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf|125|5",
+     "raw": "09 法廷等器具整備費 61,583 374,986 313,403 備品費 374,986 ( 61,583 )",
+     "bounds": {
+      "xMax": 748.7,
+      "xMin": 113.1,
+      "yMax": 76.5,
+      "yMin": 70.2
+     },
+     "relation": "unavailable",
+     "reason": "frame_unavailable"
+    },
+    {
+     "id": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf|125|8",
+     "raw": "09 法廷等器具整備費 340,014 583,259 243,245 （総務局経費）",
+     "bounds": {
+      "xMax": 400.8,
+      "xMin": 113.1,
+      "yMax": 113.6,
+      "yMin": 107.3
+     },
+     "relation": "unavailable",
+     "reason": "frame_unavailable"
+    }
+   ]
+  },
+  "P4|ambiguous": {
+   "count": 220,
+   "first3": [
+    {
+     "id": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf|36|4",
+     "raw": "計 19,071( 19,158)",
+     "bounds": {
+      "xMax": 799.2,
+      "xMin": 511,
+      "yMax": 62.5,
+      "yMin": 55.5
+     },
+     "relation": "ambiguous",
+     "reason": "candidate bbox [x 511–799.2, y 55.5–62.5] が frame [x 31.06–797.18, y 27.775–555."
+    },
+    {
+     "id": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf|1007|5",
+     "raw": "6 回 @ 324,075 円 1.1 2, 139 ( 2, 139 )",
+     "bounds": {
+      "xMax": 797.2,
+      "xMin": 583.7,
+      "yMax": 76.4,
+      "yMin": 69.4
+     },
+     "relation": "ambiguous",
+     "reason": "candidate bbox [x 583.7–797.2, y 69.4–76.4] が frame [x 50.04–462.43, y 27.775–55"
+    },
+    {
+     "id": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf|1007|7",
+     "raw": "1 回 @ 2,500,000 円 1.1 2, 750 ( 2, 750 )",
+     "bounds": {
+      "xMax": 797.2,
+      "xMin": 587.1,
+      "yMax": 104.2,
+      "yMin": 97.2
+     },
+     "relation": "ambiguous",
+     "reason": "candidate bbox [x 587.1–797.2, y 97.2–104.2] が frame [x 50.04–462.43, y 27.775–5"
+    }
+   ]
+  },
+  "P4|body_or_table_position_supported": {
+   "count": 1770,
+   "first3": [
+    {
+     "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|102|5",
+     "raw": "雑役務費 15, 000 ( 15, 000 )",
+     "bounds": {
+      "xMax": 797.2,
+      "xMin": 472.8,
+      "yMax": 76.4,
+      "yMin": 69.4
+     },
+     "relation": "body_or_table_position_supported",
+     "reason": "candidate bbox が frame [x 31.06–797.18, y 27.775–555.498] の内側"
+    },
+    {
+     "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|105|4",
+     "raw": "⑦報告書印刷費（Ａ４ 軽印刷 上質 両面１００頁）",
+     "bounds": {
+      "xMax": 649.8,
+      "xMin": 476.2,
+      "yMax": 62.5,
+      "yMin": 55.5
+     },
+     "relation": "body_or_table_position_supported",
+     "reason": "candidate bbox が frame [x 31.06–797.18, y 27.775–555.498] の内側"
+    },
+    {
+     "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|145|7",
+     "raw": "②研究員 1 人 60 日 @ 16,380 1.10 1, 081 ( 1, 081 )",
+     "bounds": {
+      "xMax": 797.2,
+      "xMin": 476.2,
+      "yMax": 125,
+      "yMin": 118
+     },
+     "relation": "body_or_table_position_supported",
+     "reason": "candidate bbox が frame [x 31.06–797.18, y 27.775–555.498] の内側"
+    }
+   ]
+  },
+  "P4|header_position_supported": {
+   "count": 3578,
+   "first3": [
+    {
+     "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_02.pdf|3|2",
+     "raw": "9101 東 日 本 大 震 災 復 興 特 別 会 計 （内閣本府等）",
+     "bounds": {
+      "xMax": 394,
+      "xMin": 38,
+      "yMax": 69.4,
+      "yMin": 54.5
+     },
+     "relation": "header_position_supported",
+     "reason": "candidate yMax 69.4 ≤ frameTop 76.381 + 0.5"
+    },
+    {
+     "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_02.pdf|5|2",
+     "raw": "9101 東 日 本 大 震 災 復 興 特 別 会 計 （内閣本府等）",
+     "bounds": {
+      "xMax": 394,
+      "xMin": 38,
+      "yMax": 69.4,
+      "yMin": 54.5
+     },
+     "relation": "header_position_supported",
+     "reason": "candidate yMax 69.4 ≤ frameTop 76.381 + 0.5"
+    },
+    {
+     "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_02.pdf|7|2",
+     "raw": "9101 東 日 本 大 震 災 復 興 特 別 会 計 （内閣本府等）",
+     "bounds": {
+      "xMax": 394,
+      "xMin": 38,
+      "yMax": 69.4,
+      "yMin": 54.5
+     },
+     "relation": "header_position_supported",
+     "reason": "candidate yMax 69.4 ≤ frameTop 76.381 + 0.5"
+    }
+   ]
+  },
+  "P4|unavailable": {
+   "count": 4,
+   "first3": [
+    {
+     "id": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf|123|7",
+     "raw": "09 情報処理業務庁費 0 229,309 229,309 （広報課経費）",
+     "bounds": {
+      "xMax": 400.8,
+      "xMin": 113.1,
+      "yMax": 101.2,
+      "yMin": 95
+     },
+     "relation": "unavailable",
+     "reason": "frame_unavailable"
+    },
+    {
+     "id": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf|124|5",
+     "raw": "次期J・NET移行作業及び共通運用保守 335,739 ( 602,456 )",
+     "bounds": {
+      "xMax": 748.7,
+      "xMin": 375.8,
+      "yMax": 76.5,
+      "yMin": 70.2
+     },
+     "relation": "unavailable",
+     "reason": "frame_unavailable"
+    },
+    {
+     "id": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf|124|7",
+     "raw": "無線LANの運用保守 4,418 ( 1,324 )",
+     "bounds": {
+      "xMax": 748.7,
+      "xMin": 375.8,
+      "yMax": 101.2,
+      "yMin": 95
+     },
+     "relation": "unavailable",
+     "reason": "frame_unavailable"
+    }
+   ]
+  },
+  "P5|ambiguous": {
+   "count": 499,
+   "first3": [
+    {
+     "id": "data/download/cas.go.jp/jp/yosan/pdf/r6_11.pdf|13|4",
+     "raw": "接続機器の保守（既存）",
+     "bounds": {
+      "xMax": 545.7,
+      "xMin": 469.3,
+      "yMax": 76.4,
+      "yMin": 69.4
+     },
+     "relation": "ambiguous",
+     "reason": "candidate bbox [x 469.3–545.7, y 69.4–76.4] が frame [x 50.04–462.43, y 27.775–55"
+    },
+    {
+     "id": "data/download/cas.go.jp/jp/yosan/pdf/r6_11.pdf|14|4",
+     "raw": "計 15, 832, 240 ( 6, 869, 444 )",
+     "bounds": {
+      "xMax": 797.2,
+      "xMin": 469.3,
+      "yMax": 76.4,
+      "yMin": 69.4
+     },
+     "relation": "ambiguous",
+     "reason": "candidate bbox [x 469.3–797.2, y 69.4–76.4] が frame [x 50.04–358.9, y 27.775–555"
+    },
+    {
+     "id": "data/download/cas.go.jp/jp/yosan/pdf/r6_11.pdf|14|5",
+     "raw": "95016-2123-09-4120 通 信 専 用 料 1, 321, 109 1, 321, 109 0 １．通信運搬費 1, 321, 109 ( 1, 321, 109 )",
+     "bounds": {
+      "xMax": 797.2,
+      "xMin": 86.3,
+      "yMax": 90.3,
+      "yMin": 83.3
+     },
+     "relation": "ambiguous",
+     "reason": "candidate bbox [x 86.3–797.2, y 83.3–90.3] が frame [x 50.04–358.9, y 27.775–555."
+    }
+   ]
+  },
+  "P5|body_or_table_position_supported": {
+   "count": 1604,
+   "first3": [
+    {
+     "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|100|4",
+     "raw": "ａ．テキスト代 500 部 @ 11,340 1.10 6, 237 ( 6, 237 )",
+     "bounds": {
+      "xMax": 797.2,
+      "xMin": 483.1,
+      "yMax": 69.4,
+      "yMin": 62.5
+     },
+     "relation": "body_or_table_position_supported",
+     "reason": "candidate bbox が frame [x 31.06–797.18, y 27.775–555.498] の内側"
+    },
+    {
+     "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|100|5",
+     "raw": "ｂ．チラシ印刷費（Ａ４、両面、平版、カラー、中質）",
+     "bounds": {
+      "xMax": 656.7,
+      "xMin": 483.1,
+      "yMax": 83.3,
+      "yMin": 76.4
+     },
+     "relation": "body_or_table_position_supported",
+     "reason": "candidate bbox が frame [x 31.06–797.18, y 27.775–555.498] の内側"
+    },
+    {
+     "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|107|4",
+     "raw": "016 国際化に伴う消費者行政 ３０年度 元 年 度 ２ 年 度 ３ 年 度 ４ 年 度 費（前年度限りの経費）",
+     "bounds": {
+      "xMax": 780.1,
+      "xMin": 79.4,
+      "yMax": 69.4,
+      "yMin": 55.5
+     },
+     "relation": "body_or_table_position_supported",
+     "reason": "candidate bbox が frame [x 31.06–797.18, y 27.775–555.498] の内側"
+    }
+   ]
+  },
+  "P5|header_position_supported": {
+   "count": 2131,
+   "first3": [
+    {
+     "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|100|0",
+     "raw": "96 内（消）",
+     "bounds": {
+      "xMax": 83,
+      "xMin": 41.5,
+      "yMax": 27.8,
+      "yMin": 20.8
+     },
+     "relation": "header_position_supported",
+     "reason": "candidate yMax 27.8 ≤ frameTop 27.775 + 0.5"
+    },
+    {
+     "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|109|0",
+     "raw": "内（消） 105",
+     "bounds": {
+      "xMax": 793.8,
+      "xMin": 748.9,
+      "yMax": 27.8,
+      "yMin": 20.8
+     },
+     "relation": "header_position_supported",
+     "reason": "candidate yMax 27.8 ≤ frameTop 27.775 + 0.5"
+    },
+    {
+     "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|111|0",
+     "raw": "内（消） 107",
+     "bounds": {
+      "xMax": 793.8,
+      "xMin": 748.9,
+      "yMax": 27.8,
+      "yMin": 20.8
+     },
+     "relation": "header_position_supported",
+     "reason": "candidate yMax 27.8 ≤ frameTop 27.775 + 0.5"
+    }
+   ]
+  },
+  "P5|unavailable": {
+   "count": 17,
+   "first3": [
+    {
+     "id": "data/download/clb.go.jp/files/topics/4473_ext_05_1.pdf|27|10",
+     "raw": "予算定員 （新規増員）",
+     "bounds": {
+      "xMax": 590.3,
+      "xMin": 112.6,
+      "yMax": 119.3,
+      "yMin": 114.1
+     },
+     "relation": "unavailable",
+     "reason": "frame_unavailable"
+    },
+    {
+     "id": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf|113|0",
+     "raw": "裁（裁）109",
+     "bounds": {
+      "xMax": 754.7,
+      "xMin": 731.5,
+      "yMax": 41.7,
+      "yMin": 36.7
+     },
+     "relation": "unavailable",
+     "reason": "frame_unavailable"
+    },
+    {
+     "id": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf|115|0",
+     "raw": "裁（裁）111",
+     "bounds": {
+      "xMax": 761.8,
+      "xMin": 738,
+      "yMax": 48.9,
+      "yMin": 43.6
+     },
+     "relation": "unavailable",
+     "reason": "frame_unavailable"
+    }
+   ]
+  }
+ }
+}

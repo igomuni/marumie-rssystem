@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261005_1331_Budget_Request_Table_Frame_Predicate_Refinement_Result.md](20261005_1331_Budget_Request_Table_Frame_Predicate_Refinement_Result.md) — table-frame relationをeligibilityに1つだけ加えたrefinementのfrozen評価。P1 dominant 2,530中2,529維持・outlier 2/2除外・P2の80.4%がbody/table・regression 0、ただしP2 shareとcoverageはgate近傍。初回runのmeasurement bug(reject pageのraw比較)を開示。判定=TABLE_FRAME_REFINEMENT_SUPPORTED
 - [20261005_1330_Budget_Request_Table_Frame_Predicate_Refinement_Preregistration.md](20261005_1330_Budget_Request_Table_Frame_Predicate_Refinement_Preregistration.md) — 直前研究のtable-frame relation(frame上側=header候補)をalternative projectionのeligibility条件に1つだけ追加するrefinementの事前登録。再利用classifier・population・fail-closed・数値gate(G1〜G5)・D1〜D4をfull evaluation前に凍結
 - [20261005_1306_Budget_Request_P1_Outlier_Failure_Isolation_Result.md](20261005_1306_Budget_Request_P1_Outlier_Failure_Isolation_Result.md) — P1のgeometry outlier 2rowはどちらもtable frame内側の本文row(source・visual一致)で、alternative projectionがページ番号のみの空titleの後に最初のcode rowを採用した結果。controlはframe上側のheader。判定=P1_OUTLIERS_BODY_TABLE_SUPPORTED
 - [20261005_1255_Budget_Request_P1_Outlier_Failure_Isolation_Protocol.md](20261005_1255_Budget_Request_P1_Outlier_Failure_Isolation_Protocol.md) — P1(projected candidate)のgeometry outlier 2rowがpage headerかbody/tableかのfailure isolation protocol。最頻topBin外を機械選択、table frame(長い垂直罫線)基準のsource-only分類、visual gate、D1〜D4を個別page inspection前に凍結
