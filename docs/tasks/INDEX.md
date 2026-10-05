@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261005_0930_Budget_Request_Page_Header_Label_Segment_Protocol.md](20261005_0930_Budget_Request_Page_Header_Label_Segment_Protocol.md) — page header first title lineのlabelを意味解釈せずsource primitiveとして抽出しexact sequenceからsegment化できるかのprotocol。title行定義・正規化(NFKC+空白数字除去)・blank非bridge・Phase B比較・gate G1/G3/G4/G5と判定規則をPhase A全件走査前に凍結
 - [20261005_0918_Budget_Request_Organization_Root_Source_Evidence_Result.md](20261005_0918_Budget_Request_Organization_Root_Source_Evidence_Result.md) — organization/root境界のsource evidence結果。手書きA2範囲はlayout range境界と6/8のみ一致(mext/mhlwは説明できず)、org7とitem97を分けるnon-circular featureは0。post-hocでpage header label(文（文）等)がmhlw両端と一致。判定=CONTRACT_DEPENDENCY_REMAINS(A=LAYOUT_BOUNDARY_ONLY, B=INSUFFICIENT_EVIDENCE)
 - [20261005_0913_Budget_Request_Organization_Root_Source_Evidence_Protocol.md](20261005_0913_Budget_Request_Organization_Root_Source_Evidence_Protocol.md) — organization/root境界のsource evidence inventoryのprotocol。Activation boundary(手書きA2範囲)とRoot semantics(org7 vs item97)を別軸で判定、boundary context幅(+/-20行・+/-1頁、mext/mhlwは+/-10頁窓)・非循環feature・判定規則をinspection前に固定
 - [20261005_0903_Budget_Request_Semantic_Boundary_Inventory_Result.md](20261005_0903_Budget_Request_Semantic_Boundary_Inventory_Result.md) — 既存hierarchyの意味境界の結果。item/detail_lineはrange内request基準で+/-6.9に完全分離(行単独)、organization7はitemと同位置でroot(range内に浅い見出し無し)として定義されM3、unclassified170はlevel_gap157等のM2 abstention。判定=SEMANTIC_BOUNDARY_DETERMINISTIC_BUT_CONTRACT_DEPENDENT
