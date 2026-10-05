@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261005_1203_Budget_Request_Label_Shaped_Predicate_Ambiguity_Result.md](20261005_1203_Budget_Request_Label_Shaped_Predicate_Ambiguity_Result.md) — label-shaped predicate ambiguity(P2 1,786row/1,123page)のsource-only分解。candidate 14,675row。完全分離するのはprojection context(位置)のみ、row-localは完全分離0だがgeometry/lexicalでTVD0.99前後、digit removal依存はP2で1/1,786。判定=AMBIGUITY_PARTIALLY_ISOLATED
 - [20261005_1200_Budget_Request_Label_Shaped_Predicate_Ambiguity_Protocol.md](20261005_1200_Budget_Request_Label_Shaped_Predicate_Ambiguity_Protocol.md) — alternative title projectionのC2 ambiguous(1,123page)をfrozen label-shaped predicateを変えずに分解するprotocol。candidate row単位・feature family F1〜F5・population P1〜P5・projection context/row-localの分離報告・判定D1〜D4を全件列挙前に凍結
 - [20261005_1147_Budget_Request_Alternative_Title_Projection_Result.md](20261005_1147_Budget_Request_Alternative_Title_Projection_Result.md) — label_and_code_same_row専用のsource-only alternative title projectionのfrozen評価。C2 2,537中2,532回復・regression/非対象変化0、ambiguousは事前定義の本文括弧行(1,123)。segment 5,482→467・過剰分断はprojection artifact、G4はmhlw 7件で不通過。判定=PARTIALLY_SUPPORTED
 - [20261005_1135_Budget_Request_Alternative_Title_Projection_Preregistration.md](20261005_1135_Budget_Request_Alternative_Title_Projection_Preregistration.md) — label_and_code_same_row(2,537page)のみを対象にしたsource-onlyなalternative title projectionの事前登録。現行mechanismのcode根拠・唯一の変更(最初のcode rowがlabel-shapedならそのrowを保持)・population C1〜C5固定・指標M1〜M6・判定規則・P4/P5(gate再適用)を実行前に凍結

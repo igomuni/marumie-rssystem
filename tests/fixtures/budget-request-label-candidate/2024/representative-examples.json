@@ -1,0 +1,547 @@
+{
+ "schema": "budget-request-label-candidate-examples/v0",
+ "note": "post-freeze の deterministic sample（id の辞書順）。人間判断（本文・header 等）は付けない。新しい rule は追加しない",
+ "P1_first5": [
+  {
+   "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|104|0",
+   "raw": "100 内（消）",
+   "normalized": "内(消)",
+   "bounds": {
+    "xMax": 83,
+    "xMin": 38,
+    "yMax": 27.8,
+    "yMin": 20.8
+   },
+   "tokenIndexes": [
+    1,
+    0
+   ],
+   "firstShapeStage": "nfkc",
+   "digitRemovalDependent": false,
+   "topBin": "0.02",
+   "firstTokenXBin": "30"
+  },
+  {
+   "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|106|0",
+   "raw": "102 内（消）",
+   "normalized": "内(消)",
+   "bounds": {
+    "xMax": 83,
+    "xMin": 38,
+    "yMax": 27.8,
+    "yMin": 20.8
+   },
+   "tokenIndexes": [
+    1,
+    0
+   ],
+   "firstShapeStage": "nfkc",
+   "digitRemovalDependent": false,
+   "topBin": "0.02",
+   "firstTokenXBin": "30"
+  },
+  {
+   "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|108|0",
+   "raw": "104 内（消）",
+   "normalized": "内(消)",
+   "bounds": {
+    "xMax": 83,
+    "xMin": 38,
+    "yMax": 27.8,
+    "yMin": 20.8
+   },
+   "tokenIndexes": [
+    1,
+    0
+   ],
+   "firstShapeStage": "nfkc",
+   "digitRemovalDependent": false,
+   "topBin": "0.02",
+   "firstTokenXBin": "30"
+  },
+  {
+   "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|110|0",
+   "raw": "106 内（消）",
+   "normalized": "内(消)",
+   "bounds": {
+    "xMax": 83,
+    "xMin": 38,
+    "yMax": 27.8,
+    "yMin": 20.8
+   },
+   "tokenIndexes": [
+    1,
+    0
+   ],
+   "firstShapeStage": "nfkc",
+   "digitRemovalDependent": false,
+   "topBin": "0.02",
+   "firstTokenXBin": "30"
+  },
+  {
+   "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|112|0",
+   "raw": "108 内（消）",
+   "normalized": "内(消)",
+   "bounds": {
+    "xMax": 83,
+    "xMin": 38,
+    "yMax": 27.8,
+    "yMin": 20.8
+   },
+   "tokenIndexes": [
+    1,
+    0
+   ],
+   "firstShapeStage": "nfkc",
+   "digitRemovalDependent": false,
+   "topBin": "0.02",
+   "firstTokenXBin": "30"
+  }
+ ],
+ "P2_first5": [
+  {
+   "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|106|5",
+   "raw": "計 44, 084 ( 50, 695 )",
+   "normalized": "計,(,)",
+   "bounds": {
+    "xMax": 797.2,
+    "xMin": 469.3,
+    "yMax": 83.3,
+    "yMin": 76.4
+   },
+   "tokenIndexes": [
+    14,
+    17,
+    16,
+    21,
+    20,
+    19,
+    23
+   ],
+   "firstShapeStage": "raw",
+   "digitRemovalDependent": false,
+   "topBin": "0.12",
+   "firstTokenXBin": "460"
+  },
+  {
+   "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|110|4",
+   "raw": "①１０～７級（全国平均 日帰り）",
+   "normalized": "~級(全国平均日帰り)",
+   "bounds": {
+    "xMax": 587.3,
+    "xMin": 476.2,
+    "yMax": 62.5,
+    "yMin": 55.5
+   },
+   "tokenIndexes": [
+    4,
+    6
+   ],
+   "firstShapeStage": "nfkc",
+   "digitRemovalDependent": false,
+   "topBin": "0.08",
+   "firstTokenXBin": "470"
+  },
+  {
+   "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|110|7",
+   "raw": "②６～３級（全国平均 日帰り）",
+   "normalized": "~級(全国平均日帰り)",
+   "bounds": {
+    "xMax": 580.4,
+    "xMin": 476.2,
+    "yMax": 97.2,
+    "yMin": 90.3
+   },
+   "tokenIndexes": [
+    27,
+    29
+   ],
+   "firstShapeStage": "nfkc",
+   "digitRemovalDependent": false,
+   "topBin": "0.14",
+   "firstTokenXBin": "470"
+  },
+  {
+   "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|112|4",
+   "raw": "前年度限りの経費 0 ( 3, 247 )",
+   "normalized": "前年度限りの経費(,)",
+   "bounds": {
+    "xMax": 797.2,
+    "xMin": 472.8,
+    "yMax": 62.5,
+    "yMin": 55.5
+   },
+   "tokenIndexes": [
+    4,
+    6,
+    10,
+    9,
+    8,
+    12
+   ],
+   "firstShapeStage": "raw",
+   "digitRemovalDependent": false,
+   "topBin": "0.08",
+   "firstTokenXBin": "470"
+  },
+  {
+   "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|112|5",
+   "raw": "計 1, 506 ( 3, 942 )",
+   "normalized": "計,(,)",
+   "bounds": {
+    "xMax": 797.2,
+    "xMin": 469.3,
+    "yMax": 76.4,
+    "yMin": 69.4
+   },
+   "tokenIndexes": [
+    13,
+    16,
+    15,
+    20,
+    19,
+    18,
+    22
+   ],
+   "firstShapeStage": "raw",
+   "digitRemovalDependent": false,
+   "topBin": "0.1",
+   "firstTokenXBin": "460"
+  }
+ ],
+ "P2_byNormalizationClass_first3": {
+  "final|digitDep=true": [
+   {
+    "id": "data/download/mlit.go.jp/page/content/001630995.pdf|242|4",
+    "raw": "95016-2122-08-6010 委 員 等 旅 費 135 135 現地調査等旅費（ＩＮＥＳ） 135",
+    "normalized": "---委員等旅費現地調査等旅費(INES)",
+    "bounds": {
+     "xMax": 738.6,
+     "xMin": 86.3,
+     "yMax": 62.5,
+     "yMin": 55.6
+    },
+    "tokenIndexes": [
+     2,
+     4,
+     6,
+     8,
+     10,
+     12
+    ],
+    "firstShapeStage": "final",
+    "digitRemovalDependent": true,
+    "topBin": "0.08",
+    "firstTokenXBin": "80"
+   }
+  ],
+  "nfkc|digitDep=false": [
+   {
+    "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|110|4",
+    "raw": "①１０～７級（全国平均 日帰り）",
+    "normalized": "~級(全国平均日帰り)",
+    "bounds": {
+     "xMax": 587.3,
+     "xMin": 476.2,
+     "yMax": 62.5,
+     "yMin": 55.5
+    },
+    "tokenIndexes": [
+     4,
+     6
+    ],
+    "firstShapeStage": "nfkc",
+    "digitRemovalDependent": false,
+    "topBin": "0.08",
+    "firstTokenXBin": "470"
+   },
+   {
+    "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|110|7",
+    "raw": "②６～３級（全国平均 日帰り）",
+    "normalized": "~級(全国平均日帰り)",
+    "bounds": {
+     "xMax": 580.4,
+     "xMin": 476.2,
+     "yMax": 97.2,
+     "yMin": 90.3
+    },
+    "tokenIndexes": [
+     27,
+     29
+    ],
+    "firstShapeStage": "nfkc",
+    "digitRemovalDependent": false,
+    "topBin": "0.14",
+    "firstTokenXBin": "470"
+   },
+   {
+    "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|120|4",
+    "raw": "②６～３級（ブロック内 １泊２日）",
+    "normalized": "~級(ブロック内泊日)",
+    "bounds": {
+     "xMax": 594.3,
+     "xMin": 476.2,
+     "yMax": 62.5,
+     "yMin": 55.5
+    },
+    "tokenIndexes": [
+     4,
+     6
+    ],
+    "firstShapeStage": "nfkc",
+    "digitRemovalDependent": false,
+    "topBin": "0.08",
+    "firstTokenXBin": "470"
+   }
+  ],
+  "raw|digitDep=false": [
+   {
+    "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|106|5",
+    "raw": "計 44, 084 ( 50, 695 )",
+    "normalized": "計,(,)",
+    "bounds": {
+     "xMax": 797.2,
+     "xMin": 469.3,
+     "yMax": 83.3,
+     "yMin": 76.4
+    },
+    "tokenIndexes": [
+     14,
+     17,
+     16,
+     21,
+     20,
+     19,
+     23
+    ],
+    "firstShapeStage": "raw",
+    "digitRemovalDependent": false,
+    "topBin": "0.12",
+    "firstTokenXBin": "460"
+   },
+   {
+    "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|112|4",
+    "raw": "前年度限りの経費 0 ( 3, 247 )",
+    "normalized": "前年度限りの経費(,)",
+    "bounds": {
+     "xMax": 797.2,
+     "xMin": 472.8,
+     "yMax": 62.5,
+     "yMin": 55.5
+    },
+    "tokenIndexes": [
+     4,
+     6,
+     10,
+     9,
+     8,
+     12
+    ],
+    "firstShapeStage": "raw",
+    "digitRemovalDependent": false,
+    "topBin": "0.08",
+    "firstTokenXBin": "470"
+   },
+   {
+    "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|112|5",
+    "raw": "計 1, 506 ( 3, 942 )",
+    "normalized": "計,(,)",
+    "bounds": {
+     "xMax": 797.2,
+     "xMin": 469.3,
+     "yMax": 76.4,
+     "yMin": 69.4
+    },
+    "tokenIndexes": [
+     13,
+     16,
+     15,
+     20,
+     19,
+     18,
+     22
+    ],
+    "firstShapeStage": "raw",
+    "digitRemovalDependent": false,
+    "topBin": "0.1",
+    "firstTokenXBin": "460"
+   }
+  ]
+ },
+ "overlapFeature_topBin_sharedValues_first3": {
+  "topBin=0.08": {
+   "P1": [
+    {
+     "id": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf|66|4",
+     "raw": "015 国民健康保険助成費（社 会福祉費）",
+     "normalized": "国民健康保険助成費(社会福祉費)",
+     "bounds": {
+      "xMax": 183.4,
+      "xMin": 86.3,
+      "yMax": 69.4,
+      "yMin": 55.6
+     },
+     "tokenIndexes": [
+      1,
+      3,
+      4
+     ],
+     "firstShapeStage": "nfkc",
+     "digitRemovalDependent": false,
+     "topBin": "0.08",
+     "firstTokenXBin": "80"
+    }
+   ],
+   "P2": [
+    {
+     "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|110|4",
+     "raw": "①１０～７級（全国平均 日帰り）",
+     "normalized": "~級(全国平均日帰り)",
+     "bounds": {
+      "xMax": 587.3,
+      "xMin": 476.2,
+      "yMax": 62.5,
+      "yMin": 55.5
+     },
+     "tokenIndexes": [
+      4,
+      6
+     ],
+     "firstShapeStage": "nfkc",
+     "digitRemovalDependent": false,
+     "topBin": "0.08",
+     "firstTokenXBin": "470"
+    },
+    {
+     "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|112|4",
+     "raw": "前年度限りの経費 0 ( 3, 247 )",
+     "normalized": "前年度限りの経費(,)",
+     "bounds": {
+      "xMax": 797.2,
+      "xMin": 472.8,
+      "yMax": 62.5,
+      "yMin": 55.5
+     },
+     "tokenIndexes": [
+      4,
+      6,
+      10,
+      9,
+      8,
+      12
+     ],
+     "firstShapeStage": "raw",
+     "digitRemovalDependent": false,
+     "topBin": "0.08",
+     "firstTokenXBin": "470"
+    },
+    {
+     "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|120|4",
+     "raw": "②６～３級（ブロック内 １泊２日）",
+     "normalized": "~級(ブロック内泊日)",
+     "bounds": {
+      "xMax": 594.3,
+      "xMin": 476.2,
+      "yMax": 62.5,
+      "yMin": 55.5
+     },
+     "tokenIndexes": [
+      4,
+      6
+     ],
+     "firstShapeStage": "nfkc",
+     "digitRemovalDependent": false,
+     "topBin": "0.08",
+     "firstTokenXBin": "470"
+    }
+   ]
+  },
+  "topBin=0.14": {
+   "P1": [
+    {
+     "id": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf|18|6",
+     "raw": "016 増 員 要 求 に 伴 う 経 費 （新規増員）",
+     "normalized": "増員要求に伴う経費(新規増員)",
+     "bounds": {
+      "xMax": 514.5,
+      "xMin": 72.5,
+      "yMax": 97.2,
+      "yMin": 90.3
+     },
+     "tokenIndexes": [
+      30,
+      32,
+      34
+     ],
+     "firstShapeStage": "nfkc",
+     "digitRemovalDependent": false,
+     "topBin": "0.14",
+     "firstTokenXBin": "70"
+    }
+   ],
+   "P2": [
+    {
+     "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|110|7",
+     "raw": "②６～３級（全国平均 日帰り）",
+     "normalized": "~級(全国平均日帰り)",
+     "bounds": {
+      "xMax": 580.4,
+      "xMin": 476.2,
+      "yMax": 97.2,
+      "yMin": 90.3
+     },
+     "tokenIndexes": [
+      27,
+      29
+     ],
+     "firstShapeStage": "nfkc",
+     "digitRemovalDependent": false,
+     "topBin": "0.14",
+     "firstTokenXBin": "470"
+    },
+    {
+     "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|114|6",
+     "raw": "２．財産被害防止・救済の施策の検討のための経費 47, 639 ( 14, 218 )",
+     "normalized": ".財産被害防止・救済の施策の検討のための経費,(,)",
+     "bounds": {
+      "xMax": 797.2,
+      "xMin": 469.3,
+      "yMax": 90.3,
+      "yMin": 83.3
+     },
+     "tokenIndexes": [
+      22,
+      25,
+      24,
+      29,
+      28,
+      27,
+      31
+     ],
+     "firstShapeStage": "raw",
+     "digitRemovalDependent": false,
+     "topBin": "0.14",
+     "firstTokenXBin": "460"
+    },
+    {
+     "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|122|6",
+     "raw": "④借料（ヒアリング会場借料）",
+     "normalized": "借料(ヒアリング会場借料)",
+     "bounds": {
+      "xMax": 573.5,
+      "xMin": 476.2,
+      "yMax": 90.3,
+      "yMin": 83.3
+     },
+     "tokenIndexes": [
+      32
+     ],
+     "firstShapeStage": "nfkc",
+     "digitRemovalDependent": false,
+     "topBin": "0.14",
+     "firstTokenXBin": "470"
+    }
+   ]
+  }
+ }
+}
