@@ -1,6 +1,6 @@
 # 概算要求PDF organization / root 境界の source evidence inventory — 結果
 
-protocol: `20261005_0913_Budget_Request_Organization_Root_Source_Evidence_Protocol.md`（Commit A `82f4cd4`、doc SHA-256 `ec3a51db…d877`）。inventory は Commit B `98245e8`。事前登録した軸・規則は結果を見た後に変更していない（post-hoc の観測は protocol の外として明示）。production code は無変更。MOF は使っていない。existing ON kind は GT ではなく、organization 7 を「正解の organization」とは呼ばない。
+protocol: `20261005_0913_Budget_Request_Organization_Root_Source_Evidence_Protocol.md`（Commit A `82f4cd4`、doc SHA-256 `ec3a51db…fd71`）。inventory は Commit B `98245e8`。事前登録した軸・規則は結果を見た後に変更していない（post-hoc の観測は protocol の外として明示）。production code は無変更。MOF は使っていない。existing ON kind は GT ではなく、organization 7 を「正解の organization」とは呼ばない。
 
 **判定: `CONTRACT_DEPENDENCY_REMAINS`（D4）。** Axis A = `LAYOUT_BOUNDARY_ONLY`、Axis B = `INSUFFICIENT_EVIDENCE`。
 
