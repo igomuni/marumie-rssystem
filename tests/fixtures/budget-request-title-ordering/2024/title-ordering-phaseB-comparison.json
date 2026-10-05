@@ -1,0 +1,564 @@
+{
+ "frozen": {
+  "hashes": {
+   "docs/tasks/20261005_1117_Budget_Request_Page_Header_Blank_Title_Ordering_Protocol.md": "b3ed79803f9d60a72bbd2b9b068d8893e042fb915958f287d4c1f2cf9af4f2f8",
+   "tests/fixtures/budget-request-header-label/2024/header-label-projection.json": "9ff3b970d403d37aea3562cc0eb87a3ee07fca92cbd3bc03986c79b7b9c402e5",
+   "tests/fixtures/budget-request-header-label/2024/header-label-structural-comparison.json": "e196ab814ccad140f0592c5500c7158e59b8d82108940ff3e1d2e7def0144d6d",
+   "tests/fixtures/budget-request-hierarchy-failure-isolation/2024/paired-manifest.json": "4fb70f3ab49c6a823cd45dad8c05d6b395f6fffb8ab9ca8009b196445616d5e1",
+   "tests/fixtures/budget-request-layout-hierarchy-inventory/2024/layout-summary.json": "67808613ed7d0a0e0ef7df7be736473a88159306417254100e6241fe69d63266",
+   "tests/fixtures/budget-request-semantic-boundary/2024/population-887.json": "24f4803bb3fefd756ccb85f313404879529588792d7ae88352b30beab34c1aee",
+   "tests/fixtures/budget-request-title-ordering/2024/page-ordering-inventory.json": "9eb910a876fb3c807fa957f9b9ca65879187f55b1d338c6e4180ea8a544fddc3",
+   "tests/fixtures/budget-request-title-ordering/2024/page-ordering-summary.json": "45a157b4d6d6a22d2b141a0734c070fb2dcaca17b8483ac79a58d750dddf61ef"
+  }
+ },
+ "labelBlankLabel": {
+  "blankPageClassOfTriples": {
+   "code_before_label": 4,
+   "code_without_label": 19,
+   "label_and_code_same_row": 2521,
+   "label_without_code": 5,
+   "multiple_labels_after_code": 6,
+   "neither_label_nor_code": 49
+  },
+  "byRelation": {
+   "no_own_label|neighbors_different": 40,
+   "no_own_label|neighbors_same": 28,
+   "own_differs_from_both|neighbors_same": 10,
+   "own_equals_both_neighbors|neighbors_same": 2490,
+   "own_equals_next_only|neighbors_different": 20,
+   "own_equals_prev_only|neighbors_different": 16
+  },
+  "description": "label → blank（1 page）→ label の triple で、blank page 自身の source label の normalized が前後の label と一致するか"
+ },
+ "layoutBoundaryPageStatus": {
+  "blank:label_shape_unrecognized": 43,
+  "blank:projection_cutoff_before_label": 5,
+  "blank:source_label_absent": 59,
+  "observed_nonblank": 113
+ },
+ "manualContractBoundaries": [
+  {
+   "aroundEnd": [
+    {
+     "blankReason": "projection_cutoff_before_label",
+     "cls": "label_and_code_same_row",
+     "currentStatus": "observed_blank",
+     "ownLabel": "内(こ)",
+     "page": 146
+    },
+    {
+     "blankReason": null,
+     "cls": "ordering_ambiguous",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": "内(こ)",
+     "page": 147
+    },
+    {
+     "currentStatus": "out_of_range",
+     "page": 148
+    }
+   ],
+   "aroundStart": [
+    {
+     "blankReason": null,
+     "cls": "code_without_label",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": null,
+     "page": 6
+    },
+    {
+     "blankReason": null,
+     "cls": "multiple_labels_before_code",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": "内(こ)",
+     "page": 7
+    },
+    {
+     "blankReason": null,
+     "cls": "label_without_code",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": "内(こ)",
+     "page": 8
+    }
+   ],
+   "diagnosticEndIsSegmentEnd": false,
+   "diagnosticStartIsSegmentStart": true,
+   "localPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+   "manual": [
+    7,
+    147
+   ]
+  },
+  {
+   "aroundEnd": [
+    {
+     "blankReason": "projection_cutoff_before_label",
+     "cls": "label_and_code_same_row",
+     "currentStatus": "observed_blank",
+     "ownLabel": "環(原)",
+     "page": 192
+    },
+    {
+     "blankReason": null,
+     "cls": "multiple_labels_before_code",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": "環(原)",
+     "page": 193
+    },
+    {
+     "currentStatus": "out_of_range",
+     "page": 194
+    }
+   ],
+   "aroundStart": [
+    {
+     "blankReason": null,
+     "cls": "code_without_label",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": null,
+     "page": 20
+    },
+    {
+     "blankReason": null,
+     "cls": "label_before_code",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": "環(本)",
+     "page": 21
+    },
+    {
+     "blankReason": null,
+     "cls": "label_before_code",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": "環(本)",
+     "page": 22
+    }
+   ],
+   "diagnosticEndIsSegmentEnd": false,
+   "diagnosticStartIsSegmentStart": true,
+   "localPath": "data/download/env.go.jp/content/000157010.pdf",
+   "manual": [
+    21,
+    193
+   ]
+  },
+  {
+   "aroundEnd": [
+    {
+     "blankReason": null,
+     "cls": "code_without_label",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": null,
+     "page": 19
+    },
+    {
+     "blankReason": null,
+     "cls": "neither_label_nor_code",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": null,
+     "page": 20
+    },
+    {
+     "blankReason": null,
+     "cls": "neither_label_nor_code",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": null,
+     "page": 21
+    }
+   ],
+   "aroundStart": [
+    {
+     "blankReason": null,
+     "cls": "code_without_label",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": null,
+     "page": 6
+    },
+    {
+     "blankReason": null,
+     "cls": "label_before_code",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": "東日本大震災復興特別会計(農林水産省)",
+     "page": 7
+    },
+    {
+     "blankReason": null,
+     "cls": "code_without_label",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": null,
+     "page": 8
+    }
+   ],
+   "diagnosticEndIsSegmentEnd": true,
+   "diagnosticStartIsSegmentStart": false,
+   "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+   "manual": [
+    7,
+    20
+   ]
+  },
+  {
+   "aroundEnd": [
+    {
+     "blankReason": null,
+     "cls": "label_before_code",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": "経(中)",
+     "page": 105
+    },
+    {
+     "blankReason": "projection_cutoff_before_label",
+     "cls": "label_and_code_same_row",
+     "currentStatus": "observed_blank",
+     "ownLabel": "経(中)",
+     "page": 106
+    },
+    {
+     "currentStatus": "out_of_range",
+     "page": 107
+    }
+   ],
+   "aroundStart": [
+    {
+     "blankReason": null,
+     "cls": "code_without_label",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": null,
+     "page": 8
+    },
+    {
+     "blankReason": null,
+     "cls": "label_before_code",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": "経(本)",
+     "page": 9
+    },
+    {
+     "blankReason": null,
+     "cls": "label_before_code",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": "経(本)",
+     "page": 10
+    }
+   ],
+   "diagnosticEndIsSegmentEnd": false,
+   "diagnosticStartIsSegmentStart": true,
+   "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "manual": [
+    9,
+    106
+   ]
+  },
+  {
+   "aroundEnd": [
+    {
+     "blankReason": null,
+     "cls": "label_before_code",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": "文(ス)",
+     "page": 1338
+    },
+    {
+     "blankReason": null,
+     "cls": "ordering_ambiguous",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": "文(ス)",
+     "page": 1339
+    },
+    {
+     "currentStatus": "out_of_range",
+     "page": 1340
+    }
+   ],
+   "aroundStart": [
+    {
+     "blankReason": "source_label_absent",
+     "cls": "neither_label_nor_code",
+     "currentStatus": "observed_blank",
+     "ownLabel": null,
+     "page": 1044
+    },
+    {
+     "blankReason": null,
+     "cls": "label_before_code",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": "文(文)",
+     "page": 1045
+    },
+    {
+     "blankReason": null,
+     "cls": "label_before_code",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": "文(文)",
+     "page": 1046
+    }
+   ],
+   "diagnosticEndIsSegmentEnd": false,
+   "diagnosticStartIsSegmentStart": true,
+   "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "manual": [
+    1045,
+    1339
+   ]
+  },
+  {
+   "aroundEnd": [
+    {
+     "blankReason": null,
+     "cls": "label_before_code",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": "厚(労)",
+     "page": 1699
+    },
+    {
+     "blankReason": null,
+     "cls": "label_before_code",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": "厚(労)",
+     "page": 1700
+    },
+    {
+     "blankReason": null,
+     "cls": "label_before_code",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": "厚(中)",
+     "page": 1701
+    }
+   ],
+   "aroundStart": [
+    {
+     "blankReason": null,
+     "cls": "multiple_labels_before_code",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": "厚(障)",
+     "page": 1554
+    },
+    {
+     "blankReason": null,
+     "cls": "label_before_code",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": "厚(地)",
+     "page": 1555
+    },
+    {
+     "blankReason": null,
+     "cls": "label_before_code",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": "厚(地)",
+     "page": 1556
+    }
+   ],
+   "diagnosticEndIsSegmentEnd": true,
+   "diagnosticStartIsSegmentStart": true,
+   "localPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "manual": [
+    1555,
+    1700
+   ]
+  },
+  {
+   "aroundEnd": [
+    {
+     "blankReason": null,
+     "cls": "code_without_label",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": null,
+     "page": 9
+    },
+    {
+     "blankReason": null,
+     "cls": "neither_label_nor_code",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": null,
+     "page": 10
+    },
+    {
+     "currentStatus": "out_of_range",
+     "page": 11
+    }
+   ],
+   "aroundStart": [
+    {
+     "blankReason": "source_label_absent",
+     "cls": "neither_label_nor_code",
+     "currentStatus": "observed_blank",
+     "ownLabel": null,
+     "page": 6
+    },
+    {
+     "blankReason": null,
+     "cls": "label_before_code",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": "東日本大震災復興特別会計(国土交通省)",
+     "page": 7
+    },
+    {
+     "blankReason": null,
+     "cls": "code_without_label",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": null,
+     "page": 8
+    }
+   ],
+   "diagnosticEndIsSegmentEnd": false,
+   "diagnosticStartIsSegmentStart": true,
+   "localPath": "data/download/mlit.go.jp/page/content/001630395.pdf",
+   "manual": [
+    7,
+    10
+   ]
+  },
+  {
+   "aroundEnd": [
+    {
+     "blankReason": null,
+     "cls": "label_before_code",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": "防(装)",
+     "page": 539
+    },
+    {
+     "blankReason": "projection_cutoff_before_label",
+     "cls": "label_and_code_same_row",
+     "currentStatus": "observed_blank",
+     "ownLabel": "防(装)",
+     "page": 540
+    },
+    {
+     "currentStatus": "out_of_range",
+     "page": 541
+    }
+   ],
+   "aroundStart": [
+    {
+     "blankReason": null,
+     "cls": "code_without_label",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": null,
+     "page": 8
+    },
+    {
+     "blankReason": null,
+     "cls": "multiple_labels_before_code",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": "防(本)",
+     "page": 9
+    },
+    {
+     "blankReason": null,
+     "cls": "label_without_code",
+     "currentStatus": "observed_nonblank",
+     "ownLabel": "防(本)",
+     "page": 10
+    }
+   ],
+   "diagnosticEndIsSegmentEnd": false,
+   "diagnosticStartIsSegmentStart": true,
+   "localPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "manual": [
+    9,
+    540
+   ]
+  }
+ ],
+ "note": "Phase A は変更していない。counterfactual は post-freeze diagnostic のみで production rule・新 extractor ではない。blank に前後 page の label を補完していない。label の意味は解釈しない。manual contract・existing ON kind は GT ではない。MOF は未使用",
+ "phaseADecision": {
+  "decision": "PROJECTION_ARTIFACT_DOMINANT",
+  "rule": 2
+ },
+ "schema": "budget-request-title-ordering-phaseB/v0",
+ "segmentCounterfactualDiagnostic": {
+  "current": {
+   "blankMediatedDifferentLabel": 114,
+   "blankMediatedSameLabelRecurrence": 2529,
+   "blankSegments": 2656,
+   "directLabelTransitions": 96,
+   "labelSegments": 2818,
+   "segments": 5482
+  },
+  "definition": "blank page に自身の label-shaped row（Phase A）があれば、その normalized を label として同じ segmentation rule を適用（前後からの補完なし）",
+  "diagnostic": {
+   "blankMediatedDifferentLabel": 102,
+   "blankMediatedSameLabelRecurrence": 49,
+   "blankSegments": 155,
+   "directLabelTransitions": 170,
+   "labelSegments": 400,
+   "segments": 563
+  },
+  "mext": {
+   "current": {
+    "blankMediatedDifferentLabel": 2,
+    "blankMediatedSameLabelRecurrence": 449,
+    "blankSegments": 451,
+    "directLabelTransitions": 1,
+    "labelSegments": 453,
+    "segments": 904
+   },
+   "diagnostic": {
+    "blankMediatedDifferentLabel": 1,
+    "blankMediatedSameLabelRecurrence": 0,
+    "blankSegments": 1,
+    "directLabelTransitions": 2,
+    "labelSegments": 4,
+    "segments": 5
+   },
+   "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf"
+  },
+  "mhlw": {
+   "current": {
+    "blankMediatedDifferentLabel": 1,
+    "blankMediatedSameLabelRecurrence": 450,
+    "blankSegments": 451,
+    "directLabelTransitions": 8,
+    "labelSegments": 460,
+    "segments": 911
+   },
+   "diagnostic": {
+    "blankMediatedDifferentLabel": 1,
+    "blankMediatedSameLabelRecurrence": 0,
+    "blankSegments": 1,
+    "directLabelTransitions": 8,
+    "labelSegments": 10,
+    "segments": 11
+   },
+   "localPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf"
+  }
+ },
+ "semanticBoundaryPopulationPages": {
+  "detail_line": {
+   "blank:projection_cutoff_before_label": 63,
+   "observed_nonblank": 550
+  },
+  "item": {
+   "observed_nonblank": 97
+  },
+  "organization": {
+   "observed_nonblank": 7
+  },
+  "unclassified": {
+   "blank:projection_cutoff_before_label": 102,
+   "observed_nonblank": 68
+  }
+ },
+ "x38Rows": {
+  "05-1b-01.pdf": {
+   "outsideManual": 450,
+   "pageLevelClass": {
+    "label_and_code_same_row": 450
+   },
+   "pageLevelReason": {
+    "blank:projection_cutoff_before_label": 450
+   },
+   "rows": 450
+  },
+  "20230914-mxt_kaikesou01-000031817_03.pdf": {
+   "outsideManual": 450,
+   "pageLevelClass": {
+    "label_and_code_same_row": 450
+   },
+   "pageLevelReason": {
+    "blank:projection_cutoff_before_label": 450
+   },
+   "rows": 450
+  }
+ }
+}
