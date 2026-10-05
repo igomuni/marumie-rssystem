@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261005_1121_Budget_Request_Page_Header_Blank_Title_Ordering_Result.md](20261005_1121_Budget_Request_Page_Header_Blank_Title_Ordering_Result.md) — header label blank 2,950pageの原因分離。88.4%(2,607)はlabel-shaped rowが存在するのにcurrent projectionが落とすartifact(先頭3桁ページ番号とlabelが同一row=2,537)、x=38 900行は全て該当。判定=PROJECTION_ARTIFACT_DOMINANT(production・補完なし)
 - [20261005_1117_Budget_Request_Page_Header_Blank_Title_Ordering_Protocol.md](20261005_1117_Budget_Request_Page_Header_Blank_Title_Ordering_Protocol.md) — header label blank page(2,950)がsource上のblankかcurrent projectionの文書順artifactかを分離するsource-schema inventoryのprotocol。label/code-shaped rowの定義・page class・blank reason優先順・判定規則をPhase A全件走査前に凍結
 - [20261005_0931_Budget_Request_Page_Header_Label_Segment_Result.md](20261005_0931_Budget_Request_Page_Header_Label_Segment_Result.md) — page header labelのsegment inventory結果。label抽出(NFKC+空白数字除去)で190種・全82PDFで再現、manual境界3点(mext/mhlw)はsegment境界と一致するがblank page交互で境界以外のtransitionが450件規模。判定=HEADER_LABEL_PRESENT_BUT_NOT_BOUNDARY_SPECIFIC
 - [20261005_0930_Budget_Request_Page_Header_Label_Segment_Protocol.md](20261005_0930_Budget_Request_Page_Header_Label_Segment_Protocol.md) — page header first title lineのlabelを意味解釈せずsource primitiveとして抽出しexact sequenceからsegment化できるかのprotocol。title行定義・正規化(NFKC+空白数字除去)・blank非bridge・Phase B比較・gate G1/G3/G4/G5と判定規則をPhase A全件走査前に凍結
