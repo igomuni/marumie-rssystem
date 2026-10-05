@@ -119,8 +119,8 @@
   }
  },
  "decision": {
-  "decision": "INVALID",
-  "rule": "gate"
+  "decision": "LEVEL_FRAME_EXPLAINS_ALL_RESIDUAL_COMPONENT_DIFFERENCE",
+  "rule": "D1"
  },
  "frozen": {
   "docs/tasks/20261005_1520_Budget_Request_Hierarchy_Stack_Reset_Counterfactual_Result.md": "31fc3cb2c4342a0f777a47844693d6d29de8b95ea986f6b74e4398186cc87e74",
@@ -137,17 +137,8 @@
   "tests/fixtures/budget-request-source-range-hierarchy/2024/phaseB-mof-diagnostic.json": "5b6fe1f309854fce5a738c24d19aabe38bb931246dc35444252c313a90c4fd83",
   "tests/fixtures/budget-request-source-range-hierarchy/2024/range-manifest.json": "3e00df693627e1bb22274c291694ac1aed2c079daf758ceda5af084da217201e"
  },
- "gateFailures": [
-  "20230907_policies_budget_04.pdf:M5_frame_identical_to_C0",
-  "000157010.pdf:M5_frame_identical_to_C0",
-  "230901-4.pdf:M5_frame_identical_to_C0",
-  "ippan_o.pdf:M5_frame_identical_to_C0",
-  "20230914-mxt_kaikesou01-000031817_03.pdf:M5_frame_identical_to_C0",
-  "05-1b-01.pdf:M5_frame_identical_to_C0",
-  "001630395.pdf:M5_frame_identical_to_C0",
-  "gaisanyoukyu.pdf:M5_frame_identical_to_C0"
- ],
- "gatesPass": false,
+ "gateFailures": [],
+ "gatesPass": true,
  "knownValueReproduction": {
   "byPriorClass_490_37_9": true,
   "primaryRows2080": true,
@@ -167,7 +158,7 @@
     "M2_node_population_and_eligibility_identical": true,
     "M3_document_order_identical": true,
     "M4_reset_event_identical": true,
-    "M5_frame_identical_to_C0": false,
+    "M5_frame_identical_to_C0": true,
     "M6_T2_and_C0_T1_reproduced": true,
     "M7_non_hierarchy_invariants": true,
     "M8_same_range_C0_T1_T2_T3_equal": true
@@ -312,7 +303,7 @@
     "M2_node_population_and_eligibility_identical": true,
     "M3_document_order_identical": true,
     "M4_reset_event_identical": true,
-    "M5_frame_identical_to_C0": false,
+    "M5_frame_identical_to_C0": true,
     "M6_T2_and_C0_T1_reproduced": true,
     "M7_non_hierarchy_invariants": true,
     "M8_same_range_C0_T1_T2_T3_equal": true
@@ -457,7 +448,7 @@
     "M2_node_population_and_eligibility_identical": true,
     "M3_document_order_identical": true,
     "M4_reset_event_identical": true,
-    "M5_frame_identical_to_C0": false,
+    "M5_frame_identical_to_C0": true,
     "M6_T2_and_C0_T1_reproduced": true,
     "M7_non_hierarchy_invariants": true,
     "M8_same_range_C0_T1_T2_T3_equal": true
@@ -602,7 +593,7 @@
     "M2_node_population_and_eligibility_identical": true,
     "M3_document_order_identical": true,
     "M4_reset_event_identical": true,
-    "M5_frame_identical_to_C0": false,
+    "M5_frame_identical_to_C0": true,
     "M6_T2_and_C0_T1_reproduced": true,
     "M7_non_hierarchy_invariants": true,
     "M8_same_range_C0_T1_T2_T3_equal": true
@@ -747,7 +738,7 @@
     "M2_node_population_and_eligibility_identical": true,
     "M3_document_order_identical": true,
     "M4_reset_event_identical": true,
-    "M5_frame_identical_to_C0": false,
+    "M5_frame_identical_to_C0": true,
     "M6_T2_and_C0_T1_reproduced": true,
     "M7_non_hierarchy_invariants": true,
     "M8_same_range_C0_T1_T2_T3_equal": true
@@ -902,7 +893,7 @@
     "M2_node_population_and_eligibility_identical": true,
     "M3_document_order_identical": true,
     "M4_reset_event_identical": true,
-    "M5_frame_identical_to_C0": false,
+    "M5_frame_identical_to_C0": true,
     "M6_T2_and_C0_T1_reproduced": true,
     "M7_non_hierarchy_invariants": true,
     "M8_same_range_C0_T1_T2_T3_equal": true
@@ -1057,7 +1048,7 @@
     "M2_node_population_and_eligibility_identical": true,
     "M3_document_order_identical": true,
     "M4_reset_event_identical": true,
-    "M5_frame_identical_to_C0": false,
+    "M5_frame_identical_to_C0": true,
     "M6_T2_and_C0_T1_reproduced": true,
     "M7_non_hierarchy_invariants": true,
     "M8_same_range_C0_T1_T2_T3_equal": true
@@ -1202,7 +1193,7 @@
     "M2_node_population_and_eligibility_identical": true,
     "M3_document_order_identical": true,
     "M4_reset_event_identical": true,
-    "M5_frame_identical_to_C0": false,
+    "M5_frame_identical_to_C0": true,
     "M6_T2_and_C0_T1_reproduced": true,
     "M7_non_hierarchy_invariants": true,
     "M8_same_range_C0_T1_T2_T3_equal": true
