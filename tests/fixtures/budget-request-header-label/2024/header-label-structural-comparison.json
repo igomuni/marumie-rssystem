@@ -1,0 +1,887 @@
+{
+ "decision": "HEADER_LABEL_PRESENT_BUT_NOT_BOUNDARY_SPECIFIC",
+ "frozen": {
+  "hashes": {
+   "docs/tasks/20261005_0930_Budget_Request_Page_Header_Label_Segment_Protocol.md": "fed6229169503ce7b1e167bba09a0dab35d67d72b1960cdc703386a1c55a5493",
+   "tests/fixtures/budget-request-header-label/2024/header-label-projection.json": "9ff3b970d403d37aea3562cc0eb87a3ee07fca92cbd3bc03986c79b7b9c402e5",
+   "tests/fixtures/budget-request-header-label/2024/header-label-summary.json": "599acde04daf80cda23404834cd895f12efe83f2188a7e72ef229527208b78f9",
+   "tests/fixtures/budget-request-hierarchy-failure-isolation/2024/paired-manifest.json": "4fb70f3ab49c6a823cd45dad8c05d6b395f6fffb8ab9ca8009b196445616d5e1",
+   "tests/fixtures/budget-request-layout-hierarchy-inventory/2024/layout-summary.json": "67808613ed7d0a0e0ef7df7be736473a88159306417254100e6241fe69d63266",
+   "tests/fixtures/budget-request-semantic-boundary/2024/population-887.json": "24f4803bb3fefd756ccb85f313404879529588792d7ae88352b30beab34c1aee"
+  }
+ },
+ "gates": {
+  "G1": {
+   "allNonblankRatio": 0.6774193548387096,
+   "nonDiscoveryNonblankRatio": 0.6575207264113699,
+   "pass": true,
+   "threshold": ">= 0.5 (both)"
+  },
+  "G3": {
+   "boundaries": [
+    {
+     "key": "mext_start",
+     "ok": true
+    },
+    {
+     "key": "mhlw_start",
+     "ok": true
+    },
+    {
+     "key": "mhlw_end",
+     "ok": true
+    }
+   ],
+   "pass": true,
+   "threshold": "mext start・mhlw start・mhlw end がすべて label segment の開始/終了 page かつ layout 境界でない"
+  },
+  "G4": {
+   "mextOtherTransitions": 451,
+   "mhlwOtherTransitions": 457,
+   "pass": false,
+   "threshold": "<= 2 each"
+  },
+  "G5": {
+   "pass": true,
+   "pdfsParenthesizedMajority": 48,
+   "pdfsWithNonblank": 71,
+   "ratio": 0.676056338028169,
+   "threshold": ">= 0.5"
+  }
+ },
+ "groups": {
+  "all": {
+   "evaluablePages": 9145,
+   "nonblankRatio": 0.6774193548387096,
+   "observedNonblankPages": 6195,
+   "parenthesizedPages": 5731,
+   "parenthesizedRatioOfNonblank": 0.9251008878127522,
+   "pdfs": 82
+  },
+  "discovery": {
+   "evaluablePages": 4079,
+   "nonblankRatio": 0.7021328757048296,
+   "observedNonblankPages": 2864,
+   "parenthesizedPages": 2801,
+   "parenthesizedRatioOfNonblank": 0.9780027932960894,
+   "pdfs": 8
+  },
+  "nonDiscovery": {
+   "evaluablePages": 5066,
+   "nonblankRatio": 0.6575207264113699,
+   "observedNonblankPages": 3331,
+   "parenthesizedPages": 2930,
+   "parenthesizedRatioOfNonblank": 0.8796157310117082,
+   "pdfs": 74
+  },
+  "nonDiscoveryParenthesizedMajorityPdfs": {
+   "pdfsParenthesizedMajority": 48,
+   "pdfsWithNonblank": 71,
+   "ratio": 0.676056338028169
+  }
+ },
+ "hierarchyRelation": {
+  "detail_line": {
+   "isFirstPlain3InSegment": {
+    "false": 526,
+    "true": 24
+   },
+   "isShallowestXInSegment": {
+    "false": 522,
+    "true": 28
+   },
+   "pageDistanceFromSegmentStart": {
+    "0": 69,
+    "1": 15,
+    "2-5": 32,
+    "6+": 434
+   },
+   "segment": {
+    "non_label:blank": 63
+   },
+   "segmentHasMultipleRootShaped": {
+    "false": 531,
+    "true": 19
+   },
+   "segmentLengthPages": {
+    "1": 56,
+    "3": 4,
+    "9": 15,
+    "10+": 475
+   }
+  },
+  "item": {
+   "isFirstPlain3InSegment": {
+    "false": 97
+   },
+   "isShallowestXInSegment": {
+    "false": 97
+   },
+   "pageDistanceFromSegmentStart": {
+    "0": 10,
+    "1": 6,
+    "2-5": 6,
+    "6+": 75
+   },
+   "segmentHasMultipleRootShaped": {
+    "false": 97
+   },
+   "segmentLengthPages": {
+    "3": 1,
+    "4": 8,
+    "9": 6,
+    "10+": 82
+   }
+  },
+  "organization": {
+   "isFirstPlain3InSegment": {
+    "false": 7
+   },
+   "isShallowestXInSegment": {
+    "false": 7
+   },
+   "pageDistanceFromSegmentStart": {
+    "0": 1,
+    "6+": 6
+   },
+   "segmentHasMultipleRootShaped": {
+    "false": 7
+   },
+   "segmentLengthPages": {
+    "10+": 7
+   }
+  },
+  "unclassified": {
+   "isFirstPlain3InSegment": {
+    "false": 35,
+    "true": 33
+   },
+   "isShallowestXInSegment": {
+    "false": 3,
+    "true": 65
+   },
+   "pageDistanceFromSegmentStart": {
+    "0": 66,
+    "6+": 2
+   },
+   "segment": {
+    "non_label:blank": 102
+   },
+   "segmentHasMultipleRootShaped": {
+    "false": 48,
+    "true": 20
+   },
+   "segmentLengthPages": {
+    "1": 66,
+    "10+": 2
+   }
+  }
+ },
+ "layoutRelation": {
+  "labelSegmentStartsByLayoutRelation": {
+   "inside_layout_range|after_blank_or_unavailable": 2446,
+   "inside_layout_range|direct": 62,
+   "layout_boundary|after_blank_or_unavailable": 71,
+   "layout_boundary|direct": 15,
+   "layout_unavailable|after_blank_or_unavailable": 126,
+   "layout_unavailable|direct": 19
+  },
+  "layoutBoundariesByLabelRelation": {
+   "blank_or_unavailable": 89,
+   "label_transition": 15,
+   "same_label": 6
+  }
+ },
+ "manualContractRelation": [
+  {
+   "end": {
+    "after": "out_of_range",
+    "at": "label:内(こ)",
+    "before": "observed_blank",
+    "blankAdjacent": true,
+    "documentEdge": true,
+    "exactLabelTransition": false,
+    "isLabelSegmentEnd": false,
+    "layoutBoundary": false
+   },
+   "interiorLabelTransitions": 22,
+   "interiorTransitionPages": [
+    105,
+    107,
+    109,
+    111,
+    113,
+    115,
+    117,
+    119,
+    121,
+    123,
+    125,
+    127,
+    129,
+    131,
+    133,
+    135,
+    137,
+    139,
+    141,
+    143,
+    145,
+    147
+   ],
+   "labelSegmentsInPdf": 25,
+   "localPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+   "manual": [
+    7,
+    147
+   ],
+   "otherLabelTransitionsInPdf": 23,
+   "start": {
+    "after": "label:内(こ)",
+    "at": "label:内(こ)",
+    "before": "label:内",
+    "blankAdjacent": false,
+    "documentEdge": false,
+    "exactLabelTransition": true,
+    "isLabelSegmentStart": true,
+    "layoutBoundary": true
+   },
+   "totalPages": 147
+  },
+  {
+   "end": {
+    "after": "out_of_range",
+    "at": "label:環(原)",
+    "before": "observed_blank",
+    "blankAdjacent": true,
+    "documentEdge": true,
+    "exactLabelTransition": false,
+    "isLabelSegmentEnd": false,
+    "layoutBoundary": false
+   },
+   "interiorLabelTransitions": 45,
+   "interiorTransitionPages": [
+    105,
+    107,
+    109,
+    111,
+    113,
+    115,
+    117,
+    119,
+    121,
+    123,
+    125,
+    127,
+    129,
+    131,
+    133,
+    135,
+    137,
+    139,
+    141,
+    143,
+    145,
+    147,
+    149,
+    151,
+    153,
+    155,
+    157,
+    159,
+    161,
+    163,
+    165,
+    167,
+    169,
+    171,
+    173,
+    175,
+    177,
+    179,
+    181,
+    183
+   ],
+   "labelSegmentsInPdf": 48,
+   "localPath": "data/download/env.go.jp/content/000157010.pdf",
+   "manual": [
+    21,
+    193
+   ],
+   "otherLabelTransitionsInPdf": 46,
+   "start": {
+    "after": "label:環(本)",
+    "at": "label:環(本)",
+    "before": "label:環",
+    "blankAdjacent": false,
+    "documentEdge": false,
+    "exactLabelTransition": true,
+    "isLabelSegmentStart": true,
+    "layoutBoundary": true
+   },
+   "totalPages": 193
+  },
+  {
+   "end": {
+    "after": "label:(第表)",
+    "at": "label:復興特",
+    "before": "label:復興特",
+    "blankAdjacent": false,
+    "documentEdge": false,
+    "exactLabelTransition": true,
+    "isLabelSegmentEnd": true,
+    "layoutBoundary": true
+   },
+   "interiorLabelTransitions": 0,
+   "interiorTransitionPages": [],
+   "labelSegmentsInPdf": 3,
+   "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+   "manual": [
+    7,
+    20
+   ],
+   "otherLabelTransitionsInPdf": 1,
+   "start": {
+    "after": "label:復興特",
+    "at": "label:復興特",
+    "before": "label:復興特",
+    "blankAdjacent": false,
+    "documentEdge": false,
+    "exactLabelTransition": false,
+    "isLabelSegmentStart": false,
+    "layoutBoundary": true
+   },
+   "totalPages": 21
+  },
+  {
+   "end": {
+    "after": "out_of_range",
+    "at": "observed_blank",
+    "before": "label:経(中)",
+    "blankAdjacent": true,
+    "documentEdge": true,
+    "exactLabelTransition": false,
+    "isLabelSegmentEnd": false,
+    "layoutBoundary": false
+   },
+   "interiorLabelTransitions": 5,
+   "interiorTransitionPages": [
+    66,
+    82,
+    85,
+    94,
+    105
+   ],
+   "labelSegmentsInPdf": 8,
+   "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "manual": [
+    9,
+    106
+   ],
+   "otherLabelTransitionsInPdf": 6,
+   "start": {
+    "after": "label:経(本)",
+    "at": "label:経(本)",
+    "before": "label:経",
+    "blankAdjacent": false,
+    "documentEdge": false,
+    "exactLabelTransition": true,
+    "isLabelSegmentStart": true,
+    "layoutBoundary": true
+   },
+   "totalPages": 106
+  },
+  {
+   "end": {
+    "after": "out_of_range",
+    "at": "label:文(ス)",
+    "before": "label:文(ス)",
+    "blankAdjacent": true,
+    "documentEdge": true,
+    "exactLabelTransition": false,
+    "isLabelSegmentEnd": false,
+    "layoutBoundary": false
+   },
+   "interiorLabelTransitions": 1,
+   "interiorTransitionPages": [
+    1260
+   ],
+   "labelSegmentsInPdf": 453,
+   "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "manual": [
+    1045,
+    1339
+   ],
+   "otherLabelTransitionsInPdf": 451,
+   "start": {
+    "after": "label:文(文)",
+    "at": "label:文(文)",
+    "before": "observed_blank",
+    "blankAdjacent": true,
+    "documentEdge": false,
+    "exactLabelTransition": false,
+    "isLabelSegmentStart": true,
+    "layoutBoundary": false
+   },
+   "totalPages": 1339
+  },
+  {
+   "end": {
+    "after": "label:厚(中)",
+    "at": "label:厚(労)",
+    "before": "label:厚(労)",
+    "blankAdjacent": false,
+    "documentEdge": false,
+    "exactLabelTransition": true,
+    "isLabelSegmentEnd": true,
+    "layoutBoundary": false
+   },
+   "interiorLabelTransitions": 1,
+   "interiorTransitionPages": [
+    1603
+   ],
+   "labelSegmentsInPdf": 460,
+   "localPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "manual": [
+    1555,
+    1700
+   ],
+   "otherLabelTransitionsInPdf": 457,
+   "start": {
+    "after": "label:厚(地)",
+    "at": "label:厚(地)",
+    "before": "label:厚(障)",
+    "blankAdjacent": false,
+    "documentEdge": false,
+    "exactLabelTransition": true,
+    "isLabelSegmentStart": true,
+    "layoutBoundary": false
+   },
+   "totalPages": 1723
+  },
+  {
+   "end": {
+    "after": "out_of_range",
+    "at": "label:復興特",
+    "before": "label:復興特",
+    "blankAdjacent": true,
+    "documentEdge": true,
+    "exactLabelTransition": false,
+    "isLabelSegmentEnd": false,
+    "layoutBoundary": false
+   },
+   "interiorLabelTransitions": 0,
+   "interiorTransitionPages": [],
+   "labelSegmentsInPdf": 3,
+   "localPath": "data/download/mlit.go.jp/page/content/001630395.pdf",
+   "manual": [
+    7,
+    10
+   ],
+   "otherLabelTransitionsInPdf": 1,
+   "start": {
+    "after": "label:復興特",
+    "at": "label:復興特",
+    "before": "observed_blank",
+    "blankAdjacent": true,
+    "documentEdge": false,
+    "exactLabelTransition": false,
+    "isLabelSegmentStart": true,
+    "layoutBoundary": true
+   },
+   "totalPages": 10
+  },
+  {
+   "end": {
+    "after": "out_of_range",
+    "at": "observed_blank",
+    "before": "label:防(装)",
+    "blankAdjacent": true,
+    "documentEdge": true,
+    "exactLabelTransition": false,
+    "isLabelSegmentEnd": false,
+    "layoutBoundary": false
+   },
+   "interiorLabelTransitions": 218,
+   "interiorTransitionPages": [
+    105,
+    107,
+    109,
+    111,
+    113,
+    115,
+    117,
+    119,
+    121,
+    123,
+    125,
+    127,
+    129,
+    131,
+    133,
+    135,
+    137,
+    139,
+    141,
+    143,
+    145,
+    147,
+    149,
+    151,
+    153,
+    155,
+    157,
+    159,
+    161,
+    163,
+    165,
+    167,
+    169,
+    171,
+    173,
+    175,
+    177,
+    179,
+    181,
+    183
+   ],
+   "labelSegmentsInPdf": 221,
+   "localPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "manual": [
+    9,
+    540
+   ],
+   "otherLabelTransitionsInPdf": 219,
+   "start": {
+    "after": "label:防(本)",
+    "at": "label:防(本)",
+    "before": "label:防",
+    "blankAdjacent": false,
+    "documentEdge": false,
+    "exactLabelTransition": true,
+    "isLabelSegmentStart": true,
+    "layoutBoundary": true
+   },
+   "totalPages": 540
+  }
+ ],
+ "mextMhlw": [
+  {
+   "blankSegments": 451,
+   "labelSegmentLengthMedian": 1,
+   "labelSegments": 453,
+   "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "longLabelSegments": [
+    [
+     "文(本)",
+     1,
+     91
+    ],
+    [
+     "文(所)",
+     991,
+     1043
+    ],
+    [
+     "文(文)",
+     1045,
+     1259
+    ],
+    [
+     "文(ス)",
+     1260,
+     1339
+    ]
+   ],
+   "longLabelSegmentsGE10": 4,
+   "manual": [
+    1045,
+    1339
+   ],
+   "manualEndSegment": {
+    "from": 1260,
+    "id": 904,
+    "kind": "label",
+    "pages": 80,
+    "state": "文(ス)",
+    "to": 1339
+   },
+   "manualStartSegment": {
+    "from": 1045,
+    "id": 903,
+    "kind": "label",
+    "pages": 215,
+    "state": "文(文)",
+    "to": 1259
+   },
+   "segments": 904,
+   "segmentsNearManualBoundaries": [
+    [
+     901,
+     "label",
+     "文(所)",
+     991,
+     1043
+    ],
+    [
+     902,
+     "blank",
+     "observed_blank",
+     1044,
+     1044
+    ],
+    [
+     903,
+     "label",
+     "文(文)",
+     1045,
+     1259
+    ],
+    [
+     904,
+     "label",
+     "文(ス)",
+     1260,
+     1339
+    ]
+   ]
+  },
+  {
+   "blankSegments": 451,
+   "labelSegmentLengthMedian": 1,
+   "labelSegments": 460,
+   "localPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "longLabelSegments": [
+    [
+     "厚",
+     9,
+     20
+    ],
+    [
+     "厚(本)",
+     21,
+     107
+    ],
+    [
+     "厚(本)",
+     1007,
+     1227
+    ],
+    [
+     "厚(検)",
+     1228,
+     1255
+    ],
+    [
+     "厚(ハ)",
+     1256,
+     1280
+    ],
+    [
+     "厚(試)",
+     1281,
+     1469
+    ],
+    [
+     "厚(障)",
+     1470,
+     1554
+    ],
+    [
+     "厚(地)",
+     1555,
+     1602
+    ],
+    [
+     "厚(労)",
+     1603,
+     1700
+    ],
+    [
+     "厚(中)",
+     1701,
+     1723
+    ]
+   ],
+   "longLabelSegmentsGE10": 10,
+   "manual": [
+    1555,
+    1700
+   ],
+   "manualEndSegment": {
+    "from": 1603,
+    "id": 910,
+    "kind": "label",
+    "pages": 98,
+    "state": "厚(労)",
+    "to": 1700
+   },
+   "manualStartSegment": {
+    "from": 1555,
+    "id": 909,
+    "kind": "label",
+    "pages": 48,
+    "state": "厚(地)",
+    "to": 1602
+   },
+   "segments": 911,
+   "segmentsNearManualBoundaries": [
+    [
+     908,
+     "label",
+     "厚(障)",
+     1470,
+     1554
+    ],
+    [
+     909,
+     "label",
+     "厚(地)",
+     1555,
+     1602
+    ],
+    [
+     910,
+     "label",
+     "厚(労)",
+     1603,
+     1700
+    ],
+    [
+     911,
+     "label",
+     "厚(中)",
+     1701,
+     1723
+    ]
+   ]
+  }
+ ],
+ "note": "構造相関のみ。label の意味は解釈しない。manual contract・existing ON kind は GT ではない。MOF は未使用",
+ "rule": 5,
+ "schema": "budget-request-header-label-structural-comparison/v0",
+ "x38Rows": {
+  "05-1b-01.pdf": {
+   "atSegmentStartPage": 450,
+   "inManual": 0,
+   "onBlankTitlePage": 450,
+   "onLabelPage": 0,
+   "outsideManual": 450,
+   "pageDistanceFromSegmentStart": {
+    "0": 450
+   },
+   "segmentDistribution": [
+    [
+     "blank:observed_blank:108-108",
+     1
+    ],
+    [
+     "blank:observed_blank:110-110",
+     1
+    ],
+    [
+     "blank:observed_blank:112-112",
+     1
+    ],
+    [
+     "blank:observed_blank:114-114",
+     1
+    ],
+    [
+     "blank:observed_blank:116-116",
+     1
+    ],
+    [
+     "blank:observed_blank:118-118",
+     1
+    ],
+    [
+     "blank:observed_blank:120-120",
+     1
+    ],
+    [
+     "blank:observed_blank:122-122",
+     1
+    ],
+    [
+     "blank:observed_blank:124-124",
+     1
+    ],
+    [
+     "blank:observed_blank:126-126",
+     1
+    ],
+    [
+     "blank:observed_blank:128-128",
+     1
+    ],
+    [
+     "blank:observed_blank:130-130",
+     1
+    ]
+   ],
+   "total": 450
+  },
+  "20230914-mxt_kaikesou01-000031817_03.pdf": {
+   "atSegmentStartPage": 450,
+   "inManual": 0,
+   "onBlankTitlePage": 450,
+   "onLabelPage": 0,
+   "outsideManual": 450,
+   "pageDistanceFromSegmentStart": {
+    "0": 450
+   },
+   "segmentDistribution": [
+    [
+     "blank:observed_blank:92-92",
+     1
+    ],
+    [
+     "blank:observed_blank:94-94",
+     1
+    ],
+    [
+     "blank:observed_blank:96-96",
+     1
+    ],
+    [
+     "blank:observed_blank:98-98",
+     1
+    ],
+    [
+     "blank:observed_blank:100-100",
+     1
+    ],
+    [
+     "blank:observed_blank:102-102",
+     1
+    ],
+    [
+     "blank:observed_blank:104-104",
+     1
+    ],
+    [
+     "blank:observed_blank:106-106",
+     1
+    ],
+    [
+     "blank:observed_blank:108-108",
+     1
+    ],
+    [
+     "blank:observed_blank:110-110",
+     1
+    ],
+    [
+     "blank:observed_blank:112-112",
+     1
+    ],
+    [
+     "blank:observed_blank:114-114",
+     1
+    ]
+   ],
+   "total": 450
+  }
+ }
+}
