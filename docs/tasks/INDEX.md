@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261005_1330_Budget_Request_Table_Frame_Predicate_Refinement_Preregistration.md](20261005_1330_Budget_Request_Table_Frame_Predicate_Refinement_Preregistration.md) — 直前研究のtable-frame relation(frame上側=header候補)をalternative projectionのeligibility条件に1つだけ追加するrefinementの事前登録。再利用classifier・population・fail-closed・数値gate(G1〜G5)・D1〜D4をfull evaluation前に凍結
 - [20261005_1306_Budget_Request_P1_Outlier_Failure_Isolation_Result.md](20261005_1306_Budget_Request_P1_Outlier_Failure_Isolation_Result.md) — P1のgeometry outlier 2rowはどちらもtable frame内側の本文row(source・visual一致)で、alternative projectionがページ番号のみの空titleの後に最初のcode rowを採用した結果。controlはframe上側のheader。判定=P1_OUTLIERS_BODY_TABLE_SUPPORTED
 - [20261005_1255_Budget_Request_P1_Outlier_Failure_Isolation_Protocol.md](20261005_1255_Budget_Request_P1_Outlier_Failure_Isolation_Protocol.md) — P1(projected candidate)のgeometry outlier 2rowがpage headerかbody/tableかのfailure isolation protocol。最頻topBin外を機械選択、table frame(長い垂直罫線)基準のsource-only分類、visual gate、D1〜D4を個別page inspection前に凍結
 - [20261005_1203_Budget_Request_Label_Shaped_Predicate_Ambiguity_Result.md](20261005_1203_Budget_Request_Label_Shaped_Predicate_Ambiguity_Result.md) — label-shaped predicate ambiguity(P2 1,786row/1,123page)のsource-only分解。candidate 14,675row。完全分離するのはprojection context(位置)のみ、row-localは完全分離0だがgeometry/lexicalでTVD0.99前後、digit removal依存はP2で1/1,786。判定=AMBIGUITY_PARTIALLY_ISOLATED
