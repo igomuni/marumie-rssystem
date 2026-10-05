@@ -137,7 +137,7 @@ async function main() {
       M2_node_population_and_eligibility_identical: JSON.stringify(h2.nodes.map(n => [n.id, n.hierarchyEligibility])) === JSON.stringify(h3.nodes.map(n => [n.id, n.hierarchyEligibility])),
       M3_document_order_identical: JSON.stringify(h2.nodes.map(n => n.id)) === JSON.stringify(h3.nodes.map(n => n.id)),
       M4_reset_event_identical: JSON.stringify(rr2.resetEvents.map(e => e.beforeNodeId)) === JSON.stringify(rr3.resetEvents.map(e => e.beforeNodeId)) && rr3.resetEvents.length === (locator ? 1 : 0) && JSON.stringify(rr2.resetEvents.map(e => e.beforeNodeId)) === JSON.stringify(srOf.get(m.localPath)!.resetEvents.map(e => e.beforeNodeId)),
-      M5_frame_identical_to_C0: JSON.stringify(h3.indentClusters) === JSON.stringify(h0.indentClusters) && JSON.stringify(h3.indentClusters.map(k => ({ xMin: k.xMin, xMax: k.xMax, memberCount: k.memberCount, level: k.level }))) === JSON.stringify(frozenCtrl),
+      M5_frame_identical_to_C0: JSON.stringify(h3.indentClusters) === JSON.stringify(h0.indentClusters) && JSON.stringify(sortDeep(h3.indentClusters.map(k => ({ xMin: k.xMin, xMax: k.xMax, memberCount: k.memberCount, level: k.level })))) === JSON.stringify(sortDeep(frozenCtrl)),
       M6_T2_and_C0_T1_reproduced: tableDigest(c0) === frozenT2Digest.c0 && tableDigest(t1) === frozenT2Digest.t1 && tableDigest(t2) === frozenT2Digest.t2,
       M7_non_hierarchy_invariants: true,
       M8_same_range_C0_T1_T2_T3_equal: !exact || (tableDigest(c0) === tableDigest(t1) && tableDigest(t1) === tableDigest(t2) && tableDigest(t2) === tableDigest(t3)),
