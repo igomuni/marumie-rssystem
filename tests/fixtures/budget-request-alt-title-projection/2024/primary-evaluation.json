@@ -1,0 +1,143 @@
+{
+ "M1": {
+  "changed": 0,
+  "extra": 0,
+  "missing": 0
+ },
+ "M2": {
+  "mismatch": 0,
+  "recovered": 2532,
+  "target": 2537,
+  "unresolved": 5
+ },
+ "M3": {
+  "C3": 0,
+  "C4": 0,
+  "C5": 0
+ },
+ "M4": {
+  "C2Ambiguous": 1123,
+  "provenanceMissing": 0
+ },
+ "M5": {
+  "alternativeArtifactSha256": "cc071c770fb51a3bf6500a1a01937bbc427283865e3143552ebd7cc5b988c6cd",
+  "deterministicRerun": true
+ },
+ "M6": {
+  "fidelityViolations": 0,
+  "neighborCopies": 0,
+  "note": "投影は同一 page の row のみから生成（他 page・他 row の参照なし。コード上 title row の raw と Phase A の label evidence の一致で検証）"
+ },
+ "classes": {
+  "C1_current_nonblank": {
+   "pages": 6195,
+   "unchanged": 6195
+  },
+  "C2_target_same_row": {
+   "ambiguous": 1123,
+   "pages": 2537,
+   "recovered": 2532,
+   "unresolved": 5
+  },
+  "C3_cutoff_other": {
+   "pages": 70,
+   "unchanged": 70
+  },
+  "C4_source_label_absent": {
+   "pages": 194,
+   "unchanged": 194
+  },
+  "C5_label_shape_unrecognized": {
+   "pages": 149,
+   "unchanged": 149
+  }
+ },
+ "corpus": {
+  "currentProjectionReproduced": true,
+  "pages": 9899,
+  "pdfs": 82,
+  "populationCounts": {
+   "C1_current_nonblank": 6195,
+   "C2_target_same_row": 2537,
+   "C3_cutoff_other": 70,
+   "C4_source_label_absent": 194,
+   "C5_label_shape_unrecognized": 149
+  }
+ },
+ "decision": "ALTERNATIVE_PROJECTION_PARTIALLY_SUPPORTED",
+ "failureSamples": {
+  "C2_ambiguous": {
+   "count": 1123,
+   "first": [
+    {
+     "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+     "page": 106
+    },
+    {
+     "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+     "page": 110
+    },
+    {
+     "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+     "page": 112
+    },
+    {
+     "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+     "page": 114
+    },
+    {
+     "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+     "page": 120
+    }
+   ]
+  },
+  "C2_unresolved": {
+   "count": 5,
+   "first": [
+    {
+     "localPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+     "page": 45
+    },
+    {
+     "localPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+     "page": 47
+    },
+    {
+     "localPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+     "page": 48
+    },
+    {
+     "localPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+     "page": 59
+    },
+    {
+     "localPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+     "page": 62
+    }
+   ]
+  }
+ },
+ "frozen": {
+  "hashes": {
+   "docs/tasks/20261005_1135_Budget_Request_Alternative_Title_Projection_Preregistration.md": "c43c49a787c2aab0eba9b84924cc45340191ee78415c48464a89110ba650454e",
+   "tests/fixtures/budget-request-alt-title-projection/2024/population-manifest.json": "ffac4a9d68c7fc4a2cd7883ecb89ed2c5f6009026dcc2fd2d24b6792d981c38d",
+   "tests/fixtures/budget-request-full-corpus-baseline/2024/corpus-manifest.json": "4a2a10ec46d75cf90d11b441a7a162654daefb008bb92edf3d264f8d118dde7a",
+   "tests/fixtures/budget-request-header-label/2024/header-label-projection.json": "9ff3b970d403d37aea3562cc0eb87a3ee07fca92cbd3bc03986c79b7b9c402e5",
+   "tests/fixtures/budget-request-header-label/2024/header-label-structural-comparison.json": "e196ab814ccad140f0592c5500c7158e59b8d82108940ff3e1d2e7def0144d6d",
+   "tests/fixtures/budget-request-header-label/2024/header-label-summary.json": "599acde04daf80cda23404834cd895f12efe83f2188a7e72ef229527208b78f9",
+   "tests/fixtures/budget-request-hierarchy-failure-isolation/2024/paired-manifest.json": "4fb70f3ab49c6a823cd45dad8c05d6b395f6fffb8ab9ca8009b196445616d5e1",
+   "tests/fixtures/budget-request-layout-hierarchy-inventory/2024/layout-summary.json": "67808613ed7d0a0e0ef7df7be736473a88159306417254100e6241fe69d63266",
+   "tests/fixtures/budget-request-semantic-boundary/2024/population-887.json": "24f4803bb3fefd756ccb85f313404879529588792d7ae88352b30beab34c1aee",
+   "tests/fixtures/budget-request-title-ordering/2024/page-ordering-inventory.json": "9eb910a876fb3c807fa957f9b9ca65879187f55b1d338c6e4180ea8a544fddc3",
+   "tests/fixtures/budget-request-title-ordering/2024/page-ordering-summary.json": "45a157b4d6d6a22d2b141a0734c070fb2dcaca17b8483ac79a58d750dddf61ef",
+   "tests/fixtures/budget-request-title-ordering/2024/title-ordering-phaseB-comparison.json": "49ac0a3c62036d1b6f2911c5cd6da2a3812fe3f9a5dfe8bfc6ab65690170ff07"
+  },
+  "implementation": {
+   "lib": "17cb97efb9861bb2b14f6103f1ebf640e23cc322d66417c6fa0a91bff9f6dbf4",
+   "script": "de59c244b3fdab1dcfc1295002fb0f3347851d7b9fbc2f44e205b1e8c3dc997a"
+  },
+  "preregistration": "c43c49a787c2aab0eba9b84924cc45340191ee78415c48464a89110ba650454e"
+ },
+ "rule": 2,
+ "schema": "budget-request-alt-title-projection-primary/v0"
+}
