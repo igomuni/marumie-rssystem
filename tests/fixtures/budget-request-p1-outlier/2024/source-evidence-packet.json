@@ -1,0 +1,2167 @@
+{
+ "classification": [
+  {
+   "basis": "candidate bbox が frame [x 31.06–797.18, y 27.775–555.498] の内側",
+   "bounds": {
+    "xMax": 183.4,
+    "xMin": 86.3,
+    "yMax": 69.4,
+    "yMin": 55.6
+   },
+   "classification": "SOURCE_BODY_OR_TABLE_POSITION_SUPPORTED",
+   "frame": {
+    "bottom": 555.498,
+    "left": 31.06,
+    "right": 797.18,
+    "top": 27.775
+   },
+   "id": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf|66|4",
+   "role": "outlier"
+  },
+  {
+   "basis": "candidate bbox が frame [x 31.06–797.18, y 27.775–555.498] の内側",
+   "bounds": {
+    "xMax": 514.5,
+    "xMin": 72.5,
+    "yMax": 97.2,
+    "yMin": 90.3
+   },
+   "classification": "SOURCE_BODY_OR_TABLE_POSITION_SUPPORTED",
+   "frame": {
+    "bottom": 555.498,
+    "left": 31.06,
+    "right": 797.18,
+    "top": 27.775
+   },
+   "id": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf|18|6",
+   "role": "outlier"
+  },
+  {
+   "basis": "candidate yMax 27.8 ≤ frameTop 27.775 + 0.5",
+   "bounds": {
+    "xMax": 83,
+    "xMin": 38,
+    "yMax": 27.8,
+    "yMin": 20.8
+   },
+   "classification": "SOURCE_HEADER_POSITION_SUPPORTED",
+   "frame": {
+    "bottom": 555.498,
+    "left": 31.06,
+    "right": 797.18,
+    "top": 27.775
+   },
+   "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|104|0",
+   "role": "control"
+  }
+ ],
+ "frozen": {
+  "populationFreezeSha256": "db22a783aa02a0b6c35f0962f270fccfad5256a14027136c09306d72a9aade5a",
+  "protocolSha256": "446bdfc43be010088b8ee5cf4d2e73fe5005a61d991105254500e1d45ddaa7ac"
+ },
+ "note": "source-only。visual inspection の前。P1 は human GT ではない。MOF・manual contract は未使用",
+ "packets": [
+  {
+   "adjacentPages": {
+    "0": {
+     "alternativeBasis": "label_on_first_code_row",
+     "alternativeProjectedTitleRaw": "015 国民健康保険助成費（社 会福祉費）",
+     "currentProjectedTitleRaw": "60",
+     "currentStatus": "observed_blank",
+     "firstLogicalRows": [
+      {
+       "index": 0,
+       "raw": "60",
+       "y": 20.8
+      },
+      {
+       "index": 1,
+       "raw": "要求 前 年 度 ６ 年 度 対 前 年 度",
+       "y": 31.2
+      },
+      {
+       "index": 2,
+       "raw": "事 項 備 考",
+       "y": 34.7
+      }
+     ],
+     "height": 595,
+     "labelShapedCandidates": [
+      {
+       "index": 4,
+       "raw": "015 国民健康保険助成費（社 会福祉費）"
+      },
+      {
+       "index": 5,
+       "raw": "005 国民健康保険助成に必要 な経費（社会福祉費）"
+      }
+     ],
+     "layoutRangeSignature": "H:w842|p207|r259|d414|R:79",
+     "page": 66,
+     "width": 842
+    },
+    "1": {
+     "alternativeBasis": null,
+     "alternativeProjectedTitleRaw": "61",
+     "currentProjectedTitleRaw": "61",
+     "currentStatus": "observed_blank",
+     "firstLogicalRows": [
+      {
+       "index": 0,
+       "raw": "61",
+       "y": 20.8
+      },
+      {
+       "index": 1,
+       "raw": "要求 前 年 度 ６ 年 度 対 前 年 度",
+       "y": 31.2
+      },
+      {
+       "index": 2,
+       "raw": "事 項 備 考",
+       "y": 34.7
+      }
+     ],
+     "height": 595,
+     "labelShapedCandidates": [],
+     "layoutRangeSignature": "H:w842|p207|r259|d414|R:79",
+     "page": 67,
+     "width": 842
+    },
+    "-1": {
+     "alternativeBasis": null,
+     "alternativeProjectedTitleRaw": "59",
+     "currentProjectedTitleRaw": "59",
+     "currentStatus": "observed_blank",
+     "firstLogicalRows": [
+      {
+       "index": 0,
+       "raw": "59",
+       "y": 20.8
+      },
+      {
+       "index": 1,
+       "raw": "要求 前 年 度 ６ 年 度 対 前 年 度",
+       "y": 31.2
+      },
+      {
+       "index": 2,
+       "raw": "事 項 備 考",
+       "y": 34.7
+      }
+     ],
+     "height": 595,
+     "labelShapedCandidates": [],
+     "layoutRangeSignature": "H:w842|p207|r259|d414|R:79",
+     "page": 65,
+     "width": 842
+    }
+   },
+   "controlForOutliers": null,
+   "drawing": {
+    "frame": {
+     "bottom": 555.498,
+     "left": 31.06,
+     "right": 797.18,
+     "top": 27.775
+    },
+    "longHorizontalRules": [
+     {
+      "lineWidth": null,
+      "xMax": 797.181,
+      "xMin": 31.059,
+      "y": 27.775
+     },
+     {
+      "lineWidth": 0.333333,
+      "xMax": 797.181,
+      "xMin": 31.059,
+      "y": 27.775
+     },
+     {
+      "lineWidth": 0.333333,
+      "xMax": 797.181,
+      "xMin": 31.059,
+      "y": 48.606
+     },
+     {
+      "lineWidth": null,
+      "xMax": 797.181,
+      "xMin": 31.059,
+      "y": 555.498
+     }
+    ],
+    "longVerticalRules": [
+     {
+      "lineWidths": [],
+      "x": 31.06,
+      "yMax": 555.498,
+      "yMin": 27.775
+     },
+     {
+      "lineWidths": [
+       0.333333
+      ],
+      "x": 50.04,
+      "yMax": 555.498,
+      "yMin": 27.775
+     },
+     {
+      "lineWidths": [
+       0.333333
+      ],
+      "x": 203.61,
+      "yMax": 555.498,
+      "yMin": 27.775
+     },
+     {
+      "lineWidths": [
+       0.333333
+      ],
+      "x": 255.37,
+      "yMax": 555.498,
+      "yMin": 27.775
+     },
+     {
+      "lineWidths": [
+       0.333333
+      ],
+      "x": 307.14,
+      "yMax": 555.498,
+      "yMin": 27.775
+     },
+     {
+      "lineWidths": [
+       0.333333
+      ],
+      "x": 358.9,
+      "yMax": 555.498,
+      "yMin": 27.775
+     },
+     {
+      "lineWidths": [
+       0.333333
+      ],
+      "x": 410.67,
+      "yMax": 555.498,
+      "yMin": 27.775
+     },
+     {
+      "lineWidths": [
+       0.333333
+      ],
+      "x": 462.43,
+      "yMax": 555.498,
+      "yMin": 27.775
+     },
+     {
+      "lineWidths": [],
+      "x": 797.18,
+      "yMax": 555.498,
+      "yMin": 27.775
+     }
+    ],
+    "nearestHorizontalRuleAtOrAboveCandidateTop": {
+     "lineWidth": 0.333333,
+     "xMax": 797.181,
+     "xMin": 31.059,
+     "y": 48.606
+    },
+    "nearestHorizontalRuleAtOrBelowCandidateBottom": {
+     "lineWidth": null,
+     "xMax": 797.181,
+     "xMin": 31.059,
+     "y": 555.498
+    }
+   },
+   "geometry": {
+    "bounds": {
+     "xMax": 183.4,
+     "xMin": 86.3,
+     "yMax": 69.4,
+     "yMin": 55.6
+    },
+    "rowLocalFeatures": {
+     "anchorAvailable": "true",
+     "digitRemovalDependent": "false",
+     "firstShapeStage": "nfkc",
+     "firstTokenOffsetFromAnchorBin": "30",
+     "firstTokenXBin": "80",
+     "heightBin": "12",
+     "lastTokenXBin": "100",
+     "maxXBin": "180",
+     "minXBin": "80",
+     "norm_asciiDigits": "0",
+     "norm_closeParen": "1",
+     "norm_comma": "0",
+     "norm_digits": "0",
+     "norm_han": "11+",
+     "norm_hiragana": "0",
+     "norm_katakana": "0",
+     "norm_latin": "0",
+     "norm_openParen": "1",
+     "norm_percent": "0",
+     "norm_punctSymbol": "2",
+     "norm_slash": "0",
+     "norm_total": "11+",
+     "norm_whitespace": "0",
+     "raw_asciiDigits": "3-5",
+     "raw_closeParen": "1",
+     "raw_comma": "0",
+     "raw_digits": "3-5",
+     "raw_han": "11+",
+     "raw_hiragana": "0",
+     "raw_katakana": "0",
+     "raw_latin": "0",
+     "raw_openParen": "1",
+     "raw_percent": "0",
+     "raw_punctSymbol": "2",
+     "raw_slash": "0",
+     "raw_total": "11+",
+     "raw_whitespace": "2",
+     "selfCodeShaped": "true",
+     "selfRequestShaped": "false",
+     "stageShapeFinal": "true",
+     "stageShapeNfkc": "true",
+     "stageShapeNoWhitespace": "true",
+     "stageShapeRaw": "false",
+     "tokenCountBin": "3-5",
+     "topBin": "0.08",
+     "widthBin": "80"
+    },
+    "universeGeometry": {
+     "anchorX": 50.04,
+     "firstTokenX": 86.3,
+     "lastTokenX": 107,
+     "tokenCount": 3,
+     "top": 0.093
+    }
+   },
+   "id": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf|66|4",
+   "identity": {
+    "localPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+    "logicalRowIndex": 4,
+    "normalized": "国民健康保険助成費(社会福祉費)",
+    "page": 66,
+    "pageGeometry": {
+     "height": 595,
+     "rotate": 0,
+     "width": 842
+    },
+    "raw": "015 国民健康保険助成費（社 会福祉費）",
+    "tokenIndexes": [
+     1,
+     3,
+     4
+    ]
+   },
+   "pageLocalStructure": [
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": true,
+     "index": 0,
+     "labelShaped": false,
+     "raw": "60",
+     "rel": -4,
+     "requestShaped": false,
+     "tokenIndexes": [
+      0
+     ],
+     "x": 41.5,
+     "y": 20.8,
+     "yMax": 27.8
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 1,
+     "labelShaped": false,
+     "raw": "要求 前 年 度 ６ 年 度 対 前 年 度",
+     "rel": -3,
+     "requestShaped": false,
+     "tokenIndexes": [
+      264,
+      281,
+      283,
+      285,
+      271,
+      273,
+      275,
+      292,
+      294,
+      296,
+      298
+     ],
+     "x": 34.1,
+     "y": 31.2,
+     "yMax": 38.2
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 2,
+     "labelShaped": false,
+     "raw": "事 項 備 考",
+     "rel": -2,
+     "requestShaped": false,
+     "tokenIndexes": [
+      267,
+      269,
+      278,
+      280
+     ],
+     "x": 91.5,
+     "y": 34.7,
+     "yMax": 41.7
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 3,
+     "labelShaped": false,
+     "raw": "番号 予 算 額 概 算 要 求 額 比 較 増 △ 減",
+     "rel": -1,
+     "requestShaped": false,
+     "tokenIndexes": [
+      265,
+      286,
+      288,
+      290,
+      276,
+      299
+     ],
+     "x": 34.1,
+     "y": 38.2,
+     "yMax": 45.1
+    },
+    {
+     "codeShaped": true,
+     "inAlternativeProjection": true,
+     "inCurrentProjection": false,
+     "index": 4,
+     "labelShaped": true,
+     "raw": "015 国民健康保険助成費（社 会福祉費）",
+     "rel": 0,
+     "requestShaped": false,
+     "tokenIndexes": [
+      1,
+      3,
+      4
+     ],
+     "x": 86.3,
+     "y": 55.6,
+     "yMax": 69.4
+    },
+    {
+     "codeShaped": true,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 5,
+     "labelShaped": true,
+     "raw": "005 国民健康保険助成に必要 な経費（社会福祉費）",
+     "rel": 1,
+     "requestShaped": false,
+     "tokenIndexes": [
+      5,
+      7,
+      8
+     ],
+     "x": 93.2,
+     "y": 76.4,
+     "yMax": 90.3
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 6,
+     "labelShaped": false,
+     "raw": "06081- 715-16-0081 国民健康保険災 55, 950 52, 448 △ 3, 502 (要 求 要 旨) 東京電力福島第一原子力発電所事故によ",
+     "rel": 2,
+     "requestShaped": false,
+     "tokenIndexes": [
+      10,
+      12,
+      16,
+      15,
+      19,
+      18,
+      21,
+      24,
+      23,
+      26,
+      28,
+      30,
+      32,
+      34,
+      13,
+      35,
+      14,
+      36
+     ],
+     "x": 86.3,
+     "y": 97.2,
+     "yMax": 118
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 7,
+     "labelShaped": false,
+     "raw": "(根 拠 法 令) 国民健康保険法第74条",
+     "rel": 3,
+     "requestShaped": false,
+     "tokenIndexes": [
+      37,
+      39,
+      41,
+      43,
+      45
+     ],
+     "x": 469.3,
+     "y": 125,
+     "yMax": 131.9
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 8,
+     "labelShaped": false,
+     "raw": "(補 助 先) 保険者(市町村)",
+     "rel": 4,
+     "requestShaped": false,
+     "tokenIndexes": [
+      46,
+      48,
+      50,
+      52
+     ],
+     "x": 469.3,
+     "y": 138.9,
+     "yMax": 145.8
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 9,
+     "labelShaped": false,
+     "raw": "(補 助 率) 定額",
+     "rel": 5,
+     "requestShaped": false,
+     "tokenIndexes": [
+      53,
+      55,
+      57,
+      59
+     ],
+     "x": 469.3,
+     "y": 152.8,
+     "yMax": 159.7
+    },
+    {
+     "codeShaped": true,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 10,
+     "labelShaped": false,
+     "raw": "020 介護保険制度施行補助金",
+     "rel": 6,
+     "requestShaped": false,
+     "tokenIndexes": [
+      61,
+      63
+     ],
+     "x": 86.3,
+     "y": 173.6,
+     "yMax": 180.5
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 11,
+     "labelShaped": false,
+     "raw": "06081- 715-16-0539 介護保険災害臨 919, 499 793, 592 △ 125, 907 ３０年度 元 年 度 ２ 年 度 ３ 年 度 ４",
+     "rel": 7,
+     "requestShaped": false,
+     "tokenIndexes": [
+      64,
+      66,
+      70,
+      69,
+      73,
+      72,
+      75,
+      78,
+      77,
+      80,
+      82,
+      84,
+      86,
+      88,
+      67
+     ],
+     "x": 86.3,
+     "y": 187.5,
+     "yMax": 201.4
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 12,
+     "labelShaped": false,
+     "raw": "( 4, 182, 537 ) ( 3, 230, 339 ) ( 2, 170, 018 ) ( 1, 093, 190 ) ( 1, 027, 679 )",
+     "rel": 8,
+     "requestShaped": false,
+     "tokenIndexes": [
+      89,
+      94,
+      93,
+      92,
+      91,
+      96,
+      101,
+      100,
+      99,
+      98,
+      103,
+      108,
+      107,
+      106,
+      105,
+      110,
+      115,
+      114,
+      113,
+      112,
+      117,
+      122,
+      121,
+      120,
+      119
+     ],
+     "x": 519.4,
+     "y": 201.4,
+     "yMax": 208.3
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 13,
+     "labelShaped": false,
+     "raw": "予 算 額 4, 182, 537 3, 230, 339 2, 170, 018 1, 093, 190 1, 027, 679",
+     "rel": 9,
+     "requestShaped": false,
+     "tokenIndexes": [
+      123,
+      125,
+      127,
+      131,
+      130,
+      129,
+      135,
+      134,
+      133,
+      139,
+      138,
+      137,
+      143,
+      142,
+      141,
+      147,
+      146,
+      145
+     ],
+     "x": 465.9,
+     "y": 208.3,
+     "yMax": 215.3
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 14,
+     "labelShaped": false,
+     "raw": "決 算 額",
+     "rel": 10,
+     "requestShaped": false,
+     "tokenIndexes": [
+      148,
+      150,
+      152
+     ],
+     "x": 465.9,
+     "y": 222.2,
+     "yMax": 229.1
+    }
+   ],
+   "projectionContext": {
+    "frozen": {
+     "altBasis": "label_on_first_code_row",
+     "altStatus": "observed_nonblank",
+     "candidateCountOnPage": 2,
+     "currentStatus": "observed_blank",
+     "firstCodeRowIndex": 4,
+     "isAdditional": false,
+     "isProjected": true,
+     "pageAmbiguous": true,
+     "population": "P1_projected_same_row",
+     "predicate": true,
+     "relativePosition": "same_as_first_code"
+    },
+    "note": "診断用。row-local predicate evidence と分離",
+    "projectionContextFeatures": {
+     "candidateCountOnPageBin": "2",
+     "codeShapedRowBefore": "false",
+     "deltaToFirstCodeBin": "0",
+     "m1Code": "false",
+     "m1Label": "false",
+     "m1Request": "false",
+     "m2Code": "false",
+     "m2Label": "false",
+     "m2Request": "false",
+     "p1Code": "true",
+     "p1Label": "true",
+     "p1Request": "false",
+     "p2Code": "false",
+     "p2Label": "false",
+     "p2Request": "false",
+     "pageRowCountBin": "11+",
+     "positionFromTopBin": "3-5",
+     "relativePosition": "same_as_first_code",
+     "requestShapedRowBefore": "false",
+     "rowIndexBin": "3-5",
+     "rowsAfterBin": "11+",
+     "rowsBeforeBin": "3-5"
+    },
+    "universeNeighbors": {
+     "m1": {
+      "code": false,
+      "i": 3,
+      "label": false,
+      "raw": "番号 予 算 額 概 算 要 求 額 比 較 増 △ 減",
+      "request": false,
+      "tokens": 6,
+      "x": 34.1,
+      "y": 38.2
+     },
+     "m2": {
+      "code": false,
+      "i": 2,
+      "label": false,
+      "raw": "事 項 備 考",
+      "request": false,
+      "tokens": 4,
+      "x": 91.5,
+      "y": 34.7
+     },
+     "p1": {
+      "code": true,
+      "i": 5,
+      "label": true,
+      "raw": "005 国民健康保険助成に必要 な経費（社会福祉費）",
+      "request": false,
+      "tokens": 3,
+      "x": 93.2,
+      "y": 76.4
+     },
+     "p2": {
+      "code": false,
+      "i": 6,
+      "label": false,
+      "raw": "06081- 715-16-0081 国民健康保険災 55, 950 52, 448 △ 3, 502 (要 求 要 旨",
+      "request": false,
+      "tokens": 18,
+      "x": 86.3,
+      "y": 97.2
+     }
+    }
+   },
+   "role": "outlier",
+   "sourceOnlyClassification": {
+    "basis": "candidate bbox が frame [x 31.06–797.18, y 27.775–555.498] の内側",
+    "classification": "SOURCE_BODY_OR_TABLE_POSITION_SUPPORTED"
+   }
+  },
+  {
+   "adjacentPages": {
+    "0": {
+     "alternativeBasis": "label_on_first_code_row",
+     "alternativeProjectedTitleRaw": "016 増 員 要 求 に 伴 う 経 費 （新規増員）",
+     "currentProjectedTitleRaw": "14",
+     "currentStatus": "observed_blank",
+     "firstLogicalRows": [
+      {
+       "index": 0,
+       "raw": "14",
+       "y": 20.8
+      },
+      {
+       "index": 1,
+       "raw": "要求 前 年 度 ６ 年 度 対 前 年 度",
+       "y": 31.2
+      },
+      {
+       "index": 2,
+       "raw": "事 項 備 考",
+       "y": 34.7
+      }
+     ],
+     "height": 595,
+     "labelShapedCandidates": [
+      {
+       "index": 6,
+       "raw": "016 増 員 要 求 に 伴 う 経 費 （新規増員）"
+      }
+     ],
+     "layoutRangeSignature": "H:w842|p207|r259|d414|R:66",
+     "page": 18,
+     "width": 842
+    },
+    "1": {
+     "alternativeBasis": null,
+     "alternativeProjectedTitleRaw": "15",
+     "currentProjectedTitleRaw": "15",
+     "currentStatus": "observed_blank",
+     "firstLogicalRows": [
+      {
+       "index": 0,
+       "raw": "15",
+       "y": 20.8
+      },
+      {
+       "index": 1,
+       "raw": "要求 前 年 度 ６ 年 度 対 前 年 度",
+       "y": 31.2
+      },
+      {
+       "index": 2,
+       "raw": "事 項 備 考",
+       "y": 34.7
+      }
+     ],
+     "height": 595,
+     "labelShapedCandidates": [],
+     "layoutRangeSignature": "H:w842|p207|r259|d414|R:66",
+     "page": 19,
+     "width": 842
+    },
+    "-1": {
+     "alternativeBasis": null,
+     "alternativeProjectedTitleRaw": "13",
+     "currentProjectedTitleRaw": "13",
+     "currentStatus": "observed_blank",
+     "firstLogicalRows": [
+      {
+       "index": 0,
+       "raw": "13",
+       "y": 20.8
+      },
+      {
+       "index": 1,
+       "raw": "要求 前 年 度 ６ 年 度 対 前 年 度",
+       "y": 31.2
+      },
+      {
+       "index": 2,
+       "raw": "事 項 備 考",
+       "y": 34.7
+      }
+     ],
+     "height": 595,
+     "labelShapedCandidates": [],
+     "layoutRangeSignature": "H:w842|p207|r259|d414|R:66",
+     "page": 17,
+     "width": 842
+    }
+   },
+   "controlForOutliers": null,
+   "drawing": {
+    "frame": {
+     "bottom": 555.498,
+     "left": 31.06,
+     "right": 797.18,
+     "top": 27.775
+    },
+    "longHorizontalRules": [
+     {
+      "lineWidth": null,
+      "xMax": 797.181,
+      "xMin": 31.059,
+      "y": 27.775
+     },
+     {
+      "lineWidth": 0.333333,
+      "xMax": 797.181,
+      "xMin": 31.059,
+      "y": 27.775
+     },
+     {
+      "lineWidth": 0.333333,
+      "xMax": 797.181,
+      "xMin": 31.059,
+      "y": 48.606
+     },
+     {
+      "lineWidth": null,
+      "xMax": 797.181,
+      "xMin": 31.059,
+      "y": 555.498
+     }
+    ],
+    "longVerticalRules": [
+     {
+      "lineWidths": [],
+      "x": 31.06,
+      "yMax": 555.498,
+      "yMin": 27.775
+     },
+     {
+      "lineWidths": [
+       0.333333
+      ],
+      "x": 50.04,
+      "yMax": 555.498,
+      "yMin": 27.775
+     },
+     {
+      "lineWidths": [
+       0.333333
+      ],
+      "x": 203.61,
+      "yMax": 555.498,
+      "yMin": 27.775
+     },
+     {
+      "lineWidths": [
+       0.333333
+      ],
+      "x": 255.37,
+      "yMax": 555.498,
+      "yMin": 27.775
+     },
+     {
+      "lineWidths": [
+       0.333333
+      ],
+      "x": 307.14,
+      "yMax": 555.498,
+      "yMin": 27.775
+     },
+     {
+      "lineWidths": [
+       0.333333
+      ],
+      "x": 358.9,
+      "yMax": 555.498,
+      "yMin": 27.775
+     },
+     {
+      "lineWidths": [
+       0.333333
+      ],
+      "x": 410.67,
+      "yMax": 555.498,
+      "yMin": 27.775
+     },
+     {
+      "lineWidths": [
+       0.333333
+      ],
+      "x": 462.43,
+      "yMax": 555.498,
+      "yMin": 27.775
+     },
+     {
+      "lineWidths": [],
+      "x": 797.18,
+      "yMax": 555.498,
+      "yMin": 27.775
+     }
+    ],
+    "nearestHorizontalRuleAtOrAboveCandidateTop": {
+     "lineWidth": 0.333333,
+     "xMax": 797.181,
+     "xMin": 31.059,
+     "y": 48.606
+    },
+    "nearestHorizontalRuleAtOrBelowCandidateBottom": {
+     "lineWidth": null,
+     "xMax": 797.181,
+     "xMin": 31.059,
+     "y": 555.498
+    }
+   },
+   "geometry": {
+    "bounds": {
+     "xMax": 514.5,
+     "xMin": 72.5,
+     "yMax": 97.2,
+     "yMin": 90.3
+    },
+    "rowLocalFeatures": {
+     "anchorAvailable": "true",
+     "digitRemovalDependent": "false",
+     "firstShapeStage": "nfkc",
+     "firstTokenOffsetFromAnchorBin": "20",
+     "firstTokenXBin": "70",
+     "heightBin": "6",
+     "lastTokenXBin": "470",
+     "maxXBin": "510",
+     "minXBin": "70",
+     "norm_asciiDigits": "0",
+     "norm_closeParen": "1",
+     "norm_comma": "0",
+     "norm_digits": "0",
+     "norm_han": "11+",
+     "norm_hiragana": "2",
+     "norm_katakana": "0",
+     "norm_latin": "0",
+     "norm_openParen": "1",
+     "norm_percent": "0",
+     "norm_punctSymbol": "2",
+     "norm_slash": "0",
+     "norm_total": "11+",
+     "norm_whitespace": "0",
+     "raw_asciiDigits": "3-5",
+     "raw_closeParen": "1",
+     "raw_comma": "0",
+     "raw_digits": "3-5",
+     "raw_han": "11+",
+     "raw_hiragana": "2",
+     "raw_katakana": "0",
+     "raw_latin": "0",
+     "raw_openParen": "1",
+     "raw_percent": "0",
+     "raw_punctSymbol": "2",
+     "raw_slash": "0",
+     "raw_total": "11+",
+     "raw_whitespace": "6-10",
+     "selfCodeShaped": "true",
+     "selfRequestShaped": "false",
+     "stageShapeFinal": "true",
+     "stageShapeNfkc": "true",
+     "stageShapeNoWhitespace": "true",
+     "stageShapeRaw": "false",
+     "tokenCountBin": "3-5",
+     "topBin": "0.14",
+     "widthBin": "440"
+    },
+    "universeGeometry": {
+     "anchorX": 50.04,
+     "firstTokenX": 72.5,
+     "lastTokenX": 472.8,
+     "tokenCount": 3,
+     "top": 0.152
+    }
+   },
+   "id": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf|18|6",
+   "identity": {
+    "localPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf",
+    "logicalRowIndex": 6,
+    "normalized": "増員要求に伴う経費(新規増員)",
+    "page": 18,
+    "pageGeometry": {
+     "height": 595,
+     "rotate": 0,
+     "width": 842
+    },
+    "raw": "016 増 員 要 求 に 伴 う 経 費 （新規増員）",
+    "tokenIndexes": [
+     30,
+     32,
+     34
+    ]
+   },
+   "pageLocalStructure": [
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": true,
+     "index": 0,
+     "labelShaped": false,
+     "raw": "14",
+     "rel": -6,
+     "requestShaped": false,
+     "tokenIndexes": [
+      0
+     ],
+     "x": 41.5,
+     "y": 20.8,
+     "yMax": 27.8
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 1,
+     "labelShaped": false,
+     "raw": "要求 前 年 度 ６ 年 度 対 前 年 度",
+     "rel": -5,
+     "requestShaped": false,
+     "tokenIndexes": [
+      472,
+      489,
+      491,
+      493,
+      479,
+      481,
+      483,
+      500,
+      502,
+      504,
+      506
+     ],
+     "x": 34.1,
+     "y": 31.2,
+     "yMax": 38.2
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 2,
+     "labelShaped": false,
+     "raw": "事 項 備 考",
+     "rel": -4,
+     "requestShaped": false,
+     "tokenIndexes": [
+      475,
+      477,
+      486,
+      488
+     ],
+     "x": 91.5,
+     "y": 34.7,
+     "yMax": 41.7
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 3,
+     "labelShaped": false,
+     "raw": "番号 予 算 額 概 算 要 求 額 比 較 増 △ 減",
+     "rel": -3,
+     "requestShaped": false,
+     "tokenIndexes": [
+      473,
+      494,
+      496,
+      498,
+      484,
+      507
+     ],
+     "x": 34.1,
+     "y": 38.2,
+     "yMax": 45.1
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 4,
+     "labelShaped": false,
+     "raw": "95012-2111-04-0100 超 過 勤 務 手 当 0 △ 8, 718 △ 8, 718",
+     "rel": -2,
+     "requestShaped": false,
+     "tokenIndexes": [
+      1,
+      3,
+      5,
+      8,
+      7,
+      10,
+      13,
+      12
+     ],
+     "x": 86.3,
+     "y": 55.6,
+     "yMax": 62.5
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 5,
+     "labelShaped": false,
+     "raw": "95012-2115-16-7500 国家公務員共済 0 △ 9, 929 △ 9, 929 組合負担金",
+     "rel": -1,
+     "requestShaped": false,
+     "tokenIndexes": [
+      15,
+      17,
+      20,
+      23,
+      22,
+      25,
+      28,
+      27,
+      18
+     ],
+     "x": 86.3,
+     "y": 69.4,
+     "yMax": 83.3
+    },
+    {
+     "codeShaped": true,
+     "inAlternativeProjection": true,
+     "inCurrentProjection": false,
+     "index": 6,
+     "labelShaped": true,
+     "raw": "016 増 員 要 求 に 伴 う 経 費 （新規増員）",
+     "rel": 0,
+     "requestShaped": false,
+     "tokenIndexes": [
+      30,
+      32,
+      34
+     ],
+     "x": 72.5,
+     "y": 90.3,
+     "yMax": 97.2
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 7,
+     "labelShaped": false,
+     "raw": "行政職給料表（一） 5級 3人 行政職給料表（一） 3級 3人 行政職給料表（一） 2級 8人 行政職給料表（一） 1級 3人",
+     "rel": 1,
+     "requestShaped": false,
+     "tokenIndexes": [
+      35,
+      37,
+      39,
+      40,
+      42,
+      44,
+      45,
+      47,
+      49,
+      50,
+      52,
+      54
+     ],
+     "x": 472.8,
+     "y": 97.2,
+     "yMax": 125
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 8,
+     "labelShaped": false,
+     "raw": "計 17人",
+     "rel": 2,
+     "requestShaped": false,
+     "tokenIndexes": [
+      55,
+      57
+     ],
+     "x": 479.8,
+     "y": 125,
+     "yMax": 131.9
+    },
+    {
+     "codeShaped": true,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 9,
+     "labelShaped": false,
+     "raw": "001 人 件 費 0 90, 707 90, 707",
+     "rel": 3,
+     "requestShaped": false,
+     "tokenIndexes": [
+      59,
+      61,
+      63,
+      65,
+      67,
+      70,
+      69,
+      73,
+      72
+     ],
+     "x": 79.4,
+     "y": 145.8,
+     "yMax": 152.8
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 10,
+     "labelShaped": false,
+     "raw": "95012-2111-02-0000 職 員 基 本 給 0 54, 088 54, 088",
+     "rel": 4,
+     "requestShaped": false,
+     "tokenIndexes": [
+      75,
+      77,
+      79,
+      82,
+      81,
+      85,
+      84
+     ],
+     "x": 86.3,
+     "y": 159.7,
+     "yMax": 166.6
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 11,
+     "labelShaped": false,
+     "raw": "02-0100 職 員 俸 給 0 43, 525 43, 525",
+     "rel": 5,
+     "requestShaped": false,
+     "tokenIndexes": [
+      87,
+      89,
+      91,
+      93,
+      95,
+      97,
+      100,
+      99,
+      103,
+      102
+     ],
+     "x": 127.7,
+     "y": 173.6,
+     "yMax": 180.5
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 12,
+     "labelShaped": false,
+     "raw": "02-0200 扶 養 手 当 0 1, 548 1, 548",
+     "rel": 6,
+     "requestShaped": false,
+     "tokenIndexes": [
+      105,
+      107,
+      109,
+      111,
+      113,
+      115,
+      118,
+      117,
+      121,
+      120
+     ],
+     "x": 127.7,
+     "y": 187.5,
+     "yMax": 194.4
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 13,
+     "labelShaped": false,
+     "raw": "02-0300 地 域 手 当 0 9, 015 9, 015",
+     "rel": 7,
+     "requestShaped": false,
+     "tokenIndexes": [
+      123,
+      125,
+      127,
+      129,
+      131,
+      133,
+      136,
+      135,
+      139,
+      138
+     ],
+     "x": 127.7,
+     "y": 201.4,
+     "yMax": 208.3
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 14,
+     "labelShaped": false,
+     "raw": "95012-2111-03-0000 職 員 諸 手 当 0 19, 240 19, 240",
+     "rel": 8,
+     "requestShaped": false,
+     "tokenIndexes": [
+      141,
+      143,
+      145,
+      148,
+      147,
+      151,
+      150
+     ],
+     "x": 86.3,
+     "y": 215.3,
+     "yMax": 222.2
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 15,
+     "labelShaped": false,
+     "raw": "03-0300 通 勤 手 当 0 1, 496 1, 496",
+     "rel": 9,
+     "requestShaped": false,
+     "tokenIndexes": [
+      153,
+      155,
+      157,
+      159,
+      161,
+      163,
+      166,
+      165,
+      169,
+      168
+     ],
+     "x": 127.7,
+     "y": 229.1,
+     "yMax": 236.1
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 16,
+     "labelShaped": false,
+     "raw": "03-0700 期 末 手 当 0 7, 260 7, 260",
+     "rel": 10,
+     "requestShaped": false,
+     "tokenIndexes": [
+      171,
+      173,
+      175,
+      177,
+      179,
+      181,
+      184,
+      183,
+      187,
+      186
+     ],
+     "x": 127.7,
+     "y": 243,
+     "yMax": 250
+    }
+   ],
+   "projectionContext": {
+    "frozen": {
+     "altBasis": "label_on_first_code_row",
+     "altStatus": "observed_nonblank",
+     "candidateCountOnPage": 1,
+     "currentStatus": "observed_blank",
+     "firstCodeRowIndex": 6,
+     "isAdditional": false,
+     "isProjected": true,
+     "pageAmbiguous": false,
+     "population": "P1_projected_same_row",
+     "predicate": true,
+     "relativePosition": "same_as_first_code"
+    },
+    "note": "診断用。row-local predicate evidence と分離",
+    "projectionContextFeatures": {
+     "candidateCountOnPageBin": "1",
+     "codeShapedRowBefore": "false",
+     "deltaToFirstCodeBin": "0",
+     "m1Code": "false",
+     "m1Label": "false",
+     "m1Request": "false",
+     "m2Code": "false",
+     "m2Label": "false",
+     "m2Request": "false",
+     "p1Code": "false",
+     "p1Label": "false",
+     "p1Request": "false",
+     "p2Code": "false",
+     "p2Label": "false",
+     "p2Request": "false",
+     "pageRowCountBin": "11+",
+     "positionFromTopBin": "6-10",
+     "relativePosition": "same_as_first_code",
+     "requestShapedRowBefore": "false",
+     "rowIndexBin": "6-10",
+     "rowsAfterBin": "11+",
+     "rowsBeforeBin": "6-10"
+    },
+    "universeNeighbors": {
+     "m1": {
+      "code": false,
+      "i": 5,
+      "label": false,
+      "raw": "95012-2115-16-7500 国家公務員共済 0 △ 9, 929 △ 9, 929 組合負担金",
+      "request": false,
+      "tokens": 9,
+      "x": 86.3,
+      "y": 69.4
+     },
+     "m2": {
+      "code": false,
+      "i": 4,
+      "label": false,
+      "raw": "95012-2111-04-0100 超 過 勤 務 手 当 0 △ 8, 718 △ 8, 718",
+      "request": false,
+      "tokens": 8,
+      "x": 86.3,
+      "y": 55.6
+     },
+     "p1": {
+      "code": false,
+      "i": 7,
+      "label": false,
+      "raw": "行政職給料表（一） 5級 3人 行政職給料表（一） 3級 3人 行政職給料表（一） 2級 8人 行政職給料表（一） 1級",
+      "request": false,
+      "tokens": 12,
+      "x": 472.8,
+      "y": 97.2
+     },
+     "p2": {
+      "code": false,
+      "i": 8,
+      "label": false,
+      "raw": "計 17人",
+      "request": false,
+      "tokens": 2,
+      "x": 479.8,
+      "y": 125
+     }
+    }
+   },
+   "role": "outlier",
+   "sourceOnlyClassification": {
+    "basis": "candidate bbox が frame [x 31.06–797.18, y 27.775–555.498] の内側",
+    "classification": "SOURCE_BODY_OR_TABLE_POSITION_SUPPORTED"
+   }
+  },
+  {
+   "adjacentPages": {
+    "0": {
+     "alternativeBasis": "label_on_first_code_row",
+     "alternativeProjectedTitleRaw": "100 内（消）",
+     "currentProjectedTitleRaw": null,
+     "currentStatus": "observed_blank",
+     "firstLogicalRows": [
+      {
+       "index": 0,
+       "raw": "100 内（消）",
+       "y": 20.8
+      },
+      {
+       "index": 1,
+       "raw": "要求 前 年 度 ６ 年 度 対 前 年 度",
+       "y": 31.2
+      },
+      {
+       "index": 2,
+       "raw": "事 項 備 考",
+       "y": 34.7
+      }
+     ],
+     "height": 595,
+     "labelShapedCandidates": [
+      {
+       "index": 0,
+       "raw": "100 内（消）"
+      }
+     ],
+     "layoutRangeSignature": "H:w842|p207|r259|d414|R:66",
+     "page": 104,
+     "width": 842
+    },
+    "1": {
+     "alternativeBasis": "before_first_code_row",
+     "alternativeProjectedTitleRaw": "内（消） 101",
+     "currentProjectedTitleRaw": "内（消） 101",
+     "currentStatus": "observed_nonblank",
+     "firstLogicalRows": [
+      {
+       "index": 0,
+       "raw": "内（消） 101",
+       "y": 20.8
+      },
+      {
+       "index": 1,
+       "raw": "要求 前 年 度 ６ 年 度 対 前 年 度",
+       "y": 31.2
+      },
+      {
+       "index": 2,
+       "raw": "事 項 備 考",
+       "y": 34.7
+      }
+     ],
+     "height": 595,
+     "labelShapedCandidates": [
+      {
+       "index": 0,
+       "raw": "内（消） 101"
+      },
+      {
+       "index": 4,
+       "raw": "⑦報告書印刷費（Ａ４ 軽印刷 上質 両面１００頁）"
+      },
+      {
+       "index": 6,
+       "raw": "⑧通信運搬費（ゆうパック８０サイズ都内）"
+      }
+     ],
+     "layoutRangeSignature": "H:w842|p207|r259|d414|R:66",
+     "page": 105,
+     "width": 842
+    },
+    "-1": {
+     "alternativeBasis": "before_first_code_row",
+     "alternativeProjectedTitleRaw": "内（消） 99",
+     "currentProjectedTitleRaw": "内（消） 99",
+     "currentStatus": "observed_nonblank",
+     "firstLogicalRows": [
+      {
+       "index": 0,
+       "raw": "内（消） 99",
+       "y": 20.8
+      },
+      {
+       "index": 1,
+       "raw": "要求 前 年 度 ６ 年 度 対 前 年 度",
+       "y": 31.2
+      },
+      {
+       "index": 2,
+       "raw": "事 項 備 考",
+       "y": 34.7
+      }
+     ],
+     "height": 595,
+     "labelShapedCandidates": [
+      {
+       "index": 0,
+       "raw": "内（消） 99"
+      }
+     ],
+     "layoutRangeSignature": "H:w842|p207|r259|d414|R:66",
+     "page": 103,
+     "width": 842
+    }
+   },
+   "controlForOutliers": [
+    "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf|66|4",
+    "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf|18|6"
+   ],
+   "drawing": {
+    "frame": {
+     "bottom": 555.498,
+     "left": 31.06,
+     "right": 797.18,
+     "top": 27.775
+    },
+    "longHorizontalRules": [
+     {
+      "lineWidth": null,
+      "xMax": 797.181,
+      "xMin": 31.059,
+      "y": 27.775
+     },
+     {
+      "lineWidth": 0.333333,
+      "xMax": 797.181,
+      "xMin": 31.059,
+      "y": 27.775
+     },
+     {
+      "lineWidth": 0.333333,
+      "xMax": 797.181,
+      "xMin": 31.059,
+      "y": 48.606
+     },
+     {
+      "lineWidth": null,
+      "xMax": 797.181,
+      "xMin": 31.059,
+      "y": 555.498
+     }
+    ],
+    "longVerticalRules": [
+     {
+      "lineWidths": [],
+      "x": 31.06,
+      "yMax": 555.498,
+      "yMin": 27.775
+     },
+     {
+      "lineWidths": [
+       0.333333
+      ],
+      "x": 50.04,
+      "yMax": 555.498,
+      "yMin": 27.775
+     },
+     {
+      "lineWidths": [
+       0.333333
+      ],
+      "x": 203.61,
+      "yMax": 555.498,
+      "yMin": 27.775
+     },
+     {
+      "lineWidths": [
+       0.333333
+      ],
+      "x": 255.37,
+      "yMax": 555.498,
+      "yMin": 27.775
+     },
+     {
+      "lineWidths": [
+       0.333333
+      ],
+      "x": 307.14,
+      "yMax": 555.498,
+      "yMin": 27.775
+     },
+     {
+      "lineWidths": [
+       0.333333
+      ],
+      "x": 358.9,
+      "yMax": 555.498,
+      "yMin": 27.775
+     },
+     {
+      "lineWidths": [
+       0.333333
+      ],
+      "x": 410.67,
+      "yMax": 555.498,
+      "yMin": 27.775
+     },
+     {
+      "lineWidths": [
+       0.333333
+      ],
+      "x": 462.43,
+      "yMax": 555.498,
+      "yMin": 27.775
+     },
+     {
+      "lineWidths": [],
+      "x": 797.18,
+      "yMax": 555.498,
+      "yMin": 27.775
+     }
+    ],
+    "nearestHorizontalRuleAtOrAboveCandidateTop": null,
+    "nearestHorizontalRuleAtOrBelowCandidateBottom": {
+     "lineWidth": null,
+     "xMax": 797.181,
+     "xMin": 31.059,
+     "y": 27.775
+    }
+   },
+   "geometry": {
+    "bounds": {
+     "xMax": 83,
+     "xMin": 38,
+     "yMax": 27.8,
+     "yMin": 20.8
+    },
+    "rowLocalFeatures": {
+     "anchorAvailable": "true",
+     "digitRemovalDependent": "false",
+     "firstShapeStage": "nfkc",
+     "firstTokenOffsetFromAnchorBin": "-20",
+     "firstTokenXBin": "30",
+     "heightBin": "6",
+     "lastTokenXBin": "50",
+     "maxXBin": "80",
+     "minXBin": "30",
+     "norm_asciiDigits": "0",
+     "norm_closeParen": "1",
+     "norm_comma": "0",
+     "norm_digits": "0",
+     "norm_han": "2",
+     "norm_hiragana": "0",
+     "norm_katakana": "0",
+     "norm_latin": "0",
+     "norm_openParen": "1",
+     "norm_percent": "0",
+     "norm_punctSymbol": "2",
+     "norm_slash": "0",
+     "norm_total": "3-5",
+     "norm_whitespace": "0",
+     "raw_asciiDigits": "3-5",
+     "raw_closeParen": "1",
+     "raw_comma": "0",
+     "raw_digits": "3-5",
+     "raw_han": "2",
+     "raw_hiragana": "0",
+     "raw_katakana": "0",
+     "raw_latin": "0",
+     "raw_openParen": "1",
+     "raw_percent": "0",
+     "raw_punctSymbol": "2",
+     "raw_slash": "0",
+     "raw_total": "6-10",
+     "raw_whitespace": "1",
+     "selfCodeShaped": "true",
+     "selfRequestShaped": "false",
+     "stageShapeFinal": "true",
+     "stageShapeNfkc": "true",
+     "stageShapeNoWhitespace": "true",
+     "stageShapeRaw": "false",
+     "tokenCountBin": "2",
+     "topBin": "0.02",
+     "widthBin": "40"
+    },
+    "universeGeometry": {
+     "anchorX": 50.04,
+     "firstTokenX": 38,
+     "lastTokenX": 55.2,
+     "tokenCount": 2,
+     "top": 0.035
+    }
+   },
+   "id": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf|104|0",
+   "identity": {
+    "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+    "logicalRowIndex": 0,
+    "normalized": "内(消)",
+    "page": 104,
+    "pageGeometry": {
+     "height": 595,
+     "rotate": 0,
+     "width": 842
+    },
+    "raw": "100 内（消）",
+    "tokenIndexes": [
+     1,
+     0
+    ]
+   },
+   "pageLocalStructure": [
+    {
+     "codeShaped": true,
+     "inAlternativeProjection": true,
+     "inCurrentProjection": false,
+     "index": 0,
+     "labelShaped": true,
+     "raw": "100 内（消）",
+     "rel": 0,
+     "requestShaped": false,
+     "tokenIndexes": [
+      1,
+      0
+     ],
+     "x": 38,
+     "y": 20.8,
+     "yMax": 27.8
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 1,
+     "labelShaped": false,
+     "raw": "要求 前 年 度 ６ 年 度 対 前 年 度",
+     "rel": 1,
+     "requestShaped": false,
+     "tokenIndexes": [
+      325,
+      342,
+      344,
+      346,
+      332,
+      334,
+      336,
+      353,
+      355,
+      357,
+      359
+     ],
+     "x": 34.1,
+     "y": 31.2,
+     "yMax": 38.2
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 2,
+     "labelShaped": false,
+     "raw": "事 項 備 考",
+     "rel": 2,
+     "requestShaped": false,
+     "tokenIndexes": [
+      328,
+      330,
+      339,
+      341
+     ],
+     "x": 91.5,
+     "y": 34.7,
+     "yMax": 41.7
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 3,
+     "labelShaped": false,
+     "raw": "番号 予 算 額 概 算 要 求 額 比 較 増 △ 減",
+     "rel": 3,
+     "requestShaped": false,
+     "tokenIndexes": [
+      326,
+      347,
+      349,
+      351,
+      337,
+      360
+     ],
+     "x": 34.1,
+     "y": 38.2,
+     "yMax": 45.1
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 4,
+     "labelShaped": false,
+     "raw": "ａ．デザイン費 990 ( 990 )",
+     "rel": 4,
+     "requestShaped": false,
+     "tokenIndexes": [
+      4,
+      6,
+      9,
+      8,
+      11
+     ],
+     "x": 479.7,
+     "y": 55.5,
+     "yMax": 62.5
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 5,
+     "labelShaped": false,
+     "raw": "（ａ）ポスター 1 種 @ 300,000 1.10 330 ( 330 )",
+     "rel": 5,
+     "requestShaped": false,
+     "tokenIndexes": [
+      12,
+      20,
+      25,
+      27,
+      22,
+      24,
+      14,
+      17,
+      16,
+      19
+     ],
+     "x": 483.1,
+     "y": 76.4,
+     "yMax": 83.3
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 6,
+     "labelShaped": false,
+     "raw": "（ｂ）チラシ 2 種 @ 300,000 1.10 660 ( 660 )",
+     "rel": 6,
+     "requestShaped": false,
+     "tokenIndexes": [
+      28,
+      36,
+      41,
+      43,
+      38,
+      40,
+      30,
+      33,
+      32,
+      35
+     ],
+     "x": 483.1,
+     "y": 97.2,
+     "yMax": 104.2
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 7,
+     "labelShaped": false,
+     "raw": "ｂ．印刷費 169 ( 169 )",
+     "rel": 7,
+     "requestShaped": false,
+     "tokenIndexes": [
+      44,
+      46,
+      49,
+      48,
+      51
+     ],
+     "x": 479.7,
+     "y": 111.1,
+     "yMax": 118
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 8,
+     "labelShaped": false,
+     "raw": "（ａ）ポスター（平版印刷、Ａ３、上質紙）",
+     "rel": 8,
+     "requestShaped": false,
+     "tokenIndexes": [
+      52
+     ],
+     "x": 483.1,
+     "y": 125,
+     "yMax": 131.9
+    },
+    {
+     "codeShaped": true,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 9,
+     "labelShaped": false,
+     "raw": "400 枚 @ 32.83 1.10 14 ( 14 )",
+     "rel": 9,
+     "requestShaped": false,
+     "tokenIndexes": [
+      59,
+      64,
+      66,
+      61,
+      63,
+      53,
+      56,
+      55,
+      58
+     ],
+     "x": 514.2,
+     "y": 138.9,
+     "yMax": 145.8
+    },
+    {
+     "codeShaped": false,
+     "inAlternativeProjection": false,
+     "inCurrentProjection": false,
+     "index": 10,
+     "labelShaped": false,
+     "raw": "（ｂ）チラシ（平版印刷、Ａ４、中質紙）",
+     "rel": 10,
+     "requestShaped": false,
+     "tokenIndexes": [
+      67
+     ],
+     "x": 483.1,
+     "y": 152.8,
+     "yMax": 159.7
+    }
+   ],
+   "projectionContext": {
+    "frozen": {
+     "altBasis": "label_on_first_code_row",
+     "altStatus": "observed_nonblank",
+     "candidateCountOnPage": 1,
+     "currentStatus": "observed_blank",
+     "firstCodeRowIndex": 0,
+     "isAdditional": false,
+     "isProjected": true,
+     "pageAmbiguous": false,
+     "population": "P1_projected_same_row",
+     "predicate": true,
+     "relativePosition": "same_as_first_code"
+    },
+    "note": "診断用。row-local predicate evidence と分離",
+    "projectionContextFeatures": {
+     "candidateCountOnPageBin": "1",
+     "codeShapedRowBefore": "false",
+     "deltaToFirstCodeBin": "0",
+     "m1Code": "none",
+     "m1Label": "none",
+     "m1Request": "none",
+     "m2Code": "none",
+     "m2Label": "none",
+     "m2Request": "none",
+     "p1Code": "false",
+     "p1Label": "false",
+     "p1Request": "false",
+     "p2Code": "false",
+     "p2Label": "false",
+     "p2Request": "false",
+     "pageRowCountBin": "11+",
+     "positionFromTopBin": "0",
+     "relativePosition": "same_as_first_code",
+     "requestShapedRowBefore": "false",
+     "rowIndexBin": "0",
+     "rowsAfterBin": "11+",
+     "rowsBeforeBin": "0"
+    },
+    "universeNeighbors": {
+     "m1": null,
+     "m2": null,
+     "p1": {
+      "code": false,
+      "i": 1,
+      "label": false,
+      "raw": "要求 前 年 度 ６ 年 度 対 前 年 度",
+      "request": false,
+      "tokens": 11,
+      "x": 34.1,
+      "y": 31.2
+     },
+     "p2": {
+      "code": false,
+      "i": 2,
+      "label": false,
+      "raw": "事 項 備 考",
+      "request": false,
+      "tokens": 4,
+      "x": 91.5,
+      "y": 34.7
+     }
+    }
+   },
+   "role": "control",
+   "sourceOnlyClassification": {
+    "basis": "candidate yMax 27.8 ≤ frameTop 27.775 + 0.5",
+    "classification": "SOURCE_HEADER_POSITION_SUPPORTED"
+   }
+  }
+ ],
+ "schema": "budget-request-p1-outlier-source-evidence/v0"
+}
