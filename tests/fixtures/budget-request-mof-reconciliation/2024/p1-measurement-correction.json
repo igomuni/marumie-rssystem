@@ -1,0 +1,74 @@
+{
+  "schema": "budget-request-p1-measurement-correction/v0",
+  "scope": "measurement / reporting correction のみ。matcher の規則・分類・frozen artifact は変更していない。原 artifact は上書きしない",
+  "definition": {
+    "document": "docs/tasks/20261005_0608_Budget_Request_MOF_Reconciliation_P1_Preregistration.md",
+    "section": "§7",
+    "text": "条件付き exact rate = 親が exact_unique の request のうち exact_unique の割合。親は parentItem.ref → item の照合結果で判定（request 自身の classification から逆算しない）"
+  },
+  "frozenInputs": {
+    "tests/fixtures/budget-request-mof-reconciliation/2024/p1-pdf-population.json": "f726c81b203eb22398cb7fd4c051bd059f40fea6e018a2a78a9e4babdfbd94b6",
+    "tests/fixtures/budget-request-mof-reconciliation/2024/p1-reconciliation-result.json": "66e8ba1d4cf16c298a7c7db083f482c6187b0a8c91ba4c4dc09fe6c607d42697",
+    "tests/fixtures/budget-request-full-corpus-baseline/2024/extraction-population.json": "3ec53c133117033ea0c8a8f23a3196f5b28ff18120957c7531c48c6df15fdbf8",
+    "tests/fixtures/budget-request-full-corpus-baseline/2024/reconciliation-result.json": "2f14d15c2a78d41f0b9669642b150637eeae6489ed8b7ac8a9d3a84e3e912904"
+  },
+  "rootCause": "original の evaluator は request 自身の classification が parent_unresolved / name_unavailable / out_of_scope でない集合を「親が解決した request」の proxy とした。matcher の判定順は out_of_scope → name_unavailable → parent_unresolved → candidate のため、request が name_unavailable だが親の項が exact_unique の record が denominator から落ちる",
+  "p1": {
+    "original": {
+      "parentExactUnique": 59,
+      "conditionalExactRateGivenResolvedParent": 0.9491525423728814,
+      "numerator": 56
+    },
+    "corrected": {
+      "requestTotal": 123,
+      "requestExactUnique": 56,
+      "parentExactUnique": 68,
+      "parentExactUniqueByOwnClass": {
+        "exact_unique": 56,
+        "name_unavailable": 9,
+        "no_exact_match": 3
+      },
+      "numerator": 56,
+      "conditionalExactRate": 0.8235294117647058,
+      "nameUnavailableWithParentExact": 9
+    },
+    "decision": {
+      "original": "GO_TO_NEXT_DESIGN",
+      "recomputedFromFrozenRecords": "GO_TO_NEXT_DESIGN",
+      "unchanged": true,
+      "note": "gate は classified share と top diagnostic category share（preregistration §9）。conditional rate は gate ではない"
+    }
+  },
+  "fullCorpus": {
+    "scope": "accountType = general の request（full-corpus reconciliation の gReq と同じ集合）",
+    "original": {
+      "comparable": 101,
+      "exactUnique": 98,
+      "rate": 0.9702970297029703
+    },
+    "corrected": {
+      "requestTotal": 2993,
+      "requestExactUnique": 98,
+      "parentExactUnique": 115,
+      "parentExactUniqueByOwnClass": {
+        "exact_unique": 98,
+        "name_unavailable": 14,
+        "no_exact_match": 3
+      },
+      "numerator": 98,
+      "conditionalExactRate": 0.8521739130434782,
+      "nameUnavailableWithParentExact": 14
+    },
+    "correctionRequired": true,
+    "decision": {
+      "original": "GO_TO_FAILURE_PRIORITIZATION",
+      "rule": "failedPdfs が 25% 以上、または一般会計で比較可能な request が 30 件未満なら NEEDS_BASELINE_INFRASTRUCTURE（conditional rate は gate ではない）",
+      "originalComparableRequests": 101,
+      "correctedParentExactUnique": 115,
+      "threshold": 30,
+      "recomputed": "GO_TO_FAILURE_PRIORITIZATION",
+      "unchanged": true,
+      "note": "gate 入力の「比較可能な request」も同じ proxy で数えられていたが、corrected 値の方が大きく（≥ 30）、decision は変わらない"
+    }
+  }
+}
