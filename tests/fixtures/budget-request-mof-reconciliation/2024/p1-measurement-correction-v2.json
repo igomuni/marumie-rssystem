@@ -1,0 +1,73 @@
+{
+  "schema": "budget-request-p1-measurement-correction-v2/v0",
+  "supersedes": {
+    "artifact": "tests/fixtures/budget-request-mof-reconciliation/2024/p1-measurement-correction.json",
+    "sha256": "67dc1eea0ce727b23a4367a8238b7827b7ceed1ddae6f6e662a501d4055e9fbf",
+    "commit": "0b4fd07",
+    "retractedClaims": [
+      "full-corpus に P1 と同じ measurement bug があった",
+      "full-corpus 97.0% → 85.2% が補正",
+      "full-corpus gate の入力を 101 → 115 に補正"
+    ]
+  },
+  "note": "parentExactUnique と comparableRequests は別の指標。前者は request 名の有無を問わず親の項が exact_unique、後者は親が exact_unique かつ request 名があり request 自身を照合できた件数",
+  "frozenInputs": {
+    "tests/fixtures/budget-request-mof-reconciliation/2024/p1-pdf-population.json": "f726c81b203eb22398cb7fd4c051bd059f40fea6e018a2a78a9e4babdfbd94b6",
+    "tests/fixtures/budget-request-mof-reconciliation/2024/p1-reconciliation-result.json": "66e8ba1d4cf16c298a7c7db083f482c6187b0a8c91ba4c4dc09fe6c607d42697",
+    "tests/fixtures/budget-request-full-corpus-baseline/2024/extraction-population.json": "3ec53c133117033ea0c8a8f23a3196f5b28ff18120957c7531c48c6df15fdbf8",
+    "tests/fixtures/budget-request-full-corpus-baseline/2024/reconciliation-result.json": "2f14d15c2a78d41f0b9669642b150637eeae6489ed8b7ac8a9d3a84e3e912904",
+    "tests/fixtures/budget-request-mof-reconciliation/2024/p1-measurement-correction.json": "67dc1eea0ce727b23a4367a8238b7827b7ceed1ddae6f6e662a501d4055e9fbf"
+  },
+  "p1": {
+    "parentExactUnique": 68,
+    "comparableRequests": 59,
+    "requestExactUnique": 56,
+    "exactRateWithinComparable": {
+      "value": 0.9491525423728814,
+      "note": "original の 56/59 = 94.9%。この指標としては正しい（original は「親が exact_unique の条件付き rate」とラベルしていた）"
+    },
+    "preregisteredConditionalExactRate": {
+      "value": 0.8235294117647058,
+      "definition": "P1 preregistration §7: 親が exact_unique の request のうち exact_unique の割合（56/68）"
+    },
+    "original": {
+      "parentExactUnique": 59,
+      "conditionalExactRateGivenResolvedParent": 0.9491525423728814
+    },
+    "decision": {
+      "original": "GO_TO_NEXT_DESIGN",
+      "recomputed": "GO_TO_NEXT_DESIGN",
+      "unchanged": true
+    }
+  },
+  "fullCorpus": {
+    "scope": "accountType = general の request",
+    "parentExactUnique": 115,
+    "comparableRequests": 101,
+    "requestExactUnique": 98,
+    "exactRateWithinComparable": {
+      "value": 0.9702970297029703,
+      "note": "98/101 = 97.0%。funnel 最終段の率として正しい（original の値のまま）"
+    },
+    "preregisteredConditionalExactRate": null,
+    "referenceOnly": {
+      "parentExactConditionalRate": 0.8521739130434782,
+      "note": "exact ÷ parentExactUnique。full-corpus の preregistration が定義した評価指標ではない（参考値）"
+    },
+    "original": {
+      "comparable": 101,
+      "exactUnique": 98,
+      "rate": 0.9702970297029703,
+      "measurementBug": false
+    },
+    "originalMatchesRecomputed": true,
+    "decision": {
+      "original": "GO_TO_FAILURE_PRIORITIZATION",
+      "gateInput": "comparableRequests（preregistration §7 の funnel と §8 gate の「比較可能な request」）",
+      "gateComparableRequests": 101,
+      "threshold": 30,
+      "recomputed": "GO_TO_FAILURE_PRIORITIZATION",
+      "unchanged": true
+    }
+  }
+}

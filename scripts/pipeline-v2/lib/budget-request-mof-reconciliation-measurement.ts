@@ -40,3 +40,29 @@ export function measureParentExact(rows: RequestMeasureRow[]): ParentExactMeasur
     nameUnavailableWithParentExact: parentExact.filter(r => r.ownClass === 'name_unavailable').length,
   };
 }
+
+/** request 自身を MOF 事項と比較できた状態（名称あり＋親の項が exact_unique）。full-corpus の funnel / gate の「比較可能な request」と同じ意味 */
+const COMPARABLE_OWN: MatchClass[] = ['exact_unique', 'exact_ambiguous', 'no_exact_match'];
+export interface ComparableMeasurement {
+  /** 親の項が exact_unique（request 名の有無を問わない） */
+  parentExactUnique: number;
+  /** 親が exact_unique かつ request 名があり、request 自身を照合できた件数 */
+  comparableRequests: number;
+  requestExactUnique: number;
+  /** exact_unique ÷ comparableRequests（funnel 最終段の率） */
+  exactRateWithinComparable: number | null;
+  /** exact_unique ÷ parentExactUnique（P1 preregistration §7 の定義） */
+  parentExactConditionalRate: number | null;
+}
+export function measureComparable(rows: RequestMeasureRow[]): ComparableMeasurement {
+  const parentExact = rows.filter(r => r.parentItemClass === 'exact_unique');
+  const comparable = parentExact.filter(r => COMPARABLE_OWN.includes(r.ownClass));
+  const exact = comparable.filter(r => r.ownClass === 'exact_unique').length;
+  return {
+    parentExactUnique: parentExact.length,
+    comparableRequests: comparable.length,
+    requestExactUnique: exact,
+    exactRateWithinComparable: comparable.length === 0 ? null : exact / comparable.length,
+    parentExactConditionalRate: parentExact.length === 0 ? null : exact / parentExact.length,
+  };
+}

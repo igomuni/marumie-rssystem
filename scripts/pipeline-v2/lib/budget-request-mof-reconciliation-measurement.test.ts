@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { measureParentExact, parentAnchor, type RequestMeasureRow } from './budget-request-mof-reconciliation-measurement';
+import { measureComparable, measureParentExact, parentAnchor, type RequestMeasureRow } from './budget-request-mof-reconciliation-measurement';
 
 const row = (ownClass: RequestMeasureRow['ownClass'], parentItemClass: RequestMeasureRow['parentItemClass']): RequestMeasureRow => ({ ownClass, parentItemClass });
 
@@ -38,5 +38,18 @@ describe('measureParentExact（preregistration §7 の条件付き exact rate）
     expect(m.requestExactUnique).toBe(2);
     expect(m.numerator).toBe(1);
     expect(m.numerator).toBeLessThanOrEqual(m.parentExactUnique);
+  });
+});
+
+describe('measureComparable（parentExactUnique と comparableRequests を分ける）', () => {
+  it('name_unavailable で親が exact_unique の request は parentExactUnique に入るが comparableRequests には入らない', () => {
+    const m = measureComparable([row('exact_unique', 'exact_unique'), row('no_exact_match', 'exact_unique'), row('name_unavailable', 'exact_unique'), row('parent_unresolved', null)]);
+    expect(m).toMatchObject({ parentExactUnique: 3, comparableRequests: 2, requestExactUnique: 1 });
+    expect(m.exactRateWithinComparable).toBe(0.5);
+    expect(m.parentExactConditionalRate).toBeCloseTo(1 / 3);
+  });
+  it('親が exact_unique でない request は、request 自身が exact_unique 系でも comparable に入らない', () => {
+    const m = measureComparable([row('exact_unique', null), row('no_exact_match', 'no_exact_match')]);
+    expect(m).toMatchObject({ parentExactUnique: 0, comparableRequests: 0, exactRateWithinComparable: null, parentExactConditionalRate: null });
   });
 });

@@ -1,5 +1,7 @@
 # P1 reconciliation 条件付き exact rate の measurement correction
 
+> **訂正あり**: §3 の full-corpus（「同じ bug」「97.0% → 85.2%」）と §4 の gate 入力 115 は撤回済み。P1 の補正（94.9% → 82.4%）は有効。`20261006_1500_Budget_Request_P1_Measurement_Correction_Revision.md` を参照。
+
 2026-10-06。PR #372 の review で見つかった測定の誤りの記録。original の 7 commit・preregistration・frozen result・Result doc は書き換えない（誤った値が保存されたこと自体も研究履歴）。matcher の規則・分類・PDF 抽出・frozen population は変更していない。
 
 補正値は `tests/fixtures/budget-request-mof-reconciliation/2024/p1-measurement-correction.json`（`scripts/pipeline-v2/evaluate-budget-request-p1-measurement-correction.ts`・helper `lib/budget-request-mof-reconciliation-measurement.ts`）。
