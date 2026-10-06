@@ -1,0 +1,36 @@
+{
+  "schema": "budget-request-item-candidate-mof-exact-name-diagnostic/v0",
+  "scope": "diagnostic only。名称単独 exact（組織なし）。候補の増減・正式照合には使わない",
+  "frozen": {
+    "candidateCountSha256": "35ffc096496ff9af7ab62ac5848b2ddef19ae0211f441193bf05598e7990d508",
+    "mofJikouSha256": "a63f50504c821ad7aff9fe1c96c80635dda978ea0870976d15f9bc9735d3ef7e"
+  },
+  "mofSections": 784,
+  "mofDistinctNormalizedSectionNames": 750,
+  "generalAccount": {
+    "candidateRows": 641,
+    "all": {
+      "rowsWithName": 618,
+      "unique_exact_name": 534,
+      "ambiguous_exact_name": 63,
+      "no_exact_name": 21
+    },
+    "hierarchyContractPdfs": {
+      "rowsWithName": 289,
+      "unique_exact_name": 257,
+      "ambiguous_exact_name": 23,
+      "no_exact_name": 9
+    },
+    "hierarchyLessPdfs": {
+      "rowsWithName": 329,
+      "unique_exact_name": 277,
+      "ambiguous_exact_name": 40,
+      "no_exact_name": 12
+    }
+  },
+  "referenceFormalReconciliation": {
+    "note": "baseline の正式照合（hierarchy 付き population、組織 + 項名）",
+    "itemsComparable": 79,
+    "exactUnique": 77
+  }
+}

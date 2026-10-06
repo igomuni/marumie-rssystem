@@ -1,0 +1,86 @@
+{
+  "schema": "budget-request-hierarchy-paired-off/v0",
+  "pairedManifestSha256": "4fb70f3ab49c6a823cd45dad8c05d6b395f6fffb8ab9ca8009b196445616d5e1",
+  "documents": [
+    {
+      "localPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "hierarchySegment": [
+        7,
+        147
+      ],
+      "records": 557,
+      "recordsSha256": "adc70a8914685b0c2d8ab43640ca661f41b968172cc391428e0874c1b412241a",
+      "contentSha256": "17b0d290385f07e7acecdfa43836d64a66ec71a4c9fd9ed4eb8624d392707d14"
+    },
+    {
+      "localPath": "data/download/env.go.jp/content/000157010.pdf",
+      "hierarchySegment": [
+        21,
+        193
+      ],
+      "records": 1631,
+      "recordsSha256": "618292101eb807735a9b0e5787ba26cf68060cd0251c2746ffbfb221eff30c6a",
+      "contentSha256": "1cc63c8881d132b7b81b8c93b1d016d15e887d9d593ec830fda55e9461d0f6a7"
+    },
+    {
+      "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+      "hierarchySegment": [
+        7,
+        20
+      ],
+      "records": 110,
+      "recordsSha256": "6d2845d61681b6422f8a4886346b1c9c34535c4eaee9723515325e0f6de203f4",
+      "contentSha256": "37c180b0a17516057318f46154cc76f852c90d70b499021aca49d9b9e9f67569"
+    },
+    {
+      "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "hierarchySegment": [
+        9,
+        106
+      ],
+      "records": 1238,
+      "recordsSha256": "81a346a3a05dc5924011c0d67729356a395355db766956f9a6d0958ed9fc83ba",
+      "contentSha256": "a7ec596b7476fac8dd26daabb07137ed07a1c426704dbb89b904a974595318ad"
+    },
+    {
+      "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+      "hierarchySegment": [
+        1045,
+        1339
+      ],
+      "records": 1082,
+      "recordsSha256": "b6aebe8c281aa4b4f5c6bf8ae5b7bbf048fee0462fde6b3cac77ab56ac5080cf",
+      "contentSha256": "6a2346f2472ef0c1b3ed9373a6d1f405dcb60987078d2ca63caaa6f22f516c75"
+    },
+    {
+      "localPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "hierarchySegment": [
+        1555,
+        1700
+      ],
+      "records": 998,
+      "recordsSha256": "0cbcbb23cb5c9a72d1341ea3a924916630afb0ae83054d4bc85f5e55a25f7f10",
+      "contentSha256": "882fba17eb3b006ee707339021c4d084a6a9bec62e09a661ef20676cee6ffa4b"
+    },
+    {
+      "localPath": "data/download/mlit.go.jp/page/content/001630395.pdf",
+      "hierarchySegment": [
+        7,
+        10
+      ],
+      "records": 45,
+      "recordsSha256": "a0c9834cb4cc92848743f15613fb946da452db30bc50276fe09c0ab07ab42412",
+      "contentSha256": "c3a21f094917127563f73e2049f146d8841c92979bf7859da3b9c44cef6f61e1"
+    },
+    {
+      "localPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "hierarchySegment": [
+        9,
+        540
+      ],
+      "records": 2312,
+      "recordsSha256": "9fe7bbc0350acdbba5a59ae0059fd33106cdf11e843d005de503b24a5d0c9e49",
+      "contentSha256": "0b7927194d9c55c203d4421ba35d6411cbeb7e07a4518d49e27e9c51b8b0350e"
+    }
+  ]
+}

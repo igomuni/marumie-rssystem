@@ -1,0 +1,679 @@
+{
+ "anchorXHistogram": {
+  "50.0": 38
+ },
+ "frozen": {
+  "hashes": {
+   "tests/fixtures/budget-request-hierarchy-failure-isolation/2024/paired-manifest.json": "4fb70f3ab49c6a823cd45dad8c05d6b395f6fffb8ab9ca8009b196445616d5e1",
+   "tests/fixtures/budget-request-range-local-item-extraction/2024/full-evaluation.json": "421dbf8b3165057926ba21c84a7debb549a31941dfc8c62df2e39df651c9519d",
+   "tests/fixtures/budget-request-rule-line-geometry/2024/rule-line-development-summary.json": "810b55f9dca750163fc3ddb74a1ff9a523bf48bcf68c16d19269a374b71d9de7",
+   "tests/fixtures/budget-request-rule-line-geometry/2024/rule-line-thin-anchor-development.json": "a45951b54bd814c575ebd821d8edd2f7c13424ca1ed8503327500e887ec7ae86"
+  },
+  "prereg": "e81d7cf7a4d020612fb6154eee5947eca0a15493d7333b741f91101a95034da7"
+ },
+ "ranges": [
+  {
+   "accountType": "special",
+   "from": 5,
+   "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_02.pdf",
+   "pagesDisagreeing": 1,
+   "rangeAnchor": {
+    "modalPages": 2,
+    "status": "available",
+    "uniquePages": 2,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "25.9": 1
+   },
+   "requestsInRange": 1,
+   "to": 7
+  },
+  {
+   "accountType": "special",
+   "from": 8,
+   "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_02.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 2,
+    "status": "available",
+    "uniquePages": 2,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "29.3": 1
+   },
+   "requestsInRange": 1,
+   "to": 9
+  },
+  {
+   "accountType": "general",
+   "from": 7,
+   "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 194,
+    "status": "available",
+    "uniquePages": 194,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 4
+   },
+   "requestsInRange": 4,
+   "to": 200
+  },
+  {
+   "accountType": "general",
+   "from": 1,
+   "localPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/1.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 3,
+    "status": "available",
+    "uniquePages": 3,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 1
+   },
+   "requestsInRange": 1,
+   "to": 3
+  },
+  {
+   "accountType": "special",
+   "from": 1,
+   "localPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/f2.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 5,
+    "status": "available",
+    "uniquePages": 5,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "29.3": 4
+   },
+   "requestsInRange": 4,
+   "to": 5
+  },
+  {
+   "accountType": "general",
+   "from": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_02.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 2,
+    "status": "available",
+    "uniquePages": 2,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 2
+   },
+   "requestsInRange": 2,
+   "to": 2
+  },
+  {
+   "accountType": "general",
+   "from": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_03.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 4,
+    "status": "available",
+    "uniquePages": 4,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 1
+   },
+   "requestsInRange": 1,
+   "to": 4
+  },
+  {
+   "accountType": "general",
+   "from": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_04.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 4,
+    "status": "available",
+    "uniquePages": 4,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 2
+   },
+   "requestsInRange": 2,
+   "to": 4
+  },
+  {
+   "accountType": "general",
+   "from": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_05.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 1,
+    "status": "available",
+    "uniquePages": 1,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 1
+   },
+   "requestsInRange": 1,
+   "to": 1
+  },
+  {
+   "accountType": "general",
+   "from": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_06.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 6,
+    "status": "available",
+    "uniquePages": 6,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 1
+   },
+   "requestsInRange": 1,
+   "to": 6
+  },
+  {
+   "accountType": "general",
+   "from": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_07.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 29,
+    "status": "available",
+    "uniquePages": 29,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 2
+   },
+   "requestsInRange": 2,
+   "to": 29
+  },
+  {
+   "accountType": "general",
+   "from": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_08.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 4,
+    "status": "available",
+    "uniquePages": 4,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 3
+   },
+   "requestsInRange": 3,
+   "to": 4
+  },
+  {
+   "accountType": "general",
+   "from": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_09.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 3,
+    "status": "available",
+    "uniquePages": 3,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 2
+   },
+   "requestsInRange": 2,
+   "to": 3
+  },
+  {
+   "accountType": "general",
+   "from": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_10.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 4,
+    "status": "available",
+    "uniquePages": 4,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 1
+   },
+   "requestsInRange": 1,
+   "to": 4
+  },
+  {
+   "accountType": "general",
+   "from": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_11.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 19,
+    "status": "available",
+    "uniquePages": 19,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 2
+   },
+   "requestsInRange": 2,
+   "to": 19
+  },
+  {
+   "accountType": "general",
+   "from": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_12.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 4,
+    "status": "available",
+    "uniquePages": 4,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 2
+   },
+   "requestsInRange": 2,
+   "to": 4
+  },
+  {
+   "accountType": "general",
+   "from": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_13.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 3,
+    "status": "available",
+    "uniquePages": 3,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 2
+   },
+   "requestsInRange": 2,
+   "to": 3
+  },
+  {
+   "accountType": "general",
+   "from": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_14.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 3,
+    "status": "available",
+    "uniquePages": 3,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 2
+   },
+   "requestsInRange": 2,
+   "to": 3
+  },
+  {
+   "accountType": "general",
+   "from": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_15.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 3,
+    "status": "available",
+    "uniquePages": 3,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 1
+   },
+   "requestsInRange": 1,
+   "to": 3
+  },
+  {
+   "accountType": "special",
+   "from": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_17.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 1,
+    "status": "available",
+    "uniquePages": 1,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "29.3": 1
+   },
+   "requestsInRange": 1,
+   "to": 1
+  },
+  {
+   "accountType": "general",
+   "from": 7,
+   "localPath": "data/download/clb.go.jp/files/topics/4473_ext_05_1.pdf",
+   "pagesDisagreeing": 4,
+   "rangeAnchor": {
+    "modalPages": 19,
+    "status": "available",
+    "uniquePages": 19,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 2
+   },
+   "requestsInRange": 2,
+   "to": 29
+  },
+  {
+   "accountType": "general",
+   "from": 7,
+   "localPath": "data/download/dangai.go.jp/info/pdf/r06_saisyutu-gaisan.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 3,
+    "status": "available",
+    "uniquePages": 3,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 2
+   },
+   "requestsInRange": 2,
+   "to": 9
+  },
+  {
+   "accountType": "general",
+   "from": 7,
+   "localPath": "data/download/digital.go.jp/assets/contents/node/basic_page/field_ref_resources/e9b99425-437c-4750-b4e2-6cca3cd877a6/0fab2c74/20230914_policies_budget_r6request_table_01.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 26,
+    "status": "available",
+    "uniquePages": 26,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 4
+   },
+   "requestsInRange": 4,
+   "to": 32
+  },
+  {
+   "accountType": "general",
+   "from": 7,
+   "localPath": "data/download/jbaudit.go.jp/jbaudit/bud_clo/bud/pdf/r06/20230906_02.pdf",
+   "pagesDisagreeing": 3,
+   "rangeAnchor": {
+    "modalPages": 39,
+    "status": "available",
+    "uniquePages": 39,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 3
+   },
+   "requestsInRange": 3,
+   "to": 48
+  },
+  {
+   "accountType": "general",
+   "from": 7,
+   "localPath": "data/download/jcrc.go.jp/content/000001746.pdf",
+   "pagesDisagreeing": 2,
+   "rangeAnchor": {
+    "modalPages": 9,
+    "status": "available",
+    "uniquePages": 9,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 3
+   },
+   "requestsInRange": 3,
+   "to": 17
+  },
+  {
+   "accountType": "general",
+   "from": 7,
+   "localPath": "data/download/jinji.go.jp/content/900024096.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 90,
+    "status": "available",
+    "uniquePages": 90,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 4
+   },
+   "requestsInRange": 4,
+   "to": 96
+  },
+  {
+   "accountType": "general",
+   "from": 7,
+   "localPath": "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-02.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 27,
+    "status": "available",
+    "uniquePages": 27,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 4
+   },
+   "requestsInRange": 4,
+   "to": 33
+  },
+  {
+   "accountType": "general",
+   "from": 5,
+   "localPath": "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-03.pdf",
+   "pagesDisagreeing": 1,
+   "rangeAnchor": {
+    "modalPages": 2,
+    "status": "available",
+    "uniquePages": 2,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "19.0": 1
+   },
+   "requestsInRange": 1,
+   "to": 7
+  },
+  {
+   "accountType": "general",
+   "from": 8,
+   "localPath": "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-03.pdf",
+   "pagesDisagreeing": 1,
+   "rangeAnchor": {
+    "modalPages": 12,
+    "status": "available",
+    "uniquePages": 12,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 1
+   },
+   "requestsInRange": 1,
+   "to": 20
+  },
+  {
+   "accountType": "special",
+   "from": 7,
+   "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-8.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 1,
+    "status": "available",
+    "uniquePages": 1,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 1
+   },
+   "requestsInRange": 1,
+   "to": 7
+  },
+  {
+   "accountType": "special",
+   "from": 7,
+   "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/enegen_o.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 1,
+    "status": "available",
+    "uniquePages": 1,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 4
+   },
+   "requestsInRange": 4,
+   "to": 7
+  },
+  {
+   "accountType": "special",
+   "from": 7,
+   "localPath": "data/download/moj.go.jp/content/001402819.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 3,
+    "status": "available",
+    "uniquePages": 3,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "29.3": 2
+   },
+   "requestsInRange": 2,
+   "to": 9
+  },
+  {
+   "accountType": "general",
+   "from": 4,
+   "localPath": "data/download/ndl.go.jp/jp/aboutus/outline/r06_budgetrequest.pdf",
+   "pagesDisagreeing": 2,
+   "rangeAnchor": {
+    "modalPages": 12,
+    "status": "available",
+    "uniquePages": 12,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 4
+   },
+   "requestsInRange": 4,
+   "to": 17
+  },
+  {
+   "accountType": "special",
+   "from": 3,
+   "localPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/hukkoutokubetukaikei.pdf",
+   "pagesDisagreeing": 1,
+   "rangeAnchor": {
+    "modalPages": 2,
+    "status": "available",
+    "uniquePages": 2,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "25.9": 2
+   },
+   "requestsInRange": 2,
+   "to": 5
+  },
+  {
+   "accountType": "special",
+   "from": 6,
+   "localPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/hukkoutokubetukaikei.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 2,
+    "status": "available",
+    "uniquePages": 2,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "29.3": 2
+   },
+   "requestsInRange": 2,
+   "to": 7
+  },
+  {
+   "accountType": "general",
+   "from": 7,
+   "localPath": "data/download/ppc.go.jp/files/pdf/230831youkyu.pdf",
+   "pagesDisagreeing": 2,
+   "rangeAnchor": {
+    "modalPages": 22,
+    "status": "available",
+    "uniquePages": 22,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 2
+   },
+   "requestsInRange": 2,
+   "to": 30
+  },
+  {
+   "accountType": "general",
+   "from": 7,
+   "localPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 15,
+    "status": "available",
+    "uniquePages": 15,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 4
+   },
+   "requestsInRange": 4,
+   "to": 21
+  },
+  {
+   "accountType": "general",
+   "from": 7,
+   "localPath": "data/download/sotsui.go.jp/budget/images/r6budget_yokyu.pdf",
+   "pagesDisagreeing": 0,
+   "rangeAnchor": {
+    "modalPages": 2,
+    "status": "available",
+    "uniquePages": 2,
+    "x": 50.04
+   },
+   "requestOffsetsToAnchor": {
+    "15.5": 1
+   },
+   "requestsInRange": 1,
+   "to": 8
+  }
+ ],
+ "requestOffsetsToAnchor": {
+  "15.5": 68,
+  "19.0": 1,
+  "25.9": 3,
+  "29.3": 10
+ },
+ "schema": "budget-request-rule-line-sparse-evaluation/v0",
+ "scope": "range_request_x_unavailable の detail range（38）での T1 anchor の可用性。item 候補は数えない（frozen rule は request 行を必要とし、5 件未満条件は緩和しない）。request 行は anchor との整合の diagnostic のみ",
+ "totals": {
+  "available": 38,
+  "disagreeingPages": 17,
+  "pages": 600,
+  "ranges": 38,
+  "requestRows": 82,
+  "unavailable": 0,
+  "uniquePages": 583
+ }
+}

@@ -1,0 +1,57 @@
+{
+ "decision": "RULE_LINE_PRESENT_BUT_SEMANTICALLY_INSUFFICIENT",
+ "gates": {
+  "F1_dev_ranges_with_anchor": {
+   "of": 32,
+   "pass": true,
+   "threshold": ">= 31",
+   "value": 32
+  },
+  "F2_items_joinable": {
+   "of": 97,
+   "pass": true,
+   "threshold": "= 97",
+   "value": 97
+  },
+  "F3_dev_pages_agreeing": {
+   "of": 7561,
+   "pass": true,
+   "threshold": ">= 0.99",
+   "value": 7550
+  },
+  "F4_offset_clusters": {
+   "itemClusters": [
+    "22.4",
+    "8.6"
+   ],
+   "pass": true,
+   "requestClusters": [
+    "15.5",
+    "29.3"
+   ],
+   "threshold": "item <= 2 and request <= 2"
+  },
+  "F5_contamination": {
+   "itemRows": 97,
+   "nonItemAtItemOffsets": 790,
+   "nonItemByKind": {
+    "detail_line": 613,
+    "organization": 7,
+    "unclassified": 170
+   },
+   "pass": false,
+   "rowsAtItemOffsets": 887,
+   "share": 0.8906426155580609,
+   "threshold": "<= 0.05"
+  },
+  "F6_sparse_ranges_with_anchor": {
+   "of": 38,
+   "pass": true,
+   "threshold": ">= 36 of 38",
+   "value": 38
+  }
+ },
+ "rule": 4,
+ "schema": "budget-request-rule-line-anchor-decision/v0",
+ "sparseSha256": "b6e652c30ff6e785bc13b8add3dcced420c5fd3a9492ab4d02895c56a14a2919"
+}

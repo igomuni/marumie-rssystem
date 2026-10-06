@@ -1,0 +1,111 @@
+{
+  "schema": "budget-request-hierarchy-paired-control/v0",
+  "pairedManifestSha256": "4fb70f3ab49c6a823cd45dad8c05d6b395f6fffb8ab9ca8009b196445616d5e1",
+  "allMatched": true,
+  "documents": [
+    {
+      "localPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "hierarchySegment": [
+        7,
+        147
+      ],
+      "records": 557,
+      "recordsSha256": "ef6f27c210859aeb870033cf05dd940f8307cbafac3171b023433596047f7e9f",
+      "contentSha256": "b24d4f0b8f1a298094b224660ef2eb5f639560def3fc208b73b7f8c8f65ff90d",
+      "baselineRecords": 557,
+      "byteExactMatch": true,
+      "recordCountKindLocatorNameParentMatch": true
+    },
+    {
+      "localPath": "data/download/env.go.jp/content/000157010.pdf",
+      "hierarchySegment": [
+        21,
+        193
+      ],
+      "records": 1631,
+      "recordsSha256": "795d789da705c62f1df4a55493de2ca1e9a4bf499f46e1454617d4130d9ad4b1",
+      "contentSha256": "0b9da93651b5c1675d05618496ec2969ecd66e6ebc69e77ad4a1dda10b056379",
+      "baselineRecords": 1631,
+      "byteExactMatch": true,
+      "recordCountKindLocatorNameParentMatch": true
+    },
+    {
+      "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+      "hierarchySegment": [
+        7,
+        20
+      ],
+      "records": 110,
+      "recordsSha256": "135f36a5ebc0c5835a3ee3a3e2b55557cd47eea8dcec366612fc6a5d15ede703",
+      "contentSha256": "ddcc9a7a7b08a678ab6f085ad134fba54c1792bae95a4cdfd8613364b38e5cb3",
+      "baselineRecords": 110,
+      "byteExactMatch": true,
+      "recordCountKindLocatorNameParentMatch": true
+    },
+    {
+      "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "hierarchySegment": [
+        9,
+        106
+      ],
+      "records": 1238,
+      "recordsSha256": "fe1b9267fa7e80c201da68e662223820b962ebf35992e5ff146f380e9710832c",
+      "contentSha256": "f7c75b2ebabc4ec928d7a39277477e4b6af409c0112684313bb92e731d3582dc",
+      "baselineRecords": 1238,
+      "byteExactMatch": true,
+      "recordCountKindLocatorNameParentMatch": true
+    },
+    {
+      "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+      "hierarchySegment": [
+        1045,
+        1339
+      ],
+      "records": 1082,
+      "recordsSha256": "223edf6d297f160d04977365a449b031e61988c815437e3c20415bbb915e8719",
+      "contentSha256": "180f4d50629ac11131493f4eb7cc473aa4ee6b0675310ee2355c4a056b16d3f7",
+      "baselineRecords": 1082,
+      "byteExactMatch": true,
+      "recordCountKindLocatorNameParentMatch": true
+    },
+    {
+      "localPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "hierarchySegment": [
+        1555,
+        1700
+      ],
+      "records": 998,
+      "recordsSha256": "02d2deffb557ced42c7153c4674909b5cd82470a9556c6e0f4141afb29269bf2",
+      "contentSha256": "a2ac145b3603849f1c2cacce19f3790ed32dadf078a8095dd8f6c380a8d4985d",
+      "baselineRecords": 998,
+      "byteExactMatch": true,
+      "recordCountKindLocatorNameParentMatch": true
+    },
+    {
+      "localPath": "data/download/mlit.go.jp/page/content/001630395.pdf",
+      "hierarchySegment": [
+        7,
+        10
+      ],
+      "records": 45,
+      "recordsSha256": "a0409627bbbd4cac5c83f60f24d10f0e5baa87476be31c0a4cd94e067234124a",
+      "contentSha256": "d72c3e24e4e6d3fb60c083f3fb5fc29ae63a13f4ced52f123908268216bc817f",
+      "baselineRecords": 45,
+      "byteExactMatch": true,
+      "recordCountKindLocatorNameParentMatch": true
+    },
+    {
+      "localPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "hierarchySegment": [
+        9,
+        540
+      ],
+      "records": 2312,
+      "recordsSha256": "55c4bcb6677a25f57ca5433499ae07cc5d13bf03e5d0833c8dc69e13101981eb",
+      "contentSha256": "57898cdf3a80cc91d104a26a41657abee587cff41ef5ffb1e0967aad1b1f6ae1",
+      "baselineRecords": 2312,
+      "byteExactMatch": true,
+      "recordCountKindLocatorNameParentMatch": true
+    }
+  ]
+}

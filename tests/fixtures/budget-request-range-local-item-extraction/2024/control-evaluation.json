@@ -1,0 +1,237 @@
+{
+ "known": {
+  "comparable": 79,
+  "exactUnique": 77,
+  "generalItems": 81,
+  "layoutEvaluablePages": 8586,
+  "layoutEvaluablePdfs": 73,
+  "prevCandidates": 929,
+  "prevGeneralCandidates": 641,
+  "productionItems": 97
+ },
+ "organizationShareOfCandidates": 0.04430379746835443,
+ "perPdf": [
+  {
+   "candidates": 13,
+   "contract": "cfa-general-detail",
+   "existingItems": 0,
+   "hierarchySegment": [
+    7,
+    147
+   ],
+   "knownOrganization": 7,
+   "localPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+   "onOther": 0,
+   "onUnclassified": 6,
+   "publisherAuthority": "こども家庭庁",
+   "ranges": [
+    {
+     "from": 7,
+     "refX": 65.57,
+     "requests": 24,
+     "signature": "H:w842|p207|r259|d414|R:66",
+     "status": "evaluable_detail_range",
+     "to": 147
+    }
+   ],
+   "recovered": 0,
+   "unjoinable": 0
+  },
+  {
+   "candidates": 35,
+   "contract": "env-detail",
+   "existingItems": 17,
+   "hierarchySegment": [
+    21,
+    193
+   ],
+   "knownOrganization": 0,
+   "localPath": "data/download/env.go.jp/content/000157010.pdf",
+   "onOther": 0,
+   "onUnclassified": 18,
+   "publisherAuthority": "環境省",
+   "ranges": [
+    {
+     "from": 21,
+     "refX": 65.57,
+     "requests": 46,
+     "signature": "H:w842|p207|r259|d414|R:66",
+     "status": "evaluable_detail_range",
+     "to": 193
+    }
+   ],
+   "recovered": 17,
+   "unjoinable": 0
+  },
+  {
+   "candidates": 8,
+   "contract": "maff-fukko-detail",
+   "existingItems": 8,
+   "hierarchySegment": [
+    7,
+    20
+   ],
+   "knownOrganization": 0,
+   "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+   "onOther": 0,
+   "onUnclassified": 0,
+   "publisherAuthority": "農林水産省",
+   "ranges": [
+    {
+     "from": 7,
+     "refX": 79.37,
+     "requests": 27,
+     "signature": "H:w842|p207|r259|d414|R:79",
+     "status": "evaluable_detail_range",
+     "to": 20
+    }
+   ],
+   "recovered": 8,
+   "unjoinable": 0
+  },
+  {
+   "candidates": 32,
+   "contract": "meti-detail",
+   "existingItems": 30,
+   "hierarchySegment": [
+    9,
+    106
+   ],
+   "knownOrganization": 0,
+   "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "onOther": 0,
+   "onUnclassified": 2,
+   "publisherAuthority": "経済産業省",
+   "ranges": [
+    {
+     "from": 9,
+     "refX": 65.57,
+     "requests": 50,
+     "signature": "H:w842|p207|r259|d414|R:66",
+     "status": "evaluable_detail_range",
+     "to": 106
+    }
+   ],
+   "recovered": 30,
+   "unjoinable": 0
+  },
+  {
+   "candidates": 19,
+   "contract": "mext-detail",
+   "existingItems": 19,
+   "hierarchySegment": [
+    1045,
+    1339
+   ],
+   "knownOrganization": 0,
+   "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "onOther": 0,
+   "onUnclassified": 0,
+   "publisherAuthority": "文部科学省",
+   "ranges": [
+    {
+     "from": 1,
+     "refX": 65.57,
+     "requests": 113,
+     "signature": "H:w842|p207|r259|d414|R:66",
+     "status": "evaluable_detail_range",
+     "to": 1339
+    }
+   ],
+   "recovered": 19,
+   "unjoinable": 0
+  },
+  {
+   "candidates": 14,
+   "contract": "mhlw-detail",
+   "existingItems": 14,
+   "hierarchySegment": [
+    1555,
+    1700
+   ],
+   "knownOrganization": 0,
+   "localPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "onOther": 0,
+   "onUnclassified": 0,
+   "publisherAuthority": "厚生労働省",
+   "ranges": [
+    {
+     "from": 21,
+     "refX": 65.57,
+     "requests": 208,
+     "signature": "H:w842|p207|r259|d414|R:66",
+     "status": "evaluable_detail_range",
+     "to": 1723
+    }
+   ],
+   "recovered": 14,
+   "unjoinable": 0
+  },
+  {
+   "candidates": 8,
+   "contract": "mlit-fukko-detail",
+   "existingItems": 8,
+   "hierarchySegment": [
+    7,
+    10
+   ],
+   "knownOrganization": 0,
+   "localPath": "data/download/mlit.go.jp/page/content/001630395.pdf",
+   "onOther": 0,
+   "onUnclassified": 0,
+   "publisherAuthority": "国土交通省",
+   "ranges": [
+    {
+     "from": 7,
+     "refX": 79.37,
+     "requests": 12,
+     "signature": "H:w842|p207|r259|d414|R:79",
+     "status": "evaluable_detail_range",
+     "to": 10
+    }
+   ],
+   "recovered": 8,
+   "unjoinable": 0
+  },
+  {
+   "candidates": 29,
+   "contract": "mod-general-detail",
+   "existingItems": 1,
+   "hierarchySegment": [
+    9,
+    540
+   ],
+   "knownOrganization": 0,
+   "localPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "onOther": 0,
+   "onUnclassified": 28,
+   "publisherAuthority": "防衛省",
+   "ranges": [
+    {
+     "from": 9,
+     "refX": 65.57,
+     "requests": 67,
+     "signature": "H:w842|p207|r259|d414|R:66",
+     "status": "evaluable_detail_range",
+     "to": 540
+    }
+   ],
+   "recovered": 1,
+   "unjoinable": 0
+  }
+ ],
+ "schema": "budget-request-range-local-item-control/v0",
+ "scope": "hierarchy 契約 8 PDF の hierarchy 区間。前回 offset の較正に使った population のため独立検証ではない（regression / mechanism check）",
+ "totals": {
+  "candidates": 158,
+  "candidatesNotItem": 61,
+  "duplicates": 0,
+  "existingItems": 97,
+  "knownOrganization": 7,
+  "missed": 0,
+  "onOther": 0,
+  "onUnclassified": 54,
+  "recovered": 97,
+  "unjoinable": 0
+ }
+}

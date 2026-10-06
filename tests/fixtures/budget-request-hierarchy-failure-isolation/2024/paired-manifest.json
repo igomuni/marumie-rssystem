@@ -1,0 +1,189 @@
+{
+  "schema": "budget-request-hierarchy-paired-manifest/v0",
+  "scope": "hierarchy 契約を持つ PDF の hierarchy 区間。ON は baseline と同じ入力、OFF は同一ページ範囲を hierarchy=null（既存の optional な入力）で 1 区間として実行する",
+  "frozenCorpusManifestSha256": "4a2a10ec46d75cf90d11b441a7a162654daefb008bb92edf3d264f8d118dde7a",
+  "corpusDocuments": 82,
+  "pairedUnit": "同一 PDF・同一ページ範囲・logical row（anchor = page + logicalRowIndex。上流 provenance。新しい ID は作らない）",
+  "classificationRules": [
+    "hierarchy_enabled 区間が無い、または contract から再計算した区間と不一致 → excluded_contract_mismatch",
+    "baseline の ON artifact 欠落・原本 hash 不一致・区間欠落・ページ数不一致・status が失敗以外で success でない → excluded_other",
+    "baseline で hard_failure → excluded_independent_hard_failure",
+    "それ以外 → paired_evaluable"
+  ],
+  "summary": {
+    "paired_evaluable": {
+      "pdfs": 8,
+      "pages": 1403,
+      "logicalRows": 51869
+    },
+    "excluded_independent_hard_failure": {
+      "pdfs": 0,
+      "pages": 0,
+      "logicalRows": 0
+    },
+    "excluded_contract_mismatch": {
+      "pdfs": 0,
+      "pages": 0,
+      "logicalRows": 0
+    },
+    "excluded_other": {
+      "pdfs": 0,
+      "pages": 0,
+      "logicalRows": 0
+    }
+  },
+  "documents": [
+    {
+      "localPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "sourceSha256": "49a975a4436da6d53319a32ca745e2d110c42839c441c6302a7361ed9a62e4cc",
+      "publisherAuthority": "こども家庭庁",
+      "accountType": "general",
+      "totalPages": 147,
+      "hierarchySegment": [
+        7,
+        147
+      ],
+      "experimentId": "cfa-general-detail",
+      "class": "paired_evaluable",
+      "reason": "hierarchy 契約あり・baseline の ON 区間が success・同一ページ範囲を OFF（null hierarchy、既存の optional な入力）でも実行できる",
+      "pagesInSegment": 141,
+      "logicalRowCandidates": 5105,
+      "onRecords": 557,
+      "baselineOnRecordsSha256": "ef6f27c210859aeb870033cf05dd940f8307cbafac3171b023433596047f7e9f"
+    },
+    {
+      "localPath": "data/download/env.go.jp/content/000157010.pdf",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "sourceSha256": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd",
+      "publisherAuthority": "環境省",
+      "accountType": "general",
+      "totalPages": 193,
+      "hierarchySegment": [
+        21,
+        193
+      ],
+      "experimentId": "env-detail",
+      "class": "paired_evaluable",
+      "reason": "hierarchy 契約あり・baseline の ON 区間が success・同一ページ範囲を OFF（null hierarchy、既存の optional な入力）でも実行できる",
+      "pagesInSegment": 173,
+      "logicalRowCandidates": 6701,
+      "onRecords": 1631,
+      "baselineOnRecordsSha256": "795d789da705c62f1df4a55493de2ca1e9a4bf499f46e1454617d4130d9ad4b1"
+    },
+    {
+      "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+      "sourceSha256": "3be3fa49d24cc02ed680f0104d41405ff5e69bfb4a84290dccc8fe8205eaa1f1",
+      "publisherAuthority": "農林水産省",
+      "accountType": "special",
+      "totalPages": 21,
+      "hierarchySegment": [
+        7,
+        20
+      ],
+      "experimentId": "maff-fukko-detail",
+      "class": "paired_evaluable",
+      "reason": "hierarchy 契約あり・baseline の ON 区間が success・同一ページ範囲を OFF（null hierarchy、既存の optional な入力）でも実行できる",
+      "pagesInSegment": 14,
+      "logicalRowCandidates": 453,
+      "onRecords": 110,
+      "baselineOnRecordsSha256": "135f36a5ebc0c5835a3ee3a3e2b55557cd47eea8dcec366612fc6a5d15ede703"
+    },
+    {
+      "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceSha256": "ba64c25df327161a33c293374a7255c203cc9a527130ece848574badefbf909a",
+      "publisherAuthority": "経済産業省",
+      "accountType": "general",
+      "totalPages": 106,
+      "hierarchySegment": [
+        9,
+        106
+      ],
+      "experimentId": "meti-detail",
+      "class": "paired_evaluable",
+      "reason": "hierarchy 契約あり・baseline の ON 区間が success・同一ページ範囲を OFF（null hierarchy、既存の optional な入力）でも実行できる",
+      "pagesInSegment": 98,
+      "logicalRowCandidates": 3501,
+      "onRecords": 1238,
+      "baselineOnRecordsSha256": "fe1b9267fa7e80c201da68e662223820b962ebf35992e5ff146f380e9710832c"
+    },
+    {
+      "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+      "canonicalUrl": "https://www.mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+      "sourceSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+      "publisherAuthority": "文部科学省",
+      "accountType": "general",
+      "totalPages": 1339,
+      "hierarchySegment": [
+        1045,
+        1339
+      ],
+      "experimentId": "mext-detail",
+      "class": "paired_evaluable",
+      "reason": "hierarchy 契約あり・baseline の ON 区間が success・同一ページ範囲を OFF（null hierarchy、既存の optional な入力）でも実行できる",
+      "pagesInSegment": 295,
+      "logicalRowCandidates": 9243,
+      "onRecords": 1082,
+      "baselineOnRecordsSha256": "223edf6d297f160d04977365a449b031e61988c815437e3c20415bbb915e8719"
+    },
+    {
+      "localPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceSha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+      "publisherAuthority": "厚生労働省",
+      "accountType": "general",
+      "totalPages": 1723,
+      "hierarchySegment": [
+        1555,
+        1700
+      ],
+      "experimentId": "mhlw-detail",
+      "class": "paired_evaluable",
+      "reason": "hierarchy 契約あり・baseline の ON 区間が success・同一ページ範囲を OFF（null hierarchy、既存の optional な入力）でも実行できる",
+      "pagesInSegment": 146,
+      "logicalRowCandidates": 6096,
+      "onRecords": 998,
+      "baselineOnRecordsSha256": "02d2deffb557ced42c7153c4674909b5cd82470a9556c6e0f4141afb29269bf2"
+    },
+    {
+      "localPath": "data/download/mlit.go.jp/page/content/001630395.pdf",
+      "canonicalUrl": "https://www.mlit.go.jp/page/content/001630395.pdf",
+      "sourceSha256": "d5e8250094ea55fee74951654a692ce345a2b8710a788017d0f5db7b9c259c1a",
+      "publisherAuthority": "国土交通省",
+      "accountType": "special",
+      "totalPages": 10,
+      "hierarchySegment": [
+        7,
+        10
+      ],
+      "experimentId": "mlit-fukko-detail",
+      "class": "paired_evaluable",
+      "reason": "hierarchy 契約あり・baseline の ON 区間が success・同一ページ範囲を OFF（null hierarchy、既存の optional な入力）でも実行できる",
+      "pagesInSegment": 4,
+      "logicalRowCandidates": 100,
+      "onRecords": 45,
+      "baselineOnRecordsSha256": "a0409627bbbd4cac5c83f60f24d10f0e5baa87476be31c0a4cd94e067234124a"
+    },
+    {
+      "localPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "sourceSha256": "57861291846015dfdc831480149d8614a1d67c283e8b6e313f5c75f92a2a6b47",
+      "publisherAuthority": "防衛省",
+      "accountType": "general",
+      "totalPages": 540,
+      "hierarchySegment": [
+        9,
+        540
+      ],
+      "experimentId": "mod-general-detail",
+      "class": "paired_evaluable",
+      "reason": "hierarchy 契約あり・baseline の ON 区間が success・同一ページ範囲を OFF（null hierarchy、既存の optional な入力）でも実行できる",
+      "pagesInSegment": 532,
+      "logicalRowCandidates": 20670,
+      "onRecords": 2312,
+      "baselineOnRecordsSha256": "55c4bcb6677a25f57ca5433499ae07cc5d13bf03e5d0833c8dc69e13101981eb"
+    }
+  ]
+}
