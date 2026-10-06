@@ -1,0 +1,135 @@
+{
+ "byCauseStatus": {
+  "UNRESOLVED": 59
+ },
+ "byMachineReadable": {
+  "false": 37,
+  "true": 22
+ },
+ "byPreviousFailureClass": {
+  "F0": 16,
+  "F1": 37,
+  "F2": 5,
+  "F7": 1
+ },
+ "bySummaryClassification": {
+  "NOT_EXACT_IN_GENERAL_SUMMARY": 22,
+  "SUMMARY_REPRESENTATION_BLOCKED": 37
+ },
+ "classificationGzSha256": "bcf6f028468802c703705a2ceef44d50bc5fdf764c0944a148e89b557c93e605",
+ "exactCovered": 725,
+ "frozen": {
+  "docs/tasks/20261006_0930_Budget_Request_Unmatched_59_Source_Failure_Inventory_Result.md": "d3869eab808a8be1739b877d387ba6d59bee2a6ab36ad2d4763866d8404ed4f3",
+  "tests/fixtures/budget-request-unmatched-59/2024/baseline.json": "7f7e219245849b4dcec9a7352dfdda70eeb09f0f404047d18f5a979ff1e24bb4",
+  "tests/fixtures/budget-request-unmatched-59/2024/source-pdf-scan.json": "0cc9313b96ba809f1b89c350345d7b4e893849130d3f40b404cd95a6fb7b22d6",
+  "tests/fixtures/budget-request-unmatched-59/2024/unmatched-59-inventory.jsonl.gz": "5d7eb41010cbac321fd30c7aca58e45b3e895ca4a787e9bcfa703cc64906b313"
+ },
+ "mofTotal": 784,
+ "notExactBreakdownByPreviousClass": {
+  "F0": 16,
+  "F2": 5,
+  "F7": 1
+ },
+ "note": "既存 fixture は変更せず新規に追加する source-side freeze。classification の件数は source evidence から再集計した実測値。725 / 784 を extractor recall と呼ばない",
+ "officialSourceObservations": {
+  "limitations": [
+   "WebFetch の抽出結果であり、HTML 原文そのものの保存ではない",
+   "同じ page への 1 回目の取得では link の base URL が異なる要約が返った（相対 link を解決した URL は取得原本の canonical URL と一致する 2 回目の抽出を採用）",
+   "Bash からの curl は許可されなかったため HTML 原文の独立取得は未実施"
+  ],
+  "observed": [
+   "page title: 令和６年度歳出概算要求書（内閣府）",
+   "一般会計 > 概算要求書 > 表紙及び総表 → pdf/0.pdf（相対 link。取得原本 data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf に対応）",
+   "個別 PDF は pdf/1.pdf … pdf/50.pdf（一般会計、51 件）",
+   "「日本学術会議」の行には「事項要求」と表示され、PDF の link が無い（直前は 国際平和協力本部 pdf/48.pdf、直後は 官民人材交流センター pdf/49.pdf）",
+   "「事項要求」についての説明文は page 上に無い"
+  ],
+  "retrievedOn": "2026-10-06",
+  "retrievedWith": "WebFetch（page 内容を要約・抽出する tool。内容は原文の逐語転記ではなく tool の出力）",
+  "url": "https://www.cao.go.jp/yosan/soshiki/r06/yosangaisan_r6.html"
+ },
+ "pdfsReferenced": [
+  {
+   "accountType": "general",
+   "authority": "消費者庁",
+   "path": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+   "sha256": "b6cc6fa0604ab64cbbf9867137db53883943b9d3b3adfd0fdc9d9eb59fd5e5d4"
+  },
+  {
+   "accountType": "general",
+   "authority": "内閣府",
+   "path": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+   "sha256": "315909085871656cc0428feaa5941ed456dd8d024c6511e511e86ab652623b33"
+  },
+  {
+   "accountType": "general",
+   "authority": "環境省",
+   "path": "data/download/env.go.jp/content/000157010.pdf",
+   "sha256": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd"
+  },
+  {
+   "accountType": "general",
+   "authority": "金融庁",
+   "path": "data/download/fsa.go.jp/common/budget/yosan/6youkyuu-2/01.pdf",
+   "sha256": "9803cfd8e2f33592ae01612cce6e570e56208f1a758027b09d69055cff91cb9b"
+  },
+  {
+   "accountType": "general",
+   "authority": "経済産業省",
+   "path": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "sha256": "ba64c25df327161a33c293374a7255c203cc9a527130ece848574badefbf909a"
+  },
+  {
+   "accountType": "general",
+   "authority": "文部科学省",
+   "path": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "sha256": "91b39e9902610e13aa7be445db2d2d2a3e38166fd5f449bd11f94cfe5fe3b6d5"
+  },
+  {
+   "accountType": "general",
+   "authority": "文部科学省",
+   "path": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_02.pdf",
+   "sha256": "d2d1927eb068a97901cb7dfb0c104013539bb6f9dda8bab4cd36dc1f9b45c831"
+  },
+  {
+   "accountType": "general",
+   "authority": "厚生労働省",
+   "path": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "sha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192"
+  },
+  {
+   "accountType": "general",
+   "authority": "国土交通省",
+   "path": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "sha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217"
+  },
+  {
+   "accountType": "general",
+   "authority": "防衛省",
+   "path": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "sha256": "57861291846015dfdc831480149d8614a1d67c283e8b6e313f5c75f92a2a6b47"
+  },
+  {
+   "accountType": "general",
+   "authority": "財務省",
+   "path": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "sha256": "6cc573bf64747e4ceb41597cc83e371f5d8144a02e3e9033501597d64cfbbc5e"
+  },
+  {
+   "accountType": "general",
+   "authority": "外務省",
+   "path": "data/download/mofa.go.jp/mofaj/files/100546568.pdf",
+   "sha256": "85781ba1f867aaab4130b2c463c588c4fc9ca6211d097cedfd495c56bf024b55"
+  },
+  {
+   "accountType": "general",
+   "authority": "法務省",
+   "path": "data/download/moj.go.jp/content/001402818.pdf",
+   "sha256": "bd5ce9c5dee48b03407e9a8d4050f3992c8a515f510c0339364316448dd9cf8c"
+  }
+ ],
+ "schema": "budget-request-unmatched59-source-side-classification/v0",
+ "unmatched": 59,
+ "visualExactObservedCount": 37,
+ "wording": "未一致 59 項について確認した範囲では、machine-readable な令和６年度一般会計概算要求の総表・目次に MOF exact 項名が存在するにもかかわらず現行 extractor が取り逃している項は確認されなかった。これは extractor 全体の recall や 725 件側の問題の有無を意味しない（分母 784 は MOF 当初予算側の項集合で、概算要求側 source universe と同一であることは証明されていない）"
+}
