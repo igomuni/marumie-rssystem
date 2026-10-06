@@ -1,0 +1,400 @@
+{
+ "candidates": {
+  "classCounts": {
+   "name_exact_ambiguous": 63,
+   "name_exact_unique": 583,
+   "name_unavailable": 7,
+   "no_exact_name_match": 23
+  },
+  "generalCandidateRows": 676
+ },
+ "coverage": {
+  "distinctNormalizedNameDenominator": 750,
+  "distinctNormalizedNamesCovered": 598,
+  "mofRowDenominator": 784,
+  "mofRowsWithExactNameCandidate": 632
+ },
+ "exactMatchesGzSha256": "e2e0e3e2ce69080a4f7062dccf3cff67bca99bee4cc50cbc5f8498b6ef52268b",
+ "frozen": {
+  "data/normalized/mof/fy2024/budget-jikou.jsonl": "a63f50504c821ad7aff9fe1c96c80635dda978ea0870976d15f9bc9735d3ef7e",
+  "docs/tasks/20261005_2040_Budget_Request_8p6pt_Item_Candidate_Full_Corpus_Protocol.md": "ad022eeb14a763da4a61cd159fab078461a640bbc56619bbf71500318857b21a",
+  "scripts/pipeline-v2/lib/budget-request-mof-reconciliation.ts": "da08b37713ecee53b642f74a0098a129de6a1e1e7ccebfb822228309acb8c19a",
+  "tests/fixtures/budget-request-full-corpus-baseline/2024/corpus-manifest.json": "4a2a10ec46d75cf90d11b441a7a162654daefb008bb92edf3d264f8d118dde7a",
+  "tests/fixtures/budget-request-hierarchy-failure-isolation/2024/off-diagnostic.json": "9b0a9273778320a42252d12073689c4d1bd690e1a0e2ac1d68aaabdb41ea2562",
+  "tests/fixtures/budget-request-hierarchy-failure-isolation/2024/paired-manifest.json": "4fb70f3ab49c6a823cd45dad8c05d6b395f6fffb8ab9ca8009b196445616d5e1"
+ },
+ "mof": {
+  "distinctNormalizedNames": 750,
+  "generalRows": 784
+ },
+ "note": "Phase A freeze 後の MOF 名称 only exact diagnostic。MOF は candidate 生成・band に使っていない。precision / recall ではなく name-only exact overlap / coverage",
+ "perPdfExact": {
+  "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf": {
+   "candidates": 3,
+   "distinctMofRows": 3,
+   "exactRows": 3
+  },
+  "data/download/cao.go.jp/yosan/soshiki/r06/pdf/1.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_02.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_03.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_04.pdf": {
+   "candidates": 2,
+   "distinctMofRows": 2,
+   "exactRows": 2
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_05.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_06.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_07.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_08.pdf": {
+   "candidates": 2,
+   "distinctMofRows": 2,
+   "exactRows": 2
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_09.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_10.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_11.pdf": {
+   "candidates": 2,
+   "distinctMofRows": 2,
+   "exactRows": 2
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_12.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_13.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_14.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_15.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf": {
+   "candidates": 13,
+   "distinctMofRows": 12,
+   "exactRows": 12
+  },
+  "data/download/clb.go.jp/files/topics/4473_ext_05_1.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf": {
+   "candidates": 6,
+   "distinctMofRows": 6,
+   "exactRows": 6
+  },
+  "data/download/dangai.go.jp/info/pdf/r06_saisyutu-gaisan.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/digital.go.jp/assets/contents/node/basic_page/field_ref_resources/e9b99425-437c-4750-b4e2-6cca3cd877a6/0fab2c74/20230914_policies_budget_r6request_table_01.pdf": {
+   "candidates": 3,
+   "distinctMofRows": 3,
+   "exactRows": 3
+  },
+  "data/download/env.go.jp/content/000157010.pdf": {
+   "candidates": 35,
+   "distinctMofRows": 34,
+   "exactRows": 34
+  },
+  "data/download/jbaudit.go.jp/jbaudit/bud_clo/bud/pdf/r06/20230906_02.pdf": {
+   "candidates": 2,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/jcrc.go.jp/content/000001746.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/jinji.go.jp/content/900024096.pdf": {
+   "candidates": 2,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-02.pdf": {
+   "candidates": 3,
+   "distinctMofRows": 3,
+   "exactRows": 3
+  },
+  "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-03.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf": {
+   "candidates": 90,
+   "distinctMofRows": 91,
+   "exactRows": 88
+  },
+  "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf": {
+   "candidates": 32,
+   "distinctMofRows": 32,
+   "exactRows": 31
+  },
+  "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf": {
+   "candidates": 69,
+   "distinctMofRows": 66,
+   "exactRows": 65
+  },
+  "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf": {
+   "candidates": 117,
+   "distinctMofRows": 110,
+   "exactRows": 110
+  },
+  "data/download/mlit.go.jp/page/content/001630995.pdf": {
+   "candidates": 173,
+   "distinctMofRows": 167,
+   "exactRows": 162
+  },
+  "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf": {
+   "candidates": 29,
+   "distinctMofRows": 28,
+   "exactRows": 28
+  },
+  "data/download/mofa.go.jp/mofaj/files/100546568.pdf": {
+   "candidates": 17,
+   "distinctMofRows": 18,
+   "exactRows": 17
+  },
+  "data/download/ndl.go.jp/jp/aboutus/outline/r06_budgetrequest.pdf": {
+   "candidates": 2,
+   "distinctMofRows": 2,
+   "exactRows": 2
+  },
+  "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf": {
+   "candidates": 14,
+   "distinctMofRows": 14,
+   "exactRows": 14
+  },
+  "data/download/ppc.go.jp/files/pdf/230831youkyu.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf": {
+   "candidates": 3,
+   "distinctMofRows": 3,
+   "exactRows": 3
+  },
+  "data/download/shugiin.go.jp/internet/itdb_annai.nsf/html/statics/osirase/kaikei-saishutsugaisan6.pdf/%24File/kaikei-saishutsugaisan6.pdf": {
+   "candidates": 3,
+   "distinctMofRows": 3,
+   "exactRows": 3
+  },
+  "data/download/sotsui.go.jp/budget/images/r6budget_yokyu.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/soumu.go.jp/main_content/000901372.pdf": {
+   "candidates": 36,
+   "distinctMofRows": 36,
+   "exactRows": 36
+  }
+ },
+ "phaseAFreeze": {
+  "scripts/pipeline-v2/lib/budget-request-rule-8p6-candidate.ts": "d6b3fc5eb423f085067e7d302070ff4e099efec7c02c271bdf1b29b14788fd31",
+  "scripts/pipeline-v2/run-budget-request-rule-8p6-phase-a.ts": "c65928f465a4ae40a9b52af390006c938e0b052dd0013f2682d9b54f7cd943ce",
+  "tests/fixtures/budget-request-rule-8p6-item-candidate/2024/phaseA-summary.json": "9f6fa81c7f9279008d1b5dfb50d63060804390045aa570f25d79a68ed1300f9c",
+  "tests/fixtures/budget-request-rule-8p6-item-candidate/2024/phaseA-universe.jsonl.gz": "0c2c51cb695375cf17f1944278556069290b3b2206010d8695bb204fa3541712"
+ },
+ "schema": "budget-request-rule-8p6-item-candidate-phaseB/v0",
+ "unmatchedMofRowIds": [
+  "mofsec_024bf044817d49461749",
+  "mofsec_0456984a2f57998b08f9",
+  "mofsec_0457ff06e8b7fcb4d0b6",
+  "mofsec_083f0591c324c7d36140",
+  "mofsec_08fc1320c8a64ec1769e",
+  "mofsec_0d5be75e595f1652833b",
+  "mofsec_10cee5a2b9a1f55b3e3a",
+  "mofsec_1287a8b8fa1bcc6d48c1",
+  "mofsec_129cfd44d5c9f6f45242",
+  "mofsec_14b8743ab1dcdbfbbbf6",
+  "mofsec_15382a9ba75787486bee",
+  "mofsec_15dc8eac0be9fe919a39",
+  "mofsec_161b3dc2e2506578a2ed",
+  "mofsec_17fa59b2e8b54427e95e",
+  "mofsec_193fb4c527010152af99",
+  "mofsec_1a3322d066d5cfeb783f",
+  "mofsec_1c9944b741a17e470144",
+  "mofsec_1d8bb54e3ce8799de456",
+  "mofsec_1ef0567fe557217950f7",
+  "mofsec_20768216a29faff4cb2b",
+  "mofsec_220414d472f65ac87dd4",
+  "mofsec_24f2a19d4729877a1731",
+  "mofsec_25cb6f5791e2a21e94ac",
+  "mofsec_276a201fbcf3a040e7a7",
+  "mofsec_2858be7c7b44f9f86ef7",
+  "mofsec_29a92c7277ec909d332c",
+  "mofsec_2a148145ba1d009966d1",
+  "mofsec_2b5c3d94cab2dd0fb035",
+  "mofsec_2c763c2d71fbacef99db",
+  "mofsec_2d0af0e958ad1208435e",
+  "mofsec_2f492d4203aa9a32ecee",
+  "mofsec_3040bed673a16cbdd2a6",
+  "mofsec_307a53794f1f268b498e",
+  "mofsec_31f6d9c946ba5053be13",
+  "mofsec_32f0bed17034776ed799",
+  "mofsec_367369fcd252884837b4",
+  "mofsec_393c11b3c7bd77f977b7",
+  "mofsec_395b4bc07723a7b10ab9",
+  "mofsec_3d1197c5dde27ff04bbf",
+  "mofsec_3d8c17f24ebde3b2df02",
+  "mofsec_3f480016e51af92fac7c",
+  "mofsec_415ed03e8483c221a1f3",
+  "mofsec_41cbedd42865fd5f6e68",
+  "mofsec_44607d7d1c3ce060a404",
+  "mofsec_44a80f1a7e23c4283e41",
+  "mofsec_49d3168ed878c91ec0fa",
+  "mofsec_4b10d5e32cfd526f4029",
+  "mofsec_4bba09e39bda0efa3524",
+  "mofsec_4d9e574dd646bd422244",
+  "mofsec_4f340cb0609a31131fa1",
+  "mofsec_51444d6367f9ed66f165",
+  "mofsec_52e09df4afa85b8d4fd1",
+  "mofsec_5406be34c3c2668465b7",
+  "mofsec_56c25c7e8dd04adca8a3",
+  "mofsec_579c9a682149804f1f9a",
+  "mofsec_58b451894a01dc9e76ed",
+  "mofsec_5c25199892b9242d336d",
+  "mofsec_5c857b62a4da2d31af4c",
+  "mofsec_5c8692d507a3cf035cac",
+  "mofsec_5ca0617a0b6f73de0720",
+  "mofsec_5d6f5fdb974a7351a49a",
+  "mofsec_5df7b3f168a29c52224e",
+  "mofsec_5e8779c6a491770ec3f5",
+  "mofsec_616e3ac03d13f0be337c",
+  "mofsec_64fb330fd22dd1f975f2",
+  "mofsec_669eecf7036d774b2e63",
+  "mofsec_67112a7192433927769e",
+  "mofsec_67ec58f05f8509fccdb0",
+  "mofsec_6888ce0aaf2074b311e6",
+  "mofsec_6a576f03849b4090ef83",
+  "mofsec_6aa32ca4857c9a40ece1",
+  "mofsec_6ac03419524ec28ba8dc",
+  "mofsec_6b3da73dddd24d1dff01",
+  "mofsec_6c2361bf61416c11c262",
+  "mofsec_70f0047ad4ce3c838005",
+  "mofsec_76e7306847e1d88ee316",
+  "mofsec_777be8437cfc561b4959",
+  "mofsec_7b0da8b44956d4d29ee0",
+  "mofsec_7c1ad4d23db03faaaab3",
+  "mofsec_7ea9560ee6dc9b91ae28",
+  "mofsec_80300d9ad77824cf87f6",
+  "mofsec_812c136aec462053c122",
+  "mofsec_81499aacfb4d3e5280bb",
+  "mofsec_85045c430659e80e0312",
+  "mofsec_8696800dbfc705ae41be",
+  "mofsec_894049e0460c15ac31e8",
+  "mofsec_8993789e382331d21965",
+  "mofsec_8af90dd6cddc473dd837",
+  "mofsec_8e68afd22d24cf0865b9",
+  "mofsec_902fad3f93e08fa5c4aa",
+  "mofsec_903a8d3234462ea57947",
+  "mofsec_90aa5d0d3275c5f5af0b",
+  "mofsec_93beb3da46bc3e05af7c",
+  "mofsec_9410840bdc0f81bea2ab",
+  "mofsec_94ab36f5b2d9288afdc7",
+  "mofsec_956eae3cff007e27507f",
+  "mofsec_984ff1a1779f4f609870",
+  "mofsec_989ef4ebe798bcd8f274",
+  "mofsec_990edf831e840b8ed29a",
+  "mofsec_9a064b0d89b3f2ad7f02",
+  "mofsec_9cca9a46aaf95a92bcc6",
+  "mofsec_9cdbbcfb08d2627258f5",
+  "mofsec_9d851e5529adf78b0aca",
+  "mofsec_9ef2ff20a93b0d5fa3e2",
+  "mofsec_9ffdf9616b66a75105bb",
+  "mofsec_a203e2d7fd6c7b72d3a6",
+  "mofsec_a3a0efdeb0203b5213dc",
+  "mofsec_a46fb2109aab2cde25e2",
+  "mofsec_a6d9002ed55676deebcf",
+  "mofsec_a87c656c92591aef3861",
+  "mofsec_a9acc8d93fb36bf32f2d",
+  "mofsec_ae06f02855cbd775c3af",
+  "mofsec_b02a7af66b784e97a2dd",
+  "mofsec_b13802eb4af0c2cebd52",
+  "mofsec_b4b92a1665e9fb8408e8",
+  "mofsec_b51b5a469faaf997a9e3",
+  "mofsec_b58d2e281cc91f038e93",
+  "mofsec_b6046e67b68611e6f8e7",
+  "mofsec_b64543663914851f5f84",
+  "mofsec_b65999bdbbb97b90eaec",
+  "mofsec_ba3df3a8e656f5192706",
+  "mofsec_bff814a4a20fc0c5fd10",
+  "mofsec_c397c6e36a6fc0ac66eb",
+  "mofsec_c413b9ce2f7817b3689e",
+  "mofsec_c6687c37ea1f87b4eda9",
+  "mofsec_cbb3cac8059399445ac7",
+  "mofsec_cbee71aea9a0104b3448",
+  "mofsec_cfefe9701468198a5298",
+  "mofsec_d01b5f74686d3aebb9b3",
+  "mofsec_d14250d23e01c8ebc0db",
+  "mofsec_d5374094731128df0098",
+  "mofsec_d824d727a99ddb432764",
+  "mofsec_de3afca90717c291cb1e",
+  "mofsec_dfb8f05651dc500ba05a",
+  "mofsec_e218f0142967c6056c6e",
+  "mofsec_e22646fe4acd7014d83c",
+  "mofsec_e4945f2746e0203544b4",
+  "mofsec_e7b1583a94f3645ba7de",
+  "mofsec_e9844cb8a024e4488833",
+  "mofsec_ea99ca99415d94ce3fb6",
+  "mofsec_eed48c38669abf079ae2",
+  "mofsec_f5a49b875b4085d259d9",
+  "mofsec_f60d6a2b8b03bbe38f4f",
+  "mofsec_f7305de8683aa80a2920",
+  "mofsec_f78c1612b99ad5e26a5c",
+  "mofsec_f7eb74792960a97bfcde",
+  "mofsec_f9b994d5e6d62fcbd1bc",
+  "mofsec_fba0e9c5f3d2a85c1a69",
+  "mofsec_fbaafff0208ab03a63ec",
+  "mofsec_fc41a9d4c691ad37fc7e",
+  "mofsec_fd027ed30728ab22a162",
+  "mofsec_fe4eb6d4a22d9ea2ebac"
+ ],
+ "unmatchedMofRows": 152
+}
