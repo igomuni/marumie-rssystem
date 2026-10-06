@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261006_1145_Budget_Request_Route_C_Drawing_Path_Preregistration.md](20261006_1145_Budget_Request_Route_C_Drawing_Path_Preregistration.md) — drawing-path目次37項の復元(OCRなし)事前登録。GT37/dev35·held-out2/safety0·H-STOP
 - [20261005_1450_Budget_Request_Hierarchy_Stack_Reset_Counterfactual_Protocol.md](20261005_1450_Budget_Request_Hierarchy_Stack_Reset_Counterfactual_Protocol.md) — T1のframe固定でmanual開始直前にstackだけresetするC0/T1/T2の事前登録
 - [20261006_1050_Budget_Request_Unmatched_59_Source_Side_Classification_Freeze.md](20261006_1050_Budget_Request_Unmatched_59_Source_Side_Classification_Freeze.md) — 未一致59項の総表レベル分類freeze。blocked37(目視で項名実在)・総表にexactなし22・未解決0、日本学術会議は事項要求
 - [20261006_0930_Budget_Request_Unmatched_59_Source_Failure_Inventory_Result.md](20261006_0930_Budget_Request_Unmatched_59_Source_Failure_Inventory_Result.md) — MOF未一致59項のsource分類。通常text/geometryで回収可0、drawing-path blocker37(法務35/金融庁2)、source不在5、unresolved16。Route C
