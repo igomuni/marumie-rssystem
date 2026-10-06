@@ -1,0 +1,299 @@
+{
+ "items": [
+  {
+   "classification": "SOURCE_CONTINUATION_STRUCTURALLY_SUPPORTED",
+   "currentExtractedName": {
+    "itemRowNameRegionText": "独立行政法人国立美術館",
+    "logicalRowResolutionOfContinuationRow": "ambiguous",
+    "logicalRowResolutionReason": "vertical gap is within the continuation range but 1/2 segment start(s) are not aligned with any token start in the preceding candidate",
+    "possibleContinuationLink": 4
+   },
+   "evidence": {
+    "amountColumnTokensInContinuationRow": 0,
+    "codeAtRowStart": true,
+    "continuationFirstTokenInNameRegion": true,
+    "continuationFirstTokenXMin": 75.922,
+    "continuationHasCodeToken": false,
+    "existingGuardObservation": {
+     "A_directlyBelow": true,
+     "B_alignedNameStart": true,
+     "C_startsWithCode": false,
+     "D_hasAmount": false,
+     "fires": true
+    },
+    "itemNameStartXMin": 75.923,
+    "lineGap": {
+     "dy": 6.944,
+     "dyFactor": 1
+    },
+    "nameRegionX": [
+     null,
+     203.587
+    ],
+    "nextRowAfterContinuation": {
+     "firstToken": "94",
+     "firstTokenInNameRegion": true,
+     "firstTokenXMin": 37.961,
+     "hasCode": true,
+     "kind": "same_physical_row"
+    },
+    "rightPanelTokensOnContinuationRow": [
+     {
+      "text": "独立行政法人国立美術館の施設整備に必要な",
+      "xMin": 472.808
+     }
+    ],
+    "sameNameCell": true,
+    "xAlignmentDelta": 0.001
+   },
+   "fullNameSourceTokens": [
+    {
+     "bbox": {
+      "xMax": 152.307,
+      "xMin": 75.923,
+      "yMax": 62.493,
+      "yMin": 55.549
+     },
+     "index": 8,
+     "role": "item_row_name",
+     "text": "独立行政法人国立美術館"
+    },
+    {
+     "bbox": {
+      "xMax": 110.642,
+      "xMin": 75.922,
+      "yMax": 69.437,
+      "yMin": 62.493
+     },
+     "index": 9,
+     "role": "continuation_row_name_region",
+     "text": "施設整備費"
+    }
+   ],
+   "itemCodeInSource": "050",
+   "logicalRowIndex": 4,
+   "mofCodeDiagnostic": "085",
+   "mofNormalizedFullName": "独立行政法人国立美術館施設整備費",
+   "mofSectionId": "mofsec_3f480016e51af92fac7c",
+   "page": 1141,
+   "pdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "rowBoundaries": {
+    "continuationPhysicalRows": [
+     5
+    ],
+    "continuationYMin": 62.5,
+    "itemRowPhysicalRows": [
+     4
+    ],
+    "itemRowYMin": 55.5,
+    "referenceFontSize": 6.944
+   }
+  },
+  {
+   "classification": "SOURCE_CONTINUATION_STRUCTURALLY_SUPPORTED",
+   "currentExtractedName": {
+    "itemRowNameRegionText": "独立行政法人日本芸術文",
+    "logicalRowResolutionOfContinuationRow": "ambiguous",
+    "logicalRowResolutionReason": "vertical gap is within the continuation range but 1/2 segment start(s) are not aligned with any token start in the preceding candidate",
+    "possibleContinuationLink": 7
+   },
+   "evidence": {
+    "amountColumnTokensInContinuationRow": 0,
+    "codeAtRowStart": true,
+    "continuationFirstTokenInNameRegion": true,
+    "continuationFirstTokenXMin": 75.922,
+    "continuationHasCodeToken": false,
+    "existingGuardObservation": {
+     "A_directlyBelow": true,
+     "B_alignedNameStart": true,
+     "C_startsWithCode": false,
+     "D_hasAmount": false,
+     "fires": true
+    },
+    "itemNameStartXMin": 75.923,
+    "lineGap": {
+     "dy": 6.944,
+     "dyFactor": 1
+    },
+    "nameRegionX": [
+     null,
+     203.587
+    ],
+    "nextRowAfterContinuation": {
+     "firstToken": "96",
+     "firstTokenInNameRegion": true,
+     "firstTokenXMin": 37.961,
+     "hasCode": true,
+     "kind": "same_physical_row"
+    },
+    "rightPanelTokensOnContinuationRow": [
+     {
+      "text": "独立行政法人日本芸術文化振興会の施設整備",
+      "xMin": 476.28
+     }
+    ],
+    "sameNameCell": true,
+    "xAlignmentDelta": 0.001
+   },
+   "fullNameSourceTokens": [
+    {
+     "bbox": {
+      "xMax": 152.307,
+      "xMin": 75.923,
+      "yMax": 118.044,
+      "yMin": 111.1
+     },
+     "index": 34,
+     "role": "item_row_name",
+     "text": "独立行政法人日本芸術文"
+    },
+    {
+     "bbox": {
+      "xMax": 138.418,
+      "xMin": 75.922,
+      "yMax": 124.988,
+      "yMin": 118.044
+     },
+     "index": 35,
+     "role": "continuation_row_name_region",
+     "text": "化振興会施設整備費"
+    }
+   ],
+   "itemCodeInSource": "070",
+   "logicalRowIndex": 7,
+   "mofCodeDiagnostic": "087",
+   "mofNormalizedFullName": "独立行政法人日本芸術文化振興会施設整備費",
+   "mofSectionId": "mofsec_6b3da73dddd24d1dff01",
+   "page": 1142,
+   "pdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "rowBoundaries": {
+    "continuationPhysicalRows": [
+     11
+    ],
+    "continuationYMin": 118,
+    "itemRowPhysicalRows": [
+     10
+    ],
+    "itemRowYMin": 111.1,
+    "referenceFontSize": 6.944
+   }
+  },
+  {
+   "classification": "SOURCE_CONTINUATION_STRUCTURALLY_SUPPORTED",
+   "currentExtractedName": {
+    "itemRowNameRegionText": "科学技術・学術政策推進",
+    "logicalRowResolutionOfContinuationRow": "continuation_by_geometry",
+    "logicalRowResolutionReason": null,
+    "possibleContinuationLink": null
+   },
+   "evidence": {
+    "amountColumnTokensInContinuationRow": 0,
+    "codeAtRowStart": true,
+    "continuationFirstTokenInNameRegion": true,
+    "continuationFirstTokenXMin": 75.922,
+    "continuationHasCodeToken": false,
+    "existingGuardObservation": {
+     "A_directlyBelow": true,
+     "B_alignedNameStart": true,
+     "C_startsWithCode": false,
+     "D_hasAmount": false,
+     "fires": true
+    },
+    "itemNameStartXMin": 75.923,
+    "lineGap": {
+     "dy": 6.944,
+     "dyFactor": 1
+    },
+    "nameRegionX": [
+     null,
+     203.587
+    ],
+    "nextRowAfterContinuation": {
+     "firstToken": "取組の内容や規模等を判断",
+     "firstTokenInNameRegion": false,
+     "firstTokenXMin": 469.336,
+     "hasCode": false,
+     "kind": "ambiguous"
+    },
+    "rightPanelTokensOnContinuationRow": [
+     {
+      "text": "(事項要求）",
+      "xMin": 472.808
+     },
+     {
+      "text": "「総合的な国力の強化に資する研究開発法人",
+      "xMin": 472.808
+     }
+    ],
+    "sameNameCell": true,
+    "xAlignmentDelta": 0.001
+   },
+   "fullNameSourceTokens": [
+    {
+     "bbox": {
+      "xMax": 152.307,
+      "xMin": 75.923,
+      "yMax": 62.493,
+      "yMin": 55.549
+     },
+     "index": 7,
+     "role": "item_row_name",
+     "text": "科学技術・学術政策推進"
+    },
+    {
+     "bbox": {
+      "xMax": 82.866,
+      "xMin": 75.922,
+      "yMax": 69.437,
+      "yMin": 62.493
+     },
+     "index": 8,
+     "role": "continuation_row_name_region",
+     "text": "費"
+    }
+   ],
+   "itemCodeInSource": "230",
+   "logicalRowIndex": 4,
+   "mofCodeDiagnostic": "023",
+   "mofNormalizedFullName": "科学技術・学術政策推進費",
+   "mofSectionId": "mofsec_a46fb2109aab2cde25e2",
+   "page": 556,
+   "pdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "rowBoundaries": {
+    "continuationPhysicalRows": [
+     5,
+     6
+    ],
+    "continuationYMin": 62.5,
+    "itemRowPhysicalRows": [
+     4
+    ],
+    "itemRowYMin": 55.5,
+    "referenceFontSize": 6.944
+   }
+  }
+ ],
+ "itemsFound": 3,
+ "note": "Phase A failure isolation。位置の特定に MOF 名称を使ったが、continuation の判定には使っていない（既存 FieldResolver の guard predicate A∧B∧¬C∧¬D を観測するだけ）。rule は未実装",
+ "pagesOfTargets": {
+  "mofsec_3f480016e51af92fac7c": [
+   1141
+  ],
+  "mofsec_6b3da73dddd24d1dff01": [
+   1142
+  ],
+  "mofsec_a46fb2109aab2cde25e2": [
+   556
+  ]
+ },
+ "physicalClassCounts": {
+  "guard_fires|name_cell|right_panel_on_same_line": 3
+ },
+ "schema": "budget-request-mext-continuation-isolation/v0",
+ "sourcePdf": {
+  "pages": 1339,
+  "path": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+  "sha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71"
+ },
+ "targetsFromBaseline": 3
+}

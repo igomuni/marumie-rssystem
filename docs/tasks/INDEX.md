@@ -4,6 +4,8 @@ task doc を新規作成したら本索引に1行追記する（新しいもの�
 
 - [20261006_1500_Budget_Request_P1_Measurement_Correction_Revision.md](20261006_1500_Budget_Request_P1_Measurement_Correction_Revision.md) — 補正の訂正。P1のみ対象(56/68=82.4%)、full-corpus 97.0%(98/101)とgate101は正
 - [20261006_1440_Budget_Request_P1_Reconciliation_Measurement_Correction.md](20261006_1440_Budget_Request_P1_Reconciliation_Measurement_Correction.md) — P1条件付きexact rateの測定補正。94.9%→82.4%(56/68)、full-corpus97.0%→85.2%。decision不変
+- [20261006_0735_Budget_Request_MEXT_Item_Name_Continuation_Result.md](20261006_0735_Budget_Request_MEXT_Item_Name_Continuation_Result.md) — 既存guard predicateによる複数行項名称のsource-only連結。MOF名称exact 717→725/784、loss 0、文科省対象3項を回収
+- [20261006_0640_Budget_Request_MEXT_Item_Name_Continuation_Protocol.md](20261006_0640_Budget_Request_MEXT_Item_Name_Continuation_Protocol.md) — 文科省3項の複数行名称を最小のsource-only continuationで回収する事前登録とbaseline(717/784)
 - [20261005_2310_Budget_Request_Item_Layout_Anchor_Coverage_Result.md](20261005_2310_Budget_Request_Item_Layout_Anchor_Coverage_Result.md) — 内閣府0.pdfの項anchor(1段シフト)をsource導出でprofile化。MOF名称exact 661→717/784、loss 0
 - [20261005_2245_Budget_Request_Item_Layout_Anchor_Coverage_Protocol.md](20261005_2245_Budget_Request_Item_Layout_Anchor_Coverage_Protocol.md) — 項anchorのsource導出profileによるcoverage増加のprotocolと661/784 baseline
 - [20261005_2130_Budget_Request_8p6pt_Full_Corpus_With_Rotate90_Result.md](20261005_2130_Budget_Request_8p6pt_Full_Corpus_With_Rotate90_Result.md) — rotate正規化を含む82PDFで8.6pt候補973行。MOF名称exactは661/784。法務省PDFはテキスト層なしで評価不能
