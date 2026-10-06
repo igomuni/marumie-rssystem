@@ -1,0 +1,191 @@
+{
+ "note": "representation observation のみ。文字復元アルゴリズムは未試行",
+ "pdfs": [
+  {
+   "attachments": 0,
+   "constructPathPerPage": {
+    "max": 2916,
+    "median": 792,
+    "min": 0,
+    "pagesWithZeroPaths": 2
+   },
+   "creator": null,
+   "gtPages": {
+    "3": {
+     "bboxHeightMedian": 5.88,
+     "bboxUnion": [
+      21.600000381469727,
+      30.569799423217773,
+      556.0800170898438,
+      797.6099853515625
+     ],
+     "constructPath": 1364,
+     "distinctShapeSignatures": 1319,
+     "fillPaths": 1364,
+     "operatorHistogram": {
+      "constructPath": 1364,
+      "restore": 1,
+      "save": 1,
+      "setFillRGBColor": 1364,
+      "transform": 3
+     },
+     "pathsWithBBox": 1364,
+     "rotate": 90,
+     "shapeSignatureRepeatMax": 32,
+     "strokePaths": 0,
+     "textItems": 0,
+     "viewport": [
+      0,
+      0,
+      595.276,
+      841.89
+     ]
+    },
+    "4": {
+     "bboxHeightMedian": 5.64,
+     "bboxUnion": [
+      21.600000381469727,
+      30.569799423217773,
+      556.0800170898438,
+      797.6099853515625
+     ],
+     "constructPath": 616,
+     "distinctShapeSignatures": 588,
+     "fillPaths": 616,
+     "operatorHistogram": {
+      "constructPath": 616,
+      "restore": 1,
+      "save": 1,
+      "setFillRGBColor": 616,
+      "transform": 3
+     },
+     "pathsWithBBox": 616,
+     "rotate": 90,
+     "shapeSignatureRepeatMax": 12,
+     "strokePaths": 0,
+     "textItems": 0,
+     "viewport": [
+      0,
+      0,
+      595.276,
+      841.89
+     ]
+    }
+   },
+   "hasOutline": false,
+   "hasPageLabels": false,
+   "id": "moj",
+   "operatorTypesUnion": [
+    "clip",
+    "constructPath",
+    "restore",
+    "save",
+    "setDash",
+    "setFillRGBColor",
+    "setLineCap",
+    "setLineJoin",
+    "setLineWidth",
+    "setStrokeRGBColor",
+    "transform"
+   ],
+   "outlineEntries": 0,
+   "pages": 737,
+   "path": "data/download/moj.go.jp/content/001402818.pdf",
+   "pdfFormatVersion": "1.5",
+   "producer": "JUST PDF 5",
+   "rotation": {
+    "90": 737
+   },
+   "sha256": "bd5ce9c5dee48b03407e9a8d4050f3992c8a515f510c0339364316448dd9cf8c",
+   "totals": {
+    "annotations": 0,
+    "imageOps": 0,
+    "markedContentActualText": 0,
+    "markedContentOps": 0,
+    "setFontOps": 0,
+    "showTextOps": 0,
+    "textItems": 0
+   }
+  },
+  {
+   "attachments": 0,
+   "constructPathPerPage": {
+    "max": 1621,
+    "median": 858,
+    "min": 74,
+    "pagesWithZeroPaths": 0
+   },
+   "creator": "DocuWorks Desk 9.1.0",
+   "gtPages": {
+    "2": {
+     "bboxHeightMedian": 5.76,
+     "bboxUnion": [
+      -10.680000305175781,
+      -458.2799987792969,
+      781.3200073242188,
+      556.155029296875
+     ],
+     "constructPath": 308,
+     "distinctShapeSignatures": 292,
+     "fillPaths": 299,
+     "operatorHistogram": {
+      "constructPath": 308,
+      "restore": 308,
+      "save": 308,
+      "setDash": 9,
+      "setLineCap": 9,
+      "setLineJoin": 9,
+      "setLineWidth": 9,
+      "setMiterLimit": 9,
+      "transform": 296
+     },
+     "pathsWithBBox": 308,
+     "rotate": 0,
+     "shapeSignatureRepeatMax": 8,
+     "strokePaths": 9,
+     "textItems": 0,
+     "viewport": [
+      0,
+      0,
+      842,
+      595
+     ]
+    }
+   },
+   "hasOutline": false,
+   "hasPageLabels": false,
+   "id": "fsa",
+   "operatorTypesUnion": [
+    "constructPath",
+    "eoClip",
+    "restore",
+    "save",
+    "setDash",
+    "setLineCap",
+    "setLineJoin",
+    "setLineWidth",
+    "setMiterLimit",
+    "transform"
+   ],
+   "outlineEntries": 0,
+   "pages": 77,
+   "path": "data/download/fsa.go.jp/common/budget/yosan/6youkyuu-2/01.pdf",
+   "pdfFormatVersion": "1.4",
+   "producer": "DocuWorks PDF Build 7.0.10",
+   "rotation": {
+    "0": 77
+   },
+   "sha256": "9803cfd8e2f33592ae01612cce6e570e56208f1a758027b09d69055cff91cb9b",
+   "totals": {
+    "annotations": 0,
+    "imageOps": 0,
+    "markedContentActualText": 0,
+    "markedContentOps": 0,
+    "setFontOps": 0,
+    "showTextOps": 0,
+    "textItems": 0
+   }
+  }
+ ],
+ "schema": "budget-request-route-c-primitive-observation/v0"
+}
