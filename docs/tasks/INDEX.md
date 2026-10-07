@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261007_1806_Budget_Request_PR1_Raw_Text_Corpus.md](20261007_1806_Budget_Request_PR1_Raw_Text_Corpus.md) — FY2024概算要求PDF全82本のpage単位Raw Text層(pdftotext -layout)。9,899p・EXTRACTED80/EMPTY2/FAILED0・決定的・GO
 - [20261006_1500_Budget_Request_P1_Measurement_Correction_Revision.md](20261006_1500_Budget_Request_P1_Measurement_Correction_Revision.md) — 補正の訂正。P1のみ対象(56/68=82.4%)、full-corpus 97.0%(98/101)とgate101は正
 - [20261006_1440_Budget_Request_P1_Reconciliation_Measurement_Correction.md](20261006_1440_Budget_Request_P1_Reconciliation_Measurement_Correction.md) — P1条件付きexact rateの測定補正。94.9%→82.4%(56/68)、full-corpus97.0%→85.2%。decision不変
 - [20261006_1145_Budget_Request_Route_C_Drawing_Path_Preregistration.md](20261006_1145_Budget_Request_Route_C_Drawing_Path_Preregistration.md) — drawing-path目次37項の復元(OCRなし)事前登録。GT37/dev35·held-out2/safety0·H-STOP
