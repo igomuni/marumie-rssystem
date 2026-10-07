@@ -36,7 +36,7 @@ FY2024 概算要求 PDF の page 単位 Raw Text を再現可能に生成し、�
 | frozen input + 文書別 hash + page 単位 text hash（~0.75MB） | `tests/fixtures/budget-request-raw-text/2024/raw-text-manifest.json` | 管理 |
 | 代表 6 page の raw text | `.../representative-pages.json` | 管理 |
 
-全文を Git に入れない根拠: 全文は text 38.6M 文字で既存 fixture 群（約 13MB）を大きく超える。page 単位 hash で再生成物の一致を検証できる。generator: `scripts/pipeline-v2/build-budget-request-raw-text.ts`。
+全文を Git に入れない根拠: 全文は text 38.6M 文字で既存 fixture 群（約 13MB）を大きく超える。page 単位 hash で再生成物の一致を検証できる。generator: `scripts/pipeline-v2/build-budget-request-raw-text.ts`。既定実行は `data/work/` のみ再生成し、frozen fixture は `--freeze-fixture` を明示したときだけ更新する（baseCommit を含むため通常再生成で書き換えない）。
 
 ## Frozen input record
 

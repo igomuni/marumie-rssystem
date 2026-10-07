@@ -3,11 +3,12 @@
  * manifest の physical PDF すべてに `pdftotext -layout` を同一条件で適用し、page ごとの raw text を保存する。
  * 抽出に失敗した PDF を別方式で救済しない。page 数が合わない PDF は FAILED として記録する。
  *
- * 使い方: npx tsx scripts/pipeline-v2/build-budget-request-raw-text.ts [--out-root=<dir>] [--no-fixture]
+ * 使い方: npx tsx scripts/pipeline-v2/build-budget-request-raw-text.ts [--out-root=<dir>] [--freeze-fixture]
+ * 既定は data/work 側だけを再生成し、frozen fixture（baseCommit を含む）は変更しない。fixture を書くのは明示的な --freeze-fixture のときだけ。
  * 出力:
  *   data/work/budget-request-raw-text/2024/pages/<slug>.jsonl   全 page の PageRawText（git 管理外・~40MB）
- *   tests/fixtures/budget-request-raw-text/2024/raw-text-manifest.json   frozen input record + page 単位 hash（git 管理）
- *   tests/fixtures/budget-request-raw-text/2024/representative-pages.json   代表 page の raw text 抜粋（git 管理）
+ *   tests/fixtures/budget-request-raw-text/2024/raw-text-manifest.json   (--freeze-fixture のみ) frozen input record + page 単位 hash（git 管理）
+ *   tests/fixtures/budget-request-raw-text/2024/representative-pages.json   (--freeze-fixture のみ) 代表 page の raw text 抜粋（git 管理）
  */
 import * as fs from 'fs';
 import * as path from 'path';
@@ -19,7 +20,7 @@ import { buildDocumentPages, documentStatusOf, sha256Hex, type PageRawText } fro
 const arg = (k: string) => process.argv.find(a => a.startsWith(`--${k}=`))?.slice(k.length + 3);
 const OUT_ROOT = arg('out-root') ?? path.join('data', 'work', 'budget-request-raw-text', '2024');
 const FIXTURE_DIR = path.join('tests', 'fixtures', 'budget-request-raw-text', '2024');
-const WRITE_FIXTURE = !process.argv.includes('--no-fixture');
+const WRITE_FIXTURE = process.argv.includes('--freeze-fixture');
 const MANIFEST_FILES = [
   path.join('scripts', 'pipeline-v2', 'lib', 'fy2024-budget-request-manifest.ts'),
   path.join('scripts', 'pipeline-v2', 'lib', 'budget-request-manifest.ts'),
