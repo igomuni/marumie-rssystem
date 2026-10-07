@@ -39,9 +39,13 @@ export function parseCoverPage(source: CoverSource, nonEmptyLines: { text: strin
   const header: CoverObservation['header'] = { codeRaw: hm ? hm[1] : null, textRawParts: hm ? [hm[2]] : first.trim() ? [first.trim()] : [], titleRawParts: [], status: hm ? 'RESOLVED' : first.trim() ? 'PARTIAL' : 'UNRESOLVED' };
   // title: header の後ろで最初に見つかる title 行
   let i = 1;
-  while (i < lines.length && !isTitle(lines[i])) { if (lines[i].trim()) unclassified.push(lines[i]); i++; }
-  if (i < lines.length) { header.titleRawParts = [lines[i].trim()]; i++; }
-  else if (header.status === 'RESOLVED') header.status = 'PARTIAL';
+  const preTitle: string[] = [];
+  while (i < lines.length && !isTitle(lines[i])) { if (lines[i].trim()) preTitle.push(lines[i]); i++; }
+  if (i < lines.length) { header.titleRawParts = [lines[i].trim()]; unclassified.push(...preTitle); i++; }
+  else { // title が見つからない: title は abstain（空）にし、header 直後から entry の parse を続ける（行を捨てない）
+    if (header.status === 'RESOLVED') header.status = 'PARTIAL';
+    i = 1;
+  }
   const entries: CoverEntry[] = [];
   for (; i < lines.length; i++) {
     const line = lines[i];
@@ -55,7 +59,8 @@ export function parseCoverPage(source: CoverSource, nonEmptyLines: { text: strin
     unclassified.push(line);
   }
   const allEntriesResolved = entries.every(e => e.status === 'RESOLVED');
-  const status: Status = entries.length === 0 && header.codeRaw === null ? 'UNRESOLVED'
+  // preregistration §3: 読める entry が 1 つも無ければ（header の状態にかかわらず）UNRESOLVED。header と全 entry が RESOLVED なら RESOLVED。それ以外 PARTIAL
+  const status: Status = entries.length === 0 ? 'UNRESOLVED'
     : header.status === 'RESOLVED' && header.titleRawParts.length > 0 && entries.length > 0 && allEntriesResolved && unclassified.length === 0 ? 'RESOLVED' : 'PARTIAL';
   return { source, status, header, entries, unclassifiedLines: unclassified };
 }

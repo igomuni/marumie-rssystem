@@ -71,6 +71,10 @@ describe('cover structure v0 parser（observed development data / synthetic を�
   });
   it('[synthetic] 構造を満たさない入力は abstain（null / PARTIAL / UNRESOLVED）で、文字を補わない', () => {
     expect(parse('').status).toBe('UNRESOLVED');
+    // preregistration §3: header・title が読めても entry が 0 件なら UNRESOLVED（PARTIAL ではない）
+    const headerOnly = parse('19 内閣府所管\n令和６年度歳出概算要求書');
+    expect([headerOnly.header.status, headerOnly.entries.length, headerOnly.status]).toEqual(['RESOLVED', 0, 'UNRESOLVED']);
+    expect(parse('内閣府所管').status).toBe('UNRESOLVED');
     const noHeaderCode = parse('内閣府所管\n令和６年度歳出概算要求書\n1. 令和６年度歳出概算要求額総表 ・・・・ 1');
     expect(noHeaderCode.header.codeRaw).toBeNull();
     expect(noHeaderCode.status).toBe('PARTIAL');
@@ -79,6 +83,7 @@ describe('cover structure v0 parser（observed development data / synthetic を�
     expect(stray.unclassifiedLines).toEqual(['何かの注記']);
     const noTitle = parse('19 内閣府所管\n1. 令和６年度歳出概算要求額総表 ・・・・ 1');
     expect(noTitle.header.titleRawParts).toEqual([]);
+    expect(noTitle.entries).toHaveLength(1);
     expect(noTitle.status).toBe('PARTIAL');
   });
   it('[synthetic] leader dots も page 参照も無い行は SCOPE の後でのみ continuation、SECTION の後では未分類', () => {
