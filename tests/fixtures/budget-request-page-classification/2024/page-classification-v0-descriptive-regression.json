@@ -1,0 +1,262 @@
+{
+ "schema": "budget-request-page-classification-v0-descriptive-regression/v0",
+ "scope": "v3 cumulative benchmark（431 row、post-hoc / descriptive）に対する frozen v0 実装の記述的 regression。research validation / fresh held-out GO ではない。open-set safety は NOT EVALUATED",
+ "implementationCommit": "dc824798de7891bc2bb0dd43657989df91ea025e",
+ "corpusClassificationDigestSha256": "39464fc76b1b83272d5852d3db1db776e22bb570ee0f6b7ca4d1da64de4a5ecc",
+ "v3Fixture": {
+  "path": "tests/fixtures/budget-request-page-classification/2024/page-classification-v3-cumulative-benchmark.json",
+  "sha256": "c2ec7064c1e3e2c2e1c7ec79980de15fe9a02310fc387d86f54c3f12254c88dd"
+ },
+ "overall": {
+  "rows": 431,
+  "knownFormGtRows": 431,
+  "resolved": 403,
+  "abstained": 28,
+  "exactPageTypeAccuracy": 0.9350348027842227,
+  "knownFormResolvedPrecision": 1,
+  "knownFormCoverage": 0.9350348027842227,
+  "wrongFamilyResolution": 0,
+  "resolvedBySource": {
+   "DIRECT": 153,
+   "INHERITED": 250
+  }
+ },
+ "byGtFamily": {
+  "COVER": {
+   "rows": 32,
+   "knownFormGtRows": 32,
+   "resolved": 32,
+   "abstained": 0,
+   "exactPageTypeAccuracy": 1,
+   "knownFormResolvedPrecision": 1,
+   "knownFormCoverage": 1,
+   "wrongFamilyResolution": 0,
+   "resolvedBySource": {
+    "DIRECT": 32,
+    "INHERITED": 0
+   }
+  },
+  "DETAIL": {
+   "rows": 231,
+   "knownFormGtRows": 231,
+   "resolved": 205,
+   "abstained": 26,
+   "exactPageTypeAccuracy": 0.8874458874458875,
+   "knownFormResolvedPrecision": 1,
+   "knownFormCoverage": 0.8874458874458875,
+   "wrongFamilyResolution": 0,
+   "resolvedBySource": {
+    "DIRECT": 32,
+    "INHERITED": 173
+   }
+  },
+  "PRIORITY_DETAIL": {
+   "rows": 11,
+   "knownFormGtRows": 11,
+   "resolved": 11,
+   "abstained": 0,
+   "exactPageTypeAccuracy": 1,
+   "knownFormResolvedPrecision": 1,
+   "knownFormCoverage": 1,
+   "wrongFamilyResolution": 0,
+   "resolvedBySource": {
+    "DIRECT": 1,
+    "INHERITED": 10
+   }
+  },
+  "PRIORITY_SUMMARY": {
+   "rows": 1,
+   "knownFormGtRows": 1,
+   "resolved": 1,
+   "abstained": 0,
+   "exactPageTypeAccuracy": 1,
+   "knownFormResolvedPrecision": 1,
+   "knownFormCoverage": 1,
+   "wrongFamilyResolution": 0,
+   "resolvedBySource": {
+    "DIRECT": 1,
+    "INHERITED": 0
+   }
+  },
+  "STAFFING": {
+   "rows": 32,
+   "knownFormGtRows": 32,
+   "resolved": 30,
+   "abstained": 2,
+   "exactPageTypeAccuracy": 0.9375,
+   "knownFormResolvedPrecision": 1,
+   "knownFormCoverage": 0.9375,
+   "wrongFamilyResolution": 0,
+   "resolvedBySource": {
+    "DIRECT": 25,
+    "INHERITED": 5
+   }
+  },
+  "SUMMARY": {
+   "rows": 74,
+   "knownFormGtRows": 74,
+   "resolved": 74,
+   "abstained": 0,
+   "exactPageTypeAccuracy": 1,
+   "knownFormResolvedPrecision": 1,
+   "knownFormCoverage": 1,
+   "wrongFamilyResolution": 0,
+   "resolvedBySource": {
+    "DIRECT": 34,
+    "INHERITED": 40
+   }
+  },
+  "TOC": {
+   "rows": 50,
+   "knownFormGtRows": 50,
+   "resolved": 50,
+   "abstained": 0,
+   "exactPageTypeAccuracy": 1,
+   "knownFormResolvedPrecision": 1,
+   "knownFormCoverage": 1,
+   "wrongFamilyResolution": 0,
+   "resolvedBySource": {
+    "DIRECT": 28,
+    "INHERITED": 22
+   }
+  }
+ },
+ "bySourceVersion": {
+  "v0": {
+   "rows": 172,
+   "knownFormGtRows": 172,
+   "resolved": 170,
+   "abstained": 2,
+   "exactPageTypeAccuracy": 0.9883720930232558,
+   "knownFormResolvedPrecision": 1,
+   "knownFormCoverage": 0.9883720930232558,
+   "wrongFamilyResolution": 0,
+   "resolvedBySource": {
+    "DIRECT": 62,
+    "INHERITED": 108
+   }
+  },
+  "v1": {
+   "rows": 89,
+   "knownFormGtRows": 89,
+   "resolved": 78,
+   "abstained": 11,
+   "exactPageTypeAccuracy": 0.8764044943820225,
+   "knownFormResolvedPrecision": 1,
+   "knownFormCoverage": 0.8764044943820225,
+   "wrongFamilyResolution": 0,
+   "resolvedBySource": {
+    "DIRECT": 29,
+    "INHERITED": 49
+   }
+  },
+  "v2": {
+   "rows": 170,
+   "knownFormGtRows": 170,
+   "resolved": 155,
+   "abstained": 15,
+   "exactPageTypeAccuracy": 0.9117647058823529,
+   "knownFormResolvedPrecision": 1,
+   "knownFormCoverage": 0.9117647058823529,
+   "wrongFamilyResolution": 0,
+   "resolvedBySource": {
+    "DIRECT": 62,
+    "INHERITED": 93
+   }
+  }
+ },
+ "byOriginalEvaluationRole": {
+  "v0|DEVELOPMENT": {
+   "rows": 142,
+   "knownFormGtRows": 142,
+   "resolved": 142,
+   "abstained": 0,
+   "exactPageTypeAccuracy": 1,
+   "knownFormResolvedPrecision": 1,
+   "knownFormCoverage": 1,
+   "wrongFamilyResolution": 0,
+   "resolvedBySource": {
+    "DIRECT": 54,
+    "INHERITED": 88
+   }
+  },
+  "v0|FROZEN_EVALUATION": {
+   "rows": 30,
+   "knownFormGtRows": 30,
+   "resolved": 28,
+   "abstained": 2,
+   "exactPageTypeAccuracy": 0.9333333333333333,
+   "knownFormResolvedPrecision": 1,
+   "knownFormCoverage": 0.9333333333333333,
+   "wrongFamilyResolution": 0,
+   "resolvedBySource": {
+    "DIRECT": 8,
+    "INHERITED": 20
+   }
+  },
+  "v1|FROZEN_EVALUATION_V1": {
+   "rows": 89,
+   "knownFormGtRows": 89,
+   "resolved": 78,
+   "abstained": 11,
+   "exactPageTypeAccuracy": 0.8764044943820225,
+   "knownFormResolvedPrecision": 1,
+   "knownFormCoverage": 0.8764044943820225,
+   "wrongFamilyResolution": 0,
+   "resolvedBySource": {
+    "DIRECT": 29,
+    "INHERITED": 49
+   }
+  },
+  "v2|FROZEN_EVALUATION_V2": {
+   "rows": 170,
+   "knownFormGtRows": 170,
+   "resolved": 155,
+   "abstained": 15,
+   "exactPageTypeAccuracy": 0.9117647058823529,
+   "knownFormResolvedPrecision": 1,
+   "knownFormCoverage": 0.9117647058823529,
+   "wrongFamilyResolution": 0,
+   "resolvedBySource": {
+    "DIRECT": 62,
+    "INHERITED": 93
+   }
+  }
+ },
+ "directSubset": {
+  "rows": 150,
+  "knownFormGtRows": 150,
+  "resolved": 150,
+  "abstained": 0,
+  "exactPageTypeAccuracy": 1,
+  "knownFormResolvedPrecision": 1,
+  "knownFormCoverage": 1,
+  "wrongFamilyResolution": 0,
+  "resolvedBySource": {
+   "DIRECT": 150,
+   "INHERITED": 0
+  }
+ },
+ "continuationSubset": {
+  "rows": 101,
+  "knownFormGtRows": 101,
+  "resolved": 101,
+  "abstained": 0,
+  "exactPageTypeAccuracy": 1,
+  "knownFormResolvedPrecision": 1,
+  "knownFormCoverage": 1,
+  "wrongFamilyResolution": 0,
+  "resolvedBySource": {
+   "DIRECT": 0,
+   "INHERITED": 101
+  }
+ },
+ "abstentionReasonsOnKnownForm": {
+  "UNRESOLVED:NO_ACTIVE_STATE|gt=DETAIL": 26,
+  "UNRESOLVED:NO_ACTIVE_STATE|gt=STAFFING": 2
+ },
+ "wrongFamilyRows": [],
+ "otherOrUnresolvedGtRows": 0,
+ "openSetSafety": "NOT_EVALUATED",
+ "engineeringJudgment": "IMPLEMENTATION_CONFORMANT / STOP FOR REVIEW"
+}
