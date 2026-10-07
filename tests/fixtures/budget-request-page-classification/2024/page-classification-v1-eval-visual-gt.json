@@ -1,0 +1,1598 @@
+{
+ "schema": "budget-request-page-classification-v1-eval-visual-gt/v0",
+ "scope": "v1 evaluation visual GT（FROZEN_EVALUATION_V1）。page の見た目だけを根拠にした label。classifier は未実装",
+ "preregistrationCommit": "4dbc6cac33a00b5e4cbff58ca9ae6c2d752798e9",
+ "preregistration": {
+  "doc": "docs/tasks/20261007_2105_Budget_Request_Page_Classification_v1_Evaluation_Preregistration.md",
+  "docSha256": "ca9b1bea2d26ffdb92da5b3f4775083de20237f64ad98c86604ace1405a64d52"
+ },
+ "rawTextCorpusDigest": "7c6d2dcec1f4bec0ca37a1b3aa391adce7d99b93ac4642c74cab7a328dac4052",
+ "v0CandidateFixtureSha256": "373c5c1281d9811656a0c4802186745550a46ca235dd572287808f5422182a05",
+ "v0VisualGtFixtureSha256": "707641561e275b658470d767d1e8e609b464f5642a862622daf9cf0d0173fcdb",
+ "v1CandidateFixtureSha256": "1eb3507576276615841cadde1d83544dac99e40dde1ce21880ae3bcaf580a162",
+ "samplingSeed": "budget-request-page-classification-v1-eval-20261007",
+ "labelingProtocol": "v1 candidate 全 row を 80dpi PNG に render し、sha256(\"blind-v1|{localPdfPath}|{physicalPage}\") 昇順の連番で（path・publisher・split・stratum・active state・DIRECT 結果・Raw Text・manifest role・近傍 page・MOF・v0 GT を見ない状態で）1 枚ずつ目視して label。OCR 不使用。",
+ "summary": {
+  "rows": 89,
+  "typeCounts": {
+   "COVER": 8,
+   "DETAIL": 56,
+   "STAFFING": 2,
+   "SUMMARY": 18,
+   "TOC": 5
+  },
+  "typeCountsByStratum": {
+   "CONTINUATION_BALANCED|DETAIL": 8,
+   "CONTINUATION_BALANCED|SUMMARY": 7,
+   "CONTINUATION_BALANCED|TOC": 1,
+   "CORPUS_RANDOM_V1|DETAIL": 29,
+   "CORPUS_RANDOM_V1|SUMMARY": 3,
+   "DIRECT_BALANCED|COVER": 8,
+   "DIRECT_BALANCED|DETAIL": 7,
+   "DIRECT_BALANCED|STAFFING": 1,
+   "DIRECT_BALANCED|SUMMARY": 8,
+   "DIRECT_BALANCED|TOC": 4,
+   "R1_NO_ACTIVE_STATE|DETAIL": 3,
+   "R2_PRE_DIRECT_TRANSITION|DETAIL": 2,
+   "R2_PRE_DIRECT_TRANSITION|SUMMARY": 1,
+   "R3_LONG_INHERITANCE_TAIL|DETAIL": 6,
+   "R5_POST_RESET|DETAIL": 1,
+   "R7_PDF_START_WITHOUT_DIRECT|STAFFING": 1
+  },
+  "v0GtOverlap": 0,
+  "sourceHashMismatch": 0,
+  "textHashMismatch": 0
+ },
+ "adequacy": {
+  "safety": {
+   "safetyNegativeRows": 0,
+   "safetyNegativePublisherDomains": 0,
+   "safetyNegativeRiskStrata": [],
+   "thresholds": {
+    "rows": 10,
+    "publisherDomains": 2,
+    "riskStrata": 2
+   },
+   "falseResolvedSafety": "NOT EVALUABLE",
+   "result": "INSUFFICIENT"
+  },
+  "semanticCoverage": {
+   "coreFamilyCounts": {
+    "COVER": 8,
+    "TOC": 5,
+    "SUMMARY": 18,
+    "DETAIL": 56,
+    "STAFFING": 2
+   },
+   "continuationOrRiskCountsByFamily": {
+    "TOC": 1,
+    "SUMMARY": 7,
+    "DETAIL": 16,
+    "STAFFING": 0
+   },
+   "thresholds": {
+    "corePerFamily": 5,
+    "continuationPerFamily": 3
+   },
+   "priorityExemption": "PRIORITY_* は publisher-domain limitation により exemption（core 5 の不足は exemption にしない）",
+   "result": "INSUFFICIENT"
+  },
+  "judgment": "INSUFFICIENT / STOP"
+ },
+ "rows": [
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+   "pdfSha256": "315909085871656cc0428feaa5941ed456dd8d024c6511e511e86ab652623b33",
+   "physicalPage": 2,
+   "textSha256": "9b4b5ec0e61807c9a0872b51079e8051ca0da1697fc52180378505d2d2a86ea4",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": 53,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "SUMMARY",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求額総表」title"
+   }
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+   "pdfSha256": "315909085871656cc0428feaa5941ed456dd8d024c6511e511e86ab652623b33",
+   "physicalPage": 4,
+   "textSha256": "641badd3b582c22b4891103242607c26dd472b4929b597d47ecd7439cc272120",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": 53,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CONTINUATION_BALANCED"
+   ],
+   "gt": {
+    "pageType": "SUMMARY",
+    "evidence": "VISUAL",
+    "note": "総表形式（明細書頁数・title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+   "pdfSha256": "315909085871656cc0428feaa5941ed456dd8d024c6511e511e86ab652623b33",
+   "physicalPage": 5,
+   "textSha256": "3f18dae4c0df0cbff2483e287b31463db40a210d7213d41f7726071cc6001094",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": 53,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CONTINUATION_BALANCED",
+    "R2_PRE_DIRECT_TRANSITION"
+   ],
+   "gt": {
+    "pageType": "SUMMARY",
+    "evidence": "VISUAL",
+    "note": "総表形式（組織計・明細書頁数・title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+   "pdfSha256": "315909085871656cc0428feaa5941ed456dd8d024c6511e511e86ab652623b33",
+   "physicalPage": 6,
+   "textSha256": "74713443c547e8a96415f3ef0dcde47ec735a07a35426d30afd62e8c210366b4",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": 53,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "COVER",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求書」表紙"
+   }
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+   "pdfSha256": "315909085871656cc0428feaa5941ed456dd8d024c6511e511e86ab652623b33",
+   "physicalPage": 8,
+   "textSha256": "af757ceb1edc0f53f877f0e81c884456c9c17d1aa26dbccfb7def1522b1b06cc",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": 53,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "COVER",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求書」表紙"
+   }
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+   "pdfSha256": "315909085871656cc0428feaa5941ed456dd8d024c6511e511e86ab652623b33",
+   "physicalPage": 9,
+   "textSha256": "e9e76716c2e9e494e54ba5dc3dddf56fc7276d6804449eb5c8864d1629ce525f",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": 53,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "SUMMARY",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求額総表」title"
+   }
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+   "pdfSha256": "315909085871656cc0428feaa5941ed456dd8d024c6511e511e86ab652623b33",
+   "physicalPage": 13,
+   "textSha256": "61e82420ee36a65451e4944bbaeea4e3d75bb79e2d347843adc225fb4b9e3bbf",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": 53,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "SUMMARY",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求額総表」title"
+   }
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+   "pdfSha256": "315909085871656cc0428feaa5941ed456dd8d024c6511e511e86ab652623b33",
+   "physicalPage": 15,
+   "textSha256": "07a74a931aab037a423d2fc740a7df4dfde877cf4ad2fe43d0296edb37015561",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": 53,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "SUMMARY",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求額総表」title"
+   }
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+   "pdfSha256": "315909085871656cc0428feaa5941ed456dd8d024c6511e511e86ab652623b33",
+   "physicalPage": 16,
+   "textSha256": "29dce68dea534cd44d4e43fb9689ea493e3884d5a0f78d19c23dcee90762efff",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": 53,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "COVER",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求書」表紙"
+   }
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+   "pdfSha256": "315909085871656cc0428feaa5941ed456dd8d024c6511e511e86ab652623b33",
+   "physicalPage": 19,
+   "textSha256": "a8b107bf14cfb093754257ac4683c4b316ace4ae5da21ea02db5206bbf9de3b3",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": 53,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "SUMMARY",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求額総表」title"
+   }
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+   "pdfSha256": "315909085871656cc0428feaa5941ed456dd8d024c6511e511e86ab652623b33",
+   "physicalPage": 20,
+   "textSha256": "37dbf2eb9342b8789fdba17fb344744e4c479f9572dbd019633683de3268f4cc",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": 53,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "COVER",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求書」表紙"
+   }
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+   "pdfSha256": "315909085871656cc0428feaa5941ed456dd8d024c6511e511e86ab652623b33",
+   "physicalPage": 21,
+   "textSha256": "4f6c717cf9edc8337c9402212509ca0e40048150d6ef31bacd230d256098e39d",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": 53,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "SUMMARY",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求額総表」title"
+   }
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+   "pdfSha256": "315909085871656cc0428feaa5941ed456dd8d024c6511e511e86ab652623b33",
+   "physicalPage": 22,
+   "textSha256": "f2feede5420affdbe38237f0ebc7e31a1bdebd101451db14465b955a47e4ff31",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": 53,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "COVER",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求書」表紙"
+   }
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+   "pdfSha256": "315909085871656cc0428feaa5941ed456dd8d024c6511e511e86ab652623b33",
+   "physicalPage": 23,
+   "textSha256": "791d1f41ad9b80a0ed3915a245eb17fc33418e3339342f9a2b2061296269e29e",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": 53,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "SUMMARY",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求額総表」title"
+   }
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+   "pdfSha256": "315909085871656cc0428feaa5941ed456dd8d024c6511e511e86ab652623b33",
+   "physicalPage": 24,
+   "textSha256": "7cc92967ac44be516e41ef57c0761e99f93cfe952bd0ebba2fa4dadb01d59a16",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": 53,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "COVER",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求書」表紙"
+   }
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+   "pdfSha256": "315909085871656cc0428feaa5941ed456dd8d024c6511e511e86ab652623b33",
+   "physicalPage": 25,
+   "textSha256": "a3e885bb0145eb5a41a0ad89cad32a025492cd27e3910e4afb720d558cdcd085",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": 53,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "SUMMARY",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求額総表」title"
+   }
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/1.pdf",
+   "pdfSha256": "7b5de5dbd397c7067cab4ea527ef02681e91265914057651ee5b886174de7f4e",
+   "physicalPage": 1,
+   "textSha256": "6afd1c770ebc2d2c804516f35f302df50493afd5533e193055291f634de221b8",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": 53,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求額明細表」title"
+   }
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/1.pdf",
+   "pdfSha256": "7b5de5dbd397c7067cab4ea527ef02681e91265914057651ee5b886174de7f4e",
+   "physicalPage": 3,
+   "textSha256": "5d593b0311ab3afa385c6f341745884703554506adcabd997f2f4928489c1406",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": 53,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CONTINUATION_BALANCED"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/e2.pdf",
+   "pdfSha256": "6267ffbdc50e439899169659817271da4aa97596eb48e85fe3122f292f3ab7f2",
+   "physicalPage": 1,
+   "textSha256": "e273637cf8183c844ad3a0056043e0015a0869f83aaf854b1bf69853f11e6f57",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": 54,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求額明細表」title"
+   }
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/e2.pdf",
+   "pdfSha256": "6267ffbdc50e439899169659817271da4aa97596eb48e85fe3122f292f3ab7f2",
+   "physicalPage": 2,
+   "textSha256": "21b30e2e767e1b9b2e530e87625ed6173745d60462b2a3708a355a47194d6a01",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": 54,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CONTINUATION_BALANCED"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/e2.pdf",
+   "pdfSha256": "6267ffbdc50e439899169659817271da4aa97596eb48e85fe3122f292f3ab7f2",
+   "physicalPage": 11,
+   "textSha256": "6e7c92979ba8b8780180d8a313425d082a3c085adaca2dad5b10f17fd7057346",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": 54,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CONTINUATION_BALANCED"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/f1.pdf",
+   "pdfSha256": "80a657b39cf675a938c21dc3ca3a79a58dfb3fef623af59ebaddc2eb60145386",
+   "physicalPage": 1,
+   "textSha256": "9da8286c90bb1e635d54c708901da2105659aa4061818f4774bb216a5e3767b7",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": 55,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "COVER",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求書」表紙"
+   }
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/f2.pdf",
+   "pdfSha256": "feca6f529406523105741fb7e136d9d4439b862fc38f422567cf0f76dadc1f89",
+   "physicalPage": 1,
+   "textSha256": "552d6005eb848d4ce61d244f240f42231a20fa857317e6de81e2496de7fda22b",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": 55,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求額明細表」title"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "pdfSha256": "91b39e9902610e13aa7be445db2d2d2a3e38166fd5f449bd11f94cfe5fe3b6d5",
+   "physicalPage": 3,
+   "textSha256": "2843553a935157cc8cfc95af621a235ac7377c3cbe6ea87992288b79f437691d",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "TOC",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求額目次」title"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "pdfSha256": "91b39e9902610e13aa7be445db2d2d2a3e38166fd5f449bd11f94cfe5fe3b6d5",
+   "physicalPage": 4,
+   "textSha256": "11e370d53fa968ca0ef45a3a60db7004f9f8f726d17a86ba47d8d34ae9c0e3f5",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CONTINUATION_BALANCED"
+   ],
+   "gt": {
+    "pageType": "TOC",
+    "evidence": "VISUAL",
+    "note": "区分/ページの2段目次の続き"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_02.pdf",
+   "pdfSha256": "d2d1927eb068a97901cb7dfb0c104013539bb6f9dda8bab4cd36dc1f9b45c831",
+   "physicalPage": 2,
+   "textSha256": "2797e7e0bd66f61ed640d0243a01a6a9a81e9bdf3f629ce1c183263411f9baee",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CONTINUATION_BALANCED"
+   ],
+   "gt": {
+    "pageType": "SUMMARY",
+    "evidence": "VISUAL",
+    "note": "総表形式（明細書頁数・title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_02.pdf",
+   "pdfSha256": "d2d1927eb068a97901cb7dfb0c104013539bb6f9dda8bab4cd36dc1f9b45c831",
+   "physicalPage": 3,
+   "textSha256": "7180e099ed6ec34bfeb86f98e716063fe49ea952e2435eaaf23f51e8e0479cbb",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CONTINUATION_BALANCED"
+   ],
+   "gt": {
+    "pageType": "SUMMARY",
+    "evidence": "VISUAL",
+    "note": "総表形式（明細書頁数・title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_02.pdf",
+   "pdfSha256": "d2d1927eb068a97901cb7dfb0c104013539bb6f9dda8bab4cd36dc1f9b45c831",
+   "physicalPage": 6,
+   "textSha256": "76432ed8b48003c00de2c180a1a1be6fce5e5067a042d4b1f1e8ba8c89ac97fd",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CONTINUATION_BALANCED"
+   ],
+   "gt": {
+    "pageType": "SUMMARY",
+    "evidence": "VISUAL",
+    "note": "総表形式（明細書頁数・title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_02.pdf",
+   "pdfSha256": "d2d1927eb068a97901cb7dfb0c104013539bb6f9dda8bab4cd36dc1f9b45c831",
+   "physicalPage": 8,
+   "textSha256": "3ad6f8502cf563c5cc86a60cbfbd44ddbaeeeed78a847eecf3d8227dd3094574",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CONTINUATION_BALANCED"
+   ],
+   "gt": {
+    "pageType": "SUMMARY",
+    "evidence": "VISUAL",
+    "note": "総表形式の所管計のみの page（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 1,
+   "textSha256": "d9d4f2fbc90e9107f8cb5b84d873f4cbc77ba242ee2eac70fdaecb48dadc13d4",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求額明細表」title"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 4,
+   "textSha256": "7c88ab9d6da7262357db06b1130010bc232dd448ab372d5b9f8769b160d15e2e",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CONTINUATION_BALANCED"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 47,
+   "textSha256": "573ec123bca4fed773a094e32d12a1eff4b23998644b3a3b05ab0013ffce2bbc",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 57,
+   "textSha256": "624c3afd6f4c49636a80878d913a297905cbc306a411ae85eb1cd41dc90db6ee",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 58,
+   "textSha256": "a2db68d0fb64c9e2b16e11b1a95fd1429e2e8ae082e25e95a76ae400ae2fcb44",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CONTINUATION_BALANCED"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 268,
+   "textSha256": "fb9239ad32ecbda257accc4cf5a2e0e623c56df6a9f4e3568fba6e8028166693",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 317,
+   "textSha256": "b339273969dfd494eeacde73763b19741607c9ce87342846ca6232fe2d8cbf05",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 434,
+   "textSha256": "03dd2b0c4bf782ef1782cc6e468387b582660381d82e516a3a639ade323cc621",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 437,
+   "textSha256": "6a96185bcf15afc3363528f9b9a80db3ab132ee3c4c6cc6bd731fe842516b95a",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 449,
+   "textSha256": "e8103ea35702036058e6c535d2b619a89f979049b2dd1666c5e093501cdedc1e",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 463,
+   "textSha256": "06bb21f38dfa04114454fc94f87b5d6753014d027f69cc1a4c0e81b227109784",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 508,
+   "textSha256": "d6e83c84b3749b5614223de1ab05e54d40202171a785fde4a04e7ed65f199bd3",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 523,
+   "textSha256": "822a6695a1e713951de52024d603deef3a2f5fac6a25fa3563fc3e392e1f705d",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 535,
+   "textSha256": "d53ae64b9fb7308e5f720a8f5ecadb4142a8b74d9d21ae5b4a1231283ad338f9",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 537,
+   "textSha256": "a8705ab25da54b8447baae660ed6cb6499d76da37421641573f96603712cd477",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 566,
+   "textSha256": "51676b15a21f9f8b4f47f9b6d7384d93d513c3a2960a981bf62f042f1b1488b2",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "R3_LONG_INHERITANCE_TAIL"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 575,
+   "textSha256": "a5fa2bc0ec24b672e9f5d7aa965d2018457dd5a2116fdf04821af8adf282c587",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 616,
+   "textSha256": "63793f37b61b7822d6604ddcb12cdc6281554dbfda137868946bd8f657705a82",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "R3_LONG_INHERITANCE_TAIL"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 704,
+   "textSha256": "25c65b49e12ec3692d570c1f4fd59fd490166a40dac837744975aba728ec43ef",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 705,
+   "textSha256": "594a6797bd47febf6b55b3d2c5aee4ca712a11fb49887757a7ddd3d25050d149",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 734,
+   "textSha256": "84b82d7d13050ef4fc6f174030836fcb621adc51021aeea68f934518e5aba90b",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 745,
+   "textSha256": "75f6d24aa0c26bc86924baca6e3ff05c5872b1213b3db791623ac2722de9ae28",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 777,
+   "textSha256": "c9cbe148a6556d54349728e38b0a1cebeb937b5e6336d6d75ca1db43abd08c35",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 801,
+   "textSha256": "cb51c2420c6a1d7dba7f7efa4680b353c5da3216e7201b16f178f16ae3783d81",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 859,
+   "textSha256": "5f018ae50a85ebfd31bb08f0e1fdb2d59ee9d6f720d8f37c8c54a95947feebff",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 870,
+   "textSha256": "853f4b7f9ef57a6cb12e1a1c1107a8025e31e3edd280955128054791476d06ee",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "R3_LONG_INHERITANCE_TAIL"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 942,
+   "textSha256": "fb711791e9d3dd5b814827ac81637ff31895b6b12cc93d943d23f94105e4f4b3",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 1020,
+   "textSha256": "85b9db7be365f0e031c35696d253f2ef84d3a254f99247110ecea2b614478bdf",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 1045,
+   "textSha256": "764c0f9aec62ec83dd3104d8a41408e2e15d12e6c4bc7d948db4c3950c07cc17",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "R5_POST_RESET"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表の列枠で1行のみ記載された page"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 1048,
+   "textSha256": "3758030d8fd20d54976deda86eedb736ebef1b168f7fa597c468651e86bc18c8",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 1063,
+   "textSha256": "ca0d301bea905e0c9ff63eada7e6071c42e0d3e9f6e2cae1db01efe7590cdef7",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 1090,
+   "textSha256": "21286e0aa5e924e5cb75ceab322e2c9f8c8a79fdb84ed6218fe49224292374c7",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 1141,
+   "textSha256": "2ecdd0a176f31b26608f3e116a83551b36ff8c2053ec252c62f6b835c5e59f96",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "R1_NO_ACTIVE_STATE"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 1195,
+   "textSha256": "41c9fb3a7618ec96f3bfea27692eff3e021e9745737fe876bd8a52d2beb8f3cd",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 1207,
+   "textSha256": "37611631e45f69448d4f880c354b14b80f90955bc0cf0d4af060a8f881cd2879",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "R1_NO_ACTIVE_STATE"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 1270,
+   "textSha256": "2db6f46537a6aa2017b2fe811e20b87cb9642f9cd97b275a82980225ea0de5c9",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 1278,
+   "textSha256": "49d923d37391d35c9ecd1f7b0433c0a25fef6d1e5653a0e666d9e1920092d45b",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 1324,
+   "textSha256": "df720ea44a65d580fd26ed7d501a48a84e4331913ad4d86cfef1b8f8d2ce0f7d",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "R1_NO_ACTIVE_STATE"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_04.pdf",
+   "pdfSha256": "d6f75f7674c94ef97eb5cb5ff1bcf73b150bb7b05bb940be1cb2adde4033f457",
+   "physicalPage": 1,
+   "textSha256": "807055e921f59a161fe467f1b3e0fea1dd019f11300e739bb45161242be845f6",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "R7_PDF_START_WITHOUT_DIRECT"
+   ],
+   "gt": {
+    "pageType": "STAFFING",
+    "evidence": "VISUAL",
+    "note": "「概算要求定員表」title"
+   }
+  },
+  {
+   "localPdfPath": "data/download/moj.go.jp/content/001402819.pdf",
+   "pdfSha256": "6635e0e5fbb8a962d439d6d8d256c0c34892b0d9a366ea04daf15d338a36bb7b",
+   "physicalPage": 3,
+   "textSha256": "378d1d15b39c05148bb810252b3f741fade1eb7485b8f47544ab9d0318f4748e",
+   "publisherDomain": "moj.go.jp",
+   "logicalDocumentIndex": 3,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "TOC",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求額目次」title"
+   }
+  },
+  {
+   "localPdfPath": "data/download/moj.go.jp/content/001402819.pdf",
+   "pdfSha256": "6635e0e5fbb8a962d439d6d8d256c0c34892b0d9a366ea04daf15d338a36bb7b",
+   "physicalPage": 8,
+   "textSha256": "038d7febbb6ffd71c26c686db46c15e5d0595a22ef935ee51a7c955fd5ddc553",
+   "publisherDomain": "moj.go.jp",
+   "logicalDocumentIndex": 3,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CONTINUATION_BALANCED"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/moj.go.jp/content/001402819.pdf",
+   "pdfSha256": "6635e0e5fbb8a962d439d6d8d256c0c34892b0d9a366ea04daf15d338a36bb7b",
+   "physicalPage": 9,
+   "textSha256": "6176ff386b4c024bf109dadc4821bb90fde575f53a96b2b73e1cbc1aa00e70ee",
+   "publisherDomain": "moj.go.jp",
+   "logicalDocumentIndex": 3,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "R2_PRE_DIRECT_TRANSITION"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/ppc.go.jp/files/pdf/230831youkyu.pdf",
+   "pdfSha256": "0a9a58273e0f9c137414e062872c1c642ad0fa5aec403ae5e606c56f198db9a3",
+   "physicalPage": 1,
+   "textSha256": "4321881f8a75c15e7f09ca351b27ff8d1550afe1758ec597948a280d3b847e0d",
+   "publisherDomain": "ppc.go.jp",
+   "logicalDocumentIndex": 47,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "COVER",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求書」表紙"
+   }
+  },
+  {
+   "localPdfPath": "data/download/ppc.go.jp/files/pdf/230831youkyu.pdf",
+   "pdfSha256": "0a9a58273e0f9c137414e062872c1c642ad0fa5aec403ae5e606c56f198db9a3",
+   "physicalPage": 3,
+   "textSha256": "b50f6563526f1fc35c3978778a16a4d89ed8bd8ca83fd379d4785962f3f32a33",
+   "publisherDomain": "ppc.go.jp",
+   "logicalDocumentIndex": 47,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "TOC",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求額目次」title"
+   }
+  },
+  {
+   "localPdfPath": "data/download/ppc.go.jp/files/pdf/230831youkyu.pdf",
+   "pdfSha256": "0a9a58273e0f9c137414e062872c1c642ad0fa5aec403ae5e606c56f198db9a3",
+   "physicalPage": 7,
+   "textSha256": "2b70e5e87a26079a68d7ec2e2582353e2a06c9ad7cbc88cdba7438558699c22f",
+   "publisherDomain": "ppc.go.jp",
+   "logicalDocumentIndex": 47,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求額明細表」title"
+   }
+  },
+  {
+   "localPdfPath": "data/download/ppc.go.jp/files/pdf/230831youkyu.pdf",
+   "pdfSha256": "0a9a58273e0f9c137414e062872c1c642ad0fa5aec403ae5e606c56f198db9a3",
+   "physicalPage": 28,
+   "textSha256": "bb95a6e563639296b131f0cd8c15724c9096013c1a39a28b59dd08501b820790",
+   "publisherDomain": "ppc.go.jp",
+   "logicalDocumentIndex": 47,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "R2_PRE_DIRECT_TRANSITION"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/ppc.go.jp/files/pdf/230831youkyu.pdf",
+   "pdfSha256": "0a9a58273e0f9c137414e062872c1c642ad0fa5aec403ae5e606c56f198db9a3",
+   "physicalPage": 29,
+   "textSha256": "5fc547f9c8484fb2c71c2b39dd15c4b145c5c673bbabb416946872e855ec3314",
+   "publisherDomain": "ppc.go.jp",
+   "logicalDocumentIndex": 47,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "STAFFING",
+    "evidence": "VISUAL",
+    "note": "「概算要求定員表」title"
+   }
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "pdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+   "physicalPage": 8,
+   "textSha256": "8afc059dabf1d3dedf92cfb022f1701df21423e3fcd2cef43dde30d6d1b59236",
+   "publisherDomain": "reconstruction.go.jp",
+   "logicalDocumentIndex": 58,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CONTINUATION_BALANCED"
+   ],
+   "gt": {
+    "pageType": "SUMMARY",
+    "evidence": "VISUAL",
+    "note": "総表形式（明細書頁数・title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "pdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+   "physicalPage": 10,
+   "textSha256": "f98fddf9333f4d1295114d054a6005e640290d3dececa4fdc12f0537017c1093",
+   "publisherDomain": "reconstruction.go.jp",
+   "logicalDocumentIndex": 58,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "SUMMARY",
+    "evidence": "VISUAL",
+    "note": "総表形式（明細書頁数・title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "pdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+   "physicalPage": 11,
+   "textSha256": "67fabe03462f6a418b386b2f3283ec1d2c1ffdad067d3ea1663039313f57bf48",
+   "publisherDomain": "reconstruction.go.jp",
+   "logicalDocumentIndex": 58,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "SUMMARY",
+    "evidence": "VISUAL",
+    "note": "総表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "pdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+   "physicalPage": 13,
+   "textSha256": "019aa88f4d74eb66e765f8ebde53f86f236e4421b3659fce4284bbe23967c017",
+   "publisherDomain": "reconstruction.go.jp",
+   "logicalDocumentIndex": 58,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求額明細表」title"
+   }
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "pdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+   "physicalPage": 16,
+   "textSha256": "b06acb0cc090968f8f06d1915cc943ee3018087ff489a1c05348b212a60d4b6e",
+   "publisherDomain": "reconstruction.go.jp",
+   "logicalDocumentIndex": 58,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CONTINUATION_BALANCED"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "pdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+   "physicalPage": 47,
+   "textSha256": "41e0f7a494fae9d5c77cba5f646c30b190a293f5737312880120a6653a268352",
+   "publisherDomain": "reconstruction.go.jp",
+   "logicalDocumentIndex": 58,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "R3_LONG_INHERITANCE_TAIL"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "pdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+   "physicalPage": 51,
+   "textSha256": "e37313b8f6c352771f32479c73d247b01f26353a72952241b4d801c652d4b832",
+   "publisherDomain": "reconstruction.go.jp",
+   "logicalDocumentIndex": 58,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "R3_LONG_INHERITANCE_TAIL"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "pdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+   "physicalPage": 64,
+   "textSha256": "b2c917f4be8f3b4cf50df60302b0cb5039e31c00c41f3fda749897a751ed246e",
+   "publisherDomain": "reconstruction.go.jp",
+   "logicalDocumentIndex": 58,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "R3_LONG_INHERITANCE_TAIL"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "pdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+   "physicalPage": 67,
+   "textSha256": "5412d6cdcb1beb2367daac346c1363d85f57e8457f1b2d2af163b5dc6d522a88",
+   "publisherDomain": "reconstruction.go.jp",
+   "logicalDocumentIndex": 58,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CORPUS_RANDOM_V1"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  },
+  {
+   "localPdfPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf",
+   "pdfSha256": "a5a91f4b79e6809bac97613037530070f2a4ae898aaf5694dfbaea0562b1e28f",
+   "physicalPage": 3,
+   "textSha256": "a5b81a9bfa18b3d484cbc1352d8990b0a10f165f8f78d793a20a3308f5bc2b5d",
+   "publisherDomain": "sangiin.go.jp",
+   "logicalDocumentIndex": 38,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "TOC",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求額目次」title"
+   }
+  },
+  {
+   "localPdfPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf",
+   "pdfSha256": "a5a91f4b79e6809bac97613037530070f2a4ae898aaf5694dfbaea0562b1e28f",
+   "physicalPage": 5,
+   "textSha256": "b5576973919dc2f8902f5bcf853280bbeeb09d93281ce9c42b4f82dae0fd0f12",
+   "publisherDomain": "sangiin.go.jp",
+   "logicalDocumentIndex": 38,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "SUMMARY",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求額総表」title"
+   }
+  },
+  {
+   "localPdfPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf",
+   "pdfSha256": "a5a91f4b79e6809bac97613037530070f2a4ae898aaf5694dfbaea0562b1e28f",
+   "physicalPage": 7,
+   "textSha256": "cbc492c1e319acce841cc8b91b37db09ea6ed21b1ce35759d8dcaa389a811d19",
+   "publisherDomain": "sangiin.go.jp",
+   "logicalDocumentIndex": 38,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "DIRECT_BALANCED"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "「歳出概算要求額明細表」title"
+   }
+  },
+  {
+   "localPdfPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf",
+   "pdfSha256": "a5a91f4b79e6809bac97613037530070f2a4ae898aaf5694dfbaea0562b1e28f",
+   "physicalPage": 9,
+   "textSha256": "cac568942b0b8a6d755203e0d7514faf4b38ebb665fc0ea1dfdfdcc7b5c15269",
+   "publisherDomain": "sangiin.go.jp",
+   "logicalDocumentIndex": 38,
+   "evaluationRole": "FROZEN_EVALUATION_V1",
+   "strata": [
+    "CONTINUATION_BALANCED"
+   ],
+   "gt": {
+    "pageType": "DETAIL",
+    "evidence": "VISUAL",
+    "note": "明細表形式（title 無し）"
+   }
+  }
+ ]
+}
