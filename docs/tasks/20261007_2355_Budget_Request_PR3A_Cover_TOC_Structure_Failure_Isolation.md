@@ -52,7 +52,7 @@ TWO_COLUMN_INTERLEAVED_LINES（render 確認した 3 page で観測。corpus 全
 
 ## Source-observation schema の含意（freeze しない提案）
 
-`LogicalDocument → PhysicalFile[] → PageObservation[] → CoverObservation / TocObservation`。各 observation は filePath・fileSha256・physicalPage・textSha256・rawText（行単位）を保持し、bbox は null（現状取れない）。publisherAuthority・budgetJurisdiction・organization・account・printedPageRefRaw・physicalPage は別 field。printedPageRefRaw は文字列のまま保持し、cover bundle ごとに scope を持たせる。TOC は line を左右 column に分けた column-aware line（列位置を保持）を中間表現にする案が必要（Raw Text の行順は信用できない）。name は「折返し行を含む raw line の列」として保持し、結合は後段の別層で行う。same-name・same-code・same-page-reference を同一 entity とみなす relation は作らない。
+`LogicalDocument → PhysicalFile[] → PageObservation[] → CoverObservation / TocObservation`。各 observation は filePath・fileSha256・physicalPage・textSha256・rawText（行単位）を保持し、bbox は null（現状取れない）。publisherAuthority・budgetJurisdiction・organization・account・printedPageRefRaw・physicalPage は別 field。printedPageRefRaw は文字列のまま保持し、cover bundle ごとに scope を持たせる。TOC は line を左右 column に分けた column-aware line（列位置を保持）を中間表現にする案が必要（render 確認した page では Raw Text の行順が読み順と一致しないため、行順を前提にしない）。name は「折返し行を含む raw line の列」として保持し、結合は後段の別層で行う。same-name・same-code・same-page-reference を同一 entity とみなす relation は作らない。
 
 ## 未解決
 
