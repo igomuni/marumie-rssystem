@@ -1,0 +1,31 @@
+{
+ "schema": "budget-request-toc-physical-row-failure-taxonomy/v0",
+ "scope": "A 層 failure taxonomy（観測整理用。解決済みとは扱わない。#389 taxonomy の対応を残し、#389 artifact は書き換えない）",
+ "counts": {
+  "COLUMN_BOUNDARY_MULTIPLE_CANDIDATES": 8,
+  "COLUMN_BOUNDARY_NO_SAFE_EVIDENCE": 0,
+  "RIGHT_EMPTY_AMBIGUOUS": 0,
+  "CROSS_COLUMN_FRAGMENT_AMBIGUOUS": 0,
+  "WRAPPED_FRAGMENT_OWNER_AMBIGUOUS": 0,
+  "RAW_SOURCE_ORDER_CONFLICT": 0,
+  "CIRCLED_REQUEST_NUMBER_REPRESENTATION_LOSS": 9,
+  "ROW_BOUNDARY_REPRESENTATION_BLOCKED": 0,
+  "NEW_RISK_FAMILY": 1
+ },
+ "countsDenominator": "render した development page 10（NEW_DEVELOPMENT 6 + RECHECK 4）",
+ "notes": {
+  "COLUMN_BOUNDARY_MULTIPLE_CANDIDATES": "右 row の開始 index が page 内で row 種別（request-number / marker）ごとに 2 値。ただし各種別の spread は 0〜2、種別間 offset は 6〜10",
+  "CIRCLED_REQUEST_NUMBER_REPRESENTATION_LOSS": "視覚の丸囲みが raw で plain digit。digit は残り row 開始は観測可能（10 page 中 9 page で丸囲みを視認、request token の連番に欠落 0）",
+  "NEW_RISK_FAMILY": "indented sub rows（3 桁 code + name + page 参照。marker・request number なし）が 1 page（jinji `900024096.pdf` p3、machine 全 82 page 中 1 page）",
+  "RAW_TEXT_ORDER_MISMATCH(#389)": "各 column 内の raw 順は visual 順と一致（単調）。column 間の raw 行は y で interleave され row 対応しない。source order conflict（同一 column 内の順序逆転）は 0"
+ },
+ "mapping389": {
+  "COLUMN_BOUNDARY_AMBIGUOUS": "COLUMN_BOUNDARY_MULTIPLE_CANDIDATES",
+  "SAME_LINE_INTERLEAVE": "（変更なし）",
+  "RIGHT_COLUMN_EMPTY": "RIGHT_EMPTY_AMBIGUOUS の否定側（右 column 空を視覚確認した page）",
+  "WRAPPED_ROW_OWNERSHIP": "WRAPPED_FRAGMENT_OWNER_AMBIGUOUS（今回は 0。#389 の 4 page と今回の fragment は全て unique）",
+  "RAW_TEXT_ORDER_MISMATCH": "RAW_SOURCE_ORDER_CONFLICT とは別（column 間の行対応不一致。column 内の順序逆転ではない）",
+  "OTHER:circled-request-number-not-in-raw": "CIRCLED_REQUEST_NUMBER_REPRESENTATION_LOSS",
+  "PUA_PRESENT": "（本 PR では対象外。#389 のまま）"
+ }
+}
