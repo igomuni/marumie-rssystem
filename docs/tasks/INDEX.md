@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261007_2105_Budget_Request_Page_Classification_v3_Cumulative_Benchmark_Preregistration.md](20261007_2105_Budget_Request_Page_Classification_v3_Cumulative_Benchmark_Preregistration.md) — Page Classification v3 cumulative benchmark 事前登録(v2閾値継承・version別mapping・family厳密一致)。dry-runを先に1回見た逸脱を開示
 - [20261008_0030_Budget_Request_Page_Classification_v2_Closed_Scope_GT_Freeze.md](20261008_0030_Budget_Request_Page_Classification_v2_Closed_Scope_GT_Freeze.md) — Page Classification v2 closed-scope GT 170row freeze。STAFFING continuation 1(≥5未達)で INSUFFICIENT/STOP・open-set NOT EVALUATED
 - [20261007_2330_Budget_Request_Page_Classification_v2_Closed_Scope_Preregistration.md](20261007_2330_Budget_Request_Page_Classification_v2_Closed_Scope_Preregistration.md) — Page Classification v2 closed-scope 事前登録(claim限定・open-set NOT EVALUATED)とcandidate 170 row freeze(label前)。STAFFING continuation poolが1で不足見込み
 - [20261007_2300_Budget_Request_Page_Classification_v1_Evaluation_GT_Freeze.md](20261007_2300_Budget_Request_Page_Classification_v1_Evaluation_GT_Freeze.md) — Page Classification v1 評価GT 89row freeze。SAFETY_NEGATIVE 0・STAFFING 2 → INSUFFICIENT/STOP(false resolved は評価不能)
