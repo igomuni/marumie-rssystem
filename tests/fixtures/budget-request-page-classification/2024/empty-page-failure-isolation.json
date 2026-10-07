@@ -18,7 +18,7 @@
  "categoryRule": "VISUALLY_BLANK: 50dpi gray render が全画素 255 / RASTER_OR_IMAGE_DOMINANT: image op > 0 かつ showText op・font・pdfjs text 文字が 0 / それ以外 UNRESOLVED",
  "summary": {
   "physicalPdfs": 47,
-  "logicalDocumentsNote": "logical document 別集計は manifest の logicalDocumentIndex（raw-text-manifest）で別途対応づけ可能",
+  "logicalDocuments": 46,
   "hashMismatch": 0,
   "byCategory": {
    "RASTER_OR_IMAGE_DOMINANT": 1,
@@ -120,6 +120,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -163,6 +164,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -206,6 +208,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -249,6 +252,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -292,6 +296,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -335,6 +340,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -378,6 +384,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -421,6 +428,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -464,6 +472,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -507,6 +516,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -550,6 +560,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -593,6 +604,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -636,6 +648,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -679,6 +692,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -722,6 +736,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -765,6 +780,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -808,6 +824,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -851,6 +868,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -894,6 +912,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -937,6 +956,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -980,6 +1000,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -1023,6 +1044,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -1066,6 +1088,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -1109,6 +1132,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -1152,6 +1176,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -1195,6 +1220,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -1238,6 +1264,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -1281,6 +1308,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -1324,6 +1352,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -1367,6 +1396,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -1410,6 +1440,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -1453,6 +1484,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -1496,6 +1528,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -1539,6 +1572,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -1582,6 +1616,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -1625,6 +1660,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -1668,6 +1704,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -1711,6 +1748,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -1754,6 +1792,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -1797,6 +1836,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -1840,6 +1880,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -1883,6 +1924,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -1926,6 +1968,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -1969,6 +2012,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -2012,6 +2056,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -2055,6 +2100,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -2098,6 +2144,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -2141,6 +2188,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -2184,6 +2232,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -2227,6 +2276,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -2270,6 +2320,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -2313,6 +2364,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -2356,6 +2408,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -2399,6 +2452,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -2442,6 +2496,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -2485,6 +2540,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -2528,6 +2584,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -2571,6 +2628,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -2614,6 +2672,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -2657,6 +2716,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -2700,6 +2760,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -2743,6 +2804,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -2786,6 +2848,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -2829,6 +2892,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -2872,6 +2936,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -2915,6 +2980,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -2958,6 +3024,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -3001,6 +3068,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -3044,6 +3112,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -3087,6 +3156,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -3130,6 +3200,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -3173,6 +3244,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -3216,6 +3288,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -3259,6 +3332,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -3302,6 +3376,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -3345,6 +3420,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -3388,6 +3464,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -3431,6 +3508,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -3474,6 +3552,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -3517,6 +3596,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -3560,6 +3640,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -3603,6 +3684,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -3646,6 +3728,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -3689,6 +3772,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -3732,6 +3816,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -3775,6 +3860,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -3818,6 +3904,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -3861,6 +3948,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -3904,6 +3992,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -3947,6 +4036,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -3990,6 +4080,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -4033,6 +4124,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -4076,6 +4168,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -4119,6 +4212,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -4162,6 +4256,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -4205,6 +4300,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -4248,6 +4344,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -4291,6 +4388,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -4334,6 +4432,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -4377,6 +4476,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -4420,6 +4520,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -4463,6 +4564,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -4506,6 +4608,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -4549,6 +4652,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -4592,6 +4696,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -4635,6 +4740,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -4678,6 +4784,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -4721,6 +4828,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -4764,6 +4872,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -4807,6 +4916,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -4850,6 +4960,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 238619,
      "nonWhiteRatio": 0.98526,
      "darkRatio": 0.01406
     }
@@ -4893,6 +5004,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -4936,6 +5048,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -4979,6 +5092,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -5022,6 +5136,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -5065,6 +5180,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }
@@ -5108,6 +5224,7 @@
      "dpi": 50,
      "widthPx": 585,
      "heightPx": 414,
+     "nonWhitePixels": 0,
      "nonWhiteRatio": 0,
      "darkRatio": 0
     }

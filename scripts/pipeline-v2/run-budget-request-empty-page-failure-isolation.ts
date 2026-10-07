@@ -29,18 +29,18 @@ const EYE_VIEWED: Record<string, { status: 'VISUALLY_BLANK' | 'VISIBLE_CONTENT';
 };
 interface PageRec { localPdfPath: string; physicalPage: number; machineObservation: Obs; context: { emptyRunLength: number; positionInDocument: string; [k: string]: unknown }; [k: string]: unknown }
 type Cat = 'VISUALLY_BLANK' | 'RASTER_OR_IMAGE_DOMINANT' | 'UNRESOLVED';
-interface Obs { showTextOps: number; imageOps: number; pathOps: number; pdfjsTextNonWhitespaceChars: number; pdffontsFontsOnPage: number; render: { nonWhiteRatio: number; [k: string]: unknown }; [k: string]: unknown }
+interface Obs { showTextOps: number; imageOps: number; pathOps: number; pdfjsTextNonWhitespaceChars: number; pdffontsFontsOnPage: number; render: { nonWhitePixels: number; nonWhiteRatio: number; [k: string]: unknown }; [k: string]: unknown }
 /** machine 観測だけから決まる deterministic rule。原因は断定しない */
 function categoryOf(o: Obs): Cat {
-  if (o.render.nonWhiteRatio === 0) return 'VISUALLY_BLANK'; // 50dpi の gray render が全画素 255
+  if (o.render.nonWhitePixels === 0) return 'VISUALLY_BLANK'; // 50dpi の gray render が全画素 255（整数画素数で判定。表示用 ratio は丸め値で判定に使わない）
   if (o.imageOps > 0 && o.showTextOps === 0 && o.pdffontsFontsOnPage === 0 && o.pdfjsTextNonWhitespaceChars === 0) return 'RASTER_OR_IMAGE_DOMINANT';
   return 'UNRESOLVED';
 }
 
-interface Doc { localPdfPath: string; pdfSha256: string; pageCount: number; status: string; emptyPages: number[]; pageTextSha256: string[] }
+interface Doc { logicalDocumentIndex: number; localPdfPath: string; pdfSha256: string; pageCount: number; status: string; emptyPages: number[]; pageTextSha256: string[] }
 
-/** pdftoppm の PGM 出力から non-white 画素率を測る（255 未満の画素）。文字の復元には使わない */
-function pixelStats(pdf: string, page: number): { width: number; height: number; nonWhiteRatio: number; darkRatio: number } {
+/** pdftoppm の PGM 出力から non-white 画素率を測る。文字の復元には使わない */
+function pixelStats(pdf: string, page: number): { width: number; height: number; nonWhitePixels: number; nonWhiteRatio: number; darkRatio: number } {
   const buf = execFileSync('pdftoppm', ['-f', String(page), '-l', String(page), '-r', String(DPI), '-gray', '-singlefile', pdf], { maxBuffer: 1 << 28 });
   // P5\n<w> <h>\n255\n<data>
   let pos = 0; const tok: string[] = [];
@@ -49,12 +49,13 @@ function pixelStats(pdf: string, page: number): { width: number; height: number;
   const [, w, h] = tok; const data = buf.subarray(pos);
   let nw = 0, dark = 0;
   for (const v of data) { if (v < 255) nw++; if (v < 128) dark++; }
-  return { width: Number(w), height: Number(h), nonWhiteRatio: nw / data.length, darkRatio: dark / data.length };
+  return { width: Number(w), height: Number(h), nonWhitePixels: nw, nonWhiteRatio: nw / data.length, darkRatio: dark / data.length };
 }
 
 async function main() {
   const m = JSON.parse(fs.readFileSync(FIXTURE, 'utf8')) as { frozenInput: { corpusDigestSha256: string }; documents: Doc[] };
   if (m.frozenInput.corpusDigestSha256 !== FROZEN_DIGEST) throw new Error('frozen corpus digest mismatch');
+  const rawDocs = m.documents;
   const docs = m.documents.filter(d => d.status === 'EXTRACTED' && d.emptyPages.length > 0);
   const targets = docs.flatMap(d => d.emptyPages.map(p => ({ d, p })));
   if (targets.length !== 117) throw new Error(`target population ${targets.length} != 117`);
@@ -101,7 +102,7 @@ async function main() {
           pdfjsTextItems: textItems.length, pdfjsTextNonWhitespaceChars: textItems.reduce((n, i) => n + i.str.replace(/\s/g, '').length, 0),
           annotations: annots.length, pdffontsFontsOnPage: ft,
           pdfimagesOnPage: imgList.filter(a => Number(a[0]) === p).length,
-          render: { dpi: DPI, widthPx: ps.width, heightPx: ps.height, nonWhiteRatio: Math.round(ps.nonWhiteRatio * 1e5) / 1e5, darkRatio: Math.round(ps.darkRatio * 1e5) / 1e5 },
+          render: { dpi: DPI, widthPx: ps.width, heightPx: ps.height, nonWhitePixels: ps.nonWhitePixels, nonWhiteRatio: Math.round(ps.nonWhiteRatio * 1e5) / 1e5, darkRatio: Math.round(ps.darkRatio * 1e5) / 1e5 },
         },
         context: { previousPageRawTextStatus: st(p - 1), nextPageRawTextStatus: st(p + 1), emptyRunLength: run, positionInDocument: p === 1 ? 'first' : p === d.pageCount ? 'last' : 'middle' },
       });
@@ -118,13 +119,14 @@ async function main() {
       ...pg,
       visualObservation: eye
         ? { status: eye.status, method: 'eye-viewed render (60dpi png) + pixel stats', note: eye.note }
-        : { status: o.render.nonWhiteRatio === 0 ? 'VISUALLY_BLANK' : 'UNRESOLVED', method: 'pixel stats only（目視していない）', note: o.render.nonWhiteRatio === 0 ? '50dpi render が全画素白' : '' },
+        : { status: o.render.nonWhitePixels === 0 ? 'VISUALLY_BLANK' : 'UNRESOLVED', method: 'pixel stats only（目視していない）', note: o.render.nonWhitePixels === 0 ? '50dpi render が全画素白' : '' },
       isolationCategory: cat,
       causeStatus: cat === 'UNRESOLVED' ? 'UNRESOLVED' : 'EVIDENCED',
     };
   });
   const tally = (f: (p: (typeof out)[number]) => string) => Object.fromEntries([...out.reduce((m2, p) => m2.set(f(p), (m2.get(f(p)) ?? 0) + 1), new Map<string, number>())].sort());
   const perPdf = tally(p => String(p.localPdfPath));
+  const perPdfSet = new Set(Object.keys(perPdf));
   const result = {
     schema: SCHEMA,
     scope: 'EXTRACTED 文書内の EMPTY page の failure isolation。page type は分類しない。OCR・Route C 不使用',
@@ -134,7 +136,7 @@ async function main() {
     categoryRule: "VISUALLY_BLANK: 50dpi gray render が全画素 255 / RASTER_OR_IMAGE_DOMINANT: image op > 0 かつ showText op・font・pdfjs text 文字が 0 / それ以外 UNRESOLVED",
     summary: {
       physicalPdfs: Object.keys(perPdf).length,
-      logicalDocumentsNote: 'logical document 別集計は manifest の logicalDocumentIndex（raw-text-manifest）で別途対応づけ可能',
+      logicalDocuments: new Set(rawDocs.filter(d => perPdfSet.has(d.localPdfPath)).map(d => d.logicalDocumentIndex)).size,
       hashMismatch,
       byCategory: tally(p => p.isolationCategory),
       byCause: tally(p => p.causeStatus),
