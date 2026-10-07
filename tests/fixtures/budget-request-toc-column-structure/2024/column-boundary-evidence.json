@@ -1,0 +1,1005 @@
+{
+ "schema": "budget-request-toc-column-boundary-evidence/v0",
+ "scope": "post-hoc 補助分析（visual 観察後）。観測量のみで、column 検出 rule・threshold ではない",
+ "summary": {
+  "pages": 82,
+  "pagesWithRightRowLine": 38,
+  "pagesWithoutRightRowLine": 44,
+  "headerLacks2ndYokyuuToken": 10,
+  "pagesWithRightRowAndHeaderToken": 37,
+  "startOffsetDistribution": {
+   "1": 10,
+   "2": 11,
+   "3": 17,
+   "8": 6,
+   "9": 19,
+   "10": 16,
+   "11": 4
+  },
+  "pagesWithMultipleRightStartColumns": 35,
+  "distinctRightStartColumnsAcrossPages": 20
+ },
+ "pages": [
+  {
+   "localPdfPath": "data/download/soumu.go.jp/main_content/000901372.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "soumu.go.jp",
+   "headerLine2ndYokyuuColumn": 53,
+   "rightRowLineCount": 28,
+   "rightRowStartColumns": [
+    56,
+    63
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    3,
+    10
+   ]
+  },
+  {
+   "localPdfPath": "data/download/soumu.go.jp/main_content/000901372.pdf",
+   "physicalPage": 4,
+   "publisherDomain": "soumu.go.jp",
+   "headerLine2ndYokyuuColumn": 48,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/soumu.go.jp/main_content/000901375.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "soumu.go.jp",
+   "headerLine2ndYokyuuColumn": 50,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/moj.go.jp/content/001402819.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "moj.go.jp",
+   "headerLine2ndYokyuuColumn": 43,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "meti.go.jp",
+   "headerLine2ndYokyuuColumn": 53,
+   "rightRowLineCount": 23,
+   "rightRowStartColumns": [
+    55,
+    62
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    2,
+    9
+   ]
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "physicalPage": 4,
+   "publisherDomain": "meti.go.jp",
+   "headerLine2ndYokyuuColumn": 58,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneju_o.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "meti.go.jp",
+   "headerLine2ndYokyuuColumn": 53,
+   "rightRowLineCount": 6,
+   "rightRowStartColumns": [
+    55,
+    62
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    2,
+    9
+   ]
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneden_o.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "meti.go.jp",
+   "headerLine2ndYokyuuColumn": 50,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/enegen_o.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "meti.go.jp",
+   "headerLine2ndYokyuuColumn": 50,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/tokkyo_o.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "meti.go.jp",
+   "headerLine2ndYokyuuColumn": 47,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/fukko_o.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "meti.go.jp",
+   "headerLine2ndYokyuuColumn": 53,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "physicalPage": 2,
+   "publisherDomain": "mof.go.jp",
+   "headerLine2ndYokyuuColumn": null,
+   "rightRowLineCount": 5,
+   "rightRowStartColumns": [
+    55,
+    62
+   ],
+   "startOffsetsFromHeader2ndYokyuu": null
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "mof.go.jp",
+   "headerLine2ndYokyuuColumn": 49,
+   "rightRowLineCount": 3,
+   "rightRowStartColumns": [
+    52,
+    59
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    3,
+    10
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024jisinn_2.pdf",
+   "physicalPage": 2,
+   "publisherDomain": "mof.go.jp",
+   "headerLine2ndYokyuuColumn": null,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": null
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024kokusaiseirikikinn_2.pdf",
+   "physicalPage": 2,
+   "publisherDomain": "mof.go.jp",
+   "headerLine2ndYokyuuColumn": null,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": null
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024gaitame_2.pdf",
+   "physicalPage": 2,
+   "publisherDomain": "mof.go.jp",
+   "headerLine2ndYokyuuColumn": null,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": null
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024zaiyuu_2.pdf",
+   "physicalPage": 2,
+   "publisherDomain": "mof.go.jp",
+   "headerLine2ndYokyuuColumn": null,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": null
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tousi_2.pdf",
+   "physicalPage": 2,
+   "publisherDomain": "mof.go.jp",
+   "headerLine2ndYokyuuColumn": null,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": null
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tokuzai_2.pdf",
+   "physicalPage": 2,
+   "publisherDomain": "mof.go.jp",
+   "headerLine2ndYokyuuColumn": null,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": null
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "mhlw.go.jp",
+   "headerLine2ndYokyuuColumn": 53,
+   "rightRowLineCount": 14,
+   "rightRowStartColumns": [
+    56,
+    63
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    3,
+    10
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "physicalPage": 4,
+   "publisherDomain": "mhlw.go.jp",
+   "headerLine2ndYokyuuColumn": 54,
+   "rightRowLineCount": 21,
+   "rightRowStartColumns": [
+    57,
+    64
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    3,
+    10
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "physicalPage": 5,
+   "publisherDomain": "mhlw.go.jp",
+   "headerLine2ndYokyuuColumn": 52,
+   "rightRowLineCount": 31,
+   "rightRowStartColumns": [
+    53,
+    63
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    1,
+    11
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "physicalPage": 6,
+   "publisherDomain": "mhlw.go.jp",
+   "headerLine2ndYokyuuColumn": 54,
+   "rightRowLineCount": 36,
+   "rightRowStartColumns": [
+    55,
+    62,
+    63
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    1,
+    8,
+    9
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "physicalPage": 7,
+   "publisherDomain": "mhlw.go.jp",
+   "headerLine2ndYokyuuColumn": 54,
+   "rightRowLineCount": 15,
+   "rightRowStartColumns": [
+    55,
+    65
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    1,
+    11
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "mhlw.go.jp",
+   "headerLine2ndYokyuuColumn": 52,
+   "rightRowLineCount": 32,
+   "rightRowStartColumns": [
+    55,
+    61,
+    62
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    3,
+    9,
+    10
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+   "physicalPage": 4,
+   "publisherDomain": "mhlw.go.jp",
+   "headerLine2ndYokyuuColumn": 48,
+   "rightRowLineCount": 2,
+   "rightRowStartColumns": [
+    51,
+    58
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    3,
+    10
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "mhlw.go.jp",
+   "headerLine2ndYokyuuColumn": 50,
+   "rightRowLineCount": 32,
+   "rightRowStartColumns": [
+    52,
+    58,
+    59
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    2,
+    8,
+    9
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf",
+   "physicalPage": 4,
+   "publisherDomain": "mhlw.go.jp",
+   "headerLine2ndYokyuuColumn": 54,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "maff.go.jp",
+   "headerLine2ndYokyuuColumn": 52,
+   "rightRowLineCount": 10,
+   "rightRowStartColumns": [
+    55,
+    62
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    3,
+    10
+   ]
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "physicalPage": 4,
+   "publisherDomain": "maff.go.jp",
+   "headerLine2ndYokyuuColumn": 50,
+   "rightRowLineCount": 36,
+   "rightRowStartColumns": [
+    53,
+    59,
+    60
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    3,
+    9,
+    10
+   ]
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "physicalPage": 5,
+   "publisherDomain": "maff.go.jp",
+   "headerLine2ndYokyuuColumn": 57,
+   "rightRowLineCount": 31,
+   "rightRowStartColumns": [
+    58,
+    60,
+    67,
+    68
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    1,
+    3,
+    10,
+    11
+   ]
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "physicalPage": 6,
+   "publisherDomain": "maff.go.jp",
+   "headerLine2ndYokyuuColumn": 39,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "maff.go.jp",
+   "headerLine2ndYokyuuColumn": 53,
+   "rightRowLineCount": 8,
+   "rightRowStartColumns": [
+    55,
+    62
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    2,
+    9
+   ]
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "maff.go.jp",
+   "headerLine2ndYokyuuColumn": 50,
+   "rightRowLineCount": 32,
+   "rightRowStartColumns": [
+    52,
+    58,
+    59
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    2,
+    8,
+    9
+   ]
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf",
+   "physicalPage": 4,
+   "publisherDomain": "maff.go.jp",
+   "headerLine2ndYokyuuColumn": 58,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-8.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "maff.go.jp",
+   "headerLine2ndYokyuuColumn": 50,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "mlit.go.jp",
+   "headerLine2ndYokyuuColumn": 48,
+   "rightRowLineCount": 32,
+   "rightRowStartColumns": [
+    51,
+    58
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    3,
+    10
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 4,
+   "publisherDomain": "mlit.go.jp",
+   "headerLine2ndYokyuuColumn": 47,
+   "rightRowLineCount": 36,
+   "rightRowStartColumns": [
+    50,
+    57
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    3,
+    10
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 5,
+   "publisherDomain": "mlit.go.jp",
+   "headerLine2ndYokyuuColumn": 51,
+   "rightRowLineCount": 36,
+   "rightRowStartColumns": [
+    52,
+    60
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    1,
+    9
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 6,
+   "publisherDomain": "mlit.go.jp",
+   "headerLine2ndYokyuuColumn": 52,
+   "rightRowLineCount": 1,
+   "rightRowStartColumns": [
+    53
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    1
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 7,
+   "publisherDomain": "mlit.go.jp",
+   "headerLine2ndYokyuuColumn": 54,
+   "rightRowLineCount": 3,
+   "rightRowStartColumns": [
+    55
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    1
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 8,
+   "publisherDomain": "mlit.go.jp",
+   "headerLine2ndYokyuuColumn": 48,
+   "rightRowLineCount": 36,
+   "rightRowStartColumns": [
+    49,
+    56,
+    57
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    1,
+    8,
+    9
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 9,
+   "publisherDomain": "mlit.go.jp",
+   "headerLine2ndYokyuuColumn": 54,
+   "rightRowLineCount": 6,
+   "rightRowStartColumns": [
+    55,
+    65
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    1,
+    11
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630393.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "mlit.go.jp",
+   "headerLine2ndYokyuuColumn": 49,
+   "rightRowLineCount": 32,
+   "rightRowStartColumns": [
+    51,
+    57,
+    58
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    2,
+    8,
+    9
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630393.pdf",
+   "physicalPage": 4,
+   "publisherDomain": "mlit.go.jp",
+   "headerLine2ndYokyuuColumn": 40,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630395.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "mlit.go.jp",
+   "headerLine2ndYokyuuColumn": 52,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157010.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "env.go.jp",
+   "headerLine2ndYokyuuColumn": 57,
+   "rightRowLineCount": 18,
+   "rightRowStartColumns": [
+    59,
+    66
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    2,
+    9
+   ]
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157010.pdf",
+   "physicalPage": 4,
+   "publisherDomain": "env.go.jp",
+   "headerLine2ndYokyuuColumn": 58,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157012.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "env.go.jp",
+   "headerLine2ndYokyuuColumn": 53,
+   "rightRowLineCount": 6,
+   "rightRowStartColumns": [
+    55,
+    62
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    2,
+    9
+   ]
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157013.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "env.go.jp",
+   "headerLine2ndYokyuuColumn": 50,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157016.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "env.go.jp",
+   "headerLine2ndYokyuuColumn": 49,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "cfa.go.jp",
+   "headerLine2ndYokyuuColumn": 53,
+   "rightRowLineCount": 9,
+   "rightRowStartColumns": [
+    56,
+    63
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    3,
+    10
+   ]
+  },
+  {
+   "localPdfPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/aac2d779/20230907_policies_budget_05.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "cfa.go.jp",
+   "headerLine2ndYokyuuColumn": 47,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/digital.go.jp/assets/contents/node/basic_page/field_ref_resources/e9b99425-437c-4750-b4e2-6cca3cd877a6/0fab2c74/20230914_policies_budget_r6request_table_01.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "digital.go.jp",
+   "headerLine2ndYokyuuColumn": 47,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+   "physicalPage": 2,
+   "publisherDomain": "npa.go.jp",
+   "headerLine2ndYokyuuColumn": 57,
+   "rightRowLineCount": 5,
+   "rightRowStartColumns": [
+    59,
+    66
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    2,
+    9
+   ]
+  },
+  {
+   "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/hukkoutokubetukaikei.pdf",
+   "physicalPage": 2,
+   "publisherDomain": "npa.go.jp",
+   "headerLine2ndYokyuuColumn": 48,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "mod.go.jp",
+   "headerLine2ndYokyuuColumn": 53,
+   "rightRowLineCount": 32,
+   "rightRowStartColumns": [
+    56,
+    63
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    3,
+    10
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "physicalPage": 4,
+   "publisherDomain": "mod.go.jp",
+   "headerLine2ndYokyuuColumn": 54,
+   "rightRowLineCount": 1,
+   "rightRowStartColumns": [
+    57
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    3
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mofa.go.jp/mofaj/files/100546568.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "mofa.go.jp",
+   "headerLine2ndYokyuuColumn": 50,
+   "rightRowLineCount": 32,
+   "rightRowStartColumns": [
+    53,
+    59,
+    60
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    3,
+    9,
+    10
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mofa.go.jp/mofaj/files/100546568.pdf",
+   "physicalPage": 4,
+   "publisherDomain": "mofa.go.jp",
+   "headerLine2ndYokyuuColumn": 47,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "sangiin.go.jp",
+   "headerLine2ndYokyuuColumn": 44,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/shugiin.go.jp/internet/itdb_annai.nsf/html/statics/osirase/kaikei-saishutsugaisan6.pdf/%24File/kaikei-saishutsugaisan6.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "shugiin.go.jp",
+   "headerLine2ndYokyuuColumn": 50,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/ndl.go.jp/jp/aboutus/outline/r06_budgetrequest.pdf",
+   "physicalPage": 2,
+   "publisherDomain": "ndl.go.jp",
+   "headerLine2ndYokyuuColumn": null,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": null
+  },
+  {
+   "localPdfPath": "data/download/sotsui.go.jp/budget/images/r6budget_yokyu.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "sotsui.go.jp",
+   "headerLine2ndYokyuuColumn": 44,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/dangai.go.jp/info/pdf/r06_saisyutu-gaisan.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "dangai.go.jp",
+   "headerLine2ndYokyuuColumn": 47,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "courts.go.jp",
+   "headerLine2ndYokyuuColumn": 46,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/jbaudit.go.jp/jbaudit/bud_clo/bud/pdf/r06/20230906_02.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "jbaudit.go.jp",
+   "headerLine2ndYokyuuColumn": 45,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/jinji.go.jp/content/900024096.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "jinji.go.jp",
+   "headerLine2ndYokyuuColumn": 48,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/jftc.go.jp/soshiki/kyotsukoukai/yosan/yosankessan/r6/r6sandanhyou.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "jftc.go.jp",
+   "headerLine2ndYokyuuColumn": 48,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/ppc.go.jp/files/pdf/230831youkyu.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "ppc.go.jp",
+   "headerLine2ndYokyuuColumn": 50,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/jcrc.go.jp/content/000001746.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "jcrc.go.jp",
+   "headerLine2ndYokyuuColumn": null,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": null
+  },
+  {
+   "localPdfPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "caa.go.jp",
+   "headerLine2ndYokyuuColumn": 50,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_02.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "caa.go.jp",
+   "headerLine2ndYokyuuColumn": null,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": null
+  },
+  {
+   "localPdfPath": "data/download/clb.go.jp/files/topics/4473_ext_05_1.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "clb.go.jp",
+   "headerLine2ndYokyuuColumn": 45,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "reconstruction.go.jp",
+   "headerLine2ndYokyuuColumn": 53,
+   "rightRowLineCount": 14,
+   "rightRowStartColumns": [
+    55,
+    62
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    2,
+    9
+   ]
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "physicalPage": 4,
+   "publisherDomain": "reconstruction.go.jp",
+   "headerLine2ndYokyuuColumn": 51,
+   "rightRowLineCount": 24,
+   "rightRowStartColumns": [
+    53,
+    60
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    2,
+    9
+   ]
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "physicalPage": 5,
+   "publisherDomain": "reconstruction.go.jp",
+   "headerLine2ndYokyuuColumn": 47,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "mext.go.jp",
+   "headerLine2ndYokyuuColumn": 49,
+   "rightRowLineCount": 32,
+   "rightRowStartColumns": [
+    52,
+    59
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    3,
+    10
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "physicalPage": 4,
+   "publisherDomain": "mext.go.jp",
+   "headerLine2ndYokyuuColumn": 51,
+   "rightRowLineCount": 34,
+   "rightRowStartColumns": [
+    54,
+    60,
+    61
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    3,
+    9,
+    10
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "physicalPage": 5,
+   "publisherDomain": "mext.go.jp",
+   "headerLine2ndYokyuuColumn": 50,
+   "rightRowLineCount": 17,
+   "rightRowStartColumns": [
+    51,
+    58,
+    59
+   ],
+   "startOffsetsFromHeader2ndYokyuu": [
+    1,
+    8,
+    9
+   ]
+  },
+  {
+   "localPdfPath": "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-02.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "kunaicho.go.jp",
+   "headerLine2ndYokyuuColumn": 47,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  },
+  {
+   "localPdfPath": "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-03.pdf",
+   "physicalPage": 3,
+   "publisherDomain": "kunaicho.go.jp",
+   "headerLine2ndYokyuuColumn": 43,
+   "rightRowLineCount": 0,
+   "rightRowStartColumns": [],
+   "startOffsetsFromHeader2ndYokyuu": []
+  }
+ ]
+}

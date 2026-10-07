@@ -8,6 +8,8 @@ type Page = { localPdfPath: string; pdfSha256: string; physicalPage: number; tex
 const inv = read<{ frozenInput: { rawTextCorpusDigestSha256: string; pageClassificationCorpusDigestSha256: string }; summary: { pages: number; direct: number; inherited: number }; pages: Page[] }>(path.join(dir, 'machine-inventory.json'));
 const sel = read<{ seed: string; previouslyRenderedInPr3aExcluded: string[]; poolSizes: Record<string, number>; sampleSize: number; sample: (Page & { selectionStratum: string[]; inspectionRole: string })[] }>(path.join(dir, 'development-sample-selection.json'));
 const raw = read<{ frozenInput: { corpusDigestSha256: string }; documents: { localPdfPath: string; pdfSha256: string; pageTextSha256: string[] }[] }>(path.join('tests', 'fixtures', 'budget-request-raw-text', '2024', 'raw-text-manifest.json'));
+const ledger12 = read<{ pages: (Page & { selectionStratum: string[]; inspectionRole: string; inspection: { rawTextViewed: boolean; renderViewed: boolean }; failureTags: string[] })[] }>(path.join(dir, 'development-explored-pages.json'));
+const boundary = read<{ summary: { pages: number; pagesWithRightRowLine: number }; pages: { localPdfPath: string; physicalPage: number; rightRowLineCount: number }[] }>(path.join(dir, 'column-boundary-evidence.json'));
 const pr3a = read<{ pages: { localPdfPath: string; physicalPage: number; classifierPageType: string; inspection: { renderViewed: boolean } }[] }>(path.join('tests', 'fixtures', 'budget-request-cover-toc-structure', '2024', 'development-explored-pages.json'));
 const cls = read<{ summary: { corpusClassificationDigestSha256: string; pageType: Record<string, number> } }>(path.join('tests', 'fixtures', 'budget-request-page-classification', '2024', 'page-classification-v0-implementation-manifest.json'));
 const key = (r: { localPdfPath: string; physicalPage: number }) => `${r.localPdfPath}#${r.physicalPage}`;
@@ -35,5 +37,20 @@ describe('toc column structure inventory（failure isolation: observation only�
     expect(sel.sampleSize).toBe(sel.sample.length);
     expect(sel.sample.every(s => invKeys.has(key(s)) && s.inspectionRole === 'DEVELOPMENT_EXPLORATION' && s.selectionStratum.length > 0)).toBe(true);
     expect(sel.seed).toMatch(/dev-/);
+  });
+  it('explored-page ledger は sample と 1:1 で、render 済み page 数が記録され、DEVELOPMENT_EXPLORATION と明示されている', () => {
+    expect(ledger12.pages.map(key).sort()).toEqual(sel.sample.map(key).sort());
+    expect(ledger12.pages.every(p => p.inspectionRole === 'DEVELOPMENT_EXPLORATION' && p.inspection.rawTextViewed)).toBe(true);
+    expect(ledger12.pages.filter(p => p.inspection.renderViewed)).toHaveLength(10);
+  });
+  it('machine の right-row 観測量は render 確認した page の視覚（右 column 空 / 使用）と一致する（記述的な照合）', () => {
+    expect(boundary.summary.pages).toBe(82);
+    const byKey = new Map(boundary.pages.map(p => [key(p), p.rightRowLineCount]));
+    for (const p of ledger12.pages.filter(x => x.inspection.renderViewed)) {
+      const empty = p.failureTags.includes('RIGHT_COLUMN_EMPTY');
+      expect(byKey.get(key(p))! === 0).toBe(empty);
+    }
+    // PR-3A の「両 page 参照候補 81/82」は request-number 行に混線した指標で、右 row 開始の観測は 38/82
+    expect(boundary.summary.pagesWithRightRowLine).toBe(boundary.pages.filter(p => p.rightRowLineCount > 0).length);
   });
 });
