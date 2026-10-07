@@ -1,5 +1,22 @@
 # 概算要求 Cover Structure v0 — Visual GT Freeze
 
+## 最終判定（訂正済み）: PROTOCOL_INVALID / STOP
+
+当初 `READY_FOR_IMPLEMENTATION` と記載したがレビューで訂正した。
+
+**invalid reason**: visual GT 作成時、header の title と SECTION_REFERENCE の label（総表・明細表・定員表）の文字列を page ごとに visual transcription せず、freeze script の定数（`TITLE_PARTS`・`SECTION`）から全 page に stamp した。したがって preregistered の P1 Character Fidelity と atomic-field coverage（title・section label を atomic field として denominator に含めることを Commit 1 で freeze 済み）の GT としては不十分で、frozen GT protocol を満たしたとは扱わない。parser implementation 前に発見されたため parser-conditioned contamination はない。
+
+訂正方針: preregistration（Commit 1 `9b6f5ac`）・candidate fixture・既存 visual GT fixture は**変更しない**（P1 から外す・再 transcription で差し替える、はいずれも preregistration / GT の事後変更に当たるため採らない）。どこまで正しく作れて、どこで protocol を破ったかを研究履歴として残す。
+
+区別:
+- crop 不足による同一 page の再 render: **execution note**（render adequacy のため。preregistered source boundary への違反なし。protocol deviation ではない）。
+- title / section label の constant stamp: **GT protocol invalidity**。
+- multiline name 0 件: limitation（frozen 55 では continuation rule を評価不能。PR-3A の development 14 page の multiline 例は development regression に使えるが formal validation には使わない）。
+- PARTIAL / UNRESOLVED 0 件: abstention safety = **NOT_EVALUATED**（将来 55 件で GO 条件を満たしても abstention safety を検証済みとしない）。
+- schema adequacy: 観測上は問題なし。ただし `READY_FOR_IMPLEMENTATION` の根拠には使わない。
+
+次に実装する場合は formal frozen evaluation ではなく **Cover Structure v0 implementation + development/descriptive regression** として扱う（既観測の PR-3A 14 page・本 55 page は held-out にならない。formal validation が必要なら未観測 corpus・新年度を別研究単位で）。確認できるのは implementation fidelity・determinism・観測済み FY2024 data 上の character/structure regression・conservative abstention behavior まで。fresh held-out generalization・formal H-COVER-v0 GO・multiline の held-out validation・abstention safety validation は主張しない。
+
 Cover parser 未実装・未評価。preregistration（commit `9b6f5ac`、doc `20261007_2310_…_Preregistration.md`）は GT 作成後も変更していない。TOC 作業・MOF・printed→physical page 変換は未着手。
 
 ## Pre-flight
@@ -12,9 +29,9 @@ COVER 69 − PR-3A explored COVER 14 = **55**。overlap 0・duplicate 0・hash m
 
 ## Visual protocol
 
-55 page を 90dpi で page 上部のみ render し、`sha256("blind-cover|{filePath}|{physicalPage}")` 昇順の連番で 1 枚ずつ目視。見せたのは render 画像と連番のみ（Raw Text・parser output・PR-3A taxonomy・manifest 由来文字列・MOF/RS は見ていない。OCR 不使用）。title は全 page 共通の見える文字列で、name の字間空白は記録せず見える文字のみを parts に入れた（比較は whitespace 除去、preregistration §4 のとおり）。
+55 page を 90dpi で page 上部のみ render し、`sha256("blind-cover|{filePath}|{physicalPage}")` 昇順の連番で 1 枚ずつ目視。見せたのは render 画像と連番のみ（Raw Text・parser output・PR-3A taxonomy・manifest 由来文字列・MOF/RS は見ていない。OCR 不使用）。title と section label は各 page の render 領域には写っていたが、文字列は page ごとに書き起こしていない（全 page で同一に見えたという印象に基づき、freeze script の定数を stamp した）。name の字間空白は記録せず見える文字のみを parts に入れた（比較は whitespace 除去、preregistration §4 のとおり）。
 
-開示（protocol deviation 候補）: PR-3A の `development-explored-pages.json` と inventory は、candidate ではない page の情報であり、GT 作成中に candidate の `firstNonEmptyLines` は読んでいない。最初に render した 1 枚目は crop が小さく、同じ page を crop し直して再 render した（同一 page の再表示で、先に別の page を見ていない）。他の逸脱はなし。
+開示: PR-3A の `development-explored-pages.json` と inventory は、candidate ではない page の情報であり、GT 作成中に candidate の `firstNonEmptyLines` は読んでいない。最初に render した 1 枚目は crop が小さく、同じ page を crop し直して再 render した（同一 page の再表示で、先に別の page を見ていない）。これは execution note であり protocol deviation ではない。title / section label の constant stamp は上記の最終判定のとおり別に protocol invalidity。
 
 ## GT counts（実測）
 
@@ -28,8 +45,8 @@ COVER 69 − PR-3A explored COVER 14 = **55**。overlap 0・duplicate 0・hash m
 
 55 page 全てが preregistered schema（header + SECTION_REFERENCE / SCOPE_REFERENCE）で losslessly に表現できた。新しい Cover family・表現不能な field は無し。**SCHEMA_ADEQUATE**。ただし multiline name が 0 件のため、continuation rule（preregistration §5）の評価力はこの GT では**検証できない**（rule の誤りも誤動作も検出されない）。これは limitation として明記する。UNRESOLVED/PARTIAL も 0 件で、abstain の safety も GT では測れない。
 
-## 判定
+## 当初の判定（上記で訂正）
 
-**READY_FOR_IMPLEMENTATION**（preregistration は GT 前に commit、contamination 0、candidate 全件 freeze、schema adequate、hash 整合）。ただし上記 limitation（multiline・abstain が GT に無い）を前提とし、implementation は開始しない。
+当初は READY_FOR_IMPLEMENTATION としていたが、title / section label を page ごとに transcription していない事実により PROTOCOL_INVALID / STOP に訂正した。
 
 parser implementation・parser evaluation・TOC PR-3C・MOF reconciliation: NOT STARTED。
