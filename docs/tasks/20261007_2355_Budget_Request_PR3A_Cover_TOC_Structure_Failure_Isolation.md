@@ -20,7 +20,7 @@ main `c531abab`。#385 は squash merge のため head `0c7ef4f` は ancestor �
 
 seed `budget-request-cover-toc-structure-dev-exploration-20261007`、stratum ごとに `sha256("{seed}|{stratum}|{path}|{page}")` 昇順の先頭 2。stratum は machine feature のみ（cover: account・multi-cover PDF・split-PDF logical document・publisher と jurisdiction metadata が異なる・staffing 参照あり/なし・非 leader 行が多い／TOC: explicit start・continuation・1 page run・multi-page run・短い/長い continuation 距離・高/低 line 数・multi-column suspected・wrapped-name suspected・private-use）。33 page（COVER 14・TOC 19）。**全 33 page の Raw Text（先頭 12〜14 行）を確認、render まで見たのは 4 page**（ledger の `inspection` に記録）。explored-page ledger: `development-explored-pages.json`。これらの page は後続 GT・frozen evaluation の候補から除外すること。
 
-stratum 設計上の注意: multi-column の初期条件（header に「ページ」が 2 つ）は **全 TOC 82 page が該当し判別力ゼロ**だった。分布から「同一行に page 参照が 2 つ並ぶ行 ≥17」に置き換えた（label は見ていない）。つまり TOC は全て two-column の枠を持つ。
+stratum 設計上の注意: multi-column の初期条件（header に「ページ」が 2 つ）は **全 TOC 82 page が該当し判別力ゼロ**だった。分布から「同一行に page 参照が 2 つ並ぶ行 ≥17」に置き換えた（label は見ていない）。machine observation として全 82 page で header の「ページ」token が 2 個あるが、82/82 の視覚確認はしていない（下記 TOC observations の区分を参照）。
 
 ## Cover observations
 
@@ -36,7 +36,9 @@ SPACED_LETTER_NAME（文字間空白）、MULTILINE_NAME（折返し・語途中
 
 ## TOC observations
 
-- 全 82 page が左右 2 段の枠（header に `ページ` が 2 つ）。Raw Text（layout）は **左右の row を同一行に並べる**ため、行順は左右が interleave し、読み順（左段を下まで→右段）とは一致しない。右段が空の page も多い（単段内容）。
+- **Machine observation（全 82 page）**: header 中の「ページ」token が 2 個（82/82）。同一 Raw Text line 上に 2 つの末尾 page 番号候補を持つ line が 1 本以上ある page が 81/82。そのうち 17 本以上ある page が 42/82（multi-column-suspected stratum の pool）。
+- **Development visual observation（render 確認した TOC 3 page のみ: env 000157012 p3、maff 230901-6 p4、mext p4）**: 3 page とも左右 2 段の枠を確認。Raw Text では左右 column の row が同一 line に並ぶ例を確認（env・mext）。maff p4 は右段が空で、左段のみ Raw Text に現れる。他の TOC page の layout は Raw Text 上の特徴からの推測であり、視覚確認はしていない。
+- **Interpretation / hypothesis（未検証）**: corpus 全体が同系の two-column layout である可能性が高い。その場合、Raw Text の行順は左右 column が interleave し、読み順（左段を下まで→右段）とは一致しない。右段が空の page も他にある可能性がある。82/82 の確認は PR-3C の failure isolation の課題。
 - 行の種類: `（組織）/（会計）/（所管）/（勘定）/（項）` + code + name、request-number 付きの `NN code name` 行、`令和６年度歳出概算要求額総表/明細表/概算要求定員表` の参照行。末尾が printed page 参照。
 - name の折返し: 次行に深いインデントだけで続き、page 参照を持たない。2 段の page では折返し行が左右どちらの段かが Raw Text 上は列位置でしか分からず、他段の row と同一行に混ざる。
 - page 参照が数字のみとは限らない: 特会の勘定ごとに `エ 9` のように prefix token が付く。
@@ -46,7 +48,7 @@ SPACED_LETTER_NAME（文字間空白）、MULTILINE_NAME（折返し・語途中
 
 ### TOC failure taxonomy（観測から）
 
-TWO_COLUMN_INTERLEAVED_LINES（全 page に該当）、WRAPPED_NAME_NO_REF、WRAPPED_NAME_IN_ONE_COLUMN_MIXED_WITH_OTHER_COLUMN、PRINTED_PAGE_REF_WITH_PREFIX_TOKEN、CONTINUATION_WITHOUT_TITLE_NEEDS_PRIOR_CONTEXT、PRIVATE_USE_CHARACTER_IN_NAME、NON_BREAKING_HYPHEN_IN_CODE、ONE_COLUMN_CONTENT_IN_TWO_COLUMN_FRAME、STAFFING_REFERENCE_ROW。単純な 1 行 regex が失敗する理由は、interleave・折返し・continuation の文脈欠落・prefix 付き参照・PUA 混入の 5 つ。
+TWO_COLUMN_INTERLEAVED_LINES（render 確認した 3 page で観測。corpus 全体は仮説）、WRAPPED_NAME_NO_REF、WRAPPED_NAME_IN_ONE_COLUMN_MIXED_WITH_OTHER_COLUMN、PRINTED_PAGE_REF_WITH_PREFIX_TOKEN、CONTINUATION_WITHOUT_TITLE_NEEDS_PRIOR_CONTEXT、PRIVATE_USE_CHARACTER_IN_NAME、NON_BREAKING_HYPHEN_IN_CODE、ONE_COLUMN_CONTENT_IN_TWO_COLUMN_FRAME（render 確認 1 page）、STAFFING_REFERENCE_ROW。単純な 1 行 regex が失敗する理由は、interleave・折返し・continuation の文脈欠落・prefix 付き参照・PUA 混入の 5 つ。
 
 ## Source-observation schema の含意（freeze しない提案）
 

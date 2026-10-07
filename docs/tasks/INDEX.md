@@ -2,7 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
-- [20261007_2355_Budget_Request_PR3A_Cover_TOC_Structure_Failure_Isolation.md](20261007_2355_Budget_Request_PR3A_Cover_TOC_Structure_Failure_Isolation.md) — PR-3A。COVER69/TOC82 の機械inventoryと開発探索33page。TOCは全page二段interleaveで折返し/文脈欠落/PUA等 → SPLIT_REQUIRED(Cover先行・TOCは別isolation)
+- [20261007_2355_Budget_Request_PR3A_Cover_TOC_Structure_Failure_Isolation.md](20261007_2355_Budget_Request_PR3A_Cover_TOC_Structure_Failure_Isolation.md) — PR-3A。COVER69/TOC82 の機械inventoryと開発探索33page。TOCはrender確認3pageで二段・左右row同一line(全82pageの視覚確認は未実施。header token2個は82/82)、折返し/文脈欠落/PUA等 → SPLIT_REQUIRED(Cover先行・TOCは別isolation)
 - [20261007_2335_Budget_Request_Page_Classification_v0_Implementation_Descriptive_Regression.md](20261007_2335_Budget_Request_Page_Classification_v0_Implementation_Descriptive_Regression.md) — frozen v0 page classifier を実装。full corpus 9,899p・431 descriptive regression は wrong-family 0/coverage 93.5%(abstain 28 全て NO_ACTIVE_STATE)・IMPLEMENTATION_CONFORMANT/STOP FOR REVIEW(validationではない)
 - [20261007_2130_Budget_Request_Page_Classification_v3_Cumulative_Benchmark_Adequacy.md](20261007_2130_Budget_Request_Page_Classification_v3_Cumulative_Benchmark_Adequacy.md) — Page Classification v3 cumulative benchmark 431row adequacy。機械的adequacy PASS(STAFFING continuationはちょうど5)だが事前登録前に結果を観測したため INVALID/STOP・post-hocなdescriptive benchmark
 - [20261007_2105_Budget_Request_Page_Classification_v3_Cumulative_Benchmark_Preregistration.md](20261007_2105_Budget_Request_Page_Classification_v3_Cumulative_Benchmark_Preregistration.md) — Page Classification v3 cumulative benchmark 事前登録(v2閾値継承・version別mapping・family厳密一致)。dry-runを先に1回見た逸脱を開示
