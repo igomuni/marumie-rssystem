@@ -25,8 +25,8 @@ seed `budget-request-toc-physical-row-failure-isolation-dev-20261008`、stratum 
 ## H-A1 — column boundary / right-empty
 
 - 10 page 中: **PAGE_LOCAL_BOUNDARY_MULTIPLE_CANDIDATES 8**（右 column を使う page。右 row の開始 index が request-number row と `（marker）` row の 2 値）、**NOT_APPLICABLE_RIGHT_EMPTY 2**（clb p3・jinji p3、視覚確認済み）、UNIQUE 0・NO_SAFE_BOUNDARY_EVIDENCE 0・AMBIGUOUS 0。
-- **post-hoc 補助分析**（`boundary-band-evidence.json`、観測量のみ）: 右 row を持つ 38 page で、右 row の開始 character index は row 種別ごとに page 内の spread が 0（61）・1（11）・2（1）。**display width（全角 2 cell）換算では spread が 0〜30 と大きく散る**ため、Raw Text の列は character index grid 上で ±2 に収まる。request row と marker row の間は 6〜10（7 が 23 page）。左 page 参照と右 row 開始の間の空白は最小 1（10 page）で、**空白幅だけでは境界を取れず、row-start token（request-number / marker）の検出が必要**。
-- 右 column の left edge は「ref 風の数字 + 空白 + row-start token」の行の右側開始 index の page 内最小（request-number 種別）で、visual の右 column 開始と一致した（render 10 page）。ただし request row が右 column に 1 つも無く marker row だけの page では offset（約 7）を使う根拠が無く、固定値にはできない（abstain 条件）。
+- **post-hoc 補助分析**（`boundary-band-evidence.json`、観測量のみ）: 右 row を持つ 38 page で、右 row の開始 character index は row 種別ごとに page 内の spread が 0（61）・1（11）・2（1）。**display width（全角 2 cell）換算では spread が 0〜30 と大きく散る**ため、Raw Text の列は character index grid 上でほぼ揃う（development observation の最大 spread は 2。tolerance の採否は preregistration で決める）。request row と marker row の間は 6〜10（7 が 23 page）。左 page 参照と右 row 開始の間の空白は最小 1（10 page）で、**空白幅だけでは境界を取れず、row-start token（request-number / marker）の検出が必要**。
+- 右 column の left edge の candidate は「ref 風の数字 + 空白 + row-start token」の行の右側開始 index の page 内最小（request-number 種別）で、visual の右 column 開始と一致した（render 10 page の観測。この一致は候補の妥当性の手がかりであり、rule・tolerance の検証ではない）。ただし request row が右 column に 1 つも無く marker row だけの page では offset（約 7）を使う根拠が無く、固定値にはできない（abstain 条件）。
 - right-empty: 右 row evidence 無し（machine）＋ 視覚で右 column 空、が 2/2。false-empty は 0 件観測。ただし残りの未視認 page（右 row evidence なしの 44 page 中 視覚確認は PR-3A / #389 / 本 PR で重複を除いて計 6 page（maff 230901-6 p4・clb p3・mlit 復興 p3・ndl p2・soumu 000901375 p3・jinji p3））での false-empty は未確認の residual risk。
 - **boundary 決定に階層 semantics は不要**だった。
 
@@ -48,7 +48,7 @@ jinji `900024096.pdf` p3 に、`（項）`/request-number の下に indent さ�
 ## candidate operation family（A 層。parser spec ではない）
 
 1. page-local column evidence: 「ref 風の末尾数字 + 空白 + row-start token（request-number / marker）」の行から、row 種別ごとの右 row 開始 index を集める。
-2. region segmentation: 右 column left edge = request-number 種別の開始 index の最小（jitter ≤2 の band）。右 row evidence が無ければ「右 column 使用の evidence なし」（right-empty ではなく no-evidence として abstain 可能な状態）。
+2. region segmentation: 右 column left edge candidate = request-number 種別の開始 index の page-local な cluster / band。**band の tolerance の具体値は本 failure isolation では固定せず、preregistration で事前に定義する**（development observation では page 内 spread が 0〜2 だったが、これは threshold の検証ではなく観測値）。右 row evidence が無ければ「右 column 使用の evidence なし」（right-empty ではなく no-evidence として abstain 可能な状態）。
 3. fragment の column assignment: 各行を band で左右に分割し、境界をまたぐ token があれば abstain。
 4. row-start 検出: request-number・marker・title・（OTHER_CODE として raw 保持）。
 5. wrap attachment: row-start も末尾 page 参照も持たない segment を、同 column の直前 row に付ける。直前 row が一意に無い・同一 raw 行に左右の fragment が載る場合は attach せず abstain。
