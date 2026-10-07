@@ -120,3 +120,21 @@ export function computeAdequacy(rows: CumulativeRow[]) {
 export function judge(adequacy: ReturnType<typeof computeAdequacy>, violations: number): 'ADEQUATE / STOP FOR REVIEW' | 'INSUFFICIENT / STOP' {
   return violations === 0 && adequacy.coreOk && adequacy.directOk && adequacy.continuationOk ? 'ADEQUATE / STOP FOR REVIEW' : 'INSUFFICIENT / STOP';
 }
+
+/**
+ * 確定済みの protocol violation（preregistration freeze の前に cumulative result を観測した）。judge() は機械的 adequacy の計算（mapping・threshold は不変）であり、
+ * 正式判定ではない。正式判定は常にこの定数に従う。
+ */
+export const FORMAL_JUDGMENT = 'INVALID / STOP' as const;
+export const INVALID_REASON = 'preregistration freeze の前に cumulative result（dry-run）を観測したため、preregistration としての独立性が失われた。mapping・threshold は結果によって変更していないが、「事前登録した threshold を未知の結果が満たした」証拠としては使えない。post-hoc / descriptive benchmark として保存する。';
+export const MECHANICAL_NOTE = 'core / DIRECT / CONTINUATION の threshold は機械的に充足（judge() が ADEQUATE / STOP FOR REVIEW 相当を返した）。preregistration 手続きの有効性とは別';
+export const PROTOCOL_DEVIATIONS = [
+  'preregistration commit の前に builder の dry-run（fixture を書かない）で結果を観測した',
+  'PR #383 head commit が squash merge のため main の ancestor ではない（tree/diff 同一は確認済み。指示では不一致時 STOP だった）',
+] as const;
+export const GENERATOR_NOTE = 'mechanicalAdequacy は judge()（機械的な threshold 判定）の結果。正式判定 judgment は protocol violation により INVALID / STOP。preregistration doc・mapping・threshold は変更していない。';
+
+export function formalAdequacy(adequacy: ReturnType<typeof computeAdequacy>, violations: number) {
+  const mechanical = judge(adequacy, violations) === 'ADEQUATE / STOP FOR REVIEW' ? 'PASS' : 'FAIL';
+  return { ...adequacy, judgment: FORMAL_JUDGMENT, mechanicalAdequacy: { result: mechanical, note: MECHANICAL_NOTE }, invalidReason: INVALID_REASON };
+}

@@ -8,7 +8,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { sha256Hex } from './lib/budget-request-raw-text';
-import { CONTINUATION_STRATUM, DIRECT_STRATUM, buildVersionRows, computeAdequacy, judge, keyOf, overlapOf, type CandidateRow, type CumulativeRow, type GtRow, type SourceVersion } from './lib/budget-request-page-classification-v3-cumulative';
+import { CONTINUATION_STRATUM, DIRECT_STRATUM, GENERATOR_NOTE, PROTOCOL_DEVIATIONS, buildVersionRows, computeAdequacy, formalAdequacy, keyOf, overlapOf, type CandidateRow, type CumulativeRow, type GtRow, type SourceVersion } from './lib/budget-request-page-classification-v3-cumulative';
 
 const arg = (k: string) => process.argv.find(a => a.startsWith(`--${k}=`))?.slice(k.length + 3);
 const FREEZE = process.argv.includes('--freeze-fixture');
@@ -62,7 +62,6 @@ function main() {
 
   const rows = [...all].sort((a, b) => (a.localPdfPath < b.localPdfPath ? -1 : a.localPdfPath > b.localPdfPath ? 1 : a.physicalPage - b.physicalPage));
   const adequacy = computeAdequacy(rows);
-  const judgment = judge(adequacy, hashMismatch + duplicateOrAmbiguous);
   const out = {
     schema: 'budget-request-page-classification-v3-cumulative-benchmark/v0',
     scope: 'CUMULATIVE_PRE_IMPLEMENTATION_BENCHMARK_V3。既存 v0/v1/v2 GT の機械的 union と adequacy 判定のみ。fresh held-out ではない。classifier は未実装。open-set safety は NOT EVALUATED',
@@ -80,8 +79,10 @@ function main() {
       byGtFamily: tally(rows, r => [r.gt.pageType]),
       bySourceStratum: tally(rows, r => r.sourceStrata.map(s => `${r.sourceVersion}|${s}`)),
     },
-    adequacy: { ...adequacy, judgment },
+    adequacy: formalAdequacy(adequacy, hashMismatch + duplicateOrAmbiguous),
     rows,
+    protocolDeviations: PROTOCOL_DEVIATIONS,
+    correctionNote: GENERATOR_NOTE,
   };
   if (FREEZE) {
     if (!arg('prereg-commit')) throw new Error('--prereg-commit is required with --freeze-fixture');
