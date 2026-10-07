@@ -2,6 +2,8 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261007_2300_Budget_Request_Page_Classification_v1_Evaluation_GT_Freeze.md](20261007_2300_Budget_Request_Page_Classification_v1_Evaluation_GT_Freeze.md) — Page Classification v1 評価GT 89row freeze。SAFETY_NEGATIVE 0・STAFFING 2 → INSUFFICIENT/STOP(false resolved は評価不能)
+- [20261007_2105_Budget_Request_Page_Classification_v1_Evaluation_Preregistration.md](20261007_2105_Budget_Request_Page_Classification_v1_Evaluation_Preregistration.md) — Page Classification v1 評価設計の事前登録(risk strata R1-R7・adequacy gate)とcandidate 89 row freeze(label前)
 - [20261007_2040_Budget_Request_Page_Classification_v0_Visual_GT_Freeze.md](20261007_2040_Budget_Request_Page_Classification_v0_Visual_GT_Freeze.md) — PR-2 Phase B。page classification v0 visual GT 172 row freeze(blind目視)。UNRESOLVED/OTHER 0・FROZEN_EVALUATION 30
 - [20261007_1925_Budget_Request_Page_Classification_v0_Preregistration.md](20261007_1925_Budget_Request_Page_Classification_v0_Preregistration.md) — PR-2 Phase B。Page Classification v0 事前登録(direct先頭5行・継承・split・GO基準)とGT candidate 172 row freeze(label前)
 - [20261007_1840_Budget_Request_PR2_Empty_Page_Failure_Isolation.md](20261007_1840_Budget_Request_PR2_Empty_Page_Failure_Isolation.md) — PR-2 Phase A。EXTRACTED文書内EMPTY 117pの切り分け(分類なし)。116=描画なしの白page・1=text層なし画像page・UNRESOLVED0・全て偶数page
