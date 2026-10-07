@@ -12,7 +12,9 @@ parser（`scripts/pipeline-v2/lib/budget-request-cover-structure.ts`）は 1 pag
 
 ## parser
 
-preregistration §3 の contract と §5 の operation family（行順・whitespace 除去・leader dots・visible な ordinal/marker/code・source-order grouping・preregistered continuation rule）の literal implementation。header は先頭行（`<code> <text>`）、title は whitespace を除いて `令和…要求書` となる行、SECTION は `N.` + label + leader dots + page 参照、SCOPE は marker + code + name + leader dots + page 参照。continuation rule: SCOPE の直後の行が marker・ordinal・leader dots・末尾 page 参照のいずれも持たなければ nameRawParts の追加 part（語途中の分断は連結しない）。どの field にも分類できない行は `unclassifiedLines` に残し status を PARTIAL にする。**新しい heuristic の追加なし・contract deviation なし**（commit 1 `6d4665b` の後 parser code は無変更）。
+preregistration §3 の contract と §5 の operation family（行順・whitespace 除去・leader dots・visible な ordinal/marker/code・source-order grouping・preregistered continuation rule）の literal implementation。header は先頭行（`<code> <text>`）、title は whitespace を除いて `令和…要求書` となる行、SECTION は `N.` + label + leader dots + page 参照、SCOPE は marker + code + name + leader dots + page 参照。continuation rule: SCOPE の直後の行が marker・ordinal・leader dots・末尾 page 参照のいずれも持たなければ nameRawParts の追加 part（語途中の分断は連結しない）。どの field にも分類できない行は `unclassifiedLines` に残し status を PARTIAL にする。**新しい heuristic の追加なし**。
+
+**review で発見した implementation bug の修正（commit `0894bff`）**: (1) preregistration §3「読める entry が 1 つも無ければ UNRESOLVED」に対し、初版 parser は header に code が無い場合のみ UNRESOLVED としていた（header・title が読めて entry が 0 件の page が PARTIAL になる）。`entries.length === 0` なら header の状態にかかわらず UNRESOLVED に修正し、synthetic test（header+title・entry 0 件 → UNRESOLVED）を追加。(2) その test の過程で、title 行が見つからない page では title 探索が全行を未分類として消費し entry を parse しない潜在 bug を発見。title は abstain（空・header PARTIAL）にしたうえで header 直後から entry の parse を続けるよう修正（行を捨てない。新しい parsing heuristic ではない）。いずれも FY2024 の COVER 69 page では発火せず、**69 件の output digest（`5a8a8b97…1aef`）と descriptive regression の内容は修正前後で同一**（implementation hash のみ更新）。
 
 ## 69 page full-corpus result
 
@@ -44,4 +46,4 @@ PARTIAL / UNRESOLVED は発生しなかった。したがって abstention path 
 
 ## final engineering judgment
 
-**IMPLEMENTATION_CONFORMANT_WITH_LIMITATIONS**: preregistered contract と operation boundary に忠実、決定的、provenance 整合、production code は GT / development fixture を参照せず、新 heuristic なし、wrong-entry attachment 0・実際の invented character 0。limitation は上記（abstention が実データで未走行、multiline 2 case、GT の protocol invalidity）。H-COVER-v0 GO を意味しない。
+**IMPLEMENTATION_CONFORMANT_WITH_LIMITATIONS**: preregistered contract と operation boundary に忠実（status semantics の初版 bug は上記のとおり修正済み）、決定的、provenance 整合、production code は GT / development fixture を参照せず、新 heuristic なし、wrong-entry attachment 0・実際の invented character 0。limitation は上記（abstention が実データで未走行、multiline 2 case、GT の protocol invalidity）。H-COVER-v0 GO を意味しない。

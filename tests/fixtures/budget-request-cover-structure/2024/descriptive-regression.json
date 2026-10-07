@@ -1,7 +1,7 @@
 {
  "schema": "budget-request-cover-structure-descriptive-regression/v0",
  "scope": "development / descriptive regression。formal validation・held-out ではない。visual GT is protocol-invalid for formal evaluation; comparison is descriptive/development only",
- "implementationCommit": "6d4665b2906a8c91da2fbd915d778cf3c4e05c5f",
+ "implementationCommit": "0894bffc049ffd494c2a2673a2cab20f62547ae7",
  "observationOutputDigestSha256": "5a8a8b97eebf1a9c252bd45a2f9db6cf11fb9fdae6db6d0d10b9cb51e17b1aef",
  "visualGtSha256": "9841075cf89f6a1904cbbd93619dea3481ac1167f72a56ae0f4777eeb9e7667a",
  "comparison55": {
