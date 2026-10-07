@@ -1,0 +1,233 @@
+{
+ "schema": "budget-request-toc-column-structure-development-sample/v0",
+ "inspectionRole": "DEVELOPMENT_EXPLORATION（held-out ではない）",
+ "seed": "budget-request-toc-column-failure-isolation-dev-20261008",
+ "previouslyRenderedInPr3aExcluded": [
+  "data/download/env.go.jp/content/000157012.pdf#3",
+  "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf#4",
+  "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf#4"
+ ],
+ "strataRules": [
+  "DIRECT",
+  "INHERITED",
+  "continuation-in-multi-page-run(prev page is TOC)",
+  "many-two-ref-lines(>=median of pages with any)",
+  "few-two-ref-lines(1..3)",
+  "no-two-ref-lines(right-empty-suspected)",
+  "wrapped-row-candidate(>=3 lines)",
+  "prefix-page-ref-candidate",
+  "PUA-present",
+  "marker-family:組織",
+  "marker-family:会計",
+  "marker-family:勘定",
+  "request-number-rows-many(>=20)",
+  "request-number-rows-few(<=6)"
+ ],
+ "poolSizes": {
+  "DIRECT": 54,
+  "INHERITED": 25,
+  "continuation-in-multi-page-run(prev page is TOC)": 25,
+  "many-two-ref-lines(>=median of pages with any)": 40,
+  "few-two-ref-lines(1..3)": 10,
+  "no-two-ref-lines(right-empty-suspected)": 1,
+  "wrapped-row-candidate(>=3 lines)": 7,
+  "prefix-page-ref-candidate": 14,
+  "PUA-present": 3,
+  "marker-family:組織": 49,
+  "marker-family:会計": 26,
+  "marker-family:勘定": 14,
+  "request-number-rows-many(>=20)": 35,
+  "request-number-rows-few(<=6)": 26
+ },
+ "perStratum": 2,
+ "sampleSize": 12,
+ "publishers": [
+  "caa.go.jp",
+  "cfa.go.jp",
+  "clb.go.jp",
+  "env.go.jp",
+  "maff.go.jp",
+  "meti.go.jp",
+  "mext.go.jp",
+  "mhlw.go.jp",
+  "mlit.go.jp",
+  "mof.go.jp",
+  "moj.go.jp",
+  "ndl.go.jp",
+  "soumu.go.jp"
+ ],
+ "sample": [
+  {
+   "localPdfPath": "data/download/clb.go.jp/files/topics/4473_ext_05_1.pdf",
+   "pdfSha256": "dbd5467fe8a6d6f2fe44ac8fba5a5412a097c21feace047a082ae15eb03f57b5",
+   "physicalPage": 3,
+   "textSha256": "4fa76aae73f92f9d7c9b78047b7e29f05b1917a31c24e96c3cab922d1740fb83",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "publisherDomain": "clb.go.jp",
+   "selectionStratum": [
+    "few-two-ref-lines(1..3)"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭（publisher 重複を避ける）。同一 stratum の重複 render を抑えるため、各 stratum の 1 page 目を満たす最小集合に絞った（seed budget-request-toc-column-failure-isolation-dev-20261008）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+   "physicalPage": 5,
+   "textSha256": "0361bbf1438795d66a8bf58db6c89927d81ca17cfffb5e6b7bfba1033ae03fea",
+   "classifierPageType": "TOC",
+   "classifierSource": "INHERITED",
+   "publisherDomain": "maff.go.jp",
+   "selectionStratum": [
+    "INHERITED",
+    "many-two-ref-lines(>=median of pages with any)"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭（publisher 重複を避ける）。同一 stratum の重複 render を抑えるため、各 stratum の 1 page 目を満たす最小集合に絞った（seed budget-request-toc-column-failure-isolation-dev-20261008）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneju_o.pdf",
+   "pdfSha256": "2c1d6cb494a41dbb8d03a63099cc4154f31d70b966c7510bc6fce3501a70e7b6",
+   "physicalPage": 3,
+   "textSha256": "0bf62775ffaf94be47956ba6760d713f34a6a8b22e47d53f962df182c250516d",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "publisherDomain": "meti.go.jp",
+   "selectionStratum": [
+    "marker-family:会計",
+    "wrapped-row-candidate(>=3 lines)"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭（publisher 重複を避ける）。同一 stratum の重複 render を抑えるため、各 stratum の 1 page 目を満たす最小集合に絞った（seed budget-request-toc-column-failure-isolation-dev-20261008）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "pdfSha256": "91b39e9902610e13aa7be445db2d2d2a3e38166fd5f449bd11f94cfe5fe3b6d5",
+   "physicalPage": 5,
+   "textSha256": "72ed43e3ab84a4a57326be1aa348c953205661100c76aef8f9c43179dbc1719d",
+   "classifierPageType": "TOC",
+   "classifierSource": "INHERITED",
+   "publisherDomain": "mext.go.jp",
+   "selectionStratum": [
+    "request-number-rows-many(>=20)"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭（publisher 重複を避ける）。同一 stratum の重複 render を抑えるため、各 stratum の 1 page 目を満たす最小集合に絞った（seed budget-request-toc-column-failure-isolation-dev-20261008）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630395.pdf",
+   "pdfSha256": "d5e8250094ea55fee74951654a692ce345a2b8710a788017d0f5db7b9c259c1a",
+   "physicalPage": 3,
+   "textSha256": "2b8840fe233a383b3d583faa12221f01b32851251e0d4ab0d5686507bf648292",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "publisherDomain": "mlit.go.jp",
+   "selectionStratum": [
+    "DIRECT",
+    "prefix-page-ref-candidate"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭（publisher 重複を避ける）。同一 stratum の重複 render を抑えるため、各 stratum の 1 page 目を満たす最小集合に絞った（seed budget-request-toc-column-failure-isolation-dev-20261008）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "pdfSha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+   "physicalPage": 4,
+   "textSha256": "c337e75d98e38434b4b90819394dd95a3b1e1aca21f521413952ecca7f8d50dc",
+   "classifierPageType": "TOC",
+   "classifierSource": "INHERITED",
+   "publisherDomain": "mlit.go.jp",
+   "selectionStratum": [
+    "continuation-in-multi-page-run(prev page is TOC)"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭（publisher 重複を避ける）。同一 stratum の重複 render を抑えるため、各 stratum の 1 page 目を満たす最小集合に絞った（seed budget-request-toc-column-failure-isolation-dev-20261008）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "pdfSha256": "6cc573bf64747e4ceb41597cc83e371f5d8144a02e3e9033501597d64cfbbc5e",
+   "physicalPage": 2,
+   "textSha256": "3e398e82d5ac63d33117036443b58502efbc394e62e1d83a5b0233ebe10eab98",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "publisherDomain": "mof.go.jp",
+   "selectionStratum": [
+    "PUA-present"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭（publisher 重複を避ける）。同一 stratum の重複 render を抑えるため、各 stratum の 1 page 目を満たす最小集合に絞った（seed budget-request-toc-column-failure-isolation-dev-20261008）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024jisinn_2.pdf",
+   "pdfSha256": "9b7690b4b4b8818949abd386ccf2375c79f95dff70d38934624de5ffca5e0fe5",
+   "physicalPage": 2,
+   "textSha256": "181e880cc766bfc5065ab14403c634ac3516c6690325f737216d5c4b6d9f96c2",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "publisherDomain": "mof.go.jp",
+   "selectionStratum": [
+    "request-number-rows-few(<=6)"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭（publisher 重複を避ける）。同一 stratum の重複 render を抑えるため、各 stratum の 1 page 目を満たす最小集合に絞った（seed budget-request-toc-column-failure-isolation-dev-20261008）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024zaiyuu_2.pdf",
+   "pdfSha256": "f8ebf4dfcfbfa3b4ae0636554e2f3e5462190db71d406de0b87fc45f12d36485",
+   "physicalPage": 2,
+   "textSha256": "21e8d687af8808b77b8980a7c2ebbf25ea9b6a13ea138f423a45da51c0489b55",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "publisherDomain": "mof.go.jp",
+   "selectionStratum": [
+    "marker-family:勘定"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭（publisher 重複を避ける）。同一 stratum の重複 render を抑えるため、各 stratum の 1 page 目を満たす最小集合に絞った（seed budget-request-toc-column-failure-isolation-dev-20261008）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/ndl.go.jp/jp/aboutus/outline/r06_budgetrequest.pdf",
+   "pdfSha256": "cb0442175d186f3041d6b3df93c46139760920b2c0162ae5a61c3abedf0a60e5",
+   "physicalPage": 2,
+   "textSha256": "d6685ff95fd2c30f2ae9022aa80d92ff3c119fd5cf42d45d777ed4ef48366b6a",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "publisherDomain": "ndl.go.jp",
+   "selectionStratum": [
+    "no-two-ref-lines(right-empty-suspected)"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭（publisher 重複を避ける）。同一 stratum の重複 render を抑えるため、各 stratum の 1 page 目を満たす最小集合に絞った（seed budget-request-toc-column-failure-isolation-dev-20261008）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/soumu.go.jp/main_content/000901372.pdf",
+   "pdfSha256": "cc54dbe5f689116619a1f8453747d47bca5b960137f90869ead26954d651703b",
+   "physicalPage": 3,
+   "textSha256": "99e12ea6f04a41b46968466e8c48153316b0246eb785025d28017d512846d273",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "publisherDomain": "soumu.go.jp",
+   "selectionStratum": [
+    "PUA-present",
+    "marker-family:組織"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭（publisher 重複を避ける）。同一 stratum の重複 render を抑えるため、各 stratum の 1 page 目を満たす最小集合に絞った（seed budget-request-toc-column-failure-isolation-dev-20261008）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/soumu.go.jp/main_content/000901375.pdf",
+   "pdfSha256": "fbe532b7b80e43f3f31685471f25a598f2532838ddcab33103ece1dd2f43a396",
+   "physicalPage": 3,
+   "textSha256": "1df31fd18e1d4b22c4e2694ba21ebf2128ba5d497b8407b41791869d7db4232b",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "publisherDomain": "soumu.go.jp",
+   "selectionStratum": [
+    "PUA-present"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭（publisher 重複を避ける）。同一 stratum の重複 render を抑えるため、各 stratum の 1 page 目を満たす最小集合に絞った（seed budget-request-toc-column-failure-isolation-dev-20261008）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  }
+ ]
+}

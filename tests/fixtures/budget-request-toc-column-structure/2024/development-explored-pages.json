@@ -1,0 +1,357 @@
+{
+ "schema": "budget-request-toc-column-structure-development-explored-pages/v0",
+ "inspectionRole": "DEVELOPMENT_EXPLORATION（held-out ではない。後続 GT・frozen evaluation の候補から除外すべき page）",
+ "previouslyRenderedInPr3a": [
+  "data/download/env.go.jp/content/000157012.pdf#3",
+  "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf#4",
+  "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf#4"
+ ],
+ "pages": [
+  {
+   "localPdfPath": "data/download/clb.go.jp/files/topics/4473_ext_05_1.pdf",
+   "pdfSha256": "dbd5467fe8a6d6f2fe44ac8fba5a5412a097c21feace047a082ae15eb03f57b5",
+   "physicalPage": 3,
+   "textSha256": "4fa76aae73f92f9d7c9b78047b7e29f05b1917a31c24e96c3cab922d1740fb83",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "publisherDomain": "clb.go.jp",
+   "selectionStratum": [
+    "few-two-ref-lines(1..3)"
+   ],
+   "inspectionRole": "DEVELOPMENT_EXPLORATION",
+   "inspection": {
+    "rawTextViewed": true,
+    "renderViewed": true
+   },
+   "visualObservation": {
+    "columnFrame": "2-column frame",
+    "rightColumn": "empty",
+    "sameLineInterleave": "no",
+    "hierarchyContext": "DIRECT page (explicit title start)",
+    "notes": "request number visually circled (①); raw shows plain digit. 1 column of content。"
+   },
+   "failureTags": [
+    "RIGHT_COLUMN_EMPTY",
+    "OTHER:circled-request-number-not-in-raw"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+   "physicalPage": 5,
+   "textSha256": "0361bbf1438795d66a8bf58db6c89927d81ca17cfffb5e6b7bfba1033ae03fea",
+   "classifierPageType": "TOC",
+   "classifierSource": "INHERITED",
+   "publisherDomain": "maff.go.jp",
+   "selectionStratum": [
+    "INHERITED",
+    "many-two-ref-lines(>=median of pages with any)"
+   ],
+   "inspectionRole": "DEVELOPMENT_EXPLORATION",
+   "inspection": {
+    "rawTextViewed": true,
+    "renderViewed": true
+   },
+   "visualObservation": {
+    "columnFrame": "2-column frame, both columns full",
+    "rightColumn": "full",
+    "sameLineInterleave": "yes (left and right rows share raw lines; raw line ≠ visual row: right rows land on raw lines between left rows when left has wrapped rows)",
+    "hierarchyContext": "PREVIOUS_TOC_STATE_REQUIRED (first left row is （項）; 組織 is not on the page. right column first row is a （組織） row)",
+    "notes": "left wrapped row (row 81) and right wrapped row (row 102) belong to their own columns by x-position; circled request numbers (91 etc.) are plain in raw"
+   },
+   "failureTags": [
+    "SAME_LINE_INTERLEAVE",
+    "RAW_TEXT_ORDER_MISMATCH",
+    "WRAPPED_ROW_OWNERSHIP",
+    "CONTINUATION_CONTEXT_REQUIRED",
+    "OTHER:circled-request-number-not-in-raw"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneju_o.pdf",
+   "pdfSha256": "2c1d6cb494a41dbb8d03a63099cc4154f31d70b966c7510bc6fce3501a70e7b6",
+   "physicalPage": 3,
+   "textSha256": "0bf62775ffaf94be47956ba6760d713f34a6a8b22e47d53f962df182c250516d",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "publisherDomain": "meti.go.jp",
+   "selectionStratum": [
+    "marker-family:会計",
+    "wrapped-row-candidate(>=3 lines)"
+   ],
+   "inspectionRole": "DEVELOPMENT_EXPLORATION",
+   "inspection": {
+    "rawTextViewed": true,
+    "renderViewed": true
+   },
+   "visualObservation": {
+    "columnFrame": "2-column frame, both columns used (right shorter)",
+    "rightColumn": "partly",
+    "sameLineInterleave": "yes (right column rows share raw lines with left rows)",
+    "hierarchyContext": "DIRECT page",
+    "notes": "prefix page ref `エ` visible in the page-reference cell of both columns (raw `エ 9`); wrapped rows: left (rows 6, 11, 14) and right (row 18) own their wraps by x-position; （勘定） marker row exists (prefix ref `エ 1`) while （会計） row has none"
+   },
+   "failureTags": [
+    "SAME_LINE_INTERLEAVE",
+    "WRAPPED_ROW_OWNERSHIP",
+    "PREFIX_PAGE_REFERENCE"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "pdfSha256": "91b39e9902610e13aa7be445db2d2d2a3e38166fd5f449bd11f94cfe5fe3b6d5",
+   "physicalPage": 5,
+   "textSha256": "72ed43e3ab84a4a57326be1aa348c953205661100c76aef8f9c43179dbc1719d",
+   "classifierPageType": "TOC",
+   "classifierSource": "INHERITED",
+   "publisherDomain": "mext.go.jp",
+   "selectionStratum": [
+    "request-number-rows-many(>=20)"
+   ],
+   "inspectionRole": "DEVELOPMENT_EXPLORATION",
+   "inspection": {
+    "rawTextViewed": true,
+    "renderViewed": true
+   },
+   "visualObservation": {
+    "columnFrame": "2-column frame, left long and right short",
+    "rightColumn": "short (starts where left ends)",
+    "sameLineInterleave": "yes",
+    "hierarchyContext": "PREVIOUS_TOC_STATE_REQUIRED (first left row is a request-number row with no （項） on the page; right column first row is also a request-number row whose parent （項） is the last row of the left column)",
+    "notes": "cross-column context: right column continues the left column at the same page"
+   },
+   "failureTags": [
+    "SAME_LINE_INTERLEAVE",
+    "CONTINUATION_CONTEXT_REQUIRED",
+    "OTHER:cross-column-context",
+    "COLUMN_BOUNDARY_AMBIGUOUS",
+    "OTHER:circled-request-number-not-in-raw"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630395.pdf",
+   "pdfSha256": "d5e8250094ea55fee74951654a692ce345a2b8710a788017d0f5db7b9c259c1a",
+   "physicalPage": 3,
+   "textSha256": "2b8840fe233a383b3d583faa12221f01b32851251e0d4ab0d5686507bf648292",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "publisherDomain": "mlit.go.jp",
+   "selectionStratum": [
+    "DIRECT",
+    "prefix-page-ref-candidate"
+   ],
+   "inspectionRole": "DEVELOPMENT_EXPLORATION",
+   "inspection": {
+    "rawTextViewed": true,
+    "renderViewed": true
+   },
+   "visualObservation": {
+    "columnFrame": "2-column frame",
+    "rightColumn": "empty",
+    "sameLineInterleave": "no",
+    "hierarchyContext": "DIRECT page",
+    "notes": "machine prefix-page-ref candidate is a false positive: no prefix is visible. hierarchy order 会計 > 所管 > 組織 > 項 visible"
+   },
+   "failureTags": [
+    "RIGHT_COLUMN_EMPTY",
+    "OTHER:prefix-candidate-false-positive"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "pdfSha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+   "physicalPage": 4,
+   "textSha256": "c337e75d98e38434b4b90819394dd95a3b1e1aca21f521413952ecca7f8d50dc",
+   "classifierPageType": "TOC",
+   "classifierSource": "INHERITED",
+   "publisherDomain": "mlit.go.jp",
+   "selectionStratum": [
+    "continuation-in-multi-page-run(prev page is TOC)"
+   ],
+   "inspectionRole": "DEVELOPMENT_EXPLORATION",
+   "inspection": {
+    "rawTextViewed": true,
+    "renderViewed": true
+   },
+   "visualObservation": {
+    "columnFrame": "2-column frame, both columns full",
+    "rightColumn": "full",
+    "sameLineInterleave": "yes",
+    "hierarchyContext": "PREVIOUS_TOC_STATE_REQUIRED (first left row is （項）; 組織 not on the page; right column first row is a request-number row whose parent （項） is the last left-column row)",
+    "notes": "regular alternating （項） / request-number rows"
+   },
+   "failureTags": [
+    "SAME_LINE_INTERLEAVE",
+    "CONTINUATION_CONTEXT_REQUIRED",
+    "OTHER:cross-column-context"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "pdfSha256": "6cc573bf64747e4ceb41597cc83e371f5d8144a02e3e9033501597d64cfbbc5e",
+   "physicalPage": 2,
+   "textSha256": "3e398e82d5ac63d33117036443b58502efbc394e62e1d83a5b0233ebe10eab98",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "publisherDomain": "mof.go.jp",
+   "selectionStratum": [
+    "PUA-present"
+   ],
+   "inspectionRole": "DEVELOPMENT_EXPLORATION",
+   "inspection": {
+    "rawTextViewed": true,
+    "renderViewed": true
+   },
+   "visualObservation": {
+    "columnFrame": "2-column frame, both columns used",
+    "rightColumn": "full",
+    "sameLineInterleave": "yes; left and right rows have different vertical spacing so raw lines do not pair visual rows (e.g. a right wrapped fragment sits on a raw line where the left side is blank)",
+    "hierarchyContext": "DIRECT page",
+    "notes": "PUA U+E5E3 inside a left-column row name (visible glyph is a printed character; no conversion table made). underlined page refs"
+   },
+   "failureTags": [
+    "SAME_LINE_INTERLEAVE",
+    "RAW_TEXT_ORDER_MISMATCH",
+    "WRAPPED_ROW_OWNERSHIP",
+    "PUA_PRESENT",
+    "OTHER:circled-request-number-not-in-raw"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024jisinn_2.pdf",
+   "pdfSha256": "9b7690b4b4b8818949abd386ccf2375c79f95dff70d38934624de5ffca5e0fe5",
+   "physicalPage": 2,
+   "textSha256": "181e880cc766bfc5065ab14403c634ac3516c6690325f737216d5c4b6d9f96c2",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "publisherDomain": "mof.go.jp",
+   "selectionStratum": [
+    "request-number-rows-few(<=6)"
+   ],
+   "inspectionRole": "DEVELOPMENT_EXPLORATION",
+   "inspection": {
+    "rawTextViewed": true,
+    "renderViewed": false
+   },
+   "visualObservation": {
+    "columnFrame": null,
+    "rightColumn": null,
+    "sameLineInterleave": null,
+    "hierarchyContext": "DIRECT page (machine only)",
+    "notes": "Raw Text only inspection (not rendered). machine: no right-row line"
+   },
+   "failureTags": []
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024zaiyuu_2.pdf",
+   "pdfSha256": "f8ebf4dfcfbfa3b4ae0636554e2f3e5462190db71d406de0b87fc45f12d36485",
+   "physicalPage": 2,
+   "textSha256": "21e8d687af8808b77b8980a7c2ebbf25ea9b6a13ea138f423a45da51c0489b55",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "publisherDomain": "mof.go.jp",
+   "selectionStratum": [
+    "marker-family:勘定"
+   ],
+   "inspectionRole": "DEVELOPMENT_EXPLORATION",
+   "inspection": {
+    "rawTextViewed": true,
+    "renderViewed": false
+   },
+   "visualObservation": {
+    "columnFrame": null,
+    "rightColumn": null,
+    "sameLineInterleave": null,
+    "hierarchyContext": "DIRECT page (machine only)",
+    "notes": "Raw Text only inspection (not rendered). machine: no right-row line; （勘定） marker present"
+   },
+   "failureTags": []
+  },
+  {
+   "localPdfPath": "data/download/ndl.go.jp/jp/aboutus/outline/r06_budgetrequest.pdf",
+   "pdfSha256": "cb0442175d186f3041d6b3df93c46139760920b2c0162ae5a61c3abedf0a60e5",
+   "physicalPage": 2,
+   "textSha256": "d6685ff95fd2c30f2ae9022aa80d92ff3c119fd5cf42d45d777ed4ef48366b6a",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "publisherDomain": "ndl.go.jp",
+   "selectionStratum": [
+    "no-two-ref-lines(right-empty-suspected)"
+   ],
+   "inspectionRole": "DEVELOPMENT_EXPLORATION",
+   "inspection": {
+    "rawTextViewed": true,
+    "renderViewed": true
+   },
+   "visualObservation": {
+    "columnFrame": "2-column frame",
+    "rightColumn": "empty",
+    "sameLineInterleave": "no",
+    "hierarchyContext": "DIRECT page",
+    "notes": "page-ref cell holds small-font prefix refs (`国`, `国(国)`) rendered close to the number; raw `国 1` / `国(国)1` (no space after the parenthesis)"
+   },
+   "failureTags": [
+    "RIGHT_COLUMN_EMPTY",
+    "PREFIX_PAGE_REFERENCE"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/soumu.go.jp/main_content/000901372.pdf",
+   "pdfSha256": "cc54dbe5f689116619a1f8453747d47bca5b960137f90869ead26954d651703b",
+   "physicalPage": 3,
+   "textSha256": "99e12ea6f04a41b46968466e8c48153316b0246eb785025d28017d512846d273",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "publisherDomain": "soumu.go.jp",
+   "selectionStratum": [
+    "PUA-present",
+    "marker-family:組織"
+   ],
+   "inspectionRole": "DEVELOPMENT_EXPLORATION",
+   "inspection": {
+    "rawTextViewed": true,
+    "renderViewed": true
+   },
+   "visualObservation": {
+    "columnFrame": "2-column frame, both columns full",
+    "rightColumn": "full",
+    "sameLineInterleave": "yes",
+    "hierarchyContext": "DIRECT page",
+    "notes": "PUA U+E5E3 inside a left-column row name (row 14, wrapped); visible glyph is a printed character; wrapped fragments belong to their own column"
+   },
+   "failureTags": [
+    "SAME_LINE_INTERLEAVE",
+    "WRAPPED_ROW_OWNERSHIP",
+    "PUA_PRESENT"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/soumu.go.jp/main_content/000901375.pdf",
+   "pdfSha256": "fbe532b7b80e43f3f31685471f25a598f2532838ddcab33103ece1dd2f43a396",
+   "physicalPage": 3,
+   "textSha256": "1df31fd18e1d4b22c4e2694ba21ebf2128ba5d497b8407b41791869d7db4232b",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "publisherDomain": "soumu.go.jp",
+   "selectionStratum": [
+    "PUA-present"
+   ],
+   "inspectionRole": "DEVELOPMENT_EXPLORATION",
+   "inspection": {
+    "rawTextViewed": true,
+    "renderViewed": true
+   },
+   "visualObservation": {
+    "columnFrame": "2-column frame",
+    "rightColumn": "empty",
+    "sameLineInterleave": "no",
+    "hierarchyContext": "DIRECT page",
+    "notes": "PUA U+E5E3 inside a row name (row 4); no other structure impact"
+   },
+   "failureTags": [
+    "RIGHT_COLUMN_EMPTY",
+    "PUA_PRESENT"
+   ]
+  }
+ ]
+}

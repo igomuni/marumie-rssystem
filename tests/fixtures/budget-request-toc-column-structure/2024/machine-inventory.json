@@ -1,0 +1,5134 @@
+{
+ "schema": "budget-request-toc-column-structure-machine-inventory/v0",
+ "scope": "TOC 82 page の machine inventory（観測量のみ。parser output ではなく、twoColumn 等の semantic label を付けていない）",
+ "generator": "scripts/pipeline-v2/analyze-budget-request-toc-column-structure.ts",
+ "frozenInput": {
+  "rawTextCorpusDigestSha256": "7c6d2dcec1f4bec0ca37a1b3aa391adce7d99b93ac4642c74cab7a328dac4052",
+  "pageClassificationCorpusDigestSha256": "39464fc76b1b83272d5852d3db1db776e22bb570ee0f6b7ca4d1da64de4a5ecc"
+ },
+ "summary": {
+  "pages": 82,
+  "direct": 55,
+  "inherited": 27,
+  "physicalPdfs": 55,
+  "publishers": 29,
+  "pagesWithAnyTwoRefLine": 81,
+  "pagesWithNoTwoRefLine": 1,
+  "twoRefLineCountDistribution": {
+   "0": 1,
+   "1": 2,
+   "2": 5,
+   "3": 3,
+   "4": 8,
+   "5": 3,
+   "6": 1,
+   "7": 2,
+   "8": 3,
+   "9": 2,
+   "10": 6,
+   "13": 1,
+   "14": 1,
+   "15": 1,
+   "16": 1,
+   "17": 4,
+   "20": 1,
+   "21": 1,
+   "22": 3,
+   "23": 2,
+   "25": 1,
+   "26": 1,
+   "27": 1,
+   "30": 28
+  },
+  "secondSegmentStartColumnVariety": {
+   "distinctColumnsAcrossAllPages": 23,
+   "pagesWithSingleColumn": 24,
+   "pagesWithMultipleColumns": 57
+  },
+  "puaPages": 3,
+  "puaCodePoints": {
+   "U+E5E3": 3
+  },
+  "pagesWithPrefixPageRefCandidate": 15,
+  "pagesWithWrappedRowCandidate": 67,
+  "markerFamilyPages": {
+   "組織": 50,
+   "会計": 27,
+   "勘定": 15
+  },
+  "previousPageIsTocInSamePdf": 27,
+  "byPublisher": {
+   "caa.go.jp": 2,
+   "cfa.go.jp": 2,
+   "clb.go.jp": 1,
+   "courts.go.jp": 1,
+   "dangai.go.jp": 1,
+   "digital.go.jp": 1,
+   "env.go.jp": 5,
+   "jbaudit.go.jp": 1,
+   "jcrc.go.jp": 1,
+   "jftc.go.jp": 1,
+   "jinji.go.jp": 1,
+   "kunaicho.go.jp": 2,
+   "maff.go.jp": 8,
+   "meti.go.jp": 7,
+   "mext.go.jp": 3,
+   "mhlw.go.jp": 9,
+   "mlit.go.jp": 10,
+   "mod.go.jp": 2,
+   "mof.go.jp": 8,
+   "mofa.go.jp": 2,
+   "moj.go.jp": 1,
+   "ndl.go.jp": 1,
+   "npa.go.jp": 2,
+   "ppc.go.jp": 1,
+   "reconstruction.go.jp": 3,
+   "sangiin.go.jp": 1,
+   "shugiin.go.jp": 1,
+   "sotsui.go.jp": 1,
+   "soumu.go.jp": 3
+  }
+ },
+ "pages": [
+  {
+   "localPdfPath": "data/download/soumu.go.jp/main_content/000901372.pdf",
+   "pdfSha256": "cc54dbe5f689116619a1f8453747d47bca5b960137f90869ead26954d651703b",
+   "physicalPage": 3,
+   "textSha256": "99e12ea6f04a41b46968466e8c48153316b0246eb785025d28017d512846d273",
+   "publisherDomain": "soumu.go.jp",
+   "logicalDocumentIndex": 0,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 41,
+   "bodyLineCount": 38,
+   "firstNonEmptyLines": [
+    "                                                                                                        1",
+    "                               令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "20     総 務 省 所 管",
+    "要求                    区                分         ページ 要求                      区                    分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    49,
+    102
+   ],
+   "lineLength": {
+    "min": 12,
+    "median": 106,
+    "max": 106
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    11,
+    56,
+    63,
+    104
+   ],
+   "largeGapLineCount": 33,
+   "trailingPageRefLineCount": 36,
+   "linesWithTwoPageRefCandidates": 33,
+   "secondSegmentStartColumns": [
+    5,
+    56,
+    61,
+    63
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 26,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 18,
+   "requestNumberTokensMidLine": 18,
+   "u2011LineCount": 25,
+   "puaCodePoints": [
+    "U+E5E3"
+   ],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 2,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "TOC",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/soumu.go.jp/main_content/000901372.pdf",
+   "pdfSha256": "cc54dbe5f689116619a1f8453747d47bca5b960137f90869ead26954d651703b",
+   "physicalPage": 4,
+   "textSha256": "f1bc7860dfcd80d073205b84351828f568003a69d3f370af1d295047eb37ed80",
+   "publisherDomain": "soumu.go.jp",
+   "logicalDocumentIndex": 0,
+   "classifierSource": "INHERITED",
+   "explicitTitleObserved": false,
+   "nonEmptyLineCount": 34,
+   "bodyLineCount": 32,
+   "firstNonEmptyLines": [
+    "  2",
+    "要求                    区                 分   ページ 要求   区   分   ページ",
+    "番号                                              番号",
+    "35    01‑95 国有提供施設等所在市町村助成交付金に必要な経費          244"
+   ],
+   "pageHeaderTokenColumns": [
+    44,
+    61
+   ],
+   "lineLength": {
+    "min": 3,
+    "median": 48,
+    "max": 64
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    2,
+    6,
+    7,
+    8
+   ],
+   "largeGapLineCount": 31,
+   "trailingPageRefLineCount": 32,
+   "linesWithTwoPageRefCandidates": 16,
+   "secondSegmentStartColumns": [
+    6
+   ],
+   "markerCounts": {
+    "組織": 4,
+    "会計": 0,
+    "勘定": 0,
+    "項": 10,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 16,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 16,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 0,
+   "previousPhysicalPageType": "TOC",
+   "nextPhysicalPageType": "SUMMARY",
+   "previousPageIsTocInSamePdf": true,
+   "developmentExploredInPr3a": true,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/soumu.go.jp/main_content/000901375.pdf",
+   "pdfSha256": "fbe532b7b80e43f3f31685471f25a598f2532838ddcab33103ece1dd2f43a396",
+   "physicalPage": 3,
+   "textSha256": "1df31fd18e1d4b22c4e2694ba21ebf2128ba5d497b8407b41791869d7db4232b",
+   "publisherDomain": "soumu.go.jp",
+   "logicalDocumentIndex": 1,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 33,
+   "bodyLineCount": 30,
+   "firstNonEmptyLines": [
+    "                                                                      1",
+    "                                  令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "9502 交付税及び譲与税配付金特別会計",
+    "要求                    区                分      ページ 要求    区       分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    46,
+    68
+   ],
+   "lineLength": {
+    "min": 20,
+    "median": 49,
+    "max": 71
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    70
+   ],
+   "largeGapLineCount": 27,
+   "trailingPageRefLineCount": 29,
+   "linesWithTwoPageRefCandidates": 17,
+   "secondSegmentStartColumns": [
+    5,
+    17
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 1,
+    "勘定": 0,
+    "項": 8,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 16,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 16,
+   "puaCodePoints": [
+    "U+E5E3"
+   ],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": true,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/moj.go.jp/content/001402819.pdf",
+   "pdfSha256": "6635e0e5fbb8a962d439d6d8d256c0c34892b0d9a366ea04daf15d338a36bb7b",
+   "physicalPage": 3,
+   "textSha256": "378d1d15b39c05148bb810252b3f741fade1eb7485b8f47544ab9d0318f4748e",
+   "publisherDomain": "moj.go.jp",
+   "logicalDocumentIndex": 3,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 15,
+   "bodyLineCount": 12,
+   "firstNonEmptyLines": [
+    "                                                               1",
+    "                           令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "9101 東 日 本 大 震 災 復 興 特 別 会 計 （法務省）",
+    "要求                    区        分       ページ 要求    区       分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    39,
+    61
+   ],
+   "lineLength": {
+    "min": 34,
+    "median": 42,
+    "max": 64
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    63
+   ],
+   "largeGapLineCount": 10,
+   "trailingPageRefLineCount": 11,
+   "linesWithTwoPageRefCandidates": 4,
+   "secondSegmentStartColumns": [
+    5,
+    16
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 1,
+    "勘定": 0,
+    "項": 2,
+    "所管": 1
+   },
+   "requestNumberRowStarts": 2,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 2,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 1,
+   "prefixPageRefCandidateTails": [
+    "復興庁                      3"
+   ],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "pdfSha256": "ba64c25df327161a33c293374a7255c203cc9a527130ece848574badefbf909a",
+   "physicalPage": 3,
+   "textSha256": "601fe8ee0e2c018c39fe3cff86000fa116db60a39513f46e1c674908c14cbe44",
+   "publisherDomain": "meti.go.jp",
+   "logicalDocumentIndex": 4,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 47,
+   "bodyLineCount": 44,
+   "firstNonEmptyLines": [
+    "                                                                                                          1",
+    "                                  令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "27     経済産業省所管",
+    "要求                  区                     分      ページ 要求                    区                     分      ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    49,
+    104
+   ],
+   "lineLength": {
+    "min": 13,
+    "median": 107,
+    "max": 107
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    11,
+    55,
+    61,
+    62,
+    106
+   ],
+   "largeGapLineCount": 41,
+   "trailingPageRefLineCount": 42,
+   "linesWithTwoPageRefCandidates": 31,
+   "secondSegmentStartColumns": [
+    5,
+    55,
+    60,
+    62
+   ],
+   "markerCounts": {
+    "組織": 3,
+    "会計": 0,
+    "勘定": 0,
+    "項": 22,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 20,
+   "requestNumberTokensMidLine": 21,
+   "u2011LineCount": 28,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 2,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "TOC",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": true,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "pdfSha256": "ba64c25df327161a33c293374a7255c203cc9a527130ece848574badefbf909a",
+   "physicalPage": 4,
+   "textSha256": "91a1bfb784f6106b944d3650cb241e76e3f58ef6bb3f96536639c57eb6b1efce",
+   "publisherDomain": "meti.go.jp",
+   "logicalDocumentIndex": 4,
+   "classifierSource": "INHERITED",
+   "explicitTitleObserved": false,
+   "nonEmptyLineCount": 33,
+   "bodyLineCount": 31,
+   "firstNonEmptyLines": [
+    "  2",
+    "要求                      区                  分          ページ 要求   区   分   ページ",
+    "番号                                                        番号",
+    "       （組織） 040 資源エネルギー庁                               81"
+   ],
+   "pageHeaderTokenColumns": [
+    54,
+    71
+   ],
+   "lineLength": {
+    "min": 3,
+    "median": 58,
+    "max": 74
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    2,
+    7,
+    8,
+    12,
+    16
+   ],
+   "largeGapLineCount": 23,
+   "trailingPageRefLineCount": 26,
+   "linesWithTwoPageRefCandidates": 13,
+   "secondSegmentStartColumns": [
+    6
+   ],
+   "markerCounts": {
+    "組織": 2,
+    "会計": 0,
+    "勘定": 0,
+    "項": 10,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 13,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 13,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 5,
+   "previousPhysicalPageType": "TOC",
+   "nextPhysicalPageType": "SUMMARY",
+   "previousPageIsTocInSamePdf": true,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneju_o.pdf",
+   "pdfSha256": "2c1d6cb494a41dbb8d03a63099cc4154f31d70b966c7510bc6fce3501a70e7b6",
+   "physicalPage": 3,
+   "textSha256": "0bf62775ffaf94be47956ba6760d713f34a6a8b22e47d53f962df182c250516d",
+   "publisherDomain": "meti.go.jp",
+   "logicalDocumentIndex": 5,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 43,
+   "bodyLineCount": 40,
+   "firstNonEmptyLines": [
+    "                                  令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "9905 エ ネ ル ギ ー 対 策 特 別 会 計 (（エネルギー需給勘定）)",
+    "要求                    区                   分      ページ 要求                     区                    分      ページ",
+    "番号                                                   番号"
+   ],
+   "pageHeaderTokenColumns": [
+    49,
+    104
+   ],
+   "lineLength": {
+    "min": 12,
+    "median": 52,
+    "max": 108
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    11,
+    55,
+    62,
+    66
+   ],
+   "largeGapLineCount": 28,
+   "trailingPageRefLineCount": 35,
+   "linesWithTwoPageRefCandidates": 22,
+   "secondSegmentStartColumns": [
+    5,
+    16,
+    55,
+    60,
+    62
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 1,
+    "勘定": 1,
+    "項": 17,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 17,
+   "requestNumberTokensMidLine": 5,
+   "u2011LineCount": 19,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 35,
+   "prefixPageRefCandidateTails": [
+    "エ 9",
+    "エ 2",
+    "エ 10",
+    "エ 3",
+    "エ 4",
+    "エ 8"
+   ],
+   "wrappedRowCandidateLines": 5,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneden_o.pdf",
+   "pdfSha256": "d9ca160f33481511b3a484853f105375895f765a01535ed6bcae4b348eba6383",
+   "physicalPage": 3,
+   "textSha256": "31f3afdc32944db085c71a08e46e66219e5690aa7a2d5ce957e5f212c741d6a5",
+   "publisherDomain": "meti.go.jp",
+   "logicalDocumentIndex": 6,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 35,
+   "bodyLineCount": 32,
+   "firstNonEmptyLines": [
+    "                                  令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "9905 エ ネ ル ギ ー 対 策 特 別 会 計 （電源開発促進勘定）",
+    "要求                    区                 分     ページ 要求    区       分   ページ",
+    "番号                                                番号"
+   ],
+   "pageHeaderTokenColumns": [
+    46,
+    68
+   ],
+   "lineLength": {
+    "min": 37,
+    "median": 50,
+    "max": 71
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7
+   ],
+   "largeGapLineCount": 27,
+   "trailingPageRefLineCount": 31,
+   "linesWithTwoPageRefCandidates": 17,
+   "secondSegmentStartColumns": [
+    5,
+    17
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 1,
+    "勘定": 1,
+    "項": 12,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 15,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 15,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 28,
+   "prefixPageRefCandidateTails": [
+    "電 1",
+    "電 2",
+    "電 3",
+    "電 14",
+    "電 15",
+    "電 16"
+   ],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/enegen_o.pdf",
+   "pdfSha256": "fbbeb3df06555205ae839e9849f460d3017d4b95cf1bfd3bf2aacb389a67e70f",
+   "physicalPage": 3,
+   "textSha256": "20fd016f275968d08c7f7c01dd913f37d7a5c7e9fdf4b1b977d92760f4f0edcc",
+   "publisherDomain": "meti.go.jp",
+   "logicalDocumentIndex": 7,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 16,
+   "bodyLineCount": 13,
+   "firstNonEmptyLines": [
+    "                                  令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "9905 エ ネ ル ギ ー 対 策 特 別 会 計 （原子力損害賠償支援勘定）",
+    "要求                  区                     分   ページ 要求    区       分   ページ",
+    "番号                                                番号"
+   ],
+   "pageHeaderTokenColumns": [
+    46,
+    68
+   ],
+   "lineLength": {
+    "min": 40,
+    "median": 49,
+    "max": 71
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7
+   ],
+   "largeGapLineCount": 11,
+   "trailingPageRefLineCount": 12,
+   "linesWithTwoPageRefCandidates": 6,
+   "secondSegmentStartColumns": [
+    5,
+    16
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 1,
+    "勘定": 1,
+    "項": 4,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 4,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 4,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 9,
+   "prefixPageRefCandidateTails": [
+    "原 1"
+   ],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/tokkyo_o.pdf",
+   "pdfSha256": "6e083f0b4115530237d4c1c91e6d105fd3ee301d49f5ad3c0e649e11f4b13fc9",
+   "physicalPage": 3,
+   "textSha256": "39b5936f8d80365d6e8e37798d5f531c6515f79817d8f0dd7a6627d8ec35f2a7",
+   "publisherDomain": "meti.go.jp",
+   "logicalDocumentIndex": 8,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 18,
+   "bodyLineCount": 15,
+   "firstNonEmptyLines": [
+    "                                                                   1",
+    "                               令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "2703 特 許 特 別 会 計 (特 許（特 許）)",
+    "要求                    区                分   ページ 要求    区       分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    43,
+    65
+   ],
+   "lineLength": {
+    "min": 27,
+    "median": 46,
+    "max": 68
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    67
+   ],
+   "largeGapLineCount": 12,
+   "trailingPageRefLineCount": 14,
+   "linesWithTwoPageRefCandidates": 7,
+   "secondSegmentStartColumns": [
+    5,
+    17
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 1,
+    "勘定": 0,
+    "項": 4,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 6,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 6,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 1,
+   "prefixPageRefCandidateTails": [
+    "特許                          3"
+   ],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/fukko_o.pdf",
+   "pdfSha256": "17c0efdce49fb24a188a08ecef5a3340ea3e76f9c6ccef10539eefd69e8d8363",
+   "physicalPage": 3,
+   "textSha256": "98d5c9b036a82fddb39f2dde0223c7299398fa74d4c19b09dbc63f8eb7d7a445",
+   "publisherDomain": "meti.go.jp",
+   "logicalDocumentIndex": 9,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 20,
+   "bodyLineCount": 17,
+   "firstNonEmptyLines": [
+    "                                                                    1",
+    "                              令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "9101 東 日 本 大 震 災 復 興 特 別 会 計 （経済産業省）",
+    "要求                    区                  分       ページ 要求   区   分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    49,
+    66
+   ],
+   "lineLength": {
+    "min": 15,
+    "median": 52,
+    "max": 69
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    11,
+    68
+   ],
+   "largeGapLineCount": 13,
+   "trailingPageRefLineCount": 15,
+   "linesWithTwoPageRefCandidates": 8,
+   "secondSegmentStartColumns": [
+    5,
+    16
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 1,
+    "勘定": 0,
+    "項": 3,
+    "所管": 1
+   },
+   "requestNumberRowStarts": 6,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 6,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 1,
+   "prefixPageRefCandidateTails": [
+    "復興庁                                3"
+   ],
+   "wrappedRowCandidateLines": 2,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "pdfSha256": "6cc573bf64747e4ceb41597cc83e371f5d8144a02e3e9033501597d64cfbbc5e",
+   "physicalPage": 2,
+   "textSha256": "3e398e82d5ac63d33117036443b58502efbc394e62e1d83a5b0233ebe10eab98",
+   "publisherDomain": "mof.go.jp",
+   "logicalDocumentIndex": 10,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 65,
+   "bodyLineCount": 62,
+   "firstNonEmptyLines": [
+    "                                                                                                           1",
+    "                                  令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "23     財 務 省 所 管",
+    "要求                                                   要求"
+   ],
+   "pageHeaderTokenColumns": [
+    49,
+    104
+   ],
+   "lineLength": {
+    "min": 16,
+    "median": 108,
+    "max": 108
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    11,
+    55,
+    62,
+    66,
+    107
+   ],
+   "largeGapLineCount": 57,
+   "trailingPageRefLineCount": 60,
+   "linesWithTwoPageRefCandidates": 41,
+   "secondSegmentStartColumns": [
+    5,
+    55,
+    60
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 18,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 39,
+   "requestNumberTokensMidLine": 21,
+   "u2011LineCount": 41,
+   "puaCodePoints": [
+    "U+E5E3"
+   ],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 2,
+   "previousPhysicalPageType": "COVER",
+   "nextPhysicalPageType": "TOC",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": true,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "pdfSha256": "6cc573bf64747e4ceb41597cc83e371f5d8144a02e3e9033501597d64cfbbc5e",
+   "physicalPage": 3,
+   "textSha256": "f36be9d02c320355276eda6b9ab5e84fdbdca961ca92d1854f2f72086cf20002",
+   "publisherDomain": "mof.go.jp",
+   "logicalDocumentIndex": 10,
+   "classifierSource": "INHERITED",
+   "explicitTitleObserved": false,
+   "nonEmptyLineCount": 39,
+   "bodyLineCount": 37,
+   "firstNonEmptyLines": [
+    "  2",
+    "要求                      区               分    ページ 要求                     区                  分   ページ",
+    "番号                                               番号",
+    "        （項） 410 予備費                           131   64   01‑13 独立行政法人酒類総合研究所運営費交付金に必要な経費        285"
+   ],
+   "pageHeaderTokenColumns": [
+    45,
+    95
+   ],
+   "lineLength": {
+    "min": 3,
+    "median": 49,
+    "max": 99
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    2,
+    7,
+    8
+   ],
+   "largeGapLineCount": 35,
+   "trailingPageRefLineCount": 37,
+   "linesWithTwoPageRefCandidates": 23,
+   "secondSegmentStartColumns": [
+    6,
+    52,
+    57
+   ],
+   "markerCounts": {
+    "組織": 3,
+    "会計": 0,
+    "勘定": 0,
+    "項": 14,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 20,
+   "requestNumberTokensMidLine": 2,
+   "u2011LineCount": 22,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 0,
+   "previousPhysicalPageType": "TOC",
+   "nextPhysicalPageType": "SUMMARY",
+   "previousPageIsTocInSamePdf": true,
+   "developmentExploredInPr3a": true,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024jisinn_2.pdf",
+   "pdfSha256": "9b7690b4b4b8818949abd386ccf2375c79f95dff70d38934624de5ffca5e0fe5",
+   "physicalPage": 2,
+   "textSha256": "181e880cc766bfc5065ab14403c634ac3516c6690325f737216d5c4b6d9f96c2",
+   "publisherDomain": "mof.go.jp",
+   "logicalDocumentIndex": 11,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 16,
+   "bodyLineCount": 13,
+   "firstNonEmptyLines": [
+    "                                                                1",
+    "                            令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "2307 地 震 再 保 険 特 別 会 計",
+    "要求                                          要求"
+   ],
+   "pageHeaderTokenColumns": [
+    40,
+    62
+   ],
+   "lineLength": {
+    "min": 22,
+    "median": 43,
+    "max": 65
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    64
+   ],
+   "largeGapLineCount": 11,
+   "trailingPageRefLineCount": 12,
+   "linesWithTwoPageRefCandidates": 5,
+   "secondSegmentStartColumns": [
+    5,
+    17
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 1,
+    "勘定": 0,
+    "項": 3,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 4,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 4,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "COVER",
+   "nextPhysicalPageType": "SUMMARY",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024kokusaiseirikikinn_2.pdf",
+   "pdfSha256": "bd0715a0585b04879c8796504d6841b91c612297299934d9298cb875cee55145",
+   "physicalPage": 2,
+   "textSha256": "d2a267c8503707f6a3f4767a868b236d424c3ab090a4cf1817410de4a3aa5e35",
+   "publisherDomain": "mof.go.jp",
+   "logicalDocumentIndex": 12,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 20,
+   "bodyLineCount": 17,
+   "firstNonEmptyLines": [
+    "                                                                   1",
+    "                               令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "2304 国債整理基金特別会計",
+    "要求                                                 要求"
+   ],
+   "pageHeaderTokenColumns": [
+    47,
+    65
+   ],
+   "lineLength": {
+    "min": 15,
+    "median": 50,
+    "max": 68
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    67
+   ],
+   "largeGapLineCount": 14,
+   "trailingPageRefLineCount": 16,
+   "linesWithTwoPageRefCandidates": 10,
+   "secondSegmentStartColumns": [
+    5,
+    16
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 1,
+    "勘定": 0,
+    "項": 3,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 9,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 9,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "COVER",
+   "nextPhysicalPageType": "SUMMARY",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024gaitame_2.pdf",
+   "pdfSha256": "4993fdf151fd6f0b5b568be1eb0cd1d42e6a1d34e88a1aeba48410ea80f9dfdf",
+   "physicalPage": 2,
+   "textSha256": "9cfc1f73e947b9067b14e119a6ba16c0f9c50a5aa7a3b16605a098fffe7bda77",
+   "publisherDomain": "mof.go.jp",
+   "logicalDocumentIndex": 13,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 22,
+   "bodyLineCount": 19,
+   "firstNonEmptyLines": [
+    "                                                                      1",
+    "                                  令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "2305 外国為替資金特別会計",
+    "要求                                                要求"
+   ],
+   "pageHeaderTokenColumns": [
+    46,
+    68
+   ],
+   "lineLength": {
+    "min": 15,
+    "median": 49,
+    "max": 71
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    70
+   ],
+   "largeGapLineCount": 17,
+   "trailingPageRefLineCount": 18,
+   "linesWithTwoPageRefCandidates": 8,
+   "secondSegmentStartColumns": [
+    5,
+    17
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 1,
+    "勘定": 0,
+    "項": 6,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 7,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 7,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "COVER",
+   "nextPhysicalPageType": "SUMMARY",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": true,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024zaiyuu_2.pdf",
+   "pdfSha256": "f8ebf4dfcfbfa3b4ae0636554e2f3e5462190db71d406de0b87fc45f12d36485",
+   "physicalPage": 2,
+   "textSha256": "21e8d687af8808b77b8980a7c2ebbf25ea9b6a13ea138f423a45da51c0489b55",
+   "publisherDomain": "mof.go.jp",
+   "logicalDocumentIndex": 14,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 25,
+   "bodyLineCount": 22,
+   "firstNonEmptyLines": [
+    "                                                                      1",
+    "                                  令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "9808 財 政 投 融 資 特 別 会 計 （財政融資資金勘定）",
+    "要求                                                要求"
+   ],
+   "pageHeaderTokenColumns": [
+    46,
+    68
+   ],
+   "lineLength": {
+    "min": 33,
+    "median": 49,
+    "max": 71
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    70
+   ],
+   "largeGapLineCount": 20,
+   "trailingPageRefLineCount": 21,
+   "linesWithTwoPageRefCandidates": 10,
+   "secondSegmentStartColumns": [
+    5,
+    17
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 1,
+    "勘定": 1,
+    "項": 7,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 8,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 8,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "COVER",
+   "nextPhysicalPageType": "SUMMARY",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tousi_2.pdf",
+   "pdfSha256": "be6b5bd2f3c0480bd8a5e9292a304e4eb37bd342deb21eb28b2464dfb5741ede",
+   "physicalPage": 2,
+   "textSha256": "0100c718b68ea8f73e8ca6cd69021311c8d7565ebd9cb6094adc07a41334ebdf",
+   "publisherDomain": "mof.go.jp",
+   "logicalDocumentIndex": 15,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 26,
+   "bodyLineCount": 23,
+   "firstNonEmptyLines": [
+    "                                                                      1",
+    "                                  令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "9808 財 政 投 融 資 特 別 会 計 （投資勘定）",
+    "要求                                                     要求"
+   ],
+   "pageHeaderTokenColumns": [
+    51,
+    68
+   ],
+   "lineLength": {
+    "min": 16,
+    "median": 54,
+    "max": 71
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    11,
+    70
+   ],
+   "largeGapLineCount": 18,
+   "trailingPageRefLineCount": 21,
+   "linesWithTwoPageRefCandidates": 10,
+   "secondSegmentStartColumns": [
+    5,
+    17
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 1,
+    "勘定": 1,
+    "項": 7,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 8,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 8,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 2,
+   "previousPhysicalPageType": "COVER",
+   "nextPhysicalPageType": "SUMMARY",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tokuzai_2.pdf",
+   "pdfSha256": "5744d1f8670a9a72d52e67771be8266e7d3d102ad35c102eb92b6c2eb5a84d75",
+   "physicalPage": 2,
+   "textSha256": "b65761f585f373ec60c0862c01bda41e7899b45a07ce4a28545cdb32db21a3b5",
+   "publisherDomain": "mof.go.jp",
+   "logicalDocumentIndex": 16,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 17,
+   "bodyLineCount": 14,
+   "firstNonEmptyLines": [
+    "                                                                     1",
+    "                                 令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "9808 財 政 投 融 資 特 別 会 計 （特定国有財産整備勘定）",
+    "要求                                               要求"
+   ],
+   "pageHeaderTokenColumns": [
+    45,
+    67
+   ],
+   "lineLength": {
+    "min": 35,
+    "median": 48,
+    "max": 70
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    69
+   ],
+   "largeGapLineCount": 12,
+   "trailingPageRefLineCount": 13,
+   "linesWithTwoPageRefCandidates": 7,
+   "secondSegmentStartColumns": [
+    5,
+    17
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 1,
+    "勘定": 1,
+    "項": 3,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 5,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 5,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "COVER",
+   "nextPhysicalPageType": "SUMMARY",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": true,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "pdfSha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+   "physicalPage": 3,
+   "textSha256": "daf020e2a88b53ce9b415958b5ec56aa0dd6ffc11208a9a835062d2e71c960ed",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 17,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 56,
+   "bodyLineCount": 53,
+   "firstNonEmptyLines": [
+    "                                                                                                      1",
+    "                                  令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "25     厚生労働省所管",
+    "要求                   区                 分         ページ 要求                     区                  分    ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    49,
+    100
+   ],
+   "lineLength": {
+    "min": 14,
+    "median": 104,
+    "max": 104
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    11,
+    56,
+    63,
+    102
+   ],
+   "largeGapLineCount": 50,
+   "trailingPageRefLineCount": 51,
+   "linesWithTwoPageRefCandidates": 39,
+   "secondSegmentStartColumns": [
+    5,
+    56,
+    61,
+    63
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 16,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 35,
+   "requestNumberTokensMidLine": 23,
+   "u2011LineCount": 37,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 2,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "TOC",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "pdfSha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+   "physicalPage": 4,
+   "textSha256": "3e506a8360d76491a07dcd99f54b5036abaf7ddd3fb7e9c658bd5e99dfffd866",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 17,
+   "classifierSource": "INHERITED",
+   "explicitTitleObserved": false,
+   "nonEmptyLineCount": 54,
+   "bodyLineCount": 52,
+   "firstNonEmptyLines": [
+    "  2",
+    "要求                   区                  分         ページ 要求                     区                   分        ページ",
+    "番号                                                    番号",
+    "46    01‑07 原爆死没者追悼平和祈念館施設整備に必要な経費                 537   68   05‑07 保健所の地域健康危機管理活動の推進に必要な経費                838"
+   ],
+   "pageHeaderTokenColumns": [
+    50,
+    106
+   ],
+   "lineLength": {
+    "min": 3,
+    "median": 110,
+    "max": 110
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    2,
+    8,
+    57,
+    64,
+    68
+   ],
+   "largeGapLineCount": 44,
+   "trailingPageRefLineCount": 51,
+   "linesWithTwoPageRefCandidates": 38,
+   "secondSegmentStartColumns": [
+    6,
+    57,
+    62,
+    64
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 0,
+    "勘定": 0,
+    "項": 28,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 30,
+   "requestNumberTokensMidLine": 21,
+   "u2011LineCount": 35,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "TOC",
+   "nextPhysicalPageType": "TOC",
+   "previousPageIsTocInSamePdf": true,
+   "developmentExploredInPr3a": true,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "pdfSha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+   "physicalPage": 5,
+   "textSha256": "6b62aacb086d566f1eab18426e632593c031f2d01711d985bd29f898d2a03256",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 17,
+   "classifierSource": "INHERITED",
+   "explicitTitleObserved": false,
+   "nonEmptyLineCount": 44,
+   "bodyLineCount": 42,
+   "firstNonEmptyLines": [
+    "                                                                                                           3",
+    "要求                   区                  分       ページ 要求                      区                     分      ページ",
+    "番号                                                  番号",
+    "89    05‑08 職業能力開発の強化に必要な経費                      954 113     01‑25 中国残留邦人等の支援事業に必要な経費                    1060"
+   ],
+   "pageHeaderTokenColumns": [
+    48,
+    105
+   ],
+   "lineLength": {
+    "min": 52,
+    "median": 109,
+    "max": 109
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    8,
+    55,
+    63,
+    67,
+    107
+   ],
+   "largeGapLineCount": 37,
+   "trailingPageRefLineCount": 40,
+   "linesWithTwoPageRefCandidates": 37,
+   "secondSegmentStartColumns": [
+    6,
+    61,
+    63
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 0,
+    "勘定": 0,
+    "項": 24,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 26,
+   "requestNumberTokensMidLine": 23,
+   "u2011LineCount": 31,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 2,
+   "previousPhysicalPageType": "TOC",
+   "nextPhysicalPageType": "TOC",
+   "previousPageIsTocInSamePdf": true,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "pdfSha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+   "physicalPage": 6,
+   "textSha256": "eb58e928a465a2cc7735d33a2f71fb1e6cb10ef4852186a33001c5ced567bc1a",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 17,
+   "classifierSource": "INHERITED",
+   "explicitTitleObserved": false,
+   "nonEmptyLineCount": 39,
+   "bodyLineCount": 37,
+   "firstNonEmptyLines": [
+    "  4",
+    "要求                   区                     分      ページ 要求                       区                分   ページ",
+    "番号                                                    番号",
+    "        （項） 390 介護保険制度運営推進費                       1164         （項） 530 国立研究開発法人国立成育医療研究センター施設整備費    1219"
+   ],
+   "pageHeaderTokenColumns": [
+    50,
+    100
+   ],
+   "lineLength": {
+    "min": 3,
+    "median": 104,
+    "max": 104
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    2,
+    8
+   ],
+   "largeGapLineCount": 36,
+   "trailingPageRefLineCount": 37,
+   "linesWithTwoPageRefCandidates": 36,
+   "secondSegmentStartColumns": [
+    6,
+    61,
+    62,
+    63
+   ],
+   "markerCounts": {
+    "組織": 3,
+    "会計": 0,
+    "勘定": 0,
+    "項": 29,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 20,
+   "requestNumberTokensMidLine": 20,
+   "u2011LineCount": 27,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 0,
+   "previousPhysicalPageType": "TOC",
+   "nextPhysicalPageType": "TOC",
+   "previousPageIsTocInSamePdf": true,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "pdfSha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+   "physicalPage": 7,
+   "textSha256": "edcb745e044a4532ca27a75e0476b49e7cdd54af23cc23332ca296acf3694a5b",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 17,
+   "classifierSource": "INHERITED",
+   "explicitTitleObserved": false,
+   "nonEmptyLineCount": 46,
+   "bodyLineCount": 44,
+   "firstNonEmptyLines": [
+    "                                                                                                      5",
+    "要求                   区                     分      ページ 要求                      区                分   ページ",
+    "番号                                                    番号",
+    "       （組織） 050 国立障害者リハビリテーションセンター                1462 197     05‑95 厚生労働統計調査に必要な経費                1618"
+   ],
+   "pageHeaderTokenColumns": [
+    50,
+    99
+   ],
+   "lineLength": {
+    "min": 14,
+    "median": 103,
+    "max": 103
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    7,
+    8,
+    12,
+    57,
+    64,
+    65,
+    102
+   ],
+   "largeGapLineCount": 40,
+   "trailingPageRefLineCount": 43,
+   "linesWithTwoPageRefCandidates": 30,
+   "secondSegmentStartColumns": [
+    6,
+    63,
+    65
+   ],
+   "markerCounts": {
+    "組織": 4,
+    "会計": 0,
+    "勘定": 0,
+    "項": 20,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 25,
+   "requestNumberTokensMidLine": 12,
+   "u2011LineCount": 29,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "TOC",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": true,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+   "pdfSha256": "769a47c4ea979473abcd1fb04b3d4aec6bdf98bc358d802f7af628990036001a",
+   "physicalPage": 3,
+   "textSha256": "2b22746ee8bab3b783f390f2e012eb258c994be57001aeab38e4449491a35b60",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 18,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 37,
+   "bodyLineCount": 34,
+   "firstNonEmptyLines": [
+    "                                                                                                        1",
+    "                                令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "2505 労 働 保 険 特 別 会 計",
+    "要求                     区                 分      ページ 要求                         区                 分    ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    48,
+    102
+   ],
+   "lineLength": {
+    "min": 20,
+    "median": 106,
+    "max": 106
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    104
+   ],
+   "largeGapLineCount": 32,
+   "trailingPageRefLineCount": 33,
+   "linesWithTwoPageRefCandidates": 32,
+   "secondSegmentStartColumns": [
+    5,
+    16,
+    55,
+    62
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 1,
+    "勘定": 2,
+    "項": 29,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 14,
+   "requestNumberTokensMidLine": 16,
+   "u2011LineCount": 18,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "TOC",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+   "pdfSha256": "769a47c4ea979473abcd1fb04b3d4aec6bdf98bc358d802f7af628990036001a",
+   "physicalPage": 4,
+   "textSha256": "b5e845079953d63cf6f5f21b5f62021967394dfb87eab0cdb44485a7072dc34a",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 18,
+   "classifierSource": "INHERITED",
+   "explicitTitleObserved": false,
+   "nonEmptyLineCount": 39,
+   "bodyLineCount": 37,
+   "firstNonEmptyLines": [
+    "  2",
+    "要求                       区              分   ページ 要求                      区   分   ページ",
+    "番号                                              番号",
+    "        （項） 180 障害者職業能力開発支援費                 556          （項） 090 予備費            778"
+   ],
+   "pageHeaderTokenColumns": [
+    44,
+    80
+   ],
+   "lineLength": {
+    "min": 3,
+    "median": 48,
+    "max": 84
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    2,
+    7,
+    8
+   ],
+   "largeGapLineCount": 35,
+   "trailingPageRefLineCount": 37,
+   "linesWithTwoPageRefCandidates": 21,
+   "secondSegmentStartColumns": [
+    6,
+    18,
+    58
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 0,
+    "勘定": 1,
+    "項": 17,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 19,
+   "requestNumberTokensMidLine": 1,
+   "u2011LineCount": 19,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 0,
+   "previousPhysicalPageType": "TOC",
+   "nextPhysicalPageType": "SUMMARY",
+   "previousPageIsTocInSamePdf": true,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf",
+   "pdfSha256": "0391edca4cd6b88140195d118613ccac33550549baf065d1951db96e9625d0b5",
+   "physicalPage": 3,
+   "textSha256": "c1ac08450da5ba867951d4a5e49400d8a9cc2a76ad56bd015204fad646060500",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 19,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 37,
+   "bodyLineCount": 34,
+   "firstNonEmptyLines": [
+    "                                                                                                    1",
+    "                                 令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "9207 年 金 特 別 会 計",
+    "要求                    区                   分   ページ 要求                        区                 分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    46,
+    98
+   ],
+   "lineLength": {
+    "min": 16,
+    "median": 101,
+    "max": 101
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    100
+   ],
+   "largeGapLineCount": 32,
+   "trailingPageRefLineCount": 33,
+   "linesWithTwoPageRefCandidates": 32,
+   "secondSegmentStartColumns": [
+    5,
+    17,
+    52,
+    58,
+    59
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 1,
+    "勘定": 5,
+    "項": 26,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 14,
+   "requestNumberTokensMidLine": 16,
+   "u2011LineCount": 19,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "TOC",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf",
+   "pdfSha256": "0391edca4cd6b88140195d118613ccac33550549baf065d1951db96e9625d0b5",
+   "physicalPage": 4,
+   "textSha256": "7d844a671faa1d241041cd7415163c15a5fde556a4c2bfda9ae5285bd800bd78",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 19,
+   "classifierSource": "INHERITED",
+   "explicitTitleObserved": false,
+   "nonEmptyLineCount": 20,
+   "bodyLineCount": 18,
+   "firstNonEmptyLines": [
+    "  2",
+    "要求                       区              分         ページ 要求   区   分   ページ",
+    "番号                                                    番号",
+    "        （項） 090 予備費                                31"
+   ],
+   "pageHeaderTokenColumns": [
+    50,
+    67
+   ],
+   "lineLength": {
+    "min": 3,
+    "median": 53,
+    "max": 70
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    2,
+    7,
+    8
+   ],
+   "largeGapLineCount": 16,
+   "trailingPageRefLineCount": 18,
+   "linesWithTwoPageRefCandidates": 10,
+   "secondSegmentStartColumns": [
+    6,
+    18
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 0,
+    "勘定": 1,
+    "項": 7,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 9,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 9,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 0,
+   "previousPhysicalPageType": "TOC",
+   "nextPhysicalPageType": "SUMMARY",
+   "previousPageIsTocInSamePdf": true,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+   "physicalPage": 3,
+   "textSha256": "f0b018623a9b0ab5110b691cb5b29b723cb61b09255000aa995a078ccebad65a",
+   "publisherDomain": "maff.go.jp",
+   "logicalDocumentIndex": 20,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 60,
+   "bodyLineCount": 57,
+   "firstNonEmptyLines": [
+    "                                                                                                           1",
+    "                                  令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "26     農林水産省所管",
+    "要求                  区                    分      ページ 要求                     区                    分       ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    48,
+    104
+   ],
+   "lineLength": {
+    "min": 14,
+    "median": 108,
+    "max": 108
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    55,
+    62,
+    66,
+    107
+   ],
+   "largeGapLineCount": 47,
+   "trailingPageRefLineCount": 53,
+   "linesWithTwoPageRefCandidates": 31,
+   "secondSegmentStartColumns": [
+    5,
+    55,
+    60,
+    62
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 27,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 28,
+   "requestNumberTokensMidLine": 16,
+   "u2011LineCount": 31,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 4,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "TOC",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+   "physicalPage": 4,
+   "textSha256": "5c6f9690094dcc7a623c9aab295a471a835632363b3bddd47e81f833f3cd2c6c",
+   "publisherDomain": "maff.go.jp",
+   "logicalDocumentIndex": 20,
+   "classifierSource": "INHERITED",
+   "explicitTitleObserved": false,
+   "nonEmptyLineCount": 39,
+   "bodyLineCount": 37,
+   "firstNonEmptyLines": [
+    "  2",
+    "要求                   区                    分   ページ 要求                        区                分        ページ",
+    "番号                                                番号",
+    "        （項） 280 農林水産業環境政策推進費                   165          （項） 010 農林水産技術会議共通費                        225"
+   ],
+   "pageHeaderTokenColumns": [
+    46,
+    102
+   ],
+   "lineLength": {
+    "min": 3,
+    "median": 106,
+    "max": 106
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    2,
+    7,
+    8
+   ],
+   "largeGapLineCount": 36,
+   "trailingPageRefLineCount": 37,
+   "linesWithTwoPageRefCandidates": 36,
+   "secondSegmentStartColumns": [
+    6,
+    53,
+    59,
+    60
+   ],
+   "markerCounts": {
+    "組織": 5,
+    "会計": 0,
+    "勘定": 0,
+    "項": 29,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 20,
+   "requestNumberTokensMidLine": 18,
+   "u2011LineCount": 31,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 0,
+   "previousPhysicalPageType": "TOC",
+   "nextPhysicalPageType": "TOC",
+   "previousPageIsTocInSamePdf": true,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+   "physicalPage": 5,
+   "textSha256": "0361bbf1438795d66a8bf58db6c89927d81ca17cfffb5e6b7bfba1033ae03fea",
+   "publisherDomain": "maff.go.jp",
+   "logicalDocumentIndex": 20,
+   "classifierSource": "INHERITED",
+   "explicitTitleObserved": false,
+   "nonEmptyLineCount": 43,
+   "bodyLineCount": 41,
+   "firstNonEmptyLines": [
+    "                                                                                                                 3",
+    "要求                  区                    分           ページ 要求                       区                   分       ページ",
+    "番号                                                       番号",
+    "       （項） 020 林野庁施設費                                 287   90    01‑49 山林施設災害復旧事業等工事諸費に必要な経費                  318"
+   ],
+   "pageHeaderTokenColumns": [
+    53,
+    110
+   ],
+   "lineLength": {
+    "min": 21,
+    "median": 114,
+    "max": 114
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    7,
+    11,
+    60,
+    68,
+    113
+   ],
+   "largeGapLineCount": 38,
+   "trailingPageRefLineCount": 39,
+   "linesWithTwoPageRefCandidates": 35,
+   "secondSegmentStartColumns": [
+    5,
+    60,
+    66,
+    68
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 32,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 21,
+   "requestNumberTokensMidLine": 19,
+   "u2011LineCount": 33,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 2,
+   "previousPhysicalPageType": "TOC",
+   "nextPhysicalPageType": "TOC",
+   "previousPageIsTocInSamePdf": true,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+   "physicalPage": 6,
+   "textSha256": "ab80c048a944499834b2c6a8b13e0ae26416ea05ff585383f4cdc5d04fab850e",
+   "publisherDomain": "maff.go.jp",
+   "logicalDocumentIndex": 20,
+   "classifierSource": "INHERITED",
+   "explicitTitleObserved": false,
+   "nonEmptyLineCount": 8,
+   "bodyLineCount": 6,
+   "firstNonEmptyLines": [
+    "  4",
+    "要求                   区         分   ページ 要求   区   分   ページ",
+    "番号                                     番号",
+    "        （項） 160 漁港施設災害復旧事業費         359"
+   ],
+   "pageHeaderTokenColumns": [
+    35,
+    52
+   ],
+   "lineLength": {
+    "min": 3,
+    "median": 39,
+    "max": 55
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    2,
+    6,
+    8
+   ],
+   "largeGapLineCount": 5,
+   "trailingPageRefLineCount": 6,
+   "linesWithTwoPageRefCandidates": 2,
+   "secondSegmentStartColumns": [
+    6
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 0,
+    "勘定": 0,
+    "項": 2,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 2,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 2,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 0,
+   "previousPhysicalPageType": "TOC",
+   "nextPhysicalPageType": "SUMMARY",
+   "previousPageIsTocInSamePdf": true,
+   "developmentExploredInPr3a": true,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+   "pdfSha256": "3be3fa49d24cc02ed680f0104d41405ff5e69bfb4a84290dccc8fe8205eaa1f1",
+   "physicalPage": 3,
+   "textSha256": "cfb69f0aa58232c148c2445de66f716ad2482e6c1c27545f5570f6d7bec85952",
+   "publisherDomain": "maff.go.jp",
+   "logicalDocumentIndex": 21,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 38,
+   "bodyLineCount": 35,
+   "firstNonEmptyLines": [
+    "                                                                                             1",
+    "                                  令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "9101 東 日 本 大 震 災 復 興 特 別 会 計 （農林水産省）",
+    "要求                    区                  分       ページ 要求                    区           分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    49,
+    91
+   ],
+   "lineLength": {
+    "min": 16,
+    "median": 52,
+    "max": 94
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    11,
+    93
+   ],
+   "largeGapLineCount": 29,
+   "trailingPageRefLineCount": 33,
+   "linesWithTwoPageRefCandidates": 27,
+   "secondSegmentStartColumns": [
+    5,
+    16,
+    55,
+    62
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 1,
+    "勘定": 0,
+    "項": 8,
+    "所管": 1
+   },
+   "requestNumberRowStarts": 20,
+   "requestNumberTokensMidLine": 7,
+   "u2011LineCount": 26,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 2,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf",
+   "pdfSha256": "aaec655a87a74e2724ac35d81b6759697749c24e586a3b09934c46c4a4fca460",
+   "physicalPage": 3,
+   "textSha256": "ce9a1c5ba6053ad9261829aabcd6f565d74a031b261013153ad50bd09d7bedcb",
+   "publisherDomain": "maff.go.jp",
+   "logicalDocumentIndex": 22,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 37,
+   "bodyLineCount": 34,
+   "firstNonEmptyLines": [
+    "                                                                                                  1",
+    "                                  令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "2610 食料安定供給特別会計",
+    "要求                    区                  分    ページ 要求                        区               分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    46,
+    96
+   ],
+   "lineLength": {
+    "min": 15,
+    "median": 99,
+    "max": 99
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    98
+   ],
+   "largeGapLineCount": 32,
+   "trailingPageRefLineCount": 33,
+   "linesWithTwoPageRefCandidates": 32,
+   "secondSegmentStartColumns": [
+    5,
+    17,
+    52,
+    59
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 1,
+    "勘定": 7,
+    "項": 23,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 15,
+   "requestNumberTokensMidLine": 16,
+   "u2011LineCount": 21,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "TOC",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf",
+   "pdfSha256": "aaec655a87a74e2724ac35d81b6759697749c24e586a3b09934c46c4a4fca460",
+   "physicalPage": 4,
+   "textSha256": "8ae3415f7a52dd697011bd50c7b0ba51e32932888ac4d7c8cc3d202980c7b6be",
+   "publisherDomain": "maff.go.jp",
+   "logicalDocumentIndex": 22,
+   "classifierSource": "INHERITED",
+   "explicitTitleObserved": false,
+   "nonEmptyLineCount": 22,
+   "bodyLineCount": 20,
+   "firstNonEmptyLines": [
+    "  2",
+    "要求                    区                 分             ページ 要求   区   分   ページ",
+    "番号                                                        番号",
+    "32    01‑46 土地改良事業に必要な経費                               24"
+   ],
+   "pageHeaderTokenColumns": [
+    54,
+    71
+   ],
+   "lineLength": {
+    "min": 3,
+    "median": 57,
+    "max": 74
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    2,
+    6,
+    8,
+    16
+   ],
+   "largeGapLineCount": 17,
+   "trailingPageRefLineCount": 19,
+   "linesWithTwoPageRefCandidates": 9,
+   "secondSegmentStartColumns": [
+    6
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 0,
+    "勘定": 0,
+    "項": 8,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 9,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 9,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "TOC",
+   "nextPhysicalPageType": "SUMMARY",
+   "previousPageIsTocInSamePdf": true,
+   "developmentExploredInPr3a": true,
+   "renderedInPr3a": true
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-8.pdf",
+   "pdfSha256": "ba176e292576d8d618b0936fd36a7129d7082efb4a7c7204a746507d757aa137",
+   "physicalPage": 3,
+   "textSha256": "cb2c1a187f44801194abe3bd9e96f196b752b7189d64e10702ce3efee6ff7dd5",
+   "publisherDomain": "maff.go.jp",
+   "logicalDocumentIndex": 23,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 10,
+   "bodyLineCount": 7,
+   "firstNonEmptyLines": [
+    "                                                                      1",
+    "                                  令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "2611 国 有 林 野 事 業 債 務 管 理 特 別 会 計 (国有林野事業債務管理（国有林野債務管理）)",
+    "要求                  区                 分       ページ 要求    区       分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    46,
+    68
+   ],
+   "lineLength": {
+    "min": 49,
+    "median": 52,
+    "max": 71
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    70
+   ],
+   "largeGapLineCount": 5,
+   "trailingPageRefLineCount": 6,
+   "linesWithTwoPageRefCandidates": 2,
+   "secondSegmentStartColumns": [
+    5,
+    16
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 1,
+    "勘定": 0,
+    "項": 1,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 1,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 1,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "pdfSha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+   "physicalPage": 3,
+   "textSha256": "9e947fc977be2e298930b72b6ad9deb15afa8936f8e6e61c83798ade39aec96f",
+   "publisherDomain": "mlit.go.jp",
+   "logicalDocumentIndex": 24,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 37,
+   "bodyLineCount": 34,
+   "firstNonEmptyLines": [
+    "                                                                                                   1",
+    "                                令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "28     国土交通省所管",
+    "要求                  区                 分     ページ 要求                     区                   分     ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    44,
+    97
+   ],
+   "lineLength": {
+    "min": 14,
+    "median": 101,
+    "max": 101
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    99
+   ],
+   "largeGapLineCount": 32,
+   "trailingPageRefLineCount": 33,
+   "linesWithTwoPageRefCandidates": 32,
+   "secondSegmentStartColumns": [
+    5,
+    51,
+    58
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 25,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 18,
+   "requestNumberTokensMidLine": 18,
+   "u2011LineCount": 22,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "TOC",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "pdfSha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+   "physicalPage": 4,
+   "textSha256": "c337e75d98e38434b4b90819394dd95a3b1e1aca21f521413952ecca7f8d50dc",
+   "publisherDomain": "mlit.go.jp",
+   "logicalDocumentIndex": 24,
+   "classifierSource": "INHERITED",
+   "explicitTitleObserved": false,
+   "nonEmptyLineCount": 39,
+   "bodyLineCount": 37,
+   "firstNonEmptyLines": [
+    "  2",
+    "要求                   区                 分   ページ 要求                     区                     分    ページ",
+    "番号                                             番号",
+    "        （項） 121 下水道防災事業費                    206   55   05‑95 整備新幹線建設推進高度化等事業に必要な経費                269"
+   ],
+   "pageHeaderTokenColumns": [
+    43,
+    97
+   ],
+   "lineLength": {
+    "min": 3,
+    "median": 101,
+    "max": 101
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    2,
+    8
+   ],
+   "largeGapLineCount": 36,
+   "trailingPageRefLineCount": 37,
+   "linesWithTwoPageRefCandidates": 36,
+   "secondSegmentStartColumns": [
+    6,
+    50,
+    57
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 0,
+    "勘定": 0,
+    "項": 35,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 18,
+   "requestNumberTokensMidLine": 19,
+   "u2011LineCount": 35,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 0,
+   "previousPhysicalPageType": "TOC",
+   "nextPhysicalPageType": "TOC",
+   "previousPageIsTocInSamePdf": true,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "pdfSha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+   "physicalPage": 5,
+   "textSha256": "838791f4bfd4a2d6bcd174928688d7c8c6e58e5789b128341ed967c746d54ba2",
+   "publisherDomain": "mlit.go.jp",
+   "logicalDocumentIndex": 24,
+   "classifierSource": "INHERITED",
+   "explicitTitleObserved": false,
+   "nonEmptyLineCount": 39,
+   "bodyLineCount": 37,
+   "firstNonEmptyLines": [
+    "                                                                                                    3",
+    "要求                   区                     分   ページ 要求                    区                    分   ページ",
+    "番号                                                 番号",
+    "74    10‑95 海事産業の市場環境整備・活性化等の推進に必要な経費           366 101   36‑44 道路環境改善事業に必要な経費                     404"
+   ],
+   "pageHeaderTokenColumns": [
+    47,
+    98
+   ],
+   "lineLength": {
+    "min": 53,
+    "median": 102,
+    "max": 102
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    8,
+    100
+   ],
+   "largeGapLineCount": 36,
+   "trailingPageRefLineCount": 37,
+   "linesWithTwoPageRefCandidates": 36,
+   "secondSegmentStartColumns": [
+    6,
+    58,
+    60
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 0,
+    "勘定": 0,
+    "項": 18,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 27,
+   "requestNumberTokensMidLine": 27,
+   "u2011LineCount": 35,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 0,
+   "previousPhysicalPageType": "TOC",
+   "nextPhysicalPageType": "TOC",
+   "previousPageIsTocInSamePdf": true,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "pdfSha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+   "physicalPage": 6,
+   "textSha256": "99efe411705eaa4d92dd015e1a008655224706d92d8bf65431e3da100df8b679",
+   "publisherDomain": "mlit.go.jp",
+   "logicalDocumentIndex": 24,
+   "classifierSource": "INHERITED",
+   "explicitTitleObserved": false,
+   "nonEmptyLineCount": 74,
+   "bodyLineCount": 72,
+   "firstNonEmptyLines": [
+    "  4",
+    "要求                   区                    分     ページ 要求                      区                     分      ページ",
+    "番号                                                  番号",
+    "128   01‑13 国立研究開発法人海上・港湾・航空技術研究所運営費交付金に必要な経費    434 147     05‑95 自動車重量税業務取扱費財源の自動車安全特別会計自動車検査登録勘定へ繰入    485"
+   ],
+   "pageHeaderTokenColumns": [
+    48,
+    105
+   ],
+   "lineLength": {
+    "min": 3,
+    "median": 74,
+    "max": 109
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    2,
+    8,
+    55,
+    63,
+    67
+   ],
+   "largeGapLineCount": 66,
+   "trailingPageRefLineCount": 71,
+   "linesWithTwoPageRefCandidates": 49,
+   "secondSegmentStartColumns": [
+    6,
+    61
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 0,
+    "勘定": 0,
+    "項": 21,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 49,
+   "requestNumberTokensMidLine": 31,
+   "u2011LineCount": 49,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "TOC",
+   "nextPhysicalPageType": "TOC",
+   "previousPageIsTocInSamePdf": true,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "pdfSha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+   "physicalPage": 7,
+   "textSha256": "c84088076ea95557c45875c5f539941e51ef83835adf3b850552eef28c3b4bd4",
+   "publisherDomain": "mlit.go.jp",
+   "logicalDocumentIndex": 24,
+   "classifierSource": "INHERITED",
+   "explicitTitleObserved": false,
+   "nonEmptyLineCount": 72,
+   "bodyLineCount": 70,
+   "firstNonEmptyLines": [
+    "                                                                                                              5",
+    "要求                   区                   分        ページ 要求                      区                  分         ページ",
+    "番号                                                    番号",
+    "178   01‑41 河川整備事業に必要な経費                           492 196     05‑43 航空機燃料税財源の空港整備事業に係る自動車安全特別会計空港整備勘定へ繰    499"
+   ],
+   "pageHeaderTokenColumns": [
+    50,
+    107
+   ],
+   "lineLength": {
+    "min": 20,
+    "median": 111,
+    "max": 111
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    8,
+    12,
+    57,
+    64,
+    65,
+    69,
+    110
+   ],
+   "largeGapLineCount": 61,
+   "trailingPageRefLineCount": 68,
+   "linesWithTwoPageRefCandidates": 33,
+   "secondSegmentStartColumns": [
+    6,
+    63
+   ],
+   "markerCounts": {
+    "組織": 3,
+    "会計": 0,
+    "勘定": 0,
+    "項": 32,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 32,
+   "requestNumberTokensMidLine": 17,
+   "u2011LineCount": 33,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 2,
+   "previousPhysicalPageType": "TOC",
+   "nextPhysicalPageType": "TOC",
+   "previousPageIsTocInSamePdf": true,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "pdfSha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+   "physicalPage": 8,
+   "textSha256": "36a7a429c0d10f6b353466d8f9fb1362d23a8777cb3943c5c815b074f7499f19",
+   "publisherDomain": "mlit.go.jp",
+   "logicalDocumentIndex": 24,
+   "classifierSource": "INHERITED",
+   "explicitTitleObserved": false,
+   "nonEmptyLineCount": 39,
+   "bodyLineCount": 37,
+   "firstNonEmptyLines": [
+    "  6",
+    "要求                   区                  分   ページ 要求                     区                 分   ページ",
+    "番号                                              番号",
+    "        （項） 015 海難審判費                        603 232   01‑41 北海道治水海岸事業工事諸費に必要な経費              721"
+   ],
+   "pageHeaderTokenColumns": [
+    44,
+    93
+   ],
+   "lineLength": {
+    "min": 3,
+    "median": 97,
+    "max": 97
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    2,
+    7,
+    8
+   ],
+   "largeGapLineCount": 36,
+   "trailingPageRefLineCount": 37,
+   "linesWithTwoPageRefCandidates": 36,
+   "secondSegmentStartColumns": [
+    6,
+    55,
+    56,
+    57
+   ],
+   "markerCounts": {
+    "組織": 5,
+    "会計": 0,
+    "勘定": 0,
+    "項": 26,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 19,
+   "requestNumberTokensMidLine": 22,
+   "u2011LineCount": 32,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 0,
+   "previousPhysicalPageType": "TOC",
+   "nextPhysicalPageType": "TOC",
+   "previousPageIsTocInSamePdf": true,
+   "developmentExploredInPr3a": true,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "pdfSha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+   "physicalPage": 9,
+   "textSha256": "d78af4870d1ddccc2257cbf33aa8a2e0191f33ff4985532a78191762660d74b5",
+   "publisherDomain": "mlit.go.jp",
+   "logicalDocumentIndex": 24,
+   "classifierSource": "INHERITED",
+   "explicitTitleObserved": false,
+   "nonEmptyLineCount": 43,
+   "bodyLineCount": 41,
+   "firstNonEmptyLines": [
+    "                                                                                                     7",
+    "要求                    区                  分        ページ 要求                      区               分   ページ",
+    "番号                                                    番号",
+    "        （項） 010 観光振興費                              863           （項） 012 海上保安官署施設費                1019"
+   ],
+   "pageHeaderTokenColumns": [
+    50,
+    98
+   ],
+   "lineLength": {
+    "min": 16,
+    "median": 54,
+    "max": 102
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    7,
+    8,
+    12,
+    57,
+    65,
+    101
+   ],
+   "largeGapLineCount": 37,
+   "trailingPageRefLineCount": 40,
+   "linesWithTwoPageRefCandidates": 25,
+   "secondSegmentStartColumns": [
+    6,
+    63,
+    65
+   ],
+   "markerCounts": {
+    "組織": 3,
+    "会計": 0,
+    "勘定": 0,
+    "項": 16,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 23,
+   "requestNumberTokensMidLine": 5,
+   "u2011LineCount": 24,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "TOC",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": true,
+   "developmentExploredInPr3a": true,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630393.pdf",
+   "pdfSha256": "efdef502e10961842477cd18cc2cb091c7a3206125881f6031fc7fa941613864",
+   "physicalPage": 3,
+   "textSha256": "9b9803effbc14a1acaf412c4670457be396ee4eeb564f70c056a60659056567d",
+   "publisherDomain": "mlit.go.jp",
+   "logicalDocumentIndex": 25,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 37,
+   "bodyLineCount": 34,
+   "firstNonEmptyLines": [
+    "                                                                                                  1",
+    "                               令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "2809 自 動 車 安 全 特 別 会 計",
+    "要求                   区                   分   ページ 要求                     区                   分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    45,
+    96
+   ],
+   "lineLength": {
+    "min": 22,
+    "median": 99,
+    "max": 99
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    98
+   ],
+   "largeGapLineCount": 32,
+   "trailingPageRefLineCount": 33,
+   "linesWithTwoPageRefCandidates": 32,
+   "secondSegmentStartColumns": [
+    5,
+    17,
+    51,
+    57,
+    58
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 1,
+    "勘定": 3,
+    "項": 28,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 14,
+   "requestNumberTokensMidLine": 16,
+   "u2011LineCount": 22,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "TOC",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630393.pdf",
+   "pdfSha256": "efdef502e10961842477cd18cc2cb091c7a3206125881f6031fc7fa941613864",
+   "physicalPage": 4,
+   "textSha256": "b746212b106c6e935376e0ed8dad55e3b26e2d6caa17df4ab2a8522fd00fe44e",
+   "publisherDomain": "mlit.go.jp",
+   "logicalDocumentIndex": 25,
+   "classifierSource": "INHERITED",
+   "explicitTitleObserved": false,
+   "nonEmptyLineCount": 10,
+   "bodyLineCount": 8,
+   "firstNonEmptyLines": [
+    "  2",
+    "要求                    区         分   ページ 要求   区   分   ページ",
+    "番号                                      番号",
+    "31    01‑20 一般会計へ繰入れに必要な経費           41"
+   ],
+   "pageHeaderTokenColumns": [
+    36,
+    53
+   ],
+   "lineLength": {
+    "min": 3,
+    "median": 39,
+    "max": 56
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    2,
+    8
+   ],
+   "largeGapLineCount": 7,
+   "trailingPageRefLineCount": 8,
+   "linesWithTwoPageRefCandidates": 4,
+   "secondSegmentStartColumns": [
+    6
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 0,
+    "勘定": 0,
+    "項": 3,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 4,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 4,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 0,
+   "previousPhysicalPageType": "TOC",
+   "nextPhysicalPageType": "SUMMARY",
+   "previousPageIsTocInSamePdf": true,
+   "developmentExploredInPr3a": true,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630395.pdf",
+   "pdfSha256": "d5e8250094ea55fee74951654a692ce345a2b8710a788017d0f5db7b9c259c1a",
+   "physicalPage": 3,
+   "textSha256": "2b8840fe233a383b3d583faa12221f01b32851251e0d4ab0d5686507bf648292",
+   "publisherDomain": "mlit.go.jp",
+   "logicalDocumentIndex": 26,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 30,
+   "bodyLineCount": 27,
+   "firstNonEmptyLines": [
+    "                                                                     1",
+    "                                 令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "9101 東 日 本 大 震 災 復 興 特 別 会 計 （国土交通省）",
+    "要求                    区                  分      ページ 要求   区     分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    48,
+    67
+   ],
+   "lineLength": {
+    "min": 36,
+    "median": 51,
+    "max": 70
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    69
+   ],
+   "largeGapLineCount": 24,
+   "trailingPageRefLineCount": 26,
+   "linesWithTwoPageRefCandidates": 14,
+   "secondSegmentStartColumns": [
+    5,
+    16
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 1,
+    "勘定": 0,
+    "項": 8,
+    "所管": 1
+   },
+   "requestNumberRowStarts": 12,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 12,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 1,
+   "prefixPageRefCandidateTails": [
+    "復興庁                               3"
+   ],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": true,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157010.pdf",
+   "pdfSha256": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd",
+   "physicalPage": 3,
+   "textSha256": "29c0f106f191102a5354954641e0b2c2996646e808553a21ec0b6b61ffc98de8",
+   "publisherDomain": "env.go.jp",
+   "logicalDocumentIndex": 27,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 51,
+   "bodyLineCount": 48,
+   "firstNonEmptyLines": [
+    "                                                                                                               1",
+    "                                 令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "29     環 境 省 所 管",
+    "要求                    区                 分            ページ 要求                    区                    分       ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    53,
+    108
+   ],
+   "lineLength": {
+    "min": 16,
+    "median": 112,
+    "max": 112
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    11,
+    15,
+    59,
+    66,
+    111
+   ],
+   "largeGapLineCount": 41,
+   "trailingPageRefLineCount": 42,
+   "linesWithTwoPageRefCandidates": 30,
+   "secondSegmentStartColumns": [
+    5,
+    59,
+    64,
+    66
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 27,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 21,
+   "requestNumberTokensMidLine": 17,
+   "u2011LineCount": 27,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 6,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "TOC",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157010.pdf",
+   "pdfSha256": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd",
+   "physicalPage": 4,
+   "textSha256": "47403ba36d0d32b13cc2546c668d913772c07ca0b3feb4d47f14431256d19921",
+   "publisherDomain": "env.go.jp",
+   "logicalDocumentIndex": 27,
+   "classifierSource": "INHERITED",
+   "explicitTitleObserved": false,
+   "nonEmptyLineCount": 30,
+   "bodyLineCount": 28,
+   "firstNonEmptyLines": [
+    "  2",
+    "要求                   区                  分             ページ 要求   区   分   ページ",
+    "番号                                                        番号",
+    "32    01‑49 廃棄物処理施設災害復旧事業に必要な経費                        133"
+   ],
+   "pageHeaderTokenColumns": [
+    54,
+    71
+   ],
+   "lineLength": {
+    "min": 3,
+    "median": 58,
+    "max": 74
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    2,
+    7,
+    8,
+    12,
+    16
+   ],
+   "largeGapLineCount": 24,
+   "trailingPageRefLineCount": 26,
+   "linesWithTwoPageRefCandidates": 15,
+   "secondSegmentStartColumns": [
+    6
+   ],
+   "markerCounts": {
+    "組織": 2,
+    "会計": 0,
+    "勘定": 0,
+    "項": 8,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 15,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 15,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 2,
+   "previousPhysicalPageType": "TOC",
+   "nextPhysicalPageType": "SUMMARY",
+   "previousPageIsTocInSamePdf": true,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157012.pdf",
+   "pdfSha256": "c71dd17f73464540ecb600d95d94104e59254e06b73efc2f282a5ecd8ba01823",
+   "physicalPage": 3,
+   "textSha256": "0765ea5df8c6d7eae7d5ca592aafd45f401b595ee4d452392679aef68b4065eb",
+   "publisherDomain": "env.go.jp",
+   "logicalDocumentIndex": 28,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 44,
+   "bodyLineCount": 41,
+   "firstNonEmptyLines": [
+    "                                  令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "9905 エ ネ ル ギ ー 対 策 特 別 会 計 (（エネルギー需給勘定）)",
+    "要求                    区                   分      ページ 要求                     区                    分      ページ",
+    "番号                                                   番号"
+   ],
+   "pageHeaderTokenColumns": [
+    49,
+    104
+   ],
+   "lineLength": {
+    "min": 12,
+    "median": 52,
+    "max": 108
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    11,
+    55,
+    60,
+    62,
+    66
+   ],
+   "largeGapLineCount": 29,
+   "trailingPageRefLineCount": 36,
+   "linesWithTwoPageRefCandidates": 22,
+   "secondSegmentStartColumns": [
+    5,
+    16,
+    55,
+    60,
+    62
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 1,
+    "勘定": 1,
+    "項": 17,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 17,
+   "requestNumberTokensMidLine": 5,
+   "u2011LineCount": 19,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 35,
+   "prefixPageRefCandidateTails": [
+    "エ 9",
+    "エ 2",
+    "エ 10",
+    "エ 3",
+    "エ 4",
+    "エ 8"
+   ],
+   "wrappedRowCandidateLines": 5,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": true,
+   "renderedInPr3a": true
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157013.pdf",
+   "pdfSha256": "5f42ccfb48cc1d2043ffe97776be359c1e51d19ad35c578166e446982eb4bbe5",
+   "physicalPage": 3,
+   "textSha256": "c98e672955f0fc1c9ccba11f7e33bc1980350d3ff663981f51896f86c36e441b",
+   "publisherDomain": "env.go.jp",
+   "logicalDocumentIndex": 29,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 36,
+   "bodyLineCount": 33,
+   "firstNonEmptyLines": [
+    "                                  令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "9905 エ ネ ル ギ ー 対 策 特 別 会 計 （電源開発促進勘定）",
+    "要求                    区                 分     ページ 要求    区       分   ページ",
+    "番号                                                番号"
+   ],
+   "pageHeaderTokenColumns": [
+    46,
+    68
+   ],
+   "lineLength": {
+    "min": 37,
+    "median": 50,
+    "max": 71
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7
+   ],
+   "largeGapLineCount": 28,
+   "trailingPageRefLineCount": 32,
+   "linesWithTwoPageRefCandidates": 17,
+   "secondSegmentStartColumns": [
+    5,
+    17
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 1,
+    "勘定": 1,
+    "項": 12,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 15,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 15,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 28,
+   "prefixPageRefCandidateTails": [
+    "電 1",
+    "電 2",
+    "電 3",
+    "電 14",
+    "電 15",
+    "電 16"
+   ],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157016.pdf",
+   "pdfSha256": "68a26e86f73d51f0849b6b3e26b96a04ab9e9489713ce25721cf35910939866a",
+   "physicalPage": 3,
+   "textSha256": "daf40abee4f7b54baebd4889de1c439fcdd1f06b38ff2788afa5406c557108bd",
+   "publisherDomain": "env.go.jp",
+   "logicalDocumentIndex": 30,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 22,
+   "bodyLineCount": 19,
+   "firstNonEmptyLines": [
+    "                                                                     1",
+    "                                 令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "9101 東 日 本 大 震 災 復 興 特 別 会 計 （環境省）",
+    "要求                    区               分      ページ 要求    区       分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    45,
+    67
+   ],
+   "lineLength": {
+    "min": 34,
+    "median": 48,
+    "max": 70
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    69
+   ],
+   "largeGapLineCount": 17,
+   "trailingPageRefLineCount": 18,
+   "linesWithTwoPageRefCandidates": 10,
+   "secondSegmentStartColumns": [
+    5,
+    16
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 1,
+    "勘定": 0,
+    "項": 4,
+    "所管": 1
+   },
+   "requestNumberRowStarts": 8,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 8,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 1,
+   "prefixPageRefCandidateTails": [
+    "復興庁                            3"
+   ],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+   "pdfSha256": "49a975a4436da6d53319a32ca745e2d110c42839c441c6302a7361ed9a62e4cc",
+   "physicalPage": 3,
+   "textSha256": "f8e7a018e95cda9b5ba2053cd3aa1871110990369b74c88a92138f39ff36529d",
+   "publisherDomain": "cfa.go.jp",
+   "logicalDocumentIndex": 31,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 38,
+   "bodyLineCount": 35,
+   "firstNonEmptyLines": [
+    "                                                                                              1",
+    "                                  令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "19     内 閣 府 所 管 （こども家庭庁）",
+    "要求                  区                  分         ページ 要求                     区           分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    49,
+    92
+   ],
+   "lineLength": {
+    "min": 12,
+    "median": 53,
+    "max": 96
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    11,
+    94
+   ],
+   "largeGapLineCount": 29,
+   "trailingPageRefLineCount": 32,
+   "linesWithTwoPageRefCandidates": 23,
+   "secondSegmentStartColumns": [
+    5,
+    56,
+    63
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 13,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 18,
+   "requestNumberTokensMidLine": 6,
+   "u2011LineCount": 21,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 3,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": true,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/aac2d779/20230907_policies_budget_05.pdf",
+   "pdfSha256": "e880abb5f5ccfaf7b2b9fe632c101287937e7b393e18e36775dc5ae92ad72026",
+   "physicalPage": 3,
+   "textSha256": "f7c7546352802d243384573fa935a732372c0bb403174a827511b5d06f4730da",
+   "publisherDomain": "cfa.go.jp",
+   "logicalDocumentIndex": 32,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 24,
+   "bodyLineCount": 21,
+   "firstNonEmptyLines": [
+    "                                                                   1",
+    "                               令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "9207 年 金 特 別 会 計 (子ども家庭局（子ども・子育て支援勘定）)",
+    "要求                    区               分    ページ 要求    区       分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    43,
+    65
+   ],
+   "lineLength": {
+    "min": 38,
+    "median": 46,
+    "max": 68
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    67
+   ],
+   "largeGapLineCount": 18,
+   "trailingPageRefLineCount": 20,
+   "linesWithTwoPageRefCandidates": 10,
+   "secondSegmentStartColumns": [
+    5,
+    17
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 1,
+    "勘定": 1,
+    "項": 6,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 8,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 8,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 1,
+   "prefixPageRefCandidateTails": [
+    "年金                          3"
+   ],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/digital.go.jp/assets/contents/node/basic_page/field_ref_resources/e9b99425-437c-4750-b4e2-6cca3cd877a6/0fab2c74/20230914_policies_budget_r6request_table_01.pdf",
+   "pdfSha256": "b77f25b26b5caf82b0b6617fb1af9b3bba9df059a8bf9a8ede63de8d1a8cfe89",
+   "physicalPage": 3,
+   "textSha256": "77ee27b57cb1bcae8ae6a626989b7288db51a1effb2ba9889cd15303ed3a1492",
+   "publisherDomain": "digital.go.jp",
+   "logicalDocumentIndex": 33,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 15,
+   "bodyLineCount": 12,
+   "firstNonEmptyLines": [
+    "                                                                   1",
+    "                               令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "32     デジタル庁所管 （デジタル庁）",
+    "要求                  区                 分    ページ 要求    区       分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    43,
+    65
+   ],
+   "lineLength": {
+    "min": 22,
+    "median": 46,
+    "max": 68
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    67
+   ],
+   "largeGapLineCount": 10,
+   "trailingPageRefLineCount": 11,
+   "linesWithTwoPageRefCandidates": 4,
+   "secondSegmentStartColumns": [
+    5
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 3,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 4,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 4,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+   "pdfSha256": "efbfdfefbf4d6c4f85c1da1867348c96964a56fefe6d4c952291e2bf3448e837",
+   "physicalPage": 2,
+   "textSha256": "8775e8d0a995ecf83d40f02825d414731ca6b1085f0b02cfbc80492f9064dc40",
+   "publisherDomain": "npa.go.jp",
+   "logicalDocumentIndex": 34,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 38,
+   "bodyLineCount": 35,
+   "firstNonEmptyLines": [
+    "                                                                                              1",
+    "                                 令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "19     内 閣 府 所 管",
+    "要求                   区                 分             ページ 要求                    区        分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    53,
+    92
+   ],
+   "lineLength": {
+    "min": 16,
+    "median": 56,
+    "max": 96
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    11,
+    15,
+    94
+   ],
+   "largeGapLineCount": 30,
+   "trailingPageRefLineCount": 32,
+   "linesWithTwoPageRefCandidates": 20,
+   "secondSegmentStartColumns": [
+    5,
+    59,
+    66
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 14,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 16,
+   "requestNumberTokensMidLine": 3,
+   "u2011LineCount": 18,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 3,
+   "previousPhysicalPageType": "COVER",
+   "nextPhysicalPageType": "SUMMARY",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/hukkoutokubetukaikei.pdf",
+   "pdfSha256": "9e44e9f3b592398750c0472ec84f94d3817d68ae50c84cf0b4df859ea3e32843",
+   "physicalPage": 2,
+   "textSha256": "44b69a58b76b2922e05878e6742b6d207f85739b78b606e841fa4694dceebf9c",
+   "publisherDomain": "npa.go.jp",
+   "logicalDocumentIndex": 35,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 14,
+   "bodyLineCount": 11,
+   "firstNonEmptyLines": [
+    "                                                                    1",
+    "                                令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "9101 東 日 本 大 震 災 復 興 特 別 会 計 （警察庁）",
+    "要求                    区             分       ページ 要求    区       分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    44,
+    66
+   ],
+   "lineLength": {
+    "min": 34,
+    "median": 47,
+    "max": 69
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    68
+   ],
+   "largeGapLineCount": 9,
+   "trailingPageRefLineCount": 10,
+   "linesWithTwoPageRefCandidates": 4,
+   "secondSegmentStartColumns": [
+    5,
+    16
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 1,
+    "勘定": 0,
+    "項": 2,
+    "所管": 1
+   },
+   "requestNumberRowStarts": 2,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 2,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 1,
+   "prefixPageRefCandidateTails": [
+    "復興庁                           3"
+   ],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "COVER",
+   "nextPhysicalPageType": "SUMMARY",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "pdfSha256": "57861291846015dfdc831480149d8614a1d67c283e8b6e313f5c75f92a2a6b47",
+   "physicalPage": 3,
+   "textSha256": "c4be00d8587e32277dc652b831f0aebe48b942931d6de74fbc6915580fe524ec",
+   "publisherDomain": "mod.go.jp",
+   "logicalDocumentIndex": 36,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 37,
+   "bodyLineCount": 34,
+   "firstNonEmptyLines": [
+    "                                                                                                       1",
+    "                                  令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "30     防 衛 省 所 管 （防衛省）",
+    "要求                    区                分         ページ 要求                     区                    分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    49,
+    101
+   ],
+   "lineLength": {
+    "min": 22,
+    "median": 105,
+    "max": 105
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    103
+   ],
+   "largeGapLineCount": 32,
+   "trailingPageRefLineCount": 33,
+   "linesWithTwoPageRefCandidates": 32,
+   "secondSegmentStartColumns": [
+    5,
+    56,
+    63
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 17,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 24,
+   "requestNumberTokensMidLine": 20,
+   "u2011LineCount": 29,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "TOC",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": true,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "pdfSha256": "57861291846015dfdc831480149d8614a1d67c283e8b6e313f5c75f92a2a6b47",
+   "physicalPage": 4,
+   "textSha256": "0f342c1a27e3145357629d8b649dd3d10ba31985b2acbc2936799eb48e87d415",
+   "publisherDomain": "mod.go.jp",
+   "logicalDocumentIndex": 36,
+   "classifierSource": "INHERITED",
+   "explicitTitleObserved": false,
+   "nonEmptyLineCount": 39,
+   "bodyLineCount": 37,
+   "firstNonEmptyLines": [
+    "  2",
+    "要求                      区                分        ページ 要求                     区       分   ページ",
+    "番号                                                    番号",
+    "45    01‑35 令和６年度甲Ⅴ型警備艦建造に必要な経費                    454   67   15‑35 運用基盤等の強化に必要な経費        534"
+   ],
+   "pageHeaderTokenColumns": [
+    50,
+    89
+   ],
+   "lineLength": {
+    "min": 3,
+    "median": 54,
+    "max": 93
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    2,
+    7,
+    8
+   ],
+   "largeGapLineCount": 35,
+   "trailingPageRefLineCount": 37,
+   "linesWithTwoPageRefCandidates": 22,
+   "secondSegmentStartColumns": [
+    6
+   ],
+   "markerCounts": {
+    "組織": 2,
+    "会計": 0,
+    "勘定": 0,
+    "項": 12,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 22,
+   "requestNumberTokensMidLine": 1,
+   "u2011LineCount": 22,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 0,
+   "previousPhysicalPageType": "TOC",
+   "nextPhysicalPageType": "SUMMARY",
+   "previousPageIsTocInSamePdf": true,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mofa.go.jp/mofaj/files/100546568.pdf",
+   "pdfSha256": "85781ba1f867aaab4130b2c463c588c4fc9ca6211d097cedfd495c56bf024b55",
+   "physicalPage": 3,
+   "textSha256": "f665917caad052c85c3bb76a518296c6dbb4a0e9d07c78c860061a8601c21b10",
+   "publisherDomain": "mofa.go.jp",
+   "logicalDocumentIndex": 37,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 37,
+   "bodyLineCount": 34,
+   "firstNonEmptyLines": [
+    "                                                                                                   1",
+    "                                  令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "22     外 務 省 所 管",
+    "要求                    区                   分   ページ 要求                       区                分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    46,
+    96
+   ],
+   "lineLength": {
+    "min": 16,
+    "median": 100,
+    "max": 100
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    99
+   ],
+   "largeGapLineCount": 32,
+   "trailingPageRefLineCount": 33,
+   "linesWithTwoPageRefCandidates": 32,
+   "secondSegmentStartColumns": [
+    5,
+    53,
+    60
+   ],
+   "markerCounts": {
+    "組織": 2,
+    "会計": 0,
+    "勘定": 0,
+    "項": 14,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 24,
+   "requestNumberTokensMidLine": 22,
+   "u2011LineCount": 30,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "TOC",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mofa.go.jp/mofaj/files/100546568.pdf",
+   "pdfSha256": "85781ba1f867aaab4130b2c463c588c4fc9ca6211d097cedfd495c56bf024b55",
+   "physicalPage": 4,
+   "textSha256": "2cb01eb41434da1dd22a7ed72603afa8984fa14a77a3b51a0f19b552749d27d1",
+   "publisherDomain": "mofa.go.jp",
+   "logicalDocumentIndex": 37,
+   "classifierSource": "INHERITED",
+   "explicitTitleObserved": false,
+   "nonEmptyLineCount": 14,
+   "bodyLineCount": 12,
+   "firstNonEmptyLines": [
+    "  2",
+    "要求                   区                 分   ページ 要求   区   分   ページ",
+    "番号                                             番号",
+    "47    25‑95 国際経済に関する取組に必要な経費                276"
+   ],
+   "pageHeaderTokenColumns": [
+    43,
+    60
+   ],
+   "lineLength": {
+    "min": 3,
+    "median": 47,
+    "max": 63
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    2,
+    8
+   ],
+   "largeGapLineCount": 11,
+   "trailingPageRefLineCount": 12,
+   "linesWithTwoPageRefCandidates": 8,
+   "secondSegmentStartColumns": [
+    6
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 0,
+    "勘定": 0,
+    "項": 3,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 8,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 8,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 0,
+   "previousPhysicalPageType": "TOC",
+   "nextPhysicalPageType": "SUMMARY",
+   "previousPageIsTocInSamePdf": true,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf",
+   "pdfSha256": "a5a91f4b79e6809bac97613037530070f2a4ae898aaf5694dfbaea0562b1e28f",
+   "physicalPage": 3,
+   "textSha256": "a5b81a9bfa18b3d484cbc1352d8990b0a10f165f8f78d793a20a3308f5bc2b5d",
+   "publisherDomain": "sangiin.go.jp",
+   "logicalDocumentIndex": 38,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 15,
+   "bodyLineCount": 12,
+   "firstNonEmptyLines": [
+    "                                                               1",
+    "                           令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "02     国    会   所 管 （参     議   院）",
+    "要求                   区              分   ページ 要求   区       分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    40,
+    61
+   ],
+   "lineLength": {
+    "min": 33,
+    "median": 43,
+    "max": 64
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    63
+   ],
+   "largeGapLineCount": 10,
+   "trailingPageRefLineCount": 11,
+   "linesWithTwoPageRefCandidates": 4,
+   "secondSegmentStartColumns": [
+    5
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 3,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 4,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 4,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/shugiin.go.jp/internet/itdb_annai.nsf/html/statics/osirase/kaikei-saishutsugaisan6.pdf/%24File/kaikei-saishutsugaisan6.pdf",
+   "pdfSha256": "30d0dfc363a1f4f7e37b64a0059b48c2f03f13f997eb251e7ef5acaabd37c435",
+   "physicalPage": 3,
+   "textSha256": "766ab6257ffc06739effa912cd84f0806a509af25661ddd63809d467ebdce692",
+   "publisherDomain": "shugiin.go.jp",
+   "logicalDocumentIndex": 39,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 16,
+   "bodyLineCount": 13,
+   "firstNonEmptyLines": [
+    "                                                                   1",
+    "                               令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "02     国    会   所 管 （衆         議     院）",
+    "要求                   区                    分   ページ 要求   区     分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    46,
+    65
+   ],
+   "lineLength": {
+    "min": 39,
+    "median": 49,
+    "max": 68
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    67
+   ],
+   "largeGapLineCount": 12,
+   "trailingPageRefLineCount": 12,
+   "linesWithTwoPageRefCandidates": 5,
+   "secondSegmentStartColumns": [
+    5
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 3,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 5,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 5,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/ndl.go.jp/jp/aboutus/outline/r06_budgetrequest.pdf",
+   "pdfSha256": "cb0442175d186f3041d6b3df93c46139760920b2c0162ae5a61c3abedf0a60e5",
+   "physicalPage": 2,
+   "textSha256": "d6685ff95fd2c30f2ae9022aa80d92ff3c119fd5cf42d45d777ed4ef48366b6a",
+   "publisherDomain": "ndl.go.jp",
+   "logicalDocumentIndex": 40,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 16,
+   "bodyLineCount": 13,
+   "firstNonEmptyLines": [
+    "                                                                     1",
+    "                                 令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "02     国   会    所   管 （国立国会図書館）",
+    "要求                                               要求"
+   ],
+   "pageHeaderTokenColumns": [
+    45,
+    67
+   ],
+   "lineLength": {
+    "min": 17,
+    "median": 51,
+    "max": 70
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    45,
+    69
+   ],
+   "largeGapLineCount": 9,
+   "trailingPageRefLineCount": 2,
+   "linesWithTwoPageRefCandidates": 0,
+   "secondSegmentStartColumns": [],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 2,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 4,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 4,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 1,
+   "prefixPageRefCandidateTails": [
+    "国 1"
+   ],
+   "wrappedRowCandidateLines": 2,
+   "previousPhysicalPageType": "COVER",
+   "nextPhysicalPageType": "SUMMARY",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/sotsui.go.jp/budget/images/r6budget_yokyu.pdf",
+   "pdfSha256": "66a11094cdda23d47ee2d3c34f4ce741d528a8480a941cbea7803232a6aef029",
+   "physicalPage": 3,
+   "textSha256": "5ad6fbcfa1d66f1b122c259add1249dbf158980b0a7631470c5a837066372103",
+   "publisherDomain": "sotsui.go.jp",
+   "logicalDocumentIndex": 41,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 10,
+   "bodyLineCount": 7,
+   "firstNonEmptyLines": [
+    "                                                                1",
+    "                            令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "02     国   会    所 管 （裁判官訴追委員会）",
+    "要求                  区           分       ページ 要求    区       分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    40,
+    62
+   ],
+   "lineLength": {
+    "min": 30,
+    "median": 43,
+    "max": 65
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    64
+   ],
+   "largeGapLineCount": 5,
+   "trailingPageRefLineCount": 6,
+   "linesWithTwoPageRefCandidates": 1,
+   "secondSegmentStartColumns": [
+    5
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 1,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 1,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 1,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/dangai.go.jp/info/pdf/r06_saisyutu-gaisan.pdf",
+   "pdfSha256": "370cd8991433528e8b07c35498959ab0b1fec0b3f634f87e12c7d539944f7a21",
+   "physicalPage": 3,
+   "textSha256": "e4bd70a18064a35fa8c3a153c00694c0e4978daa59a0e5731f72aa529bd4c2dc",
+   "publisherDomain": "dangai.go.jp",
+   "logicalDocumentIndex": 42,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 11,
+   "bodyLineCount": 8,
+   "firstNonEmptyLines": [
+    "                                                                   1",
+    "                               令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "02     国    会    所 管 （裁判官弾劾裁判所）",
+    "要求                    区            分       ページ 要求    区       分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    43,
+    65
+   ],
+   "lineLength": {
+    "min": 31,
+    "median": 46,
+    "max": 68
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    67
+   ],
+   "largeGapLineCount": 6,
+   "trailingPageRefLineCount": 7,
+   "linesWithTwoPageRefCandidates": 2,
+   "secondSegmentStartColumns": [
+    5
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 1,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 2,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 2,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf",
+   "pdfSha256": "df43f2dc183da84fa9952ae4c5e17888177df186ad4c556ed1a519ba584e3c06",
+   "physicalPage": 3,
+   "textSha256": "3020a9dfe81ef07ef874714be98b18ddf3bb8be5ccd87a5bee09202fa3bc4edd",
+   "publisherDomain": "courts.go.jp",
+   "logicalDocumentIndex": 43,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 24,
+   "bodyLineCount": 21,
+   "firstNonEmptyLines": [
+    "                                                                  1",
+    "                              令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "03     裁 判 所 所 管",
+    "要求                    区           分       ページ 要求    区       分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    42,
+    64
+   ],
+   "lineLength": {
+    "min": 16,
+    "median": 46,
+    "max": 67
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    66
+   ],
+   "largeGapLineCount": 19,
+   "trailingPageRefLineCount": 20,
+   "linesWithTwoPageRefCandidates": 9,
+   "secondSegmentStartColumns": [
+    5
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 6,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 9,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 9,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/jbaudit.go.jp/jbaudit/bud_clo/bud/pdf/r06/20230906_02.pdf",
+   "pdfSha256": "c7070f558f985d0062cec9c73736bebe3c24f1290b895ce89d5afc676b21b72b",
+   "physicalPage": 3,
+   "textSha256": "d34f9ad2ad64d45f5445015a76ef5d705a61bf8042697399e0a4f7d831ebf76a",
+   "publisherDomain": "jbaudit.go.jp",
+   "logicalDocumentIndex": 44,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 14,
+   "bodyLineCount": 11,
+   "firstNonEmptyLines": [
+    "                                                                 1",
+    "                             令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "04     会計検査院所管",
+    "要求                  区            分       ページ 要求    区       分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    41,
+    63
+   ],
+   "lineLength": {
+    "min": 14,
+    "median": 44,
+    "max": 66
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    65
+   ],
+   "largeGapLineCount": 9,
+   "trailingPageRefLineCount": 10,
+   "linesWithTwoPageRefCandidates": 3,
+   "secondSegmentStartColumns": [
+    5
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 2,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 3,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 3,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/jinji.go.jp/content/900024096.pdf",
+   "pdfSha256": "2e0229d66535e4d94f1f35f5d6c169042a6461a20f963f80cbf8945972b61bd2",
+   "physicalPage": 3,
+   "textSha256": "56ad9ce3d748bfa39e92b172611c220647066653b56ce6bb76da278567391f55",
+   "publisherDomain": "jinji.go.jp",
+   "logicalDocumentIndex": 45,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 29,
+   "bodyLineCount": 26,
+   "firstNonEmptyLines": [
+    "                                                                  1",
+    "                              令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "05     内   閣    所 管 (人事院（人事院）)",
+    "要求                    区                 分   ページ 要求   区      分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    44,
+    64
+   ],
+   "lineLength": {
+    "min": 30,
+    "median": 47,
+    "max": 67
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    66
+   ],
+   "largeGapLineCount": 24,
+   "trailingPageRefLineCount": 25,
+   "linesWithTwoPageRefCandidates": 4,
+   "secondSegmentStartColumns": [
+    5
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 2,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 4,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 4,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/jftc.go.jp/soshiki/kyotsukoukai/yosan/yosankessan/r6/r6sandanhyou.pdf",
+   "pdfSha256": "036b395c72de3e0e81f07c337e9d45361cdaedf99831d690c3ea262dfb6b57e6",
+   "physicalPage": 3,
+   "textSha256": "04ebe276d72f07cca455b2d48147429b849b365db16e782c1fbfd5ce7508a316",
+   "publisherDomain": "jftc.go.jp",
+   "logicalDocumentIndex": 46,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 16,
+   "bodyLineCount": 13,
+   "firstNonEmptyLines": [
+    "                                                                    1",
+    "                                令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "19     内 閣 府 所 管 (公正取引委員会（公正取引委員会）)",
+    "要求                  区               分       ページ 要求    区       分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    44,
+    66
+   ],
+   "lineLength": {
+    "min": 35,
+    "median": 48,
+    "max": 69
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    68
+   ],
+   "largeGapLineCount": 11,
+   "trailingPageRefLineCount": 12,
+   "linesWithTwoPageRefCandidates": 5,
+   "secondSegmentStartColumns": [
+    5
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 2,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 5,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 5,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/ppc.go.jp/files/pdf/230831youkyu.pdf",
+   "pdfSha256": "0a9a58273e0f9c137414e062872c1c642ad0fa5aec403ae5e606c56f198db9a3",
+   "physicalPage": 3,
+   "textSha256": "b50f6563526f1fc35c3978778a16a4d89ed8bd8ca83fd379d4785962f3f32a33",
+   "publisherDomain": "ppc.go.jp",
+   "logicalDocumentIndex": 47,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 12,
+   "bodyLineCount": 9,
+   "firstNonEmptyLines": [
+    "                                                                      1",
+    "                                  令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "19     内 閣 府 所 管 （個人情報保護委員会）",
+    "要求                  区                 分       ページ 要求    区       分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    46,
+    68
+   ],
+   "lineLength": {
+    "min": 28,
+    "median": 49,
+    "max": 71
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    70
+   ],
+   "largeGapLineCount": 7,
+   "trailingPageRefLineCount": 8,
+   "linesWithTwoPageRefCandidates": 2,
+   "secondSegmentStartColumns": [
+    5
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 1,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 2,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 2,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/jcrc.go.jp/content/000001746.pdf",
+   "pdfSha256": "7632ed4048799b0f9b2001fef9a7ff94883885ff07e1145d55a4cd335f10583d",
+   "physicalPage": 3,
+   "textSha256": "5a5bab00d6161ccc360f07b6e1a3d02218f5141bdd7b54f1343d34cb2f4f0f6d",
+   "publisherDomain": "jcrc.go.jp",
+   "logicalDocumentIndex": 48,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 13,
+   "bodyLineCount": 10,
+   "firstNonEmptyLines": [
+    "                                                                   1",
+    "                               令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "19     内 閣 府 所 管 （カジノ管理委員会）",
+    "要求                                             要求"
+   ],
+   "pageHeaderTokenColumns": [
+    43,
+    65
+   ],
+   "lineLength": {
+    "min": 27,
+    "median": 46,
+    "max": 68
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    67
+   ],
+   "largeGapLineCount": 8,
+   "trailingPageRefLineCount": 9,
+   "linesWithTwoPageRefCandidates": 3,
+   "secondSegmentStartColumns": [
+    5
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 1,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 3,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 3,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+   "pdfSha256": "b6cc6fa0604ab64cbbf9867137db53883943b9d3b3adfd0fdc9d9eb59fd5e5d4",
+   "physicalPage": 3,
+   "textSha256": "2603bae95bdb9665aa11c2fe8e23a9ce5edc37dd89ef763243a21a739620b785",
+   "publisherDomain": "caa.go.jp",
+   "logicalDocumentIndex": 50,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 16,
+   "bodyLineCount": 13,
+   "firstNonEmptyLines": [
+    "                                                                      1",
+    "                                  令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "19     内 閣 府 所 管 （消費者庁）",
+    "要求                    区                 分     ページ 要求    区       分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    46,
+    68
+   ],
+   "lineLength": {
+    "min": 23,
+    "median": 50,
+    "max": 71
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    70
+   ],
+   "largeGapLineCount": 11,
+   "trailingPageRefLineCount": 12,
+   "linesWithTwoPageRefCandidates": 4,
+   "secondSegmentStartColumns": [
+    5
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 3,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 4,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 4,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_02.pdf",
+   "pdfSha256": "69e170e83244c869cd1190d191b02b9d5cf4b5bca1388b57e20fa539bc08ca60",
+   "physicalPage": 3,
+   "textSha256": "3a0770a4eb93e813e900f9b490c29f386e34eade1131f61fb90b6363d5c75691",
+   "publisherDomain": "caa.go.jp",
+   "logicalDocumentIndex": 51,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 13,
+   "bodyLineCount": 10,
+   "firstNonEmptyLines": [
+    "                                                               1",
+    "                           令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "9101 東 日 本 大 震 災 復 興 特 別 会 計 （内閣本府等）",
+    "要求                                         要求"
+   ],
+   "pageHeaderTokenColumns": [
+    39,
+    61
+   ],
+   "lineLength": {
+    "min": 36,
+    "median": 42,
+    "max": 64
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    63
+   ],
+   "largeGapLineCount": 8,
+   "trailingPageRefLineCount": 9,
+   "linesWithTwoPageRefCandidates": 3,
+   "secondSegmentStartColumns": [
+    5,
+    16
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 1,
+    "勘定": 0,
+    "項": 1,
+    "所管": 1
+   },
+   "requestNumberRowStarts": 1,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 1,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 1,
+   "prefixPageRefCandidateTails": [
+    "復興庁                      3"
+   ],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/clb.go.jp/files/topics/4473_ext_05_1.pdf",
+   "pdfSha256": "dbd5467fe8a6d6f2fe44ac8fba5a5412a097c21feace047a082ae15eb03f57b5",
+   "physicalPage": 3,
+   "textSha256": "4fa76aae73f92f9d7c9b78047b7e29f05b1917a31c24e96c3cab922d1740fb83",
+   "publisherDomain": "clb.go.jp",
+   "logicalDocumentIndex": 52,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 12,
+   "bodyLineCount": 9,
+   "firstNonEmptyLines": [
+    "                                                                 1",
+    "                             令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "05     内   閣    所 管 (内閣法制局（内閣法制局）)",
+    "要求                  区            分       ページ 要求    区       分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    41,
+    63
+   ],
+   "lineLength": {
+    "min": 34,
+    "median": 44,
+    "max": 66
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    65
+   ],
+   "largeGapLineCount": 7,
+   "trailingPageRefLineCount": 8,
+   "linesWithTwoPageRefCandidates": 2,
+   "secondSegmentStartColumns": [
+    5
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 1,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 2,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 2,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "pdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+   "physicalPage": 3,
+   "textSha256": "8c22462a899952790b2eaefbdf6d97ee6332799e4845d549d949028f7db71315",
+   "publisherDomain": "reconstruction.go.jp",
+   "logicalDocumentIndex": 58,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 56,
+   "bodyLineCount": 53,
+   "firstNonEmptyLines": [
+    "                                                                                                          1",
+    "                                令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "9101 東 日 本 大 震 災 復 興 特 別 会 計",
+    "要求                    区                分         ページ 要求                    区                     分      ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    49,
+    104
+   ],
+   "lineLength": {
+    "min": 12,
+    "median": 107,
+    "max": 107
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    11,
+    55,
+    62,
+    66,
+    106
+   ],
+   "largeGapLineCount": 47,
+   "trailingPageRefLineCount": 50,
+   "linesWithTwoPageRefCandidates": 36,
+   "secondSegmentStartColumns": [
+    5,
+    16,
+    55,
+    60,
+    62
+   ],
+   "markerCounts": {
+    "組織": 3,
+    "会計": 1,
+    "勘定": 0,
+    "項": 20,
+    "所管": 3
+   },
+   "requestNumberRowStarts": 25,
+   "requestNumberTokensMidLine": 22,
+   "u2011LineCount": 30,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 1,
+   "prefixPageRefCandidateTails": [
+    "財務省                                7"
+   ],
+   "wrappedRowCandidateLines": 3,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "TOC",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "pdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+   "physicalPage": 4,
+   "textSha256": "361f4dc9ee487a6060136938614747ff113214a2cee2e7b86ad2072152c83317",
+   "publisherDomain": "reconstruction.go.jp",
+   "logicalDocumentIndex": 58,
+   "classifierSource": "INHERITED",
+   "explicitTitleObserved": false,
+   "nonEmptyLineCount": 51,
+   "bodyLineCount": 49,
+   "firstNonEmptyLines": [
+    "  2",
+    "要求                   区                     分   ページ 要求                    区                    分       ページ",
+    "番号                                                 番号",
+    "35    15‑14 公立文教施設整備に必要な経費                      56   66   91‑65 共同利用小型漁船建造に必要な経費                       73"
+   ],
+   "pageHeaderTokenColumns": [
+    47,
+    102
+   ],
+   "lineLength": {
+    "min": 3,
+    "median": 105,
+    "max": 105
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    2,
+    8,
+    53,
+    60,
+    64
+   ],
+   "largeGapLineCount": 45,
+   "trailingPageRefLineCount": 47,
+   "linesWithTwoPageRefCandidates": 41,
+   "secondSegmentStartColumns": [
+    6,
+    53,
+    58,
+    60
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 0,
+    "勘定": 0,
+    "項": 19,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 38,
+   "requestNumberTokensMidLine": 21,
+   "u2011LineCount": 39,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 2,
+   "previousPhysicalPageType": "TOC",
+   "nextPhysicalPageType": "TOC",
+   "previousPageIsTocInSamePdf": true,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "pdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+   "physicalPage": 5,
+   "textSha256": "48a05d6c92d806acaa8de10ba91e34e810e920110bf9c5856693097d8b60f8c8",
+   "publisherDomain": "reconstruction.go.jp",
+   "logicalDocumentIndex": 58,
+   "classifierSource": "INHERITED",
+   "explicitTitleObserved": false,
+   "nonEmptyLineCount": 23,
+   "bodyLineCount": 21,
+   "firstNonEmptyLines": [
+    "                                                              3",
+    "要求                   区                 分   ページ 要求   区   分   ページ",
+    "番号                                             番号",
+    "87    21‑95 生物多様性の保全等の推進に必要な経費              88"
+   ],
+   "pageHeaderTokenColumns": [
+    43,
+    60
+   ],
+   "lineLength": {
+    "min": 46,
+    "median": 46,
+    "max": 63
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    8,
+    62
+   ],
+   "largeGapLineCount": 20,
+   "trailingPageRefLineCount": 21,
+   "linesWithTwoPageRefCandidates": 17,
+   "secondSegmentStartColumns": [
+    6
+   ],
+   "markerCounts": {
+    "組織": 0,
+    "会計": 0,
+    "勘定": 0,
+    "項": 3,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 17,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 17,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 0,
+   "previousPhysicalPageType": "TOC",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": true,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "pdfSha256": "91b39e9902610e13aa7be445db2d2d2a3e38166fd5f449bd11f94cfe5fe3b6d5",
+   "physicalPage": 3,
+   "textSha256": "2843553a935157cc8cfc95af621a235ac7377c3cbe6ea87992288b79f437691d",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 37,
+   "bodyLineCount": 34,
+   "firstNonEmptyLines": [
+    "                                                                                                    1",
+    "                                 令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "24     文部科学省所管",
+    "要求                  区                   分    ページ 要求                     区                     分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    45,
+    98
+   ],
+   "lineLength": {
+    "min": 14,
+    "median": 102,
+    "max": 102
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    100
+   ],
+   "largeGapLineCount": 32,
+   "trailingPageRefLineCount": 33,
+   "linesWithTwoPageRefCandidates": 32,
+   "secondSegmentStartColumns": [
+    5,
+    52,
+    59
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 20,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 22,
+   "requestNumberTokensMidLine": 19,
+   "u2011LineCount": 29,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "TOC",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": true,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "pdfSha256": "91b39e9902610e13aa7be445db2d2d2a3e38166fd5f449bd11f94cfe5fe3b6d5",
+   "physicalPage": 4,
+   "textSha256": "11e370d53fa968ca0ef45a3a60db7004f9f8f726d17a86ba47d8d34ae9c0e3f5",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "classifierSource": "INHERITED",
+   "explicitTitleObserved": false,
+   "nonEmptyLineCount": 41,
+   "bodyLineCount": 39,
+   "firstNonEmptyLines": [
+    "  2",
+    "要求                   区                     分   ページ 要求                     区                     分          ページ",
+    "番号                                                 番号",
+    "42    23‑13 オープンサイエンス等の推進に必要な経費                 667          （項） 440 電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ    818"
+   ],
+   "pageHeaderTokenColumns": [
+    47,
+    107
+   ],
+   "lineLength": {
+    "min": 3,
+    "median": 111,
+    "max": 111
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    2,
+    8,
+    54,
+    69
+   ],
+   "largeGapLineCount": 37,
+   "trailingPageRefLineCount": 37,
+   "linesWithTwoPageRefCandidates": 36,
+   "secondSegmentStartColumns": [
+    6,
+    54,
+    59,
+    61
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 29,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 24,
+   "requestNumberTokensMidLine": 18,
+   "u2011LineCount": 32,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 2,
+   "previousPhysicalPageType": "TOC",
+   "nextPhysicalPageType": "TOC",
+   "previousPageIsTocInSamePdf": true,
+   "developmentExploredInPr3a": true,
+   "renderedInPr3a": true
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "pdfSha256": "91b39e9902610e13aa7be445db2d2d2a3e38166fd5f449bd11f94cfe5fe3b6d5",
+   "physicalPage": 5,
+   "textSha256": "72ed43e3ab84a4a57326be1aa348c953205661100c76aef8f9c43179dbc1719d",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "classifierSource": "INHERITED",
+   "explicitTitleObserved": false,
+   "nonEmptyLineCount": 39,
+   "bodyLineCount": 37,
+   "firstNonEmptyLines": [
+    "                                                                                                   3",
+    "要求                      区                 分   ページ 要求                       区               分    ページ",
+    "番号                                                番号",
+    "83    01‑13 科学技術・学術政策研究所に必要な経費                 993 103   06‑13 独立行政法人国立科学博物館施設整備に必要な経費          1267"
+   ],
+   "pageHeaderTokenColumns": [
+    46,
+    96
+   ],
+   "lineLength": {
+    "min": 50,
+    "median": 52,
+    "max": 100
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    7,
+    8,
+    99
+   ],
+   "largeGapLineCount": 35,
+   "trailingPageRefLineCount": 37,
+   "linesWithTwoPageRefCandidates": 26,
+   "secondSegmentStartColumns": [
+    6,
+    57,
+    59
+   ],
+   "markerCounts": {
+    "組織": 2,
+    "会計": 0,
+    "勘定": 0,
+    "項": 20,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 20,
+   "requestNumberTokensMidLine": 11,
+   "u2011LineCount": 23,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 0,
+   "previousPhysicalPageType": "TOC",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": true,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-02.pdf",
+   "pdfSha256": "ffab15073beb2411d9396f7ca0cbb1ce33ccdf99be05e6d0d88e29366912e261",
+   "physicalPage": 3,
+   "textSha256": "e21814c2b8d5b7cf3327ba839373f6c46470cc3a27b183e2da80f9529efc2e91",
+   "publisherDomain": "kunaicho.go.jp",
+   "logicalDocumentIndex": 60,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 15,
+   "bodyLineCount": 12,
+   "firstNonEmptyLines": [
+    "                                                                   1",
+    "                               令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "01     皇 室 費 所 管 （皇室費）",
+    "要求                    区            分       ページ 要求    区       分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    43,
+    65
+   ],
+   "lineLength": {
+    "min": 22,
+    "median": 46,
+    "max": 68
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    67
+   ],
+   "largeGapLineCount": 10,
+   "trailingPageRefLineCount": 11,
+   "linesWithTwoPageRefCandidates": 4,
+   "secondSegmentStartColumns": [
+    5
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 3,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 4,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 4,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  },
+  {
+   "localPdfPath": "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-03.pdf",
+   "pdfSha256": "8a1049d06d4e27183a6f292e6afdd83e134775fd58ca4b5895bbb325a8d6ee8b",
+   "physicalPage": 3,
+   "textSha256": "9fb3e556ef409c2e237b46509948821a55f0843db5e5b1c3d6a87e2710489e7e",
+   "publisherDomain": "kunaicho.go.jp",
+   "logicalDocumentIndex": 61,
+   "classifierSource": "DIRECT",
+   "explicitTitleObserved": true,
+   "nonEmptyLineCount": 11,
+   "bodyLineCount": 8,
+   "firstNonEmptyLines": [
+    "                                                               1",
+    "                           令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "19     内 閣 府 所 管 （宮内庁）",
+    "要求                     区       分       ページ 要求    区       分   ページ"
+   ],
+   "pageHeaderTokenColumns": [
+    39,
+    61
+   ],
+   "lineLength": {
+    "min": 22,
+    "median": 42,
+    "max": 64
+   },
+   "leadingWhitespaceDistinct": [
+    0,
+    5,
+    6,
+    7,
+    63
+   ],
+   "largeGapLineCount": 6,
+   "trailingPageRefLineCount": 7,
+   "linesWithTwoPageRefCandidates": 1,
+   "secondSegmentStartColumns": [
+    5
+   ],
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "勘定": 0,
+    "項": 1,
+    "所管": 0
+   },
+   "requestNumberRowStarts": 1,
+   "requestNumberTokensMidLine": 0,
+   "u2011LineCount": 1,
+   "puaCodePoints": [],
+   "prefixPageRefCandidateLines": 0,
+   "prefixPageRefCandidateTails": [],
+   "wrappedRowCandidateLines": 1,
+   "previousPhysicalPageType": "NO_TEXT",
+   "nextPhysicalPageType": "NO_TEXT",
+   "previousPageIsTocInSamePdf": false,
+   "developmentExploredInPr3a": false,
+   "renderedInPr3a": false
+  }
+ ]
+}

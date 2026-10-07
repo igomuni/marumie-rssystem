@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261008_0746_Budget_Request_TOC_Column_Aware_Failure_Isolation.md](20261008_0746_Budget_Request_TOC_Column_Aware_Failure_Isolation.md) — TOC column-aware failure isolation。render10page+machine82。右rowを持つpageは38/82(81/82はrequest-number混線)・折返しはx位置で帰属・INHERITEDは前TOC stateが必要 → SPLIT_REQUIRED(列分割/row組立→階層carryの順)
 - [20261008_0010_Budget_Request_Cover_Structure_v0_Implementation_Descriptive_Regression.md](20261008_0010_Budget_Request_Cover_Structure_v0_Implementation_Descriptive_Regression.md) — Cover Structure v0 parser実装。COVER69全RESOLVED・55page descriptive 580/581一致(不一致1はGT側転記ミス)・multiline2件。formal validationではない(IMPLEMENTATION_CONFORMANT_WITH_LIMITATIONS)
 - [20261007_2340_Budget_Request_Cover_Structure_v0_Visual_GT_Freeze.md](20261007_2340_Budget_Request_Cover_Structure_v0_Visual_GT_Freeze.md) — Cover Structure v0 visual GT 55page freeze(全RESOLVED・multiline/abstain なし=limitation)。title/section labelを定数stampしたため PROTOCOL_INVALID/STOP(GT/preregは不変・schemaは観測上問題なし・実装は未着手)
 - [20261007_2310_Budget_Request_Cover_Structure_v0_Preregistration.md](20261007_2310_Budget_Request_Cover_Structure_v0_Preregistration.md) — Cover Structure v0 事前登録(schema・比較規則・continuation rule・coverage定義・GO基準)とfrozen candidate 55page(=COVER69−explored14)freeze。GT前
