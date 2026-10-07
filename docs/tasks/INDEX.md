@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261007_2330_Budget_Request_Page_Classification_v2_Closed_Scope_Preregistration.md](20261007_2330_Budget_Request_Page_Classification_v2_Closed_Scope_Preregistration.md) — Page Classification v2 closed-scope 事前登録(claim限定・open-set NOT EVALUATED)とcandidate 170 row freeze(label前)。STAFFING continuation poolが1で不足見込み
 - [20261007_2300_Budget_Request_Page_Classification_v1_Evaluation_GT_Freeze.md](20261007_2300_Budget_Request_Page_Classification_v1_Evaluation_GT_Freeze.md) — Page Classification v1 評価GT 89row freeze。SAFETY_NEGATIVE 0・STAFFING 2 → INSUFFICIENT/STOP(false resolved は評価不能)
 - [20261007_2105_Budget_Request_Page_Classification_v1_Evaluation_Preregistration.md](20261007_2105_Budget_Request_Page_Classification_v1_Evaluation_Preregistration.md) — Page Classification v1 評価設計の事前登録(risk strata R1-R7・adequacy gate)とcandidate 89 row freeze(label前)
 - [20261007_2040_Budget_Request_Page_Classification_v0_Visual_GT_Freeze.md](20261007_2040_Budget_Request_Page_Classification_v0_Visual_GT_Freeze.md) — PR-2 Phase B。page classification v0 visual GT 172 row freeze(blind目視)。UNRESOLVED/OTHER 0・FROZEN_EVALUATION 30
