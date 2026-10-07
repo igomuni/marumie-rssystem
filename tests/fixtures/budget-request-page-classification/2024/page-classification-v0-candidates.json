@@ -1,0 +1,3066 @@
+{
+ "schema": "budget-request-page-classification-v0-candidates/v0",
+ "scope": "GT candidate の凍結。label は未付与。classifier は未実装",
+ "generator": "scripts/pipeline-v2/build-budget-request-page-classification-candidates.ts",
+ "frozenInput": {
+  "rawTextCorpusDigestSha256": "7c6d2dcec1f4bec0ca37a1b3aa391adce7d99b93ac4642c74cab7a328dac4052",
+  "phaseAFixture": "tests/fixtures/budget-request-page-classification/2024/empty-page-failure-isolation.json",
+  "phaseAFixtureSha256": "1ba611a0dfcdc8dfcb399eada9dc6daf96586899a323732d913f981115d8743b"
+ },
+ "parameters": {
+  "seed": "budget-request-page-classification-v0-20261007",
+  "directWindow": 5,
+  "perDirectFamily": 12,
+  "perDistanceBucket": 3,
+  "randomPages": 64,
+  "devPercent": 70,
+  "hashRule": "sha256(\"{seed}|{tag}|{localPdfPath}|{physicalPage}\") 昇順"
+ },
+ "population": {
+  "physicalPages": 9899,
+  "textObservable": 8968,
+  "rawTextEmpty": 931,
+  "phaseAVisuallyBlank": 116,
+  "phaseAVisibleContentEmpty": 1,
+  "fullyEmptyUnresolved": 814
+ },
+ "directCandidatePool": {
+  "PRIORITY_SUMMARY": 1,
+  "PRIORITY_DETAIL": 1,
+  "SUMMARY": 69,
+  "DETAIL": 73,
+  "STAFFING": 44,
+  "TOC": 55,
+  "COVER": 69,
+  "conflictPages": 0
+ },
+ "continuationCandidatePool": {
+  "DETAIL|d1": 69,
+  "DETAIL|d2": 67,
+  "DETAIL|d3-5": 155,
+  "DETAIL|d6+": 7927,
+  "PRIORITY_DETAIL|d1": 1,
+  "PRIORITY_DETAIL|d2": 1,
+  "PRIORITY_DETAIL|d3-5": 3,
+  "PRIORITY_DETAIL|d6+": 5,
+  "STAFFING|d1": 4,
+  "STAFFING|d2": 1,
+  "SUMMARY|d1": 24,
+  "SUMMARY|d2": 16,
+  "SUMMARY|d3-5": 24,
+  "SUMMARY|d6+": 31,
+  "TOC|d1": 15,
+  "TOC|d2": 5,
+  "TOC|d3-5": 6,
+  "TOC|d6+": 1
+ },
+ "summary": {
+  "rows": 172,
+  "byStratum": {
+   "CONTINUATION": 46,
+   "CORPUS_RANDOM": 64,
+   "DIRECT": 62
+  },
+  "duplicateKeys": 0,
+  "byRole": {
+   "DEVELOPMENT": 142,
+   "FROZEN_EVALUATION": 30
+  },
+  "publisherOverlap": 0,
+  "textHashMismatch": 0,
+  "directByFamilyAndRole": {
+   "COVER|DEVELOPMENT": 8,
+   "COVER|FROZEN_EVALUATION": 4,
+   "DETAIL|DEVELOPMENT": 11,
+   "DETAIL|FROZEN_EVALUATION": 1,
+   "PRIORITY_DETAIL|DEVELOPMENT": 1,
+   "PRIORITY_SUMMARY|DEVELOPMENT": 1,
+   "STAFFING|DEVELOPMENT": 11,
+   "STAFFING|FROZEN_EVALUATION": 1,
+   "SUMMARY|DEVELOPMENT": 11,
+   "SUMMARY|FROZEN_EVALUATION": 1,
+   "TOC|DEVELOPMENT": 11,
+   "TOC|FROZEN_EVALUATION": 1
+  },
+  "continuationByFamilyAndRole": {
+   "DETAIL|DEVELOPMENT": 12,
+   "PRIORITY_DETAIL|DEVELOPMENT": 8,
+   "STAFFING|DEVELOPMENT": 3,
+   "STAFFING|FROZEN_EVALUATION": 1,
+   "SUMMARY|DEVELOPMENT": 10,
+   "SUMMARY|FROZEN_EVALUATION": 2,
+   "TOC|DEVELOPMENT": 7,
+   "TOC|FROZEN_EVALUATION": 3
+  }
+ },
+ "publisherAssignment": {
+  "caa.go.jp": "DEVELOPMENT",
+  "cao.go.jp": "FROZEN_EVALUATION",
+  "cas.go.jp": "DEVELOPMENT",
+  "cfa.go.jp": "DEVELOPMENT",
+  "clb.go.jp": "DEVELOPMENT",
+  "courts.go.jp": "DEVELOPMENT",
+  "dangai.go.jp": "DEVELOPMENT",
+  "digital.go.jp": "DEVELOPMENT",
+  "env.go.jp": "DEVELOPMENT",
+  "fsa.go.jp": "FROZEN_EVALUATION",
+  "jbaudit.go.jp": "DEVELOPMENT",
+  "jcrc.go.jp": "DEVELOPMENT",
+  "jftc.go.jp": "DEVELOPMENT",
+  "jinji.go.jp": "DEVELOPMENT",
+  "kunaicho.go.jp": "DEVELOPMENT",
+  "maff.go.jp": "DEVELOPMENT",
+  "meti.go.jp": "DEVELOPMENT",
+  "mext.go.jp": "FROZEN_EVALUATION",
+  "mhlw.go.jp": "DEVELOPMENT",
+  "mlit.go.jp": "DEVELOPMENT",
+  "mod.go.jp": "DEVELOPMENT",
+  "mof.go.jp": "DEVELOPMENT",
+  "mofa.go.jp": "DEVELOPMENT",
+  "moj.go.jp": "FROZEN_EVALUATION",
+  "ndl.go.jp": "DEVELOPMENT",
+  "npa.go.jp": "DEVELOPMENT",
+  "ppc.go.jp": "FROZEN_EVALUATION",
+  "reconstruction.go.jp": "FROZEN_EVALUATION",
+  "sangiin.go.jp": "FROZEN_EVALUATION",
+  "shugiin.go.jp": "DEVELOPMENT",
+  "sotsui.go.jp": "DEVELOPMENT",
+  "soumu.go.jp": "DEVELOPMENT"
+ },
+ "rows": [
+  {
+   "localPdfPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_02.pdf",
+   "pdfSha256": "69e170e83244c869cd1190d191b02b9d5cf4b5bca1388b57e20fa539bc08ca60",
+   "physicalPage": 1,
+   "textSha256": "6e7e7f8ad0f221ac2addaa7b757255647686f43622e1d3594307fc507eb0ba33",
+   "publisherDomain": "caa.go.jp",
+   "logicalDocumentIndex": 51,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "COVER"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_02.pdf",
+   "pdfSha256": "69e170e83244c869cd1190d191b02b9d5cf4b5bca1388b57e20fa539bc08ca60",
+   "physicalPage": 8,
+   "textSha256": "0b28ed85e8b864e557919797f9aa644cd279a04884be8e916f81cf16655ffe0b",
+   "publisherDomain": "caa.go.jp",
+   "logicalDocumentIndex": 51,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "DETAIL",
+     "distanceBucket": "d1",
+     "directStartPage": 7,
+     "distanceInTextObservablePages": 1
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+   "pdfSha256": "b6cc6fa0604ab64cbbf9867137db53883943b9d3b3adfd0fdc9d9eb59fd5e5d4",
+   "physicalPage": 7,
+   "textSha256": "c0c0667408fb4fbfef926de79864968e7f47b8c809656faa95632732cec3c01d",
+   "publisherDomain": "caa.go.jp",
+   "logicalDocumentIndex": 50,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "DETAIL"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+   "pdfSha256": "315909085871656cc0428feaa5941ed456dd8d024c6511e511e86ab652623b33",
+   "physicalPage": 10,
+   "textSha256": "aa5b5b7baf5beef17426346846983a959fb220d015d7e01bb84079c36f3c89de",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": 53,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "COVER"
+    }
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+   "pdfSha256": "315909085871656cc0428feaa5941ed456dd8d024c6511e511e86ab652623b33",
+   "physicalPage": 18,
+   "textSha256": "fa36b00cff36cc97ceb8a460b3a8f4119a99cf63460f5ed0c30ef1ddbeb010f1",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": 53,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "COVER"
+    }
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/e2.pdf",
+   "pdfSha256": "6267ffbdc50e439899169659817271da4aa97596eb48e85fe3122f292f3ab7f2",
+   "physicalPage": 16,
+   "textSha256": "f5b59c4ecb42da6758833df1e33ed55e143e15dcd7be4f83f8cad96ba996b95e",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": 54,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/e2.pdf",
+   "pdfSha256": "6267ffbdc50e439899169659817271da4aa97596eb48e85fe3122f292f3ab7f2",
+   "physicalPage": 19,
+   "textSha256": "8c3dfc5939ae613dcd2ec3aef9cdd291196492bf9d0d43cd682a690db978f32d",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": 54,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_02.pdf",
+   "pdfSha256": "37c5d82cb7fc835ab16d7f85c113f646d712c34315cf45fce556846f0419d5c0",
+   "physicalPage": 1,
+   "textSha256": "65d036911d8acde781f7093877289346bf559372770b6a2fa1ecd6bba9ebba3f",
+   "publisherDomain": "cas.go.jp",
+   "logicalDocumentIndex": 56,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "DETAIL"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_06.pdf",
+   "pdfSha256": "b10ea4e5d675351ff448be312f918f51f547127b008b8186f1626e663ce38fd8",
+   "physicalPage": 4,
+   "textSha256": "e8ec04f411bac2094226ab3befd8cdfc3a33af51a246021316cc3597d3291204",
+   "publisherDomain": "cas.go.jp",
+   "logicalDocumentIndex": 56,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "DETAIL",
+     "distanceBucket": "d3-5",
+     "directStartPage": 1,
+     "distanceInTextObservablePages": 3
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_06.pdf",
+   "pdfSha256": "b10ea4e5d675351ff448be312f918f51f547127b008b8186f1626e663ce38fd8",
+   "physicalPage": 5,
+   "textSha256": "0c7a7649324239ad673ab35686f267e08dcceaa1834b635739214b6cf99772f6",
+   "publisherDomain": "cas.go.jp",
+   "logicalDocumentIndex": 56,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_07.pdf",
+   "pdfSha256": "ed04c0bd225d8247281e057f577f0f539d87e0de875ee1e12951b12d081b4f64",
+   "physicalPage": 26,
+   "textSha256": "d2f05052744b78636460c2ed582d06520a6a3b66add9660c0855ae0fd06cb2c4",
+   "publisherDomain": "cas.go.jp",
+   "logicalDocumentIndex": 56,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_08.pdf",
+   "pdfSha256": "38098a4fc77d5315dc56e4eef28ef15ef94ec2e42b5633e59018da061729be12",
+   "physicalPage": 1,
+   "textSha256": "7c5e49c6b1eb66ce29f6e8ff1916da39e8e9971d0776c98f5074e1bbf43e85e4",
+   "publisherDomain": "cas.go.jp",
+   "logicalDocumentIndex": 56,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "DETAIL"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_10.pdf",
+   "pdfSha256": "7f09e773f3055fbcd48d7588c27261022dd0fd94bb37be792f4b047461024087",
+   "physicalPage": 2,
+   "textSha256": "1e0ecc97bd926c95836d2ff801cf8f80e98088078030e96045d8f369cf3ff9bb",
+   "publisherDomain": "cas.go.jp",
+   "logicalDocumentIndex": 56,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "DETAIL",
+     "distanceBucket": "d1",
+     "directStartPage": 1,
+     "distanceInTextObservablePages": 1
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_11.pdf",
+   "pdfSha256": "af935092d4eeb800a9909e12de837c336d489b83691a77250d4cdf6aa69acd11",
+   "physicalPage": 3,
+   "textSha256": "85824a075938633bdbad70e3492509dbeb4b3e5cc3ffeafcd84e872924cf4431",
+   "publisherDomain": "cas.go.jp",
+   "logicalDocumentIndex": 56,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "DETAIL",
+     "distanceBucket": "d2",
+     "directStartPage": 1,
+     "distanceInTextObservablePages": 2
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_12.pdf",
+   "pdfSha256": "1b516fb3640e34c5d2d2a494d43a894b6dbe07ba88cc67c9245adb1ee16fa714",
+   "physicalPage": 1,
+   "textSha256": "07c08b9beaf2961c127af032d0b531f27386d3956f464a55998398b534d26696",
+   "publisherDomain": "cas.go.jp",
+   "logicalDocumentIndex": 56,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "DETAIL"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+   "pdfSha256": "49a975a4436da6d53319a32ca745e2d110c42839c441c6302a7361ed9a62e4cc",
+   "physicalPage": 1,
+   "textSha256": "1a0597751c45325e8c63bb6ed9b2ba130d598ee0296bbe5a5ef8f4906ff7e1a5",
+   "publisherDomain": "cfa.go.jp",
+   "logicalDocumentIndex": 31,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "COVER"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+   "pdfSha256": "49a975a4436da6d53319a32ca745e2d110c42839c441c6302a7361ed9a62e4cc",
+   "physicalPage": 3,
+   "textSha256": "f8e7a018e95cda9b5ba2053cd3aa1871110990369b74c88a92138f39ff36529d",
+   "publisherDomain": "cfa.go.jp",
+   "logicalDocumentIndex": 31,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "TOC"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+   "pdfSha256": "49a975a4436da6d53319a32ca745e2d110c42839c441c6302a7361ed9a62e4cc",
+   "physicalPage": 5,
+   "textSha256": "44ff77b9ec1d79199db80ffc4b769ab21f050dd3724feb5e20d5c3a854da5112",
+   "publisherDomain": "cfa.go.jp",
+   "logicalDocumentIndex": 31,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "SUMMARY"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+   "pdfSha256": "49a975a4436da6d53319a32ca745e2d110c42839c441c6302a7361ed9a62e4cc",
+   "physicalPage": 67,
+   "textSha256": "8ef468adfaa1cfcd50f8f06dc7e3e67079720c70a37a2a6206c52e10b0c4797f",
+   "publisherDomain": "cfa.go.jp",
+   "logicalDocumentIndex": 31,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+   "pdfSha256": "49a975a4436da6d53319a32ca745e2d110c42839c441c6302a7361ed9a62e4cc",
+   "physicalPage": 129,
+   "textSha256": "03be143162ff874651d4106d59e2c3cd7a628d44b307d9226aa61ea92f765a61",
+   "publisherDomain": "cfa.go.jp",
+   "logicalDocumentIndex": 31,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/aac2d779/20230907_policies_budget_05.pdf",
+   "pdfSha256": "e880abb5f5ccfaf7b2b9fe632c101287937e7b393e18e36775dc5ae92ad72026",
+   "physicalPage": 1,
+   "textSha256": "193b591ebb7b768e1ed135dd3f978173cfe9c4001fdfcf7b9cdd8d9090b85b6d",
+   "publisherDomain": "cfa.go.jp",
+   "logicalDocumentIndex": 32,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "COVER"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/clb.go.jp/files/topics/4473_ext_05_1.pdf",
+   "pdfSha256": "dbd5467fe8a6d6f2fe44ac8fba5a5412a097c21feace047a082ae15eb03f57b5",
+   "physicalPage": 1,
+   "textSha256": "ba1a0a8ba0617e339fcd44ab6a500bdb59e279cbb9b3292298875d18238440e6",
+   "publisherDomain": "clb.go.jp",
+   "logicalDocumentIndex": 52,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "COVER"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf",
+   "pdfSha256": "df43f2dc183da84fa9952ae4c5e17888177df186ad4c556ed1a519ba584e3c06",
+   "physicalPage": 1,
+   "textSha256": "f2ca7ce3f7fc063d38217da4afbf57b63d3f791df60f1983711e97f0384f7b42",
+   "publisherDomain": "courts.go.jp",
+   "logicalDocumentIndex": 43,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "COVER"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf",
+   "pdfSha256": "df43f2dc183da84fa9952ae4c5e17888177df186ad4c556ed1a519ba584e3c06",
+   "physicalPage": 3,
+   "textSha256": "3020a9dfe81ef07ef874714be98b18ddf3bb8be5ccd87a5bee09202fa3bc4edd",
+   "publisherDomain": "courts.go.jp",
+   "logicalDocumentIndex": 43,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "TOC"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf",
+   "pdfSha256": "df43f2dc183da84fa9952ae4c5e17888177df186ad4c556ed1a519ba584e3c06",
+   "physicalPage": 7,
+   "textSha256": "c31aeab92652231d7ca7a905b8a2b4ec9714ba3de24256cf9372b25f0248f5d6",
+   "publisherDomain": "courts.go.jp",
+   "logicalDocumentIndex": 43,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "DETAIL"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf",
+   "pdfSha256": "df43f2dc183da84fa9952ae4c5e17888177df186ad4c556ed1a519ba584e3c06",
+   "physicalPage": 88,
+   "textSha256": "871d18b3577d0ba59095d23d23e4b8d89356242ead864c3b56813d181f8f8c22",
+   "publisherDomain": "courts.go.jp",
+   "logicalDocumentIndex": 43,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf",
+   "pdfSha256": "df43f2dc183da84fa9952ae4c5e17888177df186ad4c556ed1a519ba584e3c06",
+   "physicalPage": 113,
+   "textSha256": "0ae2051fb183da14cb6823ecfe8eb32fa869610d622e9924774cc929d267fec4",
+   "publisherDomain": "courts.go.jp",
+   "logicalDocumentIndex": 43,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "STAFFING"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf",
+   "pdfSha256": "df43f2dc183da84fa9952ae4c5e17888177df186ad4c556ed1a519ba584e3c06",
+   "physicalPage": 116,
+   "textSha256": "d50375ed2f67cc974ed6e85db79f17692b5bf9259941a8cf538894d717124940",
+   "publisherDomain": "courts.go.jp",
+   "logicalDocumentIndex": 43,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "PRIORITY_SUMMARY"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf",
+   "pdfSha256": "df43f2dc183da84fa9952ae4c5e17888177df186ad4c556ed1a519ba584e3c06",
+   "physicalPage": 117,
+   "textSha256": "473038fcb4118d911f8fc694af7c0be8fd207561aaffa660e280108cc787d94c",
+   "publisherDomain": "courts.go.jp",
+   "logicalDocumentIndex": 43,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "PRIORITY_DETAIL"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf",
+   "pdfSha256": "df43f2dc183da84fa9952ae4c5e17888177df186ad4c556ed1a519ba584e3c06",
+   "physicalPage": 118,
+   "textSha256": "5a448f6ebd6b0106b70e9478c5ffb6aac5b3f8b842f7755031901c66b1ba8cf3",
+   "publisherDomain": "courts.go.jp",
+   "logicalDocumentIndex": 43,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "PRIORITY_DETAIL",
+     "distanceBucket": "d1",
+     "directStartPage": 117,
+     "distanceInTextObservablePages": 1
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf",
+   "pdfSha256": "df43f2dc183da84fa9952ae4c5e17888177df186ad4c556ed1a519ba584e3c06",
+   "physicalPage": 119,
+   "textSha256": "4bd06ed39118bfbd78c603a3bc5879803a0ae450fe55ed4e9e934af07443ebcf",
+   "publisherDomain": "courts.go.jp",
+   "logicalDocumentIndex": 43,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "PRIORITY_DETAIL",
+     "distanceBucket": "d2",
+     "directStartPage": 117,
+     "distanceInTextObservablePages": 2
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf",
+   "pdfSha256": "df43f2dc183da84fa9952ae4c5e17888177df186ad4c556ed1a519ba584e3c06",
+   "physicalPage": 120,
+   "textSha256": "0a9db7f3d0c5d1fcee35ea1976324b68ea34e2aa0a5dd9bc45e6cd44782266bf",
+   "publisherDomain": "courts.go.jp",
+   "logicalDocumentIndex": 43,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "PRIORITY_DETAIL",
+     "distanceBucket": "d3-5",
+     "directStartPage": 117,
+     "distanceInTextObservablePages": 3
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf",
+   "pdfSha256": "df43f2dc183da84fa9952ae4c5e17888177df186ad4c556ed1a519ba584e3c06",
+   "physicalPage": 121,
+   "textSha256": "cd22de62e630e832828873ca83257667efbc93eb88759d82c33e0903b8075c23",
+   "publisherDomain": "courts.go.jp",
+   "logicalDocumentIndex": 43,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "PRIORITY_DETAIL",
+     "distanceBucket": "d3-5",
+     "directStartPage": 117,
+     "distanceInTextObservablePages": 4
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf",
+   "pdfSha256": "df43f2dc183da84fa9952ae4c5e17888177df186ad4c556ed1a519ba584e3c06",
+   "physicalPage": 122,
+   "textSha256": "a9c2eed05e5bb7b48018eeaad09c10a8c637b92a10968fba7dd6e7fb5adc5c20",
+   "publisherDomain": "courts.go.jp",
+   "logicalDocumentIndex": 43,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "PRIORITY_DETAIL",
+     "distanceBucket": "d3-5",
+     "directStartPage": 117,
+     "distanceInTextObservablePages": 5
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf",
+   "pdfSha256": "df43f2dc183da84fa9952ae4c5e17888177df186ad4c556ed1a519ba584e3c06",
+   "physicalPage": 124,
+   "textSha256": "f0c6d0bf4fe16bfa60c835a77d2675df1e7b42c8b0657d1e718b4ec1004ec44e",
+   "publisherDomain": "courts.go.jp",
+   "logicalDocumentIndex": 43,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "PRIORITY_DETAIL",
+     "distanceBucket": "d6+",
+     "directStartPage": 117,
+     "distanceInTextObservablePages": 7
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf",
+   "pdfSha256": "df43f2dc183da84fa9952ae4c5e17888177df186ad4c556ed1a519ba584e3c06",
+   "physicalPage": 125,
+   "textSha256": "1efac04046b451509ca85f0b797259cad2edd4d94dcecaef8e0556f2ac9cff17",
+   "publisherDomain": "courts.go.jp",
+   "logicalDocumentIndex": 43,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "PRIORITY_DETAIL",
+     "distanceBucket": "d6+",
+     "directStartPage": 117,
+     "distanceInTextObservablePages": 8
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf",
+   "pdfSha256": "df43f2dc183da84fa9952ae4c5e17888177df186ad4c556ed1a519ba584e3c06",
+   "physicalPage": 127,
+   "textSha256": "d4e373d1397a63d2ce74cfd1a05471c6345d41a01d65712d777480c855b17481",
+   "publisherDomain": "courts.go.jp",
+   "logicalDocumentIndex": 43,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "PRIORITY_DETAIL",
+     "distanceBucket": "d6+",
+     "directStartPage": 117,
+     "distanceInTextObservablePages": 10
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/dangai.go.jp/info/pdf/r06_saisyutu-gaisan.pdf",
+   "pdfSha256": "370cd8991433528e8b07c35498959ab0b1fec0b3f634f87e12c7d539944f7a21",
+   "physicalPage": 1,
+   "textSha256": "262246729369097f79691f6f575e4241dd41ec34a4b49b4a879be35fa93027b3",
+   "publisherDomain": "dangai.go.jp",
+   "logicalDocumentIndex": 42,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "COVER"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/digital.go.jp/assets/contents/node/basic_page/field_ref_resources/e9b99425-437c-4750-b4e2-6cca3cd877a6/0fab2c74/20230914_policies_budget_r6request_table_01.pdf",
+   "pdfSha256": "b77f25b26b5caf82b0b6617fb1af9b3bba9df059a8bf9a8ede63de8d1a8cfe89",
+   "physicalPage": 7,
+   "textSha256": "62d6956076b5c372ba5568b81e1be9aea1007ec980230a11fa625156ecf64788",
+   "publisherDomain": "digital.go.jp",
+   "logicalDocumentIndex": 33,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "DETAIL"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157010.pdf",
+   "pdfSha256": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd",
+   "physicalPage": 8,
+   "textSha256": "5b63af31bf16041213113f1c7538eed09a1c8180aabc04195b674df6a6bb4bc0",
+   "publisherDomain": "env.go.jp",
+   "logicalDocumentIndex": 27,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "SUMMARY",
+     "distanceBucket": "d3-5",
+     "directStartPage": 5,
+     "distanceInTextObservablePages": 3
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157010.pdf",
+   "pdfSha256": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd",
+   "physicalPage": 10,
+   "textSha256": "497c4be7a02ee15062eb9640c1291b385756e393153b4d161566fca4094c1750",
+   "publisherDomain": "env.go.jp",
+   "logicalDocumentIndex": 27,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "SUMMARY",
+     "distanceBucket": "d3-5",
+     "directStartPage": 5,
+     "distanceInTextObservablePages": 5
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157010.pdf",
+   "pdfSha256": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd",
+   "physicalPage": 17,
+   "textSha256": "cc1a12900d0629eae14ae9bbc49de25ff1dc32d357d5a1d92f1724e2418b0315",
+   "publisherDomain": "env.go.jp",
+   "logicalDocumentIndex": 27,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "SUMMARY",
+     "distanceBucket": "d6+",
+     "directStartPage": 5,
+     "distanceInTextObservablePages": 12
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157010.pdf",
+   "pdfSha256": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd",
+   "physicalPage": 25,
+   "textSha256": "596130c84d668134e146d6e63c96982ecf107146ba7ac094029ab18c0c2ca7c3",
+   "publisherDomain": "env.go.jp",
+   "logicalDocumentIndex": 27,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "DETAIL",
+     "distanceBucket": "d3-5",
+     "directStartPage": 21,
+     "distanceInTextObservablePages": 4
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157010.pdf",
+   "pdfSha256": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd",
+   "physicalPage": 37,
+   "textSha256": "5efeff3a5f1d0043890ab6568e808a6ad11e635c46bc935041925ad7e7886286",
+   "publisherDomain": "env.go.jp",
+   "logicalDocumentIndex": 27,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157012.pdf",
+   "pdfSha256": "c71dd17f73464540ecb600d95d94104e59254e06b73efc2f282a5ecd8ba01823",
+   "physicalPage": 3,
+   "textSha256": "0765ea5df8c6d7eae7d5ca592aafd45f401b595ee4d452392679aef68b4065eb",
+   "publisherDomain": "env.go.jp",
+   "logicalDocumentIndex": 28,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "TOC"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157013.pdf",
+   "pdfSha256": "5f42ccfb48cc1d2043ffe97776be359c1e51d19ad35c578166e446982eb4bbe5",
+   "physicalPage": 7,
+   "textSha256": "e273637cf8183c844ad3a0056043e0015a0869f83aaf854b1bf69853f11e6f57",
+   "publisherDomain": "env.go.jp",
+   "logicalDocumentIndex": 29,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "DETAIL"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157013.pdf",
+   "pdfSha256": "5f42ccfb48cc1d2043ffe97776be359c1e51d19ad35c578166e446982eb4bbe5",
+   "physicalPage": 11,
+   "textSha256": "1018b82a37511c7f7dc56c8271c1cc8c42d9a5b73a16a0cdcba4f8832307c26b",
+   "publisherDomain": "env.go.jp",
+   "logicalDocumentIndex": 29,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/jbaudit.go.jp/jbaudit/bud_clo/bud/pdf/r06/20230906_02.pdf",
+   "pdfSha256": "c7070f558f985d0062cec9c73736bebe3c24f1290b895ce89d5afc676b21b72b",
+   "physicalPage": 17,
+   "textSha256": "59f318d465b76eb0f4b784a752ed6fcf8d489402e1b553d65f33ff2257d758e8",
+   "publisherDomain": "jbaudit.go.jp",
+   "logicalDocumentIndex": 44,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/jbaudit.go.jp/jbaudit/bud_clo/bud/pdf/r06/20230906_02.pdf",
+   "pdfSha256": "c7070f558f985d0062cec9c73736bebe3c24f1290b895ce89d5afc676b21b72b",
+   "physicalPage": 18,
+   "textSha256": "4442fb423d0128e10f565605d9fe097e9a93457599fa9bed65b587a0f7f34c10",
+   "publisherDomain": "jbaudit.go.jp",
+   "logicalDocumentIndex": 44,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/jbaudit.go.jp/jbaudit/bud_clo/bud/pdf/r06/20230906_02.pdf",
+   "pdfSha256": "c7070f558f985d0062cec9c73736bebe3c24f1290b895ce89d5afc676b21b72b",
+   "physicalPage": 41,
+   "textSha256": "b00c3736de6db4ddf00bfe78e07a75bff36149b0ba059978000d4db51af08490",
+   "publisherDomain": "jbaudit.go.jp",
+   "logicalDocumentIndex": 44,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "DETAIL",
+     "distanceBucket": "d6+",
+     "directStartPage": 7,
+     "distanceInTextObservablePages": 34
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/jcrc.go.jp/content/000001746.pdf",
+   "pdfSha256": "7632ed4048799b0f9b2001fef9a7ff94883885ff07e1145d55a4cd335f10583d",
+   "physicalPage": 1,
+   "textSha256": "3ddfc7e40007debc3fd4b7da34f82e78743647057c17fed606c65f7cc14bcdde",
+   "publisherDomain": "jcrc.go.jp",
+   "logicalDocumentIndex": 48,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "COVER"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/jftc.go.jp/soshiki/kyotsukoukai/yosan/yosankessan/r6/r6sandanhyou.pdf",
+   "pdfSha256": "036b395c72de3e0e81f07c337e9d45361cdaedf99831d690c3ea262dfb6b57e6",
+   "physicalPage": 9,
+   "textSha256": "60952b75d155a7a351af2694266e199de3dd948146745ff2b8e7e4f2b8c9ebe9",
+   "publisherDomain": "jftc.go.jp",
+   "logicalDocumentIndex": 46,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "DETAIL",
+     "distanceBucket": "d2",
+     "directStartPage": 7,
+     "distanceInTextObservablePages": 2
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/jftc.go.jp/soshiki/kyotsukoukai/yosan/yosankessan/r6/r6sandanhyou.pdf",
+   "pdfSha256": "036b395c72de3e0e81f07c337e9d45361cdaedf99831d690c3ea262dfb6b57e6",
+   "physicalPage": 140,
+   "textSha256": "31a739111520fc45f3513f63fde5ad2b9712f7a136be0b6f4d5b8bcbc8de7a8e",
+   "publisherDomain": "jftc.go.jp",
+   "logicalDocumentIndex": 46,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "STAFFING"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/jinji.go.jp/content/900024096.pdf",
+   "pdfSha256": "2e0229d66535e4d94f1f35f5d6c169042a6461a20f963f80cbf8945972b61bd2",
+   "physicalPage": 7,
+   "textSha256": "5019443bcdb93a08170df13fb295c0265abc1f7a587849ad676fac72944a7485",
+   "publisherDomain": "jinji.go.jp",
+   "logicalDocumentIndex": 45,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "DETAIL"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/jinji.go.jp/content/900024096.pdf",
+   "pdfSha256": "2e0229d66535e4d94f1f35f5d6c169042a6461a20f963f80cbf8945972b61bd2",
+   "physicalPage": 97,
+   "textSha256": "9168bfe8bfa04fc7cf11f1fcd8bd73a625d6960230d4d54695145b7e24aa9c12",
+   "publisherDomain": "jinji.go.jp",
+   "logicalDocumentIndex": 45,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "STAFFING"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/jinji.go.jp/content/900024096.pdf",
+   "pdfSha256": "2e0229d66535e4d94f1f35f5d6c169042a6461a20f963f80cbf8945972b61bd2",
+   "physicalPage": 98,
+   "textSha256": "24fbdaf0f6877d91261b8f7c535e38b3d09f62037a7a492973518a8324a12040",
+   "publisherDomain": "jinji.go.jp",
+   "logicalDocumentIndex": 45,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "STAFFING"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-02.pdf",
+   "pdfSha256": "ffab15073beb2411d9396f7ca0cbb1ce33ccdf99be05e6d0d88e29366912e261",
+   "physicalPage": 13,
+   "textSha256": "b117731594b302467843ab1b92d2a90e8c4789eceb07ba9066ba6c62e1d65e80",
+   "publisherDomain": "kunaicho.go.jp",
+   "logicalDocumentIndex": 60,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+   "physicalPage": 3,
+   "textSha256": "f0b018623a9b0ab5110b691cb5b29b723cb61b09255000aa995a078ccebad65a",
+   "publisherDomain": "maff.go.jp",
+   "logicalDocumentIndex": 20,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "TOC"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+   "physicalPage": 5,
+   "textSha256": "0361bbf1438795d66a8bf58db6c89927d81ca17cfffb5e6b7bfba1033ae03fea",
+   "publisherDomain": "maff.go.jp",
+   "logicalDocumentIndex": 20,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "TOC",
+     "distanceBucket": "d2",
+     "directStartPage": 3,
+     "distanceInTextObservablePages": 2
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+   "physicalPage": 8,
+   "textSha256": "17c38c1da707ddd03ef70d0b3f689e1b6fd1f33d5c666bc2ffcb8ab36a960372",
+   "publisherDomain": "maff.go.jp",
+   "logicalDocumentIndex": 20,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "SUMMARY",
+     "distanceBucket": "d1",
+     "directStartPage": 7,
+     "distanceInTextObservablePages": 1
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+   "physicalPage": 9,
+   "textSha256": "b3de8e52f0293f6602baed531ace17d6cf63aafe13a670c7d47fcecb39bde9dd",
+   "publisherDomain": "maff.go.jp",
+   "logicalDocumentIndex": 20,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "SUMMARY",
+     "distanceBucket": "d2",
+     "directStartPage": 7,
+     "distanceInTextObservablePages": 2
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+   "physicalPage": 47,
+   "textSha256": "6e635ab4285e7df1e7b15a1f77a4d1406354b8d61be6c1703865febcbd907cc5",
+   "publisherDomain": "maff.go.jp",
+   "logicalDocumentIndex": 20,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+   "physicalPage": 291,
+   "textSha256": "ad37ccebd6d0e19721f64a3f3b4e4d89f6c5a67e4e86bebc41ad4aed2dfa1dc8",
+   "publisherDomain": "maff.go.jp",
+   "logicalDocumentIndex": 20,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+   "physicalPage": 297,
+   "textSha256": "b8e2518909152b59860e40ac85fed6c05d012eca89e0f689b29986fc3aab3d83",
+   "publisherDomain": "maff.go.jp",
+   "logicalDocumentIndex": 20,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+   "physicalPage": 361,
+   "textSha256": "1e32411275591fba8c29c7897fa0a97ef96f31d795d1305381b1c5dce4bd5a75",
+   "publisherDomain": "maff.go.jp",
+   "logicalDocumentIndex": 20,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+   "physicalPage": 369,
+   "textSha256": "0da83530bc311f7171721259d8e7e4cbeef604b0da32169722115cb6e4e34066",
+   "publisherDomain": "maff.go.jp",
+   "logicalDocumentIndex": 20,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "STAFFING",
+     "distanceBucket": "d2",
+     "directStartPage": 367,
+     "distanceInTextObservablePages": 2
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+   "physicalPage": 370,
+   "textSha256": "352dd6e186e518fb8fa6d0a0457487d70cbcadfc945fa23b7e1d1793134b917d",
+   "publisherDomain": "maff.go.jp",
+   "logicalDocumentIndex": 20,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "STAFFING"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+   "physicalPage": 373,
+   "textSha256": "1674e199530098993c9005b499abaa76ff11de0de38b9689e37d0227473ff18a",
+   "publisherDomain": "maff.go.jp",
+   "logicalDocumentIndex": 20,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "STAFFING",
+     "distanceBucket": "d1",
+     "directStartPage": 372,
+     "distanceInTextObservablePages": 1
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+   "physicalPage": 375,
+   "textSha256": "d4442f1475771699a7146ad7da17de6510ba55d381a9ab998349d5d3f3571269",
+   "publisherDomain": "maff.go.jp",
+   "logicalDocumentIndex": 20,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "STAFFING"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+   "physicalPage": 376,
+   "textSha256": "542c048c7462afd79f9005757c1bfbcbba72a1bdc8f7f3e36a20bc8de3d5d7f7",
+   "publisherDomain": "maff.go.jp",
+   "logicalDocumentIndex": 20,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "STAFFING",
+     "distanceBucket": "d1",
+     "directStartPage": 375,
+     "distanceInTextObservablePages": 1
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf",
+   "pdfSha256": "aaec655a87a74e2724ac35d81b6759697749c24e586a3b09934c46c4a4fca460",
+   "physicalPage": 6,
+   "textSha256": "d29a752cef9caad72913e5abb259c195ac7f3788bb279586262c6e49feace935",
+   "publisherDomain": "maff.go.jp",
+   "logicalDocumentIndex": 22,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "SUMMARY",
+     "distanceBucket": "d1",
+     "directStartPage": 5,
+     "distanceInTextObservablePages": 1
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf",
+   "pdfSha256": "aaec655a87a74e2724ac35d81b6759697749c24e586a3b09934c46c4a4fca460",
+   "physicalPage": 32,
+   "textSha256": "b03fb279248fad480b7834b7b5499ed4d70e500c42145b1427a99913feaf203b",
+   "publisherDomain": "maff.go.jp",
+   "logicalDocumentIndex": 22,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf",
+   "pdfSha256": "aaec655a87a74e2724ac35d81b6759697749c24e586a3b09934c46c4a4fca460",
+   "physicalPage": 35,
+   "textSha256": "6ca9ff88cd8f954ca8b812f414d331476077857db27cd6c57df755de05b23bf0",
+   "publisherDomain": "maff.go.jp",
+   "logicalDocumentIndex": 22,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "STAFFING"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneden_o.pdf",
+   "pdfSha256": "d9ca160f33481511b3a484853f105375895f765a01535ed6bcae4b348eba6383",
+   "physicalPage": 3,
+   "textSha256": "31f3afdc32944db085c71a08e46e66219e5690aa7a2d5ce957e5f212c741d6a5",
+   "publisherDomain": "meti.go.jp",
+   "logicalDocumentIndex": 6,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "TOC"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/enegen_o.pdf",
+   "pdfSha256": "fbbeb3df06555205ae839e9849f460d3017d4b95cf1bfd3bf2aacb389a67e70f",
+   "physicalPage": 3,
+   "textSha256": "20fd016f275968d08c7f7c01dd913f37d7a5c7e9fdf4b1b977d92760f4f0edcc",
+   "publisherDomain": "meti.go.jp",
+   "logicalDocumentIndex": 7,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "TOC"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/enegen_o.pdf",
+   "pdfSha256": "fbbeb3df06555205ae839e9849f460d3017d4b95cf1bfd3bf2aacb389a67e70f",
+   "physicalPage": 5,
+   "textSha256": "b69e74baba6ccd91d388085a4d16ed4bcc84890b892b08a97bd2d0ef3d753620",
+   "publisherDomain": "meti.go.jp",
+   "logicalDocumentIndex": 7,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "SUMMARY"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneju_o.pdf",
+   "pdfSha256": "2c1d6cb494a41dbb8d03a63099cc4154f31d70b966c7510bc6fce3501a70e7b6",
+   "physicalPage": 3,
+   "textSha256": "0bf62775ffaf94be47956ba6760d713f34a6a8b22e47d53f962df182c250516d",
+   "publisherDomain": "meti.go.jp",
+   "logicalDocumentIndex": 5,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "TOC"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneju_o.pdf",
+   "pdfSha256": "2c1d6cb494a41dbb8d03a63099cc4154f31d70b966c7510bc6fce3501a70e7b6",
+   "physicalPage": 5,
+   "textSha256": "d7dee3612a58c3f0e26f8585eedd9653f6509a206af9d5ef09d9647e0342570f",
+   "publisherDomain": "meti.go.jp",
+   "logicalDocumentIndex": 5,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "SUMMARY"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneju_o.pdf",
+   "pdfSha256": "2c1d6cb494a41dbb8d03a63099cc4154f31d70b966c7510bc6fce3501a70e7b6",
+   "physicalPage": 15,
+   "textSha256": "37574fa18b5c0a5df4e34fa8138bffdf073cd446d0372f6789325a3290caa85f",
+   "publisherDomain": "meti.go.jp",
+   "logicalDocumentIndex": 5,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "pdfSha256": "ba64c25df327161a33c293374a7255c203cc9a527130ece848574badefbf909a",
+   "physicalPage": 4,
+   "textSha256": "91a1bfb784f6106b944d3650cb241e76e3f58ef6bb3f96536639c57eb6b1efce",
+   "publisherDomain": "meti.go.jp",
+   "logicalDocumentIndex": 4,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "TOC",
+     "distanceBucket": "d1",
+     "directStartPage": 3,
+     "distanceInTextObservablePages": 1
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "pdfSha256": "ba64c25df327161a33c293374a7255c203cc9a527130ece848574badefbf909a",
+   "physicalPage": 5,
+   "textSha256": "fe7583f5b4b815ba6c283d18506ee6d4a8e7834739c14cf8439403a5faf97c26",
+   "publisherDomain": "meti.go.jp",
+   "logicalDocumentIndex": 4,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "SUMMARY"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/tokkyo_o.pdf",
+   "pdfSha256": "6e083f0b4115530237d4c1c91e6d105fd3ee301d49f5ad3c0e649e11f4b13fc9",
+   "physicalPage": 3,
+   "textSha256": "39b5936f8d80365d6e8e37798d5f531c6515f79817d8f0dd7a6627d8ec35f2a7",
+   "publisherDomain": "meti.go.jp",
+   "logicalDocumentIndex": 8,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "TOC"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/tokkyo_o.pdf",
+   "pdfSha256": "6e083f0b4115530237d4c1c91e6d105fd3ee301d49f5ad3c0e649e11f4b13fc9",
+   "physicalPage": 5,
+   "textSha256": "c72656b29906a8b998468505f1fc6660bd36d65cee5f4707241f381148115a7e",
+   "publisherDomain": "meti.go.jp",
+   "logicalDocumentIndex": 8,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "SUMMARY"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "pdfSha256": "91b39e9902610e13aa7be445db2d2d2a3e38166fd5f449bd11f94cfe5fe3b6d5",
+   "physicalPage": 1,
+   "textSha256": "5015dc606106f1957870c0676295503864d0e80bac7f23ad67e7387c049753cb",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "COVER"
+    }
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "pdfSha256": "91b39e9902610e13aa7be445db2d2d2a3e38166fd5f449bd11f94cfe5fe3b6d5",
+   "physicalPage": 5,
+   "textSha256": "72ed43e3ab84a4a57326be1aa348c953205661100c76aef8f9c43179dbc1719d",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "TOC",
+     "distanceBucket": "d2",
+     "directStartPage": 3,
+     "distanceInTextObservablePages": 2
+    }
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_02.pdf",
+   "pdfSha256": "d2d1927eb068a97901cb7dfb0c104013539bb6f9dda8bab4cd36dc1f9b45c831",
+   "physicalPage": 5,
+   "textSha256": "8431930f3594f48555b7cacecf4ec2ac0032b13b4431a38d7b87b1733bd57571",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "SUMMARY",
+     "distanceBucket": "d3-5",
+     "directStartPage": 1,
+     "distanceInTextObservablePages": 4
+    }
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_02.pdf",
+   "pdfSha256": "d2d1927eb068a97901cb7dfb0c104013539bb6f9dda8bab4cd36dc1f9b45c831",
+   "physicalPage": 7,
+   "textSha256": "27cc4d5ddf531338d1bd47666c48d3d4190f424434b7aca83c1c1c08fc290b9c",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "SUMMARY",
+     "distanceBucket": "d6+",
+     "directStartPage": 1,
+     "distanceInTextObservablePages": 6
+    }
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 8,
+   "textSha256": "9ad2c29ab45ce8445cba98e01cb2c0807eb4779deda9d827ad39c4712d322795",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 335,
+   "textSha256": "a24e7a1676093cd015057a652b19f518ac561e2e31ff94800d46c4db1172f48b",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 379,
+   "textSha256": "393c464d2ce3e01feddf87b920dca1765d48c3ff655453438f53f8444fe9909a",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 448,
+   "textSha256": "38b95f036fbd119d716ab5cb2fa66d6c15b35bff4fd400689f4e32bc20d21cb9",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 601,
+   "textSha256": "ed01360211882788c5aa36dddcf7f00a46ec8bd57db3691b7fc8525cbc824d65",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 784,
+   "textSha256": "3d68fc348f0a6d09c8d3058c094fbfe2ca1e3fe339eca7cfeb48f786f37942a8",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 814,
+   "textSha256": "94827b5b2f4d9f35b4ec41473504bc2a0c9883fa9eeeb3224205bedac33f1798",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 815,
+   "textSha256": "476bc24af16f4286edd32bf7f767843e8fc0304c3d98762d8ea96a1ee53f309e",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 1066,
+   "textSha256": "53f81fa65279f8ba96321c1559c15c2f292c270a2cb14c4e7b92e3ad7ec53467",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "physicalPage": 1214,
+   "textSha256": "8a2ee718e80c5244ba9c7b972746c5018b3d191990d1770d789ddb8d052d684f",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": 59,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "pdfSha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+   "physicalPage": 6,
+   "textSha256": "eb58e928a465a2cc7735d33a2f71fb1e6cb10ef4852186a33001c5ced567bc1a",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 17,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "TOC",
+     "distanceBucket": "d3-5",
+     "directStartPage": 3,
+     "distanceInTextObservablePages": 3
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "pdfSha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+   "physicalPage": 7,
+   "textSha256": "edcb745e044a4532ca27a75e0476b49e7cdd54af23cc23332ca296acf3694a5b",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 17,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "TOC",
+     "distanceBucket": "d3-5",
+     "directStartPage": 3,
+     "distanceInTextObservablePages": 4
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "pdfSha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+   "physicalPage": 20,
+   "textSha256": "38d474cf27d4a223ad6ad587b4eb1a0f28788d25cd76893eb169816b8ccc72a8",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 17,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "SUMMARY",
+     "distanceBucket": "d6+",
+     "directStartPage": 9,
+     "distanceInTextObservablePages": 11
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "pdfSha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+   "physicalPage": 191,
+   "textSha256": "27361f5252dd9c755415a6d66ca7f0742e30c276f6215873b3069a901f6b3936",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 17,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "pdfSha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+   "physicalPage": 405,
+   "textSha256": "2f38f26584de2602a41af2c00fb4f37852b0ebe982d0e5b8f224e3efa2d90104",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 17,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "pdfSha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+   "physicalPage": 530,
+   "textSha256": "bc88e75a4d02e59b94866a5d40bbe8f6a390362278db9cfa2a7ddae36c78e90f",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 17,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "pdfSha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+   "physicalPage": 959,
+   "textSha256": "3bcd25b8e2dedfad46966619798abe6166193571e5a87a5c679ab519924c9d62",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 17,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "pdfSha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+   "physicalPage": 1012,
+   "textSha256": "1e60083ad6856b05e03620059d24368fa83a772078852842be614aeddf1693ec",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 17,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "pdfSha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+   "physicalPage": 1104,
+   "textSha256": "eb821073ec72a56fd5f1b0d38011374609fa8ccfef2b0a7517c24777206e6d82",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 17,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "pdfSha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+   "physicalPage": 1130,
+   "textSha256": "6005b1ce42c21a7435f013f78ec3b16f77c74adff85d3f6c1c0d04db8208f14a",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 17,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "pdfSha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+   "physicalPage": 1190,
+   "textSha256": "04f53c82df0d37f7736e2b5a3d25e8c41d88f542a7c574a9796902bb11a592de",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 17,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "pdfSha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+   "physicalPage": 1402,
+   "textSha256": "6b769969f3f6b1558838820d1ae3873a42373f1e1a526e9986c9fc02f7bc0290",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 17,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "pdfSha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+   "physicalPage": 1634,
+   "textSha256": "42af21db78fbd70ff0ae17fcf05adb287f0da466cebf0d3542e3577021b5a561",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 17,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+   "pdfSha256": "769a47c4ea979473abcd1fb04b3d4aec6bdf98bc358d802f7af628990036001a",
+   "physicalPage": 112,
+   "textSha256": "a069ce5bb1ef157438e42b86e5148a876032b8568fd3a522d95753c09210fbe6",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 18,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "DETAIL",
+     "distanceBucket": "d6+",
+     "directStartPage": 9,
+     "distanceInTextObservablePages": 103
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+   "pdfSha256": "769a47c4ea979473abcd1fb04b3d4aec6bdf98bc358d802f7af628990036001a",
+   "physicalPage": 222,
+   "textSha256": "68812e0beeea583931a4d7908255f14f895080a707130fbfce4c715d49fdbe5f",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 18,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+   "pdfSha256": "769a47c4ea979473abcd1fb04b3d4aec6bdf98bc358d802f7af628990036001a",
+   "physicalPage": 277,
+   "textSha256": "bbca5ae2fccc75fd0fabae96bbec096454be17dc88a5686870c23aab4d792e01",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 18,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+   "pdfSha256": "769a47c4ea979473abcd1fb04b3d4aec6bdf98bc358d802f7af628990036001a",
+   "physicalPage": 314,
+   "textSha256": "8adb81eeee6a19c947ec9c2c35b8ba08990d270e43f9e2b4f7fd94eb99bc5598",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 18,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+   "pdfSha256": "769a47c4ea979473abcd1fb04b3d4aec6bdf98bc358d802f7af628990036001a",
+   "physicalPage": 368,
+   "textSha256": "9dbf34be4a9e9d65f43355f75bf80efbaac73774a4adee0db4ef55606fd8c2b9",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 18,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+   "pdfSha256": "769a47c4ea979473abcd1fb04b3d4aec6bdf98bc358d802f7af628990036001a",
+   "physicalPage": 484,
+   "textSha256": "16887bef204af64cfd12dce0ddfe20e395bcdc985fa59823969f6de4bf07394a",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 18,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+   "pdfSha256": "769a47c4ea979473abcd1fb04b3d4aec6bdf98bc358d802f7af628990036001a",
+   "physicalPage": 510,
+   "textSha256": "f342f3b6e635cac43721b3d9fd891a9a84c726975d4605863c3e5822f3967a46",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 18,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+   "pdfSha256": "769a47c4ea979473abcd1fb04b3d4aec6bdf98bc358d802f7af628990036001a",
+   "physicalPage": 696,
+   "textSha256": "339a7b85295b2d1c33937d9373130966ffbc5cd2ff217134bd2c18d660799c8c",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 18,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf",
+   "pdfSha256": "0391edca4cd6b88140195d118613ccac33550549baf065d1951db96e9625d0b5",
+   "physicalPage": 4,
+   "textSha256": "7d844a671faa1d241041cd7415163c15a5fde556a4c2bfda9ae5285bd800bd78",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 19,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "TOC",
+     "distanceBucket": "d1",
+     "directStartPage": 3,
+     "distanceInTextObservablePages": 1
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf",
+   "pdfSha256": "0391edca4cd6b88140195d118613ccac33550549baf065d1951db96e9625d0b5",
+   "physicalPage": 5,
+   "textSha256": "2fdc1db7466159ac87f325f3321166f6f7d0a88eda4792013cd80bfc5b39d0bb",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 19,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "SUMMARY"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf",
+   "pdfSha256": "0391edca4cd6b88140195d118613ccac33550549baf065d1951db96e9625d0b5",
+   "physicalPage": 7,
+   "textSha256": "2ff0297b3adc6b4cc0b8d402d2a7ce68bf8c4ad44357fbf5567a5348fd188390",
+   "publisherDomain": "mhlw.go.jp",
+   "logicalDocumentIndex": 19,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "SUMMARY",
+     "distanceBucket": "d2",
+     "directStartPage": 5,
+     "distanceInTextObservablePages": 2
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630393.pdf",
+   "pdfSha256": "efdef502e10961842477cd18cc2cb091c7a3206125881f6031fc7fa941613864",
+   "physicalPage": 3,
+   "textSha256": "9b9803effbc14a1acaf412c4670457be396ee4eeb564f70c056a60659056567d",
+   "publisherDomain": "mlit.go.jp",
+   "logicalDocumentIndex": 25,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "TOC"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630393.pdf",
+   "pdfSha256": "efdef502e10961842477cd18cc2cb091c7a3206125881f6031fc7fa941613864",
+   "physicalPage": 6,
+   "textSha256": "73e67a8025c321ab70bfee269bc71a2414611db6c99e068d93b7d7f0f69e81fa",
+   "publisherDomain": "mlit.go.jp",
+   "logicalDocumentIndex": 25,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "SUMMARY",
+     "distanceBucket": "d1",
+     "directStartPage": 5,
+     "distanceInTextObservablePages": 1
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630395.pdf",
+   "pdfSha256": "d5e8250094ea55fee74951654a692ce345a2b8710a788017d0f5db7b9c259c1a",
+   "physicalPage": 3,
+   "textSha256": "2b8840fe233a383b3d583faa12221f01b32851251e0d4ab0d5686507bf648292",
+   "publisherDomain": "mlit.go.jp",
+   "logicalDocumentIndex": 26,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "TOC"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "pdfSha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+   "physicalPage": 6,
+   "textSha256": "99efe411705eaa4d92dd015e1a008655224706d92d8bf65431e3da100df8b679",
+   "publisherDomain": "mlit.go.jp",
+   "logicalDocumentIndex": 24,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "TOC",
+     "distanceBucket": "d3-5",
+     "directStartPage": 3,
+     "distanceInTextObservablePages": 3
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "pdfSha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+   "physicalPage": 9,
+   "textSha256": "d78af4870d1ddccc2257cbf33aa8a2e0191f33ff4985532a78191762660d74b5",
+   "publisherDomain": "mlit.go.jp",
+   "logicalDocumentIndex": 24,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "TOC",
+     "distanceBucket": "d6+",
+     "directStartPage": 3,
+     "distanceInTextObservablePages": 6
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "pdfSha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+   "physicalPage": 188,
+   "textSha256": "b536466eace57be28db42059d4aea942ce6b0df2388728b557b60a8a66b6d538",
+   "publisherDomain": "mlit.go.jp",
+   "logicalDocumentIndex": 24,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "pdfSha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+   "physicalPage": 341,
+   "textSha256": "2c5970479a2b09a89c73049c9311ed029cee60a447e28dce4baee34519bfe9e6",
+   "publisherDomain": "mlit.go.jp",
+   "logicalDocumentIndex": 24,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "pdfSha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+   "physicalPage": 900,
+   "textSha256": "3baca518dbf2c89c8ff28896b09fa643248869dceaa02a1fd5e0b1f098cbabb3",
+   "publisherDomain": "mlit.go.jp",
+   "logicalDocumentIndex": 24,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "pdfSha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+   "physicalPage": 961,
+   "textSha256": "6e4080d1da9726d51945d31a727a9b08086dfbf374ada92b2b74ff47e3069329",
+   "publisherDomain": "mlit.go.jp",
+   "logicalDocumentIndex": 24,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "pdfSha256": "57861291846015dfdc831480149d8614a1d67c283e8b6e313f5c75f92a2a6b47",
+   "physicalPage": 89,
+   "textSha256": "7e0312d33960081a6d003c24ddcee5267eabba52821bd3d3dc071e49c46bf97b",
+   "publisherDomain": "mod.go.jp",
+   "logicalDocumentIndex": 36,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "pdfSha256": "57861291846015dfdc831480149d8614a1d67c283e8b6e313f5c75f92a2a6b47",
+   "physicalPage": 316,
+   "textSha256": "9118351ddd40d028b0b95872b1dda80ed6a0cadf2004f275328c4eeb94b62e4d",
+   "publisherDomain": "mod.go.jp",
+   "logicalDocumentIndex": 36,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "pdfSha256": "57861291846015dfdc831480149d8614a1d67c283e8b6e313f5c75f92a2a6b47",
+   "physicalPage": 503,
+   "textSha256": "538c7c2d386a61e5cacf91e2c87bb1d28d21be8d16400c379d7c7a3eb1ee96ca",
+   "publisherDomain": "mod.go.jp",
+   "logicalDocumentIndex": 36,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "pdfSha256": "6cc573bf64747e4ceb41597cc83e371f5d8144a02e3e9033501597d64cfbbc5e",
+   "physicalPage": 9,
+   "textSha256": "0ea3015522b08d21c674d34ee1b396d0a592fc392cb435f70545ff05d240fa7b",
+   "publisherDomain": "mof.go.jp",
+   "logicalDocumentIndex": 10,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "DETAIL",
+     "distanceBucket": "d1",
+     "directStartPage": 8,
+     "distanceInTextObservablePages": 1
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "pdfSha256": "6cc573bf64747e4ceb41597cc83e371f5d8144a02e3e9033501597d64cfbbc5e",
+   "physicalPage": 45,
+   "textSha256": "003b8e8495278bd8ae66fe0cb1c8823b0c80adf92c3d132e0deaac4013bc5f6f",
+   "publisherDomain": "mof.go.jp",
+   "logicalDocumentIndex": 10,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "pdfSha256": "6cc573bf64747e4ceb41597cc83e371f5d8144a02e3e9033501597d64cfbbc5e",
+   "physicalPage": 91,
+   "textSha256": "e2291fcdd1b3cbe45953046fa784153db2393de839b8253ac0ee8357474a241c",
+   "publisherDomain": "mof.go.jp",
+   "logicalDocumentIndex": 10,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "pdfSha256": "6cc573bf64747e4ceb41597cc83e371f5d8144a02e3e9033501597d64cfbbc5e",
+   "physicalPage": 150,
+   "textSha256": "acbaf07cd66594eed92f46dec565faf24dfa55d675533ac8220c7c9e97776749",
+   "publisherDomain": "mof.go.jp",
+   "logicalDocumentIndex": 10,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "pdfSha256": "6cc573bf64747e4ceb41597cc83e371f5d8144a02e3e9033501597d64cfbbc5e",
+   "physicalPage": 245,
+   "textSha256": "dd418a9d00a327c057442159b767a4c7cbb6d19e5c067454edcf1fe6922ee02a",
+   "publisherDomain": "mof.go.jp",
+   "logicalDocumentIndex": 10,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "pdfSha256": "6cc573bf64747e4ceb41597cc83e371f5d8144a02e3e9033501597d64cfbbc5e",
+   "physicalPage": 295,
+   "textSha256": "9b8f30cdf793a94b2ab1b660cf75d005b1ee548d2450bd11f2b761e51b7fb7a5",
+   "publisherDomain": "mof.go.jp",
+   "logicalDocumentIndex": 10,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "STAFFING"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024jisinn_2.pdf",
+   "pdfSha256": "9b7690b4b4b8818949abd386ccf2375c79f95dff70d38934624de5ffca5e0fe5",
+   "physicalPage": 2,
+   "textSha256": "181e880cc766bfc5065ab14403c634ac3516c6690325f737216d5c4b6d9f96c2",
+   "publisherDomain": "mof.go.jp",
+   "logicalDocumentIndex": 11,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "TOC"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024kokusaiseirikikinn_2.pdf",
+   "pdfSha256": "bd0715a0585b04879c8796504d6841b91c612297299934d9298cb875cee55145",
+   "physicalPage": 4,
+   "textSha256": "cd32b7246e671b6e7ea974d31e7f621f4575bc4ed3c9d64c4d97ee93aae7c0b8",
+   "publisherDomain": "mof.go.jp",
+   "logicalDocumentIndex": 12,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "DETAIL"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tokuzai_2.pdf",
+   "pdfSha256": "5744d1f8670a9a72d52e67771be8266e7d3d102ad35c102eb92b6c2eb5a84d75",
+   "physicalPage": 3,
+   "textSha256": "01d51b4640ab57be5b9169f44d382eea3396466b0ce1e31afd205a0d955bd9a8",
+   "publisherDomain": "mof.go.jp",
+   "logicalDocumentIndex": 16,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "SUMMARY"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tousi_2.pdf",
+   "pdfSha256": "be6b5bd2f3c0480bd8a5e9292a304e4eb37bd342deb21eb28b2464dfb5741ede",
+   "physicalPage": 1,
+   "textSha256": "98d4880036c4a1707d97fb8161cca0dea3e7296a047e676cb5c5821ab6008075",
+   "publisherDomain": "mof.go.jp",
+   "logicalDocumentIndex": 15,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "COVER"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tousi_2.pdf",
+   "pdfSha256": "be6b5bd2f3c0480bd8a5e9292a304e4eb37bd342deb21eb28b2464dfb5741ede",
+   "physicalPage": 3,
+   "textSha256": "77561444eb0dd84586a63d1e3898aa4bb7a37709b2a83444401714de54a9b9cb",
+   "publisherDomain": "mof.go.jp",
+   "logicalDocumentIndex": 15,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "SUMMARY"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024zaiyuu_2.pdf",
+   "pdfSha256": "f8ebf4dfcfbfa3b4ae0636554e2f3e5462190db71d406de0b87fc45f12d36485",
+   "physicalPage": 3,
+   "textSha256": "e43b96cb936fe4b53877f35279f6fa1be3d88840b057333cc8794fefee98fc5c",
+   "publisherDomain": "mof.go.jp",
+   "logicalDocumentIndex": 14,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "SUMMARY"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024zaiyuu_2.pdf",
+   "pdfSha256": "f8ebf4dfcfbfa3b4ae0636554e2f3e5462190db71d406de0b87fc45f12d36485",
+   "physicalPage": 9,
+   "textSha256": "59d2474f246473252b90b451c660be36d182b6f612a94d487da4c6fa3d607a96",
+   "publisherDomain": "mof.go.jp",
+   "logicalDocumentIndex": 14,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "DETAIL",
+     "distanceBucket": "d3-5",
+     "directStartPage": 4,
+     "distanceInTextObservablePages": 5
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024zaiyuu_2.pdf",
+   "pdfSha256": "f8ebf4dfcfbfa3b4ae0636554e2f3e5462190db71d406de0b87fc45f12d36485",
+   "physicalPage": 16,
+   "textSha256": "034ff5cf8123cb917726f0c88e7ef1fb6c55ca8536b4e0579d2be7863db91702",
+   "publisherDomain": "mof.go.jp",
+   "logicalDocumentIndex": 14,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "STAFFING"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/mofa.go.jp/mofaj/files/100546568.pdf",
+   "pdfSha256": "85781ba1f867aaab4130b2c463c588c4fc9ca6211d097cedfd495c56bf024b55",
+   "physicalPage": 265,
+   "textSha256": "77be449baa75e865438286024cee2902ebcbbfe8db3fc3a1ad9103f8e8c08b8d",
+   "publisherDomain": "mofa.go.jp",
+   "logicalDocumentIndex": 37,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/moj.go.jp/content/001402819.pdf",
+   "pdfSha256": "6635e0e5fbb8a962d439d6d8d256c0c34892b0d9a366ea04daf15d338a36bb7b",
+   "physicalPage": 1,
+   "textSha256": "0e1411c78141a49795553093e96c40454684844d749636b87b2f062d3fbcb4af",
+   "publisherDomain": "moj.go.jp",
+   "logicalDocumentIndex": 3,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "COVER"
+    }
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/moj.go.jp/content/001402819.pdf",
+   "pdfSha256": "6635e0e5fbb8a962d439d6d8d256c0c34892b0d9a366ea04daf15d338a36bb7b",
+   "physicalPage": 7,
+   "textSha256": "8f4e5aa3250831b190c6354b72af010247f30a3cdd63180b9ef46eb6194bb41f",
+   "publisherDomain": "moj.go.jp",
+   "logicalDocumentIndex": 3,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "DETAIL"
+    }
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/moj.go.jp/content/001402819.pdf",
+   "pdfSha256": "6635e0e5fbb8a962d439d6d8d256c0c34892b0d9a366ea04daf15d338a36bb7b",
+   "physicalPage": 11,
+   "textSha256": "a5d85cdc414f93ed88e0c42796ebfb515961083395110bcffc59978486c03977",
+   "publisherDomain": "moj.go.jp",
+   "logicalDocumentIndex": 3,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "STAFFING"
+    }
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/ndl.go.jp/jp/aboutus/outline/r06_budgetrequest.pdf",
+   "pdfSha256": "cb0442175d186f3041d6b3df93c46139760920b2c0162ae5a61c3abedf0a60e5",
+   "physicalPage": 4,
+   "textSha256": "1d97e99f4e72ede0ca388ef59359bfd85467b805790007673b236f8ef8260ffb",
+   "publisherDomain": "ndl.go.jp",
+   "logicalDocumentIndex": 40,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "DETAIL"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/hukkoutokubetukaikei.pdf",
+   "pdfSha256": "9e44e9f3b592398750c0472ec84f94d3817d68ae50c84cf0b4df859ea3e32843",
+   "physicalPage": 3,
+   "textSha256": "7830fe854c2f84ea33a392ffca4ce2796951b276e4164642d0a697f96e0e1c6c",
+   "publisherDomain": "npa.go.jp",
+   "logicalDocumentIndex": 35,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "SUMMARY"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+   "pdfSha256": "efbfdfefbf4d6c4f85c1da1867348c96964a56fefe6d4c952291e2bf3448e837",
+   "physicalPage": 24,
+   "textSha256": "94f7f0c4b3435e69f65d33934cfab5c7e7ec8515151430e9cb58587011eaa305",
+   "publisherDomain": "npa.go.jp",
+   "logicalDocumentIndex": 34,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+   "pdfSha256": "efbfdfefbf4d6c4f85c1da1867348c96964a56fefe6d4c952291e2bf3448e837",
+   "physicalPage": 49,
+   "textSha256": "09770132da666be33ed84cde7f23f610fc94480f839806f3a8adc2ae4bcb93bd",
+   "publisherDomain": "npa.go.jp",
+   "logicalDocumentIndex": 34,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "DETAIL",
+     "distanceBucket": "d6+",
+     "directStartPage": 5,
+     "distanceInTextObservablePages": 44
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+   "pdfSha256": "efbfdfefbf4d6c4f85c1da1867348c96964a56fefe6d4c952291e2bf3448e837",
+   "physicalPage": 110,
+   "textSha256": "87059c1c70cb66b57cb190cf977eb73fe46fc2fdf00edbd0a3e36a3a82606205",
+   "publisherDomain": "npa.go.jp",
+   "logicalDocumentIndex": 34,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "STAFFING"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+   "pdfSha256": "efbfdfefbf4d6c4f85c1da1867348c96964a56fefe6d4c952291e2bf3448e837",
+   "physicalPage": 111,
+   "textSha256": "b38605b2da75c4a692f3c4169b96fb3986cd7160d0c4045dec5059bc8c929cf1",
+   "publisherDomain": "npa.go.jp",
+   "logicalDocumentIndex": 34,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "STAFFING"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/ppc.go.jp/files/pdf/230831youkyu.pdf",
+   "pdfSha256": "0a9a58273e0f9c137414e062872c1c642ad0fa5aec403ae5e606c56f198db9a3",
+   "physicalPage": 5,
+   "textSha256": "714c4ba22fa28d90d2c41cabf2e8deb8ce72887c59a59010e551ce6674250702",
+   "publisherDomain": "ppc.go.jp",
+   "logicalDocumentIndex": 47,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "SUMMARY"
+    }
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/ppc.go.jp/files/pdf/230831youkyu.pdf",
+   "pdfSha256": "0a9a58273e0f9c137414e062872c1c642ad0fa5aec403ae5e606c56f198db9a3",
+   "physicalPage": 30,
+   "textSha256": "7e30510d9f650b867a7932d16785a7192f9fe71ed1e61564d32baa0a4d6f4b4d",
+   "publisherDomain": "ppc.go.jp",
+   "logicalDocumentIndex": 47,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "STAFFING",
+     "distanceBucket": "d1",
+     "directStartPage": 29,
+     "distanceInTextObservablePages": 1
+    }
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "pdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+   "physicalPage": 3,
+   "textSha256": "8c22462a899952790b2eaefbdf6d97ee6332799e4845d549d949028f7db71315",
+   "publisherDomain": "reconstruction.go.jp",
+   "logicalDocumentIndex": 58,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "TOC"
+    }
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "pdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+   "physicalPage": 4,
+   "textSha256": "361f4dc9ee487a6060136938614747ff113214a2cee2e7b86ad2072152c83317",
+   "publisherDomain": "reconstruction.go.jp",
+   "logicalDocumentIndex": 58,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "TOC",
+     "distanceBucket": "d1",
+     "directStartPage": 3,
+     "distanceInTextObservablePages": 1
+    }
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "pdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+   "physicalPage": 5,
+   "textSha256": "48a05d6c92d806acaa8de10ba91e34e810e920110bf9c5856693097d8b60f8c8",
+   "publisherDomain": "reconstruction.go.jp",
+   "logicalDocumentIndex": 58,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "TOC",
+     "distanceBucket": "d2",
+     "directStartPage": 3,
+     "distanceInTextObservablePages": 2
+    }
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "pdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+   "physicalPage": 12,
+   "textSha256": "a92c7cd603de27ba6fd800377ba11384c90c9d02dd8734a16952efaed1bf99a3",
+   "publisherDomain": "reconstruction.go.jp",
+   "logicalDocumentIndex": 58,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "pdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+   "physicalPage": 14,
+   "textSha256": "181f65246882d68e8b6e04cf1633c0ae209c9f34ac119a986cdbd1b05ec86f20",
+   "publisherDomain": "reconstruction.go.jp",
+   "logicalDocumentIndex": 58,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "pdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+   "physicalPage": 33,
+   "textSha256": "b99b4d0e869acb38d33b36fb40471280496528f936c5044d64ed58cb969b6660",
+   "publisherDomain": "reconstruction.go.jp",
+   "logicalDocumentIndex": 58,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "pdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+   "physicalPage": 37,
+   "textSha256": "94a5fd783734fe8608ef7ded89d9e031de68ccfd9c45bd88417a15e41e5f0145",
+   "publisherDomain": "reconstruction.go.jp",
+   "logicalDocumentIndex": 58,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "FROZEN_EVALUATION"
+  },
+  {
+   "localPdfPath": "data/download/shugiin.go.jp/internet/itdb_annai.nsf/html/statics/osirase/kaikei-saishutsugaisan6.pdf/%24File/kaikei-saishutsugaisan6.pdf",
+   "pdfSha256": "30d0dfc363a1f4f7e37b64a0059b48c2f03f13f997eb251e7ef5acaabd37c435",
+   "physicalPage": 5,
+   "textSha256": "7534e91d376b435b1343465b129ba60f64cb4589d2ae506a1adc07b18d941b9f",
+   "publisherDomain": "shugiin.go.jp",
+   "logicalDocumentIndex": 39,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "SUMMARY"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/shugiin.go.jp/internet/itdb_annai.nsf/html/statics/osirase/kaikei-saishutsugaisan6.pdf/%24File/kaikei-saishutsugaisan6.pdf",
+   "pdfSha256": "30d0dfc363a1f4f7e37b64a0059b48c2f03f13f997eb251e7ef5acaabd37c435",
+   "physicalPage": 7,
+   "textSha256": "1c7eb2fc739a96817c748d5f1c1bd0a4c469ef0b8d211c63ec4aed10fdd1a23e",
+   "publisherDomain": "shugiin.go.jp",
+   "logicalDocumentIndex": 39,
+   "strata": [
+    "DIRECT"
+   ],
+   "strataDetail": {
+    "DIRECT": {
+     "family": "DETAIL"
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/soumu.go.jp/main_content/000901372.pdf",
+   "pdfSha256": "cc54dbe5f689116619a1f8453747d47bca5b960137f90869ead26954d651703b",
+   "physicalPage": 7,
+   "textSha256": "01023b351926f61e6aa1419e8050f7711616d607667dabbc5137f6857c8821d0",
+   "publisherDomain": "soumu.go.jp",
+   "logicalDocumentIndex": 0,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "SUMMARY",
+     "distanceBucket": "d2",
+     "directStartPage": 5,
+     "distanceInTextObservablePages": 2
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/soumu.go.jp/main_content/000901372.pdf",
+   "pdfSha256": "cc54dbe5f689116619a1f8453747d47bca5b960137f90869ead26954d651703b",
+   "physicalPage": 11,
+   "textSha256": "5233ce7cf89a3498adff27db0317b5d92d83fda373a2e26cafe232c96d026af0",
+   "publisherDomain": "soumu.go.jp",
+   "logicalDocumentIndex": 0,
+   "strata": [
+    "CONTINUATION"
+   ],
+   "strataDetail": {
+    "CONTINUATION": {
+     "stateFamily": "DETAIL",
+     "distanceBucket": "d2",
+     "directStartPage": 9,
+     "distanceInTextObservablePages": 2
+    }
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/soumu.go.jp/main_content/000901372.pdf",
+   "pdfSha256": "cc54dbe5f689116619a1f8453747d47bca5b960137f90869ead26954d651703b",
+   "physicalPage": 205,
+   "textSha256": "20fc743ae7b5ec7ba8a4f697884fd514ac5489cc1c19a44fced788c26cd60dc7",
+   "publisherDomain": "soumu.go.jp",
+   "logicalDocumentIndex": 0,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  },
+  {
+   "localPdfPath": "data/download/soumu.go.jp/main_content/000901372.pdf",
+   "pdfSha256": "cc54dbe5f689116619a1f8453747d47bca5b960137f90869ead26954d651703b",
+   "physicalPage": 264,
+   "textSha256": "b42245913afc73750e11740f19185e80bb88273158d8498613f5fccd64cc4809",
+   "publisherDomain": "soumu.go.jp",
+   "logicalDocumentIndex": 0,
+   "strata": [
+    "CORPUS_RANDOM"
+   ],
+   "strataDetail": {
+    "CORPUS_RANDOM": {}
+   },
+   "evaluationRole": "DEVELOPMENT"
+  }
+ ]
+}

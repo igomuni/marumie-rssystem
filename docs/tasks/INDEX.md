@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261007_1925_Budget_Request_Page_Classification_v0_Preregistration.md](20261007_1925_Budget_Request_Page_Classification_v0_Preregistration.md) — PR-2 Phase B。Page Classification v0 事前登録(direct先頭5行・継承・split・GO基準)とGT candidate 172 row freeze(label前)
 - [20261007_1840_Budget_Request_PR2_Empty_Page_Failure_Isolation.md](20261007_1840_Budget_Request_PR2_Empty_Page_Failure_Isolation.md) — PR-2 Phase A。EXTRACTED文書内EMPTY 117pの切り分け(分類なし)。116=描画なしの白page・1=text層なし画像page・UNRESOLVED0・全て偶数page
 - [20261007_1806_Budget_Request_PR1_Raw_Text_Corpus.md](20261007_1806_Budget_Request_PR1_Raw_Text_Corpus.md) — FY2024概算要求PDF全82本のpage単位Raw Text層(pdftotext -layout)。9,899p・EXTRACTED80/EMPTY2/FAILED0・決定的・GO
 - [20261006_1500_Budget_Request_P1_Measurement_Correction_Revision.md](20261006_1500_Budget_Request_P1_Measurement_Correction_Revision.md) — 補正の訂正。P1のみ対象(56/68=82.4%)、full-corpus 97.0%(98/101)とgate101は正
