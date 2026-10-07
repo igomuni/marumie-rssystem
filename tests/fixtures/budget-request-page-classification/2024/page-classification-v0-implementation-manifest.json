@@ -1,0 +1,494 @@
+{
+ "schema": "budget-request-page-classification-v0-implementation-manifest/v0",
+ "scope": "frozen v0 specification の literal implementation の full-corpus 出力 manifest。rule 変更・GT 由来の調整なし。open-set safety は NOT EVALUATED",
+ "specVersion": "page-classification-v0-frozen",
+ "frozenInput": {
+  "rawTextCorpusDigestSha256": "7c6d2dcec1f4bec0ca37a1b3aa391adce7d99b93ac4642c74cab7a328dac4052",
+  "phaseAFixtureSha256": "1ba611a0dfcdc8dfcb399eada9dc6daf96586899a323732d913f981115d8743b"
+ },
+ "implementation": {
+  "files": {
+   "scripts/pipeline-v2/lib/budget-request-page-classification.ts": "9476bac301f819b716433f2da0ae59c3eff1906a573d565484fcf54b17cb3c6a",
+   "scripts/pipeline-v2/lib/budget-request-page-classification-direct.ts": "2642ebfd7d6e589fd6681b0eb279b2a4119c1094b3c7904f81d7f6ec9bbb118f",
+   "scripts/pipeline-v2/build-budget-request-page-classification.ts": "e3e7d2c26bbac400cff4f188c048fb1c6143cabb39aab0449a21d2d07c7058b3"
+  },
+  "node": "v24.9.0",
+  "platform": "darwin-arm64"
+ },
+ "summary": {
+  "totalPages": 9899,
+  "rawStatus": {
+   "EMPTY": 931,
+   "EXTRACTED": 8968
+  },
+  "classificationStatus": {
+   "NO_TEXT": 931,
+   "RESOLVED": 8667,
+   "UNRESOLVED": 301
+  },
+  "pageType": {
+   "COVER": 69,
+   "DETAIL": 8291,
+   "PRIORITY_DETAIL": 11,
+   "PRIORITY_SUMMARY": 1,
+   "STAFFING": 49,
+   "SUMMARY": 164,
+   "TOC": 82,
+   "UNRESOLVED": 301,
+   "null": 931
+  },
+  "source": {
+   "DIRECT": 312,
+   "INHERITED": 8355,
+   "null": 1232
+  },
+  "unresolvedReason": {
+   "NO_ACTIVE_STATE": 301
+  },
+  "noTextReason": {
+   "NO_TEXT_RASTER_OR_IMAGE_DOMINANT": 1,
+   "NO_TEXT_UNRESOLVED": 814,
+   "NO_TEXT_VISUALLY_BLANK": 116
+  },
+  "resetCounts": {
+   "DIRECT_NON_INHERITABLE": 10,
+   "NO_TEXT_RASTER_OR_IMAGE_DOMINANT": 1
+  },
+  "bridgedBlankPages": 71,
+  "pageLossOrDuplicate": 0,
+  "corpusClassificationDigestSha256": "39464fc76b1b83272d5852d3db1db776e22bb570ee0f6b7ca4d1da64de4a5ecc"
+ },
+ "conformance": {
+  "v0": {
+   "directChecked": 62,
+   "directMismatch": 0,
+   "stateChecked": 46,
+   "stateMismatch": 0
+  },
+  "v1": {
+   "directChecked": 29,
+   "directMismatch": 0,
+   "stateChecked": 49,
+   "stateMismatch": 0
+  },
+  "v2": {
+   "directChecked": 62,
+   "directMismatch": 0,
+   "stateChecked": 93,
+   "stateMismatch": 0
+  },
+  "totalMismatch": 0
+ },
+ "perPdf": [
+  {
+   "localPdfPath": "data/download/soumu.go.jp/main_content/000901372.pdf",
+   "pageCount": 454,
+   "classificationDigestSha256": "9a3f4408d2d0b5bd248426278b2904c87f32aefe69b1d0198396d9bc813909a1"
+  },
+  {
+   "localPdfPath": "data/download/soumu.go.jp/main_content/000901375.pdf",
+   "pageCount": 22,
+   "classificationDigestSha256": "88265d0c5a75add9a9f4d87f2de018003c9e17abc36c1424f3212e82ae34f590"
+  },
+  {
+   "localPdfPath": "data/download/moj.go.jp/content/001402818.pdf",
+   "pageCount": 737,
+   "classificationDigestSha256": "16040fc80b711ba62309043f1f34483a596a56a37f613ecdd2a01f284ba9014c"
+  },
+  {
+   "localPdfPath": "data/download/moj.go.jp/content/001402819.pdf",
+   "pageCount": 11,
+   "classificationDigestSha256": "89a144f9c972dbb0a9958b4f4050f58e203ea07199b4b17f90a530190bc76dfc"
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "pageCount": 106,
+   "classificationDigestSha256": "966b1d8cfc794dad155acf00068ab54df9ac1d60e68fe199148304f095febe2f"
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneju_o.pdf",
+   "pageCount": 16,
+   "classificationDigestSha256": "25dfee998fdd5b7d370a28be4896d0bf7bb956aae01ec3e0f3447020527319cf"
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneden_o.pdf",
+   "pageCount": 25,
+   "classificationDigestSha256": "d45d2e691f0010766d56d457de0b4140d2bf65964887a7e26e94dafc2035b67f"
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/enegen_o.pdf",
+   "pageCount": 7,
+   "classificationDigestSha256": "e0e3a95e8a61f9093efa7be7f2c211c90d6d344237a951837f17dc82de46caba"
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/tokkyo_o.pdf",
+   "pageCount": 17,
+   "classificationDigestSha256": "de998837d100cfe7e180ea599592e2a3b631ee55b5012bb6dbf0942c3a2a850b"
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/fukko_o.pdf",
+   "pageCount": 10,
+   "classificationDigestSha256": "b75302a83b49575716fcdd6edb9e378151700f4b22920bfb7fd5be840d7a5df7"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "pageCount": 297,
+   "classificationDigestSha256": "e63597ef7b79f68389d57179799752a8d45c7f33180c786cf76f10e39a55437d"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024jisinn_2.pdf",
+   "pageCount": 9,
+   "classificationDigestSha256": "93ae36a52302866ef7828ce4ba9f6ace7638f265770b0b331166be5d4e9c39a6"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024kokusaiseirikikinn_2.pdf",
+   "pageCount": 9,
+   "classificationDigestSha256": "db27de7d87488e91d47ad08353b58510e6f306e87dde8f693520293f8fde7bad"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024gaitame_2.pdf",
+   "pageCount": 20,
+   "classificationDigestSha256": "e91d116066b9d414f77e20907e2a01a399946f3187ad9e2ba728fa0574915e70"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024zaiyuu_2.pdf",
+   "pageCount": 16,
+   "classificationDigestSha256": "0b2f5d43fdb622c36501378249a9e5f31953da11db1396637d1b345f0f0e6ef5"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tousi_2.pdf",
+   "pageCount": 11,
+   "classificationDigestSha256": "2b3709919ef64114c83ed4b5ef7a025345d4fce65dfde358d2a1bfe1eeae3701"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tokuzai_2.pdf",
+   "pageCount": 6,
+   "classificationDigestSha256": "d057de32b5b4d0ba84e79509cc7a04a5578894cb30477a1be936f0dfa46442fd"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "pageCount": 1723,
+   "classificationDigestSha256": "75c178fd2fda774e057a32ae3d0de82829955096fea8d0d2de8e8d16bf7f6e22"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+   "pageCount": 782,
+   "classificationDigestSha256": "e3ac81801b0c0ddc4730e82d09eed8a1c791428577fd94a61ce7a6ab029118f0"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf",
+   "pageCount": 48,
+   "classificationDigestSha256": "d042d180d25c1f7da934c5addadd66a1e204a45da6b934cd8604ee331940bedc"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "pageCount": 378,
+   "classificationDigestSha256": "4963acbbf66c793163d7f4259eb2250d9bef082f5c1343cbc726e0d2cd89760f"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+   "pageCount": 21,
+   "classificationDigestSha256": "192304ffe6b0d275a14337af4521fe6fdb83d2eb5fb08bf6c0c9b7a48c485bec"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf",
+   "pageCount": 35,
+   "classificationDigestSha256": "d21b3ea7daeba66c8376dace3d0a1663c9192e4c9f272afa9a6cb0dc0eb7f9bf"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-8.pdf",
+   "pageCount": 7,
+   "classificationDigestSha256": "8d08990f46147b7567cb4a249dd47c0f172a7a4c89c093c30e4935ba6f96ab43"
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "pageCount": 1097,
+   "classificationDigestSha256": "3e6f7a274d073a42f79798b3f1bb51844e14f60192a446434df041d8ddf20657"
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630393.pdf",
+   "pageCount": 51,
+   "classificationDigestSha256": "e8224a426ed244c9c89abf683f6571b72de25c280d3933a6991f3ffbe31bc9af"
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630395.pdf",
+   "pageCount": 10,
+   "classificationDigestSha256": "0cd335720da9d53d66e5c1ebdb6461f3e445d495400a6d575e08936b99e566c2"
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157010.pdf",
+   "pageCount": 193,
+   "classificationDigestSha256": "2807c9947a2659084c2a151d7f2e08609090f45d312128973ee4e88f79e0e04c"
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157012.pdf",
+   "pageCount": 16,
+   "classificationDigestSha256": "44d81a6b33b861278a7e614cba4962a1cc5b40afa52433f6a700bc725678c952"
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157013.pdf",
+   "pageCount": 25,
+   "classificationDigestSha256": "d5e3095e5a7002779591b58960e854731afae3a27c4a6d2503e1b385dbcdfb6e"
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157016.pdf",
+   "pageCount": 30,
+   "classificationDigestSha256": "511933eecce4d1be1569887db38d925bfa1eeceede5fb94de9a98cb2f1883f74"
+  },
+  {
+   "localPdfPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+   "pageCount": 147,
+   "classificationDigestSha256": "c6f1dd2dbffc9b62cb81683352c26405b4f7f214865f618f249e0733ca96cb7b"
+  },
+  {
+   "localPdfPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/aac2d779/20230907_policies_budget_05.pdf",
+   "pageCount": 29,
+   "classificationDigestSha256": "08cd07cfcf360b274d287b01998b87babfc037a8db378a7ad7085e446da21459"
+  },
+  {
+   "localPdfPath": "data/download/digital.go.jp/assets/contents/node/basic_page/field_ref_resources/e9b99425-437c-4750-b4e2-6cca3cd877a6/0fab2c74/20230914_policies_budget_r6request_table_01.pdf",
+   "pageCount": 32,
+   "classificationDigestSha256": "ecac458703adad3e3836c2b2a3d5ce61d7dda662ecdb761913a71333f90ce5b6"
+  },
+  {
+   "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+   "pageCount": 112,
+   "classificationDigestSha256": "344c82ea261ed8630c4c23113eec2e36a457238bf31d8312376d42310ba28940"
+  },
+  {
+   "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/hukkoutokubetukaikei.pdf",
+   "pageCount": 7,
+   "classificationDigestSha256": "89ec1d7378524d23f17c6d0384f7efbb42c833a83c98cde56d8b0aa1d3c0af8b"
+  },
+  {
+   "localPdfPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "pageCount": 540,
+   "classificationDigestSha256": "5883560772766e564049652b3d82ad1ba81e9c5b1c161c0a658fd5fa5cf2d56e"
+  },
+  {
+   "localPdfPath": "data/download/mofa.go.jp/mofaj/files/100546568.pdf",
+   "pageCount": 314,
+   "classificationDigestSha256": "1a66eb878c9f36f36a36488e7e8f16dc1091e844ffff4448b56a3b274b273f9a"
+  },
+  {
+   "localPdfPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf",
+   "pageCount": 21,
+   "classificationDigestSha256": "ca4250b58b49f14afe77aecf43c0ab99271b90ba407d84459d15b0b16570766a"
+  },
+  {
+   "localPdfPath": "data/download/shugiin.go.jp/internet/itdb_annai.nsf/html/statics/osirase/kaikei-saishutsugaisan6.pdf/%24File/kaikei-saishutsugaisan6.pdf",
+   "pageCount": 36,
+   "classificationDigestSha256": "588acbff16e9416f45e432a308cc596712bef95aeecf57ec0abd3f5a385686bc"
+  },
+  {
+   "localPdfPath": "data/download/ndl.go.jp/jp/aboutus/outline/r06_budgetrequest.pdf",
+   "pageCount": 17,
+   "classificationDigestSha256": "797e4612d3c09d018373a8a1fcfb6af89dd1544cb8a67af81a828841bb9cfec4"
+  },
+  {
+   "localPdfPath": "data/download/sotsui.go.jp/budget/images/r6budget_yokyu.pdf",
+   "pageCount": 8,
+   "classificationDigestSha256": "fff9145272bca646845a6d389b03201870fd0a7d1c69923d052c6e5a637a847b"
+  },
+  {
+   "localPdfPath": "data/download/dangai.go.jp/info/pdf/r06_saisyutu-gaisan.pdf",
+   "pageCount": 9,
+   "classificationDigestSha256": "48c4e004fdb8d7e47aa2fda97bd4bbbe6b91bcf71746c8508e7ea79df15306c4"
+  },
+  {
+   "localPdfPath": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf",
+   "pageCount": 127,
+   "classificationDigestSha256": "9fd431445b581e131dbdbb6583baf1e35feb25d718747d3b46cc830851ab192d"
+  },
+  {
+   "localPdfPath": "data/download/jbaudit.go.jp/jbaudit/bud_clo/bud/pdf/r06/20230906_02.pdf",
+   "pageCount": 48,
+   "classificationDigestSha256": "e5d30405892c7d81c464cbdecf056f82941774cfd634ca14159aec1731e10d19"
+  },
+  {
+   "localPdfPath": "data/download/jinji.go.jp/content/900024096.pdf",
+   "pageCount": 98,
+   "classificationDigestSha256": "9df547867847f0ce2e45cd2477007f5e38f36d95bb1762e805a39f0be8b1bf71"
+  },
+  {
+   "localPdfPath": "data/download/jftc.go.jp/soshiki/kyotsukoukai/yosan/yosankessan/r6/r6sandanhyou.pdf",
+   "pageCount": 140,
+   "classificationDigestSha256": "3d164d3c388ef2981f9f889e78d30e4abcc34eeb9b535ea265fea4c8ab9009d6"
+  },
+  {
+   "localPdfPath": "data/download/ppc.go.jp/files/pdf/230831youkyu.pdf",
+   "pageCount": 30,
+   "classificationDigestSha256": "e3253a598c495b4a48c59731dc6330ee503f617d03ca87ab0278b712d5a3dccd"
+  },
+  {
+   "localPdfPath": "data/download/jcrc.go.jp/content/000001746.pdf",
+   "pageCount": 17,
+   "classificationDigestSha256": "f28bd7db0964b21c88181fd21f082927012ae0f1e3bff92efde64d8afcd7f48d"
+  },
+  {
+   "localPdfPath": "data/download/fsa.go.jp/common/budget/yosan/6youkyuu-2/01.pdf",
+   "pageCount": 77,
+   "classificationDigestSha256": "9b458290e4b7ec02f2de86f9e0a64532211e7b085d0179304dc52de33070a153"
+  },
+  {
+   "localPdfPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+   "pageCount": 200,
+   "classificationDigestSha256": "9ea5e4a10dd4e1d4523ebe97804b1777930166194b338f67c961bd68b12e3cae"
+  },
+  {
+   "localPdfPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_02.pdf",
+   "pageCount": 9,
+   "classificationDigestSha256": "98a1edf6e4926153798938b74264cbf8e794ef10a7936a6d0d89af397a6874d2"
+  },
+  {
+   "localPdfPath": "data/download/clb.go.jp/files/topics/4473_ext_05_1.pdf",
+   "pageCount": 29,
+   "classificationDigestSha256": "2a00fad41b30758bac81d0a434f32ea8e300d963774a14a1279a62a417e02d63"
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+   "pageCount": 25,
+   "classificationDigestSha256": "2b29a733b83cd9eb90ec4d2d8e53195a4bdb8aed4433f27fd883f647b3bab59b"
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/1.pdf",
+   "pageCount": 3,
+   "classificationDigestSha256": "a604e735151a3d9329db7f5cc66aabd7ac3bdd6d617fc721752e025c4d240dd8"
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/e2.pdf",
+   "pageCount": 19,
+   "classificationDigestSha256": "a66515eb1010d3f64dd68d89c4ae14a21b878098c35b2cedc7a623ccf059182e"
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/f1.pdf",
+   "pageCount": 2,
+   "classificationDigestSha256": "d34dd245c5f5dd63ef51d1f272c5a287a61460da6266f3fda66f7ee6826fe4e0"
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/f2.pdf",
+   "pageCount": 5,
+   "classificationDigestSha256": "7f149a986f0c82793815472489d286c972122adaaa1abb02068d216021c84a57"
+  },
+  {
+   "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_01.pdf",
+   "pageCount": 2,
+   "classificationDigestSha256": "e7d8a90c3968f8ce10ac79ee230210a19e1ea62efd8adf577393ad8b12d94da6"
+  },
+  {
+   "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_02.pdf",
+   "pageCount": 2,
+   "classificationDigestSha256": "04040bd4c22e69d378af61eb0f76ca3a8782d60483bb0284bc204c5463ca0bc9"
+  },
+  {
+   "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_03.pdf",
+   "pageCount": 4,
+   "classificationDigestSha256": "cc6087bf4a2d0dbd4ef181a9a3458be935f39e13fcb40b8b300a5f1c7ce5eedc"
+  },
+  {
+   "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_04.pdf",
+   "pageCount": 4,
+   "classificationDigestSha256": "e2999adeeea3788980e716a252a2cc638ad0d2cc44e11fd4e41d808238d550e5"
+  },
+  {
+   "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_05.pdf",
+   "pageCount": 1,
+   "classificationDigestSha256": "9d4b8c82d76936d91799e361d85b2c278846cc460b41b69cf23d3ef506acb05b"
+  },
+  {
+   "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_06.pdf",
+   "pageCount": 6,
+   "classificationDigestSha256": "43ce3ea6bdb5ce6d94d74cd36fe502a2fbad10c46257855e5281a8114b517aa3"
+  },
+  {
+   "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_07.pdf",
+   "pageCount": 29,
+   "classificationDigestSha256": "9420b1d6dd9baaaf7137d6e0feaa4af2aeaab456ee08d2eabebb48f5a416c493"
+  },
+  {
+   "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_08.pdf",
+   "pageCount": 4,
+   "classificationDigestSha256": "5f1b23ddd7d6e5e157e35c6d62084a8f02a9349c7500087c54a768b937126cfe"
+  },
+  {
+   "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_09.pdf",
+   "pageCount": 3,
+   "classificationDigestSha256": "516e82d6e96216bee170539b92c808fe7b846fea0fb6aa5696f27bed8902884f"
+  },
+  {
+   "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_10.pdf",
+   "pageCount": 4,
+   "classificationDigestSha256": "ff20c4a43380cb595fb07e1fad9d9f8795dcf55d3b298096bcdef8d5c0ae92e4"
+  },
+  {
+   "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_11.pdf",
+   "pageCount": 19,
+   "classificationDigestSha256": "7351ae2fc25e5f1b1dd1fd5371f2845afdf611e66c571cb8c14006c2bd374fe0"
+  },
+  {
+   "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_12.pdf",
+   "pageCount": 4,
+   "classificationDigestSha256": "aa8af9cde694b39f9e5be092dd8a228a823901600b70b1399bb6ce3add668ce5"
+  },
+  {
+   "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_13.pdf",
+   "pageCount": 3,
+   "classificationDigestSha256": "971a9776f83f4c981c238b679784f123a40f4a13c4df64533b71e175dc68997b"
+  },
+  {
+   "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_14.pdf",
+   "pageCount": 3,
+   "classificationDigestSha256": "51b8592767e18461dd752d2bcb7460a3105bab6ffde6454a67358b8e05a4366c"
+  },
+  {
+   "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_15.pdf",
+   "pageCount": 3,
+   "classificationDigestSha256": "f497d80b28df55590ae4253b7ba4c6b0925ecf44889e4f684a91c01eae0e6b24"
+  },
+  {
+   "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_16.pdf",
+   "pageCount": 2,
+   "classificationDigestSha256": "3451a78a6c5c1f2bc5975341818cdd4412c29fce028f1988bf06f434e0c627d4"
+  },
+  {
+   "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_17.pdf",
+   "pageCount": 1,
+   "classificationDigestSha256": "3092ca5243d98b6e37bfb13fab554a64773bb04e946ab1b65bf41b22994d76b4"
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "pageCount": 103,
+   "classificationDigestSha256": "cda038a45ec95d83a2f3b2ee19936858e53e7f89ad95bde5d6ce40cc4399c1e0"
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "pageCount": 6,
+   "classificationDigestSha256": "38bd2e1bbf8a91bfd1545aacb89a840c22f2d62e49a227dde1cb25dc32cf9983"
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_02.pdf",
+   "pageCount": 8,
+   "classificationDigestSha256": "b068f354fca87b3d60ba535b3b5eddefe30e2419e89d6b79d01a7ff39e6edff7"
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pageCount": 1339,
+   "classificationDigestSha256": "69a92a2870b55a702525b6802e83dca72d96df1d7db74b59f1d0775ea91572b7"
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_04.pdf",
+   "pageCount": 6,
+   "classificationDigestSha256": "d40a8aed792c64834743eef28569cb25179d426ebdc69fe49b75aae5b8cae51a"
+  },
+  {
+   "localPdfPath": "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-02.pdf",
+   "pageCount": 33,
+   "classificationDigestSha256": "2c0a2774a4c9284931bc1d52bd1c79094a5b9725300c2c25d2a4c638dbf82be4"
+  },
+  {
+   "localPdfPath": "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-03.pdf",
+   "pageCount": 20,
+   "classificationDigestSha256": "98c099962480a01679dd764574e0f964eb95b940f42ff81986fe744276813c00"
+  }
+ ]
+}
