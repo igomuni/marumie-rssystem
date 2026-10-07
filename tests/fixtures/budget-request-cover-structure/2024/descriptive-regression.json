@@ -1,0 +1,146 @@
+{
+ "schema": "budget-request-cover-structure-descriptive-regression/v0",
+ "scope": "development / descriptive regression。formal validation・held-out ではない。visual GT is protocol-invalid for formal evaluation; comparison is descriptive/development only",
+ "implementationCommit": "6d4665b2906a8c91da2fbd915d778cf3c4e05c5f",
+ "observationOutputDigestSha256": "5a8a8b97eebf1a9c252bd45a2f9db6cf11fb9fdae6db6d0d10b9cb51e17b1aef",
+ "visualGtSha256": "9841075cf89f6a1904cbbd93619dea3481ac1167f72a56ae0f4777eeb9e7667a",
+ "comparison55": {
+  "pages": 55,
+  "comparedAtomicFields": 581,
+  "matches": 580,
+  "mismatches": 1,
+  "abstentions": 0,
+  "inventedCharacterCandidates": 1,
+  "entryKindSequence": {
+   "pass": 55,
+   "fail": 0
+  },
+  "wrongEntryAttachmentPages": 0,
+  "descriptiveMatchRate": 0.9982788296041308,
+  "excludedFromComparison": "header title・SECTION ordinal・SECTION label（visual GT では定数 stamp のため formal character comparison 対象外）",
+  "mismatchRows": [
+   {
+    "page": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf#1",
+    "field": "entry3.name",
+    "parser": "文部科学本省所轄機関",
+    "gt": "文部科学省所轄機関"
+   }
+  ],
+  "structureFails": []
+ },
+ "development14": {
+  "coverPages": 14,
+  "multilinePages": 2,
+  "multilineCases": 2,
+  "rows": [
+   {
+    "filePath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+    "physicalPage": 1,
+    "status": "RESOLVED",
+    "scopeEntries": 1,
+    "multilineScopeNames": []
+   },
+   {
+    "filePath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+    "physicalPage": 8,
+    "status": "RESOLVED",
+    "scopeEntries": 1,
+    "multilineScopeNames": []
+   },
+   {
+    "filePath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+    "physicalPage": 10,
+    "status": "RESOLVED",
+    "scopeEntries": 1,
+    "multilineScopeNames": [
+     [
+      "科学技術・イノベーション",
+      "推進事務局"
+     ]
+    ]
+   },
+   {
+    "filePath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+    "physicalPage": 24,
+    "status": "RESOLVED",
+    "scopeEntries": 1,
+    "multilineScopeNames": []
+   },
+   {
+    "filePath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/f1.pdf",
+    "physicalPage": 1,
+    "status": "RESOLVED",
+    "scopeEntries": 1,
+    "multilineScopeNames": []
+   },
+   {
+    "filePath": "data/download/env.go.jp/content/000157016.pdf",
+    "physicalPage": 1,
+    "status": "RESOLVED",
+    "scopeEntries": 1,
+    "multilineScopeNames": []
+   },
+   {
+    "filePath": "data/download/jbaudit.go.jp/jbaudit/bud_clo/bud/pdf/r06/20230906_02.pdf",
+    "physicalPage": 1,
+    "status": "RESOLVED",
+    "scopeEntries": 1,
+    "multilineScopeNames": []
+   },
+   {
+    "filePath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+    "physicalPage": 1,
+    "status": "RESOLVED",
+    "scopeEntries": 7,
+    "multilineScopeNames": []
+   },
+   {
+    "filePath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneden_o.pdf",
+    "physicalPage": 1,
+    "status": "RESOLVED",
+    "scopeEntries": 1,
+    "multilineScopeNames": []
+   },
+   {
+    "filePath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+    "physicalPage": 1,
+    "status": "RESOLVED",
+    "scopeEntries": 8,
+    "multilineScopeNames": [
+     [
+      "国立障害者リハビリテーシ",
+      "ョンセンター"
+     ]
+    ]
+   },
+   {
+    "filePath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024gaitame_2.pdf",
+    "physicalPage": 1,
+    "status": "RESOLVED",
+    "scopeEntries": 1,
+    "multilineScopeNames": []
+   },
+   {
+    "filePath": "data/download/moj.go.jp/content/001402819.pdf",
+    "physicalPage": 1,
+    "status": "RESOLVED",
+    "scopeEntries": 1,
+    "multilineScopeNames": []
+   },
+   {
+    "filePath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+    "physicalPage": 1,
+    "status": "RESOLVED",
+    "scopeEntries": 1,
+    "multilineScopeNames": []
+   },
+   {
+    "filePath": "data/download/sotsui.go.jp/budget/images/r6budget_yokyu.pdf",
+    "physicalPage": 1,
+    "status": "RESOLVED",
+    "scopeEntries": 1,
+    "multilineScopeNames": []
+   }
+  ]
+ }
+}
