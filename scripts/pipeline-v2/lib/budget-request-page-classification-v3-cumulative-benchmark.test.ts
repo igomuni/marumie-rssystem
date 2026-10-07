@@ -10,7 +10,7 @@ const bench = read<{
   preregistrationCommit: string;
   frozenInput: { rawTextCorpusDigestSha256: string; files: Record<string, string> };
   summary: { sourceRows: Record<string, number>; uniqueRows: number; pairwiseOverlap: Record<string, number>; duplicateOrAmbiguousJoin: number; hashMismatch: number; bySourceEvaluationRole: Record<string, number> };
-  adequacy: ReturnType<typeof computeAdequacy> & { judgment: string };
+  adequacy: ReturnType<typeof computeAdequacy> & { judgment: string; mechanicalAdequacy: { result: string }; invalidReason: string };
   rows: CumulativeRow[];
 }>('page-classification-v3-cumulative-benchmark.json');
 const raw = JSON.parse(fs.readFileSync(path.join('tests', 'fixtures', 'budget-request-raw-text', '2024', 'raw-text-manifest.json'), 'utf8')) as { frozenInput: { corpusDigestSha256: string }; documents: { localPdfPath: string; pdfSha256: string; pageTextSha256: string[] }[] };
@@ -48,9 +48,12 @@ describe('page classification v3 cumulative benchmark（mechanical freeze）', (
   });
   it('adequacy が fixture の rows から決定的に再計算でき、threshold は v2 のまま、openSetSafety は NOT_EVALUATED', () => {
     const a = computeAdequacy(bench.rows);
-    const { judgment, ...stored } = bench.adequacy;
+    const { judgment, mechanicalAdequacy, invalidReason, ...stored } = bench.adequacy;
     expect(a).toEqual(stored);
-    expect(judgment).toBe(judge(a, bench.summary.hashMismatch + bench.summary.duplicateOrAmbiguousJoin));
+    // 機械的な threshold 判定は PASS だが、事前登録の手続き違反（freeze 前に結果を観測）により正式判定は INVALID / STOP
+    expect(mechanicalAdequacy.result).toBe(judge(a, bench.summary.hashMismatch + bench.summary.duplicateOrAmbiguousJoin) === 'ADEQUATE / STOP FOR REVIEW' ? 'PASS' : 'FAIL');
+    expect(judgment).toBe('INVALID / STOP');
+    expect(invalidReason).toMatch(/freeze の前/);
     expect(THRESHOLDS).toEqual({ corePerFamily: 10, directPerCoreFamily: 5, continuationPerFamily: 5 });
     expect(a.openSetSafety).toBe('NOT_EVALUATED');
     expect(bench.preregistrationCommit).toMatch(/^[0-9a-f]{40}$/);

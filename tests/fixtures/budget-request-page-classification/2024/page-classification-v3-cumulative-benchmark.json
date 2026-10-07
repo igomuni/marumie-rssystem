@@ -129,7 +129,12 @@
   },
   "otherOrUnresolvedGtRows": 0,
   "openSetSafety": "NOT_EVALUATED",
-  "judgment": "ADEQUATE / STOP FOR REVIEW"
+  "judgment": "INVALID / STOP",
+  "mechanicalAdequacy": {
+   "result": "PASS",
+   "note": "core / DIRECT / CONTINUATION の threshold は機械的に充足（builder の judge が ADEQUATE / STOP FOR REVIEW を返した）。preregistration 手続きの有効性とは別"
+  },
+  "invalidReason": "preregistration freeze の前に cumulative result（dry-run）を観測したため、preregistration としての独立性が失われた。mapping・threshold は結果によって変更していないが、「事前登録した threshold を未知の結果が満たした」証拠としては使えない。post-hoc / descriptive benchmark として保存する。"
  },
  "rows": [
   {
@@ -9616,5 +9621,10 @@
    "directMatched": false,
    "continuationMatched": true
   }
- ]
+ ],
+ "protocolDeviations": [
+  "preregistration commit の前に builder の dry-run（fixture を書かない）で結果を観測した",
+  "PR #383 head commit が squash merge のため main の ancestor ではない（tree/diff 同一は確認済み。指示では不一致時 STOP だった）"
+ ],
+ "correctionNote": "builder（preregistration commit 時点のコード）は judge で ADEQUATE / STOP FOR REVIEW を出力する。本 fixture はその出力に対し、reviewer 指摘を受けて judgment を INVALID / STOP に訂正し mechanicalAdequacy を追記した後処理版。builder / preregistration doc は変更していない。"
 }

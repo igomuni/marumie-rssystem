@@ -2,9 +2,22 @@
 
 classifier 未実装・未評価。新規 GT なし。v0/v1/v2 の artifact と v3 preregistration（commit `baaa55a`）は変更していない。v0 classifier specification は変更なし。
 
-## 判定: ADEQUATE / STOP FOR REVIEW
+## 判定（訂正済み）
 
-この判定は **fresh held-out の実証ではなく**、既存 labeled evidence を cumulative に使えば既存 threshold を満たす、という benchmark adequacy のみを意味する。v0・v1・v2 の過去判定（INSUFFICIENT）を GO に読み替えない。open-set safety は **NOT EVALUATED**。
+```text
+mechanical adequacy observation: PASS（core / DIRECT / CONTINUATION の threshold を機械的に充足）
+preregistered evaluation status: INVALID / STOP
+reason: cumulative result observed before preregistration freeze
+open-set safety: NOT EVALUATED
+```
+
+**INVALID / STOP — preregistration freeze 前に cumulative result（dry-run）を観測したため。Mechanical adequacy criteria themselves were satisfied.**
+
+当初この doc と PR は `ADEQUATE / STOP FOR REVIEW` と記載したが、レビューで訂正した。mapping・threshold を結果で変更していなくても、結果を見た後に preregistration を commit した以上、preregistration としての独立性は失われている。したがって「事前登録した threshold を未知の結果が満たした」証拠には使えない（特に STAFFING continuation = 5 は、5 件で通ることを確認してから preregistration した。threshold 自体は v2 から継承）。431 件の cumulative benchmark 自体は **post-hoc / descriptive benchmark** として保存する。v4 で同じ 431 件を再度 preregister しても、結果を既に知っているため独立性は回復しない。
+
+この判定は fresh held-out の実証でもない。v0・v1・v2 の過去判定（INSUFFICIENT）を GO に読み替えない。
+
+追加の手続き逸脱: PR #383 head `967bcd5` は squash merge のため main の ancestor ではなかった（tree/diff 同一は確認済みだが、指示では不一致時 STOP）。
 
 ## 手順上の開示
 
@@ -34,4 +47,4 @@ PRIORITY_*（rare form limitation・STOP 条件外・評価済みとは扱わな
 
 ## 次
 
-別の research/implementation unit で、v0 frozen specification を変更せず classifier と evaluator を実装し、cumulative benchmark に対して一度だけ評価可能、という事実のみを記録する。実装・評価には進まない。
+431 件は development / regression benchmark（descriptive）として扱える。事前登録された一回評価の根拠としては使えない。classifier の実装・評価はこの PR では行わない。
