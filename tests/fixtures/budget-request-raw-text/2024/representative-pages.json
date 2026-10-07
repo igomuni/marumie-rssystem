@@ -1,0 +1,53 @@
+{
+ "schema": "budget-request-raw-text-representative/v0",
+ "pages": [
+  {
+   "localPdfPath": "data/download/moj.go.jp/content/001402818.pdf",
+   "page": 1,
+   "pageCount": 737,
+   "text": "",
+   "textSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "status": "EMPTY"
+  },
+  {
+   "localPdfPath": "data/download/moj.go.jp/content/001402818.pdf",
+   "page": 3,
+   "pageCount": 737,
+   "text": "",
+   "textSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "status": "EMPTY"
+  },
+  {
+   "localPdfPath": "data/download/fsa.go.jp/common/budget/yosan/6youkyuu-2/01.pdf",
+   "page": 1,
+   "pageCount": 77,
+   "text": "",
+   "textSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "status": "EMPTY"
+  },
+  {
+   "localPdfPath": "data/download/fsa.go.jp/common/budget/yosan/6youkyuu-2/01.pdf",
+   "page": 2,
+   "pageCount": 77,
+   "text": "",
+   "textSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "status": "EMPTY"
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "page": 1,
+   "pageCount": 6,
+   "text": "24 文部科学省所管\n\n\n\n  令   和   ６       年      度      歳      出      概      算      要          求   書\n\n\n\n      1. 令和６年度歳出概算要求額総表 ・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・   1\n      2. 令和６年度歳出概算要求額明細表 ・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・     9\n         （組織）010 文 部 科 学 本 省          ・・・・・・・・・・・・・・・・・・・・・・・・・・   9\n         （組織）020 文 部 科 学 本 省 所 轄 機 関 ・・・・・・・・・・・・・・・・・・・・・・・・・・ 904\n         （組織）030 文        化        庁 ・・・・・・・・・・・・・・・・・・・・・・・・・・ 1053\n         （組織）040 ス   ポ    ー   ツ    庁 ・・・・・・・・・・・・・・・・・・・・・・・・・・ 1268\n",
+   "textSha256": "5015dc606106f1957870c0676295503864d0e80bac7f23ad67e7387c049753cb",
+   "status": "EXTRACTED"
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "page": 2,
+   "pageCount": 6,
+   "text": "",
+   "textSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "status": "EMPTY"
+  }
+ ]
+}
