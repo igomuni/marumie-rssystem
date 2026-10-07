@@ -1,0 +1,43 @@
+{
+ "schema": "budget-request-cover-structure-implementation-manifest/v0",
+ "scope": "Cover Structure v0 parser の全 COVER page への適用結果 manifest。development / descriptive のみ（formal validation・held-out ではない）",
+ "frozenInput": {
+  "rawTextCorpusDigestSha256": "7c6d2dcec1f4bec0ca37a1b3aa391adce7d99b93ac4642c74cab7a328dac4052",
+  "pageClassificationCorpusDigestSha256": "39464fc76b1b83272d5852d3db1db776e22bb570ee0f6b7ca4d1da64de4a5ecc"
+ },
+ "implementation": {
+  "files": {
+   "scripts/pipeline-v2/lib/budget-request-cover-structure.ts": "2e9c870e3b659ff1401d7e32c43eafcc361881cc475c9ac4ae838a6782a4abd5",
+   "scripts/pipeline-v2/build-budget-request-cover-structure.ts": "2d0233b178d38a3d477ea42fa00e4cb7b55852e68fab0032c495acd7d1c06f45"
+  },
+  "node": "v24.9.0"
+ },
+ "summary": {
+  "coverPages": 69,
+  "provenanceMismatch": 0,
+  "parserErrors": 0,
+  "status": {
+   "RESOLVED": 69
+  },
+  "headerStatus": {
+   "RESOLVED": 69
+  },
+  "entryKindSequence": {
+   "SSC": 37,
+   "SSCC": 1,
+   "SSCCC": 2,
+   "SSCCCC": 1,
+   "SSCCCCC": 1,
+   "SSCCCCCCCC": 1,
+   "SSCCCCCCCCCCCC": 1,
+   "SSCCCCCCCS": 1,
+   "SSCCCCCS": 1,
+   "SSCCCCS": 1,
+   "SSCS": 22
+  },
+  "multilineScopeNamePages": 2,
+  "pagesWithUnclassifiedLines": 0,
+  "outputDigestSha256": "5a8a8b97eebf1a9c252bd45a2f9db6cf11fb9fdae6db6d0d10b9cb51e17b1aef"
+ },
+ "partialOrUnresolved": []
+}

@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261008_0010_Budget_Request_Cover_Structure_v0_Implementation_Descriptive_Regression.md](20261008_0010_Budget_Request_Cover_Structure_v0_Implementation_Descriptive_Regression.md) — Cover Structure v0 parser実装。COVER69全RESOLVED・55page descriptive 580/581一致(不一致1はGT側転記ミス)・multiline2件。formal validationではない(IMPLEMENTATION_CONFORMANT_WITH_LIMITATIONS)
 - [20261007_2340_Budget_Request_Cover_Structure_v0_Visual_GT_Freeze.md](20261007_2340_Budget_Request_Cover_Structure_v0_Visual_GT_Freeze.md) — Cover Structure v0 visual GT 55page freeze(全RESOLVED・multiline/abstain なし=limitation)。title/section labelを定数stampしたため PROTOCOL_INVALID/STOP(GT/preregは不変・schemaは観測上問題なし・実装は未着手)
 - [20261007_2310_Budget_Request_Cover_Structure_v0_Preregistration.md](20261007_2310_Budget_Request_Cover_Structure_v0_Preregistration.md) — Cover Structure v0 事前登録(schema・比較規則・continuation rule・coverage定義・GO基準)とfrozen candidate 55page(=COVER69−explored14)freeze。GT前
 - [20261007_2355_Budget_Request_PR3A_Cover_TOC_Structure_Failure_Isolation.md](20261007_2355_Budget_Request_PR3A_Cover_TOC_Structure_Failure_Isolation.md) — PR-3A。COVER69/TOC82 の機械inventoryと開発探索33page。TOCはrender確認3pageで二段枠、うち2pageで左右row同一line(全82pageの視覚確認は未実施。header token2個は82/82)、折返し/文脈欠落/PUA等 → SPLIT_REQUIRED(Cover先行・TOCは別isolation)
