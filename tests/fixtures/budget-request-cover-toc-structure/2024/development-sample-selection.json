@@ -1,0 +1,431 @@
+{
+ "schema": "budget-request-cover-toc-structure-development-sample/v0",
+ "inspectionRole": "DEVELOPMENT_EXPLORATION（future frozen evaluation ではない）",
+ "seed": "budget-request-cover-toc-structure-dev-exploration-20261007",
+ "hashRule": "sha256(\"{seed}|{stratum}|{localPdfPath}|{physicalPage}\") 昇順の先頭 N",
+ "perStratum": 2,
+ "poolSizes": {
+  "COVER|account:general": 40,
+  "COVER|account:special": 29,
+  "COVER|many-non-leader-lines(multiline-name-candidate)": 2,
+  "COVER|multi-cover-pdf": 11,
+  "COVER|publisher-differs-from-jurisdiction-metadata": 19,
+  "COVER|split-pdf-logical-document": 15,
+  "COVER|staffing-reference-text:absent": 44,
+  "COVER|staffing-reference-text:present": 25,
+  "TOC|continuation": 27,
+  "TOC|explicit-title-start": 55,
+  "TOC|high-line-count(>=40)": 18,
+  "TOC|long-continuation-distance(>=5)": 2,
+  "TOC|low-line-count(<=8)": 1,
+  "TOC|multi-column-suspected(two-ref-lines>=17)": 42,
+  "TOC|multi-page-run": 42,
+  "TOC|private-use-character": 3,
+  "TOC|short-continuation-distance(1-2)": 20,
+  "TOC|single-page-run": 40,
+  "TOC|wrapped-name-suspected": 9
+ },
+ "sampleSize": 33,
+ "sample": [
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+   "pdfSha256": "315909085871656cc0428feaa5941ed456dd8d024c6511e511e86ab652623b33",
+   "physicalPage": 1,
+   "textSha256": "f2531ddabf76ce4f5e4ef07c7600df38da20c46735d93f4c1453c9ae7da3c535",
+   "classifierPageType": "COVER",
+   "selectionStratum": [
+    "COVER|account:general"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+   "pdfSha256": "315909085871656cc0428feaa5941ed456dd8d024c6511e511e86ab652623b33",
+   "physicalPage": 8,
+   "textSha256": "af757ceb1edc0f53f877f0e81c884456c9c17d1aa26dbccfb7def1522b1b06cc",
+   "classifierPageType": "COVER",
+   "selectionStratum": [
+    "COVER|staffing-reference-text:absent"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+   "pdfSha256": "315909085871656cc0428feaa5941ed456dd8d024c6511e511e86ab652623b33",
+   "physicalPage": 10,
+   "textSha256": "aa5b5b7baf5beef17426346846983a959fb220d015d7e01bb84079c36f3c89de",
+   "classifierPageType": "COVER",
+   "selectionStratum": [
+    "COVER|many-non-leader-lines(multiline-name-candidate)",
+    "COVER|multi-cover-pdf"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+   "pdfSha256": "315909085871656cc0428feaa5941ed456dd8d024c6511e511e86ab652623b33",
+   "physicalPage": 24,
+   "textSha256": "7cc92967ac44be516e41ef57c0761e99f93cfe952bd0ebba2fa4dadb01d59a16",
+   "classifierPageType": "COVER",
+   "selectionStratum": [
+    "COVER|multi-cover-pdf",
+    "COVER|split-pdf-logical-document"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/f1.pdf",
+   "pdfSha256": "80a657b39cf675a938c21dc3ca3a79a58dfb3fef623af59ebaddc2eb60145386",
+   "physicalPage": 1,
+   "textSha256": "9da8286c90bb1e635d54c708901da2105659aa4061818f4774bb216a5e3767b7",
+   "classifierPageType": "COVER",
+   "selectionStratum": [
+    "COVER|split-pdf-logical-document"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+   "pdfSha256": "49a975a4436da6d53319a32ca745e2d110c42839c441c6302a7361ed9a62e4cc",
+   "physicalPage": 3,
+   "textSha256": "f8e7a018e95cda9b5ba2053cd3aa1871110990369b74c88a92138f39ff36529d",
+   "classifierPageType": "TOC",
+   "selectionStratum": [
+    "TOC|wrapped-name-suspected"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157012.pdf",
+   "pdfSha256": "c71dd17f73464540ecb600d95d94104e59254e06b73efc2f282a5ecd8ba01823",
+   "physicalPage": 3,
+   "textSha256": "0765ea5df8c6d7eae7d5ca592aafd45f401b595ee4d452392679aef68b4065eb",
+   "classifierPageType": "TOC",
+   "selectionStratum": [
+    "TOC|wrapped-name-suspected"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157016.pdf",
+   "pdfSha256": "68a26e86f73d51f0849b6b3e26b96a04ab9e9489713ce25721cf35910939866a",
+   "physicalPage": 1,
+   "textSha256": "b5c44467eed4ea7eb4b3ff528fae4c32a184770cef0d4804436c486df3930293",
+   "classifierPageType": "COVER",
+   "selectionStratum": [
+    "COVER|account:special"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/jbaudit.go.jp/jbaudit/bud_clo/bud/pdf/r06/20230906_02.pdf",
+   "pdfSha256": "c7070f558f985d0062cec9c73736bebe3c24f1290b895ce89d5afc676b21b72b",
+   "physicalPage": 1,
+   "textSha256": "5b62e5fe9c7a3734466f04b8695373460813ddfa499c3c09c4ef21fa6345c0e4",
+   "classifierPageType": "COVER",
+   "selectionStratum": [
+    "COVER|staffing-reference-text:present"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+   "physicalPage": 1,
+   "textSha256": "9c53e5e23aba20c9ecabc4396b4a42ee9916ab72f1b7d0c93d46c2b9068ec8ff",
+   "classifierPageType": "COVER",
+   "selectionStratum": [
+    "COVER|account:general"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+   "physicalPage": 6,
+   "textSha256": "ab80c048a944499834b2c6a8b13e0ae26416ea05ff585383f4cdc5d04fab850e",
+   "classifierPageType": "TOC",
+   "selectionStratum": [
+    "TOC|low-line-count(<=8)"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf",
+   "pdfSha256": "aaec655a87a74e2724ac35d81b6759697749c24e586a3b09934c46c4a4fca460",
+   "physicalPage": 4,
+   "textSha256": "8ae3415f7a52dd697011bd50c7b0ba51e32932888ac4d7c8cc3d202980c7b6be",
+   "classifierPageType": "TOC",
+   "selectionStratum": [
+    "TOC|continuation"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneden_o.pdf",
+   "pdfSha256": "d9ca160f33481511b3a484853f105375895f765a01535ed6bcae4b348eba6383",
+   "physicalPage": 1,
+   "textSha256": "d3ec0aedb607cc39e25a184b935cb83868f90c64dc8d8d0b86fd3a51a83da06e",
+   "classifierPageType": "COVER",
+   "selectionStratum": [
+    "COVER|staffing-reference-text:absent"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "pdfSha256": "ba64c25df327161a33c293374a7255c203cc9a527130ece848574badefbf909a",
+   "physicalPage": 3,
+   "textSha256": "601fe8ee0e2c018c39fe3cff86000fa116db60a39513f46e1c674908c14cbe44",
+   "classifierPageType": "TOC",
+   "selectionStratum": [
+    "TOC|high-line-count(>=40)"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "pdfSha256": "91b39e9902610e13aa7be445db2d2d2a3e38166fd5f449bd11f94cfe5fe3b6d5",
+   "physicalPage": 3,
+   "textSha256": "2843553a935157cc8cfc95af621a235ac7377c3cbe6ea87992288b79f437691d",
+   "classifierPageType": "TOC",
+   "selectionStratum": [
+    "TOC|explicit-title-start"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "pdfSha256": "91b39e9902610e13aa7be445db2d2d2a3e38166fd5f449bd11f94cfe5fe3b6d5",
+   "physicalPage": 4,
+   "textSha256": "11e370d53fa968ca0ef45a3a60db7004f9f8f726d17a86ba47d8d34ae9c0e3f5",
+   "classifierPageType": "TOC",
+   "selectionStratum": [
+    "TOC|high-line-count(>=40)"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "pdfSha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+   "physicalPage": 1,
+   "textSha256": "764855f16132cf720db4c859741b3d3750eb8988c635dff82612cdf6cf3d802b",
+   "classifierPageType": "COVER",
+   "selectionStratum": [
+    "COVER|many-non-leader-lines(multiline-name-candidate)"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "pdfSha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+   "physicalPage": 4,
+   "textSha256": "3e506a8360d76491a07dcd99f54b5036abaf7ddd3fb7e9c658bd5e99dfffd866",
+   "classifierPageType": "TOC",
+   "selectionStratum": [
+    "TOC|multi-column-suspected(two-ref-lines>=17)"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630393.pdf",
+   "pdfSha256": "efdef502e10961842477cd18cc2cb091c7a3206125881f6031fc7fa941613864",
+   "physicalPage": 4,
+   "textSha256": "b746212b106c6e935376e0ed8dad55e3b26e2d6caa17df4ab2a8522fd00fe44e",
+   "classifierPageType": "TOC",
+   "selectionStratum": [
+    "TOC|multi-page-run",
+    "TOC|short-continuation-distance(1-2)"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630395.pdf",
+   "pdfSha256": "d5e8250094ea55fee74951654a692ce345a2b8710a788017d0f5db7b9c259c1a",
+   "physicalPage": 3,
+   "textSha256": "2b8840fe233a383b3d583faa12221f01b32851251e0d4ab0d5686507bf648292",
+   "classifierPageType": "TOC",
+   "selectionStratum": [
+    "TOC|single-page-run"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "pdfSha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+   "physicalPage": 8,
+   "textSha256": "36a7a429c0d10f6b353466d8f9fb1362d23a8777cb3943c5c815b074f7499f19",
+   "classifierPageType": "TOC",
+   "selectionStratum": [
+    "TOC|long-continuation-distance(>=5)"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "pdfSha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+   "physicalPage": 9,
+   "textSha256": "d78af4870d1ddccc2257cbf33aa8a2e0191f33ff4985532a78191762660d74b5",
+   "classifierPageType": "TOC",
+   "selectionStratum": [
+    "TOC|long-continuation-distance(>=5)"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "pdfSha256": "57861291846015dfdc831480149d8614a1d67c283e8b6e313f5c75f92a2a6b47",
+   "physicalPage": 3,
+   "textSha256": "c4be00d8587e32277dc652b831f0aebe48b942931d6de74fbc6915580fe524ec",
+   "classifierPageType": "TOC",
+   "selectionStratum": [
+    "TOC|multi-column-suspected(two-ref-lines>=17)"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024gaitame_2.pdf",
+   "pdfSha256": "4993fdf151fd6f0b5b568be1eb0cd1d42e6a1d34e88a1aeba48410ea80f9dfdf",
+   "physicalPage": 1,
+   "textSha256": "20c1d603a5005f67ddf6703d5d2812f0ef265904eb27a9a797c02a7cd3700493",
+   "classifierPageType": "COVER",
+   "selectionStratum": [
+    "COVER|account:special"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024gaitame_2.pdf",
+   "pdfSha256": "4993fdf151fd6f0b5b568be1eb0cd1d42e6a1d34e88a1aeba48410ea80f9dfdf",
+   "physicalPage": 2,
+   "textSha256": "9cfc1f73e947b9067b14e119a6ba16c0f9c50a5aa7a3b16605a098fffe7bda77",
+   "classifierPageType": "TOC",
+   "selectionStratum": [
+    "TOC|explicit-title-start"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "pdfSha256": "6cc573bf64747e4ceb41597cc83e371f5d8144a02e3e9033501597d64cfbbc5e",
+   "physicalPage": 2,
+   "textSha256": "3e398e82d5ac63d33117036443b58502efbc394e62e1d83a5b0233ebe10eab98",
+   "classifierPageType": "TOC",
+   "selectionStratum": [
+    "TOC|private-use-character"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "pdfSha256": "6cc573bf64747e4ceb41597cc83e371f5d8144a02e3e9033501597d64cfbbc5e",
+   "physicalPage": 3,
+   "textSha256": "f36be9d02c320355276eda6b9ab5e84fdbdca961ca92d1854f2f72086cf20002",
+   "classifierPageType": "TOC",
+   "selectionStratum": [
+    "TOC|multi-page-run"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tokuzai_2.pdf",
+   "pdfSha256": "5744d1f8670a9a72d52e67771be8266e7d3d102ad35c102eb92b6c2eb5a84d75",
+   "physicalPage": 2,
+   "textSha256": "b65761f585f373ec60c0862c01bda41e7899b45a07ce4a28545cdb32db21a3b5",
+   "classifierPageType": "TOC",
+   "selectionStratum": [
+    "TOC|single-page-run"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/moj.go.jp/content/001402819.pdf",
+   "pdfSha256": "6635e0e5fbb8a962d439d6d8d256c0c34892b0d9a366ea04daf15d338a36bb7b",
+   "physicalPage": 1,
+   "textSha256": "0e1411c78141a49795553093e96c40454684844d749636b87b2f062d3fbcb4af",
+   "classifierPageType": "COVER",
+   "selectionStratum": [
+    "COVER|staffing-reference-text:present"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "pdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+   "physicalPage": 1,
+   "textSha256": "98ba4dc10953756f64840a002558793ee88a540eccb8ee0bb1f4891c2b88f9eb",
+   "classifierPageType": "COVER",
+   "selectionStratum": [
+    "COVER|publisher-differs-from-jurisdiction-metadata"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/sotsui.go.jp/budget/images/r6budget_yokyu.pdf",
+   "pdfSha256": "66a11094cdda23d47ee2d3c34f4ce741d528a8480a941cbea7803232a6aef029",
+   "physicalPage": 1,
+   "textSha256": "defbca6fdedc600f4ef737852e0a20766037ae271ac5d93f3ea17af5fc2a58ae",
+   "classifierPageType": "COVER",
+   "selectionStratum": [
+    "COVER|publisher-differs-from-jurisdiction-metadata"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/soumu.go.jp/main_content/000901372.pdf",
+   "pdfSha256": "cc54dbe5f689116619a1f8453747d47bca5b960137f90869ead26954d651703b",
+   "physicalPage": 4,
+   "textSha256": "f1bc7860dfcd80d073205b84351828f568003a69d3f370af1d295047eb37ed80",
+   "classifierPageType": "TOC",
+   "selectionStratum": [
+    "TOC|continuation",
+    "TOC|short-continuation-distance(1-2)"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/soumu.go.jp/main_content/000901375.pdf",
+   "pdfSha256": "fbe532b7b80e43f3f31685471f25a598f2532838ddcab33103ece1dd2f43a396",
+   "physicalPage": 3,
+   "textSha256": "1df31fd18e1d4b22c4e2694ba21ebf2128ba5d497b8407b41791869d7db4232b",
+   "classifierPageType": "TOC",
+   "selectionStratum": [
+    "TOC|private-use-character"
+   ],
+   "selectionReason": "deterministic hash 順で各 stratum の先頭 2（seed budget-request-cover-toc-structure-dev-exploration-20261007）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  }
+ ]
+}
