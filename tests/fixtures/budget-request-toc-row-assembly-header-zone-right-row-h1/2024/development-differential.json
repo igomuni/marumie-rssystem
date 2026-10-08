@@ -1,0 +1,1151 @@
+{
+ "schema": "budget-request-toc-header-zone-h1-development-differential/v0",
+ "pages": [
+  {
+   "localPdfPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "census": {
+    "triggerLines": [
+     7,
+     8
+    ],
+    "negativeControlLines": [
+     0,
+     2,
+     4
+    ],
+    "tokenTypes": {
+     "REQUEST": 1,
+     "MARKER": 1,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 2,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 2,
+    "rightKinds": {
+     "REQUEST_NUMBER_ROW": 1,
+     "MARKER_ROW": 1
+    },
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "d5b18b07deaa68e04bcf261140e9da677ae64fc8ad77e88d1cbe7bc11742a67d",
+   "h1OutputSha256": "2b049712c5dfa2aa36983e78a053195428d61a342ebff0602455ff587d1c0135",
+   "identicalToBaseline": false
+  },
+  {
+   "localPdfPath": "data/download/clb.go.jp/files/topics/4473_ext_05_1.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "census": {
+    "triggerLines": [],
+    "negativeControlLines": [],
+    "tokenTypes": {
+     "REQUEST": 0,
+     "MARKER": 0,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 0,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 0,
+    "rightKinds": {},
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "a0273ec5654bc8299efb929aa1ee6884322b17336080ba0c5d4a4f2274dde06e",
+   "h1OutputSha256": "a0273ec5654bc8299efb929aa1ee6884322b17336080ba0c5d4a4f2274dde06e",
+   "identicalToBaseline": true
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157010.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "census": {
+    "triggerLines": [
+     7,
+     9
+    ],
+    "negativeControlLines": [
+     0,
+     2,
+     4
+    ],
+    "tokenTypes": {
+     "REQUEST": 1,
+     "MARKER": 1,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 2,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 2,
+    "rightKinds": {
+     "REQUEST_NUMBER_ROW": 1,
+     "MARKER_ROW": 1
+    },
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "3a055d497aab26999f155353fc17391c8dc37f8f1b3c5f8571face45696090b9",
+   "h1OutputSha256": "7594e15fc5ef24d4aa76ea917b515f6fb0db2e4fe522016650cceee0dc61a8e9",
+   "identicalToBaseline": false
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157012.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "census": {
+    "triggerLines": [
+     5,
+     7
+    ],
+    "negativeControlLines": [
+     0,
+     2
+    ],
+    "tokenTypes": {
+     "REQUEST": 1,
+     "MARKER": 1,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 2,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 2,
+    "rightKinds": {
+     "MARKER_ROW": 1,
+     "REQUEST_NUMBER_ROW": 1
+    },
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "f7c052745479100b0cfa813386b0a2a32d351e08df168d5a81528fe3264a1d38",
+   "h1OutputSha256": "2f7b1bd7567c7039093c8416b66b829c5dec14ed47413331f824925d97cfe2f0",
+   "identicalToBaseline": false
+  },
+  {
+   "localPdfPath": "data/download/jinji.go.jp/content/900024096.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "census": {
+    "triggerLines": [],
+    "negativeControlLines": [],
+    "tokenTypes": {
+     "REQUEST": 0,
+     "MARKER": 0,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 0,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 0,
+    "rightKinds": {},
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "b794347d385d2b1a791a72e339496d7c77c35f00cb1bef9c272487aaaf363f60",
+   "h1OutputSha256": "b794347d385d2b1a791a72e339496d7c77c35f00cb1bef9c272487aaaf363f60",
+   "identicalToBaseline": true
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "physicalPage": 5,
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_SPLIT",
+   "census": {
+    "triggerLines": [],
+    "negativeControlLines": [
+     0,
+     1,
+     2
+    ],
+    "tokenTypes": {
+     "REQUEST": 0,
+     "MARKER": 0,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 0,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 0,
+    "rightKinds": {},
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "2886c42a6b092e656827038dc0e2ec82fd4ab04e79a6384457f0597efed349a0",
+   "h1OutputSha256": "2886c42a6b092e656827038dc0e2ec82fd4ab04e79a6384457f0597efed349a0",
+   "identicalToBaseline": true
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "physicalPage": 6,
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "census": {
+    "triggerLines": [],
+    "negativeControlLines": [],
+    "tokenTypes": {
+     "REQUEST": 0,
+     "MARKER": 0,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 0,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 0,
+    "rightKinds": {},
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "fbfa3046a89f47ce64061de700a00bf18c9172aa6f7415c90986b37cb82a7674",
+   "h1OutputSha256": "fbfa3046a89f47ce64061de700a00bf18c9172aa6f7415c90986b37cb82a7674",
+   "identicalToBaseline": true
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf",
+   "physicalPage": 4,
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "census": {
+    "triggerLines": [],
+    "negativeControlLines": [],
+    "tokenTypes": {
+     "REQUEST": 0,
+     "MARKER": 0,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 0,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 0,
+    "rightKinds": {},
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "3f0a550eb0261d720f5e91995361811049dd589542ffe6d0e7650eb50913cd0f",
+   "h1OutputSha256": "3f0a550eb0261d720f5e91995361811049dd589542ffe6d0e7650eb50913cd0f",
+   "identicalToBaseline": true
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneju_o.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "census": {
+    "triggerLines": [
+     5,
+     7
+    ],
+    "negativeControlLines": [
+     0,
+     2
+    ],
+    "tokenTypes": {
+     "REQUEST": 1,
+     "MARKER": 1,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 2,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 2,
+    "rightKinds": {
+     "MARKER_ROW": 1,
+     "REQUEST_NUMBER_ROW": 1
+    },
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "f5af752672102fbeb75dc4fca6383649059c6624dc2ca5a473607a7b1b772823",
+   "h1OutputSha256": "eac5f2201ae71d630772352d237d827736c3124132beee44858b676e03f2a15f",
+   "identicalToBaseline": false
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "census": {
+    "triggerLines": [
+     7,
+     8
+    ],
+    "negativeControlLines": [
+     0,
+     2,
+     4
+    ],
+    "tokenTypes": {
+     "REQUEST": 1,
+     "MARKER": 1,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 2,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 2,
+    "rightKinds": {
+     "REQUEST_NUMBER_ROW": 1,
+     "MARKER_ROW": 1
+    },
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "77f355e8f7b37d3fd0411974a8bcd12fa3e42778b518f6f85200a20dee7affc7",
+   "h1OutputSha256": "d4bf4eb74f4086d083b19b4836f3a0a25f9d2f3bb10c7c472299bc2e5f07fb95",
+   "identicalToBaseline": false
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "census": {
+    "triggerLines": [
+     7,
+     9
+    ],
+    "negativeControlLines": [
+     0,
+     2,
+     4
+    ],
+    "tokenTypes": {
+     "REQUEST": 1,
+     "MARKER": 1,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 2,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 2,
+    "rightKinds": {
+     "REQUEST_NUMBER_ROW": 1,
+     "MARKER_ROW": 1
+    },
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "6892c2238181dc203188b80ca6ddccbedc14a6779269dc3894417f8edff54e6f",
+   "h1OutputSha256": "fa2e38ec71a36bd8f7acd3f0f87254acd57e75a2a9cf7eed9c37dd2a4e90bd76",
+   "identicalToBaseline": false
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "physicalPage": 4,
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_SPLIT",
+   "census": {
+    "triggerLines": [],
+    "negativeControlLines": [
+     1
+    ],
+    "tokenTypes": {
+     "REQUEST": 0,
+     "MARKER": 0,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 0,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 0,
+    "rightKinds": {},
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "cc126add44618f402d3105b01f9f492f86f28d4db84d460287b844aefc6ef365",
+   "h1OutputSha256": "cc126add44618f402d3105b01f9f492f86f28d4db84d460287b844aefc6ef365",
+   "identicalToBaseline": true
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "physicalPage": 5,
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_SPLIT",
+   "census": {
+    "triggerLines": [],
+    "negativeControlLines": [
+     0,
+     1,
+     2
+    ],
+    "tokenTypes": {
+     "REQUEST": 0,
+     "MARKER": 0,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 0,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 0,
+    "rightKinds": {},
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "95e7ebf3d295e75ff708213b9f27a3d4bff1533e3eda1e476bc5afaff5b7ddb2",
+   "h1OutputSha256": "95e7ebf3d295e75ff708213b9f27a3d4bff1533e3eda1e476bc5afaff5b7ddb2",
+   "identicalToBaseline": true
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "physicalPage": 4,
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_SPLIT",
+   "census": {
+    "triggerLines": [],
+    "negativeControlLines": [
+     1
+    ],
+    "tokenTypes": {
+     "REQUEST": 0,
+     "MARKER": 0,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 0,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 0,
+    "rightKinds": {},
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "71897bda389859fc389b9c946b4100213c5924b6bb5aa3f0a3d16dbb5fa3db9e",
+   "h1OutputSha256": "71897bda389859fc389b9c946b4100213c5924b6bb5aa3f0a3d16dbb5fa3db9e",
+   "identicalToBaseline": true
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "physicalPage": 7,
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_SPLIT",
+   "census": {
+    "triggerLines": [],
+    "negativeControlLines": [
+     0,
+     1,
+     2
+    ],
+    "tokenTypes": {
+     "REQUEST": 0,
+     "MARKER": 0,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 0,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 0,
+    "rightKinds": {},
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "a9df5264dd6ee17ed45b0922e5c920225f93b03d01ced098404b1da3f3b01c8a",
+   "h1OutputSha256": "a9df5264dd6ee17ed45b0922e5c920225f93b03d01ced098404b1da3f3b01c8a",
+   "identicalToBaseline": true
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630393.pdf",
+   "physicalPage": 4,
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "census": {
+    "triggerLines": [],
+    "negativeControlLines": [],
+    "tokenTypes": {
+     "REQUEST": 0,
+     "MARKER": 0,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 0,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 0,
+    "rightKinds": {},
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "fcc652976086ab047a5ba3f68712cb70a0d9fa4492e2220fbeba83296256e7ab",
+   "h1OutputSha256": "fcc652976086ab047a5ba3f68712cb70a0d9fa4492e2220fbeba83296256e7ab",
+   "identicalToBaseline": true
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630395.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "census": {
+    "triggerLines": [],
+    "negativeControlLines": [],
+    "tokenTypes": {
+     "REQUEST": 0,
+     "MARKER": 0,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 0,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 0,
+    "rightKinds": {},
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "01584fbbfb18e70797ec0f982b5400b799add5b3d34538649fab35c3cb8ef08a",
+   "h1OutputSha256": "01584fbbfb18e70797ec0f982b5400b799add5b3d34538649fab35c3cb8ef08a",
+   "identicalToBaseline": true
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 4,
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_SPLIT",
+   "census": {
+    "triggerLines": [],
+    "negativeControlLines": [
+     1
+    ],
+    "tokenTypes": {
+     "REQUEST": 0,
+     "MARKER": 0,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 0,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 0,
+    "rightKinds": {},
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "1435d75b7aedb2fcfdffaa93367089831d2277ec1bebeda2f2a9ac71da1769b3",
+   "h1OutputSha256": "1435d75b7aedb2fcfdffaa93367089831d2277ec1bebeda2f2a9ac71da1769b3",
+   "identicalToBaseline": true
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 6,
+   "classifierSource": "INHERITED",
+   "pageState": "PAGE_ABSTAINED",
+   "census": {
+    "triggerLines": [],
+    "negativeControlLines": [],
+    "tokenTypes": {
+     "REQUEST": 0,
+     "MARKER": 0,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 0,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 0,
+    "rightKinds": {},
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "d366e5acc38ca8a12320d3a6f97a03898f47f68e5cb7cabf724673ec1116ed81",
+   "h1OutputSha256": "d366e5acc38ca8a12320d3a6f97a03898f47f68e5cb7cabf724673ec1116ed81",
+   "identicalToBaseline": true
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 7,
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_SPLIT",
+   "census": {
+    "triggerLines": [],
+    "negativeControlLines": [
+     0,
+     1,
+     2
+    ],
+    "tokenTypes": {
+     "REQUEST": 0,
+     "MARKER": 0,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 0,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 0,
+    "rightKinds": {},
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "5abdc3cc9afd53158674ff04a37bf1c9c24dce1e6b458385e9939e186ccd8510",
+   "h1OutputSha256": "5abdc3cc9afd53158674ff04a37bf1c9c24dce1e6b458385e9939e186ccd8510",
+   "identicalToBaseline": true
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 8,
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_SPLIT",
+   "census": {
+    "triggerLines": [],
+    "negativeControlLines": [
+     1,
+     2
+    ],
+    "tokenTypes": {
+     "REQUEST": 0,
+     "MARKER": 0,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 0,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 0,
+    "rightKinds": {},
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "49701de0a89910e6726dc113106eb33c1b31dffbfdb159542972fb881c33cd65",
+   "h1OutputSha256": "49701de0a89910e6726dc113106eb33c1b31dffbfdb159542972fb881c33cd65",
+   "identicalToBaseline": true
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 9,
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_SPLIT",
+   "census": {
+    "triggerLines": [],
+    "negativeControlLines": [
+     0,
+     1,
+     2
+    ],
+    "tokenTypes": {
+     "REQUEST": 0,
+     "MARKER": 0,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 0,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 0,
+    "rightKinds": {},
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "5d5fd0e634bccde57b40228e5e57ec7bf4a42f3b95dcd22a4d10abbac28c0913",
+   "h1OutputSha256": "5d5fd0e634bccde57b40228e5e57ec7bf4a42f3b95dcd22a4d10abbac28c0913",
+   "identicalToBaseline": true
+  },
+  {
+   "localPdfPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "census": {
+    "triggerLines": [
+     7,
+     9
+    ],
+    "negativeControlLines": [
+     0,
+     2,
+     4
+    ],
+    "tokenTypes": {
+     "REQUEST": 2,
+     "MARKER": 0,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 2,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 2,
+    "rightKinds": {
+     "REQUEST_NUMBER_ROW": 2
+    },
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "ed0deb3f6155ff150ebb7f761b38869354d4f233adda54a740725bc794460568",
+   "h1OutputSha256": "224f9afd18d5d1948aa62a9818b1e9250efc9229546197c24c439613b389807b",
+   "identicalToBaseline": false
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024gaitame_2.pdf",
+   "physicalPage": 2,
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "census": {
+    "triggerLines": [],
+    "negativeControlLines": [],
+    "tokenTypes": {
+     "REQUEST": 0,
+     "MARKER": 0,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 0,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 0,
+    "rightKinds": {},
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "d36ca78ee6d787b35b0d63e3e09ef36bfd2517f08b3516f28cedbd5b367fe952",
+   "h1OutputSha256": "d36ca78ee6d787b35b0d63e3e09ef36bfd2517f08b3516f28cedbd5b367fe952",
+   "identicalToBaseline": true
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "physicalPage": 2,
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "census": {
+    "triggerLines": [
+     7
+    ],
+    "negativeControlLines": [
+     0,
+     2,
+     5,
+     8
+    ],
+    "tokenTypes": {
+     "REQUEST": 1,
+     "MARKER": 0,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 1,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 1,
+    "rightKinds": {
+     "REQUEST_NUMBER_ROW": 1
+    },
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "311608208ba3ccbe48cd80c26492084fdf361f1f146037dc38257f8b4d50ad51",
+   "h1OutputSha256": "7158bf240509588f703411cedb00f3ce73670f553de37c07ba3c8dc4f2154ec8",
+   "identicalToBaseline": false
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "physicalPage": 3,
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_SPLIT",
+   "census": {
+    "triggerLines": [],
+    "negativeControlLines": [
+     1
+    ],
+    "tokenTypes": {
+     "REQUEST": 0,
+     "MARKER": 0,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 0,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 0,
+    "rightKinds": {},
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "333e566c22b0527d6a57adee8506fdadb9f30ffb902f1a1cd87491de8db2a9d1",
+   "h1OutputSha256": "333e566c22b0527d6a57adee8506fdadb9f30ffb902f1a1cd87491de8db2a9d1",
+   "identicalToBaseline": true
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024jisinn_2.pdf",
+   "physicalPage": 2,
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "census": {
+    "triggerLines": [],
+    "negativeControlLines": [],
+    "tokenTypes": {
+     "REQUEST": 0,
+     "MARKER": 0,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 0,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 0,
+    "rightKinds": {},
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "8fb8d284fccd8ffdbe15cbc6a52140aac1b0335fdbdc35f5b294f9694d235e61",
+   "h1OutputSha256": "8fb8d284fccd8ffdbe15cbc6a52140aac1b0335fdbdc35f5b294f9694d235e61",
+   "identicalToBaseline": true
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tokuzai_2.pdf",
+   "physicalPage": 2,
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "census": {
+    "triggerLines": [],
+    "negativeControlLines": [],
+    "tokenTypes": {
+     "REQUEST": 0,
+     "MARKER": 0,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 0,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 0,
+    "rightKinds": {},
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "fb3e5d9224f5c7efcd94f570cc92fdafa240a6424039d352148246576946c8a9",
+   "h1OutputSha256": "fb3e5d9224f5c7efcd94f570cc92fdafa240a6424039d352148246576946c8a9",
+   "identicalToBaseline": true
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024zaiyuu_2.pdf",
+   "physicalPage": 2,
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "census": {
+    "triggerLines": [],
+    "negativeControlLines": [],
+    "tokenTypes": {
+     "REQUEST": 0,
+     "MARKER": 0,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 0,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 0,
+    "rightKinds": {},
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "c1a6e511131f606f55344f1cbaeedab391b675edbd2820ebcea1298becd87d42",
+   "h1OutputSha256": "c1a6e511131f606f55344f1cbaeedab391b675edbd2820ebcea1298becd87d42",
+   "identicalToBaseline": true
+  },
+  {
+   "localPdfPath": "data/download/ndl.go.jp/jp/aboutus/outline/r06_budgetrequest.pdf",
+   "physicalPage": 2,
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "census": {
+    "triggerLines": [],
+    "negativeControlLines": [],
+    "tokenTypes": {
+     "REQUEST": 0,
+     "MARKER": 0,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 0,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 0,
+    "rightKinds": {},
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "29c8564a0a5b5ab19caa97c226165d5b3df3348ca2f17f6c2d49335fdc13a54e",
+   "h1OutputSha256": "29c8564a0a5b5ab19caa97c226165d5b3df3348ca2f17f6c2d49335fdc13a54e",
+   "identicalToBaseline": true
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "census": {
+    "triggerLines": [
+     7,
+     9
+    ],
+    "negativeControlLines": [
+     0,
+     2,
+     4
+    ],
+    "tokenTypes": {
+     "REQUEST": 2,
+     "MARKER": 0,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 2,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 2,
+    "rightKinds": {
+     "REQUEST_NUMBER_ROW": 2
+    },
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "0804eb391badfaf96ea07d6a25979eaf897c8fe7d6df28e0bae2a79421ae9af4",
+   "h1OutputSha256": "93568b2395d666b32da9be8d6316fe58c64bc00fb01c60c97870ef4a55e788f5",
+   "identicalToBaseline": false
+  },
+  {
+   "localPdfPath": "data/download/soumu.go.jp/main_content/000901372.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "census": {
+    "triggerLines": [
+     7,
+     9
+    ],
+    "negativeControlLines": [
+     0,
+     2,
+     4
+    ],
+    "tokenTypes": {
+     "REQUEST": 1,
+     "MARKER": 1,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 2,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 2,
+    "rightKinds": {
+     "REQUEST_NUMBER_ROW": 1,
+     "MARKER_ROW": 1
+    },
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "859f7ba3274055b416050cda5e56470fc42731f58b713a0405876ba60283a998",
+   "h1OutputSha256": "7ba0def4547a47469b0672110c95ac534b19668424f24256db2adde42d7d04af",
+   "identicalToBaseline": false
+  },
+  {
+   "localPdfPath": "data/download/soumu.go.jp/main_content/000901372.pdf",
+   "physicalPage": 4,
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "census": {
+    "triggerLines": [],
+    "negativeControlLines": [],
+    "tokenTypes": {
+     "REQUEST": 0,
+     "MARKER": 0,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 0,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 0,
+    "rightKinds": {},
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "617a11906d931acd0aa055ae19bedf75e494078f2d0877265fe9fc1d7323f0e8",
+   "h1OutputSha256": "617a11906d931acd0aa055ae19bedf75e494078f2d0877265fe9fc1d7323f0e8",
+   "identicalToBaseline": true
+  },
+  {
+   "localPdfPath": "data/download/soumu.go.jp/main_content/000901375.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "census": {
+    "triggerLines": [],
+    "negativeControlLines": [],
+    "tokenTypes": {
+     "REQUEST": 0,
+     "MARKER": 0,
+     "OTHER_CODE": 0
+    }
+   },
+   "report": {
+    "pageStateChanges": 0,
+    "undeclared": [],
+    "triggerLineChanges": 0,
+    "triggerMismatches": [],
+    "falseSplits": [],
+    "declaredDownstreamFragments": 0,
+    "provenanceMismatches": 0,
+    "leftTitleCount": 0,
+    "rightKinds": {},
+    "abstentionDelta": {}
+   },
+   "baselineOutputSha256": "d2cb26fd74a8f69faf27be88d7afc3d20edc43878a2bb4e953c8d41f87efbc7e",
+   "h1OutputSha256": "d2cb26fd74a8f69faf27be88d7afc3d20edc43878a2bb4e953c8d41f87efbc7e",
+   "identicalToBaseline": true
+  }
+ ]
+}

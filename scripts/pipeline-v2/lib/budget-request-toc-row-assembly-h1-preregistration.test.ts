@@ -29,7 +29,8 @@ describe('H1（header zone right row-start split）preregistration の integrity
     expect(p.heldoutParserExecutionCountTotal).toBe(1);
     expect(read(path.join(ev, 'evaluation-result.json')).formalExecutionCount).toBe(1);
     expect(fs.readdirSync(ev).sort()).toEqual(['evaluation-launch-manifest.json', 'evaluation-result.json', 'execution-started.json', 'heldout-parser-output.json']);
-    expect(fs.readdirSync(h1dir)).toEqual(['preregistration.json']);
+    expect(fs.readdirSync(h1dir)).toContain('preregistration.json');
+    expect(fs.readdirSync(h1dir).filter(f => /heldout|held-out|evaluation-result|parser-output/.test(f))).toEqual([]);
   });
   it('H1 は単一変更で、tokenless fragment は対象外・特例禁止、PLAIN_ROW mapping・page/publisher/token 固有条件がない', () => {
     expect(p.status).toBe('H1_PREREGISTERED_FROZEN');

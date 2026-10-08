@@ -1,0 +1,284 @@
+{
+ "schema": "budget-request-toc-header-zone-h1-development-synthetic/v0",
+ "note": "#398 の rule から作った synthetic。held-out の実値・raw line は含まない。expect は実装の出力ではなく rule から手で決めた期待",
+ "rightBandEdge": 60,
+ "cases": [
+  {
+   "id": "P1-request-right",
+   "polarity": "positive",
+   "description": "REQUEST_TOKEN が E 以右にある header zone 行",
+   "lines": [
+    "令和6年度歳出概算要求額目次",
+    "要求 区分 ページ",
+    "総表 1                                                        5 01-95 右の事業 11",
+    "1 01-95 左の事業 3                                              2 01-95 右の事業 5",
+    "   （項） 010 左の項 4                                               （項） 020 右の項 6",
+    "3 01-95 左の事業 7                                              4 01-95 右の事業 9"
+   ],
+   "expect": {
+    "triggerLineIndexes": [
+     2
+    ],
+    "rightKinds": [
+     "REQUEST_NUMBER_ROW"
+    ],
+    "pageState": "ASSEMBLED_SPLIT"
+   }
+  },
+  {
+   "id": "P2-marker-right",
+   "polarity": "positive",
+   "description": "MARKER_TOKEN が E 以右にある header zone 行",
+   "lines": [
+    "令和6年度歳出概算要求額目次",
+    "要求 区分 ページ",
+    "総表 1                                                           （項） 030 右の項 12",
+    "1 01-95 左の事業 3                                              2 01-95 右の事業 5",
+    "   （項） 010 左の項 4                                               （項） 020 右の項 6",
+    "3 01-95 左の事業 7                                              4 01-95 右の事業 9"
+   ],
+   "expect": {
+    "triggerLineIndexes": [
+     2
+    ],
+    "rightKinds": [
+     "MARKER_ROW"
+    ],
+    "pageState": "ASSEMBLED_SPLIT"
+   }
+  },
+  {
+   "id": "P3-other-code-right",
+   "polarity": "positive",
+   "description": "frozen の OTHER_CODE pattern に segment 全体が一致",
+   "lines": [
+    "令和6年度歳出概算要求額目次",
+    "要求 区分 ページ",
+    "総表 1                                                           001 既定定員に伴う経費 3",
+    "1 01-95 左の事業 3                                              2 01-95 右の事業 5",
+    "   （項） 010 左の項 4                                               （項） 020 右の項 6",
+    "3 01-95 左の事業 7                                              4 01-95 右の事業 9"
+   ],
+   "expect": {
+    "triggerLineIndexes": [
+     2
+    ],
+    "rightKinds": [
+     "OTHER_CODE"
+    ],
+    "pageState": "ASSEMBLED_SPLIT"
+   }
+  },
+  {
+   "id": "P4-left-text-right-request",
+   "polarity": "positive",
+   "description": "LEFT に文字、RIGHT に request",
+   "lines": [
+    "令和6年度歳出概算要求額目次",
+    "要求 区分 ページ",
+    "あいう 見出し 12                                                  5 01-95 右の事業 11",
+    "1 01-95 左の事業 3                                              2 01-95 右の事業 5",
+    "   （項） 010 左の項 4                                               （項） 020 右の項 6",
+    "3 01-95 左の事業 7                                              4 01-95 右の事業 9"
+   ],
+   "expect": {
+    "triggerLineIndexes": [
+     2
+    ],
+    "rightKinds": [
+     "REQUEST_NUMBER_ROW"
+    ],
+    "pageState": "ASSEMBLED_SPLIT"
+   }
+  },
+  {
+   "id": "P5-left-blank-right-request",
+   "polarity": "positive",
+   "description": "LEFT が空白の行は行頭が row-start token になり header zone ではない（T2 を満たさず body 行として frozen と同じ出力）",
+   "lines": [
+    "令和6年度歳出概算要求額目次",
+    "要求 区分 ページ",
+    "                                                            5 01-95 右の事業 11",
+    "1 01-95 左の事業 3                                              2 01-95 右の事業 5",
+    "   （項） 010 左の項 4                                               （項） 020 右の項 6",
+    "3 01-95 左の事業 7                                              4 01-95 右の事業 9"
+   ],
+   "expect": {
+    "triggerLineIndexes": [],
+    "pageState": "ASSEMBLED_SPLIT"
+   }
+  },
+  {
+   "id": "P6-right-unit-fragment-owner",
+   "polarity": "positive",
+   "description": "H1 の RIGHT unit が直後の token なし fragment の owner 候補になる（declared downstream effect）",
+   "lines": [
+    "令和6年度歳出概算要求額目次",
+    "要求 区分 ページ",
+    "総表 1                                                        5 01-95 右の事業 11",
+    "1 01-95 左の事業 3                                                 右の続き",
+    "   （項） 010 左の項 4                                            6 01-95 右の事業 9",
+    "3 01-95 左の事業 7                                              7 01-95 右の事業 10"
+   ],
+   "expect": {
+    "triggerLineIndexes": [
+     2
+    ],
+    "rightKinds": [
+     "REQUEST_NUMBER_ROW"
+    ],
+    "downstreamFragments": 1,
+    "pageState": "ASSEMBLED_SPLIT"
+   }
+  },
+  {
+   "id": "N7-page-title-right",
+   "polarity": "negative",
+   "description": "E 以右に page title 相当の text のみ（row-start token なし）",
+   "lines": [
+    "令和6年度歳出概算要求額目次",
+    "歳出概算要求額目次                                                   概算要求額目次の右側",
+    "要求 区分 ページ",
+    "1 01-95 左の事業 3                                              2 01-95 右の事業 5",
+    "   （項） 010 左の項 4                                               （項） 020 右の項 6",
+    "3 01-95 左の事業 7                                              4 01-95 右の事業 9"
+   ],
+   "expect": {
+    "triggerLineIndexes": [],
+    "pageState": "ASSEMBLED_SPLIT"
+   }
+  },
+  {
+   "id": "N8-column-heading-right",
+   "polarity": "negative",
+   "description": "E 以右に列見出し相当の text のみ",
+   "lines": [
+    "令和6年度歳出概算要求額目次",
+    "要求 区分 ページ                                                   要求 区分 ページ",
+    "1 01-95 左の事業 3                                              2 01-95 右の事業 5",
+    "   （項） 010 左の項 4                                               （項） 020 右の項 6",
+    "3 01-95 左の事業 7                                              4 01-95 右の事業 9"
+   ],
+   "expect": {
+    "triggerLineIndexes": [],
+    "pageState": "ASSEMBLED_SPLIT"
+   }
+  },
+  {
+   "id": "N9-tokenless-wrapped-like",
+   "polarity": "negative",
+   "description": "token を持たない wrapped fragment 風の右側 text",
+   "lines": [
+    "令和6年度歳出概算要求額目次",
+    "要求 区分 ページ",
+    "総表 1                                                           続きの文字列",
+    "1 01-95 左の事業 3                                              2 01-95 右の事業 5",
+    "   （項） 010 左の項 4                                               （項） 020 右の項 6",
+    "3 01-95 左の事業 7                                              4 01-95 右の事業 9"
+   ],
+   "expect": {
+    "triggerLineIndexes": [],
+    "pageState": "ASSEMBLED_SPLIT"
+   }
+  },
+  {
+   "id": "N10-boundary-conflict",
+   "polarity": "negative",
+   "description": "band 外（E+3）の request token を持つ行は BOUNDARY_CONFLICT_LINE 相当で分割しない",
+   "lines": [
+    "令和6年度歳出概算要求額目次",
+    "要求 区分 ページ",
+    "総表 あ                                                           5 01-95 右の事業 11",
+    "1 01-95 左の事業 3                                              2 01-95 右の事業 5",
+    "   （項） 010 左の項 4                                               （項） 020 右の項 6",
+    "3 01-95 左の事業 7                                              4 01-95 右の事業 9"
+   ],
+   "expect": {
+    "triggerLineIndexes": [],
+    "pageState": "ASSEMBLED_SPLIT"
+   }
+  },
+  {
+   "id": "N11-boundary-crossing",
+   "polarity": "negative",
+   "description": "line[E-1] と line[E] がともに非空白（BOUNDARY_CROSSING 相当）",
+   "lines": [
+    "令和6年度歳出概算要求額目次",
+    "要求 区分 ページ",
+    "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz5 01-95 右の事業 11",
+    "1 01-95 左の事業 3                                              2 01-95 右の事業 5",
+    "   （項） 010 左の項 4                                               （項） 020 右の項 6",
+    "3 01-95 左の事業 7                                              4 01-95 右の事業 9"
+   ],
+   "expect": {
+    "triggerLineIndexes": [],
+    "pageState": "ASSEMBLED_SPLIT"
+   }
+  },
+  {
+   "id": "N12-unsplit-page",
+   "polarity": "negative",
+   "description": "right evidence がなく UNSPLIT になる page",
+   "lines": [
+    "令和6年度歳出概算要求額目次",
+    "要求 区分 ページ",
+    "総表 1                                                        右側の見出し文字",
+    "1 01-95 左の事業 3",
+    "   （項） 010 左の項 4"
+   ],
+   "expect": {
+    "triggerLineIndexes": [],
+    "pageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE"
+   }
+  },
+  {
+   "id": "N13-page-abstained",
+   "polarity": "negative",
+   "description": "marker のみの右 column で PAGE_ABSTAINED になる page",
+   "lines": [
+    "令和6年度歳出概算要求額目次",
+    "要求 区分 ページ",
+    "総表 1                                                           （項） 030 右の項 12",
+    "1 01-95 左の事業 3                                                 （項） 020 右の項 6"
+   ],
+   "expect": {
+    "triggerLineIndexes": [],
+    "pageState": "PAGE_ABSTAINED"
+   }
+  },
+  {
+   "id": "N14-outside-header-zone",
+   "polarity": "negative",
+   "description": "header zone 外（body 行の後）にある同じ token pattern",
+   "lines": [
+    "令和6年度歳出概算要求額目次",
+    "要求 区分 ページ",
+    "1 01-95 左の事業 3                                              2 01-95 右の事業 5",
+    "   （項） 010 左の項 4                                               （項） 020 右の項 6",
+    "3 01-95 左の事業 7                                              4 01-95 右の事業 9",
+    "定員表 1                                                       5 01-95 右の事業 13"
+   ],
+   "expect": {
+    "triggerLineIndexes": [],
+    "pageState": "ASSEMBLED_SPLIT"
+   }
+  },
+  {
+   "id": "N15-left-only",
+   "polarity": "negative",
+   "description": "E より左だけに content がある header zone 行",
+   "lines": [
+    "令和6年度歳出概算要求額目次",
+    "要求 区分 ページ",
+    "総表 1",
+    "1 01-95 左の事業 3                                              2 01-95 右の事業 5",
+    "   （項） 010 左の項 4                                               （項） 020 右の項 6",
+    "3 01-95 左の事業 7                                              4 01-95 右の事業 9"
+   ],
+   "expect": {
+    "triggerLineIndexes": [],
+    "pageState": "ASSEMBLED_SPLIT"
+   }
+  }
+ ]
+}
