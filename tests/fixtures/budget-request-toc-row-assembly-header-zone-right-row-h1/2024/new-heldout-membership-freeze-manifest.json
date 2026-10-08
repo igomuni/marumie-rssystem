@@ -1,0 +1,68 @@
+{
+ "schema": "budget-request-toc-h1-new-heldout-membership-freeze-manifest/v0",
+ "status": "NEW_HELDOUT_MEMBERSHIP_FROZEN",
+ "createdAt": "2026-10-08T21:50:09+09:00",
+ "baseMainSha": "1dab76b5aa5fae3453744936491ac2e4864f978f",
+ "population": {
+  "total": 82,
+  "development": 34,
+  "firstHeldout": 23,
+  "newHeldout": 25
+ },
+ "overlaps": {
+  "developmentFirstHeldout": 0,
+  "developmentNewHeldout": 0,
+  "firstHeldoutNewHeldout": 0
+ },
+ "unionCount": 82,
+ "missing": 0,
+ "duplicateRole": 0,
+ "membershipFileSha256": "7c238b9b6c756ebc9baec46f47f33db1706fee8ca40d87b1eb6d87bcf6538d06",
+ "membershipDigestSha256": "06c2e68d7ac178e7e0561d16976c47936ab9d52b59d91710cab145fa8822ab28",
+ "firstHeldoutMembershipDigestSha256": "8fa5a8a8444be31a637fae618235b0a77c6b37745441edc06534fe63c5a44156",
+ "derivationMethod": "集合差のみ（identity と classifierSource と explored 判定の identity）。sampling なし・trigger 有無・publisher 比率・positive/negative 比率で選ばない",
+ "derivationInputs": {
+  "inventory": {
+   "path": "tests/fixtures/budget-request-toc-physical-row/2024/candidate-inventory.json",
+   "sha256": "4a350774bd60b4a4f098fd83514ce38721f4c14f4a6c7489b01828ba87e2cf98",
+   "note": "82 TOC page の identity 一覧として使用。whitelist field 以外は読み取り後に保持しない（機械 feature は使用・出力・観測していない）"
+  },
+  "developmentLedger390": {
+   "path": "tests/fixtures/budget-request-toc-physical-row/2024/development-explored-pages.json",
+   "sha256": "bbd608e6ca040557cb335b1daa3f027fdf35605c9bb334e03499029929a72aee"
+  },
+  "firstHeldout": {
+   "path": "tests/fixtures/budget-request-toc-row-assembly/2024/heldout-candidates.json",
+   "sha256": "369c309a38c79c576af686290930cebaed1249ac4834946c2766d1e77811fd12"
+  }
+ },
+ "allowedMetadata": [
+  "localPdfPath",
+  "physicalPage",
+  "classifierSource",
+  "explored.pr3aExplored",
+  "explored.issue389Explored",
+  "frozen population membership"
+ ],
+ "prohibitedEvidence": [
+  "H1 parser output / trigger 有無",
+  "E",
+  "row-start token",
+  "raw-line content",
+  "GT content",
+  "PDF visual content / render",
+  "#396 failure similarity",
+  "ministry / layout による選別"
+ ],
+ "h1ExecutionsOnNewHeldout": 0,
+ "triggerCensusOnNewHeldout": 0,
+ "rawTextInspected": false,
+ "pdfOrRenderInspected": false,
+ "visualInspectionCount": 0,
+ "gtAuthored": false,
+ "contamination": false,
+ "derivationScriptDependencies": "fs / path / crypto のみ（raw text / parser / PDF / H1 を import しない）",
+ "nextUnit": "新 held-out 25 の visual-only GT freeze。H1 execution はその後",
+ "claimBoundary": "membership を固定しただけ。新 held-out は未実行・未観測。H1 の安全性・有効性・formal evaluation の GO ではない",
+ "judgment": "READY_FOR_NEW_HELDOUT_VISUAL_GT_FREEZE"
+}

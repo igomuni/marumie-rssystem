@@ -41,7 +41,6 @@
   "scripts/pipeline-v2/lib/budget-request-toc-row-assembly-h1.test.ts": "2073bdba3250c39c9dbef24b5f88ab463c3169c75e19a047fa9f98edcb28a01c",
   "scripts/pipeline-v2/lib/budget-request-toc-row-assembly-h1-differential.ts": "c38694a463005932ed50e5e4e3c225f36fdd54d511533d03fe6441b75c77cd18",
   "scripts/pipeline-v2/lib/budget-request-toc-row-assembly-h1-development-result.test.ts": "7d17a62d0ec5f2780ab6e9ee584f6f456136b298a396fdcf618053928e55334a",
-  "scripts/pipeline-v2/lib/budget-request-toc-row-assembly-h1-preregistration.test.ts": "05b6b23d204b09d545748bb351fe11d28abd1c0f397aa2b09c24c8da0a44dd93",
   "scripts/pipeline-v2/run-budget-request-toc-header-zone-h1-development.ts": "6038e6242d2f9b1922548b97f8a60bc81a3adc24aba29cec402630cd9f3a5d68",
   "scripts/pipeline-v2/build-budget-request-toc-header-zone-h1-synthetic.ts": "c1114698e2b3f21d3277f70897cb27105b67c69064900b2ac09e7f1e7b0f19d9"
  },

@@ -16,7 +16,7 @@ if (sha('scripts/pipeline-v2/lib/budget-request-toc-row-assembly.ts') !== EXPECT
 if (typeof h1.assembleTocPageH1 !== 'function') throw new Error('STOP_H1_IMPLEMENTATION_NOT_FREEZABLE: entry point');
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8')) as { devDependencies: Record<string, string>; dependencies?: Record<string, string> };
 const dev = JSON.parse(fs.readFileSync(path.join(H1D, 'development-result.json'), 'utf8'));
-const files = ['scripts/pipeline-v2/lib/budget-request-toc-row-assembly-h1.test.ts', 'scripts/pipeline-v2/lib/budget-request-toc-row-assembly-h1-differential.ts', 'scripts/pipeline-v2/lib/budget-request-toc-row-assembly-h1-development-result.test.ts', 'scripts/pipeline-v2/lib/budget-request-toc-row-assembly-h1-preregistration.test.ts', 'scripts/pipeline-v2/run-budget-request-toc-header-zone-h1-development.ts', 'scripts/pipeline-v2/build-budget-request-toc-header-zone-h1-synthetic.ts'];
+const files = ['scripts/pipeline-v2/lib/budget-request-toc-row-assembly-h1.test.ts', 'scripts/pipeline-v2/lib/budget-request-toc-row-assembly-h1-differential.ts', 'scripts/pipeline-v2/lib/budget-request-toc-row-assembly-h1-development-result.test.ts', 'scripts/pipeline-v2/run-budget-request-toc-header-zone-h1-development.ts', 'scripts/pipeline-v2/build-budget-request-toc-header-zone-h1-synthetic.ts'];
 const manifest = {
   schema: 'budget-request-toc-row-assembly-h1-implementation-freeze/v0',
   status: 'H1_IMPLEMENTATION_FROZEN',
