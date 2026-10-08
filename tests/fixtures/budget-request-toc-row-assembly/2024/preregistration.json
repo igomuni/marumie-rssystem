@@ -1,0 +1,189 @@
+{
+  "schema": "budget-request-toc-row-assembly-preregistration/v0",
+  "status": "PREREGISTERED_FROZEN",
+  "scope": "FY2024 概算要求 PDF の TOC 82 page に対する A 層（physical row reconstruction）の rule / 抽象 contract / GT・評価 protocol の事前固定。parser・GT・評価は含まない。変更は禁止（変更が要るなら本 preregistration に対する STOP / protocol deviation として保存し、別研究単位で再 preregister する）",
+  "integrity": {
+    "createdAt": "2026-10-08T11:50:06+09:00",
+    "baseMainSha": "5a02b54cb0f1363df85617af361c2cc2b234d0ba",
+    "dependencies": {
+      "pr390HeadSha": "b10919e61fa4d54add035e8c758a7cebf7544552",
+      "pr390Artifacts": "tests/fixtures/budget-request-toc-physical-row/2024/",
+      "pr389Artifacts": "tests/fixtures/budget-request-toc-column-structure/2024/",
+      "rawTextManifest": "tests/fixtures/budget-request-raw-text/2024/raw-text-manifest.json"
+    },
+    "frozenInput": {
+      "rawTextCorpusDigestSha256": "7c6d2dcec1f4bec0ca37a1b3aa391adce7d99b93ac4642c74cab7a328dac4052",
+      "pageClassificationCorpusDigestSha256": "39464fc76b1b83272d5852d3db1db776e22bb570ee0f6b7ca4d1da64de4a5ecc"
+    },
+    "population": { "tocPages": 82, "direct": 55, "inherited": 27, "physicalPdfs": 55 },
+    "developmentEvidenceUsed": [
+      "PR-3A explored 19 page / #389 explored 12 page / #390 render 10 page（新規 6 + 再確認 4）。いずれも development 観測であり held-out ではない",
+      "machine inventory（#389 machine-inventory / #390 candidate-inventory, boundary-band-evidence）"
+    ],
+    "posthocEvidenceUsed": [
+      "right-row start の character index spread 0〜2（行種別ごと）は #390 で post-hoc に観測された development observation。validated rule ではない。T=2 は本 preregistration の preregistered choice であり frozen evaluation では未検証",
+      "jinji p3 の indented 3 桁 code row（OTHER_CODE の根拠。1 page・1 件の bounded risk）"
+    ],
+    "claimBoundary": "本 preregistration は rule と protocol の固定のみ。rule の正しさ・汎化・coverage は何も検証していない。READY_FOR_TOC_ROW_ASSEMBLY_GT_FREEZE は GT / fixture freeze を開始してよいという意味のみで、parser 実装 GO ではない"
+  },
+  "inputContract": {
+    "perPage": ["localPdfPath", "pdfSha256", "physicalPage", "textSha256", "classifierSource(DIRECT|INHERITED)", "nonEmptyLines[{lineIndex,text}]"],
+    "lineUnit": "Raw Text の nonEmptyLines[].text を 1 raw line とする。列位置は text の Unicode code point index（character index）。display width は使わない",
+    "notUsed": ["reading order の推定", "PDF 座標（本 unit の parser は raw text のみ。GT 側のみ visual を使う）", "他 page の情報", "hierarchy / parent"]
+  },
+  "outputContract": {
+    "pageState": ["ASSEMBLED_SPLIT", "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE", "PAGE_ABSTAINED"],
+    "rowFields": ["pageIdentity", "column(LEFT|RIGHT|UNSPLIT)", "sourceOrder(column 内 index)", "rowKind", "rowStartTokenRaw", "codeRaw", "titleRaw", "pageRefRaw", "fragments[{lineIndex,textRaw}]", "provenance", "state(RESOLVED|ABSTAINED)", "abstentionReason|null"],
+    "provenance": ["localPdfPath", "pdfSha256", "physicalPage", "textSha256", "lineIndex", "charStart", "charEnd", "sourceRawSlice"],
+    "excluded": ["parent ministry", "parent section", "carried hierarchy", "semantic budget category", "数値化された page ref", "丸囲み復元", "PUA 復元"],
+    "decisions": {
+      "adopted": ["page identity", "column", "source order", "row kind", "raw row-start token", "raw code", "raw title", "raw trailing page ref", "attached fragments", "provenance", "resolution/abstention state"],
+      "rejected": ["hierarchy 系 field 全て", "reading order / left-right 対応"]
+    }
+  },
+  "rules": {
+    "patterns": {
+      "PAGEREF": "(?:[ぁ-んァ-ヶ一-龥]{1}(?:[（(][^）)]{1,2}[）)])?\\s?)?\\d{1,4}",
+      "REQUEST_TOKEN": "\\d{1,3}\\s+\\d{2}[\\u2010\\u2011-]\\d{2}",
+      "MARKER_TOKEN": "[（(][^）)\\s]+[）)]",
+      "TRAILING_PAGEREF": "\\s+PAGEREF\\s*$（segment 末尾。先頭の空白 1 個以上が必須）",
+      "OTHER_CODE": "^\\s+(0\\d{2})\\s+(?!\\d{2}[\\u2010\\u2011-]\\d{2})(\\S.*?\\S)\\s+(PAGEREF)\\s*$",
+      "TITLE": "^\\s*令\\s*和（header zone 内のみ）",
+      "RIGHT_BAND_EVIDENCE": "\\d{1,4}(\\s+)(REQUEST_TOKEN)（行内で先頭 token ではない request token の開始 character index を右 row 開始 index とする。band 構築はこの pattern のみ）"
+    },
+    "bandToleranceChars": 2,
+    "bandToleranceUnit": "raw line の character index（Unicode code point）",
+    "bandMinEvidence": 2,
+    "bandConstruction": "page 内の RIGHT_BAND_EVIDENCE の開始 index を昇順に並べ、最小値 E から [E, E+2] に全て入れば 1 cluster。1 つでも E+2 を超えれば MULTIPLE_INCOMPATIBLE_BOUNDARY_CLUSTERS。件数が 2 未満なら RIGHT_EVIDENCE_INSUFFICIENT。代表 left edge E = cluster の最小 index。marker は band 構築に使わない",
+    "lineConflict": "E 解決後、行内で先頭 token ではない request token の開始 index が [E-2, E-1] または E+3 以上にあれば BOUNDARY_CONFLICT_LINE（その行は abstain）",
+    "boundaryCrossing": "line[E-1] と line[E] がともに非空白なら BOUNDARY_CROSSING（その行は abstain。左右に推測配置しない）",
+    "segmentation": "E 解決 page: left = line[0:E], right = line[E:]。空白のみの segment は存在しないものとして扱う。E 未解決の page は分割しない",
+    "noRightEvidence": "RIGHT_BAND_EVIDENCE も marker 右候補（行内で先頭 token ではない MARKER_TOKEN の直前が数字+空白）も 0 件の page は NO_RIGHT_COLUMN_EVIDENCE。RIGHT_EMPTY を出力しない。row は column=UNSPLIT として行全体を保持する",
+    "markerOnlyRight": "marker 右候補が 1 件以上あり request 右候補が 0 件なら MARKER_ONLY_RIGHT_BOUNDARY で page abstain（offset を推定しない）",
+    "headerZone": "page 先頭から最初の row-start 行（REQUEST_TOKEN / MARKER_TOKEN / OTHER_CODE のいずれかで始まる行）の直前まで。header zone の行は TITLE_OR_HEADING として行全体を raw 保持し分割しない",
+    "rowKinds": {
+      "REQUEST_NUMBER_ROW": "segment 先頭 token が REQUEST_TOKEN",
+      "MARKER_ROW": "segment 先頭 token が MARKER_TOKEN",
+      "TITLE_OR_HEADING": "header zone の行",
+      "OTHER_CODE": "OTHER_CODE pattern に完全一致（0 始まり 3 桁 code。pageref 必須）",
+      "WRAPPED_FRAGMENT": "header zone 外・上記いずれでもなく先頭 token が数字で始まらず、末尾に TRAILING_PAGEREF を持たない segment",
+      "UNKNOWN_ABSTAINED": "上記いずれにも当たらない segment（数字で始まる未定義形、fragment なのに page ref を持つもの等）"
+    },
+    "fragmentAttachment": "WRAPPED_FRAGMENT は同一 page・同一 column 内で直前の RESOLVED な row（REQUEST_NUMBER_ROW / MARKER_ROW / OTHER_CODE）に attach する。連続する fragment は同じ owner に順序どおり attach する。owner と fragment の間に当該 column の ABSTAINED segment / TITLE が挟まる場合、owner が無い場合は FRAGMENT_NO_SAFE_OWNER。同一 raw line の左右両 segment が fragment の場合は SIMULTANEOUS_LR_FRAGMENT（両方 abstain）。NO_RIGHT_COLUMN_EVIDENCE page は UNSPLIT stream 内の直前 row に同様に attach",
+    "sourceOrder": "各 column 内で lineIndex の昇順（Raw Text の順）を保持。lineIndex が非単調なら SOURCE_ORDER_CONFLICT で page abstain。左右 column を raw line 単位で対応付けない。出力順は (column, lineIndex) であり読み順の主張ではない",
+    "circledRequestNumber": "raw の plain digit を request number token として扱う。丸囲みを復元・推定しない。style 差の意味を推定しない。representation loss は limitation として記録",
+    "pageRef": "末尾の PAGEREF token を raw のまま保持。数値化・補完・正規化・他 page 照合をしない（`エ 9` `国(国)1` 等の prefix も raw）",
+    "otherCodeScope": "OTHER_CODE は jinji p3 形式（0 始まり 3 桁 code + 名称 + page ref）に限る。それ以外の未知 code 形は OTHER_CODE_UNSUPPORTED_FORM で abstain。意味分類ではない"
+  },
+  "abstentionConditions": [
+    "FROZEN_INPUT_MISMATCH",
+    "RIGHT_EVIDENCE_INSUFFICIENT",
+    "MARKER_ONLY_RIGHT_BOUNDARY",
+    "MULTIPLE_INCOMPATIBLE_BOUNDARY_CLUSTERS",
+    "BOUNDARY_CONFLICT_LINE",
+    "BOUNDARY_CROSSING",
+    "UNKNOWN_ROW_START",
+    "FRAGMENT_WITH_PAGE_REF",
+    "FRAGMENT_OWNER_NOT_UNIQUE",
+    "FRAGMENT_NO_SAFE_OWNER",
+    "SIMULTANEOUS_LR_FRAGMENT",
+    "SOURCE_ORDER_CONFLICT",
+    "REQUIRES_HIERARCHY_SEMANTICS",
+    "OTHER_CODE_UNSUPPORTED_FORM",
+    "PROVENANCE_UNAVAILABLE"
+  ],
+  "abstentionScope": {
+    "pageLevel": ["FROZEN_INPUT_MISMATCH", "RIGHT_EVIDENCE_INSUFFICIENT", "MARKER_ONLY_RIGHT_BOUNDARY", "MULTIPLE_INCOMPATIBLE_BOUNDARY_CLUSTERS", "SOURCE_ORDER_CONFLICT"],
+    "lineOrSegmentLevel": ["BOUNDARY_CONFLICT_LINE", "BOUNDARY_CROSSING", "UNKNOWN_ROW_START", "FRAGMENT_WITH_PAGE_REF", "FRAGMENT_OWNER_NOT_UNIQUE", "FRAGMENT_NO_SAFE_OWNER", "SIMULTANEOUS_LR_FRAGMENT", "REQUIRES_HIERARCHY_SEMANTICS", "OTHER_CODE_UNSUPPORTED_FORM", "PROVENANCE_UNAVAILABLE"]
+  },
+  "failureTaxonomy": {
+    "reusedFrom390": ["COLUMN_BOUNDARY_MULTIPLE_CANDIDATES", "COLUMN_BOUNDARY_NO_SAFE_EVIDENCE", "RIGHT_EMPTY_AMBIGUOUS", "CROSS_COLUMN_FRAGMENT_AMBIGUOUS", "WRAPPED_FRAGMENT_OWNER_AMBIGUOUS", "RAW_SOURCE_ORDER_CONFLICT", "CIRCLED_REQUEST_NUMBER_REPRESENTATION_LOSS", "ROW_BOUNDARY_REPRESENTATION_BLOCKED"],
+    "addedForEvaluation": ["SEGMENT_CROSS_BOUNDARY", "FRAGMENT_NO_SAFE_OWNER", "UNKNOWN_ROW_START", "OTHER_CODE_UNSUPPORTED_FORM", "PROVENANCE_FAILURE", "NO_EVIDENCE_BUT_VISUAL_RIGHT_PRESENT"],
+    "abstentionToFamily": {
+      "RIGHT_EVIDENCE_INSUFFICIENT": "COLUMN_BOUNDARY_NO_SAFE_EVIDENCE",
+      "MARKER_ONLY_RIGHT_BOUNDARY": "COLUMN_BOUNDARY_NO_SAFE_EVIDENCE",
+      "MULTIPLE_INCOMPATIBLE_BOUNDARY_CLUSTERS": "COLUMN_BOUNDARY_MULTIPLE_CANDIDATES",
+      "BOUNDARY_CONFLICT_LINE": "COLUMN_BOUNDARY_MULTIPLE_CANDIDATES",
+      "BOUNDARY_CROSSING": "SEGMENT_CROSS_BOUNDARY",
+      "UNKNOWN_ROW_START": "UNKNOWN_ROW_START",
+      "FRAGMENT_WITH_PAGE_REF": "FRAGMENT_NO_SAFE_OWNER",
+      "FRAGMENT_OWNER_NOT_UNIQUE": "WRAPPED_FRAGMENT_OWNER_AMBIGUOUS",
+      "FRAGMENT_NO_SAFE_OWNER": "FRAGMENT_NO_SAFE_OWNER",
+      "SIMULTANEOUS_LR_FRAGMENT": "CROSS_COLUMN_FRAGMENT_AMBIGUOUS",
+      "SOURCE_ORDER_CONFLICT": "RAW_SOURCE_ORDER_CONFLICT",
+      "REQUIRES_HIERARCHY_SEMANTICS": "ROW_BOUNDARY_REPRESENTATION_BLOCKED",
+      "OTHER_CODE_UNSUPPORTED_FORM": "OTHER_CODE_UNSUPPORTED_FORM",
+      "PROVENANCE_UNAVAILABLE": "PROVENANCE_FAILURE",
+      "FROZEN_INPUT_MISMATCH": "PROVENANCE_FAILURE"
+    }
+  },
+  "gtProtocol": {
+    "evaluationUnits": {
+      "page": "page state（ASSEMBLED_SPLIT / UNSPLIT / PAGE_ABSTAINED）と visual の column 構成の一致",
+      "row": "visual row 1 つ。id = `{localPdfPath}#{physicalPage}:{column}:{orderInColumn}`。一意",
+      "fragment": "wrapped fragment 1 つと visual owner row の対"
+    },
+    "gtSource": "PDF の visual 観察のみ。raw text 補完・blank→0・差分補完・丸囲み推測・他 page や一般知識・parser output を見ながらの作成を禁止",
+    "gtRowFields": ["column", "orderInColumn", "rowKind(visual)", "requestNumberVisualToken|null", "codeVisual|null", "markerVisual|null", "pageRefVisual|null", "wrappedFragmentCount", "unreadable flag"],
+    "alignment": "parser row と GT row の対応は row-start token（number/code/marker）+ column + column 内順序で取る。raw text 側 provenance の再現（rawSlice が Raw Text artifact と一致するか）は機械検証",
+    "explored": { "pr3a": 19, "issue389": 12, "pr390New": 6, "pr390Recheck": 4, "exclusionRule": "PR-3A explored ∪ #389 explored ∪ #390 render 済み page を held-out 候補から除外（RECHECK 4 は #389 explored に含まれる）。除外は 34 page", "pool": 48 },
+    "selection": {
+      "script": "scripts/pipeline-v2/build-budget-request-toc-row-assembly-heldout-candidates.ts",
+      "membershipFixture": "tests/fixtures/budget-request-toc-row-assembly/2024/heldout-candidates.json",
+      "membershipDigestSha256": "8fa5a8a8444be31a637fae618235b0a77c6b37745441edc06534fe63c5a44156",
+      "sampleSize": 23,
+      "seed": "budget-request-toc-row-assembly-heldout-20261008",
+      "note": "membership は machine inventory のみで決定。render・目視・parser は未使用。名称は HELDOUT_CANDIDATE。GT freeze 後も parser 実装前に membership を変更しない。candidate は目視前なので held-out evidence とは呼ばない"
+    },
+    "strata": {
+      "pool>0": {
+        "right-column-used(right-row evidence)": { "pool": 17, "take": 6 },
+        "no-right-row-evidence & body>=15": { "pool": 12, "take": 4 },
+        "no-right-row-evidence & body<15": { "pool": 19, "take": 2 },
+        "wrapped-fragment(right column line>=1)": { "pool": 3, "take": 3 },
+        "wrapped-fragment(left column line>=1)": { "pool": 7, "take": 2 },
+        "asymmetric(right-row lines<30% of body)": { "pool": 6, "take": 2 },
+        "INHERITED": { "pool": 12, "take": 3 },
+        "DIRECT": { "pool": 36, "take": 3 }
+      },
+      "pool0_notSampled": ["marker-only right column", "simultaneous left/right fragment", "OTHER_CODE row", "multiple row-start index clusters beyond tolerance"],
+      "pool0Note": "pool 0 の stratum は held-out 候補に存在しない（OTHER_CODE は development 済みの jinji p3 の 1 page のみ）。存在するものとして捏造せず、これらの risk は held-out では未検証（NOT_COVERED）と明記する。development page 上の OTHER_CODE は descriptive regression のみ"
+    },
+    "frozenHashes": ["GT fixture 全文", "heldout-candidates membershipDigest", "preregistration.json", "evaluation script", "parser output（評価時）"],
+    "order": ["1. GT freeze unit（visual GT を作り commit・SHA-256 固定。parser は未実装）", "2. parser 実装 unit（development 34 page のみで descriptive regression。held-out GT を読まない・規則変更は preregistration 違反）", "3. frozen evaluation unit（held-out candidate を一度だけ評価。tolerance 等の rule 変更禁止）"],
+    "limitation": "同一 agent が GT と parser の両方を扱う。commit order と hash で leakage を抑えるが独立検証ではない。sample 23 page は小さく、汎化は主張しない"
+  },
+  "metrics": {
+    "units": ["page", "row", "fragment"],
+    "outcomes": ["CORRECT", "INCORRECT", "ABSTAINED", "UNRESOLVED"],
+    "severe": ["FALSE_POSITIVE_ROW_ASSEMBLY", "WRONG_COLUMN_ASSIGNMENT", "WRONG_FRAGMENT_ATTACHMENT", "PROVENANCE_MISMATCH"],
+    "other": ["WRONG_ROW_START_CLASSIFICATION", "ABSTENTION_COUNT_BY_REASON", "ABSTENTION_RATE(page,row,fragment)", "FAILURE_TAXONOMY_COUNTS", "NO_EVIDENCE_BUT_VISUAL_RIGHT_PRESENT_COUNT", "COVERAGE_BY_STRATUM"],
+    "definitions": {
+      "FALSE_POSITIVE_ROW_ASSEMBLY": "RESOLVED row が GT のどの visual row にも対応しない、または複数 GT row を 1 row にした/ 1 row を分割した",
+      "WRONG_COLUMN_ASSIGNMENT": "RESOLVED row/segment の column が GT と異なる",
+      "WRONG_FRAGMENT_ATTACHMENT": "attach された fragment の owner が GT の owner と異なる",
+      "WRONG_ROW_START_CLASSIFICATION": "rowKind が GT の visual kind と異なる（丸囲みの style 差は無視）",
+      "PROVENANCE_MISMATCH": "provenance.sourceRawSlice が Raw Text artifact の line[charStart:charEnd] と一致しない、または欠落"
+    }
+  },
+  "goStop": {
+    "judgments": ["STOP_SAFETY", "STOP_PROTOCOL", "SAFETY_PASS_COVERAGE_REPORTED"],
+    "stopSafety": "held-out 評価で severe 4 種のいずれかが 1 件でも出たら STOP_SAFETY（abstention より重い。tolerance や rule を調整して再評価しない。別研究単位で再仮説化）",
+    "stopProtocol": "評価前に preregistration / GT / membership の SHA-256 が一致しない、explored page が held-out に混入、評価を見て rule を変更、のいずれかで STOP_PROTOCOL",
+    "safetyPass": "severe が 0 件 かつ protocol 遵守なら SAFETY_PASS_COVERAGE_REPORTED。これは「この sample で severe error が観測されなかった」のみを意味する",
+    "unresolvedAcceptanceThreshold": ["coverage（RESOLVED 率）の下限", "abstention rate の上限", "WRONG_ROW_START_CLASSIFICATION の許容"],
+    "unresolvedAcceptanceThresholdHandling": "根拠が不足するため数値を作らない。評価結果の報告のみ行い、coverage / abstention の採否と次工程（B 層・統合）へ進むかは user review に委ねる。SAFETY_PASS_COVERAGE_REPORTED でも自動で次工程に進まない"
+  },
+  "unresolved": [
+    "UNRESOLVED_ACCEPTANCE_THRESHOLD: coverage / abstention / row-start classification の数値基準",
+    "band tolerance T=2 は development observation に基づく preregistered choice で未検証",
+    "bandMinEvidence=2 は保守的設計判断で development evidence に基づく数値ではない（single request-kind 右 row の page は RIGHT_EVIDENCE_INSUFFICIENT で abstain する）",
+    "wrapped fragment 行が page ref を持つかは未確認。持つ fragment は FRAGMENT_WITH_PAGE_REF で abstain する",
+    "右 column が fragment / OTHER_CODE のみの page は NO_RIGHT_COLUMN_EVIDENCE になり UNSPLIT で保持される（NO_EVIDENCE_BUT_VISUAL_RIGHT_PRESENT として評価で計測）",
+    "同一 raw line 左右同時 wrap は NOT_OBSERVED_IN_TARGETED_SAMPLE（存在しないとは言わない）。held-out candidate に machine 候補 0",
+    "marker-only right / OTHER_CODE は held-out pool 0 のため held-out では NOT_COVERED",
+    "丸囲み request number の style・PUA の復元は対象外（representation limitation）",
+    "MOF 補正予算 / RS との整合、INHERITED の state 解決、B 層 hierarchy は本 unit の対象外"
+  ],
+  "judgment": "READY_FOR_TOC_ROW_ASSEMBLY_GT_FREEZE"
+}
