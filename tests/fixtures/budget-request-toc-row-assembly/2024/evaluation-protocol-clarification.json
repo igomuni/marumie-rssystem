@@ -1,0 +1,147 @@
+{
+  "schema": "budget-request-toc-row-assembly-evaluation-protocol-clarification/v0",
+  "status": "STOP_PROTOCOL_AMENDMENT_REQUIRED",
+  "createdAt": "2026-10-08T18:37:48+09:00",
+  "baseMainSha": "e0f3470de11d2916cc64c83fe461f7acb6a084b3",
+  "stopReason": "#391 は alignment を「row-start token + column + column 内順序」と frozen している。本 artifact の rowCorrespondence は column と順序を identity key から外しており、clarification ではなく frozen alignment rule の変更（amendment）に当たる。#391 の alignment では WRONG_COLUMN_ASSIGNMENT を独立に評価する対応付けが十分に定義されていなかった（protocol design failure の発見）。本 artifact の contract は凍結しない。amendment は #391 を改変せず独立した研究単位で設計する",
+  "frozenStatus": "NOT_FROZEN（本 artifact の rowCorrespondence 以下は amendment 設計の入力案であり、評価 contract として採用していない）",
+  "headerZoneNote": "header zone の扱いは #391 のまま変更しない。右 column の row を含む行が TITLE_OR_HEADING に統合されて severe になる場合は parser hypothesis の正当な失敗結果（STOP_SAFETY）であり、protocol 側で緩和しない",
+  "scope": "held-out 評価の comparison contract の未定義点（GT PLAIN_ROW ↔ parser taxonomy、row 対応、severe の判定可能性、applicability）を評価前に固定する。#391 preregistration の rule / metric 定義 / severe 定義 / 閾値は変更しない。評価は実行しない",
+  "dependencyHashes": {
+    "preregistrationSha256": "0cfec657698f699bc3686a7944439db918e7515e439c74457d9c6458e6b42ac8",
+    "gtFreezeManifestSha256": "ea924b89f3d5a140a9361b96544bfdbc33e7bea42966e3c39fda59bf98294949",
+    "gtFreezeStatus": "GT_FROZEN",
+    "implementationFreezeManifestSha256": "9d5edca2f902779d18f7c95c3d48e8f4272ea92999f3140b564abb2cb52c05a0",
+    "implementationFreezeStatus": "IMPLEMENTATION_FROZEN",
+    "implementationCommit": "c59f6c97055716234c2fb1099de3c03693a8f860",
+    "parserSourceSha256": "f3b726f8054340422eeb838187fed91b3435f7201dc39abfd4d40f382c9636dd",
+    "ruleConfigSha256": "6a0565e61162dd76c702ef0c997cb6f9aec79f1a6f17e9f2c872ecd2e5014251",
+    "rawTextCorpusDigestSha256": "7c6d2dcec1f4bec0ca37a1b3aa391adce7d99b93ac4642c74cab7a328dac4052",
+    "pageClassificationCorpusDigestSha256": "39464fc76b1b83272d5852d3db1db776e22bb570ee0f6b7ca4d1da64de4a5ecc"
+  },
+  "membershipDigestSha256": "8fa5a8a8444be31a637fae618235b0a77c6b37745441edc06534fe63c5a44156",
+  "population": { "heldoutCandidates": 23, "direct": 14, "inherited": 9, "developmentExplored": 34, "overlap": 0 },
+  "accessBoundary": {
+    "used": ["#391 preregistration.json", "#392 GT の schema / taxonomy metadata（フィールド名と観測 class の定義のみ）", "#393 parser の出力 schema（型定義）と implementation freeze manifest"],
+    "notUsed": ["個別の held-out row 値", "PLAIN_ROW 32 件の内容・page 別分布", "visual source / render / annotation detail", "held-out への parser 実行・出力"],
+    "premise": "PLAIN_ROW は visual observational class であり、parser taxonomy への mapping は未定義、という境界のみを前提とした"
+  },
+  "schemaFindings": {
+    "gtRowIdentityPrimitives": ["localPdfPath", "physicalPage", "column(LEFT|RIGHT)", "orderInColumn", "requestNumberVisualToken", "codeVisual", "markerVisual", "pageRefVisual", "rowKindVisual(REQUEST_NUMBER_ROW|MARKER_ROW|PLAIN_ROW)"],
+    "gtHasNoRawPosition": "GT は visual のみで記録しており lineIndex / charStart / charEnd / rawSlice を持たない。したがって span / raw slice による GT↔parser の物理対応は schema 上不可能（STOP_GT_SCHEMA_INSUFFICIENT に該当し得る箇所）",
+    "parserIdentityPrimitives": ["localPdfPath", "physicalPage", "column(LEFT|RIGHT|UNSPLIT)", "sourceOrder(column 内。TITLE / abstained も数える)", "rowKind", "rowStartTokenRaw", "codeRaw", "pageRefRaw", "provenance(lineIndex, charStart, charEnd, sourceRawSlice)"],
+    "commonPrimitives": ["localPdfPath", "physicalPage", "row-start token（request 番号 / marker + code）", "pageRef token", "column（parser が LEFT/RIGHT を主張するときのみ）"],
+    "resolution": "token-less な PLAIN_ROW は共通 primitive の page ref + 順序だけでは一意な物理 identity を作れない（page ref は重複する。parser は UNSPLIT）。よって PLAIN_ROW は全ての row-level metric で NOT_COMPARABLE とし、mapping を作らない。token-keyed row（REQUEST / MARKER）は共通 primitive から決定的に対応付けられる"
+  },
+  "comparabilityStates": {
+    "fourStates": ["CORRECT", "INCORRECT", "ABSTAINED", "UNRESOLVED"],
+    "fourStatesNote": "#391 の意味を書き換えない",
+    "orthogonalApplicability": ["COMPARABLE", "NOT_COMPARABLE"],
+    "notComparableRule": "NOT_COMPARABLE は metric ごとの適用可否で、四状態のいずれにも数えず、分子にも分母にも入れない。parser ABSTAINED でも GT UNRESOLVED でもない。件数は別に報告する",
+    "amendmentCheck": "applicability（PLAIN_ROW の NOT_COMPARABLE）は方向として妥当だが、rowCorrespondence が #391 の frozen alignment（token + column + 順序）を変更するため一体で amendment 扱い（STOP_PROTOCOL_AMENDMENT_REQUIRED）"
+  },
+  "normalization": {
+    "purpose": "GT の visual 文字列と parser の raw 文字列を比較するためだけの等価規則。値の補完・修正は行わない",
+    "rules": ["空白の連続は単一空白に畳む（key 比較では空白を除去）", "ハイフン U+2010 / U+2011 / '-' は同一視（#391 REQUEST_TOKEN の文字クラスと同じ）", "括弧 '(' ')' は全角 '（' '）' と同一視（#391 MARKER_TOKEN の文字クラスと同じ）"],
+    "forbidden": ["NFKC 等の Unicode 正規化", "数字の変換", "page ref の補完・数値化"]
+  },
+  "rowCorrespondence": {
+    "unit": "GT の physical row（rowId）と parser の RESOLVED unit",
+    "identityKeys": {
+      "REQUEST": "(localPdfPath, physicalPage, 正規化した request 番号)。page 内で一意な前提。parser 側の重複は 2 件目以降を余剰 unit として扱う",
+      "MARKER": "(localPdfPath, physicalPage, 正規化した marker 括弧文字列, code, 正規化した page ref, 出現順 occurrence)。occurrence は同一 (marker, code, page ref) 内の (LEFT → RIGHT → UNSPLIT, column 内順) の通し番号"
+    },
+    "attributesNotInKey": ["column", "order"],
+    "whyColumnNotInKey": "column を key に入れると wrong column が「欠落 + 余剰」に化け、WRONG_COLUMN_ASSIGNMENT（#391 severe）が判定できなくなる。column と順序は対応付け後に比較する属性とする",
+    "orderCheck": "同一 column の対応済み row 同士で順序が逆転していれば ORDER_INVERSION として件数を記録（descriptive。severe ではない）",
+    "unmatchable": {
+      "gtRowKinds": ["PLAIN_ROW"],
+      "parserUnitKinds": ["TITLE_OR_HEADING", "UNKNOWN_ABSTAINED", "WRAPPED_FRAGMENT 候補の abstention"],
+      "state": "NOT_COMPARABLE",
+      "reason": "対応する GT class が無い（GT は page header 行を row として記録しない。PLAIN_ROW への mapping は作らない）"
+    },
+    "parserOtherCode": "parser の RESOLVED OTHER_CODE row は対応する GT visual class を持たないため、UNRESOLVED（reason: NO_GT_CLASS_FOR_OTHER_CODE）として件数と raw slice を報告する。severe に数えず、evaluation unit の review 対象とする（held-out pool では machine 候補 0）",
+    "noHeuristicTuning": "対応 rule は評価前に固定。held-out の実値を見て調整しない"
+  },
+  "pageLevel": {
+    "PAGE_ABSTAINED": "page outcome = ABSTAINED。当該 page の GT token-keyed row は全て ABSTAINED（reason = page abstention reason）",
+    "ASSEMBLED_SPLIT_and_GT_right_ROWS": "CORRECT（parser の column 主張が GT の右 column 使用と矛盾しない）",
+    "ASSEMBLED_SPLIT_and_GT_right_BLANK": "INCORRECT（右 column を主張したが GT は右 blank）。severe ではなく page-level descriptive family とする",
+    "UNSPLIT_and_GT_right_BLANK": "NOT_COMPARABLE（parser は column を主張しておらず、RIGHT_EMPTY も出していない）",
+    "UNSPLIT_and_GT_right_ROWS": "UNRESOLVED（family: NO_EVIDENCE_BUT_VISUAL_RIGHT_PRESENT。#391 で別計測と定めたもの。severe に数えない）",
+    "GT_page_UNRESOLVED": "UNRESOLVED"
+  },
+  "rowLevelOutcomeForGtTokenKeyedRow": {
+    "scope": "rowKindVisual が REQUEST_NUMBER_ROW または MARKER_ROW の GT row（COMPARABLE）。PLAIN_ROW は全 metric で NOT_COMPARABLE",
+    "orderOfEvaluation": [
+      "P1 page が PAGE_ABSTAINED → ABSTAINED",
+      "P2 parser が UNSPLIT かつ GT page の右 column が ROWS かつ GT row.column = RIGHT → UNRESOLVED（NO_EVIDENCE_BUT_VISUAL_RIGHT_PRESENT）",
+      "P3 identityKey が RESOLVED な parser unit（REQUEST_NUMBER_ROW / MARKER_ROW）と一致 → 一致 unit の column が LEFT/RIGHT で GT と同じなら CORRECT、異なれば INCORRECT（WRONG_COLUMN_ASSIGNMENT、severe）、parser が UNSPLIT なら column は NOT_COMPARABLE として行は CORRECT",
+      "P4 identityKey 不一致で、GT の token 文字列（空白畳み後の `request番号 code` / `marker code`）が別の RESOLVED unit の sourceRawSlice に含まれる → INCORRECT（FALSE_POSITIVE_ROW_ASSEMBLY: 複数 GT row を 1 unit に統合、severe）",
+      "P5 同様に ABSTAINED unit の sourceRawSlice に含まれる → ABSTAINED（unit の reason）",
+      "P6 いずれにも該当しない → INCORRECT（OMITTED_SILENTLY。非 severe。件数を報告）"
+    ],
+    "wrongRowStartClassification": "WRONG_ROW_START_CLASSIFICATION は COMPARABLE な row（REQUEST / MARKER）のみを対象とし、identityKey 不一致の GT row が、もう一方の comparable kind の RESOLVED unit（REQUEST ↔ MARKER）の rowStartTokenRaw と正規化後一致する場合に計上する。PLAIN_ROW・TITLE_OR_HEADING・UNKNOWN_ABSTAINED・OTHER_CODE は対象外（NOT_COMPARABLE）"
+  },
+  "fragmentLevel": {
+    "unit": "GT fragment（ownerRowId, orderInOwner）",
+    "correspondence": "owner row が P3 で対応済みなら parser の `unit.fragments[orderInOwner-1]` と対応する（fragment text の一致は要件にしない）",
+    "outcomes": [
+      "owner が ABSTAINED / UNRESOLVED（P1・P2・P5）→ fragment も同じ状態",
+      "owner 対応済みで parser fragment が存在 → CORRECT",
+      "owner 対応済みで parser fragment が無く、同 column の owner 以降に FRAGMENT_* の ABSTAINED unit がある → ABSTAINED",
+      "owner 対応済みで parser fragment が無く abstention も無い → INCORRECT（OMITTED_SILENTLY。非 severe）",
+      "owner が対応不能（P4・P6）→ UNRESOLVED"
+    ],
+    "wrongFragmentAttachment": "対応済み unit に付いた parser fragment 数が GT の wrappedFragmentCount を超える分、または parser fragment の正規化 text が別 owner の GT fragment と一意に一致し当該 unit の GT fragment とは一致しない場合に WRONG_FRAGMENT_ATTACHMENT（severe）",
+    "textAgreement": "fragment text の一致率は descriptive のみ（transcription 差の影響があるため判定に使わない）"
+  },
+  "provenanceLevel": {
+    "unit": "parser の全 RESOLVED unit と全 attach 済み fragment（GT 不要・機械検証）",
+    "check": "provenance.pdfSha256 / textSha256 が Raw Text manifest と一致し、sourceRawSlice が frozen Raw Text の line[charStart:charEnd]（code point）と一致する",
+    "failure": "PROVENANCE_MISMATCH（severe）"
+  },
+  "severeRules": {
+    "definitionsUnchanged": ["FALSE_POSITIVE_ROW_ASSEMBLY", "WRONG_COLUMN_ASSIGNMENT", "WRONG_FRAGMENT_ATTACHMENT", "PROVENANCE_MISMATCH"],
+    "FALSE_POSITIVE_ROW_ASSEMBLY": "(a) RESOLVED な REQUEST/MARKER unit が GT の identityKey と一致しない（重複 unit を含む）、(b) P4（複数 GT row を 1 unit に統合）。TITLE_OR_HEADING / UNKNOWN_ABSTAINED / OTHER_CODE unit は (a) の対象外。(b) では TITLE_OR_HEADING unit に token が含まれる場合も統合として計上する",
+    "WRONG_COLUMN_ASSIGNMENT": "P3 で column が異なる。UNSPLIT は column を主張しないため対象外",
+    "WRONG_FRAGMENT_ATTACHMENT": "fragmentLevel の定義",
+    "PROVENANCE_MISMATCH": "provenanceLevel の定義",
+    "PLAIN_ROW": "PLAIN_ROW 自体は severe の判定対象にならない（NOT_COMPARABLE）。ただし PLAIN_ROW と同じ物理行に token-keyed row が載る場合の統合は P4 で判定される",
+    "decisionWhenNotDeterminable": "判定不能な場合は resolved にせず UNRESOLVED とする。severe には数えない"
+  },
+  "abstentionHandling": {
+    "distinct": ["parser ABSTAINED（出力状態）", "GT UNRESOLVED（GT 側に確定値なし）", "NOT_COMPARABLE（metric 適用外）"],
+    "rule": "NOT_COMPARABLE は parser abstention ではない。三者を別カウントで報告し、合算しない"
+  },
+  "descriptiveMetrics": {
+    "note": "分子・分母のみ事前固定。閾値は決めない。結果を見て metric を選ばない",
+    "pageResolutionCoverage": "分子 = pageState が ASSEMBLED_* の page、分母 = 23",
+    "physicalRowCoverage": "分子 = P3 に到達（RESOLVED unit と対応）した GT 行、分母 = COMPARABLE な GT 行（REQUEST + MARKER）",
+    "comparableRowClassificationCoverage": "分子 = CORRECT または INCORRECT の GT 行（P3・P4・P6）、分母 = COMPARABLE な GT 行",
+    "fragmentAttachmentCoverage": "分子 = parser fragment と対応した GT fragment、分母 = GT fragment 総数",
+    "alsoReported": ["abstention 件数（reason 別）", "UNRESOLVED 件数（family 別）", "NOT_COMPARABLE 件数（metric 別）", "ORDER_INVERSION", "OMITTED_SILENTLY", "token field agreement（code・page ref・descriptive）", "stratum 別 coverage"]
+  },
+  "acceptanceThresholds": {
+    "status": "UNRESOLVED_ACCEPTANCE_THRESHOLD（変更なし）",
+    "items": ["coverage lower bound", "abstention upper bound", "WRONG_ROW_START_CLASSIFICATION tolerance"],
+    "note": "今回も数値を決めない"
+  },
+  "goStop": {
+    "STOP_SAFETY": "severe error >= 1",
+    "STOP_PROTOCOL": "hash mismatch / contamination / 評価後の rule・contract 変更",
+    "SAFETY_PASS_COVERAGE_REPORTED": "severe = 0 かつ protocol 遵守。sample 内で severe が観測されなかったことのみを意味し、production GO ではない"
+  },
+  "forbiddenPostHocChanges": ["PLAIN_ROW → parser kind の mapping を評価中に追加すること", "対応 rule・正規化 rule・applicability の評価後変更", "parser / GT / preregistration / membership / implementation freeze の変更", "T=2 / minEvidence=2 の変更", "評価結果を見た metric 選択", "candidate の drop / replacement"],
+  "evaluationRun": { "oneShot": true, "heldoutParserExecutions": 0, "heldoutOutputArtifacts": 0, "evaluationPerformed": false, "note": "本 artifact は評価結果の field を持たない" },
+  "claimBoundary": "comparison contract の固定のみ。parser の正しさ・coverage・severe error は何も評価していない。PLAIN_ROW を parser taxonomy に写像していない。個別の GT row 値は閲覧していない（ただし GT は同一 agent が #392 で作成しており記憶としての知識は排除できない）",
+  "unresolved": [
+    "UNRESOLVED_ACCEPTANCE_THRESHOLD（coverage 下限 / abstention 上限 / WRONG_ROW_START_CLASSIFICATION 許容）",
+    "#391 の frozen alignment（row-start token + column + 順序）を本 contract は変更している → amendment。独立した研究単位で設計する",
+    "P4（統合検出）は sourceRawSlice への token 包含で判定するため、preregistered header zone rule により TITLE_OR_HEADING が右 column の row を含む構造的ケースがあれば、評価で severe（STOP_SAFETY）となり得る。これは rule の帰結であり本 protocol で緩和しない",
+    "PLAIN_ROW は全 metric で NOT_COMPARABLE のため、PLAIN_ROW 行に関する parser の誤りは本評価では検出されない（limitation）",
+    "token 一致による対応は、parser / GT の読み取り差（transcription 誤り）を区別できない",
+    "同一 agent が GT を作成しており独立検証ではない"
+  ],
+  "judgment": "STOP_PROTOCOL_AMENDMENT_REQUIRED"
+}
