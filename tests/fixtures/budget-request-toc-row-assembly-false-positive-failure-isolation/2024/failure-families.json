@@ -1,0 +1,194 @@
+{
+ "schema": "budget-request-toc-row-assembly-false-positive-failure-families/v0",
+ "note": "family 化と causal status（観測 table とは分離）。#396 は再判定しない。parser・GT・evaluator・threshold は変更していない。fix simulation はしていない",
+ "frozen": {
+  "evaluationResultSha256": "fcb1e40cc25969748516c4bbe1673d15418051a5d01d912310118abba4d05f66",
+  "heldoutParserOutputSha256": "d95abb76ea63e660189167d6d8d6f8f34e9234cb879be18854b44c8b375b6f6b",
+  "groundTruthSha256": "2e18ecd39fc471256f1a2a70a4e75ad24e958ca4f82cfd233e958f2cdf7c4444"
+ },
+ "accounting": {
+  "severeTotal": 10,
+  "familyCountSum": 10,
+  "unclassified": 0,
+  "uniqueEvidenceIds": 10,
+  "affectedPages": 5,
+  "mechanisticallyExplained": 10,
+  "hypothesized": 0,
+  "unresolved": 0
+ },
+ "assignment": [
+  {
+   "evidenceId": "FP-01",
+   "family": "HEADER_ZONE_WHOLE_LINE_CONTAINS_RIGHT_COLUMN_ROW_START"
+  },
+  {
+   "evidenceId": "FP-02",
+   "family": "HEADER_ZONE_WHOLE_LINE_CONTAINS_RIGHT_COLUMN_ROW_START"
+  },
+  {
+   "evidenceId": "FP-03",
+   "family": "HEADER_ZONE_WHOLE_LINE_CONTAINS_RIGHT_COLUMN_ROW_START"
+  },
+  {
+   "evidenceId": "FP-04",
+   "family": "HEADER_ZONE_WHOLE_LINE_CONTAINS_RIGHT_COLUMN_ROW_START"
+  },
+  {
+   "evidenceId": "FP-05",
+   "family": "HEADER_ZONE_WHOLE_LINE_CONTAINS_RIGHT_COLUMN_ROW_START"
+  },
+  {
+   "evidenceId": "FP-06",
+   "family": "HEADER_ZONE_WHOLE_LINE_CONTAINS_RIGHT_COLUMN_ROW_START"
+  },
+  {
+   "evidenceId": "FP-07",
+   "family": "HEADER_ZONE_WHOLE_LINE_CONTAINS_RIGHT_COLUMN_ROW_START"
+  },
+  {
+   "evidenceId": "FP-08",
+   "family": "HEADER_ZONE_WHOLE_LINE_CONTAINS_RIGHT_COLUMN_ROW_START"
+  },
+  {
+   "evidenceId": "FP-09",
+   "family": "HEADER_ZONE_WHOLE_LINE_CONTAINS_RIGHT_COLUMN_ROW_START"
+  },
+  {
+   "evidenceId": "FP-10",
+   "family": "HEADER_ZONE_WHOLE_LINE_CONTAINS_RIGHT_COLUMN_ROW_START"
+  }
+ ],
+ "families": [
+  {
+   "label": "HEADER_ZONE_WHOLE_LINE_CONTAINS_RIGHT_COLUMN_ROW_START",
+   "observableDefinition": "parser page が ASSEMBLED_SPLIT（右 band E 解決済み）で、E より右に GT の右 column row の row-start token を含む raw line が、最初の row-start 行より前（header zone）にあり、whole-line の TITLE_OR_HEADING 1 unit（column=UNSPLIT, row-start token なし）として出力された。token は E 以右にあり boundary crossing はない",
+   "count": 10,
+   "pages": 5,
+   "evidenceIds": [
+    "FP-01",
+    "FP-02",
+    "FP-03",
+    "FP-04",
+    "FP-05",
+    "FP-06",
+    "FP-07",
+    "FP-08",
+    "FP-09",
+    "FP-10"
+   ],
+   "commonObservablePattern": "全件で unit は TITLE_OR_HEADING・UNSPLIT・rowStartTokenRaw=null、GT の右 row は 1 件の token を含み、同一 raw line の左側は GT の PLAIN_ROW（同 order の LEFT row）。header zone 内の同 page の最初の row-start 行は line 11 / 10、問題の行はそれより前（line 7 / 9）。1 unit あたり severe 1 件、1 page あたり 2 件",
+   "subVariantsObservedOnly": {
+    "byTokenKind": {
+     "MARKER_TOKEN": 3,
+     "REQUEST_TOKEN": 7
+    },
+    "byHeaderLineOrderOnPage": {
+     "line#1": 5,
+     "line#2": 5
+    },
+    "note": "同一機構内の観測属性であり独立 family ではない"
+   },
+   "counterexample": {
+    "description": "右 band が解決された他の ASSEMBLED_SPLIT page（severe 0）では、header zone 内で E 以右に内容を持つ行は page title / 列見出し行のみ（GT の row token を含まない）",
+    "pages": [
+     {
+      "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "physicalPage": 5,
+      "headerZoneLinesRightOfE": [
+       {
+        "lineIndex": 0,
+        "text": "3"
+       },
+       {
+        "lineIndex": 1,
+        "text": "求                      区                "
+       },
+       {
+        "lineIndex": 2,
+        "text": "号"
+       }
+      ]
+     },
+     {
+      "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "physicalPage": 6,
+      "headerZoneLinesRightOfE": [
+       {
+        "lineIndex": 1,
+        "text": "求                       区               "
+       },
+       {
+        "lineIndex": 2,
+        "text": "号"
+       }
+      ]
+     },
+     {
+      "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+      "physicalPage": 5,
+      "headerZoneLinesRightOfE": [
+       {
+        "lineIndex": 0,
+        "text": "3"
+       },
+       {
+        "lineIndex": 1,
+        "text": "求                    区                  "
+       },
+       {
+        "lineIndex": 2,
+        "text": "号"
+       }
+      ]
+     },
+     {
+      "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+      "physicalPage": 4,
+      "headerZoneLinesRightOfE": [
+       {
+        "lineIndex": 1,
+        "text": "区                    分       ページ"
+       }
+      ]
+     }
+    ]
+   },
+   "parserRuleRelation": "#391 preregistration の header zone rule（最初の row-start 行の直前まで。header zone の行は分割せず whole-line を TITLE_OR_HEADING として保持）と #393 の実装どおりの出力。row-start 判定は行頭 token のみで、行頭が「令和…」の行は row-start ではないため header zone が延びる。実装の逸脱ではない",
+   "evaluatorArtifactPossibility": "10 件とも merge predicate の token は E 以右の GT 右 row の token で、境界の数字 lookbehind/lookahead に適合し、同一 raw line の左側は GT の PLAIN_ROW。文字列の偶然一致ではなく、複数の GT visual row（左 PLAIN_ROW + 右 row）が 1 parser unit の sourceRawSlice に含まれる。predicate-only の疑いは 0 件",
+   "causalStatus": "MECHANISTICALLY_EXPLAINED",
+   "causalBasis": "frozen parser の header zone 経路（行頭が row-start でない行は header zone として whole-line 保持）と保存済み出力（問題の行はいずれも最初の非 TITLE unit より前の TITLE unit）から、出力に至る機構を追跡できる。同一機構が 10 件全てに当てはまる",
+   "limitations": [
+    "同一 raw line の左 PLAIN_ROW と右 row が視覚上も同一 baseline かは目視していない（family 判定には不要）",
+    "なぜこの page の右 column が左より上から始まるかという layout 上の理由は仮説の対象で、本 unit では扱わない"
+   ]
+  }
+ ],
+ "adjacentObservationsNotInSevere": [
+  {
+   "note": "同じ header zone 機構で whole-line に取り込まれた右 column の wrapped fragment 行（token を持たないため merge predicate の対象外）",
+   "cases": [
+    {
+     "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+     "physicalPage": 3,
+     "lineIndex": 10,
+     "text": "に必要な経費"
+    }
+   ],
+   "status": "OBSERVED_PATTERN（#396 の severe 件数には含まれない）"
+  }
+ ],
+ "visualInspection": {
+  "performed": false,
+  "reason": "保存済み artifact のみで family 判定が一意にできたため escalation 不要",
+  "pages": [],
+  "gtChanged": false
+ },
+ "evaluatorPredicateCheck": {
+  "physicalMergeSupported": 10,
+  "predicateOnlyPossibility": 0,
+  "unresolved": 0,
+  "note": "#396 は frozen contract 上 severe のまま再判定しない"
+ },
+ "nextResearchQuestion": "右 band E が解決された page で、header zone の行（最初の row-start 行より前）が右 column の row-start token を含むかどうかを、preregistered primitive（E、row-start token pattern）だけから区別できるか。別 unit で仮説形成する（本 unit は fix を含まない）",
+ "judgment": "READY_FOR_FALSE_POSITIVE_HYPOTHESIS_FORMATION"
+}
