@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261008_1952_Budget_Request_TOC_A_Layer_Row_Assembly_One_Shot_Frozen_Evaluation.md](20261008_1952_Budget_Request_TOC_A_Layer_Row_Assembly_One_Shot_Frozen_Evaluation.md) — TOC A層row assembly 23 held-outへの一回限りformal評価。protocol compliant・execution 1回。severe 10件(FALSE_POSITIVE/MERGE、5page)・他severe 0 → STOP_SAFETY(保存してSTOP)
 - [20261008_1931_Budget_Request_TOC_A_Layer_Row_Assembly_Evaluation_Protocol_Amendment.md](20261008_1931_Budget_Request_TOC_A_Layer_Row_Assembly_Evaluation_Protocol_Amendment.md) — #394 STOPを受けた評価手順amendment。column/順序をidentityから外しkey group件数比較で重複・欠落・余剰・統合を検出、PLAIN_ROWはNOT_COMPARABLE(mappingなし)、header-zone例外なし → READY_..._AFTER_AMENDMENT
 - [20261008_1837_Budget_Request_TOC_A_Layer_Row_Assembly_Evaluation_Protocol_Clarification.md](20261008_1837_Budget_Request_TOC_A_Layer_Row_Assembly_Evaluation_Protocol_Clarification.md) — TOC A層row assembly 評価contract案(凍結せず)。PLAIN_ROWはmapping無し・全row-level metricでNOT_COMPARABLE、row対応はtoken key(column/orderは対応後の属性)、severe判定rule、coverage分子分母 → STOP_PROTOCOL_AMENDMENT_REQUIRED(#391のalignmentを変更するためamendmentが必要)
 - [20261008_1810_Budget_Request_TOC_A_Layer_Row_Assembly_Parser_Implementation.md](20261008_1810_Budget_Request_TOC_A_Layer_Row_Assembly_Parser_Implementation.md) — TOC A層row assembly parser実装。#391 ruleのまま(T=2/minEvidence=2)・development34pageのみregression・held-out実行0・PLAIN_ROW mappingは実装に不要だが評価前に要clarification → READY_FOR_TOC_ROW_ASSEMBLY_FROZEN_EVALUATION
