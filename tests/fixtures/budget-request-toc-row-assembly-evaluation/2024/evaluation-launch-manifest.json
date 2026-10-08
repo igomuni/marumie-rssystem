@@ -1,0 +1,30 @@
+{
+ "schema": "budget-request-toc-row-assembly-evaluation-launch-manifest/v0",
+ "status": "EVALUATOR_FROZEN_BEFORE_LAUNCH",
+ "createdAt": "2026-10-08T19:52:13+09:00",
+ "baseMainSha": "8d41f9a58863b08063c2036e3fea681cd8f16a24",
+ "evaluatorCommit": "abaa58119840db84b68c782f4593bdc3eda550f0",
+ "frozenDependencyHashes": {
+  "preregistrationSha256": "0cfec657698f699bc3686a7944439db918e7515e439c74457d9c6458e6b42ac8",
+  "gtFreezeManifestSha256": "ea924b89f3d5a140a9361b96544bfdbc33e7bea42966e3c39fda59bf98294949",
+  "groundTruthSha256": "2e18ecd39fc471256f1a2a70a4e75ad24e958ca4f82cfd233e958f2cdf7c4444",
+  "implementationFreezeManifestSha256": "9d5edca2f902779d18f7c95c3d48e8f4272ea92999f3140b564abb2cb52c05a0",
+  "parserSourceSha256": "f3b726f8054340422eeb838187fed91b3435f7201dc39abfd4d40f382c9636dd",
+  "ruleConfigSha256": "6a0565e61162dd76c702ef0c997cb6f9aec79f1a6f17e9f2c872ecd2e5014251",
+  "amendmentSha256": "958985cc7d895071bb77ad6d57a45de0e82c65677ea45828fb3e916389933f00",
+  "stopArtifact394Sha256": "bd85b5137de0643dc48f224c6bb7bdb8171d96b50de22ed32c8a14710c9bba54",
+  "membershipDigestSha256": "8fa5a8a8444be31a637fae618235b0a77c6b37745441edc06534fe63c5a44156",
+  "rawTextCorpusDigestSha256": "7c6d2dcec1f4bec0ca37a1b3aa391adce7d99b93ac4642c74cab7a328dac4052",
+  "pageClassificationCorpusDigestSha256": "39464fc76b1b83272d5852d3db1db776e22bb570ee0f6b7ca4d1da64de4a5ecc"
+ },
+ "evaluatorSha256": {
+  "scripts/pipeline-v2/lib/budget-request-toc-row-assembly-evaluator.ts": "d5bb1708223255c93351fdc3cdb2c1e3aeebda8a4d5c63f84584c58a0998eb96",
+  "scripts/pipeline-v2/lib/budget-request-toc-row-assembly-evaluator.test.ts": "f08b8c1e56aae3e6482344a9a188cf7807b2651451469d080d54f4606a7440f8",
+  "scripts/pipeline-v2/run-budget-request-toc-row-assembly-heldout-evaluation.ts": "f69f67b89f6d07503b16ff8ec42b9d891752f89e2cf351944183ee6ee88f4b45"
+ },
+ "evaluatorConfigSha256": null,
+ "executionCommand": "npx tsx scripts/pipeline-v2/run-budget-request-toc-row-assembly-heldout-evaluation.ts --execute",
+ "formalExecutionCountBefore": 0,
+ "heldoutParserOutputPreexisting": false,
+ "protocolClaim": "23 held-out page 全件への一回限りの formal execution。評価中・評価後に parser / GT / preregistration / amendment / membership / matching rule / metric を変更しない。retry しない"
+}
