@@ -10,10 +10,10 @@
   "membershipFileSha256": "7c238b9b6c756ebc9baec46f47f33db1706fee8ca40d87b1eb6d87bcf6538d06",
   "membershipDigestSha256": "06c2e68d7ac178e7e0561d16976c47936ab9d52b59d91710cab145fa8822ab28",
   "membershipFreezeManifestSha256": "635a236cce52cf8ec7a038c02f650713b84e6894146ca9385481e9605dd625b5",
-  "groundTruthSha256": "0f7584487f54cffe44b3e10e36f1368006850619d5f009e7bab432ab43eb1e81",
-  "annotationLedgerSha256": "207e6954abc46563d7e53ee099b8bde0a7d56b4d98f85a27d5fa8860eb4066ff",
+  "groundTruthSha256": "693ce90d0f289139d96771da1737c762a05c616c2a3afd8103a0f4979063705f",
+  "annotationLedgerSha256": "49d48e46ad2b1428ce5719e78fcdde4adb443c3f41283618523fb44d63d881f1",
   "renderManifestSha256": "9ed0844b5a394472b96194e6a827ed0ea892f543ed358b1d173ed6d33ec0ec81",
-  "visualGtSourceSha256": "521731ad98ba17a60d8d3e74e8a2d0ef06b8edd19700e05bef8bf5107b4df67c",
+  "visualGtSourceSha256": "a514d97176908a61aa0600277da11c1816eb12cde217ecc6ea5a89945171073e",
   "h1PreregistrationSha256": "0c3a377ba9d32ec55701f8d0982ff9a48e8cd9f16ba8c81927fcedffcdec1b27",
   "parser393SourceSha256": "f3b726f8054340422eeb838187fed91b3435f7201dc39abfd4d40f382c9636dd"
  },
@@ -155,9 +155,7 @@
   "unresolvedFragments": 0,
   "unreadableFields": 0
  },
- "schemaDeviations": [
-  "REQUEST / MARKER row の titleVisual は転記していない（#392 schema 継承。評価 contract が title を使わない）。PLAIN_ROW と fragment は転記"
- ],
+ "postReviewAmendment": "ledger.postReviewAmendment を参照（#401 review finding による REQUEST / MARKER row の title 追記。formal evaluation 前・H1 未実行の時点での visual GT correction）",
  "contamination": false,
  "firewall": {
   "h1ExecutionsOnNewHeldout": 0,

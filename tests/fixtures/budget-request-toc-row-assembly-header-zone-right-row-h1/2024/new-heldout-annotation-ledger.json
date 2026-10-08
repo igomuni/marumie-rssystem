@@ -9,6 +9,19 @@
   "annotation correction: 0（freeze 前に visual 以外の根拠で値を直していない）"
  ],
  "annotationCorrectionsBeforeFreeze": 0,
+ "postReviewAmendment": {
+  "trigger": "#401 の review finding（指示書 §7 の title/body 転記要件に対し、初版は REQUEST / MARKER row の title を省略していた）",
+  "action": "原本 PDF の render（110dpi、初版と同一 PNG）を再び目視し、REQUEST / MARKER 560 row の title を visual のみで追記。既存の token・page ref・column・順序は変更していない",
+  "changedFields": [
+   "titleVisual（REQUEST / MARKER 560 row を追加。PLAIN_ROW・fragment は初版のまま）"
+  ],
+  "unchangedFields": [
+   "row の identity・column・orderInColumn・token・code・marker・pageRef・fragment・counts"
+  ],
+  "h1OrParserOutputConsulted": false,
+  "formalEvaluationBeforeAmendment": 0,
+  "h1ExecutionsOnNewHeldoutBeforeAmendment": 0
+ },
  "supplementalRenders": [
   {
    "memberIndex": 4,

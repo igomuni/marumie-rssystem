@@ -10,7 +10,7 @@
 - 原本 PDF を read-only で `pdftoppm` 110dpi で render して目視（#392 と同条件）。PNG は repo に含めず sha256 のみ render manifest に記録。`pdftotext`・parser・H1 の出力は使用・表示していない。GT の値は視覚のみ。
 - supplemental render: 1 page（`jbaudit … 20230906_02.pdf` p3）。page ref 列が黒枠内の反転表示で 110dpi では判読が不安定だったため、その列を 300 / 600dpi で crop して目視した（理由は ledger）。見えた値のみ転記。
 - #392 の GT schema を継承（REQUEST_NUMBER_ROW / MARKER_ROW / PLAIN_ROW。PLAIN_ROW は visual-only で parser mapping なし）。H1 固有の class・label は作っていない。page ref は見えた表記のまま（`電 1` `原 1` の prefix も保持）。
-- **schema 上の範囲限定（要確認）**: 指示書 §7 は row の title 転記を最低限としているが、#392 の schema を継承して REQUEST / MARKER row の title は転記していない（評価 contract #395 が title を使わず、転記しても評価に寄与しないため）。PLAIN_ROW と wrapped fragment は title / text を転記した。
+- **schema と title 転記（review 対応）**: #392 の row は `titleVisual` を持たないため、本 GT は #392 schema を**拡張して `titleVisual` を追加**した。指示書 §7 は title/body の転記を最低限としているため、**全 614 row（REQUEST / MARKER / PLAIN）で転記**した。初版（#401 初回 push）は REQUEST / MARKER の title を省略していたが、review finding により、formal evaluation 前・H1 未実行の時点で、同じ 110dpi render を visual のみで再度目視して追記した（`ledger.postReviewAmendment`。token・page ref・column・順序・fragment・件数は不変）。折返しのある row の `titleVisual` は 1 行目に見えた text のみで、続きは fragment の `textVisual`。
 - quality pass は visual GT の内部整合のみ（row ID 一意・(column, order) 一意・要求番号の連番・ledger 集計との一致・fragment owner の存在・render と member の identity 一致）。annotation correction は 0。parser / H1 との比較・trigger 数え上げはしていない。
 
 ## GT の記述統計（GT のみから。H1 trigger の集計はしていない）

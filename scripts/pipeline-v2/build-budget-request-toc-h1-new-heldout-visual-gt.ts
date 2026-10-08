@@ -49,11 +49,11 @@ function build() {
         const rowId = `${c.localPdfPath}#${c.physicalPage}:${col}:${order}`;
         const base = { rowId, column: col, orderInColumn: order, wrappedFragmentCount: 0, unreadable: false };
         let r: Row;
-        if (f[0] === 'Q') r = { ...base, rowKindVisual: 'REQUEST_NUMBER_ROW', requestNumberVisualToken: f[1].replace(/c$/, ''), requestNumberCircledVisual: f[1].endsWith('c'), codeVisual: f[2], markerVisual: null, pageRefVisual: f[3], titleVisual: null, fieldStates: {} };
-        else if (f[0] === 'M') r = { ...base, rowKindVisual: 'MARKER_ROW', requestNumberVisualToken: null, requestNumberCircledVisual: null, codeVisual: f[1], markerVisual: `（${f[2]}）`, pageRefVisual: f[3], titleVisual: null, fieldStates: {} };
+        if (f[0] === 'Q') r = { ...base, rowKindVisual: 'REQUEST_NUMBER_ROW', requestNumberVisualToken: f[1].replace(/c$/, ''), requestNumberCircledVisual: f[1].endsWith('c'), codeVisual: f[2], markerVisual: null, pageRefVisual: f[3], titleVisual: f.slice(4).join(':') || null, fieldStates: {} };
+        else if (f[0] === 'M') r = { ...base, rowKindVisual: 'MARKER_ROW', requestNumberVisualToken: null, requestNumberCircledVisual: null, codeVisual: f[1], markerVisual: `（${f[2]}）`, pageRefVisual: f[3], titleVisual: f.slice(4).join(':') || null, fieldStates: {} };
         else if (f[0] === 'P') r = { ...base, rowKindVisual: 'PLAIN_ROW', requestNumberVisualToken: null, requestNumberCircledVisual: null, codeVisual: null, markerVisual: null, pageRefVisual: f[1], titleVisual: f.slice(2).join(':'), fieldStates: {} };
         else throw new Error(`bad item ${it}`);
-        r.fieldStates = { requestNumber: r.requestNumberVisualToken ? 'PRESENT_READABLE' : 'ABSENT_BLANK', code: r.codeVisual ? 'PRESENT_READABLE' : 'ABSENT_BLANK', marker: r.markerVisual ? 'PRESENT_READABLE' : 'ABSENT_BLANK', pageRef: r.pageRefVisual ? 'PRESENT_READABLE' : 'ABSENT_BLANK', title: r.titleVisual ? 'PRESENT_READABLE' : 'NOT_RECORDED' };
+        r.fieldStates = { requestNumber: r.requestNumberVisualToken ? 'PRESENT_READABLE' : 'ABSENT_BLANK', code: r.codeVisual ? 'PRESENT_READABLE' : 'ABSENT_BLANK', marker: r.markerVisual ? 'PRESENT_READABLE' : 'ABSENT_BLANK', pageRef: r.pageRefVisual ? 'PRESENT_READABLE' : 'ABSENT_BLANK', title: r.titleVisual ? 'PRESENT_READABLE' : 'ABSENT_BLANK' };
         rows.push(r); owner = r;
       }
     }
@@ -80,7 +80,7 @@ function build() {
     schema: 'budget-request-toc-h1-new-heldout-visual-gt/v0',
     scope: 'H1 新 held-out 25 page の Visual GT。PDF の視覚観察のみ（pdftotext・parser・H1 出力は未使用・未観察）。#392 の GT schema を継承。評価結果ではない',
     inheritedSchema: 'budget-request-toc-row-assembly-visual-gt/v0（#392）。rowKindVisual は REQUEST_NUMBER_ROW / MARKER_ROW / PLAIN_ROW（visual-only。parser mapping なし）',
-    schemaNotes: ['titleVisual は PLAIN_ROW と wrapped fragment のみ転記。REQUEST / MARKER row の title は #392 schema と同様に転記しない（評価 contract #395 が title を使わないため。指示書 §7 の title 転記要件に対する意図的な範囲限定として manifest に明記）', 'pageRefVisual は見えた表記のまま（prefix 付きの「電 1」「原 1」もそのまま。正規化・補完なし）', 'requestNumberCircledVisual は丸囲みが見えたか（復元・推測なし）', 'fragment の ownerStatus は UNIQUE / AMBIGUOUS / NO_SAFE_OWNER。本 GT では全て UNIQUE'],
+    schemaNotes: ['#392 の GT schema を拡張して titleVisual を追加した（#392 の row は titleVisual を持たない）。指示書 §7 の title/body 転記要件に従い、全 row（REQUEST / MARKER / PLAIN）で titleVisual を転記した。折返しのある row の titleVisual は 1 行目に見えた text のみで、続きは fragment の textVisual に別記録', 'pageRefVisual は見えた表記のまま（prefix 付きの「電 1」「原 1」もそのまま。正規化・補完なし）', 'requestNumberCircledVisual は丸囲みが見えたか（復元・推測なし）', 'fragment の ownerStatus は UNIQUE / AMBIGUOUS / NO_SAFE_OWNER。本 GT では全て UNIQUE', '#401 の review finding により、初版（title は PLAIN_ROW と fragment のみ）に対して REQUEST / MARKER row の title を visual のみで追記した（postReviewAmendment）'],
     membershipDigestSha256: mem.digestSha256,
     gtSource: 'new-heldout-visual-gt-source.txt を本 script で変換',
     enums: { rowKindVisual: ['REQUEST_NUMBER_ROW', 'MARKER_ROW', 'PLAIN_ROW'], fieldState: ['PRESENT_READABLE', 'ABSENT_BLANK', 'PRESENT_UNREADABLE', 'AMBIGUOUS', 'NOT_APPLICABLE', 'NOT_RECORDED'], rightColumnVisual: ['ROWS', 'BLANK_NO_ROWS', 'AMBIGUOUS'], fragmentOwnerStatus: ['UNIQUE', 'AMBIGUOUS', 'NO_SAFE_OWNER'] },
@@ -95,6 +95,7 @@ function build() {
     recordedAt, recordedAtNote: '記録時刻は GT 組立時刻。page ごとの目視時刻は取得していない（同一 session）',
     qualityPass: ['visual 内部整合のみ: row identity 一意・(column, orderInColumn) 一意・要求番号が page 内で連番・ledger 集計 = GT 集計・fragment owner が存在・render と member の identity 一致', 'annotation correction: 0（freeze 前に visual 以外の根拠で値を直していない）'],
     annotationCorrectionsBeforeFreeze: 0,
+    postReviewAmendment: { trigger: '#401 の review finding（指示書 §7 の title/body 転記要件に対し、初版は REQUEST / MARKER row の title を省略していた）', action: '原本 PDF の render（110dpi、初版と同一 PNG）を再び目視し、REQUEST / MARKER 560 row の title を visual のみで追記。既存の token・page ref・column・順序は変更していない', changedFields: ['titleVisual（REQUEST / MARKER 560 row を追加。PLAIN_ROW・fragment は初版のまま）'], unchangedFields: ['row の identity・column・orderInColumn・token・code・marker・pageRef・fragment・counts'], h1OrParserOutputConsulted: false, formalEvaluationBeforeAmendment: 0, h1ExecutionsOnNewHeldoutBeforeAmendment: 0 },
     supplementalRenders: SUPP,
     pages: pages.map((p, i) => ({
       index: i, localPdfPath: p.localPdfPath, pdfSha256: p.pdfSha256, physicalPage: p.physicalPage, textSha256: p.textSha256, classifierSource: p.classifierSource,
@@ -139,7 +140,7 @@ if (FREEZE) {
     annotationProtocol: '#392 の Visual GT protocol を継承（PDF visual のみ・blank→0 / 補完 / raw text / parser 参照の禁止・unreadable は推測しない）',
     renderProtocol: 'pdftoppm 110dpi 全 25 page。supplemental: 1 page の page-ref 列を 300 / 600dpi crop（理由は ledger）',
     gtSummary: counts,
-    schemaDeviations: ['REQUEST / MARKER row の titleVisual は転記していない（#392 schema 継承。評価 contract が title を使わない）。PLAIN_ROW と fragment は転記'],
+    postReviewAmendment: 'ledger.postReviewAmendment を参照（#401 review finding による REQUEST / MARKER row の title 追記。formal evaluation 前・H1 未実行の時点での visual GT correction）',
     contamination: false, firewall: { h1ExecutionsOnNewHeldout: 0, parser393ExecutionsOnNewHeldout: 0, triggerCensus: 0, parserOutputViewed: false, h1SpecificLabels: false, rawTextUsedForGtValues: false, pdftotextDisplayed: false },
     formalEvaluationCount: { heldoutParserExecutionsTotal: 1, note: '#396 のみ。本 unit では増えていない' },
     unresolvedOrUnreadable: { unresolvedRows: 0, unreadableFields: 0, note: 'formal evaluation の可能性に影響する未解決はない' },

@@ -64,6 +64,9 @@ describe('H1 新 held-out visual GT freeze の integrity（visual-only。H1 / pa
     expect(ledger.pages.reduce((a: number, p: { circledCount: number }) => a + p.circledCount, 0)).toBe(gt.counts.circledRequestNumbers);
     expect(man.gtSummary).toEqual(gt.counts);
     expect(all.filter(r => r.rowKindVisual === 'PLAIN_ROW').every(r => r.requestNumberVisualToken === null)).toBe(true);
+    for (const r of all as unknown as { rowKindVisual: string; titleVisual: string | null; fieldStates: Record<string, string> }[]) { expect(typeof r.titleVisual).toBe('string'); expect((r.titleVisual as string).length).toBeGreaterThan(0); expect(r.fieldStates.title).toBe('PRESENT_READABLE'); }
+    expect(ledger.postReviewAmendment.changedFields.join()).toMatch(/titleVisual/);
+    expect(ledger.postReviewAmendment).toMatchObject({ h1OrParserOutputConsulted: false, formalEvaluationBeforeAmendment: 0, h1ExecutionsOnNewHeldoutBeforeAmendment: 0 });
   });
   it('render manifest が 25 page 全件を 110dpi で持ち、PDF hash が Raw Text manifest と一致し、supplemental は ledger に記録されている', () => {
     expect(render.renders).toHaveLength(25);
