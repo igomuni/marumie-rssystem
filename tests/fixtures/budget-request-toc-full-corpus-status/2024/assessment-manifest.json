@@ -1,0 +1,44 @@
+{
+ "schema": "budget-request-toc-full-corpus-status-assessment-manifest/v0",
+ "status": "POST_HOC_FULL_CORPUS_STATUS_ASSESSMENT",
+ "createdAt": "2026-10-09T08:02:58+09:00",
+ "baseMainSha": "a59f6e2571d2297e2855e0b2418cd328175a3a78",
+ "h1SourceSha256": "ea6af6debefc6c092c3725fc5e37f8ea7a53658fb24d876c2f725e33c6178343",
+ "parser393SourceSha256": "f3b726f8054340422eeb838187fed91b3435f7201dc39abfd4d40f382c9636dd",
+ "evaluatorSourceSha256": "d5bb1708223255c93351fdc3cdb2c1e3aeebda8a4d5c63f84584c58a0998eb96",
+ "partitions": {
+  "development": {
+   "count": 34,
+   "digestSha256": "c7eb0269e648ece613c66c54130bfdea0902b8b473863910174db50b2bb97056"
+  },
+  "firstHeldout": {
+   "count": 23,
+   "membershipDigestSha256": "8fa5a8a8444be31a637fae618235b0a77c6b37745441edc06534fe63c5a44156"
+  },
+  "newHeldout": {
+   "count": 25,
+   "membershipDigestSha256": "06c2e68d7ac178e7e0561d16976c47936ab9d52b59d91710cab145fa8822ab28"
+  },
+  "total": 82,
+  "overlaps": 0
+ },
+ "formalResultHashes": {
+  "result396": "fcb1e40cc25969748516c4bbe1673d15418051a5d01d912310118abba4d05f66",
+  "result402": "7b024a25dd3f62b4987126fd275f9275b4afbf40b7569df490175fb9c83f2283",
+  "newHeldoutH1Output402": "64f344ff43728b8957fe695046a5a60ac8951703824051bc06a83078f257f366"
+ },
+ "outputHashes": {
+  "fullCorpusH1Output": "7d31dbb5e03b5c1984b2aa1af2c7f2ae09d74d3d213f673ee9f5f65b3e4f2316",
+  "fullCorpusStatus": "3f2f8914d39633dc86f64e96367f31e43a2ade6ee3246befa76190aab9614424",
+  "humanReviewQueue": "8a26b91c83f64f799d10246f3af12920f66bdec80d3af405deb86c4d98b93221"
+ },
+ "assessmentSources": {
+  "runner": "7215a0ffea3cb586340c95fbe9f4020b8ff2ec17868b027c323ebf10ba5c0cc4",
+  "helper": "4df1855961efb85acd799c1fe7d0e92a1073e8bd7f59582d437d15dca64739be"
+ },
+ "deterministicRerunIdentical": true,
+ "new25OutputIdenticalToFormal402Output": true,
+ "h1ExecutionsOnFullCorpus": "POST_HOC（formal evaluation ではない。one-shot 制約なし）",
+ "claimBoundary": "POST_HOC の機械的な現状地図。formal held-out evaluation ではない（#396 / #402 の formal result は不変・再判定なし）。正しさの証明・production GO・B 層 GO ではない。GT のない development 34 page を correct とは判定していない。failure の原因は決めていない",
+ "judgment": "READY_FOR_HUMAN_FAILURE_ISOLATION_REVIEW"
+}
