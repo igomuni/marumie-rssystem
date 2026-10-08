@@ -1,0 +1,63 @@
+{
+ "schema": "budget-request-toc-header-zone-h1-development-result/v0",
+ "scope": "explored development 34 page のみ。#396 の held-out 23 と将来 held-out には未実行。formal evaluation ではない。visual GT は作らない",
+ "h1": {
+  "implementation": "scripts/pipeline-v2/lib/budget-request-toc-row-assembly-h1.ts",
+  "sourceSha256": "ea6af6debefc6c092c3725fc5e37f8ea7a53658fb24d876c2f725e33c6178343",
+  "ruleConfigSha256": "6a0565e61162dd76c702ef0c997cb6f9aec79f1a6f17e9f2c872ecd2e5014251",
+  "baseline393SourceSha256": "f3b726f8054340422eeb838187fed91b3435f7201dc39abfd4d40f382c9636dd",
+  "preregistrationSha256": "0c3a377ba9d32ec55701f8d0982ff9a48e8cd9f16ba8c81927fcedffcdec1b27"
+ },
+ "population": {
+  "developmentPages": 34,
+  "heldout396Executed": 0,
+  "futureHeldoutExecuted": 0
+ },
+ "census": {
+  "triggerLines": 19,
+  "triggerPages": 10,
+  "tokenTypes": {
+   "REQUEST": 12,
+   "MARKER": 7,
+   "OTHER_CODE": 0
+  },
+  "negativeControlLines": 50
+ },
+ "devSyntheticOnly": false,
+ "metrics": {
+  "primarySafety": {
+   "falseSplitCount": 0,
+   "provenanceMismatch": 0,
+   "unrelatedRowOutputChanges": 0,
+   "unexpectedPageStateChanges": 0,
+   "otherUndeclaredDifferences": 0
+  },
+  "primaryTarget": {
+   "eligibleTriggerCount": 19,
+   "expectedSplitCount": 19,
+   "actualSplitCount": 19,
+   "triggerMismatches": 0
+  },
+  "secondary": {
+   "abstentionDelta": {},
+   "leftTitleCount": 19,
+   "rightKindDistribution": {
+    "REQUEST_NUMBER_ROW": 12,
+    "MARKER_ROW": 7
+   },
+   "negativeControlLines": 50,
+   "tokenlessLimitationRemains": "negativeControlLines が whole-line のまま（H1 は token なし行を分割しない）",
+   "declaredDownstreamFragmentOwnerEffects": 0
+  }
+ },
+ "falsification": {
+  "safetyRegression": 0,
+  "triggerImplementationMismatch": 0
+ },
+ "differentialSummary": {
+  "identicalToBaselinePages": 24,
+  "pagesWithDifferences": 10
+ },
+ "judgment": "READY_FOR_H1_DEVELOPMENT_FREEZE_AND_NEW_HELDOUT_GT",
+ "claimBoundary": "development 結果のみ。H1 の安全性・有効性の主張は行わない（DEV_SYNTHETIC_ONLY の場合は特に development corpus に positive evidence がない）。#396 の severe 10 件が直るかは確認していない"
+}
