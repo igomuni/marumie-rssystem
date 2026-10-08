@@ -1,0 +1,137 @@
+{
+  "schema": "budget-request-toc-row-assembly-header-zone-right-row-h1-preregistration/v0",
+  "status": "H1_PREREGISTERED_FROZEN",
+  "createdAt": "2026-10-08T20:23:28+09:00",
+  "baseMainSha": "c3d8f25d99924532a7864c01544013c9aa367638",
+  "scope": "#397 で isolate した単一 family の修正仮説 H1 の事前固定（仮説・trigger・non-trigger・LEFT/RIGHT 処理・反証条件・metric・将来の held-out 選定 protocol）。parser は変更しない。development 評価も新しい held-out 評価もしない。H1 を反証可能な形に凍結するのみ",
+  "dependencyHashes": {
+    "evaluationResult396Sha256": "fcb1e40cc25969748516c4bbe1673d15418051a5d01d912310118abba4d05f66",
+    "heldoutParserOutput396Sha256": "d95abb76ea63e660189167d6d8d6f8f34e9234cb879be18854b44c8b375b6f6b",
+    "isolationObservations397Sha256": "ec58bbb2564a5068d9feb21044f5097dfc6c88bcdb63de828ef5a9da6ebe27ad",
+    "isolationFamilies397Sha256": "000857fad4f2ef1328b037ac2e73d7b72c5b839cb67815c236344dd9d87782b5",
+    "preregistration391Sha256": "0cfec657698f699bc3686a7944439db918e7515e439c74457d9c6458e6b42ac8",
+    "groundTruth392Sha256": "2e18ecd39fc471256f1a2a70a4e75ad24e958ca4f82cfd233e958f2cdf7c4444",
+    "implementationFreeze393ManifestSha256": "9d5edca2f902779d18f7c95c3d48e8f4272ea92999f3140b564abb2cb52c05a0",
+    "parserSource393Sha256": "f3b726f8054340422eeb838187fed91b3435f7201dc39abfd4d40f382c9636dd",
+    "amendment395Sha256": "958985cc7d895071bb77ad6d57a45de0e82c65677ea45828fb3e916389933f00",
+    "heldoutMembershipDigest396": "8fa5a8a8444be31a637fae618235b0a77c6b37745441edc06534fe63c5a44156"
+  },
+  "heldoutParserExecutionCountTotal": 1,
+  "heldoutParserExecutionNote": "#396 の 1 回のみ。本 unit では新規 held-out 出力なし",
+  "hypothesis": {
+    "id": "H1",
+    "name": "Header-Zone Right Row-Start Split",
+    "family": "HEADER_ZONE_WHOLE_LINE_CONTAINS_RIGHT_COLUMN_ROW_START",
+    "statement": "page-local の right band E が frozen rule で安全に解決済み（ASSEMBLED_SPLIT）の page では、header zone 内の raw line であっても、E 以右の segment が frozen な row-start token pattern で始まり、frozen の boundary safety 条件を満たす場合、line 全体を無条件に whole-line の TITLE_OR_HEADING / UNSPLIT とせず、E を境界として LEFT / RIGHT に物理分割する",
+    "notAHypothesisAbout": "header zone そのものの廃止・縮小。header zone の終端定義（最初の row-start 行の直前）は変更しない",
+    "statusOfEffect": "H1 の改善効果は仮説。#396 の 10 件が直ることを確認していない（確認してはならない）"
+  },
+  "motivatingObservations": {
+    "source": "#397 failure isolation（MECHANISTICALLY_EXPLAINED 10 / 10、単一 family）",
+    "facts": ["10 severe 全件で parser page state = ASSEMBLED_SPLIT かつ E 解決済み", "問題の raw line は最初の row-start 行より前（frozen の header zone）", "line 全体が TITLE_OR_HEADING / UNSPLIT の 1 unit", "E 以右に GT の右 column row の row-start token があり、boundary crossing はない", "同一行の左側は GT の PLAIN_ROW", "token は request 7 / marker 3"],
+    "motivationOnlyNegativeEvidence": "severe 0 の他の分割 page では header zone 内で E 以右にあるのは page title / 列見出しのみ（row-start token なし）。これは post-hoc evidence であり formal validation には使わず、negative control の動機としてのみ記録する"
+  },
+  "exactTrigger": {
+    "allOf": [
+      "T1 page の state が frozen rule により ASSEMBLED_SPLIT（E が bandToleranceChars=2・bandMinEvidence=2 の既存規則で解決済み）",
+      "T2 対象 raw line が frozen の header zone 内（最初の row-start 行の直前まで。この判定は一切変更しない）",
+      "T3 line の code point index E 以降の segment（先頭の空白を除く）が、frozen な row-start token pattern（REQUEST_TOKEN で始まる、MARKER_TOKEN で始まる、または frozen の OTHER_CODE pattern に segment 全体が一致）のいずれかに該当する。body 行の右 segment と同じ判定",
+      "T4 frozen の boundary safety 条件を、body 行と同一の判定でともに満たす: (a) 行内で先頭 token でない request token が [E-2, E-1] または E+3 以上に無い（BOUNDARY_CONFLICT_LINE でない）、(b) line[E-1] と line[E] が両方非空白ではない（BOUNDARY_CROSSING でない）",
+      "T5 新しい semantic inference を必要としない（page title か row か等の意味判定をしない）"
+    ],
+    "evaluatedPerLine": "header zone の各 raw line を独立に判定する。line が trigger しても header zone の範囲・他の行の扱いは変えない",
+    "noSpecificConditions": "publisher / PDF 名 / page 番号 / 特定 token・文字列（「令和」等）/ 特定 line index / 特定 ministry / GT 値を条件に含めない"
+  },
+  "exactNonTrigger": {
+    "unchangedFrozenBehavior": [
+      "NT1 ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE または PAGE_ABSTAINED の page の header zone 行",
+      "NT2 header zone 外の行（body 行の分割・分類は #393 のまま）",
+      "NT3 E 以右に text があっても row-start token で始まらない header zone 行（negative control。whole-line TITLE_OR_HEADING / UNSPLIT のまま）",
+      "NT4 token を持たない右 column の wrapped fragment 行（KNOWN_SECONDARY_LIMITATION_NOT_TARGETED。whole-line のまま）",
+      "NT5 T4 の boundary safety を満たさない行（H1 では分割せず frozen の whole-line TITLE_OR_HEADING のまま。新たな abstention も作らない）",
+      "NT6 E より左にしか内容がない header zone 行"
+    ]
+  },
+  "oneChangeBoundary": {
+    "changedBehavior": "ASSEMBLED_SPLIT page の header zone 内で T1〜T5 を満たす行の分割挙動のみ（whole-line TITLE_OR_HEADING → LEFT / RIGHT の 2 unit）",
+    "unchangedBehavior": ["T=2 / bandMinEvidence=2", "right band の推定と evidence の数え方（header 行の token も従来どおり evidence に数える）", "request-token evidence rule", "marker-only page / no-right page の挙動", "row-start token grammar（新 grammar なし）", "row taxonomy（新 row kind なし）", "OTHER_CODE", "body 行の分割・分類", "header zone の終端判定", "wrapped fragment の owner と attach の規則", "fragment attachment", "provenance model", "page state と abstention reason の定義", "evaluation matching（#395）", "GT", "acceptance thresholds"],
+    "implementationBoundary": "H1 の実装は frozen な #393 の source・freeze を変更せず、別 version の実装として追加する。frozen #393 と H1 実装の出力は、trigger した行以外の全ての unit で一致しなければならない（差分テスト）",
+    "downstreamEffectDeclared": "H1 が出力した RIGHT unit は、body 行と同一の frozen fragment 規則で『直前の RESOLVED row』になり得る（この経路に特例を設けない）。header zone の後続の行は従来どおり whole-line TITLE_OR_HEADING として barrier になり owner を解除する。H1 が作る唯一の下流差はこの owner 候補の存在であり、特例も追加の attach 規則も設けない"
+  },
+  "leftHandling": {
+    "rule": "trigger した行の LEFT segment = line[0:E] を、既存の定義どおり header zone の内容として TITLE_OR_HEADING（RESOLVED、column=LEFT、raw 文字列と provenance を保持）とする。この判定は『位置（header zone 内）』のみによる既存定義で、page title か視覚上の行かという意味判定を行わない",
+    "deterministic": true,
+    "semanticInference": "なし",
+    "plainRowMapping": "なし（GT PLAIN_ROW への mapping 禁止。評価上の LEFT TITLE_OR_HEADING と GT PLAIN_ROW は #395 のとおり NOT_COMPARABLE）",
+    "leftNotDiscarded": "LEFT segment の内容は捨てない。charStart / charEnd は LEFT segment の非空白の範囲",
+    "whyLeftIsNeverRowStart": "header zone の行は定義上、行頭が row-start token ではない。LEFT segment は行頭から始まるため row-start token で始まらない",
+    "barrier": "LEFT の TITLE_OR_HEADING は frozen のとおり当該 page の fragment owner を解除する。その後に RIGHT unit を出力する（同一行内の出力順は LEFT → RIGHT で body 行と同じ）"
+  },
+  "rightHandling": {
+    "tokenGrammar": "frozen の REQUEST_TOKEN / MARKER_TOKEN / OTHER_CODE pattern のみ。新しい grammar を追加しない",
+    "classification": "body 行の RIGHT segment と同一の frozen 分類（REQUEST_NUMBER_ROW / MARKER_ROW / OTHER_CODE）。H1 のための新 row kind なし",
+    "provenance": "frozen の provenance model（file / PDF hash / physical page / text hash / lineIndex / charStart・charEnd / sourceRawSlice）。charStart は RIGHT segment の非空白の開始、sourceRawSlice は line[charStart:charEnd] と一致",
+    "abstentionIfClassificationFails": "frozen の abstention 規則に従う（H1 で新規 abstention reason を作らない）"
+  },
+  "knownSecondaryLimitation": {
+    "label": "KNOWN_SECONDARY_LIMITATION_NOT_TARGETED",
+    "case": "#397 の付随観測（230901-2.pdf p3 line 10）: 右 column の wrapped fragment が token を持たないまま header zone の whole-line に吸収される",
+    "reason": "H1 は row-start token を安全な trigger primitive とする仮説。token なし fragment を同時に扱うと 2 変更になり、owner inference が必要になり得る",
+    "h1Target": false,
+    "specialCaseAllowed": false,
+    "acceptance": "H1 が成功してもこの case が残ることを許容する。H1 実装でこの fragment 向けの特例を追加してはならない"
+  },
+  "forbiddenRules": ["publisher / PDF / page / 特定 token / 特定 line index / 特定 ministry / GT 値を条件にすること", "GT PLAIN_ROW → parser kind の mapping", "header zone の廃止・短縮・終端条件の変更", "T=2 / bandMinEvidence の変更", "marker を band evidence に使うこと", "token なし fragment の特例", "新 row kind / 新 abstention reason / 新 token grammar", "#396 の 23 page に H1 を適用して確認すること", "#396 の severe 10 件が直ったかの実行確認", "結果を見た後の trigger・LEFT 処理の変更"],
+  "populations": {
+    "development": { "pages": "既存 explored / development 34 page + synthetic fixture のみ", "rule": "H1 の実装・debugging・development 評価に使ってよいのはこれのみ。development 34 page に H1 trigger が実在するかの機械確認は次 unit で行ってよい（本 unit では実験しない）" },
+    "postHocExcluded": { "pages": "#396 の held-out 23 page", "role": "POST_HOC_FAILURE_ANALYSIS_ONLY", "forbidden": ["H1 の実装・debugging・development 評価への使用", "H1 の validation held-out としての再利用", "10 severe が H1 で直ったかの実行確認"] },
+    "futureHeldout": {
+      "role": "H1 の formal evaluation 用。#396 の 23 とは独立",
+      "selectionProtocol": [
+        "除外: #396 の held-out 23 と、development / explored 34（#390 / #391 までに目視した page）。#396 の membership digest と ledger を除外の根拠にする",
+        "対象は TOC 82 から上記を除いた残りの page（算術上 82 - 23 - 34 = 25。disjointness は #392 / #396 の既存 integrity で確認済み。実際の membership は後続 unit で決める）",
+        "selection は machine-only・deterministic。H1 実装後の parser 出力や GT・視覚情報を見て選ばない",
+        "trigger 候補の有無は raw text 上の frozen primitive（E 解決・header zone・E 以右の row-start token・boundary safety）を機械的に適用して labeling する。H1 実装の出力には依存させない",
+        "positive-trigger page だけでなく negative-control page（T3 を満たさない header 行を持つ ASSEMBLED_SPLIT page、UNSPLIT page 等）も含める",
+        "publisher / page の多様性を結果に合わせて調整しない。サンプリングせず残り page 全件を候補とする（偏りの余地を作らない）",
+        "formal evaluation の前に visual GT を freeze する（GT freeze → H1 development 実装の凍結 → one-shot evaluation の順）"
+      ],
+      "membershipDeferredTo": "後続 unit（本 unit では選定しない）",
+      "ifNoPositiveTriggerPage": "positive-trigger page が 0 なら H1 は held-out で検証できず、H1_UNVALIDATED として報告する（pass にしない）",
+      "limitation": "残り page は #396 の held-out と同じ publisher の別 page を含み得るため独立性は限定的"
+    }
+  },
+  "developmentEvidencePolicy": {
+    "syntheticOnlyDecision": "development 34 page に H1 trigger が実在しない場合でも、synthetic fixture による実装検証は許容する（自動 STOP にしない）。ただし development 結果は『synthetic-only の検証』と明記し、H1 の有効性・安全性の主張は新 held-out の positive / negative control による formal evaluation の結果にのみ基づく。結果を見て変更しない",
+    "mustBeStated": "DEV_SYNTHETIC_ONLY（development 34 に positive trigger が無い場合）"
+  },
+  "metrics": {
+    "primarySafety": ["false split count（trigger 条件を満たさない行の分割、または分割位置が E と異なる）", "provenance mismatch（rawSlice と frozen Raw Text の不一致）", "unrelated-row output changes（frozen #393 の出力と trigger 行以外で差が出た unit 数）", "unexpected page-state changes（page state・page abstention reason の変化）"],
+    "primaryTargetBehavior": ["eligible header-zone right-row-start trigger の件数（機械判定）", "trigger した行が development / synthetic fixture の期待どおり分割された件数"],
+    "secondary": ["abstention の変化（reason 別）", "LEFT 側の TITLE_OR_HEADING 件数", "RIGHT 側の row kind 分布", "token なし fragment（known limitation）が残る件数"],
+    "notUsedAsDevelopmentMetric": "#396 の severe 件数",
+    "thresholds": "UNRESOLVED_ACCEPTANCE_THRESHOLD（維持。coverage 下限・abstention 上限・WRONG_ROW_START_CLASSIFICATION 許容）"
+  },
+  "negativeControls": {
+    "definition": "right band E が解決され、header zone 内で、E 以右に text があり、row-start token を持たない行",
+    "expected": "H1 は分割してはならない（whole-line TITLE_OR_HEADING / UNSPLIT のまま）",
+    "synthetic": "development 実装 unit で synthetic fixture に必ず含める。page title・列見出し・token なし fragment を模した行",
+    "validationSource": "#397 の severe 0 の分割 page の header text は post-hoc evidence のため formal validation に使わない"
+  },
+  "falsificationCriteria": {
+    "safetyRegression": ["LEFT / RIGHT を誤って分割する（E 以外で分割、trigger 条件外の行を分割）", "header 専用の行を row として生成する（NT3 / NT4 の行が REQUEST / MARKER / OTHER_CODE unit になる）", "boundary crossing を許容する", "provenance の不整合", "trigger 行以外の unit の出力が frozen #393 と異なる", "fragment owner / attach の挙動が H1 の declared downstream effect 以外で変わる"],
+    "triggerInsufficiency": ["既存 primitive だけで safe trigger を deterministic に定義できない", "LEFT 側の扱いを semantic inference なしで定義できない"],
+    "noDevelopmentSupport": "synthetic-only は自動 STOP にしない（developmentEvidencePolicy）。ただし positive / negative の挙動が synthetic でも検証できない場合は STOP 候補",
+    "onFalsification": "現在の preregistration に対する failure として保存し、STOP とする。trigger / LEFT 処理を後から調整して救済しない。再仮説化は別 unit"
+  },
+  "stopCriteria": ["STOP_HYPOTHESIS_LEFT_SIDE_UNSPECIFIED", "STOP_HYPOTHESIS_TRIGGER_AMBIGUOUS", "STOP_HYPOTHESIS_REQUIRES_SECOND_CHANGE", "STOP_FROZEN_ARTIFACT_INTEGRITY", "STOP_HYPOTHESIS_REQUIRES_POSTHOC_HELDOUT_USE"],
+  "claimBoundary": "H1 を反証可能な形で凍結しただけ。H1 が安全であること・#396 の 10 件が直ること・parser が正しいことは何も示していない。parser fix GO / safety GO / production GO ではない。parser・GT・#391 / #395 / #396 / #397 は変更していない",
+  "unresolved": [
+    "UNRESOLVED_ACCEPTANCE_THRESHOLD",
+    "development 34 page に H1 trigger が実在するかは未確認（次 unit で機械確認）",
+    "新 held-out の membership と positive-trigger 件数は未確定",
+    "LEFT を TITLE_OR_HEADING のまま保持する選択は、評価上 GT PLAIN_ROW と NOT_COMPARABLE のままであること（#395 の限界）を引き継ぐ",
+    "同一 agent が GT を作成しており独立検証ではない"
+  ],
+  "judgment": "READY_FOR_HEADER_ZONE_RIGHT_ROW_H1_DEVELOPMENT_IMPLEMENTATION"
+}
