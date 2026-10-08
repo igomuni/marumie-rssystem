@@ -1,0 +1,152 @@
+{
+ "schema": "budget-request-toc-h1-new-heldout-membership/v0",
+ "status": "NEW_HELDOUT_MEMBERSHIP_FROZEN",
+ "derivation": "NEW_HELDOUT = TOC_82 - DEVELOPMENT_34 - FIRST_HELDOUT_23（集合差のみ。sampling・選別なし）",
+ "canonicalOrder": [
+  "localPdfPath",
+  "physicalPage"
+ ],
+ "digestSha256": "06c2e68d7ac178e7e0561d16976c47936ab9d52b59d91710cab145fa8822ab28",
+ "digestRule": "sha256(各 member を `localPdfPath\\tphysicalPage\\tclassifierSource` とし、canonical order で改行連結)",
+ "counts": {
+  "total": 82,
+  "development": 34,
+  "firstHeldout": 23,
+  "newHeldout": 25,
+  "union": 82,
+  "overlapDevFirst": 0,
+  "overlapDevNew": 0,
+  "overlapFirstNew": 0,
+  "missing": 0,
+  "outsideInventory": 0,
+  "direct": 22,
+  "inherited": 3
+ },
+ "members": [
+  {
+   "localPdfPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT"
+  },
+  {
+   "localPdfPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/aac2d779/20230907_policies_budget_05.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT"
+  },
+  {
+   "localPdfPath": "data/download/digital.go.jp/assets/contents/node/basic_page/field_ref_resources/e9b99425-437c-4750-b4e2-6cca3cd877a6/0fab2c74/20230914_policies_budget_r6request_table_01.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT"
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157013.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT"
+  },
+  {
+   "localPdfPath": "data/download/jbaudit.go.jp/jbaudit/bud_clo/bud/pdf/r06/20230906_02.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT"
+  },
+  {
+   "localPdfPath": "data/download/jcrc.go.jp/content/000001746.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT"
+  },
+  {
+   "localPdfPath": "data/download/jftc.go.jp/soshiki/kyotsukoukai/yosan/yosankessan/r6/r6sandanhyou.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT"
+  },
+  {
+   "localPdfPath": "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-02.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT"
+  },
+  {
+   "localPdfPath": "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-03.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "physicalPage": 4,
+   "classifierSource": "INHERITED"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT"
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneden_o.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT"
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/enegen_o.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT"
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/fukko_o.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT"
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/tokkyo_o.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf",
+   "physicalPage": 4,
+   "classifierSource": "INHERITED"
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630393.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT"
+  },
+  {
+   "localPdfPath": "data/download/mofa.go.jp/mofaj/files/100546568.pdf",
+   "physicalPage": 4,
+   "classifierSource": "INHERITED"
+  },
+  {
+   "localPdfPath": "data/download/moj.go.jp/content/001402819.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT"
+  },
+  {
+   "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/hukkoutokubetukaikei.pdf",
+   "physicalPage": 2,
+   "classifierSource": "DIRECT"
+  },
+  {
+   "localPdfPath": "data/download/ppc.go.jp/files/pdf/230831youkyu.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT"
+  },
+  {
+   "localPdfPath": "data/download/sotsui.go.jp/budget/images/r6budget_yokyu.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT"
+  }
+ ]
+}

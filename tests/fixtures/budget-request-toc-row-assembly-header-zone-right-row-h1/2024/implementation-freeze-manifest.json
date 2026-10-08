@@ -1,0 +1,59 @@
+{
+ "schema": "budget-request-toc-row-assembly-h1-implementation-freeze/v0",
+ "status": "H1_IMPLEMENTATION_FROZEN",
+ "createdAt": "2026-10-08T21:50:09+09:00",
+ "baseMainSha": "1dab76b5aa5fae3453744936491ac2e4864f978f",
+ "implementationMergedInCommit": "1dab76b5aa5fae3453744936491ac2e4864f978f",
+ "freezeCommit": "この manifest を追加する git commit（自己参照を避けるため hash は本文に埋め込まない）",
+ "h1": {
+  "sourcePath": "scripts/pipeline-v2/lib/budget-request-toc-row-assembly-h1.ts",
+  "sourceSha256": "ea6af6debefc6c092c3725fc5e37f8ea7a53658fb24d876c2f725e33c6178343",
+  "entryPoint": "assembleTocPageH1",
+  "changedAfterDevelopmentEvaluation": false
+ },
+ "dependencies": {
+  "h1PreregistrationSha256": "0c3a377ba9d32ec55701f8d0982ff9a48e8cd9f16ba8c81927fcedffcdec1b27",
+  "parser393SourceSha256": "f3b726f8054340422eeb838187fed91b3435f7201dc39abfd4d40f382c9636dd",
+  "preregistration391Sha256": "0cfec657698f699bc3686a7944439db918e7515e439c74457d9c6458e6b42ac8",
+  "amendment395Sha256": "958985cc7d895071bb77ad6d57a45de0e82c65677ea45828fb3e916389933f00",
+  "evaluationResult396Sha256": "fcb1e40cc25969748516c4bbe1673d15418051a5d01d912310118abba4d05f66",
+  "heldoutParserOutput396Sha256": "d95abb76ea63e660189167d6d8d6f8f34e9234cb879be18854b44c8b375b6f6b",
+  "isolationObservations397Sha256": "ec58bbb2564a5068d9feb21044f5097dfc6c88bcdb63de828ef5a9da6ebe27ad",
+  "isolationFamilies397Sha256": "000857fad4f2ef1328b037ac2e73d7b72c5b839cb67815c236344dd9d87782b5"
+ },
+ "developmentArtifacts": {
+  "resultSha256": "69bf56114f111631fafde91c8ad7a472116bb81f8cc4782836d5635e76f14670",
+  "syntheticSha256": "a7ea9e4127d9eb16d2f9949724d41288e3136655dd0a70b3d4c5e6422dbcc167",
+  "differentialSha256": "660239414fd037b52a9d1a0bb73a0a7f0dae494d5482e6cdee3325f069ab95fa"
+ },
+ "developmentJudgment": "READY_FOR_H1_DEVELOPMENT_FREEZE_AND_NEW_HELDOUT_GT",
+ "developmentSummary": {
+  "pages": 34,
+  "triggerLines": 19,
+  "triggerPages": 10,
+  "falsification": {
+   "safetyRegression": 0,
+   "triggerImplementationMismatch": 0
+  },
+  "devSyntheticOnly": false
+ },
+ "fileSha256": {
+  "scripts/pipeline-v2/lib/budget-request-toc-row-assembly-h1.test.ts": "2073bdba3250c39c9dbef24b5f88ab463c3169c75e19a047fa9f98edcb28a01c",
+  "scripts/pipeline-v2/lib/budget-request-toc-row-assembly-h1-differential.ts": "c38694a463005932ed50e5e4e3c225f36fdd54d511533d03fe6441b75c77cd18",
+  "scripts/pipeline-v2/lib/budget-request-toc-row-assembly-h1-development-result.test.ts": "7d17a62d0ec5f2780ab6e9ee584f6f456136b298a396fdcf618053928e55334a",
+  "scripts/pipeline-v2/run-budget-request-toc-header-zone-h1-development.ts": "6038e6242d2f9b1922548b97f8a60bc81a3adc24aba29cec402630cd9f3a5d68",
+  "scripts/pipeline-v2/build-budget-request-toc-header-zone-h1-synthetic.ts": "c1114698e2b3f21d3277f70897cb27105b67c69064900b2ac09e7f1e7b0f19d9"
+ },
+ "runtime": {
+  "node": "v24.9.0",
+  "vitest": "^4.1.10",
+  "typescript": "^5.7.2",
+  "tsx": "^4.19.2"
+ },
+ "heldoutExecutions": {
+  "total396Only": 1,
+  "h1On396Heldout23": 0,
+  "h1OnNewHeldout": 0
+ },
+ "claimBoundary": "H1 の implementation identity を固定しただけ。H1 の安全性・有効性は新 held-out の formal evaluation まで主張しない。#396 の severe が直るかは未確認"
+}
