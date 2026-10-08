@@ -1,0 +1,35 @@
+{
+ "schema": "budget-request-toc-h1-formal-evaluation-launch-manifest/v0",
+ "status": "EVALUATOR_FROZEN_BEFORE_LAUNCH",
+ "createdAt": "2026-10-09T07:47:51+09:00",
+ "baseMainSha": "6c361b94cff8bb419404b79f718b4e39cf68ded6",
+ "evaluatorCommit": "8d4723dc93a93ec6dc252c477ab7af5e35ef8587",
+ "frozenDependencyHashes": {
+  "h1SourceSha256": "ea6af6debefc6c092c3725fc5e37f8ea7a53658fb24d876c2f725e33c6178343",
+  "membershipDigestSha256": "06c2e68d7ac178e7e0561d16976c47936ab9d52b59d91710cab145fa8822ab28",
+  "membershipFileSha256": "7c238b9b6c756ebc9baec46f47f33db1706fee8ca40d87b1eb6d87bcf6538d06",
+  "groundTruthSha256": "693ce90d0f289139d96771da1737c762a05c616c2a3afd8103a0f4979063705f",
+  "annotationLedgerSha256": "49d48e46ad2b1428ce5719e78fcdde4adb443c3f41283618523fb44d63d881f1",
+  "renderManifestSha256": "9ed0844b5a394472b96194e6a827ed0ea892f543ed358b1d173ed6d33ec0ec81",
+  "visualGtFreezeManifestSha256": "c41b6b51202ba61a980197b02745c8f78c710acdcbf0081d4f02f6889ab6c1f0",
+  "implementationFreezeManifestSha256": "ce80c5bb9c0e86a1cce278236afd86f34afe4615e90c5e8de17cf1582ec8f7cf",
+  "membershipFreezeManifestSha256": "635a236cce52cf8ec7a038c02f650713b84e6894146ca9385481e9605dd625b5",
+  "h1PreregistrationSha256": "0c3a377ba9d32ec55701f8d0982ff9a48e8cd9f16ba8c81927fcedffcdec1b27",
+  "parser393SourceSha256": "f3b726f8054340422eeb838187fed91b3435f7201dc39abfd4d40f382c9636dd",
+  "amendment395Sha256": "958985cc7d895071bb77ad6d57a45de0e82c65677ea45828fb3e916389933f00",
+  "ruleConfigSha256": "6a0565e61162dd76c702ef0c997cb6f9aec79f1a6f17e9f2c872ecd2e5014251"
+ },
+ "evaluatorSha256": {
+  "scripts/pipeline-v2/lib/budget-request-toc-row-assembly-evaluator.ts": "d5bb1708223255c93351fdc3cdb2c1e3aeebda8a4d5c63f84584c58a0998eb96",
+  "scripts/pipeline-v2/lib/budget-request-toc-row-assembly-evaluator.test.ts": "f08b8c1e56aae3e6482344a9a188cf7807b2651451469d080d54f4606a7440f8",
+  "scripts/pipeline-v2/lib/budget-request-toc-h1-formal-evaluation.ts": "522edd8de4d30cb122a021e1cc19b3c90e276e2be145e3e2fbeca6cdca83fd5a",
+  "scripts/pipeline-v2/lib/budget-request-toc-h1-formal-evaluation.test.ts": "a99ba781772767012d6a25e152a321e52b17e197fcf92460c6266cf886f700a4",
+  "scripts/pipeline-v2/run-budget-request-toc-h1-formal-evaluation.ts": "e4164d15a1e192c613c844c7355a1ba500754370e3ee782be73e57db2035e794"
+ },
+ "evaluationRules": "#395 を機械化した budget-request-toc-row-assembly-evaluator.ts を変更せず使用（#396 で使用したものと同一）",
+ "executionCommand": "npx tsx scripts/pipeline-v2/run-budget-request-toc-h1-formal-evaluation.ts --execute",
+ "h1ExecutionsOnNewHeldoutBefore": 0,
+ "parser393ExecutionsOnNewHeldoutBefore": 0,
+ "triggerCensusBefore": 0,
+ "protocolClaim": "新 held-out 25 page への H1 formal execution は exactly once。実行後の出力を immutable に保存し SHA-256 固定。評価・集計は保存済み出力の read-only。H1 / GT / membership / 評価規則 / threshold を変更しない。retry しない"
+}
