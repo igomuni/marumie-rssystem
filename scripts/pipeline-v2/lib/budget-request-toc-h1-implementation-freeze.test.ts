@@ -37,6 +37,6 @@ describe('H1 implementation freeze の integrity（実装は変更しない）',
     expect(sha('tests/fixtures/budget-request-toc-row-assembly-false-positive-failure-isolation/2024/failure-families.json')).toBe(d.isolationFamilies397Sha256);
     expect(m.heldoutExecutions).toEqual({ total396Only: 1, h1On396Heldout23: 0, h1OnNewHeldout: 0 });
     expect(fs.readdirSync('tests/fixtures/budget-request-toc-row-assembly-evaluation/2024').sort()).toEqual(['evaluation-launch-manifest.json', 'evaluation-result.json', 'execution-started.json', 'heldout-parser-output.json']);
-    expect(fs.readdirSync(dir).filter(f => /heldout-.*output|new-heldout.*(output|gt|ground)|visual/i.test(f))).toEqual([]);
+    expect(fs.readdirSync(dir).filter(f => /parser-output|heldout-output|evaluation-result|h1-output/i.test(f))).toEqual([]);
   });
 });

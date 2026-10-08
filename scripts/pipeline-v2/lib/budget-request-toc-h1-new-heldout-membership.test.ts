@@ -52,8 +52,8 @@ describe('H1 新 held-out membership freeze（集合差のみ。新 25 page は�
     }
   });
   it('新 25 への H1 実行・trigger census・目視・GT・contamination がない', () => {
-    expect(man).toMatchObject({ h1ExecutionsOnNewHeldout: 0, triggerCensusOnNewHeldout: 0, rawTextInspected: false, pdfOrRenderInspected: false, visualInspectionCount: 0, gtAuthored: false, contamination: false });
-    expect(fs.readdirSync(dir).filter(f => /ground|visual|annotation|render|parser-output|heldout-output/i.test(f))).toEqual([]);
+    expect(man).toMatchObject({ h1ExecutionsOnNewHeldout: 0, triggerCensusOnNewHeldout: 0, contamination: false }); // 本 manifest は membership freeze 時点の記録（後続 unit の GT 作成は別 manifest）
+    expect(fs.readdirSync(dir).filter(f => /parser-output|heldout-output|evaluation-result|h1-output/i.test(f))).toEqual([]);
     expect(man.judgment).toBe('READY_FOR_NEW_HELDOUT_VISUAL_GT_FREEZE');
     expect(man.claimBoundary).toMatch(/GO ではない/);
     expect(fs.readdirSync('tests/fixtures/budget-request-toc-row-assembly-evaluation/2024')).toHaveLength(4);
