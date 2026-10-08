@@ -1,8 +1,12 @@
 # FY2024 概算要求 TOC A 層 row assembly — Evaluation Protocol Clarification
 
-機械可読な正本: `tests/fixtures/budget-request-toc-row-assembly/2024/evaluation-protocol-clarification.json`（status `EVALUATION_PROTOCOL_CLARIFIED_FROZEN`）。
+機械可読な正本: `tests/fixtures/budget-request-toc-row-assembly/2024/evaluation-protocol-clarification.json`（status `STOP_PROTOCOL_AMENDMENT_REQUIRED`。contract は**凍結していない**）。
 
-**本 unit は comparison contract の固定のみ。held-out への parser 実行 0、GT との比較なし、評価なし。** parser・GT・preregistration・membership・implementation freeze は変更していない。judgment = `READY_FOR_TOC_ROW_ASSEMBLY_ONE_SHOT_FROZEN_EVALUATION`（#393 の implementation を変えずに 23 page への一回限りの formal evaluation を次 unit で始めてよい、のみ）。
+## 結論（review 後）
+
+**`STOP_PROTOCOL_AMENDMENT_REQUIRED`。** #391 は alignment を「row-start token + column + column 内順序」と frozen している。下の row 対応案は column と順序を key から外しており、clarification ではなく amendment に当たる。#391 の alignment では `WRONG_COLUMN_ASSIGNMENT` を独立に評価できる対応付けが定義されていなかった、という protocol design failure の発見として保存する。amendment は #391 を改変せず独立した研究単位で設計する。header zone の扱いは #391 のまま（右 column の row を含む行が統合され severe になれば parser hypothesis の正当な失敗＝STOP_SAFETY で、protocol 側で緩和しない）。`PLAIN_ROW → NOT_COMPARABLE` は方向として妥当だが amendment と一体のため未採用。以下は amendment 設計の入力案。
+
+**本 unit は comparison contract の固定のみ。held-out への parser 実行 0、GT との比較なし、評価なし。** parser・GT・preregistration・membership・implementation freeze は変更していない。judgment = `STOP_PROTOCOL_AMENDMENT_REQUIRED`（一回限りの formal evaluation はまだ始めない）。
 
 ## schema 確認（値は見ていない）
 
@@ -23,7 +27,7 @@
 
 ## 未解決・要確認
 
-- #391 の alignment 文言（token + column + 順序）と、本 contract の「column・順序は key 外」の差。WRONG_COLUMN を判定可能にする clarification と判断したが、reviewer の確認を要する（amendment と判断されるなら `STOP_PROTOCOL_AMENDMENT_REQUIRED`）。
+- #391 の frozen alignment と本案の差は amendment（上記 STOP）。
 - 統合検出（rawSlice への token 包含）は、preregistered header zone rule により TITLE_OR_HEADING が右 column の row を含む構造的ケースがあれば、評価で severe になり得る。rule の帰結であり緩和しない。
 - PLAIN_ROW に関する parser の誤りは本評価で検出されない（limitation）。
 - 同一 agent が GT を作成している（記憶としての GT 知識は排除できない）。独立検証ではない。

@@ -13,7 +13,8 @@ const impl = read(path.join(par, 'implementation-freeze-manifest.json'));
 
 describe('toc row assembly evaluation protocol clarification（contract のみ。評価ではない）', () => {
   it('dependency hash・membership・implementation freeze が現行 artifact と一致する', () => {
-    expect(p.status).toBe('EVALUATION_PROTOCOL_CLARIFIED_FROZEN');
+    expect(p.status).toBe('STOP_PROTOCOL_AMENDMENT_REQUIRED');
+    expect(p.frozenStatus).toMatch(/^NOT_FROZEN/);
     expect(p.dependencyHashes.preregistrationSha256).toBe(sha(path.join(asm, 'preregistration.json')));
     expect(p.dependencyHashes.gtFreezeManifestSha256).toBe(sha(path.join(asm, 'gt-freeze-manifest.json')));
     expect(p.dependencyHashes.implementationFreezeManifestSha256).toBe(sha(path.join(par, 'implementation-freeze-manifest.json')));
@@ -47,7 +48,8 @@ describe('toc row assembly evaluation protocol clarification（contract のみ�
     expect(fs.readdirSync(par).sort()).toEqual(['development-regression.json', 'implementation-freeze-manifest.json']);
     expect(fs.readdirSync(asm).filter(f => /output|evaluation-result|parser-output/.test(f))).toEqual([]);
     expect(sha(path.join(asm, 'preregistration.json'))).toBe('0cfec657698f699bc3686a7944439db918e7515e439c74457d9c6458e6b42ac8');
-    expect(p.judgment).toBe('READY_FOR_TOC_ROW_ASSEMBLY_ONE_SHOT_FROZEN_EVALUATION');
+    expect(p.judgment).toBe('STOP_PROTOCOL_AMENDMENT_REQUIRED');
+    expect(JSON.stringify(p)).not.toMatch(/READY_FOR_TOC_ROW_ASSEMBLY_ONE_SHOT/);
   });
   it('severe・descriptive metric・abstention 区別の contract が揃っている', () => {
     for (const k of ['FALSE_POSITIVE_ROW_ASSEMBLY', 'WRONG_COLUMN_ASSIGNMENT', 'WRONG_FRAGMENT_ATTACHMENT', 'PROVENANCE_MISMATCH']) expect(p.severeRules[k]).toBeDefined();
@@ -56,5 +58,7 @@ describe('toc row assembly evaluation protocol clarification（contract のみ�
     expect(p.rowCorrespondence.identityKeys.REQUEST).toBeDefined();
     expect(p.rowCorrespondence.identityKeys.MARKER).toBeDefined();
     expect(p.rowCorrespondence.attributesNotInKey).toEqual(['column', 'order']);
+    expect(p.stopReason).toMatch(/amendment/);
+    expect(pre.gtProtocol.alignment).toMatch(/row-start token.*\+ column/);
   });
 });

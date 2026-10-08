@@ -1,8 +1,11 @@
 {
   "schema": "budget-request-toc-row-assembly-evaluation-protocol-clarification/v0",
-  "status": "EVALUATION_PROTOCOL_CLARIFIED_FROZEN",
+  "status": "STOP_PROTOCOL_AMENDMENT_REQUIRED",
   "createdAt": "2026-10-08T18:37:48+09:00",
   "baseMainSha": "e0f3470de11d2916cc64c83fe461f7acb6a084b3",
+  "stopReason": "#391 は alignment を「row-start token + column + column 内順序」と frozen している。本 artifact の rowCorrespondence は column と順序を identity key から外しており、clarification ではなく frozen alignment rule の変更（amendment）に当たる。#391 の alignment では WRONG_COLUMN_ASSIGNMENT を独立に評価する対応付けが十分に定義されていなかった（protocol design failure の発見）。本 artifact の contract は凍結しない。amendment は #391 を改変せず独立した研究単位で設計する",
+  "frozenStatus": "NOT_FROZEN（本 artifact の rowCorrespondence 以下は amendment 設計の入力案であり、評価 contract として採用していない）",
+  "headerZoneNote": "header zone の扱いは #391 のまま変更しない。右 column の row を含む行が TITLE_OR_HEADING に統合されて severe になる場合は parser hypothesis の正当な失敗結果（STOP_SAFETY）であり、protocol 側で緩和しない",
   "scope": "held-out 評価の comparison contract の未定義点（GT PLAIN_ROW ↔ parser taxonomy、row 対応、severe の判定可能性、applicability）を評価前に固定する。#391 preregistration の rule / metric 定義 / severe 定義 / 閾値は変更しない。評価は実行しない",
   "dependencyHashes": {
     "preregistrationSha256": "0cfec657698f699bc3686a7944439db918e7515e439c74457d9c6458e6b42ac8",
@@ -35,7 +38,7 @@
     "fourStatesNote": "#391 の意味を書き換えない",
     "orthogonalApplicability": ["COMPARABLE", "NOT_COMPARABLE"],
     "notComparableRule": "NOT_COMPARABLE は metric ごとの適用可否で、四状態のいずれにも数えず、分子にも分母にも入れない。parser ABSTAINED でも GT UNRESOLVED でもない。件数は別に報告する",
-    "amendmentCheck": "applicability は #391 の四状態・severe 定義・閾値を変更せず、評価対象の範囲を schema から定めるだけなので #391 の amendment ではないと判断した（STOP_PROTOCOL_AMENDMENT_REQUIRED は不要）。ただし #391 の alignment 文言（token + column + 順序）との差は unresolved に記録"
+    "amendmentCheck": "applicability（PLAIN_ROW の NOT_COMPARABLE）は方向として妥当だが、rowCorrespondence が #391 の frozen alignment（token + column + 順序）を変更するため一体で amendment 扱い（STOP_PROTOCOL_AMENDMENT_REQUIRED）"
   },
   "normalization": {
     "purpose": "GT の visual 文字列と parser の raw 文字列を比較するためだけの等価規則。値の補完・修正は行わない",
@@ -134,11 +137,11 @@
   "claimBoundary": "comparison contract の固定のみ。parser の正しさ・coverage・severe error は何も評価していない。PLAIN_ROW を parser taxonomy に写像していない。個別の GT row 値は閲覧していない（ただし GT は同一 agent が #392 で作成しており記憶としての知識は排除できない）",
   "unresolved": [
     "UNRESOLVED_ACCEPTANCE_THRESHOLD（coverage 下限 / abstention 上限 / WRONG_ROW_START_CLASSIFICATION 許容）",
-    "#391 の alignment 文言（row-start token + column + 順序）に対し、本 contract は column と順序を identity key から外し対応後の比較属性とした。WRONG_COLUMN_ASSIGNMENT を判定可能にするための clarification と判断したが、reviewer 確認を要する",
+    "#391 の frozen alignment（row-start token + column + 順序）を本 contract は変更している → amendment。独立した研究単位で設計する",
     "P4（統合検出）は sourceRawSlice への token 包含で判定するため、preregistered header zone rule により TITLE_OR_HEADING が右 column の row を含む構造的ケースがあれば、評価で severe（STOP_SAFETY）となり得る。これは rule の帰結であり本 protocol で緩和しない",
     "PLAIN_ROW は全 metric で NOT_COMPARABLE のため、PLAIN_ROW 行に関する parser の誤りは本評価では検出されない（limitation）",
     "token 一致による対応は、parser / GT の読み取り差（transcription 誤り）を区別できない",
     "同一 agent が GT を作成しており独立検証ではない"
   ],
-  "judgment": "READY_FOR_TOC_ROW_ASSEMBLY_ONE_SHOT_FROZEN_EVALUATION"
+  "judgment": "STOP_PROTOCOL_AMENDMENT_REQUIRED"
 }
