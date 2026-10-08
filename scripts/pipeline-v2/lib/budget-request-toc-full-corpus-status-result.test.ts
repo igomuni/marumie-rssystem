@@ -65,6 +65,7 @@ describe('POST_HOC full-corpus status assessment の integrity（H1 / GT / forma
     expect(g.first23_currentH1_posthoc.rows.gtComparable + g.new25_currentH1_posthoc.rows.gtComparable).toBe(g.combined48.rows.gtComparable);
     expect(g.first23_currentH1_posthoc.severe.total + g.new25_currentH1_posthoc.severe.total).toBe(g.combined48.severe.total);
     expect(status.machineObservedStatusTaxonomy.GT_UNAVAILABLE).toBe(status.observability.E_evaluationApplicability.gtUnavailableParserComparableUnits);
-    expect(JSON.stringify(status)).not.toMatch(/production GO.*(可|OK)|acceptanceThreshold/);
+    expect(status.claimBoundary).toMatch(/production GO・B 層 GO ではない/);
+    expect(JSON.stringify(status)).not.toMatch(/acceptanceThreshold|passThreshold/);
   });
 });
