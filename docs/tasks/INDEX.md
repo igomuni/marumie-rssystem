@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261008_1150_Budget_Request_TOC_A_Layer_Row_Assembly_Preregistration.md](20261008_1150_Budget_Request_TOC_A_Layer_Row_Assembly_Preregistration.md) — TOC A層row assembly preregistration。band tolerance=2 char index・marker-only/no-evidenceはabstain・fragmentは同column直前rowへ・severe error 0でSAFETY_PASS・GT freeze protocol(held-out候補23page)を事前固定 → READY_FOR_TOC_ROW_ASSEMBLY_GT_FREEZE(parser GOではない)
 - [20261008_0900_Budget_Request_TOC_Physical_Row_Minimal_Failure_Isolation.md](20261008_0900_Budget_Request_TOC_Physical_Row_Minimal_Failure_Isolation.md) — TOC A層(物理row再構成)最小failure isolation。render10(新規6+再確認4)。右row開始はindex band(spread≤2)・折返しはx位置で一意・丸囲みはrow境界を阻害せず → READY_FOR_TOC_ROW_ASSEMBLY_PREREG(parser GOではない)
 - [20261008_0746_Budget_Request_TOC_Column_Aware_Failure_Isolation.md](20261008_0746_Budget_Request_TOC_Column_Aware_Failure_Isolation.md) — TOC column-aware failure isolation。render10page+machine82。右rowを持つpageは38/82(81/82はrequest-number混線)・折返しはx位置で帰属・INHERITEDは前TOC stateが必要 → SPLIT_REQUIRED(列分割/row組立→階層carryの順)
 - [20261008_0010_Budget_Request_Cover_Structure_v0_Implementation_Descriptive_Regression.md](20261008_0010_Budget_Request_Cover_Structure_v0_Implementation_Descriptive_Regression.md) — Cover Structure v0 parser実装。COVER69全RESOLVED・55page descriptive 580/581一致(不一致1はGT側転記ミス)・multiline2件。formal validationではない(IMPLEMENTATION_CONFORMANT_WITH_LIMITATIONS)
