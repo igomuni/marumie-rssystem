@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261008_1810_Budget_Request_TOC_A_Layer_Row_Assembly_Parser_Implementation.md](20261008_1810_Budget_Request_TOC_A_Layer_Row_Assembly_Parser_Implementation.md) — TOC A層row assembly parser実装。#391 ruleのまま(T=2/minEvidence=2)・development34pageのみregression・held-out実行0・PLAIN_ROW mappingは実装に不要だが評価前に要clarification → READY_FOR_TOC_ROW_ASSEMBLY_FROZEN_EVALUATION
 - [20261008_1503_Budget_Request_TOC_A_Layer_Row_Assembly_Visual_GT_Freeze.md](20261008_1503_Budget_Request_TOC_A_Layer_Row_Assembly_Visual_GT_Freeze.md) — TOC A層row assembly Visual GT freeze。held-out候補23page・834 row・fragment17・unresolved0を目視のみで凍結(parser/評価なし) → READY_FOR_TOC_ROW_ASSEMBLY_IMPLEMENTATION
 - [20261008_1150_Budget_Request_TOC_A_Layer_Row_Assembly_Preregistration.md](20261008_1150_Budget_Request_TOC_A_Layer_Row_Assembly_Preregistration.md) — TOC A層row assembly preregistration。band tolerance=2 char index・marker-only/no-evidenceはabstain・fragmentは同column直前rowへ・severe error 0でSAFETY_PASS・GT freeze protocol(held-out候補23page)を事前固定 → READY_FOR_TOC_ROW_ASSEMBLY_GT_FREEZE(parser GOではない)
 - [20261008_0900_Budget_Request_TOC_Physical_Row_Minimal_Failure_Isolation.md](20261008_0900_Budget_Request_TOC_Physical_Row_Minimal_Failure_Isolation.md) — TOC A層(物理row再構成)最小failure isolation。render10(新規6+再確認4)。右row開始はindex band(spread≤2)・折返しはx位置で一意・丸囲みはrow境界を阻害せず → READY_FOR_TOC_ROW_ASSEMBLY_PREREG(parser GOではない)

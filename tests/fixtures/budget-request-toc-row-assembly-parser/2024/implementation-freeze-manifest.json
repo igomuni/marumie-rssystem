@@ -1,0 +1,49 @@
+{
+ "schema": "budget-request-toc-row-assembly-implementation-freeze/v0",
+ "status": "IMPLEMENTATION_FROZEN",
+ "createdAt": "2026-10-08T09:10:26.635Z",
+ "baseMainSha": "6e9a4fb584abc33013956bb093a82564a6821793",
+ "implementationCommit": "c59f6c97055716234c2fb1099de3c03693a8f860",
+ "dependency": {
+  "pr391": "preregistration",
+  "pr392": "visual GT freeze（内容は未読）"
+ },
+ "sourceSha256": {
+  "scripts/pipeline-v2/lib/budget-request-toc-row-assembly.ts": "f3b726f8054340422eeb838187fed91b3435f7201dc39abfd4d40f382c9636dd",
+  "scripts/pipeline-v2/lib/budget-request-toc-row-assembly.test.ts": "82375b0dcf8e29f34b409b2f40306ca10484ca0cff7de7c7d3a6b5f4978d4850",
+  "scripts/pipeline-v2/run-budget-request-toc-row-assembly-development.ts": "99cd6585c34a15e538ef32255dc92aadc528be39d2451d12defaa2e59a537423"
+ },
+ "ruleConfigSha256": "6a0565e61162dd76c702ef0c997cb6f9aec79f1a6f17e9f2c872ecd2e5014251",
+ "preregistrationSha256": "0cfec657698f699bc3686a7944439db918e7515e439c74457d9c6458e6b42ac8",
+ "gtFreezeManifest": {
+  "path": "tests/fixtures/budget-request-toc-row-assembly/2024/gt-freeze-manifest.json",
+  "sha256": "ea924b89f3d5a140a9361b96544bfdbc33e7bea42966e3c39fda59bf98294949",
+  "status": "GT_FROZEN",
+  "groundTruthSha256": "2e18ecd39fc471256f1a2a70a4e75ad24e958ca4f82cfd233e958f2cdf7c4444"
+ },
+ "membershipDigestSha256": "8fa5a8a8444be31a637fae618235b0a77c6b37745441edc06534fe63c5a44156",
+ "developmentRegressionSha256": "aff57cb74ebca1abeb44c88ad66d7a26045f1e275fc869e64a065a45de0a50ad",
+ "developmentSummary": {
+  "pages": 34,
+  "heldoutPagesExecuted": 0,
+  "pageStates": {
+   "ASSEMBLED_SPLIT": 20,
+   "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE": 13,
+   "PAGE_ABSTAINED": 1
+  },
+  "pageAbstentionReasons": {
+   "RIGHT_EVIDENCE_INSUFFICIENT": 1
+  },
+  "rows": 1519,
+  "fragmentsAttached": 36,
+  "rowAbstentionByReason": {
+   "FRAGMENT_WITH_PAGE_REF": 12
+  }
+ },
+ "environment": {
+  "node": "v24.9.0",
+  "vitest": "4.1.10"
+ },
+ "claimBoundary": "実装 freeze のみ。held-out 評価・accuracy・coverage・severe error は未実施。数値基準（UNRESOLVED_ACCEPTANCE_THRESHOLD）は未決。次 unit は本 implementation を変更せず frozen evaluation を行う",
+ "judgment": "READY_FOR_TOC_ROW_ASSEMBLY_FROZEN_EVALUATION"
+}
