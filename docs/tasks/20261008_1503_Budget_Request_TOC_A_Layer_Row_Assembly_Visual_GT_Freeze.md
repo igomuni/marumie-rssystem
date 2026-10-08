@@ -23,6 +23,10 @@
 | unresolved page / row / fragment | 0 / 0 / 0 |
 | unreadable field | 0 |
 
+## taxonomy の境界
+
+`rowKindVisual`（特に `PLAIN_ROW` = 要求番号・marker を持たず page ref を持つ行、32 row）は **visual observational class** であり、#391 の parser row kind との semantic / evaluation mapping は**本 GT freeze では定義しない**。GT を見た後に `PLAIN_ROW → TITLE_OR_HEADING` 等を決めることは新しい研究判断になるため、frozen evaluation で事後的に mapping を作ってはならない。必要なら parser implementation 前の別 protocol clarification として扱う（`WRONG_ROW_START_CLASSIFICATION` の PLAIN_ROW 該当分の扱いも同様に未定義）。
+
 ## 新しい visual risk 観測（rule は変更しない）
 
 - 右 column が marker row（項）から始まる page がある（左 column 最終 row の続き）。

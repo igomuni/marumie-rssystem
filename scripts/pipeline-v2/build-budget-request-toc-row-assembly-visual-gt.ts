@@ -143,6 +143,7 @@ function main() {
       frozenInput: pre.integrity.frozenInput,
       sourcePdfHashes: [...new Map(held.pages.map(c => [c.localPdfPath, c.pdfSha256])).entries()].map(([localPdfPath, pdfSha256]) => ({ localPdfPath, pdfSha256 })),
       counts,
+      taxonomyBoundary: 'rowKindVisual（特に PLAIN_ROW）は visual observational class であり、#391 の parser row kind（REQUEST_NUMBER_ROW / MARKER_ROW / TITLE_OR_HEADING / OTHER_CODE / WRAPPED_FRAGMENT / UNKNOWN_ABSTAINED）との semantic / evaluation mapping は本 GT freeze では定義しない。GT を見た後の mapping 決定は新しい研究判断になるため、frozen evaluation で事後的に mapping を作ってはならない。必要なら parser implementation 前の別 protocol clarification として扱う',
       claimBoundary: 'GT freeze のみ。parser・評価は未実施。GT 誤りは silent fix せず別 correction protocol / 研究単位で扱う。candidate は目視により held-out GT evidence になった（以後 development tuning に使わない）',
       judgment: 'READY_FOR_TOC_ROW_ASSEMBLY_IMPLEMENTATION',
     };

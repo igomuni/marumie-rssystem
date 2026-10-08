@@ -42,6 +42,7 @@ describe('toc row assembly visual GT freeze（GT integrity のみ。parser の�
     expect(sha('annotation-ledger.json')).toBe(manifest.sha256.annotationLedger);
     expect(sha('render-manifest.json')).toBe(manifest.sha256.renderManifest);
     expect(sha('visual-gt-source.txt')).toBe(manifest.sha256.visualGtSource);
+    expect(manifest.taxonomyBoundary).toMatch(/PLAIN_ROW[\s\S]*mapping は本 GT freeze では定義しない[\s\S]*事後的に mapping を作ってはならない/);
     expect(manifest.judgment).toBe('READY_FOR_TOC_ROW_ASSEMBLY_IMPLEMENTATION');
   });
   it('row ID と (page, column, orderInColumn) が一意で、fragment owner が存在し、wrappedFragmentCount と整合する', () => {
