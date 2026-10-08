@@ -1,0 +1,909 @@
+{
+ "schema": "budget-request-toc-row-assembly-false-positive-observations/v0",
+ "note": "観測 table（原因名を付けない）。保存済み artifact の読み取りのみ。parser は実行していない",
+ "frozen": {
+  "evaluationResultSha256": "fcb1e40cc25969748516c4bbe1673d15418051a5d01d912310118abba4d05f66",
+  "heldoutParserOutputSha256": "d95abb76ea63e660189167d6d8d6f8f34e9234cb879be18854b44c8b375b6f6b",
+  "groundTruthSha256": "2e18ecd39fc471256f1a2a70a4e75ad24e958ca4f82cfd233e958f2cdf7c4444"
+ },
+ "severeExpected": 10,
+ "severeObserved": 10,
+ "affectedPages": 5,
+ "observations": [
+  {
+   "evidenceId": "FP-01",
+   "severeFamily": "FALSE_POSITIVE_ROW_ASSEMBLY",
+   "reason": "MERGE",
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "parserPageState": "ASSEMBLED_SPLIT",
+   "gtRowId": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3:RIGHT:1",
+   "gtKey": "M|（項）|120",
+   "gtColumn": "RIGHT",
+   "gtOrderInColumn": 1,
+   "gtRowKindVisual": "MARKER_ROW",
+   "gtLeftRowSameOrderInColumn": {
+    "rowId": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3:LEFT:1",
+    "rowKindVisual": "PLAIN_ROW"
+   },
+   "parserUnitId": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3:UNSPLIT:5@line7",
+   "parserUnitRowKind": "TITLE_OR_HEADING",
+   "parserUnitColumn": "UNSPLIT",
+   "parserUnitState": "RESOLVED",
+   "parserUnitRowStartTokenRaw": null,
+   "sourceLineIndex": 7,
+   "sourceRawLine": "     令和６年度歳出概算要求額総表                               1           （項） 120 農業経営安定事業費等食料安定供給特別会計へ繰入            115",
+   "sourceRawSlice": "令和６年度歳出概算要求額総表                               1           （項） 120 農業経営安定事業費等食料安定供給特別会計へ繰入            115",
+   "matchedToken": "（項） 120",
+   "gtKeysContainedInLine": [
+    "M|（項）|120"
+   ],
+   "headerZone": {
+    "unitIsTitleOrHeading": true,
+    "headerUnitsOnPage": 8,
+    "headerUnitLineIndexes": [
+     0,
+     2,
+     3,
+     4,
+     5,
+     7,
+     9,
+     10
+    ],
+    "firstNonTitleUnitLineIndex": 11
+   },
+   "geometry": {
+    "rawLineLength": 108,
+    "unitCharStart": 5,
+    "unitCharEnd": 108,
+    "rightBandEdgeE": 55,
+    "matchedTokenCharIndex": 62,
+    "tokenSideOfE": "AT_OR_RIGHT_OF_E",
+    "charBeforeEIsWhitespace": true,
+    "charAtEIsWhitespace": true,
+    "boundaryCrossingState": "NOT_CROSSING",
+    "normalizedTokenOffsetInCollapsedLine": 17
+   },
+   "severeCountOnSameParserUnit": 1,
+   "severeCountOnSamePage": 2
+  },
+  {
+   "evidenceId": "FP-02",
+   "severeFamily": "FALSE_POSITIVE_ROW_ASSEMBLY",
+   "reason": "MERGE",
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "parserPageState": "ASSEMBLED_SPLIT",
+   "gtRowId": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3:RIGHT:2",
+   "gtKey": "R|18",
+   "gtColumn": "RIGHT",
+   "gtOrderInColumn": 2,
+   "gtRowKindVisual": "REQUEST_NUMBER_ROW",
+   "gtLeftRowSameOrderInColumn": {
+    "rowId": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3:LEFT:2",
+    "rowKindVisual": "PLAIN_ROW"
+   },
+   "parserUnitId": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3:UNSPLIT:6@line9",
+   "parserUnitRowKind": "TITLE_OR_HEADING",
+   "parserUnitColumn": "UNSPLIT",
+   "parserUnitState": "RESOLVED",
+   "parserUnitRowStartTokenRaw": null,
+   "sourceLineIndex": 9,
+   "sourceRawLine": "     令和６年度歳出概算要求額明細表                              9    18   01‑65 農業経営安定事業等の財源の食料安定供給特別会計農業経営安定勘定へ繰入れ    115",
+   "sourceRawSlice": "令和６年度歳出概算要求額明細表                              9    18   01‑65 農業経営安定事業等の財源の食料安定供給特別会計農業経営安定勘定へ繰入れ    115",
+   "matchedToken": "18 01-65",
+   "gtKeysContainedInLine": [
+    "R|18"
+   ],
+   "headerZone": {
+    "unitIsTitleOrHeading": true,
+    "headerUnitsOnPage": 8,
+    "headerUnitLineIndexes": [
+     0,
+     2,
+     3,
+     4,
+     5,
+     7,
+     9,
+     10
+    ],
+    "firstNonTitleUnitLineIndex": 11
+   },
+   "geometry": {
+    "rawLineLength": 108,
+    "unitCharStart": 5,
+    "unitCharEnd": 108,
+    "rightBandEdgeE": 55,
+    "matchedTokenCharIndex": 55,
+    "tokenSideOfE": "AT_OR_RIGHT_OF_E",
+    "charBeforeEIsWhitespace": true,
+    "charAtEIsWhitespace": false,
+    "boundaryCrossingState": "NOT_CROSSING",
+    "normalizedTokenOffsetInCollapsedLine": 18
+   },
+   "severeCountOnSameParserUnit": 1,
+   "severeCountOnSamePage": 2
+  },
+  {
+   "evidenceId": "FP-03",
+   "severeFamily": "FALSE_POSITIVE_ROW_ASSEMBLY",
+   "reason": "MERGE",
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "parserPageState": "ASSEMBLED_SPLIT",
+   "gtRowId": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf#3:RIGHT:1",
+   "gtKey": "M|（項）|015",
+   "gtColumn": "RIGHT",
+   "gtOrderInColumn": 1,
+   "gtRowKindVisual": "MARKER_ROW",
+   "gtLeftRowSameOrderInColumn": {
+    "rowId": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf#3:LEFT:1",
+    "rowKindVisual": "PLAIN_ROW"
+   },
+   "parserUnitId": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf#3:UNSPLIT:5@line7",
+   "parserUnitRowKind": "TITLE_OR_HEADING",
+   "parserUnitColumn": "UNSPLIT",
+   "parserUnitState": "RESOLVED",
+   "parserUnitRowStartTokenRaw": null,
+   "sourceLineIndex": 7,
+   "sourceRawLine": "     令和６年度歳出概算要求額総表                             1          （項） 015 実施機関保険給付費等交付金                    7",
+   "sourceRawSlice": "令和６年度歳出概算要求額総表                             1          （項） 015 実施機関保険給付費等交付金                    7",
+   "matchedToken": "（項） 015",
+   "gtKeysContainedInLine": [
+    "M|（項）|015"
+   ],
+   "headerZone": {
+    "unitIsTitleOrHeading": true,
+    "headerUnitsOnPage": 7,
+    "headerUnitLineIndexes": [
+     0,
+     2,
+     3,
+     4,
+     5,
+     7,
+     9
+    ],
+    "firstNonTitleUnitLineIndex": 11
+   },
+   "geometry": {
+    "rawLineLength": 101,
+    "unitCharStart": 5,
+    "unitCharEnd": 101,
+    "rightBandEdgeE": 52,
+    "matchedTokenCharIndex": 59,
+    "tokenSideOfE": "AT_OR_RIGHT_OF_E",
+    "charBeforeEIsWhitespace": true,
+    "charAtEIsWhitespace": true,
+    "boundaryCrossingState": "NOT_CROSSING",
+    "normalizedTokenOffsetInCollapsedLine": 17
+   },
+   "severeCountOnSameParserUnit": 1,
+   "severeCountOnSamePage": 2
+  },
+  {
+   "evidenceId": "FP-04",
+   "severeFamily": "FALSE_POSITIVE_ROW_ASSEMBLY",
+   "reason": "MERGE",
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "parserPageState": "ASSEMBLED_SPLIT",
+   "gtRowId": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf#3:RIGHT:2",
+   "gtKey": "R|15",
+   "gtColumn": "RIGHT",
+   "gtOrderInColumn": 2,
+   "gtRowKindVisual": "REQUEST_NUMBER_ROW",
+   "gtLeftRowSameOrderInColumn": {
+    "rowId": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf#3:LEFT:2",
+    "rowKindVisual": "PLAIN_ROW"
+   },
+   "parserUnitId": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf#3:UNSPLIT:6@line9",
+   "parserUnitRowKind": "TITLE_OR_HEADING",
+   "parserUnitColumn": "UNSPLIT",
+   "parserUnitState": "RESOLVED",
+   "parserUnitRowStartTokenRaw": null,
+   "sourceLineIndex": 9,
+   "sourceRawLine": "     令和６年度歳出概算要求額明細表                            5   15   01‑02 実施機関保険給付費等交付金に必要な経費                  7",
+   "sourceRawSlice": "令和６年度歳出概算要求額明細表                            5   15   01‑02 実施機関保険給付費等交付金に必要な経費                  7",
+   "matchedToken": "15 01-02",
+   "gtKeysContainedInLine": [
+    "R|15"
+   ],
+   "headerZone": {
+    "unitIsTitleOrHeading": true,
+    "headerUnitsOnPage": 7,
+    "headerUnitLineIndexes": [
+     0,
+     2,
+     3,
+     4,
+     5,
+     7,
+     9
+    ],
+    "firstNonTitleUnitLineIndex": 11
+   },
+   "geometry": {
+    "rawLineLength": 101,
+    "unitCharStart": 5,
+    "unitCharEnd": 101,
+    "rightBandEdgeE": 52,
+    "matchedTokenCharIndex": 52,
+    "tokenSideOfE": "AT_OR_RIGHT_OF_E",
+    "charBeforeEIsWhitespace": true,
+    "charAtEIsWhitespace": false,
+    "boundaryCrossingState": "NOT_CROSSING",
+    "normalizedTokenOffsetInCollapsedLine": 18
+   },
+   "severeCountOnSameParserUnit": 1,
+   "severeCountOnSamePage": 2
+  },
+  {
+   "evidenceId": "FP-05",
+   "severeFamily": "FALSE_POSITIVE_ROW_ASSEMBLY",
+   "reason": "MERGE",
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "parserPageState": "ASSEMBLED_SPLIT",
+   "gtRowId": "data/download/mlit.go.jp/page/content/001630995.pdf#3:RIGHT:1",
+   "gtKey": "R|19",
+   "gtColumn": "RIGHT",
+   "gtOrderInColumn": 1,
+   "gtRowKindVisual": "REQUEST_NUMBER_ROW",
+   "gtLeftRowSameOrderInColumn": {
+    "rowId": "data/download/mlit.go.jp/page/content/001630995.pdf#3:LEFT:1",
+    "rowKindVisual": "PLAIN_ROW"
+   },
+   "parserUnitId": "data/download/mlit.go.jp/page/content/001630995.pdf#3:UNSPLIT:5@line7",
+   "parserUnitRowKind": "TITLE_OR_HEADING",
+   "parserUnitColumn": "UNSPLIT",
+   "parserUnitState": "RESOLVED",
+   "parserUnitRowStartTokenRaw": null,
+   "sourceLineIndex": 7,
+   "sourceRawLine": "     令和６年度歳出概算要求額総表                            1   19   20‑46 水資源確保を図るための農業農村整備事業に必要な経費           186",
+   "sourceRawSlice": "令和６年度歳出概算要求額総表                            1   19   20‑46 水資源確保を図るための農業農村整備事業に必要な経費           186",
+   "matchedToken": "19 20-46",
+   "gtKeysContainedInLine": [
+    "R|19"
+   ],
+   "headerZone": {
+    "unitIsTitleOrHeading": true,
+    "headerUnitsOnPage": 7,
+    "headerUnitLineIndexes": [
+     0,
+     2,
+     3,
+     4,
+     5,
+     7,
+     9
+    ],
+    "firstNonTitleUnitLineIndex": 11
+   },
+   "geometry": {
+    "rawLineLength": 101,
+    "unitCharStart": 5,
+    "unitCharEnd": 101,
+    "rightBandEdgeE": 51,
+    "matchedTokenCharIndex": 51,
+    "tokenSideOfE": "AT_OR_RIGHT_OF_E",
+    "charBeforeEIsWhitespace": true,
+    "charAtEIsWhitespace": false,
+    "boundaryCrossingState": "NOT_CROSSING",
+    "normalizedTokenOffsetInCollapsedLine": 17
+   },
+   "severeCountOnSameParserUnit": 1,
+   "severeCountOnSamePage": 2
+  },
+  {
+   "evidenceId": "FP-06",
+   "severeFamily": "FALSE_POSITIVE_ROW_ASSEMBLY",
+   "reason": "MERGE",
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "parserPageState": "ASSEMBLED_SPLIT",
+   "gtRowId": "data/download/mlit.go.jp/page/content/001630995.pdf#3:RIGHT:2",
+   "gtKey": "R|20",
+   "gtColumn": "RIGHT",
+   "gtOrderInColumn": 2,
+   "gtRowKindVisual": "REQUEST_NUMBER_ROW",
+   "gtLeftRowSameOrderInColumn": {
+    "rowId": "data/download/mlit.go.jp/page/content/001630995.pdf#3:LEFT:2",
+    "rowKindVisual": "PLAIN_ROW"
+   },
+   "parserUnitId": "data/download/mlit.go.jp/page/content/001630995.pdf#3:UNSPLIT:6@line9",
+   "parserUnitRowKind": "TITLE_OR_HEADING",
+   "parserUnitColumn": "UNSPLIT",
+   "parserUnitState": "RESOLVED",
+   "parserUnitRowStartTokenRaw": null,
+   "sourceLineIndex": 9,
+   "sourceRawLine": "     令和６年度歳出概算要求額明細表                          19   20   25‑41 水資源開発事業の促進に必要な経費                    186",
+   "sourceRawSlice": "令和６年度歳出概算要求額明細表                          19   20   25‑41 水資源開発事業の促進に必要な経費                    186",
+   "matchedToken": "20 25-41",
+   "gtKeysContainedInLine": [
+    "R|20"
+   ],
+   "headerZone": {
+    "unitIsTitleOrHeading": true,
+    "headerUnitsOnPage": 7,
+    "headerUnitLineIndexes": [
+     0,
+     2,
+     3,
+     4,
+     5,
+     7,
+     9
+    ],
+    "firstNonTitleUnitLineIndex": 11
+   },
+   "geometry": {
+    "rawLineLength": 101,
+    "unitCharStart": 5,
+    "unitCharEnd": 101,
+    "rightBandEdgeE": 51,
+    "matchedTokenCharIndex": 51,
+    "tokenSideOfE": "AT_OR_RIGHT_OF_E",
+    "charBeforeEIsWhitespace": true,
+    "charAtEIsWhitespace": false,
+    "boundaryCrossingState": "NOT_CROSSING",
+    "normalizedTokenOffsetInCollapsedLine": 19
+   },
+   "severeCountOnSameParserUnit": 1,
+   "severeCountOnSamePage": 2
+  },
+  {
+   "evidenceId": "FP-07",
+   "severeFamily": "FALSE_POSITIVE_ROW_ASSEMBLY",
+   "reason": "MERGE",
+   "localPdfPath": "data/download/mofa.go.jp/mofaj/files/100546568.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "parserPageState": "ASSEMBLED_SPLIT",
+   "gtRowId": "data/download/mofa.go.jp/mofaj/files/100546568.pdf#3:RIGHT:1",
+   "gtKey": "R|25",
+   "gtColumn": "RIGHT",
+   "gtOrderInColumn": 1,
+   "gtRowKindVisual": "REQUEST_NUMBER_ROW",
+   "gtLeftRowSameOrderInColumn": {
+    "rowId": "data/download/mofa.go.jp/mofaj/files/100546568.pdf#3:LEFT:1",
+    "rowKindVisual": "PLAIN_ROW"
+   },
+   "parserUnitId": "data/download/mofa.go.jp/mofaj/files/100546568.pdf#3:UNSPLIT:5@line7",
+   "parserUnitRowKind": "TITLE_OR_HEADING",
+   "parserUnitColumn": "UNSPLIT",
+   "parserUnitState": "RESOLVED",
+   "parserUnitRowStartTokenRaw": null,
+   "sourceLineIndex": 7,
+   "sourceRawLine": "     令和６年度歳出概算要求額総表                             1    25   05‑50 経済協力に係る広報文化交流及び報道対策に必要な経費        144",
+   "sourceRawSlice": "令和６年度歳出概算要求額総表                             1    25   05‑50 経済協力に係る広報文化交流及び報道対策に必要な経費        144",
+   "matchedToken": "25 05-50",
+   "gtKeysContainedInLine": [
+    "R|25"
+   ],
+   "headerZone": {
+    "unitIsTitleOrHeading": true,
+    "headerUnitsOnPage": 7,
+    "headerUnitLineIndexes": [
+     0,
+     2,
+     3,
+     4,
+     5,
+     7,
+     9
+    ],
+    "firstNonTitleUnitLineIndex": 11
+   },
+   "geometry": {
+    "rawLineLength": 100,
+    "unitCharStart": 5,
+    "unitCharEnd": 100,
+    "rightBandEdgeE": 53,
+    "matchedTokenCharIndex": 53,
+    "tokenSideOfE": "AT_OR_RIGHT_OF_E",
+    "charBeforeEIsWhitespace": true,
+    "charAtEIsWhitespace": false,
+    "boundaryCrossingState": "NOT_CROSSING",
+    "normalizedTokenOffsetInCollapsedLine": 17
+   },
+   "severeCountOnSameParserUnit": 1,
+   "severeCountOnSamePage": 2
+  },
+  {
+   "evidenceId": "FP-08",
+   "severeFamily": "FALSE_POSITIVE_ROW_ASSEMBLY",
+   "reason": "MERGE",
+   "localPdfPath": "data/download/mofa.go.jp/mofaj/files/100546568.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "parserPageState": "ASSEMBLED_SPLIT",
+   "gtRowId": "data/download/mofa.go.jp/mofaj/files/100546568.pdf#3:RIGHT:2",
+   "gtKey": "R|26",
+   "gtColumn": "RIGHT",
+   "gtOrderInColumn": 2,
+   "gtRowKindVisual": "REQUEST_NUMBER_ROW",
+   "gtLeftRowSameOrderInColumn": {
+    "rowId": "data/download/mofa.go.jp/mofaj/files/100546568.pdf#3:LEFT:2",
+    "rowKindVisual": "PLAIN_ROW"
+   },
+   "parserUnitId": "data/download/mofa.go.jp/mofaj/files/100546568.pdf#3:UNSPLIT:6@line9",
+   "parserUnitRowKind": "TITLE_OR_HEADING",
+   "parserUnitColumn": "UNSPLIT",
+   "parserUnitState": "RESOLVED",
+   "parserUnitRowStartTokenRaw": null,
+   "sourceLineIndex": 9,
+   "sourceRawLine": "     令和６年度歳出概算要求額明細表                            5    26   10‑95 広報文化交流及び報道対策に必要な経費               145",
+   "sourceRawSlice": "令和６年度歳出概算要求額明細表                            5    26   10‑95 広報文化交流及び報道対策に必要な経費               145",
+   "matchedToken": "26 10-95",
+   "gtKeysContainedInLine": [
+    "R|26"
+   ],
+   "headerZone": {
+    "unitIsTitleOrHeading": true,
+    "headerUnitsOnPage": 7,
+    "headerUnitLineIndexes": [
+     0,
+     2,
+     3,
+     4,
+     5,
+     7,
+     9
+    ],
+    "firstNonTitleUnitLineIndex": 11
+   },
+   "geometry": {
+    "rawLineLength": 100,
+    "unitCharStart": 5,
+    "unitCharEnd": 100,
+    "rightBandEdgeE": 53,
+    "matchedTokenCharIndex": 53,
+    "tokenSideOfE": "AT_OR_RIGHT_OF_E",
+    "charBeforeEIsWhitespace": true,
+    "charAtEIsWhitespace": false,
+    "boundaryCrossingState": "NOT_CROSSING",
+    "normalizedTokenOffsetInCollapsedLine": 18
+   },
+   "severeCountOnSameParserUnit": 1,
+   "severeCountOnSamePage": 2
+  },
+  {
+   "evidenceId": "FP-09",
+   "severeFamily": "FALSE_POSITIVE_ROW_ASSEMBLY",
+   "reason": "MERGE",
+   "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+   "physicalPage": 2,
+   "classifierSource": "DIRECT",
+   "parserPageState": "ASSEMBLED_SPLIT",
+   "gtRowId": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf#2:RIGHT:1",
+   "gtKey": "M|（項）|120",
+   "gtColumn": "RIGHT",
+   "gtOrderInColumn": 1,
+   "gtRowKindVisual": "MARKER_ROW",
+   "gtLeftRowSameOrderInColumn": {
+    "rowId": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf#2:LEFT:1",
+    "rowKindVisual": "PLAIN_ROW"
+   },
+   "parserUnitId": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf#2:UNSPLIT:5@line7",
+   "parserUnitRowKind": "TITLE_OR_HEADING",
+   "parserUnitColumn": "UNSPLIT",
+   "parserUnitState": "RESOLVED",
+   "parserUnitRowStartTokenRaw": null,
+   "sourceLineIndex": 7,
+   "sourceRawLine": "     令和６年度歳出概算要求額総表                                    1          （項） 120 科学警察研究所             59",
+   "sourceRawSlice": "令和６年度歳出概算要求額総表                                    1          （項） 120 科学警察研究所             59",
+   "matchedToken": "（項） 120",
+   "gtKeysContainedInLine": [
+    "M|（項）|120"
+   ],
+   "headerZone": {
+    "unitIsTitleOrHeading": true,
+    "headerUnitsOnPage": 7,
+    "headerUnitLineIndexes": [
+     0,
+     2,
+     3,
+     4,
+     5,
+     7,
+     9
+    ],
+    "firstNonTitleUnitLineIndex": 10
+   },
+   "geometry": {
+    "rawLineLength": 96,
+    "unitCharStart": 5,
+    "unitCharEnd": 96,
+    "rightBandEdgeE": 59,
+    "matchedTokenCharIndex": 66,
+    "tokenSideOfE": "AT_OR_RIGHT_OF_E",
+    "charBeforeEIsWhitespace": true,
+    "charAtEIsWhitespace": true,
+    "boundaryCrossingState": "NOT_CROSSING",
+    "normalizedTokenOffsetInCollapsedLine": 17
+   },
+   "severeCountOnSameParserUnit": 1,
+   "severeCountOnSamePage": 2
+  },
+  {
+   "evidenceId": "FP-10",
+   "severeFamily": "FALSE_POSITIVE_ROW_ASSEMBLY",
+   "reason": "MERGE",
+   "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+   "physicalPage": 2,
+   "classifierSource": "DIRECT",
+   "parserPageState": "ASSEMBLED_SPLIT",
+   "gtRowId": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf#2:RIGHT:2",
+   "gtKey": "R|17",
+   "gtColumn": "RIGHT",
+   "gtOrderInColumn": 2,
+   "gtRowKindVisual": "REQUEST_NUMBER_ROW",
+   "gtLeftRowSameOrderInColumn": {
+    "rowId": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf#2:LEFT:2",
+    "rowKindVisual": "PLAIN_ROW"
+   },
+   "parserUnitId": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf#2:UNSPLIT:6@line9",
+   "parserUnitRowKind": "TITLE_OR_HEADING",
+   "parserUnitColumn": "UNSPLIT",
+   "parserUnitState": "RESOLVED",
+   "parserUnitRowStartTokenRaw": null,
+   "sourceLineIndex": 9,
+   "sourceRawLine": "     令和６年度歳出概算要求額明細表                                   3   17   01‑13 科学警察研究所に必要な経費          59",
+   "sourceRawSlice": "令和６年度歳出概算要求額明細表                                   3   17   01‑13 科学警察研究所に必要な経費          59",
+   "matchedToken": "17 01-13",
+   "gtKeysContainedInLine": [
+    "R|17"
+   ],
+   "headerZone": {
+    "unitIsTitleOrHeading": true,
+    "headerUnitsOnPage": 7,
+    "headerUnitLineIndexes": [
+     0,
+     2,
+     3,
+     4,
+     5,
+     7,
+     9
+    ],
+    "firstNonTitleUnitLineIndex": 10
+   },
+   "geometry": {
+    "rawLineLength": 95,
+    "unitCharStart": 5,
+    "unitCharEnd": 95,
+    "rightBandEdgeE": 59,
+    "matchedTokenCharIndex": 59,
+    "tokenSideOfE": "AT_OR_RIGHT_OF_E",
+    "charBeforeEIsWhitespace": true,
+    "charAtEIsWhitespace": false,
+    "boundaryCrossingState": "NOT_CROSSING",
+    "normalizedTokenOffsetInCollapsedLine": 18
+   },
+   "severeCountOnSameParserUnit": 1,
+   "severeCountOnSamePage": 2
+  }
+ ],
+ "pageContextForAssembledSplitPages": [
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "physicalPage": 3,
+   "rightBandEdgeE": 55,
+   "severeOnPage": 2,
+   "headerZoneLinesWithContentAtOrRightOfE": [
+    {
+     "lineIndex": 0,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "1",
+     "severeEvidenceIds": []
+    },
+    {
+     "lineIndex": 2,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "額 目 次",
+     "severeEvidenceIds": []
+    },
+    {
+     "lineIndex": 4,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "区                    分       ページ",
+     "severeEvidenceIds": []
+    },
+    {
+     "lineIndex": 7,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "（項） 120 農業経営安定事業費等食料安定供給特別会計へ繰入            115",
+     "severeEvidenceIds": [
+      "FP-01"
+     ]
+    },
+    {
+     "lineIndex": 9,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "18   01‑65 農業経営安定事業等の財源の食料安定供給特別会計農業経営安定勘定へ繰入れ    115",
+     "severeEvidenceIds": [
+      "FP-02"
+     ]
+    },
+    {
+     "lineIndex": 10,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "に必要な経費",
+     "severeEvidenceIds": []
+    }
+   ],
+   "headerZoneLineCount": 8
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "physicalPage": 5,
+   "rightBandEdgeE": 53,
+   "severeOnPage": 0,
+   "headerZoneLinesWithContentAtOrRightOfE": [
+    {
+     "lineIndex": 0,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "3",
+     "severeEvidenceIds": []
+    },
+    {
+     "lineIndex": 1,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "求                      区                     分      ページ",
+     "severeEvidenceIds": []
+    },
+    {
+     "lineIndex": 2,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "号",
+     "severeEvidenceIds": []
+    }
+   ],
+   "headerZoneLineCount": 3
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "physicalPage": 6,
+   "rightBandEdgeE": 55,
+   "severeOnPage": 0,
+   "headerZoneLinesWithContentAtOrRightOfE": [
+    {
+     "lineIndex": 1,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "求                       区                分   ページ",
+     "severeEvidenceIds": []
+    },
+    {
+     "lineIndex": 2,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "号",
+     "severeEvidenceIds": []
+    }
+   ],
+   "headerZoneLineCount": 3
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf",
+   "physicalPage": 3,
+   "rightBandEdgeE": 52,
+   "severeOnPage": 2,
+   "headerZoneLinesWithContentAtOrRightOfE": [
+    {
+     "lineIndex": 0,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "1",
+     "severeEvidenceIds": []
+    },
+    {
+     "lineIndex": 2,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "求 額 目 次",
+     "severeEvidenceIds": []
+    },
+    {
+     "lineIndex": 4,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "区                 分   ページ",
+     "severeEvidenceIds": []
+    },
+    {
+     "lineIndex": 7,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "（項） 015 実施機関保険給付費等交付金                    7",
+     "severeEvidenceIds": [
+      "FP-03"
+     ]
+    },
+    {
+     "lineIndex": 9,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "15   01‑02 実施機関保険給付費等交付金に必要な経費                  7",
+     "severeEvidenceIds": [
+      "FP-04"
+     ]
+    }
+   ],
+   "headerZoneLineCount": 7
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 3,
+   "rightBandEdgeE": 51,
+   "severeOnPage": 2,
+   "headerZoneLinesWithContentAtOrRightOfE": [
+    {
+     "lineIndex": 0,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "1",
+     "severeEvidenceIds": []
+    },
+    {
+     "lineIndex": 2,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "求 額 目 次",
+     "severeEvidenceIds": []
+    },
+    {
+     "lineIndex": 4,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "区                   分     ページ",
+     "severeEvidenceIds": []
+    },
+    {
+     "lineIndex": 7,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "19   20‑46 水資源確保を図るための農業農村整備事業に必要な経費           186",
+     "severeEvidenceIds": [
+      "FP-05"
+     ]
+    },
+    {
+     "lineIndex": 9,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "20   25‑41 水資源開発事業の促進に必要な経費                    186",
+     "severeEvidenceIds": [
+      "FP-06"
+     ]
+    }
+   ],
+   "headerZoneLineCount": 7
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 5,
+   "rightBandEdgeE": 52,
+   "severeOnPage": 0,
+   "headerZoneLinesWithContentAtOrRightOfE": [
+    {
+     "lineIndex": 0,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "3",
+     "severeEvidenceIds": []
+    },
+    {
+     "lineIndex": 1,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "求                    区                    分   ページ",
+     "severeEvidenceIds": []
+    },
+    {
+     "lineIndex": 2,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "号",
+     "severeEvidenceIds": []
+    }
+   ],
+   "headerZoneLineCount": 3
+  },
+  {
+   "localPdfPath": "data/download/mofa.go.jp/mofaj/files/100546568.pdf",
+   "physicalPage": 3,
+   "rightBandEdgeE": 53,
+   "severeOnPage": 2,
+   "headerZoneLinesWithContentAtOrRightOfE": [
+    {
+     "lineIndex": 0,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "1",
+     "severeEvidenceIds": []
+    },
+    {
+     "lineIndex": 2,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "求 額 目 次",
+     "severeEvidenceIds": []
+    },
+    {
+     "lineIndex": 4,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "区                分   ページ",
+     "severeEvidenceIds": []
+    },
+    {
+     "lineIndex": 7,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "25   05‑50 経済協力に係る広報文化交流及び報道対策に必要な経費        144",
+     "severeEvidenceIds": [
+      "FP-07"
+     ]
+    },
+    {
+     "lineIndex": 9,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "26   10‑95 広報文化交流及び報道対策に必要な経費               145",
+     "severeEvidenceIds": [
+      "FP-08"
+     ]
+    }
+   ],
+   "headerZoneLineCount": 7
+  },
+  {
+   "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+   "physicalPage": 2,
+   "rightBandEdgeE": 59,
+   "severeOnPage": 2,
+   "headerZoneLinesWithContentAtOrRightOfE": [
+    {
+     "lineIndex": 0,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "1",
+     "severeEvidenceIds": []
+    },
+    {
+     "lineIndex": 2,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "次",
+     "severeEvidenceIds": []
+    },
+    {
+     "lineIndex": 4,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "区        分   ページ",
+     "severeEvidenceIds": []
+    },
+    {
+     "lineIndex": 7,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "（項） 120 科学警察研究所             59",
+     "severeEvidenceIds": [
+      "FP-09"
+     ]
+    },
+    {
+     "lineIndex": 9,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "17   01‑13 科学警察研究所に必要な経費          59",
+     "severeEvidenceIds": [
+      "FP-10"
+     ]
+    }
+   ],
+   "headerZoneLineCount": 7
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "physicalPage": 4,
+   "rightBandEdgeE": 53,
+   "severeOnPage": 0,
+   "headerZoneLinesWithContentAtOrRightOfE": [
+    {
+     "lineIndex": 1,
+     "hasContentAtOrRightOfE": true,
+     "textAtOrRightOfE": "区                    分       ページ",
+     "severeEvidenceIds": []
+    }
+   ],
+   "headerZoneLineCount": 3
+  }
+ ]
+}
