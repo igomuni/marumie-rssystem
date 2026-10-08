@@ -1,0 +1,180 @@
+{
+ "schema": "budget-request-toc-h1-new-heldout-visual-gt-freeze-manifest/v0",
+ "status": "NEW_HELDOUT_VISUAL_GT_FROZEN",
+ "createdAt": "2026-10-09T06:25:20+09:00",
+ "baseMainSha": "ec3906e01db815628bcece04eccd8ba05fc429bd",
+ "freezeCommit": "この manifest を追加する git commit（自己参照を避けるため hash は本文に埋め込まない）",
+ "hashes": {
+  "implementationFreezeManifestSha256": "ce80c5bb9c0e86a1cce278236afd86f34afe4615e90c5e8de17cf1582ec8f7cf",
+  "h1SourceSha256": "ea6af6debefc6c092c3725fc5e37f8ea7a53658fb24d876c2f725e33c6178343",
+  "membershipFileSha256": "7c238b9b6c756ebc9baec46f47f33db1706fee8ca40d87b1eb6d87bcf6538d06",
+  "membershipDigestSha256": "06c2e68d7ac178e7e0561d16976c47936ab9d52b59d91710cab145fa8822ab28",
+  "membershipFreezeManifestSha256": "635a236cce52cf8ec7a038c02f650713b84e6894146ca9385481e9605dd625b5",
+  "groundTruthSha256": "693ce90d0f289139d96771da1737c762a05c616c2a3afd8103a0f4979063705f",
+  "annotationLedgerSha256": "49d48e46ad2b1428ce5719e78fcdde4adb443c3f41283618523fb44d63d881f1",
+  "renderManifestSha256": "9ed0844b5a394472b96194e6a827ed0ea892f543ed358b1d173ed6d33ec0ec81",
+  "visualGtSourceSha256": "a514d97176908a61aa0600277da11c1816eb12cde217ecc6ea5a89945171073e",
+  "h1PreregistrationSha256": "0c3a377ba9d32ec55701f8d0982ff9a48e8cd9f16ba8c81927fcedffcdec1b27",
+  "parser393SourceSha256": "f3b726f8054340422eeb838187fed91b3435f7201dc39abfd4d40f382c9636dd"
+ },
+ "sourcePdfHashes": [
+  {
+   "localPdfPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+   "pdfSha256": "b6cc6fa0604ab64cbbf9867137db53883943b9d3b3adfd0fdc9d9eb59fd5e5d4"
+  },
+  {
+   "localPdfPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/aac2d779/20230907_policies_budget_05.pdf",
+   "pdfSha256": "e880abb5f5ccfaf7b2b9fe632c101287937e7b393e18e36775dc5ae92ad72026"
+  },
+  {
+   "localPdfPath": "data/download/digital.go.jp/assets/contents/node/basic_page/field_ref_resources/e9b99425-437c-4750-b4e2-6cca3cd877a6/0fab2c74/20230914_policies_budget_r6request_table_01.pdf",
+   "pdfSha256": "b77f25b26b5caf82b0b6617fb1af9b3bba9df059a8bf9a8ede63de8d1a8cfe89"
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157013.pdf",
+   "pdfSha256": "5f42ccfb48cc1d2043ffe97776be359c1e51d19ad35c578166e446982eb4bbe5"
+  },
+  {
+   "localPdfPath": "data/download/jbaudit.go.jp/jbaudit/bud_clo/bud/pdf/r06/20230906_02.pdf",
+   "pdfSha256": "c7070f558f985d0062cec9c73736bebe3c24f1290b895ce89d5afc676b21b72b"
+  },
+  {
+   "localPdfPath": "data/download/jcrc.go.jp/content/000001746.pdf",
+   "pdfSha256": "7632ed4048799b0f9b2001fef9a7ff94883885ff07e1145d55a4cd335f10583d"
+  },
+  {
+   "localPdfPath": "data/download/jftc.go.jp/soshiki/kyotsukoukai/yosan/yosankessan/r6/r6sandanhyou.pdf",
+   "pdfSha256": "036b395c72de3e0e81f07c337e9d45361cdaedf99831d690c3ea262dfb6b57e6"
+  },
+  {
+   "localPdfPath": "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-02.pdf",
+   "pdfSha256": "ffab15073beb2411d9396f7ca0cbb1ce33ccdf99be05e6d0d88e29366912e261"
+  },
+  {
+   "localPdfPath": "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-03.pdf",
+   "pdfSha256": "8a1049d06d4e27183a6f292e6afdd83e134775fd58ca4b5895bbb325a8d6ee8b"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+   "pdfSha256": "3be3fa49d24cc02ed680f0104d41405ff5e69bfb4a84290dccc8fe8205eaa1f1"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf",
+   "pdfSha256": "aaec655a87a74e2724ac35d81b6759697749c24e586a3b09934c46c4a4fca460"
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneden_o.pdf",
+   "pdfSha256": "d9ca160f33481511b3a484853f105375895f765a01535ed6bcae4b348eba6383"
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/enegen_o.pdf",
+   "pdfSha256": "fbbeb3df06555205ae839e9849f460d3017d4b95cf1bfd3bf2aacb389a67e70f"
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/fukko_o.pdf",
+   "pdfSha256": "17c0efdce49fb24a188a08ecef5a3340ea3e76f9c6ccef10539eefd69e8d8363"
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/tokkyo_o.pdf",
+   "pdfSha256": "6e083f0b4115530237d4c1c91e6d105fd3ee301d49f5ad3c0e649e11f4b13fc9"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "pdfSha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+   "pdfSha256": "769a47c4ea979473abcd1fb04b3d4aec6bdf98bc358d802f7af628990036001a"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf",
+   "pdfSha256": "0391edca4cd6b88140195d118613ccac33550549baf065d1951db96e9625d0b5"
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630393.pdf",
+   "pdfSha256": "efdef502e10961842477cd18cc2cb091c7a3206125881f6031fc7fa941613864"
+  },
+  {
+   "localPdfPath": "data/download/mofa.go.jp/mofaj/files/100546568.pdf",
+   "pdfSha256": "85781ba1f867aaab4130b2c463c588c4fc9ca6211d097cedfd495c56bf024b55"
+  },
+  {
+   "localPdfPath": "data/download/moj.go.jp/content/001402819.pdf",
+   "pdfSha256": "6635e0e5fbb8a962d439d6d8d256c0c34892b0d9a366ea04daf15d338a36bb7b"
+  },
+  {
+   "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/hukkoutokubetukaikei.pdf",
+   "pdfSha256": "9e44e9f3b592398750c0472ec84f94d3817d68ae50c84cf0b4df859ea3e32843"
+  },
+  {
+   "localPdfPath": "data/download/ppc.go.jp/files/pdf/230831youkyu.pdf",
+   "pdfSha256": "0a9a58273e0f9c137414e062872c1c642ad0fa5aec403ae5e606c56f198db9a3"
+  },
+  {
+   "localPdfPath": "data/download/sotsui.go.jp/budget/images/r6budget_yokyu.pdf",
+   "pdfSha256": "66a11094cdda23d47ee2d3c34f4ce741d528a8480a941cbea7803232a6aef029"
+  }
+ ],
+ "pageCount": 25,
+ "annotationCompletion": {
+  "complete": 25,
+  "total": 25
+ },
+ "annotationProtocol": "#392 の Visual GT protocol を継承（PDF visual のみ・blank→0 / 補完 / raw text / parser 参照の禁止・unreadable は推測しない）",
+ "renderProtocol": "pdftoppm 110dpi 全 25 page。supplemental: 1 page の page-ref 列を 300 / 600dpi crop（理由は ledger）",
+ "gtSummary": {
+  "pages": 25,
+  "direct": 22,
+  "inherited": 3,
+  "rightColumnUsedPages": 6,
+  "rightColumnBlankPages": 19,
+  "rightColumnAmbiguousPages": 0,
+  "rows": 614,
+  "byRowKind": {
+   "REQUEST_NUMBER_ROW": 303,
+   "MARKER_ROW": 257,
+   "PLAIN_ROW": 54
+  },
+  "rowsByColumn": {
+   "LEFT": 441,
+   "RIGHT": 173
+  },
+  "wrappedFragments": 3,
+  "fragmentOwnerStatus": {
+   "UNIQUE": 3,
+   "AMBIGUOUS": 0,
+   "NO_SAFE_OWNER": 0
+  },
+  "circledRequestNumbers": 18,
+  "unresolvedPages": 0,
+  "unresolvedRows": 0,
+  "unresolvedFragments": 0,
+  "unreadableFields": 0
+ },
+ "postReviewAmendment": "ledger.postReviewAmendment を参照（#401 review finding による REQUEST / MARKER row の title 追記。formal evaluation 前・H1 未実行の時点での visual GT correction）",
+ "contamination": false,
+ "firewall": {
+  "h1ExecutionsOnNewHeldout": 0,
+  "parser393ExecutionsOnNewHeldout": 0,
+  "triggerCensus": 0,
+  "parserOutputViewed": false,
+  "h1SpecificLabels": false,
+  "rawTextUsedForGtValues": false,
+  "pdftotextDisplayed": false
+ },
+ "formalEvaluationCount": {
+  "heldoutParserExecutionsTotal": 1,
+  "note": "#396 のみ。本 unit では増えていない"
+ },
+ "unresolvedOrUnreadable": {
+  "unresolvedRows": 0,
+  "unreadableFields": 0,
+  "note": "formal evaluation の可能性に影響する未解決はない"
+ },
+ "claimBoundary": "visual-only GT freeze。H1 の安全性・有効性は未評価。GT は同一 agent の作成で独立検証ではない。GT freeze 後の修正は silent fix せず別 correction protocol",
+ "judgment": "READY_FOR_H1_ONE_SHOT_FROZEN_EVALUATION"
+}
