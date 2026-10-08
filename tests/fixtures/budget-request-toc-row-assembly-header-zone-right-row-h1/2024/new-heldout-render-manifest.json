@@ -1,0 +1,251 @@
+{
+ "schema": "budget-request-toc-h1-new-heldout-render-manifest/v0",
+ "tool": "pdftoppm",
+ "baseDpi": 110,
+ "format": "png",
+ "note": "render artifact は repository に含めない（#392 慣行）。sha256 は目視に使った PNG の記録（render の再現性は pdftoppm の版に依存）",
+ "renders": [
+  {
+   "id": "render:0",
+   "localPdfPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+   "pdfSha256": "b6cc6fa0604ab64cbbf9867137db53883943b9d3b3adfd0fdc9d9eb59fd5e5d4",
+   "physicalPage": 3,
+   "dpi": 110,
+   "pngSha256": "416edd933d6ead014de04f3d5c0bace1b84b1eb206094c0c209945f952699e12",
+   "supplementalRenderUsed": false
+  },
+  {
+   "id": "render:1",
+   "localPdfPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/aac2d779/20230907_policies_budget_05.pdf",
+   "pdfSha256": "e880abb5f5ccfaf7b2b9fe632c101287937e7b393e18e36775dc5ae92ad72026",
+   "physicalPage": 3,
+   "dpi": 110,
+   "pngSha256": "3502220964a6116d00b450cca3551dec57e0c355e1aa4e663d924180ef056999",
+   "supplementalRenderUsed": false
+  },
+  {
+   "id": "render:2",
+   "localPdfPath": "data/download/digital.go.jp/assets/contents/node/basic_page/field_ref_resources/e9b99425-437c-4750-b4e2-6cca3cd877a6/0fab2c74/20230914_policies_budget_r6request_table_01.pdf",
+   "pdfSha256": "b77f25b26b5caf82b0b6617fb1af9b3bba9df059a8bf9a8ede63de8d1a8cfe89",
+   "physicalPage": 3,
+   "dpi": 110,
+   "pngSha256": "46832ce59b46bda862758430786978d69e4133f162a9f565db88f12fc79b4e7a",
+   "supplementalRenderUsed": false
+  },
+  {
+   "id": "render:3",
+   "localPdfPath": "data/download/env.go.jp/content/000157013.pdf",
+   "pdfSha256": "5f42ccfb48cc1d2043ffe97776be359c1e51d19ad35c578166e446982eb4bbe5",
+   "physicalPage": 3,
+   "dpi": 110,
+   "pngSha256": "adac371f574c962d3da218e3e0cbe3e2d4fcd4111e00229acc740d40c09eb79a",
+   "supplementalRenderUsed": false
+  },
+  {
+   "id": "render:4",
+   "localPdfPath": "data/download/jbaudit.go.jp/jbaudit/bud_clo/bud/pdf/r06/20230906_02.pdf",
+   "pdfSha256": "c7070f558f985d0062cec9c73736bebe3c24f1290b895ce89d5afc676b21b72b",
+   "physicalPage": 3,
+   "dpi": 110,
+   "pngSha256": "90b8971474eab8915a3bf9a7590ad426a58fbe3111992521208d0dcb7f7d2463",
+   "supplementalRenderUsed": true
+  },
+  {
+   "id": "render:5",
+   "localPdfPath": "data/download/jcrc.go.jp/content/000001746.pdf",
+   "pdfSha256": "7632ed4048799b0f9b2001fef9a7ff94883885ff07e1145d55a4cd335f10583d",
+   "physicalPage": 3,
+   "dpi": 110,
+   "pngSha256": "32aadd825f24a7b154b652febd19b42e0bfdf428d2259fd03d05d42d0fee2e69",
+   "supplementalRenderUsed": false
+  },
+  {
+   "id": "render:6",
+   "localPdfPath": "data/download/jftc.go.jp/soshiki/kyotsukoukai/yosan/yosankessan/r6/r6sandanhyou.pdf",
+   "pdfSha256": "036b395c72de3e0e81f07c337e9d45361cdaedf99831d690c3ea262dfb6b57e6",
+   "physicalPage": 3,
+   "dpi": 110,
+   "pngSha256": "3512ddae23d4ec0fdcb1570b445756d445ff69c84a6e5bc16a1aa8a11e739180",
+   "supplementalRenderUsed": false
+  },
+  {
+   "id": "render:7",
+   "localPdfPath": "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-02.pdf",
+   "pdfSha256": "ffab15073beb2411d9396f7ca0cbb1ce33ccdf99be05e6d0d88e29366912e261",
+   "physicalPage": 3,
+   "dpi": 110,
+   "pngSha256": "62989cd5fea02ea9bbeacf51fd4f180f0c8036f0004fd43e5ec2d13225391a30",
+   "supplementalRenderUsed": false
+  },
+  {
+   "id": "render:8",
+   "localPdfPath": "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-03.pdf",
+   "pdfSha256": "8a1049d06d4e27183a6f292e6afdd83e134775fd58ca4b5895bbb325a8d6ee8b",
+   "physicalPage": 3,
+   "dpi": 110,
+   "pngSha256": "79bd5433001541305997e04247f7a19d906c9517c8c4fb1dced618a1023bba18",
+   "supplementalRenderUsed": false
+  },
+  {
+   "id": "render:9",
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+   "physicalPage": 4,
+   "dpi": 110,
+   "pngSha256": "21bb8bd3e46c967667da5239c5ae6eccdcf3e8a5936a1eaafec4e1890c9f0f64",
+   "supplementalRenderUsed": false
+  },
+  {
+   "id": "render:10",
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+   "pdfSha256": "3be3fa49d24cc02ed680f0104d41405ff5e69bfb4a84290dccc8fe8205eaa1f1",
+   "physicalPage": 3,
+   "dpi": 110,
+   "pngSha256": "2ca42ad4f4b121cb35d45c3e8f4d4e1e9f9f047ac2cc4a7471a7c30178e9abd4",
+   "supplementalRenderUsed": false
+  },
+  {
+   "id": "render:11",
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf",
+   "pdfSha256": "aaec655a87a74e2724ac35d81b6759697749c24e586a3b09934c46c4a4fca460",
+   "physicalPage": 3,
+   "dpi": 110,
+   "pngSha256": "42cea6b8711ca6da08bffe9d6ecb9ba4bcc6d86ed13154d71741979d86b88d8e",
+   "supplementalRenderUsed": false
+  },
+  {
+   "id": "render:12",
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneden_o.pdf",
+   "pdfSha256": "d9ca160f33481511b3a484853f105375895f765a01535ed6bcae4b348eba6383",
+   "physicalPage": 3,
+   "dpi": 110,
+   "pngSha256": "dd92c35621dae606912da943dcb43bd4cd00addabd66ad0db6fac8fe9a02db58",
+   "supplementalRenderUsed": false
+  },
+  {
+   "id": "render:13",
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/enegen_o.pdf",
+   "pdfSha256": "fbbeb3df06555205ae839e9849f460d3017d4b95cf1bfd3bf2aacb389a67e70f",
+   "physicalPage": 3,
+   "dpi": 110,
+   "pngSha256": "5e695755b1905a16f6d6102cb964313fac911691f1572724bb2272a389b0e285",
+   "supplementalRenderUsed": false
+  },
+  {
+   "id": "render:14",
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/fukko_o.pdf",
+   "pdfSha256": "17c0efdce49fb24a188a08ecef5a3340ea3e76f9c6ccef10539eefd69e8d8363",
+   "physicalPage": 3,
+   "dpi": 110,
+   "pngSha256": "2bf8e030a80059ba14e834e9660dc38695968e1d788e8f8c5c723b98678fa16f",
+   "supplementalRenderUsed": false
+  },
+  {
+   "id": "render:15",
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/tokkyo_o.pdf",
+   "pdfSha256": "6e083f0b4115530237d4c1c91e6d105fd3ee301d49f5ad3c0e649e11f4b13fc9",
+   "physicalPage": 3,
+   "dpi": 110,
+   "pngSha256": "17da49f56c2d413fe824746a643d03df071a3d782f6a4b8f07732ec647131b9a",
+   "supplementalRenderUsed": false
+  },
+  {
+   "id": "render:16",
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "pdfSha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+   "physicalPage": 3,
+   "dpi": 110,
+   "pngSha256": "ecc0522e1822790a511c981ed27ea35f3a6f06ea3642686b0ac605b38e6f5b7b",
+   "supplementalRenderUsed": false
+  },
+  {
+   "id": "render:17",
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+   "pdfSha256": "769a47c4ea979473abcd1fb04b3d4aec6bdf98bc358d802f7af628990036001a",
+   "physicalPage": 3,
+   "dpi": 110,
+   "pngSha256": "005ae6c14bcb55994ac1334e676b5feb3e27b164c2042b4f041a5d8b7276fc7e",
+   "supplementalRenderUsed": false
+  },
+  {
+   "id": "render:18",
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf",
+   "pdfSha256": "0391edca4cd6b88140195d118613ccac33550549baf065d1951db96e9625d0b5",
+   "physicalPage": 4,
+   "dpi": 110,
+   "pngSha256": "e996d279b6cdcf2609f9f0addf71d467ea5fa45cae3e12a127a162bc0df3d1af",
+   "supplementalRenderUsed": false
+  },
+  {
+   "id": "render:19",
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630393.pdf",
+   "pdfSha256": "efdef502e10961842477cd18cc2cb091c7a3206125881f6031fc7fa941613864",
+   "physicalPage": 3,
+   "dpi": 110,
+   "pngSha256": "c7760638e6d53bd47d02b2504cf8bf8b358337e76849fb66ecf4927aec924c13",
+   "supplementalRenderUsed": false
+  },
+  {
+   "id": "render:20",
+   "localPdfPath": "data/download/mofa.go.jp/mofaj/files/100546568.pdf",
+   "pdfSha256": "85781ba1f867aaab4130b2c463c588c4fc9ca6211d097cedfd495c56bf024b55",
+   "physicalPage": 4,
+   "dpi": 110,
+   "pngSha256": "eb67adf6881bf88633254020d4d2fc3f57b3f359d9780f0f479c15a186e65e27",
+   "supplementalRenderUsed": false
+  },
+  {
+   "id": "render:21",
+   "localPdfPath": "data/download/moj.go.jp/content/001402819.pdf",
+   "pdfSha256": "6635e0e5fbb8a962d439d6d8d256c0c34892b0d9a366ea04daf15d338a36bb7b",
+   "physicalPage": 3,
+   "dpi": 110,
+   "pngSha256": "16343b19815a4538202899f35067ee74850af904b567a919cb2adf1be2986a1d",
+   "supplementalRenderUsed": false
+  },
+  {
+   "id": "render:22",
+   "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/hukkoutokubetukaikei.pdf",
+   "pdfSha256": "9e44e9f3b592398750c0472ec84f94d3817d68ae50c84cf0b4df859ea3e32843",
+   "physicalPage": 2,
+   "dpi": 110,
+   "pngSha256": "eee9e1cf279ae1da943d467e8a0aef2301ba5972e36b1712ad0338f81fbee9db",
+   "supplementalRenderUsed": false
+  },
+  {
+   "id": "render:23",
+   "localPdfPath": "data/download/ppc.go.jp/files/pdf/230831youkyu.pdf",
+   "pdfSha256": "0a9a58273e0f9c137414e062872c1c642ad0fa5aec403ae5e606c56f198db9a3",
+   "physicalPage": 3,
+   "dpi": 110,
+   "pngSha256": "04ba1cc33f7f61352adb00621c384aa7b9df8726797ac55d3cd2d30481bed0ac",
+   "supplementalRenderUsed": false
+  },
+  {
+   "id": "render:24",
+   "localPdfPath": "data/download/sotsui.go.jp/budget/images/r6budget_yokyu.pdf",
+   "pdfSha256": "66a11094cdda23d47ee2d3c34f4ce741d528a8480a941cbea7803232a6aef029",
+   "physicalPage": 3,
+   "dpi": 110,
+   "pngSha256": "8154dbbbbed5e1d6798f7a430188f1938d4f5d94bfd77a655236da83f2732a03",
+   "supplementalRenderUsed": false
+  }
+ ],
+ "supplementalRenders": [
+  {
+   "memberIndex": 4,
+   "physicalPage": 3,
+   "localPdfPath": "data/download/jbaudit.go.jp/jbaudit/bud_clo/bud/pdf/r06/20230906_02.pdf",
+   "dpi": [
+    300,
+    600
+   ],
+   "region": "page-ref column crop",
+   "reason": "110dpi では page ref セルが黒枠内の反転表示で判読が不安定だったため、高 DPI の crop で目視した（見えた値のみ転記）",
+   "pngSha256": [
+    "986bc601c65e1d4791f922816b213213e71ed643dc88340d70c3dc8999657be1",
+    "1f4ea4ad7e367c165dcb07b1cb6314ae7af44c40e246717eb1840f91e67a6a9e"
+   ]
+  }
+ ]
+}
