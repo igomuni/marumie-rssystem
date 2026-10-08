@@ -1,0 +1,1284 @@
+{
+ "schema": "budget-request-toc-physical-row-boundary-band-evidence/v0",
+ "scope": "post-hoc 補助分析。観測量のみ（rule・threshold ではない）",
+ "summary": {
+  "pagesWithRightRow": 38,
+  "indexSpreadWithinPagePerKind": {
+   "0": 61,
+   "1": 11,
+   "2": 1
+  },
+  "displayCellSpreadWithinPagePerKind": {
+   "0": 7,
+   "1": 1,
+   "3": 2,
+   "5": 2,
+   "6": 2,
+   "8": 3,
+   "9": 1,
+   "10": 2,
+   "11": 4,
+   "12": 1,
+   "13": 3,
+   "14": 4,
+   "15": 4,
+   "16": 2,
+   "18": 1,
+   "19": 6,
+   "20": 5,
+   "21": 2,
+   "22": 1,
+   "23": 3,
+   "24": 4,
+   "25": 6,
+   "26": 1,
+   "27": 2,
+   "28": 2,
+   "30": 2
+  },
+  "markerMinusRequestMinIndex": {
+   "6": 7,
+   "7": 23,
+   "8": 1,
+   "9": 1,
+   "10": 3
+  },
+  "minWhitespaceBetweenLeftRefAndRightStart": {
+   "1": 10,
+   "3": 26,
+   "4": 2
+  }
+ },
+ "pages": [
+  {
+   "localPdfPath": "data/download/soumu.go.jp/main_content/000901372.pdf",
+   "physicalPage": 3,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 0
+   },
+   "displayCellSpread": {
+    "req": 27,
+    "marker": 8
+   },
+   "markerMinusRequestMinIndex": 7,
+   "minWhitespaceBetweenLeftRefAndRightStart": 3
+  },
+  {
+   "localPdfPath": "data/download/soumu.go.jp/main_content/000901372.pdf",
+   "physicalPage": 4,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/soumu.go.jp/main_content/000901375.pdf",
+   "physicalPage": 3,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/moj.go.jp/content/001402819.pdf",
+   "physicalPage": 3,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "physicalPage": 3,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 0
+   },
+   "displayCellSpread": {
+    "req": 25,
+    "marker": 19
+   },
+   "markerMinusRequestMinIndex": 7,
+   "minWhitespaceBetweenLeftRefAndRightStart": 3
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "physicalPage": 4,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneju_o.pdf",
+   "physicalPage": 3,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 0
+   },
+   "displayCellSpread": {
+    "req": 10,
+    "marker": 3
+   },
+   "markerMinusRequestMinIndex": 7,
+   "minWhitespaceBetweenLeftRefAndRightStart": 3
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneden_o.pdf",
+   "physicalPage": 3,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/enegen_o.pdf",
+   "physicalPage": 3,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/tokkyo_o.pdf",
+   "physicalPage": 3,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/fukko_o.pdf",
+   "physicalPage": 3,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "physicalPage": 2,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 0
+   },
+   "displayCellSpread": {
+    "req": 20,
+    "marker": 0
+   },
+   "markerMinusRequestMinIndex": 7,
+   "minWhitespaceBetweenLeftRefAndRightStart": 3
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "physicalPage": 3,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 0
+   },
+   "displayCellSpread": {
+    "req": 1,
+    "marker": 0
+   },
+   "markerMinusRequestMinIndex": 7,
+   "minWhitespaceBetweenLeftRefAndRightStart": 3
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024jisinn_2.pdf",
+   "physicalPage": 2,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024kokusaiseirikikinn_2.pdf",
+   "physicalPage": 2,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024gaitame_2.pdf",
+   "physicalPage": 2,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024zaiyuu_2.pdf",
+   "physicalPage": 2,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tousi_2.pdf",
+   "physicalPage": 2,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tokuzai_2.pdf",
+   "physicalPage": 2,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "physicalPage": 3,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 0
+   },
+   "displayCellSpread": {
+    "req": 28,
+    "marker": 15
+   },
+   "markerMinusRequestMinIndex": 7,
+   "minWhitespaceBetweenLeftRefAndRightStart": 3
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "physicalPage": 4,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 0
+   },
+   "displayCellSpread": {
+    "req": 19,
+    "marker": 11
+   },
+   "markerMinusRequestMinIndex": 7,
+   "minWhitespaceBetweenLeftRefAndRightStart": 3
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "physicalPage": 5,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 0
+   },
+   "displayCellSpread": {
+    "req": 24,
+    "marker": 24
+   },
+   "markerMinusRequestMinIndex": 10,
+   "minWhitespaceBetweenLeftRefAndRightStart": 1
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "physicalPage": 6,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 1
+   },
+   "displayCellSpread": {
+    "req": 23,
+    "marker": 25
+   },
+   "markerMinusRequestMinIndex": 7,
+   "minWhitespaceBetweenLeftRefAndRightStart": 1
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "physicalPage": 7,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 0
+   },
+   "displayCellSpread": {
+    "req": 13,
+    "marker": 24
+   },
+   "markerMinusRequestMinIndex": 10,
+   "minWhitespaceBetweenLeftRefAndRightStart": 1
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+   "physicalPage": 3,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 1
+   },
+   "displayCellSpread": {
+    "req": 26,
+    "marker": 16
+   },
+   "markerMinusRequestMinIndex": 6,
+   "minWhitespaceBetweenLeftRefAndRightStart": 3
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+   "physicalPage": 4,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 0
+   },
+   "displayCellSpread": {
+    "req": 0,
+    "marker": 0
+   },
+   "markerMinusRequestMinIndex": 7,
+   "minWhitespaceBetweenLeftRefAndRightStart": 3
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf",
+   "physicalPage": 3,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 1
+   },
+   "displayCellSpread": {
+    "req": 27,
+    "marker": 25
+   },
+   "markerMinusRequestMinIndex": 6,
+   "minWhitespaceBetweenLeftRefAndRightStart": 3
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf",
+   "physicalPage": 4,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "physicalPage": 3,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 0
+   },
+   "displayCellSpread": {
+    "req": 13,
+    "marker": 6
+   },
+   "markerMinusRequestMinIndex": 7,
+   "minWhitespaceBetweenLeftRefAndRightStart": 4
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "physicalPage": 4,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 1
+   },
+   "displayCellSpread": {
+    "req": 11,
+    "marker": 18
+   },
+   "markerMinusRequestMinIndex": 6,
+   "minWhitespaceBetweenLeftRefAndRightStart": 3
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "physicalPage": 5,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 2,
+    "marker": 1
+   },
+   "displayCellSpread": {
+    "req": 30,
+    "marker": 25
+   },
+   "markerMinusRequestMinIndex": 9,
+   "minWhitespaceBetweenLeftRefAndRightStart": 1
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "physicalPage": 6,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+   "physicalPage": 3,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 0
+   },
+   "displayCellSpread": {
+    "req": 8,
+    "marker": 0
+   },
+   "markerMinusRequestMinIndex": 7,
+   "minWhitespaceBetweenLeftRefAndRightStart": 3
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf",
+   "physicalPage": 3,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 1
+   },
+   "displayCellSpread": {
+    "req": 21,
+    "marker": 20
+   },
+   "markerMinusRequestMinIndex": 6,
+   "minWhitespaceBetweenLeftRefAndRightStart": 3
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf",
+   "physicalPage": 4,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-8.pdf",
+   "physicalPage": 3,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 3,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 0
+   },
+   "displayCellSpread": {
+    "req": 13,
+    "marker": 14
+   },
+   "markerMinusRequestMinIndex": 7,
+   "minWhitespaceBetweenLeftRefAndRightStart": 3
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 4,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 0
+   },
+   "displayCellSpread": {
+    "req": 15,
+    "marker": 14
+   },
+   "markerMinusRequestMinIndex": 7,
+   "minWhitespaceBetweenLeftRefAndRightStart": 3
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 5,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 0
+   },
+   "displayCellSpread": {
+    "req": 20,
+    "marker": 11
+   },
+   "markerMinusRequestMinIndex": 8,
+   "minWhitespaceBetweenLeftRefAndRightStart": 1
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 6,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": 0,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": 1
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 7,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": 23,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": 1
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 8,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 1
+   },
+   "displayCellSpread": {
+    "req": 12,
+    "marker": 15
+   },
+   "markerMinusRequestMinIndex": 7,
+   "minWhitespaceBetweenLeftRefAndRightStart": 1
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 9,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 0
+   },
+   "displayCellSpread": {
+    "req": 25,
+    "marker": 14
+   },
+   "markerMinusRequestMinIndex": 10,
+   "minWhitespaceBetweenLeftRefAndRightStart": 1
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630393.pdf",
+   "physicalPage": 3,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 1
+   },
+   "displayCellSpread": {
+    "req": 21,
+    "marker": 24
+   },
+   "markerMinusRequestMinIndex": 6,
+   "minWhitespaceBetweenLeftRefAndRightStart": 3
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630393.pdf",
+   "physicalPage": 4,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630395.pdf",
+   "physicalPage": 3,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157010.pdf",
+   "physicalPage": 3,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 0
+   },
+   "displayCellSpread": {
+    "req": 30,
+    "marker": 16
+   },
+   "markerMinusRequestMinIndex": 7,
+   "minWhitespaceBetweenLeftRefAndRightStart": 3
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157010.pdf",
+   "physicalPage": 4,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157012.pdf",
+   "physicalPage": 3,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 0
+   },
+   "displayCellSpread": {
+    "req": 10,
+    "marker": 3
+   },
+   "markerMinusRequestMinIndex": 7,
+   "minWhitespaceBetweenLeftRefAndRightStart": 3
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157013.pdf",
+   "physicalPage": 3,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157016.pdf",
+   "physicalPage": 3,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+   "physicalPage": 3,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 0
+   },
+   "displayCellSpread": {
+    "req": 6,
+    "marker": 5
+   },
+   "markerMinusRequestMinIndex": 7,
+   "minWhitespaceBetweenLeftRefAndRightStart": 4
+  },
+  {
+   "localPdfPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/aac2d779/20230907_policies_budget_05.pdf",
+   "physicalPage": 3,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/digital.go.jp/assets/contents/node/basic_page/field_ref_resources/e9b99425-437c-4750-b4e2-6cca3cd877a6/0fab2c74/20230914_policies_budget_r6request_table_01.pdf",
+   "physicalPage": 3,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+   "physicalPage": 2,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 0
+   },
+   "displayCellSpread": {
+    "req": 8,
+    "marker": 5
+   },
+   "markerMinusRequestMinIndex": 7,
+   "minWhitespaceBetweenLeftRefAndRightStart": 3
+  },
+  {
+   "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/hukkoutokubetukaikei.pdf",
+   "physicalPage": 2,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "physicalPage": 3,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 0
+   },
+   "displayCellSpread": {
+    "req": 25,
+    "marker": 23
+   },
+   "markerMinusRequestMinIndex": 7,
+   "minWhitespaceBetweenLeftRefAndRightStart": 3
+  },
+  {
+   "localPdfPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "physicalPage": 4,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": 0,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": 3
+  },
+  {
+   "localPdfPath": "data/download/mofa.go.jp/mofaj/files/100546568.pdf",
+   "physicalPage": 3,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 1
+   },
+   "displayCellSpread": {
+    "req": 19,
+    "marker": 22
+   },
+   "markerMinusRequestMinIndex": 6,
+   "minWhitespaceBetweenLeftRefAndRightStart": 3
+  },
+  {
+   "localPdfPath": "data/download/mofa.go.jp/mofaj/files/100546568.pdf",
+   "physicalPage": 4,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf",
+   "physicalPage": 3,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/shugiin.go.jp/internet/itdb_annai.nsf/html/statics/osirase/kaikei-saishutsugaisan6.pdf/%24File/kaikei-saishutsugaisan6.pdf",
+   "physicalPage": 3,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/ndl.go.jp/jp/aboutus/outline/r06_budgetrequest.pdf",
+   "physicalPage": 2,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/sotsui.go.jp/budget/images/r6budget_yokyu.pdf",
+   "physicalPage": 3,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/dangai.go.jp/info/pdf/r06_saisyutu-gaisan.pdf",
+   "physicalPage": 3,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf",
+   "physicalPage": 3,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/jbaudit.go.jp/jbaudit/bud_clo/bud/pdf/r06/20230906_02.pdf",
+   "physicalPage": 3,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/jinji.go.jp/content/900024096.pdf",
+   "physicalPage": 3,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/jftc.go.jp/soshiki/kyotsukoukai/yosan/yosankessan/r6/r6sandanhyou.pdf",
+   "physicalPage": 3,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/ppc.go.jp/files/pdf/230831youkyu.pdf",
+   "physicalPage": 3,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/jcrc.go.jp/content/000001746.pdf",
+   "physicalPage": 3,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+   "physicalPage": 3,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_02.pdf",
+   "physicalPage": 3,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/clb.go.jp/files/topics/4473_ext_05_1.pdf",
+   "physicalPage": 3,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "physicalPage": 3,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 0
+   },
+   "displayCellSpread": {
+    "req": 28,
+    "marker": 9
+   },
+   "markerMinusRequestMinIndex": 7,
+   "minWhitespaceBetweenLeftRefAndRightStart": 3
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "physicalPage": 4,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 0
+   },
+   "displayCellSpread": {
+    "req": 11,
+    "marker": 19
+   },
+   "markerMinusRequestMinIndex": 7,
+   "minWhitespaceBetweenLeftRefAndRightStart": 3
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "physicalPage": 5,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "physicalPage": 3,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 0
+   },
+   "displayCellSpread": {
+    "req": 14,
+    "marker": 19
+   },
+   "markerMinusRequestMinIndex": 7,
+   "minWhitespaceBetweenLeftRefAndRightStart": 3
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "physicalPage": 4,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 1
+   },
+   "displayCellSpread": {
+    "req": 20,
+    "marker": 20
+   },
+   "markerMinusRequestMinIndex": 6,
+   "minWhitespaceBetweenLeftRefAndRightStart": 3
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "physicalPage": 5,
+   "hasRightRow": true,
+   "indexSpread": {
+    "req": 0,
+    "marker": 1
+   },
+   "displayCellSpread": {
+    "req": 15,
+    "marker": 19
+   },
+   "markerMinusRequestMinIndex": 7,
+   "minWhitespaceBetweenLeftRefAndRightStart": 1
+  },
+  {
+   "localPdfPath": "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-02.pdf",
+   "physicalPage": 3,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  },
+  {
+   "localPdfPath": "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-03.pdf",
+   "physicalPage": 3,
+   "hasRightRow": false,
+   "indexSpread": {
+    "req": null,
+    "marker": null
+   },
+   "displayCellSpread": {
+    "req": null,
+    "marker": null
+   },
+   "markerMinusRequestMinIndex": null,
+   "minWhitespaceBetweenLeftRefAndRightStart": null
+  }
+ ]
+}

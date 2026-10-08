@@ -1,0 +1,180 @@
+{
+ "schema": "budget-request-toc-physical-row-development-sample/v0",
+ "inspectionRole": "DEVELOPMENT_EXPLORATION（held-out ではない・formal preregistration ではない）",
+ "seed": "budget-request-toc-physical-row-failure-isolation-dev-20261008",
+ "hashRule": "sha256(\"{seed}|{stratum}|{localPdfPath}|{physicalPage}\") 昇順の先頭 1（publisher 重複を避ける）",
+ "denominator": "TOC 82 − PR-3A explored − #389 explored",
+ "strataRules": [
+  "H-A1:right-row-evidence+multiple-start-columns+header-2nd-要求-present",
+  "H-A1:right-row-evidence+header-2nd-要求-missing",
+  "H-A1:no-right-row-evidence+body>=15(false-empty-risk)",
+  "H-A1:right-short-asymmetric(right-row-lines<30%-of-body)",
+  "H-A1:boundary-conflict-lines>=1(token cut at hint boundary)",
+  "H-A2:simultaneous-left-right-fragment-line>=1",
+  "H-A2:right-fragment-without-preceding-right-owner>=1",
+  "H-A2:right-only-raw-lines>=3(source-order-risk)",
+  "H-A2:right-fragment-line>=1(wrap in right column; both-column wrap candidates are absent by machine)",
+  "H-A2:left-fragment-lines>=2(multiple wraps in a left column)"
+ ],
+ "poolSizes": {
+  "H-A1:right-row-evidence+multiple-start-columns+header-2nd-要求-present": 19,
+  "H-A1:right-row-evidence+header-2nd-要求-missing": 0,
+  "H-A1:no-right-row-evidence+body>=15(false-empty-risk)": 13,
+  "H-A1:right-short-asymmetric(right-row-lines<30%-of-body)": 9,
+  "H-A1:boundary-conflict-lines>=1(token cut at hint boundary)": 0,
+  "H-A2:simultaneous-left-right-fragment-line>=1": 0,
+  "H-A2:right-fragment-without-preceding-right-owner>=1": 0,
+  "H-A2:right-only-raw-lines>=3(source-order-risk)": 9,
+  "H-A2:right-fragment-line>=1(wrap in right column; both-column wrap candidates are absent by machine)": 7,
+  "H-A2:left-fragment-lines>=2(multiple wraps in a left column)": 6
+ },
+ "newDevelopment": 6,
+ "recheck": 4,
+ "totalRender": 10,
+ "pages": [
+  {
+   "localPdfPath": "data/download/clb.go.jp/files/topics/4473_ext_05_1.pdf",
+   "pdfSha256": "dbd5467fe8a6d6f2fe44ac8fba5a5412a097c21feace047a082ae15eb03f57b5",
+   "physicalPage": 3,
+   "textSha256": "4fa76aae73f92f9d7c9b78047b7e29f05b1917a31c24e96c3cab922d1740fb83",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "publisherDomain": "clb.go.jp",
+   "role": "RECHECK",
+   "selectionStratum": [
+    "H-A3:known-circled-request-number-case(#389)"
+   ],
+   "recheckReason": "H-A3: circled request number の row 開始・page 参照・x 位置との関係を、既存 #389 の render evidence と突き合わせるために同 page を再 render する（新規 sample denominator には含めない）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157010.pdf",
+   "pdfSha256": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd",
+   "physicalPage": 3,
+   "textSha256": "29c0f106f191102a5354954641e0b2c2996646e808553a21ec0b6b61ffc98de8",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "publisherDomain": "env.go.jp",
+   "role": "NEW_DEVELOPMENT",
+   "selectionStratum": [
+    "H-A2:right-fragment-line>=1(wrap in right column; both-column wrap candidates are absent by machine)"
+   ],
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/jinji.go.jp/content/900024096.pdf",
+   "pdfSha256": "2e0229d66535e4d94f1f35f5d6c169042a6461a20f963f80cbf8945972b61bd2",
+   "physicalPage": 3,
+   "textSha256": "56ad9ce3d748bfa39e92b172611c220647066653b56ce6bb76da278567391f55",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "publisherDomain": "jinji.go.jp",
+   "role": "NEW_DEVELOPMENT",
+   "selectionStratum": [
+    "H-A1:no-right-row-evidence+body>=15(false-empty-risk)"
+   ],
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+   "physicalPage": 5,
+   "textSha256": "0361bbf1438795d66a8bf58db6c89927d81ca17cfffb5e6b7bfba1033ae03fea",
+   "classifierPageType": "TOC",
+   "classifierSource": "INHERITED",
+   "publisherDomain": "maff.go.jp",
+   "role": "RECHECK",
+   "selectionStratum": [
+    "H-A3:known-circled-request-number-case(#389)"
+   ],
+   "recheckReason": "H-A3: circled request number の row 開始・page 参照・x 位置との関係を、既存 #389 の render evidence と突き合わせるために同 page を再 render する（新規 sample denominator には含めない）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "pdfSha256": "91b39e9902610e13aa7be445db2d2d2a3e38166fd5f449bd11f94cfe5fe3b6d5",
+   "physicalPage": 5,
+   "textSha256": "72ed43e3ab84a4a57326be1aa348c953205661100c76aef8f9c43179dbc1719d",
+   "classifierPageType": "TOC",
+   "classifierSource": "INHERITED",
+   "publisherDomain": "mext.go.jp",
+   "role": "RECHECK",
+   "selectionStratum": [
+    "H-A3:known-circled-request-number-case(#389)"
+   ],
+   "recheckReason": "H-A3: circled request number の row 開始・page 参照・x 位置との関係を、既存 #389 の render evidence と突き合わせるために同 page を再 render する（新規 sample denominator には含めない）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "pdfSha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+   "physicalPage": 7,
+   "textSha256": "edcb745e044a4532ca27a75e0476b49e7cdd54af23cc23332ca296acf3694a5b",
+   "classifierPageType": "TOC",
+   "classifierSource": "INHERITED",
+   "publisherDomain": "mhlw.go.jp",
+   "role": "NEW_DEVELOPMENT",
+   "selectionStratum": [
+    "H-A1:right-row-evidence+multiple-start-columns+header-2nd-要求-present"
+   ],
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "pdfSha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+   "physicalPage": 6,
+   "textSha256": "99efe411705eaa4d92dd015e1a008655224706d92d8bf65431e3da100df8b679",
+   "classifierPageType": "TOC",
+   "classifierSource": "INHERITED",
+   "publisherDomain": "mlit.go.jp",
+   "role": "NEW_DEVELOPMENT",
+   "selectionStratum": [
+    "H-A2:right-only-raw-lines>=3(source-order-risk)"
+   ],
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "pdfSha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+   "physicalPage": 7,
+   "textSha256": "c84088076ea95557c45875c5f539941e51ef83835adf3b850552eef28c3b4bd4",
+   "classifierPageType": "TOC",
+   "classifierSource": "INHERITED",
+   "publisherDomain": "mlit.go.jp",
+   "role": "NEW_DEVELOPMENT",
+   "selectionStratum": [
+    "H-A1:right-short-asymmetric(right-row-lines<30%-of-body)"
+   ],
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "pdfSha256": "6cc573bf64747e4ceb41597cc83e371f5d8144a02e3e9033501597d64cfbbc5e",
+   "physicalPage": 2,
+   "textSha256": "3e398e82d5ac63d33117036443b58502efbc394e62e1d83a5b0233ebe10eab98",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "publisherDomain": "mof.go.jp",
+   "role": "RECHECK",
+   "selectionStratum": [
+    "H-A3:known-circled-request-number-case(#389)"
+   ],
+   "recheckReason": "H-A3: circled request number の row 開始・page 参照・x 位置との関係を、既存 #389 の render evidence と突き合わせるために同 page を再 render する（新規 sample denominator には含めない）",
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "pdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+   "physicalPage": 3,
+   "textSha256": "8c22462a899952790b2eaefbdf6d97ee6332799e4845d549d949028f7db71315",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "publisherDomain": "reconstruction.go.jp",
+   "role": "NEW_DEVELOPMENT",
+   "selectionStratum": [
+    "H-A2:left-fragment-lines>=2(multiple wraps in a left column)"
+   ],
+   "inspectionRole": "DEVELOPMENT_EXPLORATION"
+  }
+ ]
+}
