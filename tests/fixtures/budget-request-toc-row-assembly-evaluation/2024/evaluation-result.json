@@ -1,0 +1,7979 @@
+{
+ "schema": "budget-request-toc-row-assembly-evaluation-result/v0",
+ "note": "raw result（解釈を含まない）。評価後の追加解析・rule 変更・retry をしない",
+ "formalExecutionCount": 1,
+ "startedAt": "2026-10-08T10:52:17.343Z",
+ "completedAt": "2026-10-08T10:52:17.644Z",
+ "launchManifestSha256": "80897a1a941d7baf55660d34387c70bdb863de0455345ab7fe7494eaf99f5b7d",
+ "parserOutputSha256": "d95abb76ea63e660189167d6d8d6f8f34e9234cb879be18854b44c8b375b6f6b",
+ "protocolCompliance": {
+  "frozenHashesMatched": true,
+  "mismatches": [],
+  "membershipUnchanged": true,
+  "retries": 0,
+  "candidateDropOrReplacement": 0,
+  "evaluatorChangedAfterLaunch": false,
+  "compliant": true
+ },
+ "summary": {
+  "pages": 23,
+  "direct": 14,
+  "inherited": 9,
+  "pageStates": {
+   "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE": 12,
+   "ASSEMBLED_SPLIT": 9,
+   "PAGE_ABSTAINED": 2
+  },
+  "pageOutcomes": {
+   "NOT_COMPARABLE:UNSPLIT_AND_GT_RIGHT_BLANK": 12,
+   "CORRECT:SPLIT_AND_GT_RIGHT_ROWS": 9,
+   "ABSTAINED:RIGHT_EVIDENCE_INSUFFICIENT": 2
+  },
+  "rows": {
+   "gtComparable": 802,
+   "parserComparableUnits": 717,
+   "matched": 717,
+   "states": {
+    "CORRECT": 717,
+    "INCORRECT": 10,
+    "ABSTAINED": 75,
+    "UNRESOLVED": 0
+   },
+   "omittedSilently": 0,
+   "orderInversions": 0,
+   "notComparable": {
+    "plainRow": 32,
+    "classification": 802,
+    "columnUnclaimed": 160
+   },
+   "pageLevelNotComparable": 12
+  },
+  "severe": {
+   "FALSE_POSITIVE_ROW_ASSEMBLY": {
+    "count": 10,
+    "pages": [
+     "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3",
+     "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf#3",
+     "data/download/mlit.go.jp/page/content/001630995.pdf#3",
+     "data/download/mofa.go.jp/mofaj/files/100546568.pdf#3",
+     "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf#2"
+    ],
+    "evidence": [
+     {
+      "family": "FALSE_POSITIVE_ROW_ASSEMBLY",
+      "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "physicalPage": 3,
+      "gtKey": "M|（項）|120",
+      "gtRowId": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3:RIGHT:1",
+      "parserUnit": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3:UNSPLIT:5@line7",
+      "reason": "MERGE",
+      "detail": {
+       "unitKind": "TITLE_OR_HEADING"
+      }
+     },
+     {
+      "family": "FALSE_POSITIVE_ROW_ASSEMBLY",
+      "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "physicalPage": 3,
+      "gtKey": "R|18",
+      "gtRowId": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3:RIGHT:2",
+      "parserUnit": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3:UNSPLIT:6@line9",
+      "reason": "MERGE",
+      "detail": {
+       "unitKind": "TITLE_OR_HEADING"
+      }
+     },
+     {
+      "family": "FALSE_POSITIVE_ROW_ASSEMBLY",
+      "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf",
+      "physicalPage": 3,
+      "gtKey": "M|（項）|015",
+      "gtRowId": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf#3:RIGHT:1",
+      "parserUnit": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf#3:UNSPLIT:5@line7",
+      "reason": "MERGE",
+      "detail": {
+       "unitKind": "TITLE_OR_HEADING"
+      }
+     },
+     {
+      "family": "FALSE_POSITIVE_ROW_ASSEMBLY",
+      "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf",
+      "physicalPage": 3,
+      "gtKey": "R|15",
+      "gtRowId": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf#3:RIGHT:2",
+      "parserUnit": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf#3:UNSPLIT:6@line9",
+      "reason": "MERGE",
+      "detail": {
+       "unitKind": "TITLE_OR_HEADING"
+      }
+     },
+     {
+      "family": "FALSE_POSITIVE_ROW_ASSEMBLY",
+      "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+      "physicalPage": 3,
+      "gtKey": "R|19",
+      "gtRowId": "data/download/mlit.go.jp/page/content/001630995.pdf#3:RIGHT:1",
+      "parserUnit": "data/download/mlit.go.jp/page/content/001630995.pdf#3:UNSPLIT:5@line7",
+      "reason": "MERGE",
+      "detail": {
+       "unitKind": "TITLE_OR_HEADING"
+      }
+     },
+     {
+      "family": "FALSE_POSITIVE_ROW_ASSEMBLY",
+      "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+      "physicalPage": 3,
+      "gtKey": "R|20",
+      "gtRowId": "data/download/mlit.go.jp/page/content/001630995.pdf#3:RIGHT:2",
+      "parserUnit": "data/download/mlit.go.jp/page/content/001630995.pdf#3:UNSPLIT:6@line9",
+      "reason": "MERGE",
+      "detail": {
+       "unitKind": "TITLE_OR_HEADING"
+      }
+     },
+     {
+      "family": "FALSE_POSITIVE_ROW_ASSEMBLY",
+      "localPdfPath": "data/download/mofa.go.jp/mofaj/files/100546568.pdf",
+      "physicalPage": 3,
+      "gtKey": "R|25",
+      "gtRowId": "data/download/mofa.go.jp/mofaj/files/100546568.pdf#3:RIGHT:1",
+      "parserUnit": "data/download/mofa.go.jp/mofaj/files/100546568.pdf#3:UNSPLIT:5@line7",
+      "reason": "MERGE",
+      "detail": {
+       "unitKind": "TITLE_OR_HEADING"
+      }
+     },
+     {
+      "family": "FALSE_POSITIVE_ROW_ASSEMBLY",
+      "localPdfPath": "data/download/mofa.go.jp/mofaj/files/100546568.pdf",
+      "physicalPage": 3,
+      "gtKey": "R|26",
+      "gtRowId": "data/download/mofa.go.jp/mofaj/files/100546568.pdf#3:RIGHT:2",
+      "parserUnit": "data/download/mofa.go.jp/mofaj/files/100546568.pdf#3:UNSPLIT:6@line9",
+      "reason": "MERGE",
+      "detail": {
+       "unitKind": "TITLE_OR_HEADING"
+      }
+     },
+     {
+      "family": "FALSE_POSITIVE_ROW_ASSEMBLY",
+      "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+      "physicalPage": 2,
+      "gtKey": "M|（項）|120",
+      "gtRowId": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf#2:RIGHT:1",
+      "parserUnit": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf#2:UNSPLIT:5@line7",
+      "reason": "MERGE",
+      "detail": {
+       "unitKind": "TITLE_OR_HEADING"
+      }
+     },
+     {
+      "family": "FALSE_POSITIVE_ROW_ASSEMBLY",
+      "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+      "physicalPage": 2,
+      "gtKey": "R|17",
+      "gtRowId": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf#2:RIGHT:2",
+      "parserUnit": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf#2:UNSPLIT:6@line9",
+      "reason": "MERGE",
+      "detail": {
+       "unitKind": "TITLE_OR_HEADING"
+      }
+     }
+    ]
+   },
+   "WRONG_COLUMN_ASSIGNMENT": {
+    "count": 0,
+    "pages": [],
+    "evidence": []
+   },
+   "WRONG_FRAGMENT_ATTACHMENT": {
+    "count": 0,
+    "pages": [],
+    "evidence": []
+   },
+   "PROVENANCE_MISMATCH": {
+    "count": 0,
+    "pages": [],
+    "evidence": []
+   },
+   "total": 10,
+   "affectedPages": [
+    "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3",
+    "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf#3",
+    "data/download/mlit.go.jp/page/content/001630995.pdf#3",
+    "data/download/mofa.go.jp/mofaj/files/100546568.pdf#3",
+    "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf#2"
+   ]
+  },
+  "fragments": {
+   "gt": 17,
+   "correct": 15,
+   "incorrect": 0,
+   "abstained": 0,
+   "unresolved": 3,
+   "notComparable": 0,
+   "wrongAttachment": 0
+  },
+  "provenance": {
+   "checkedUnits": 837,
+   "checkedFragments": 16,
+   "mismatches": 0
+  },
+  "abstentionByReason": {
+   "RIGHT_EVIDENCE_INSUFFICIENT": 2
+  },
+  "unresolvedByFamily": {
+   "AMBIGUOUS_OWNER_GROUP": 3
+  },
+  "blockingUnresolved": {
+   "count": 3,
+   "families": [
+    "AMBIGUOUS_OWNER_GROUP"
+   ],
+   "affectedPages": [
+    "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3",
+    "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf#4"
+   ]
+  },
+  "coverage": {
+   "pageResolutionCoverage": {
+    "numerator": 21,
+    "denominator": 23,
+    "value": 0.9130434782608695
+   },
+   "physicalRowCoverage": {
+    "numerator": 717,
+    "denominator": 802,
+    "value": 0.8940149625935162
+   },
+   "comparableRowClassificationCoverage": {
+    "numerator": 727,
+    "denominator": 802,
+    "value": 0.9064837905236908
+   },
+   "fragmentAttachmentCoverage": {
+    "numerator": 15,
+    "denominator": 17,
+    "value": 0.8823529411764706
+   },
+   "byStratum": {
+    "no-right-row-evidence & body<15": {
+     "pages": 2,
+     "pageResolutionCoverage": {
+      "numerator": 2,
+      "denominator": 2,
+      "value": 1
+     },
+     "physicalRowCoverage": {
+      "numerator": 14,
+      "denominator": 14,
+      "value": 1
+     }
+    },
+    "no-right-row-evidence & body>=15": {
+     "pages": 4,
+     "pageResolutionCoverage": {
+      "numerator": 4,
+      "denominator": 4,
+      "value": 1
+     },
+     "physicalRowCoverage": {
+      "numerator": 64,
+      "denominator": 64,
+      "value": 1
+     }
+    },
+    "DIRECT": {
+     "pages": 3,
+     "pageResolutionCoverage": {
+      "numerator": 3,
+      "denominator": 3,
+      "value": 1
+     },
+     "physicalRowCoverage": {
+      "numerator": 15,
+      "denominator": 15,
+      "value": 1
+     }
+    },
+    "INHERITED": {
+     "pages": 3,
+     "pageResolutionCoverage": {
+      "numerator": 3,
+      "denominator": 3,
+      "value": 1
+     },
+     "physicalRowCoverage": {
+      "numerator": 169,
+      "denominator": 169,
+      "value": 1
+     }
+    },
+    "right-column-used(right-row evidence)": {
+     "pages": 6,
+     "pageResolutionCoverage": {
+      "numerator": 6,
+      "denominator": 6,
+      "value": 1
+     },
+     "physicalRowCoverage": {
+      "numerator": 342,
+      "denominator": 352,
+      "value": 0.9715909090909091
+     }
+    },
+    "wrapped-fragment(right column line>=1)": {
+     "pages": 3,
+     "pageResolutionCoverage": {
+      "numerator": 3,
+      "denominator": 3,
+      "value": 1
+     },
+     "physicalRowCoverage": {
+      "numerator": 201,
+      "denominator": 203,
+      "value": 0.9901477832512315
+     }
+    },
+    "wrapped-fragment(left column line>=1)": {
+     "pages": 2,
+     "pageResolutionCoverage": {
+      "numerator": 2,
+      "denominator": 2,
+      "value": 1
+     },
+     "physicalRowCoverage": {
+      "numerator": 42,
+      "denominator": 42,
+      "value": 1
+     }
+    },
+    "asymmetric(right-row lines<30% of body)": {
+     "pages": 2,
+     "pageResolutionCoverage": {
+      "numerator": 0,
+      "denominator": 2,
+      "value": 0
+     },
+     "physicalRowCoverage": {
+      "numerator": 0,
+      "denominator": 75,
+      "value": 0
+     }
+    }
+   }
+  }
+ },
+ "pages": [
+  {
+   "localPdfPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_02.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "strata": [
+    "no-right-row-evidence & body<15"
+   ],
+   "parserPageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "pageOutcome": {
+    "state": "NOT_COMPARABLE",
+    "reason": "UNSPLIT_AND_GT_RIGHT_BLANK"
+   },
+   "gtComparableRows": 5,
+   "parserComparableUnits": 5,
+   "matchedRows": 5,
+   "rowStates": {
+    "CORRECT": 5,
+    "INCORRECT": 0,
+    "ABSTAINED": 0,
+    "UNRESOLVED": 0
+   },
+   "rowNotComparable": {
+    "plainRow": 3,
+    "classification": 5,
+    "columnUnclaimed": 5
+   },
+   "omittedSilently": 0,
+   "orderInversions": 0,
+   "groups": [
+    {
+     "key": "M|（会計）|01",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（所管）|31",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（組織）|010",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|155",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|1",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    }
+   ],
+   "fragments": {
+    "gt": 0,
+    "correct": 0,
+    "incorrect": 0,
+    "abstained": 0,
+    "unresolved": 0,
+    "notComparable": 0,
+    "wrongAttachment": 0
+   },
+   "provenance": {
+    "checkedUnits": 12,
+    "checkedFragments": 0,
+    "mismatches": 0
+   },
+   "instances": []
+  },
+  {
+   "localPdfPath": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "strata": [
+    "no-right-row-evidence & body>=15"
+   ],
+   "parserPageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "pageOutcome": {
+    "state": "NOT_COMPARABLE",
+    "reason": "UNSPLIT_AND_GT_RIGHT_BLANK"
+   },
+   "gtComparableRows": 16,
+   "parserComparableUnits": 16,
+   "matchedRows": 16,
+   "rowStates": {
+    "CORRECT": 16,
+    "INCORRECT": 0,
+    "ABSTAINED": 0,
+    "UNRESOLVED": 0
+   },
+   "rowNotComparable": {
+    "plainRow": 3,
+    "classification": 16,
+    "columnUnclaimed": 16
+   },
+   "omittedSilently": 0,
+   "orderInversions": 0,
+   "groups": [
+    {
+     "key": "M|（組織）|010",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|010",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|020",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|030",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|040",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|050",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|080",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|1",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|2",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|3",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|4",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|5",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|6",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|7",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|8",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|9",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    }
+   ],
+   "fragments": {
+    "gt": 0,
+    "correct": 0,
+    "incorrect": 0,
+    "abstained": 0,
+    "unresolved": 0,
+    "notComparable": 0,
+    "wrongAttachment": 0
+   },
+   "provenance": {
+    "checkedUnits": 23,
+    "checkedFragments": 0,
+    "mismatches": 0
+   },
+   "instances": []
+  },
+  {
+   "localPdfPath": "data/download/dangai.go.jp/info/pdf/r06_saisyutu-gaisan.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "strata": [
+    "DIRECT"
+   ],
+   "parserPageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "pageOutcome": {
+    "state": "NOT_COMPARABLE",
+    "reason": "UNSPLIT_AND_GT_RIGHT_BLANK"
+   },
+   "gtComparableRows": 4,
+   "parserComparableUnits": 4,
+   "matchedRows": 4,
+   "rowStates": {
+    "CORRECT": 4,
+    "INCORRECT": 0,
+    "ABSTAINED": 0,
+    "UNRESOLVED": 0
+   },
+   "rowNotComparable": {
+    "plainRow": 2,
+    "classification": 4,
+    "columnUnclaimed": 4
+   },
+   "omittedSilently": 0,
+   "orderInversions": 0,
+   "groups": [
+    {
+     "key": "M|（組織）|050",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|010",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|1",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|2",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    }
+   ],
+   "fragments": {
+    "gt": 0,
+    "correct": 0,
+    "incorrect": 0,
+    "abstained": 0,
+    "unresolved": 0,
+    "notComparable": 0,
+    "wrongAttachment": 0
+   },
+   "provenance": {
+    "checkedUnits": 11,
+    "checkedFragments": 0,
+    "mismatches": 0
+   },
+   "instances": []
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157010.pdf",
+   "physicalPage": 4,
+   "classifierSource": "INHERITED",
+   "strata": [
+    "INHERITED"
+   ],
+   "parserPageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "pageOutcome": {
+    "state": "NOT_COMPARABLE",
+    "reason": "UNSPLIT_AND_GT_RIGHT_BLANK"
+   },
+   "gtComparableRows": 25,
+   "parserComparableUnits": 25,
+   "matchedRows": 25,
+   "rowStates": {
+    "CORRECT": 25,
+    "INCORRECT": 0,
+    "ABSTAINED": 0,
+    "UNRESOLVED": 0
+   },
+   "rowNotComparable": {
+    "plainRow": 0,
+    "classification": 25,
+    "columnUnclaimed": 25
+   },
+   "omittedSilently": 0,
+   "orderInversions": 0,
+   "groups": [
+    {
+     "key": "M|（組織）|020",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（組織）|030",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|010",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|020",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|030",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|510",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|520",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|525",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|530",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|550",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|32",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|33",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|34",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|35",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|36",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|37",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|38",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|39",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|40",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|41",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|42",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|43",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|44",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|45",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|46",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    }
+   ],
+   "fragments": {
+    "gt": 2,
+    "correct": 2,
+    "incorrect": 0,
+    "abstained": 0,
+    "unresolved": 0,
+    "notComparable": 0,
+    "wrongAttachment": 0
+   },
+   "provenance": {
+    "checkedUnits": 28,
+    "checkedFragments": 2,
+    "mismatches": 0
+   },
+   "instances": []
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157016.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "strata": [
+    "no-right-row-evidence & body>=15"
+   ],
+   "parserPageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "pageOutcome": {
+    "state": "NOT_COMPARABLE",
+    "reason": "UNSPLIT_AND_GT_RIGHT_BLANK"
+   },
+   "gtComparableRows": 15,
+   "parserComparableUnits": 15,
+   "matchedRows": 15,
+   "rowStates": {
+    "CORRECT": 15,
+    "INCORRECT": 0,
+    "ABSTAINED": 0,
+    "UNRESOLVED": 0
+   },
+   "rowNotComparable": {
+    "plainRow": 2,
+    "classification": 15,
+    "columnUnclaimed": 15
+   },
+   "omittedSilently": 0,
+   "orderInversions": 0,
+   "groups": [
+    {
+     "key": "M|（会計）|01",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（所管）|31",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（組織）|010",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|820",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|824",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|834",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|901",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|1",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|2",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|3",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|4",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|5",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|6",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|7",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|8",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    }
+   ],
+   "fragments": {
+    "gt": 0,
+    "correct": 0,
+    "incorrect": 0,
+    "abstained": 0,
+    "unresolved": 0,
+    "notComparable": 0,
+    "wrongAttachment": 0
+   },
+   "provenance": {
+    "checkedUnits": 22,
+    "checkedFragments": 0,
+    "mismatches": 0
+   },
+   "instances": []
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "strata": [
+    "right-column-used(right-row evidence)",
+    "wrapped-fragment(right column line>=1)"
+   ],
+   "parserPageState": "ASSEMBLED_SPLIT",
+   "pageOutcome": {
+    "state": "CORRECT",
+    "reason": "SPLIT_AND_GT_RIGHT_ROWS"
+   },
+   "gtComparableRows": 61,
+   "parserComparableUnits": 59,
+   "matchedRows": 59,
+   "rowStates": {
+    "CORRECT": 59,
+    "INCORRECT": 2,
+    "ABSTAINED": 0,
+    "UNRESOLVED": 0
+   },
+   "rowNotComparable": {
+    "plainRow": 2,
+    "classification": 61,
+    "columnUnclaimed": 0
+   },
+   "omittedSilently": 0,
+   "orderInversions": 0,
+   "groups": [
+    {
+     "key": "M|（組織）|010",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|010",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|020",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|025",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|030",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|040",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|050",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|060",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|070",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|080",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|090",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|100",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|110",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|120",
+     "n": 1,
+     "m": 0,
+     "matched": 0,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": "INCORRECT_MERGED"
+    },
+    {
+     "key": "M|（項）|130",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|140",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|150",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|160",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|170",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|180",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|190",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|200",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|210",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|220",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|230",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|240",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|260",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|270",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|1",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|10",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|11",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|12",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|13",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|14",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|15",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|16",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|17",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|18",
+     "n": 1,
+     "m": 0,
+     "matched": 0,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": "INCORRECT_MERGED"
+    },
+    {
+     "key": "R|19",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|2",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|20",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|21",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|22",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|23",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|24",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|25",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|26",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|27",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|28",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|29",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|3",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|30",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|31",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|32",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|33",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|4",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|5",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|6",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|7",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|8",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|9",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    }
+   ],
+   "fragments": {
+    "gt": 3,
+    "correct": 2,
+    "incorrect": 0,
+    "abstained": 0,
+    "unresolved": 1,
+    "notComparable": 0,
+    "wrongAttachment": 0
+   },
+   "provenance": {
+    "checkedUnits": 67,
+    "checkedFragments": 2,
+    "mismatches": 0
+   },
+   "instances": [
+    {
+     "family": "INCORRECT_MERGED_ROW",
+     "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+     "physicalPage": 3,
+     "gtRowId": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3:RIGHT:1",
+     "gtKey": "M|（項）|120",
+     "state": "INCORRECT_MERGED"
+    },
+    {
+     "family": "INCORRECT_MERGED_ROW",
+     "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+     "physicalPage": 3,
+     "gtRowId": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3:RIGHT:2",
+     "gtKey": "R|18",
+     "state": "INCORRECT_MERGED"
+    },
+    {
+     "family": "FALSE_POSITIVE_ROW_ASSEMBLY",
+     "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+     "physicalPage": 3,
+     "gtKey": "M|（項）|120",
+     "gtRowId": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3:RIGHT:1",
+     "parserUnit": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3:UNSPLIT:5@line7",
+     "reason": "MERGE",
+     "detail": {
+      "unitKind": "TITLE_OR_HEADING"
+     }
+    },
+    {
+     "family": "FALSE_POSITIVE_ROW_ASSEMBLY",
+     "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+     "physicalPage": 3,
+     "gtKey": "R|18",
+     "gtRowId": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3:RIGHT:2",
+     "parserUnit": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3:UNSPLIT:6@line9",
+     "reason": "MERGE",
+     "detail": {
+      "unitKind": "TITLE_OR_HEADING"
+     }
+    },
+    {
+     "family": "AMBIGUOUS_OWNER_GROUP",
+     "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+     "physicalPage": 3,
+     "gtRowId": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3:RIGHT:2+f1",
+     "gtKey": "R|18",
+     "state": "UNRESOLVED"
+    }
+   ]
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-8.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "strata": [
+    "DIRECT"
+   ],
+   "parserPageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "pageOutcome": {
+    "state": "NOT_COMPARABLE",
+    "reason": "UNSPLIT_AND_GT_RIGHT_BLANK"
+   },
+   "gtComparableRows": 3,
+   "parserComparableUnits": 3,
+   "matchedRows": 3,
+   "rowStates": {
+    "CORRECT": 3,
+    "INCORRECT": 0,
+    "ABSTAINED": 0,
+    "UNRESOLVED": 0
+   },
+   "rowNotComparable": {
+    "plainRow": 2,
+    "classification": 3,
+    "columnUnclaimed": 3
+   },
+   "omittedSilently": 0,
+   "orderInversions": 0,
+   "groups": [
+    {
+     "key": "M|（会計）|11",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|010",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|1",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    }
+   ],
+   "fragments": {
+    "gt": 0,
+    "correct": 0,
+    "incorrect": 0,
+    "abstained": 0,
+    "unresolved": 0,
+    "notComparable": 0,
+    "wrongAttachment": 0
+   },
+   "provenance": {
+    "checkedUnits": 10,
+    "checkedFragments": 0,
+    "mismatches": 0
+   },
+   "instances": []
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "physicalPage": 4,
+   "classifierSource": "INHERITED",
+   "strata": [
+    "wrapped-fragment(left column line>=1)"
+   ],
+   "parserPageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "pageOutcome": {
+    "state": "NOT_COMPARABLE",
+    "reason": "UNSPLIT_AND_GT_RIGHT_BLANK"
+   },
+   "gtComparableRows": 25,
+   "parserComparableUnits": 25,
+   "matchedRows": 25,
+   "rowStates": {
+    "CORRECT": 25,
+    "INCORRECT": 0,
+    "ABSTAINED": 0,
+    "UNRESOLVED": 0
+   },
+   "rowNotComparable": {
+    "plainRow": 0,
+    "classification": 25,
+    "columnUnclaimed": 25
+   },
+   "omittedSilently": 0,
+   "orderInversions": 0,
+   "groups": [
+    {
+     "key": "M|（組織）|040",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（組織）|060",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|010",
+     "n": 2,
+     "m": 2,
+     "matched": 2,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|015",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|020",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|030",
+     "n": 2,
+     "m": 2,
+     "matched": 2,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|040",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|050",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|063",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|080",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|38",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|39",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|40",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|41",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|42",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|43",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|44",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|45",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|46",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|47",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|48",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|49",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|50",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    }
+   ],
+   "fragments": {
+    "gt": 5,
+    "correct": 4,
+    "incorrect": 0,
+    "abstained": 0,
+    "unresolved": 2,
+    "notComparable": 0,
+    "wrongAttachment": 0
+   },
+   "provenance": {
+    "checkedUnits": 28,
+    "checkedFragments": 5,
+    "mismatches": 0
+   },
+   "instances": [
+    {
+     "family": "AMBIGUOUS_OWNER_GROUP",
+     "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+     "physicalPage": 4,
+     "gtRowId": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf#4:LEFT:10+f1",
+     "gtKey": "M|（項）|030",
+     "state": "UNRESOLVED"
+    },
+    {
+     "family": "AMBIGUOUS_OWNER_GROUP",
+     "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+     "physicalPage": 4,
+     "gtKey": "M|（項）|030",
+     "parserUnit": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf#4:UNSPLIT:12@line15",
+     "state": "UNRESOLVED",
+     "detail": {
+      "parserFragments": 1
+     }
+    }
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "physicalPage": 5,
+   "classifierSource": "INHERITED",
+   "strata": [
+    "wrapped-fragment(right column line>=1)"
+   ],
+   "parserPageState": "ASSEMBLED_SPLIT",
+   "pageOutcome": {
+    "state": "CORRECT",
+    "reason": "SPLIT_AND_GT_RIGHT_ROWS"
+   },
+   "gtComparableRows": 71,
+   "parserComparableUnits": 71,
+   "matchedRows": 71,
+   "rowStates": {
+    "CORRECT": 71,
+    "INCORRECT": 0,
+    "ABSTAINED": 0,
+    "UNRESOLVED": 0
+   },
+   "rowNotComparable": {
+    "plainRow": 0,
+    "classification": 71,
+    "columnUnclaimed": 0
+   },
+   "omittedSilently": 0,
+   "orderInversions": 0,
+   "groups": [
+    {
+     "key": "M|（項）|250",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|255",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|260",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|265",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|310",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|313",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|315",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|320",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|321",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|322",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|324",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|325",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|330",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|335",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|340",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|342",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|343",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|345",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|355",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|365",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|370",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|375",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|380",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|385",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|100",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|101",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|102",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|103",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|104",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|105",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|106",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|107",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|108",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|109",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|110",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|111",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|112",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|113",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|114",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|115",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|116",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|117",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|118",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|119",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|120",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|121",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|122",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|123",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|124",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|125",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|126",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|127",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|128",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|129",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|130",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|131",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|132",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|133",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|134",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|135",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|89",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|90",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|91",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|92",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|93",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|94",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|95",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|96",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|97",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|98",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|99",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    }
+   ],
+   "fragments": {
+    "gt": 2,
+    "correct": 2,
+    "incorrect": 0,
+    "abstained": 0,
+    "unresolved": 0,
+    "notComparable": 0,
+    "wrongAttachment": 0
+   },
+   "provenance": {
+    "checkedUnits": 74,
+    "checkedFragments": 2,
+    "mismatches": 0
+   },
+   "instances": []
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "physicalPage": 6,
+   "classifierSource": "INHERITED",
+   "strata": [
+    "INHERITED"
+   ],
+   "parserPageState": "ASSEMBLED_SPLIT",
+   "pageOutcome": {
+    "state": "CORRECT",
+    "reason": "SPLIT_AND_GT_RIGHT_ROWS"
+   },
+   "gtComparableRows": 72,
+   "parserComparableUnits": 72,
+   "matchedRows": 72,
+   "rowStates": {
+    "CORRECT": 72,
+    "INCORRECT": 0,
+    "ABSTAINED": 0,
+    "UNRESOLVED": 0
+   },
+   "rowNotComparable": {
+    "plainRow": 0,
+    "classification": 72,
+    "columnUnclaimed": 0
+   },
+   "omittedSilently": 0,
+   "orderInversions": 0,
+   "groups": [
+    {
+     "key": "M|（組織）|030",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（組織）|040",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（組織）|045",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|005",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|010",
+     "n": 3,
+     "m": 3,
+     "matched": 3,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|015",
+     "n": 2,
+     "m": 2,
+     "matched": 2,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|016",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|020",
+     "n": 3,
+     "m": 3,
+     "matched": 3,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|030",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|390",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|395",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|400",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|405",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|408",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|415",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|420",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|430",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|440",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|450",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|460",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|470",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|480",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|490",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|510",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|520",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|530",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|540",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|136",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|137",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|138",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|139",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|140",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|141",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|142",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|143",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|144",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|145",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|146",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|147",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|148",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|149",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|150",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|151",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|152",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|153",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|154",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|155",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|156",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|157",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|158",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|159",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|160",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|161",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|162",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|163",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|164",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|165",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|166",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|167",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|168",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|169",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|170",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|171",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|172",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|173",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|174",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|175",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    }
+   ],
+   "fragments": {
+    "gt": 0,
+    "correct": 0,
+    "incorrect": 0,
+    "abstained": 0,
+    "unresolved": 0,
+    "notComparable": 0,
+    "wrongAttachment": 0
+   },
+   "provenance": {
+    "checkedUnits": 75,
+    "checkedFragments": 0,
+    "mismatches": 0
+   },
+   "instances": []
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+   "physicalPage": 4,
+   "classifierSource": "INHERITED",
+   "strata": [
+    "asymmetric(right-row lines<30% of body)"
+   ],
+   "parserPageState": "PAGE_ABSTAINED",
+   "pageOutcome": {
+    "state": "ABSTAINED",
+    "reason": "RIGHT_EVIDENCE_INSUFFICIENT"
+   },
+   "gtComparableRows": 38,
+   "parserComparableUnits": 0,
+   "matchedRows": 0,
+   "rowStates": {
+    "CORRECT": 0,
+    "INCORRECT": 0,
+    "ABSTAINED": 38,
+    "UNRESOLVED": 0
+   },
+   "rowNotComparable": {
+    "plainRow": 0,
+    "classification": 38,
+    "columnUnclaimed": 0
+   },
+   "omittedSilently": 0,
+   "orderInversions": 0,
+   "groups": [],
+   "fragments": {
+    "gt": 0,
+    "correct": 0,
+    "incorrect": 0,
+    "abstained": 0,
+    "unresolved": 0,
+    "notComparable": 0,
+    "wrongAttachment": 0
+   },
+   "provenance": {
+    "checkedUnits": 0,
+    "checkedFragments": 0,
+    "mismatches": 0
+   },
+   "instances": []
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "strata": [
+    "right-column-used(right-row evidence)"
+   ],
+   "parserPageState": "ASSEMBLED_SPLIT",
+   "pageOutcome": {
+    "state": "CORRECT",
+    "reason": "SPLIT_AND_GT_RIGHT_ROWS"
+   },
+   "gtComparableRows": 62,
+   "parserComparableUnits": 60,
+   "matchedRows": 60,
+   "rowStates": {
+    "CORRECT": 60,
+    "INCORRECT": 2,
+    "ABSTAINED": 0,
+    "UNRESOLVED": 0
+   },
+   "rowNotComparable": {
+    "plainRow": 2,
+    "classification": 62,
+    "columnUnclaimed": 0
+   },
+   "omittedSilently": 0,
+   "orderInversions": 0,
+   "groups": [
+    {
+     "key": "M|（会計）|07",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（勘定）|1",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（勘定）|2",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（勘定）|3",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（勘定）|5",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（勘定）|6",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|010",
+     "n": 4,
+     "m": 4,
+     "matched": 4,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|011",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|013",
+     "n": 2,
+     "m": 2,
+     "matched": 2,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|015",
+     "n": 2,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": "INCORRECT_MERGED"
+    },
+    {
+     "key": "M|（項）|016",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|020",
+     "n": 5,
+     "m": 5,
+     "matched": 5,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|025",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|030",
+     "n": 2,
+     "m": 2,
+     "matched": 2,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|040",
+     "n": 2,
+     "m": 2,
+     "matched": 2,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|050",
+     "n": 2,
+     "m": 2,
+     "matched": 2,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|070",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|090",
+     "n": 3,
+     "m": 3,
+     "matched": 3,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|1",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|10",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|11",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|12",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|13",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|14",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|15",
+     "n": 1,
+     "m": 0,
+     "matched": 0,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": "INCORRECT_MERGED"
+    },
+    {
+     "key": "R|16",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|17",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|18",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|19",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|2",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|20",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|21",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|22",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|23",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|24",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|25",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|26",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|27",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|28",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|29",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|3",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|30",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|4",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|5",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|6",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|7",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|8",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|9",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    }
+   ],
+   "fragments": {
+    "gt": 0,
+    "correct": 0,
+    "incorrect": 0,
+    "abstained": 0,
+    "unresolved": 0,
+    "notComparable": 0,
+    "wrongAttachment": 0
+   },
+   "provenance": {
+    "checkedUnits": 67,
+    "checkedFragments": 0,
+    "mismatches": 0
+   },
+   "instances": [
+    {
+     "family": "INCORRECT_MERGED_ROW",
+     "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf",
+     "physicalPage": 3,
+     "gtRowId": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf#3:RIGHT:24",
+     "gtKey": "M|（項）|015",
+     "state": "INCORRECT_MERGED"
+    },
+    {
+     "family": "INCORRECT_MERGED_ROW",
+     "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf",
+     "physicalPage": 3,
+     "gtRowId": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf#3:RIGHT:2",
+     "gtKey": "R|15",
+     "state": "INCORRECT_MERGED"
+    },
+    {
+     "family": "FALSE_POSITIVE_ROW_ASSEMBLY",
+     "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf",
+     "physicalPage": 3,
+     "gtKey": "M|（項）|015",
+     "gtRowId": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf#3:RIGHT:1",
+     "parserUnit": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf#3:UNSPLIT:5@line7",
+     "reason": "MERGE",
+     "detail": {
+      "unitKind": "TITLE_OR_HEADING"
+     }
+    },
+    {
+     "family": "FALSE_POSITIVE_ROW_ASSEMBLY",
+     "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf",
+     "physicalPage": 3,
+     "gtKey": "R|15",
+     "gtRowId": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf#3:RIGHT:2",
+     "parserUnit": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf#3:UNSPLIT:6@line9",
+     "reason": "MERGE",
+     "detail": {
+      "unitKind": "TITLE_OR_HEADING"
+     }
+    }
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "strata": [
+    "right-column-used(right-row evidence)"
+   ],
+   "parserPageState": "ASSEMBLED_SPLIT",
+   "pageOutcome": {
+    "state": "CORRECT",
+    "reason": "SPLIT_AND_GT_RIGHT_ROWS"
+   },
+   "gtComparableRows": 62,
+   "parserComparableUnits": 60,
+   "matchedRows": 60,
+   "rowStates": {
+    "CORRECT": 60,
+    "INCORRECT": 2,
+    "ABSTAINED": 0,
+    "UNRESOLVED": 0
+   },
+   "rowNotComparable": {
+    "plainRow": 2,
+    "classification": 62,
+    "columnUnclaimed": 0
+   },
+   "omittedSilently": 0,
+   "orderInversions": 0,
+   "groups": [
+    {
+     "key": "M|（組織）|010",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|002",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|007",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|012",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|013",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|017",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|022",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|027",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|036",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|047",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|051",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|057",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|058",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|062",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|067",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|069",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|071",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|076",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|077",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|087",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|092",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|096",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|102",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|106",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|111",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|116",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|1",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|10",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|11",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|12",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|13",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|14",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|15",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|16",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|17",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|18",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|19",
+     "n": 1,
+     "m": 0,
+     "matched": 0,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": "INCORRECT_MERGED"
+    },
+    {
+     "key": "R|2",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|20",
+     "n": 1,
+     "m": 0,
+     "matched": 0,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": "INCORRECT_MERGED"
+    },
+    {
+     "key": "R|21",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|22",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|23",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|24",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|25",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|26",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|27",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|28",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|29",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|3",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|30",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|31",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|32",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|33",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|34",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|35",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|36",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|4",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|5",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|6",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|7",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|8",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|9",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    }
+   ],
+   "fragments": {
+    "gt": 0,
+    "correct": 0,
+    "incorrect": 0,
+    "abstained": 0,
+    "unresolved": 0,
+    "notComparable": 0,
+    "wrongAttachment": 0
+   },
+   "provenance": {
+    "checkedUnits": 67,
+    "checkedFragments": 0,
+    "mismatches": 0
+   },
+   "instances": [
+    {
+     "family": "INCORRECT_MERGED_ROW",
+     "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+     "physicalPage": 3,
+     "gtRowId": "data/download/mlit.go.jp/page/content/001630995.pdf#3:RIGHT:1",
+     "gtKey": "R|19",
+     "state": "INCORRECT_MERGED"
+    },
+    {
+     "family": "INCORRECT_MERGED_ROW",
+     "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+     "physicalPage": 3,
+     "gtRowId": "data/download/mlit.go.jp/page/content/001630995.pdf#3:RIGHT:2",
+     "gtKey": "R|20",
+     "state": "INCORRECT_MERGED"
+    },
+    {
+     "family": "FALSE_POSITIVE_ROW_ASSEMBLY",
+     "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+     "physicalPage": 3,
+     "gtKey": "R|19",
+     "gtRowId": "data/download/mlit.go.jp/page/content/001630995.pdf#3:RIGHT:1",
+     "parserUnit": "data/download/mlit.go.jp/page/content/001630995.pdf#3:UNSPLIT:5@line7",
+     "reason": "MERGE",
+     "detail": {
+      "unitKind": "TITLE_OR_HEADING"
+     }
+    },
+    {
+     "family": "FALSE_POSITIVE_ROW_ASSEMBLY",
+     "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+     "physicalPage": 3,
+     "gtKey": "R|20",
+     "gtRowId": "data/download/mlit.go.jp/page/content/001630995.pdf#3:RIGHT:2",
+     "parserUnit": "data/download/mlit.go.jp/page/content/001630995.pdf#3:UNSPLIT:6@line9",
+     "reason": "MERGE",
+     "detail": {
+      "unitKind": "TITLE_OR_HEADING"
+     }
+    }
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 5,
+   "classifierSource": "INHERITED",
+   "strata": [
+    "INHERITED"
+   ],
+   "parserPageState": "ASSEMBLED_SPLIT",
+   "pageOutcome": {
+    "state": "CORRECT",
+    "reason": "SPLIT_AND_GT_RIGHT_ROWS"
+   },
+   "gtComparableRows": 72,
+   "parserComparableUnits": 72,
+   "matchedRows": 72,
+   "rowStates": {
+    "CORRECT": 72,
+    "INCORRECT": 0,
+    "ABSTAINED": 0,
+    "UNRESOLVED": 0
+   },
+   "rowNotComparable": {
+    "plainRow": 0,
+    "classification": 72,
+    "columnUnclaimed": 0
+   },
+   "omittedSilently": 0,
+   "orderInversions": 0,
+   "groups": [
+    {
+     "key": "M|（項）|322",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|325",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|326",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|327",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|330",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|351",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|356",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|374",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|376",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|395",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|571",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|577",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|582",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|587",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|592",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|597",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|602",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|608",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|100",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|101",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|102",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|103",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|104",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|105",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|106",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|107",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|108",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|109",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|110",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|111",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|112",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|113",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|114",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|115",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|116",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|117",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|118",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|119",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|120",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|121",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|122",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|123",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|124",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|125",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|126",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|127",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|74",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|75",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|76",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|77",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|78",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|79",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|80",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|81",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|82",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|83",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|84",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|85",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|86",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|87",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|88",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|89",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|90",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|91",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|92",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|93",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|94",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|95",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|96",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|97",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|98",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|99",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    }
+   ],
+   "fragments": {
+    "gt": 0,
+    "correct": 0,
+    "incorrect": 0,
+    "abstained": 0,
+    "unresolved": 0,
+    "notComparable": 0,
+    "wrongAttachment": 0
+   },
+   "provenance": {
+    "checkedUnits": 75,
+    "checkedFragments": 0,
+    "mismatches": 0
+   },
+   "instances": []
+  },
+  {
+   "localPdfPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "physicalPage": 4,
+   "classifierSource": "INHERITED",
+   "strata": [
+    "asymmetric(right-row lines<30% of body)"
+   ],
+   "parserPageState": "PAGE_ABSTAINED",
+   "pageOutcome": {
+    "state": "ABSTAINED",
+    "reason": "RIGHT_EVIDENCE_INSUFFICIENT"
+   },
+   "gtComparableRows": 37,
+   "parserComparableUnits": 0,
+   "matchedRows": 0,
+   "rowStates": {
+    "CORRECT": 0,
+    "INCORRECT": 0,
+    "ABSTAINED": 37,
+    "UNRESOLVED": 0
+   },
+   "rowNotComparable": {
+    "plainRow": 0,
+    "classification": 37,
+    "columnUnclaimed": 0
+   },
+   "omittedSilently": 0,
+   "orderInversions": 0,
+   "groups": [],
+   "fragments": {
+    "gt": 0,
+    "correct": 0,
+    "incorrect": 0,
+    "abstained": 0,
+    "unresolved": 0,
+    "notComparable": 0,
+    "wrongAttachment": 0
+   },
+   "provenance": {
+    "checkedUnits": 0,
+    "checkedFragments": 0,
+    "mismatches": 0
+   },
+   "instances": []
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024kokusaiseirikikinn_2.pdf",
+   "physicalPage": 2,
+   "classifierSource": "DIRECT",
+   "strata": [
+    "no-right-row-evidence & body>=15"
+   ],
+   "parserPageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "pageOutcome": {
+    "state": "NOT_COMPARABLE",
+    "reason": "UNSPLIT_AND_GT_RIGHT_BLANK"
+   },
+   "gtComparableRows": 13,
+   "parserComparableUnits": 13,
+   "matchedRows": 13,
+   "rowStates": {
+    "CORRECT": 13,
+    "INCORRECT": 0,
+    "ABSTAINED": 0,
+    "UNRESOLVED": 0
+   },
+   "rowNotComparable": {
+    "plainRow": 2,
+    "classification": 13,
+    "columnUnclaimed": 13
+   },
+   "omittedSilently": 0,
+   "orderInversions": 0,
+   "groups": [
+    {
+     "key": "M|（会計）|04",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|010",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|012",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|013",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|1",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|2",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|3",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|4",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|5",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|6",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|7",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|8",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|9",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    }
+   ],
+   "fragments": {
+    "gt": 0,
+    "correct": 0,
+    "incorrect": 0,
+    "abstained": 0,
+    "unresolved": 0,
+    "notComparable": 0,
+    "wrongAttachment": 0
+   },
+   "provenance": {
+    "checkedUnits": 20,
+    "checkedFragments": 0,
+    "mismatches": 0
+   },
+   "instances": []
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tousi_2.pdf",
+   "physicalPage": 2,
+   "classifierSource": "DIRECT",
+   "strata": [
+    "wrapped-fragment(left column line>=1)"
+   ],
+   "parserPageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "pageOutcome": {
+    "state": "NOT_COMPARABLE",
+    "reason": "UNSPLIT_AND_GT_RIGHT_BLANK"
+   },
+   "gtComparableRows": 17,
+   "parserComparableUnits": 17,
+   "matchedRows": 17,
+   "rowStates": {
+    "CORRECT": 17,
+    "INCORRECT": 0,
+    "ABSTAINED": 0,
+    "UNRESOLVED": 0
+   },
+   "rowNotComparable": {
+    "plainRow": 3,
+    "classification": 17,
+    "columnUnclaimed": 17
+   },
+   "omittedSilently": 0,
+   "orderInversions": 0,
+   "groups": [
+    {
+     "key": "M|（会計）|08",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（勘定）|2",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|010",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|020",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|040",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|050",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|080",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|085",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|090",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|1",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|2",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|3",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|4",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|5",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|6",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|7",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|8",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    }
+   ],
+   "fragments": {
+    "gt": 1,
+    "correct": 1,
+    "incorrect": 0,
+    "abstained": 0,
+    "unresolved": 0,
+    "notComparable": 0,
+    "wrongAttachment": 0
+   },
+   "provenance": {
+    "checkedUnits": 24,
+    "checkedFragments": 1,
+    "mismatches": 0
+   },
+   "instances": []
+  },
+  {
+   "localPdfPath": "data/download/mofa.go.jp/mofaj/files/100546568.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "strata": [
+    "right-column-used(right-row evidence)"
+   ],
+   "parserPageState": "ASSEMBLED_SPLIT",
+   "pageOutcome": {
+    "state": "CORRECT",
+    "reason": "SPLIT_AND_GT_RIGHT_ROWS"
+   },
+   "gtComparableRows": 62,
+   "parserComparableUnits": 60,
+   "matchedRows": 60,
+   "rowStates": {
+    "CORRECT": 60,
+    "INCORRECT": 2,
+    "ABSTAINED": 0,
+    "UNRESOLVED": 0
+   },
+   "rowNotComparable": {
+    "plainRow": 2,
+    "classification": 62,
+    "columnUnclaimed": 0
+   },
+   "omittedSilently": 0,
+   "orderInversions": 0,
+   "groups": [
+    {
+     "key": "M|（組織）|010",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（組織）|020",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|005",
+     "n": 2,
+     "m": 2,
+     "matched": 2,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|010",
+     "n": 2,
+     "m": 2,
+     "matched": 2,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|030",
+     "n": 2,
+     "m": 2,
+     "matched": 2,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|035",
+     "n": 2,
+     "m": 2,
+     "matched": 2,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|045",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|047",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|050",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|075",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|077",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|080",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|1",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|10",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|11",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|12",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|13",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|14",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|15",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|16",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|17",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|18",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|19",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|2",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|20",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|21",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|22",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|23",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|24",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|25",
+     "n": 1,
+     "m": 0,
+     "matched": 0,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": "INCORRECT_MERGED"
+    },
+    {
+     "key": "R|26",
+     "n": 1,
+     "m": 0,
+     "matched": 0,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": "INCORRECT_MERGED"
+    },
+    {
+     "key": "R|27",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|28",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|29",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|3",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|30",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|31",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|32",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|33",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|34",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|35",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|36",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|37",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|38",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|39",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|4",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|40",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|41",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|42",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|43",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|44",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|45",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|46",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|5",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|6",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|7",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|8",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|9",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    }
+   ],
+   "fragments": {
+    "gt": 0,
+    "correct": 0,
+    "incorrect": 0,
+    "abstained": 0,
+    "unresolved": 0,
+    "notComparable": 0,
+    "wrongAttachment": 0
+   },
+   "provenance": {
+    "checkedUnits": 67,
+    "checkedFragments": 0,
+    "mismatches": 0
+   },
+   "instances": [
+    {
+     "family": "INCORRECT_MERGED_ROW",
+     "localPdfPath": "data/download/mofa.go.jp/mofaj/files/100546568.pdf",
+     "physicalPage": 3,
+     "gtRowId": "data/download/mofa.go.jp/mofaj/files/100546568.pdf#3:RIGHT:1",
+     "gtKey": "R|25",
+     "state": "INCORRECT_MERGED"
+    },
+    {
+     "family": "INCORRECT_MERGED_ROW",
+     "localPdfPath": "data/download/mofa.go.jp/mofaj/files/100546568.pdf",
+     "physicalPage": 3,
+     "gtRowId": "data/download/mofa.go.jp/mofaj/files/100546568.pdf#3:RIGHT:2",
+     "gtKey": "R|26",
+     "state": "INCORRECT_MERGED"
+    },
+    {
+     "family": "FALSE_POSITIVE_ROW_ASSEMBLY",
+     "localPdfPath": "data/download/mofa.go.jp/mofaj/files/100546568.pdf",
+     "physicalPage": 3,
+     "gtKey": "R|25",
+     "gtRowId": "data/download/mofa.go.jp/mofaj/files/100546568.pdf#3:RIGHT:1",
+     "parserUnit": "data/download/mofa.go.jp/mofaj/files/100546568.pdf#3:UNSPLIT:5@line7",
+     "reason": "MERGE",
+     "detail": {
+      "unitKind": "TITLE_OR_HEADING"
+     }
+    },
+    {
+     "family": "FALSE_POSITIVE_ROW_ASSEMBLY",
+     "localPdfPath": "data/download/mofa.go.jp/mofaj/files/100546568.pdf",
+     "physicalPage": 3,
+     "gtKey": "R|26",
+     "gtRowId": "data/download/mofa.go.jp/mofaj/files/100546568.pdf#3:RIGHT:2",
+     "parserUnit": "data/download/mofa.go.jp/mofaj/files/100546568.pdf#3:UNSPLIT:6@line9",
+     "reason": "MERGE",
+     "detail": {
+      "unitKind": "TITLE_OR_HEADING"
+     }
+    }
+   ]
+  },
+  {
+   "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+   "physicalPage": 2,
+   "classifierSource": "DIRECT",
+   "strata": [
+    "right-column-used(right-row evidence)"
+   ],
+   "parserPageState": "ASSEMBLED_SPLIT",
+   "pageOutcome": {
+    "state": "CORRECT",
+    "reason": "SPLIT_AND_GT_RIGHT_ROWS"
+   },
+   "gtComparableRows": 34,
+   "parserComparableUnits": 32,
+   "matchedRows": 32,
+   "rowStates": {
+    "CORRECT": 32,
+    "INCORRECT": 2,
+    "ABSTAINED": 0,
+    "UNRESOLVED": 0
+   },
+   "rowNotComparable": {
+    "plainRow": 3,
+    "classification": 34,
+    "columnUnclaimed": 0
+   },
+   "omittedSilently": 0,
+   "orderInversions": 0,
+   "groups": [
+    {
+     "key": "M|（組織）|070",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|010",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|020",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|030",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|040",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|050",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|060",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|065",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|070",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|080",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|090",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|100",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|110",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|120",
+     "n": 1,
+     "m": 0,
+     "matched": 0,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": "INCORRECT_MERGED"
+    },
+    {
+     "key": "M|（項）|130",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|1",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|10",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|11",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|12",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|13",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|14",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|15",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|16",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|17",
+     "n": 1,
+     "m": 0,
+     "matched": 0,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": "INCORRECT_MERGED"
+    },
+    {
+     "key": "R|18",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|19",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|2",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|3",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|4",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|5",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|6",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|7",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|8",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|9",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    }
+   ],
+   "fragments": {
+    "gt": 2,
+    "correct": 2,
+    "incorrect": 0,
+    "abstained": 0,
+    "unresolved": 0,
+    "notComparable": 0,
+    "wrongAttachment": 0
+   },
+   "provenance": {
+    "checkedUnits": 39,
+    "checkedFragments": 2,
+    "mismatches": 0
+   },
+   "instances": [
+    {
+     "family": "INCORRECT_MERGED_ROW",
+     "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+     "physicalPage": 2,
+     "gtRowId": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf#2:RIGHT:1",
+     "gtKey": "M|（項）|120",
+     "state": "INCORRECT_MERGED"
+    },
+    {
+     "family": "INCORRECT_MERGED_ROW",
+     "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+     "physicalPage": 2,
+     "gtRowId": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf#2:RIGHT:2",
+     "gtKey": "R|17",
+     "state": "INCORRECT_MERGED"
+    },
+    {
+     "family": "FALSE_POSITIVE_ROW_ASSEMBLY",
+     "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+     "physicalPage": 2,
+     "gtKey": "M|（項）|120",
+     "gtRowId": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf#2:RIGHT:1",
+     "parserUnit": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf#2:UNSPLIT:5@line7",
+     "reason": "MERGE",
+     "detail": {
+      "unitKind": "TITLE_OR_HEADING"
+     }
+    },
+    {
+     "family": "FALSE_POSITIVE_ROW_ASSEMBLY",
+     "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+     "physicalPage": 2,
+     "gtKey": "R|17",
+     "gtRowId": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf#2:RIGHT:2",
+     "parserUnit": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf#2:UNSPLIT:6@line9",
+     "reason": "MERGE",
+     "detail": {
+      "unitKind": "TITLE_OR_HEADING"
+     }
+    }
+   ]
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "physicalPage": 4,
+   "classifierSource": "INHERITED",
+   "strata": [
+    "right-column-used(right-row evidence)",
+    "wrapped-fragment(right column line>=1)"
+   ],
+   "parserPageState": "ASSEMBLED_SPLIT",
+   "pageOutcome": {
+    "state": "CORRECT",
+    "reason": "SPLIT_AND_GT_RIGHT_ROWS"
+   },
+   "gtComparableRows": 71,
+   "parserComparableUnits": 71,
+   "matchedRows": 71,
+   "rowStates": {
+    "CORRECT": 71,
+    "INCORRECT": 0,
+    "ABSTAINED": 0,
+    "UNRESOLVED": 0
+   },
+   "rowNotComparable": {
+    "plainRow": 0,
+    "classification": 71,
+    "columnUnclaimed": 0
+   },
+   "omittedSilently": 0,
+   "orderInversions": 0,
+   "groups": [
+    {
+     "key": "M|（項）|465",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|492",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|505",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|541",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|547",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|551",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|553",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|625",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|640",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|641",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|644",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|691",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|769",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|772",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|812",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|815",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|818",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|820",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|824",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|35",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|36",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|37",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|38",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|39",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|40",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|41",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|42",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|43",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|44",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|45",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|46",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|47",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|48",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|49",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|50",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|51",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|52",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|53",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|54",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|55",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|56",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|57",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|58",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|59",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|60",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|61",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|62",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|63",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|64",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|65",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|66",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|67",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|68",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|69",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|70",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|71",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|72",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|73",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|74",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|75",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|76",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|77",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|78",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|79",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|80",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|81",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|82",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|83",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|84",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|85",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|86",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    }
+   ],
+   "fragments": {
+    "gt": 2,
+    "correct": 2,
+    "incorrect": 0,
+    "abstained": 0,
+    "unresolved": 0,
+    "notComparable": 0,
+    "wrongAttachment": 0
+   },
+   "provenance": {
+    "checkedUnits": 74,
+    "checkedFragments": 2,
+    "mismatches": 0
+   },
+   "instances": []
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "physicalPage": 5,
+   "classifierSource": "INHERITED",
+   "strata": [
+    "no-right-row-evidence & body>=15"
+   ],
+   "parserPageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "pageOutcome": {
+    "state": "NOT_COMPARABLE",
+    "reason": "UNSPLIT_AND_GT_RIGHT_BLANK"
+   },
+   "gtComparableRows": 20,
+   "parserComparableUnits": 20,
+   "matchedRows": 20,
+   "rowStates": {
+    "CORRECT": 20,
+    "INCORRECT": 0,
+    "ABSTAINED": 0,
+    "UNRESOLVED": 0
+   },
+   "rowNotComparable": {
+    "plainRow": 0,
+    "classification": 20,
+    "columnUnclaimed": 20
+   },
+   "omittedSilently": 0,
+   "orderInversions": 0,
+   "groups": [
+    {
+     "key": "M|（項）|834",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|901",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|906",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|100",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|101",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|102",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|103",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|87",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|88",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|89",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|90",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|91",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|92",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|93",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|94",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|95",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|96",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|97",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|98",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|99",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    }
+   ],
+   "fragments": {
+    "gt": 0,
+    "correct": 0,
+    "incorrect": 0,
+    "abstained": 0,
+    "unresolved": 0,
+    "notComparable": 0,
+    "wrongAttachment": 0
+   },
+   "provenance": {
+    "checkedUnits": 23,
+    "checkedFragments": 0,
+    "mismatches": 0
+   },
+   "instances": []
+  },
+  {
+   "localPdfPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "strata": [
+    "DIRECT"
+   ],
+   "parserPageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "pageOutcome": {
+    "state": "NOT_COMPARABLE",
+    "reason": "UNSPLIT_AND_GT_RIGHT_BLANK"
+   },
+   "gtComparableRows": 8,
+   "parserComparableUnits": 8,
+   "matchedRows": 8,
+   "rowStates": {
+    "CORRECT": 8,
+    "INCORRECT": 0,
+    "ABSTAINED": 0,
+    "UNRESOLVED": 0
+   },
+   "rowNotComparable": {
+    "plainRow": 2,
+    "classification": 8,
+    "columnUnclaimed": 8
+   },
+   "omittedSilently": 0,
+   "orderInversions": 0,
+   "groups": [
+    {
+     "key": "M|（組織）|020",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|010",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|020",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|030",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|1",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|2",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|3",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|4",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    }
+   ],
+   "fragments": {
+    "gt": 0,
+    "correct": 0,
+    "incorrect": 0,
+    "abstained": 0,
+    "unresolved": 0,
+    "notComparable": 0,
+    "wrongAttachment": 0
+   },
+   "provenance": {
+    "checkedUnits": 15,
+    "checkedFragments": 0,
+    "mismatches": 0
+   },
+   "instances": []
+  },
+  {
+   "localPdfPath": "data/download/shugiin.go.jp/internet/itdb_annai.nsf/html/statics/osirase/kaikei-saishutsugaisan6.pdf/%24File/kaikei-saishutsugaisan6.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "strata": [
+    "no-right-row-evidence & body<15"
+   ],
+   "parserPageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "pageOutcome": {
+    "state": "NOT_COMPARABLE",
+    "reason": "UNSPLIT_AND_GT_RIGHT_BLANK"
+   },
+   "gtComparableRows": 9,
+   "parserComparableUnits": 9,
+   "matchedRows": 9,
+   "rowStates": {
+    "CORRECT": 9,
+    "INCORRECT": 0,
+    "ABSTAINED": 0,
+    "UNRESOLVED": 0
+   },
+   "rowNotComparable": {
+    "plainRow": 2,
+    "classification": 9,
+    "columnUnclaimed": 9
+   },
+   "omittedSilently": 0,
+   "orderInversions": 0,
+   "groups": [
+    {
+     "key": "M|（組織）|010",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|010",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|020",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "M|（項）|030",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|1",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|2",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|3",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|4",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    },
+    {
+     "key": "R|5",
+     "n": 1,
+     "m": 1,
+     "matched": 1,
+     "wrongColumn": 0,
+     "extras": 0,
+     "unmatchedState": null
+    }
+   ],
+   "fragments": {
+    "gt": 0,
+    "correct": 0,
+    "incorrect": 0,
+    "abstained": 0,
+    "unresolved": 0,
+    "notComparable": 0,
+    "wrongAttachment": 0
+   },
+   "provenance": {
+    "checkedUnits": 16,
+    "checkedFragments": 0,
+    "mismatches": 0
+   },
+   "instances": []
+  }
+ ],
+ "finalJudgment": "STOP_SAFETY"
+}
