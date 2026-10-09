@@ -1,0 +1,1098 @@
+{
+ "schema": "budget-request-toc-header-tokenless-positive-discovery-sample-manifest/v0",
+ "note": "independent positive discovery sample（GT ではない・prevalence 推定ではない）。candidate 行は機械条件で選んだ raw line で、continuation / title / column heading のいずれも意味しない。選定は PDF・#407 の visual 結果を一切見ず、census.json の機械特徴の feature-space coverage だけで行った。右 text 本文は保存しない（sha256 のみ）",
+ "sourceCensus": {
+  "path": "tests/fixtures/budget-request-toc-header-tokenless-failure-isolation/2024/census.json",
+  "sha256": "d2c3f9b0878614466a3f69034164c86f60050c4783633e31a4b7fbaf2ceda5e7"
+ },
+ "excludedManifest": {
+  "path": "tests/fixtures/budget-request-toc-header-tokenless-visual-failure-isolation/2024/review-sample-manifest.json",
+  "sha256": "d4afe8153e5b77379ce7ad6578c4060a670ddbbda69b97c50d25f375697ab01a",
+  "usedFor": "row identity のみ"
+ },
+ "selectionProcedure": "scripts/pipeline-v2/lib/budget-request-toc-header-tokenless-positive-discovery-sample.ts（ヘッダコメント参照）",
+ "algorithm": {
+  "eligible": "census mechanical candidate 91 行 − 除外 12 行 = 79 行（行単位の除外）",
+  "features": [
+   "distanceToHeaderEnd",
+   "nearestTrigger",
+   "offsetFromE",
+   "leftBlank?0:1",
+   "rightTextChars",
+   "candidatesOnPage",
+   "hasTrigger",
+   "hasAttachment",
+   "lineIndex"
+  ],
+  "normalization": "eligible 全体 min-max、全成分同等の重み、Euclid 距離",
+  "noTriggerSentinel": 20,
+  "steps": [
+   "seed = eligible centroid から最遠",
+   "partition 保証 各 5 件以上（最小選択数の partition から farthest-first）",
+   "残り枠は全体 farthest-first",
+   "1 sample / page",
+   "tie = (localPdfPath, physicalPage, lineIndex) 辞書順"
+  ],
+  "constants": {
+   "sampleSize": 20,
+   "minPerPartition": 5,
+   "eligibleExpected": 79
+  }
+ },
+ "eligibleSummary": {
+  "rows": 79,
+  "pages": 33,
+  "rowsPerPageDistribution": {
+   "1": 4,
+   "2": 12,
+   "3": 17
+  },
+  "rowsByPartition": {
+   "DEVELOPMENT_EXPLORED": 43,
+   "FIRST_HELDOUT_POSTHOC": 22,
+   "NEW_HELDOUT_POSTHOC": 14
+  },
+  "pagesByPartition": {
+   "DEVELOPMENT_EXPLORED": 18,
+   "FIRST_HELDOUT_POSTHOC": 9,
+   "NEW_HELDOUT_POSTHOC": 6
+  }
+ },
+ "excludedRows": [
+  {
+   "localPdfPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+   "physicalPage": 3,
+   "lineIndex": 4,
+   "reason": "#407 control FB-01"
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157010.pdf",
+   "physicalPage": 3,
+   "lineIndex": 0,
+   "reason": "#407 control FB-02"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "physicalPage": 3,
+   "lineIndex": 10,
+   "reason": "census anchor H2"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "physicalPage": 5,
+   "lineIndex": 0,
+   "reason": "#407 control FB-04"
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf",
+   "physicalPage": 3,
+   "lineIndex": 4,
+   "reason": "#407 control FB-05"
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "physicalPage": 4,
+   "lineIndex": 1,
+   "reason": "#407 control FB-06"
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "physicalPage": 5,
+   "lineIndex": 0,
+   "reason": "#407 control FB-07"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "physicalPage": 5,
+   "lineIndex": 2,
+   "reason": "#407 control FB-08"
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+   "physicalPage": 3,
+   "lineIndex": 0,
+   "reason": "#407 control FB-09"
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 4,
+   "lineIndex": 1,
+   "reason": "#407 control FB-10"
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "physicalPage": 2,
+   "lineIndex": 8,
+   "reason": "census anchor H7"
+  },
+  {
+   "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+   "physicalPage": 2,
+   "lineIndex": 2,
+   "reason": "#407 control FB-12"
+  }
+ ],
+ "ordering": "(localPdfPath, physicalPage, lineIndex) 辞書順 → PD-01..PD-20",
+ "samples": [
+  {
+   "sampleId": "PD-01",
+   "localPdfPath": "data/download/env.go.jp/content/000157010.pdf",
+   "physicalPage": 3,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "lineIndex": 2,
+   "charStart": 59,
+   "triggerContext": {
+    "hasTrigger": true,
+    "pageTriggerCount": 2,
+    "precedingTriggerDistance": null,
+    "followingTriggerDistance": 4,
+    "primary": "HEADER_TOKENLESS_WITHOUT_TRIGGER_CONTEXT",
+    "pageKnownFlag": false,
+    "knownFlagMatch": false
+   },
+   "attachmentContext": {
+    "hasAttachment": true,
+    "currentFragmentsAttached": 6
+   },
+   "censusFeatures": {
+    "edge": 59,
+    "pageState": "ASSEMBLED_SPLIT",
+    "position": 1,
+    "offsetFromE": 0,
+    "rightTextChars": 1,
+    "rightTextSha256": "172fb7e67b9b09dd2a61ca0d8319ec9324fe206dedea52030769b709c0e6f6b5",
+    "leftBlank": false,
+    "distanceToHeaderEnd": 6,
+    "wholeLineTitleInOutput": true,
+    "pageRefTokenless": false,
+    "candidatesOnPage": 3
+   },
+   "selectionRationale": {
+    "rule": "remaining slot: global farthest-first from 17 selected",
+    "normalizedFeatures": [
+     0.714285714286,
+     0.157894736842,
+     0,
+     1,
+     0,
+     0.666666666667,
+     1,
+     1,
+     0.4
+    ]
+   }
+  },
+  {
+   "sampleId": "PD-02",
+   "localPdfPath": "data/download/env.go.jp/content/000157012.pdf",
+   "physicalPage": 3,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "lineIndex": 0,
+   "charStart": 56,
+   "triggerContext": {
+    "hasTrigger": true,
+    "pageTriggerCount": 2,
+    "precedingTriggerDistance": null,
+    "followingTriggerDistance": 4,
+    "primary": "HEADER_TOKENLESS_WITHOUT_TRIGGER_CONTEXT",
+    "pageKnownFlag": false,
+    "knownFlagMatch": false
+   },
+   "attachmentContext": {
+    "hasAttachment": true,
+    "currentFragmentsAttached": 4
+   },
+   "censusFeatures": {
+    "edge": 55,
+    "pageState": "ASSEMBLED_SPLIT",
+    "position": 0,
+    "offsetFromE": 1,
+    "rightTextChars": 5,
+    "rightTextSha256": "fde50b890b8b397c2e4654830f55d78f62098162db1b7950652461634f921d57",
+    "leftBlank": false,
+    "distanceToHeaderEnd": 6,
+    "wholeLineTitleInOutput": true,
+    "pageRefTokenless": false,
+    "candidatesOnPage": 2
+   },
+   "selectionRationale": {
+    "rule": "partition guarantee (DEVELOPMENT_EXPLORED, 3/5): farthest-first within partition from 6 selected",
+    "normalizedFeatures": [
+     0.714285714286,
+     0.157894736842,
+     0.018181818182,
+     1,
+     0.074074074074,
+     0.333333333333,
+     1,
+     1,
+     0
+    ]
+   }
+  },
+  {
+   "sampleId": "PD-03",
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "physicalPage": 3,
+   "partition": "FIRST_HELDOUT_POSTHOC",
+   "lineIndex": 2,
+   "charStart": 56,
+   "triggerContext": {
+    "hasTrigger": true,
+    "pageTriggerCount": 2,
+    "precedingTriggerDistance": null,
+    "followingTriggerDistance": 4,
+    "primary": "HEADER_TOKENLESS_WITHOUT_TRIGGER_CONTEXT",
+    "pageKnownFlag": true,
+    "knownFlagMatch": false
+   },
+   "attachmentContext": {
+    "hasAttachment": true,
+    "currentFragmentsAttached": 2
+   },
+   "censusFeatures": {
+    "edge": 55,
+    "pageState": "ASSEMBLED_SPLIT",
+    "position": 1,
+    "offsetFromE": 1,
+    "rightTextChars": 5,
+    "rightTextSha256": "fde50b890b8b397c2e4654830f55d78f62098162db1b7950652461634f921d57",
+    "leftBlank": false,
+    "distanceToHeaderEnd": 7,
+    "wholeLineTitleInOutput": true,
+    "pageRefTokenless": false,
+    "candidatesOnPage": 4
+   },
+   "selectionRationale": {
+    "rule": "partition guarantee (FIRST_HELDOUT_POSTHOC, 5/5): farthest-first within partition from 13 selected",
+    "normalizedFeatures": [
+     0.857142857143,
+     0.157894736842,
+     0.018181818182,
+     1,
+     0.074074074074,
+     1,
+     1,
+     1,
+     0.4
+    ]
+   }
+  },
+  {
+   "sampleId": "PD-04",
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "physicalPage": 4,
+   "partition": "NEW_HELDOUT_POSTHOC",
+   "lineIndex": 1,
+   "charStart": 76,
+   "triggerContext": {
+    "hasTrigger": false,
+    "pageTriggerCount": 0,
+    "precedingTriggerDistance": null,
+    "followingTriggerDistance": null,
+    "primary": "HEADER_TOKENLESS_WITHOUT_TRIGGER_CONTEXT",
+    "pageKnownFlag": false,
+    "knownFlagMatch": false
+   },
+   "attachmentContext": {
+    "hasAttachment": false,
+    "currentFragmentsAttached": 0
+   },
+   "censusFeatures": {
+    "edge": 53,
+    "pageState": "ASSEMBLED_SPLIT",
+    "position": 1,
+    "offsetFromE": 23,
+    "rightTextChars": 29,
+    "rightTextSha256": "5e215262db3b223225950bd03fa808f3d888de91d8a8f5c82e922b76a477c6cd",
+    "leftBlank": false,
+    "distanceToHeaderEnd": 2,
+    "wholeLineTitleInOutput": true,
+    "pageRefTokenless": false,
+    "candidatesOnPage": 1
+   },
+   "selectionRationale": {
+    "rule": "partition guarantee (NEW_HELDOUT_POSTHOC, 4/5): farthest-first within partition from 11 selected",
+    "normalizedFeatures": [
+     0.142857142857,
+     1,
+     0.418181818182,
+     1,
+     0.518518518519,
+     0,
+     0,
+     0,
+     0.2
+    ]
+   }
+  },
+  {
+   "sampleId": "PD-05",
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "physicalPage": 5,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "lineIndex": 1,
+   "charStart": 58,
+   "triggerContext": {
+    "hasTrigger": false,
+    "pageTriggerCount": 0,
+    "precedingTriggerDistance": null,
+    "followingTriggerDistance": null,
+    "primary": "HEADER_TOKENLESS_WITHOUT_TRIGGER_CONTEXT",
+    "pageKnownFlag": false,
+    "knownFlagMatch": false
+   },
+   "attachmentContext": {
+    "hasAttachment": true,
+    "currentFragmentsAttached": 2
+   },
+   "censusFeatures": {
+    "edge": 58,
+    "pageState": "ASSEMBLED_SPLIT",
+    "position": 1,
+    "offsetFromE": 0,
+    "rightTextChars": 55,
+    "rightTextSha256": "48cb88ded6fb6e2bb983a2a47aad3eed41a4cf9eb518ef6a5e56a287e458ed0e",
+    "leftBlank": false,
+    "distanceToHeaderEnd": 2,
+    "wholeLineTitleInOutput": true,
+    "pageRefTokenless": false,
+    "candidatesOnPage": 3
+   },
+   "selectionRationale": {
+    "rule": "partition guarantee (DEVELOPMENT_EXPLORED, 2/5): farthest-first within partition from 3 selected",
+    "normalizedFeatures": [
+     0.142857142857,
+     1,
+     0,
+     1,
+     1,
+     0.666666666667,
+     0,
+     1,
+     0.2
+    ]
+   }
+  },
+  {
+   "sampleId": "PD-06",
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+   "physicalPage": 3,
+   "partition": "NEW_HELDOUT_POSTHOC",
+   "lineIndex": 4,
+   "charStart": 75,
+   "triggerContext": {
+    "hasTrigger": true,
+    "pageTriggerCount": 2,
+    "precedingTriggerDistance": null,
+    "followingTriggerDistance": 2,
+    "primary": "HEADER_TOKENLESS_WITHOUT_TRIGGER_CONTEXT",
+    "pageKnownFlag": false,
+    "knownFlagMatch": false
+   },
+   "attachmentContext": {
+    "hasAttachment": true,
+    "currentFragmentsAttached": 1
+   },
+   "censusFeatures": {
+    "edge": 55,
+    "pageState": "ASSEMBLED_SPLIT",
+    "position": 3,
+    "offsetFromE": 20,
+    "rightTextChars": 19,
+    "rightTextSha256": "c1b05fdde1f8099c791cf9aaadf759d5ac333c3aedee84ddf55f851fed1d3e92",
+    "leftBlank": false,
+    "distanceToHeaderEnd": 4,
+    "wholeLineTitleInOutput": true,
+    "pageRefTokenless": false,
+    "candidatesOnPage": 3
+   },
+   "selectionRationale": {
+    "rule": "partition guarantee (NEW_HELDOUT_POSTHOC, 5/5): farthest-first within partition from 14 selected",
+    "normalizedFeatures": [
+     0.428571428571,
+     0.052631578947,
+     0.363636363636,
+     1,
+     0.333333333333,
+     0.666666666667,
+     1,
+     1,
+     0.8
+    ]
+   }
+  },
+  {
+   "sampleId": "PD-07",
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneju_o.pdf",
+   "physicalPage": 3,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "lineIndex": 2,
+   "charStart": 76,
+   "triggerContext": {
+    "hasTrigger": true,
+    "pageTriggerCount": 2,
+    "precedingTriggerDistance": null,
+    "followingTriggerDistance": 2,
+    "primary": "HEADER_TOKENLESS_WITHOUT_TRIGGER_CONTEXT",
+    "pageKnownFlag": false,
+    "knownFlagMatch": false
+   },
+   "attachmentContext": {
+    "hasAttachment": true,
+    "currentFragmentsAttached": 4
+   },
+   "censusFeatures": {
+    "edge": 55,
+    "pageState": "ASSEMBLED_SPLIT",
+    "position": 2,
+    "offsetFromE": 21,
+    "rightTextChars": 31,
+    "rightTextSha256": "75c9a81bf4dd582016f48ec91bcd0136d4a97196f2c510eb08e0223e2565c647",
+    "leftBlank": false,
+    "distanceToHeaderEnd": 4,
+    "wholeLineTitleInOutput": true,
+    "pageRefTokenless": false,
+    "candidatesOnPage": 2
+   },
+   "selectionRationale": {
+    "rule": "remaining slot: global farthest-first from 16 selected",
+    "normalizedFeatures": [
+     0.428571428571,
+     0.052631578947,
+     0.381818181818,
+     1,
+     0.555555555556,
+     0.333333333333,
+     1,
+     1,
+     0.4
+    ]
+   }
+  },
+  {
+   "sampleId": "PD-08",
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "physicalPage": 3,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "lineIndex": 4,
+   "charStart": 75,
+   "triggerContext": {
+    "hasTrigger": true,
+    "pageTriggerCount": 2,
+    "precedingTriggerDistance": null,
+    "followingTriggerDistance": 2,
+    "primary": "HEADER_TOKENLESS_WITHOUT_TRIGGER_CONTEXT",
+    "pageKnownFlag": false,
+    "knownFlagMatch": false
+   },
+   "attachmentContext": {
+    "hasAttachment": true,
+    "currentFragmentsAttached": 1
+   },
+   "censusFeatures": {
+    "edge": 55,
+    "pageState": "ASSEMBLED_SPLIT",
+    "position": 3,
+    "offsetFromE": 20,
+    "rightTextChars": 32,
+    "rightTextSha256": "8d29623f78067bf0c708b928a184620a16a79a9dec45dd4e44ae23ad30722fe3",
+    "leftBlank": false,
+    "distanceToHeaderEnd": 4,
+    "wholeLineTitleInOutput": true,
+    "pageRefTokenless": false,
+    "candidatesOnPage": 3
+   },
+   "selectionRationale": {
+    "rule": "remaining slot: global farthest-first from 19 selected",
+    "normalizedFeatures": [
+     0.428571428571,
+     0.052631578947,
+     0.363636363636,
+     1,
+     0.574074074074,
+     0.666666666667,
+     1,
+     1,
+     0.8
+    ]
+   }
+  },
+  {
+   "sampleId": "PD-09",
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "physicalPage": 3,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "lineIndex": 4,
+   "charStart": 72,
+   "triggerContext": {
+    "hasTrigger": true,
+    "pageTriggerCount": 2,
+    "precedingTriggerDistance": null,
+    "followingTriggerDistance": 2,
+    "primary": "HEADER_TOKENLESS_WITHOUT_TRIGGER_CONTEXT",
+    "pageKnownFlag": false,
+    "knownFlagMatch": false
+   },
+   "attachmentContext": {
+    "hasAttachment": false,
+    "currentFragmentsAttached": 0
+   },
+   "censusFeatures": {
+    "edge": 52,
+    "pageState": "ASSEMBLED_SPLIT",
+    "position": 3,
+    "offsetFromE": 20,
+    "rightTextChars": 29,
+    "rightTextSha256": "c8880b60d64eb4fcc9863dacc4e82757b4db93a753302c87b21a46a983b312ef",
+    "leftBlank": false,
+    "distanceToHeaderEnd": 4,
+    "wholeLineTitleInOutput": true,
+    "pageRefTokenless": false,
+    "candidatesOnPage": 3
+   },
+   "selectionRationale": {
+    "rule": "remaining slot: global farthest-first from 15 selected",
+    "normalizedFeatures": [
+     0.428571428571,
+     0.052631578947,
+     0.363636363636,
+     1,
+     0.518518518519,
+     0.666666666667,
+     1,
+     0,
+     0.8
+    ]
+   }
+  },
+  {
+   "sampleId": "PD-10",
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "physicalPage": 5,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "lineIndex": 1,
+   "charStart": 51,
+   "triggerContext": {
+    "hasTrigger": false,
+    "pageTriggerCount": 0,
+    "precedingTriggerDistance": null,
+    "followingTriggerDistance": null,
+    "primary": "HEADER_TOKENLESS_WITHOUT_TRIGGER_CONTEXT",
+    "pageKnownFlag": false,
+    "knownFlagMatch": false
+   },
+   "attachmentContext": {
+    "hasAttachment": false,
+    "currentFragmentsAttached": 0
+   },
+   "censusFeatures": {
+    "edge": 51,
+    "pageState": "ASSEMBLED_SPLIT",
+    "position": 1,
+    "offsetFromE": 0,
+    "rightTextChars": 48,
+    "rightTextSha256": "7f2de88601ce4b1100e0ab9c6ef8bd3293ea4d6bd03bb18e268754ea8687f793",
+    "leftBlank": false,
+    "distanceToHeaderEnd": 2,
+    "wholeLineTitleInOutput": true,
+    "pageRefTokenless": false,
+    "candidatesOnPage": 3
+   },
+   "selectionRationale": {
+    "rule": "partition guarantee (DEVELOPMENT_EXPLORED, 5/5): farthest-first within partition from 12 selected",
+    "normalizedFeatures": [
+     0.142857142857,
+     1,
+     0,
+     1,
+     0.87037037037,
+     0.666666666667,
+     0,
+     0,
+     0.2
+    ]
+   }
+  },
+  {
+   "sampleId": "PD-11",
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "physicalPage": 3,
+   "partition": "NEW_HELDOUT_POSTHOC",
+   "lineIndex": 0,
+   "charStart": 102,
+   "triggerContext": {
+    "hasTrigger": true,
+    "pageTriggerCount": 2,
+    "precedingTriggerDistance": null,
+    "followingTriggerDistance": 5,
+    "primary": "HEADER_TOKENLESS_WITHOUT_TRIGGER_CONTEXT",
+    "pageKnownFlag": false,
+    "knownFlagMatch": false
+   },
+   "attachmentContext": {
+    "hasAttachment": true,
+    "currentFragmentsAttached": 1
+   },
+   "censusFeatures": {
+    "edge": 56,
+    "pageState": "ASSEMBLED_SPLIT",
+    "position": 0,
+    "offsetFromE": 46,
+    "rightTextChars": 1,
+    "rightTextSha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+    "leftBlank": true,
+    "distanceToHeaderEnd": 7,
+    "wholeLineTitleInOutput": true,
+    "pageRefTokenless": false,
+    "candidatesOnPage": 3
+   },
+   "selectionRationale": {
+    "rule": "partition guarantee (NEW_HELDOUT_POSTHOC, 1/5): farthest-first within partition from 2 selected",
+    "normalizedFeatures": [
+     0.857142857143,
+     0.210526315789,
+     0.836363636364,
+     0,
+     0,
+     0.666666666667,
+     1,
+     1,
+     0
+    ]
+   }
+  },
+  {
+   "sampleId": "PD-12",
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "physicalPage": 5,
+   "partition": "FIRST_HELDOUT_POSTHOC",
+   "lineIndex": 0,
+   "charStart": 107,
+   "triggerContext": {
+    "hasTrigger": false,
+    "pageTriggerCount": 0,
+    "precedingTriggerDistance": null,
+    "followingTriggerDistance": null,
+    "primary": "HEADER_TOKENLESS_WITHOUT_TRIGGER_CONTEXT",
+    "pageKnownFlag": false,
+    "knownFlagMatch": false
+   },
+   "attachmentContext": {
+    "hasAttachment": true,
+    "currentFragmentsAttached": 2
+   },
+   "censusFeatures": {
+    "edge": 53,
+    "pageState": "ASSEMBLED_SPLIT",
+    "position": 0,
+    "offsetFromE": 54,
+    "rightTextChars": 1,
+    "rightTextSha256": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+    "leftBlank": true,
+    "distanceToHeaderEnd": 3,
+    "wholeLineTitleInOutput": true,
+    "pageRefTokenless": false,
+    "candidatesOnPage": 3
+   },
+   "selectionRationale": {
+    "rule": "partition guarantee (FIRST_HELDOUT_POSTHOC, 3/5): farthest-first within partition from 7 selected",
+    "normalizedFeatures": [
+     0.285714285714,
+     1,
+     0.981818181818,
+     0,
+     0,
+     0.666666666667,
+     0,
+     1,
+     0
+    ]
+   }
+  },
+  {
+   "sampleId": "PD-13",
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "physicalPage": 6,
+   "partition": "FIRST_HELDOUT_POSTHOC",
+   "lineIndex": 2,
+   "charStart": 55,
+   "triggerContext": {
+    "hasTrigger": false,
+    "pageTriggerCount": 0,
+    "precedingTriggerDistance": null,
+    "followingTriggerDistance": null,
+    "primary": "HEADER_TOKENLESS_WITHOUT_TRIGGER_CONTEXT",
+    "pageKnownFlag": false,
+    "knownFlagMatch": false
+   },
+   "attachmentContext": {
+    "hasAttachment": false,
+    "currentFragmentsAttached": 0
+   },
+   "censusFeatures": {
+    "edge": 55,
+    "pageState": "ASSEMBLED_SPLIT",
+    "position": 2,
+    "offsetFromE": 0,
+    "rightTextChars": 1,
+    "rightTextSha256": "f9376c98b6cb1cb49f4c6a9ef0efaa60159bac7d5b69003a6514fd7ea91ed90a",
+    "leftBlank": false,
+    "distanceToHeaderEnd": 1,
+    "wholeLineTitleInOutput": true,
+    "pageRefTokenless": false,
+    "candidatesOnPage": 2
+   },
+   "selectionRationale": {
+    "rule": "partition guarantee (FIRST_HELDOUT_POSTHOC, 2/5): farthest-first within partition from 4 selected",
+    "normalizedFeatures": [
+     0,
+     1,
+     0,
+     1,
+     0,
+     0.333333333333,
+     0,
+     0,
+     0.4
+    ]
+   }
+  },
+  {
+   "sampleId": "PD-14",
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "physicalPage": 7,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "lineIndex": 2,
+   "charStart": 55,
+   "triggerContext": {
+    "hasTrigger": false,
+    "pageTriggerCount": 0,
+    "precedingTriggerDistance": null,
+    "followingTriggerDistance": null,
+    "primary": "HEADER_TOKENLESS_WITHOUT_TRIGGER_CONTEXT",
+    "pageKnownFlag": false,
+    "knownFlagMatch": false
+   },
+   "attachmentContext": {
+    "hasAttachment": true,
+    "currentFragmentsAttached": 1
+   },
+   "censusFeatures": {
+    "edge": 55,
+    "pageState": "ASSEMBLED_SPLIT",
+    "position": 2,
+    "offsetFromE": 0,
+    "rightTextChars": 1,
+    "rightTextSha256": "f9376c98b6cb1cb49f4c6a9ef0efaa60159bac7d5b69003a6514fd7ea91ed90a",
+    "leftBlank": false,
+    "distanceToHeaderEnd": 1,
+    "wholeLineTitleInOutput": true,
+    "pageRefTokenless": false,
+    "candidatesOnPage": 3
+   },
+   "selectionRationale": {
+    "rule": "partition guarantee (DEVELOPMENT_EXPLORED, 4/5): farthest-first within partition from 9 selected",
+    "normalizedFeatures": [
+     0,
+     1,
+     0,
+     1,
+     0,
+     0.666666666667,
+     0,
+     1,
+     0.4
+    ]
+   }
+  },
+  {
+   "sampleId": "PD-15",
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+   "physicalPage": 3,
+   "partition": "NEW_HELDOUT_POSTHOC",
+   "lineIndex": 2,
+   "charStart": 56,
+   "triggerContext": {
+    "hasTrigger": true,
+    "pageTriggerCount": 2,
+    "precedingTriggerDistance": null,
+    "followingTriggerDistance": 4,
+    "primary": "HEADER_TOKENLESS_WITHOUT_TRIGGER_CONTEXT",
+    "pageKnownFlag": false,
+    "knownFlagMatch": false
+   },
+   "attachmentContext": {
+    "hasAttachment": false,
+    "currentFragmentsAttached": 0
+   },
+   "censusFeatures": {
+    "edge": 55,
+    "pageState": "ASSEMBLED_SPLIT",
+    "position": 1,
+    "offsetFromE": 1,
+    "rightTextChars": 3,
+    "rightTextSha256": "20e60c9afa50cd7bef40fa60bab73cd379f8db1f53ed072d4bd11168a774bdee",
+    "leftBlank": false,
+    "distanceToHeaderEnd": 6,
+    "wholeLineTitleInOutput": true,
+    "pageRefTokenless": false,
+    "candidatesOnPage": 3
+   },
+   "selectionRationale": {
+    "rule": "partition guarantee (NEW_HELDOUT_POSTHOC, 2/5): farthest-first within partition from 5 selected",
+    "normalizedFeatures": [
+     0.714285714286,
+     0.157894736842,
+     0.018181818182,
+     1,
+     0.037037037037,
+     0.666666666667,
+     1,
+     0,
+     0.4
+    ]
+   }
+  },
+  {
+   "sampleId": "PD-16",
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630393.pdf",
+   "physicalPage": 3,
+   "partition": "NEW_HELDOUT_POSTHOC",
+   "lineIndex": 0,
+   "charStart": 98,
+   "triggerContext": {
+    "hasTrigger": true,
+    "pageTriggerCount": 2,
+    "precedingTriggerDistance": null,
+    "followingTriggerDistance": 5,
+    "primary": "HEADER_TOKENLESS_WITHOUT_TRIGGER_CONTEXT",
+    "pageKnownFlag": false,
+    "knownFlagMatch": false
+   },
+   "attachmentContext": {
+    "hasAttachment": false,
+    "currentFragmentsAttached": 0
+   },
+   "censusFeatures": {
+    "edge": 51,
+    "pageState": "ASSEMBLED_SPLIT",
+    "position": 0,
+    "offsetFromE": 47,
+    "rightTextChars": 1,
+    "rightTextSha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+    "leftBlank": true,
+    "distanceToHeaderEnd": 7,
+    "wholeLineTitleInOutput": true,
+    "pageRefTokenless": false,
+    "candidatesOnPage": 3
+   },
+   "selectionRationale": {
+    "rule": "partition guarantee (NEW_HELDOUT_POSTHOC, 3/5): farthest-first within partition from 8 selected",
+    "normalizedFeatures": [
+     0.857142857143,
+     0.210526315789,
+     0.854545454545,
+     0,
+     0,
+     0.666666666667,
+     1,
+     0,
+     0
+    ]
+   }
+  },
+  {
+   "sampleId": "PD-17",
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 5,
+   "partition": "FIRST_HELDOUT_POSTHOC",
+   "lineIndex": 0,
+   "charStart": 100,
+   "triggerContext": {
+    "hasTrigger": false,
+    "pageTriggerCount": 0,
+    "precedingTriggerDistance": null,
+    "followingTriggerDistance": null,
+    "primary": "HEADER_TOKENLESS_WITHOUT_TRIGGER_CONTEXT",
+    "pageKnownFlag": false,
+    "knownFlagMatch": false
+   },
+   "attachmentContext": {
+    "hasAttachment": false,
+    "currentFragmentsAttached": 0
+   },
+   "censusFeatures": {
+    "edge": 52,
+    "pageState": "ASSEMBLED_SPLIT",
+    "position": 0,
+    "offsetFromE": 48,
+    "rightTextChars": 1,
+    "rightTextSha256": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+    "leftBlank": true,
+    "distanceToHeaderEnd": 3,
+    "wholeLineTitleInOutput": true,
+    "pageRefTokenless": false,
+    "candidatesOnPage": 3
+   },
+   "selectionRationale": {
+    "rule": "seed: farthest from eligible centroid",
+    "normalizedFeatures": [
+     0.285714285714,
+     1,
+     0.872727272727,
+     0,
+     0,
+     0.666666666667,
+     0,
+     0,
+     0
+    ]
+   }
+  },
+  {
+   "sampleId": "PD-18",
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 8,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "lineIndex": 1,
+   "charStart": 49,
+   "triggerContext": {
+    "hasTrigger": false,
+    "pageTriggerCount": 0,
+    "precedingTriggerDistance": null,
+    "followingTriggerDistance": null,
+    "primary": "HEADER_TOKENLESS_WITHOUT_TRIGGER_CONTEXT",
+    "pageKnownFlag": false,
+    "knownFlagMatch": false
+   },
+   "attachmentContext": {
+    "hasAttachment": false,
+    "currentFragmentsAttached": 0
+   },
+   "censusFeatures": {
+    "edge": 49,
+    "pageState": "ASSEMBLED_SPLIT",
+    "position": 1,
+    "offsetFromE": 0,
+    "rightTextChars": 47,
+    "rightTextSha256": "41f4ab96ffe14484a30df61c3bfb52c391a0839c290999cbeb343cd90dc5bc61",
+    "leftBlank": false,
+    "distanceToHeaderEnd": 2,
+    "wholeLineTitleInOutput": true,
+    "pageRefTokenless": false,
+    "candidatesOnPage": 2
+   },
+   "selectionRationale": {
+    "rule": "remaining slot: global farthest-first from 18 selected",
+    "normalizedFeatures": [
+     0.142857142857,
+     1,
+     0,
+     1,
+     0.851851851852,
+     0.333333333333,
+     0,
+     0,
+     0.2
+    ]
+   }
+  },
+  {
+   "sampleId": "PD-19",
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "physicalPage": 2,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "lineIndex": 5,
+   "charStart": 75,
+   "triggerContext": {
+    "hasTrigger": true,
+    "pageTriggerCount": 1,
+    "precedingTriggerDistance": null,
+    "followingTriggerDistance": 1,
+    "primary": "HEADER_TOKENLESS_WITHOUT_TRIGGER_CONTEXT",
+    "pageKnownFlag": true,
+    "knownFlagMatch": false
+   },
+   "attachmentContext": {
+    "hasAttachment": true,
+    "currentFragmentsAttached": 1
+   },
+   "censusFeatures": {
+    "edge": 55,
+    "pageState": "ASSEMBLED_SPLIT",
+    "position": 4,
+    "offsetFromE": 20,
+    "rightTextChars": 32,
+    "rightTextSha256": "8d29623f78067bf0c708b928a184620a16a79a9dec45dd4e44ae23ad30722fe3",
+    "leftBlank": false,
+    "distanceToHeaderEnd": 4,
+    "wholeLineTitleInOutput": true,
+    "pageRefTokenless": false,
+    "candidatesOnPage": 4
+   },
+   "selectionRationale": {
+    "rule": "partition guarantee (DEVELOPMENT_EXPLORED, 1/5): farthest-first within partition from 1 selected",
+    "normalizedFeatures": [
+     0.428571428571,
+     0,
+     0.363636363636,
+     1,
+     0.574074074074,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "sampleId": "PD-20",
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "physicalPage": 4,
+   "partition": "FIRST_HELDOUT_POSTHOC",
+   "lineIndex": 1,
+   "charStart": 73,
+   "triggerContext": {
+    "hasTrigger": false,
+    "pageTriggerCount": 0,
+    "precedingTriggerDistance": null,
+    "followingTriggerDistance": null,
+    "primary": "HEADER_TOKENLESS_WITHOUT_TRIGGER_CONTEXT",
+    "pageKnownFlag": false,
+    "knownFlagMatch": false
+   },
+   "attachmentContext": {
+    "hasAttachment": true,
+    "currentFragmentsAttached": 2
+   },
+   "censusFeatures": {
+    "edge": 53,
+    "pageState": "ASSEMBLED_SPLIT",
+    "position": 1,
+    "offsetFromE": 20,
+    "rightTextChars": 32,
+    "rightTextSha256": "a0f36030cb93e8543a00332b3d018f637de5711add09f192abc4d18c4825e32c",
+    "leftBlank": false,
+    "distanceToHeaderEnd": 2,
+    "wholeLineTitleInOutput": true,
+    "pageRefTokenless": false,
+    "candidatesOnPage": 1
+   },
+   "selectionRationale": {
+    "rule": "partition guarantee (FIRST_HELDOUT_POSTHOC, 4/5): farthest-first within partition from 10 selected",
+    "normalizedFeatures": [
+     0.142857142857,
+     1,
+     0.363636363636,
+     1,
+     0.574074074074,
+     0,
+     0,
+     1,
+     0.2
+    ]
+   }
+  }
+ ]
+}

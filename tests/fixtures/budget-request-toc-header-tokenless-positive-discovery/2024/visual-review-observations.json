@@ -1,0 +1,570 @@
+{
+  "schema": "budget-request-toc-header-tokenless-positive-discovery-visual-review-observations/v0",
+  "note": "exploratory な視覚観察の保存（GT ではない）。各 observation は blind reviewer の記録（renderConditions を含む）をそのまま保持し、要約・書き換え・誤字修正をしていない",
+  "exploratory": true,
+  "notGroundTruth": true,
+  "blindReview": "reviewer は partition・機械特徴・H2/H7 anchor との関係・#407 の結果・仮説を知らされていない（locator の行位置と右 text のみ）。unblind は task doc の記述的比較で Phase 3 に行った",
+  "sampleSelection": "sample 選定は Commit 1（9eff9e0）の manifest freeze より前に PDF を見ずに行い、freeze 後に差し替えていない",
+  "sourceManifest": {
+    "path": "tests/fixtures/budget-request-toc-header-tokenless-positive-discovery/2024/discovery-sample-manifest.json",
+    "sha256": "18c745a126c65981336e408aa69369416247670f5c56461e0266cd9724660018"
+  },
+  "reviewerIds": [
+    "R1",
+    "R2",
+    "R3",
+    "R4"
+  ],
+  "reviewerAssignment": {
+    "R1": [
+      "PD-01",
+      "PD-05",
+      "PD-09",
+      "PD-13",
+      "PD-17"
+    ],
+    "R2": [
+      "PD-02",
+      "PD-06",
+      "PD-10",
+      "PD-14",
+      "PD-18"
+    ],
+    "R3": [
+      "PD-03",
+      "PD-07",
+      "PD-11",
+      "PD-15",
+      "PD-19"
+    ],
+    "R4": [
+      "PD-04",
+      "PD-08",
+      "PD-12",
+      "PD-16",
+      "PD-20"
+    ]
+  },
+  "observations": [
+    {
+      "sampleId": "PD-01",
+      "visualRole": "HEADER_OR_TITLE",
+      "rowRelation": null,
+      "ownerVisual": null,
+      "physicalObservations": {
+        "candidateColumn": "spans_both",
+        "alignmentWithPrecedingLine": "null: nothing above except small page number '1' at top right",
+        "alignmentWithOwner": "null: not a continuation",
+        "indentation": "title is centered over the page, wide letter-spacing",
+        "verticalProximity": "closely above the section label '29 環境省所管'; below it the table frame/heading row follows",
+        "alignmentWithColumnHeading": "null: it is the title above the column heading row",
+        "ruleOrLineSeparatorRelation": "inside the outer page frame, above the horizontal rule that begins the column-heading row",
+        "surroundingRowPattern": "page-top title block (title, ministry label), then heading row, then table rows"
+      },
+      "visibleText": "令和６年度歳出概算要求額目次 (the locator's '次' is the last, rightmost character of this widely spaced title); below: 29 環境省所管",
+      "confidence": "high",
+      "needsSecondReview": false,
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": null
+      },
+      "notes": "locator char '次' visually matches the final char of the title line; physicalPage 3 shows page number 1 at top right."
+    },
+    {
+      "sampleId": "PD-02",
+      "visualRole": "HEADER_OR_TITLE",
+      "rowRelation": null,
+      "ownerVisual": null,
+      "physicalObservations": {
+        "candidateColumn": "spans_both",
+        "alignmentWithPrecedingLine": "null: not applicable: element is not a continuation row",
+        "alignmentWithOwner": "null: not applicable: element is not a continuation row",
+        "indentation": "centered title spanning page width, widely letter-spaced",
+        "verticalProximity": "top of page, inside the bordered frame, above the section line and the column-heading band",
+        "alignmentWithColumnHeading": "null: not applicable: element is not a continuation row",
+        "ruleOrLineSeparatorRelation": "title and section-name lines sit inside the top box, separated from the column-heading band below by a horizontal rule",
+        "surroundingRowPattern": "below: line 9905エネルギー対策特別会計(（エネルギー需給勘定）); then 2-column heading band; then table rows"
+      },
+      "visibleText": "令和6年度歳出概算要求額目次 (page-top title, widely spaced); next line: 9905エネルギー対策特別会計(（エネルギー需給勘定）)",
+      "confidence": "high",
+      "needsSecondReview": false,
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": null
+      },
+      "notes": "Locator's rightText 額 目 次 corresponds to the tail of the visible centered title. Not a table row. No owner/continuation relation observed."
+    },
+    {
+      "sampleId": "PD-03",
+      "visualRole": "HEADER_OR_TITLE",
+      "rowRelation": null,
+      "ownerVisual": null,
+      "physicalObservations": {
+        "candidateColumn": "spans_both",
+        "alignmentWithPrecedingLine": "null: no meaningful preceding text line (page-number '1' small at top right outside frame)",
+        "alignmentWithOwner": "null: not a continuation candidate (no owner)",
+        "indentation": "centered, widely letter-spaced title across full frame width",
+        "verticalProximity": "The title is the first line inside the frame, above the '26 農林水産省所管' line; the column-heading row is below those",
+        "alignmentWithColumnHeading": "null: title sits above the column-heading row, not within the columns",
+        "ruleOrLineSeparatorRelation": "Title band is inside the outer frame; a horizontal rule separates it from the column-heading row below",
+        "surroundingRowPattern": "Single large letter-spaced title line followed by a ministry line and then a heading row (要求番号/区分/ページ x2) and two-column list"
+      },
+      "visibleText": "令和6年度歳出概算要求額目次 (rendered with wide spacing: 令 和 6 年 度 歳 出 概 算 要 求 額 目 次); the locator's right fragment '額 目 次' is the tail of this title",
+      "confidence": "high",
+      "needsSecondReview": false,
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": null
+      },
+      "notes": "Locator fragment corresponds to the tail of the centered title; not a list row."
+    },
+    {
+      "sampleId": "PD-04",
+      "visualRole": "COLUMN_HEADING",
+      "rowRelation": null,
+      "ownerVisual": null,
+      "physicalObservations": {
+        "candidateColumn": "right",
+        "alignmentWithPrecedingLine": "A small page number '2' is visible above the table at upper left, outside the frame; the header row is the table's first row",
+        "alignmentWithOwner": null,
+        "indentation": "not indented; heading cells (要求番号 / 区 分 / ページ) are centered within their table-header cells",
+        "verticalProximity": "inside the boxed header row at the top of the table, directly above the first data row",
+        "alignmentWithColumnHeading": "is the column heading itself; right-half heading consisting of 要求番号 cell, 区 分 cell, ページ cell, mirroring the left-half heading",
+        "ruleOrLineSeparatorRelation": "enclosed by the table's horizontal rules above and below the header row; vertical rules separate 要求番号 / 区 分 / ページ cells",
+        "surroundingRowPattern": "followed by table data rows (request number, item name, page number) in two side-by-side column blocks"
+      },
+      "visibleText": "要求番号 | 区 分 | ページ (right block: 要求番号 | 区 分 | ページ); page number '2' above table at left",
+      "confidence": "high",
+      "needsSecondReview": false,
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": null
+      },
+      "notes": "Rendered page 4 at 110dpi. Located at the right-half heading 区 分 / ページ. Not a data-row continuation. Right-half 'ページ' cell text appears slightly clipped at the cell edge (visible as 'ページ')."
+    },
+    {
+      "sampleId": "PD-05",
+      "visualRole": "COLUMN_HEADING",
+      "rowRelation": null,
+      "ownerVisual": null,
+      "physicalObservations": {
+        "candidateColumn": "right",
+        "alignmentWithPrecedingLine": "null: above is only page number '3' at top right, outside the frame",
+        "alignmentWithOwner": "null: not a continuation",
+        "indentation": "heading cells centered within their columns",
+        "verticalProximity": "top row of the table frame",
+        "alignmentWithColumnHeading": "it is the column heading row itself: right-half block 要求番号 / 区 分 / ページ",
+        "ruleOrLineSeparatorRelation": "heading row bounded by frame top and a rule beneath it",
+        "surroundingRowPattern": "single heading row at top of page, followed by data rows of (項)/numbered items; no title block on this page"
+      },
+      "visibleText": "Right-half heading cells: 要求(番号) | 区 分 | ページ (left half identical: 要求(番号) | 区 分 | ページ)",
+      "confidence": "medium",
+      "needsSecondReview": false,
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": null
+      },
+      "notes": "locator rightText begins at '求' of the right-half heading; the cell shows stacked 要求/番号 text, small at 110dpi but readable."
+    },
+    {
+      "sampleId": "PD-06",
+      "visualRole": "COLUMN_HEADING",
+      "rowRelation": null,
+      "ownerVisual": null,
+      "physicalObservations": {
+        "candidateColumn": "right",
+        "alignmentWithPrecedingLine": "null: not applicable: element is not a continuation row",
+        "alignmentWithOwner": "null: not applicable: element is not a continuation row",
+        "indentation": "heading text centered within right-half heading cell",
+        "verticalProximity": "directly under title/section lines, directly above first table rows",
+        "alignmentWithColumnHeading": "null: not applicable: element is not a continuation row",
+        "ruleOrLineSeparatorRelation": "inside the horizontal band bounded by rules; right half separated from left half by a double vertical line",
+        "surroundingRowPattern": "heading band: 要求番号 | 区分 | ページ | 要求番号 | 区分 | ページ; below: table rows with left and right halves"
+      },
+      "visibleText": "Right-half heading cell: 要求/番号 (stacked), 区 分, ページ. Title above: 令和６年度歳出概算要求額目次 / 9101東日本大震災復興特別会計（農林水産省）. Small '1' visible at page top-right.",
+      "confidence": "high",
+      "needsSecondReview": false,
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": null
+      },
+      "notes": "Locator row (rightText 区 分 ページ) matches the right half of the heading band. Not a continuation."
+    },
+    {
+      "sampleId": "PD-07",
+      "visualRole": "COLUMN_HEADING",
+      "rowRelation": null,
+      "ownerVisual": null,
+      "physicalObservations": {
+        "candidateColumn": "right",
+        "alignmentWithPrecedingLine": "null: preceding line is the machine-title/account-name block above the heading row",
+        "alignmentWithOwner": "null: not a continuation candidate (no owner)",
+        "indentation": "heading text centered over its column",
+        "verticalProximity": "Immediately below the account-name line '9905エネルギー対策特別会計(…)' and directly above the first list row",
+        "alignmentWithColumnHeading": "Is the column heading itself: right half shows 要求番号 / 区 分 / ページ",
+        "ruleOrLineSeparatorRelation": "Heading row is bounded by horizontal rules above and below within the frame",
+        "surroundingRowPattern": "Heading row of a two-column list; right column list is shorter (ends partway down page)"
+      },
+      "visibleText": "区 分 / ページ (right-half heading, with 要求番号 at its left and 区分 centered, ページ at far right); title above reads 令和6年度歳出概算要求額目次, account line reads 9905エネルギー対策特別会計((エネルギー需給勘定))",
+      "confidence": "high",
+      "needsSecondReview": false,
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": null
+      },
+      "notes": "Locator fragment '区 分 ページ' lies in the right-hand column-heading cell group. Left half has the same heading."
+    },
+    {
+      "sampleId": "PD-08",
+      "visualRole": "COLUMN_HEADING",
+      "rowRelation": null,
+      "ownerVisual": null,
+      "physicalObservations": {
+        "candidateColumn": "right",
+        "alignmentWithPrecedingLine": "Directly beneath the title block (令和６年度歳出概算要求額目次 / 27 経済産業省所管); the header row is the first row of the table body",
+        "alignmentWithOwner": null,
+        "indentation": "not indented; heading cells (要求番号 / 区 分 / ページ) are centered within their table-header cells",
+        "verticalProximity": "inside the boxed header row at the top of the table, directly above the first data row",
+        "alignmentWithColumnHeading": "is the column heading itself; right-half heading consisting of 要求番号 cell, 区 分 cell, ページ cell, mirroring the left-half heading",
+        "ruleOrLineSeparatorRelation": "enclosed by the table's horizontal rules above and below the header row; vertical rules separate 要求番号 / 区 分 / ページ cells",
+        "surroundingRowPattern": "followed by table data rows (request number, item name, page number) in two side-by-side column blocks"
+      },
+      "visibleText": "令和６年度歳出概算要求額目次 / 27 経済産業省所管 / 要求番号 | 区 分 | ページ (right block: 要求番号 | 区 分 | ページ)",
+      "confidence": "high",
+      "needsSecondReview": false,
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": null
+      },
+      "notes": "Rendered page 3 at 110dpi. Located at right-half heading 区 分 / ページ under the title block."
+    },
+    {
+      "sampleId": "PD-09",
+      "visualRole": "COLUMN_HEADING",
+      "rowRelation": null,
+      "ownerVisual": null,
+      "physicalObservations": {
+        "candidateColumn": "right",
+        "alignmentWithPrecedingLine": "null: above are title '令和６年度歳出概算要求額目次' and '24 文部科学省所管'",
+        "alignmentWithOwner": "null: not a continuation",
+        "indentation": "cells centered within columns",
+        "verticalProximity": "directly below the ministry label, inside the frame",
+        "alignmentWithColumnHeading": "it is the column heading row: right half 要求番号 | 区 分 | ページ",
+        "ruleOrLineSeparatorRelation": "heading row has rule beneath; data rows start below",
+        "surroundingRowPattern": "title block, then heading row, then data rows"
+      },
+      "visibleText": "Right-half heading: 要求(番号) | 区 分 | ページ (left half same)",
+      "confidence": "high",
+      "needsSecondReview": false,
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": null
+      },
+      "notes": "locator text '区 分 ページ' matches right-half heading cells."
+    },
+    {
+      "sampleId": "PD-10",
+      "visualRole": "COLUMN_HEADING",
+      "rowRelation": null,
+      "ownerVisual": null,
+      "physicalObservations": {
+        "candidateColumn": "right",
+        "alignmentWithPrecedingLine": "null: not applicable: element is not a continuation row",
+        "alignmentWithOwner": "null: not applicable: element is not a continuation row",
+        "indentation": "heading text centered in right-half cell",
+        "verticalProximity": "top of table; heading band immediately above first data rows; no title/section line above it on this page",
+        "alignmentWithColumnHeading": "null: not applicable: element is not a continuation row",
+        "ruleOrLineSeparatorRelation": "inside bordered heading band, double vertical line between halves",
+        "surroundingRowPattern": "heading band: 要求番号|区分|ページ | 要求番号|区分|ページ; rows start with 83 / 103; small '3' at page top-right"
+      },
+      "visibleText": "Right-half heading: 要求/番号, 区 分, ページ. Small '3' at page top-right above the frame.",
+      "confidence": "high",
+      "needsSecondReview": false,
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": null
+      },
+      "notes": "Locator lineIndex 1 rightText 求 区 分 ページ matches right half of heading band (and the preceding '3' line matches the page-top number). Not a continuation."
+    },
+    {
+      "sampleId": "PD-11",
+      "visualRole": "OTHER",
+      "rowRelation": null,
+      "ownerVisual": null,
+      "physicalObservations": {
+        "candidateColumn": "right",
+        "alignmentWithPrecedingLine": "null: first element on the page; nothing above",
+        "alignmentWithOwner": "null: no owner (not a continuation)",
+        "indentation": "null: single small numeral",
+        "verticalProximity": "Above the framed title block, outside the frame, at top right corner",
+        "alignmentWithColumnHeading": "null: not within the heading row",
+        "ruleOrLineSeparatorRelation": "Sits outside/above the outer frame line",
+        "surroundingRowPattern": "Only element outside the frame above the title"
+      },
+      "visibleText": "1 (small numeral at top right outside the frame, above the title block)",
+      "confidence": "high",
+      "needsSecondReview": false,
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": null
+      },
+      "notes": "Appears to be a page-number-like numeral; I observed only the numeral '1' and its position."
+    },
+    {
+      "sampleId": "PD-12",
+      "visualRole": "OTHER",
+      "rowRelation": null,
+      "ownerVisual": null,
+      "physicalObservations": {
+        "candidateColumn": "right",
+        "alignmentWithPrecedingLine": "null: nothing precedes it on the page",
+        "alignmentWithOwner": null,
+        "indentation": "null: single isolated mark",
+        "verticalProximity": "sits just above the top border of the table frame, a short gap above the header row",
+        "alignmentWithColumnHeading": "located at the far right edge, above and beyond the right-hand ページ cell, not within the heading cells",
+        "ruleOrLineSeparatorRelation": "outside the table frame, above its top rule",
+        "surroundingRowPattern": "isolated small numeral in the page margin above the table; table header row follows below"
+      },
+      "visibleText": "3",
+      "confidence": "high",
+      "needsSecondReview": false,
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": null
+      },
+      "notes": "Rendered page 5 at 110dpi. A lone small numeral '3' at upper right outside the table frame; visually a page number-like mark, not table content. Role chosen OTHER (not a heading, title, or row continuation)."
+    },
+    {
+      "sampleId": "PD-13",
+      "visualRole": "COLUMN_HEADING",
+      "rowRelation": null,
+      "ownerVisual": null,
+      "physicalObservations": {
+        "candidateColumn": "right",
+        "alignmentWithPrecedingLine": "null: above is only a small page number '4' at top left, outside the frame",
+        "alignmentWithOwner": "null: not a continuation",
+        "indentation": "stacked two-line cell text",
+        "verticalProximity": "top row of table",
+        "alignmentWithColumnHeading": "the locator's '号' is within the right-half 要求番号 heading cell (second stacked line '番号'); neighbouring cells 区 分, ページ",
+        "ruleOrLineSeparatorRelation": "heading cell boxed by frame/rules",
+        "surroundingRowPattern": "single heading row at top of page followed by data rows"
+      },
+      "visibleText": "Right-half heading cell: 要求 / 番号 (stacked); adjacent cells 区 分, ページ. Left half same.",
+      "confidence": "medium",
+      "needsSecondReview": false,
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": null
+      },
+      "notes": "locator gives only '号' at the line (text of line 2 not provided); identified as the lower stacked line of the right-half 要求番号 cell. Judged from the render alone; no other text at that position was visible."
+    },
+    {
+      "sampleId": "PD-14",
+      "visualRole": "COLUMN_HEADING",
+      "rowRelation": null,
+      "ownerVisual": null,
+      "physicalObservations": {
+        "candidateColumn": "right",
+        "alignmentWithPrecedingLine": "null: not applicable: element is not a continuation row",
+        "alignmentWithOwner": "null: not applicable: element is not a continuation row",
+        "indentation": "stacked two-line label 要求/番号 in a narrow cell",
+        "verticalProximity": "heading band at top of table, directly above first data rows",
+        "alignmentWithColumnHeading": "null: not applicable: element is not a continuation row",
+        "ruleOrLineSeparatorRelation": "inside the heading band, in the narrow cell adjacent to the double vertical line",
+        "surroundingRowPattern": "heading band: 要求番号|区分|ページ | 要求番号|区分|ページ; page-top number '5' visible"
+      },
+      "visibleText": "Right-half heading cell shows stacked 要求 / 番号 (the 号 is the lower line of the narrow 要求番号 label); 区 分; ページ. Small '5' at page top-right.",
+      "confidence": "medium",
+      "needsSecondReview": false,
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": null
+      },
+      "notes": "Locator's rightText is only 号; I could only associate it with the visible 番号 of the stacked 要求番号 label (which half is not independently proven at 110dpi; the nearest right-half label is the right 要求番号 cell). Not a table data row."
+    },
+    {
+      "sampleId": "PD-15",
+      "visualRole": "HEADER_OR_TITLE",
+      "rowRelation": null,
+      "ownerVisual": null,
+      "physicalObservations": {
+        "candidateColumn": "spans_both",
+        "alignmentWithPrecedingLine": "null: preceding text is only a small numeral outside the frame at top right",
+        "alignmentWithOwner": "null: not a continuation candidate (no owner)",
+        "indentation": "centered, widely letter-spaced title across full frame width",
+        "verticalProximity": "First line within the frame, above the '2505労働保険特別会計' line",
+        "alignmentWithColumnHeading": "null: title sits above the column-heading row",
+        "ruleOrLineSeparatorRelation": "Title band inside outer frame, rule separates from heading row below",
+        "surroundingRowPattern": "Title, account-name line, heading row, then two-column list"
+      },
+      "visibleText": "令和6年度歳出概算要求額目次 (wide-spaced); locator fragment '目 次' is its tail. Account line: 2505労働保険特別会計",
+      "confidence": "high",
+      "needsSecondReview": false,
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": null
+      },
+      "notes": "Locator fragment is the tail of the centered title."
+    },
+    {
+      "sampleId": "PD-16",
+      "visualRole": "OTHER",
+      "rowRelation": null,
+      "ownerVisual": null,
+      "physicalObservations": {
+        "candidateColumn": "right",
+        "alignmentWithPrecedingLine": "null: nothing precedes it on the page",
+        "alignmentWithOwner": null,
+        "indentation": "null: single isolated mark",
+        "verticalProximity": "sits just above the top-right corner of the table frame; the title 令和６年度歳出概算要求額目次 appears below, inside the frame",
+        "alignmentWithColumnHeading": "located at the far right edge above the frame, not within the heading cells",
+        "ruleOrLineSeparatorRelation": "outside the table frame, above its top rule",
+        "surroundingRowPattern": "isolated small numeral in the page margin; title block (令和６年度歳出概算要求額目次 / 2809自動車安全特別会計) and header row follow below"
+      },
+      "visibleText": "1",
+      "confidence": "high",
+      "needsSecondReview": false,
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": null
+      },
+      "notes": "Rendered page 3 at 110dpi. A lone small numeral '1' at upper right outside the table frame; page number-like mark, not table content. Role chosen OTHER."
+    },
+    {
+      "sampleId": "PD-17",
+      "visualRole": "OTHER",
+      "rowRelation": null,
+      "ownerVisual": null,
+      "physicalObservations": {
+        "candidateColumn": "right",
+        "alignmentWithPrecedingLine": "null: first line on page",
+        "alignmentWithOwner": "null: not a continuation",
+        "indentation": "null: isolated small glyph at the top-right margin",
+        "verticalProximity": "separated from the table by a blank margin strip above the frame",
+        "alignmentWithColumnHeading": "null: sits above and outside the heading row, near the right edge",
+        "ruleOrLineSeparatorRelation": "outside/above the page table frame",
+        "surroundingRowPattern": "page-margin number above heading row, then heading row, then data rows"
+      },
+      "visibleText": "3 (small, top-right corner above the table frame)",
+      "confidence": "high",
+      "needsSecondReview": false,
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": null
+      },
+      "notes": "visible as a page number; no other text on that line."
+    },
+    {
+      "sampleId": "PD-18",
+      "visualRole": "COLUMN_HEADING",
+      "rowRelation": null,
+      "ownerVisual": null,
+      "physicalObservations": {
+        "candidateColumn": "right",
+        "alignmentWithPrecedingLine": "null: not applicable: element is not a continuation row",
+        "alignmentWithOwner": "null: not applicable: element is not a continuation row",
+        "indentation": "heading text centered in right-half cell",
+        "verticalProximity": "top of table; heading band directly above first data rows",
+        "alignmentWithColumnHeading": "null: not applicable: element is not a continuation row",
+        "ruleOrLineSeparatorRelation": "inside bordered heading band, double vertical line between halves",
+        "surroundingRowPattern": "heading band: 要求番号|区分|ページ | 要求番号|区分|ページ; small '6' at page top-left above frame"
+      },
+      "visibleText": "Right-half heading: 要求/番号, 区 分, ページ. Small '6' at page top-left above the frame.",
+      "confidence": "high",
+      "needsSecondReview": false,
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": null
+      },
+      "notes": "Locator lineIndex 1 rightText 求 区 分 ページ matches right half of heading band. Not a continuation."
+    },
+    {
+      "sampleId": "PD-19",
+      "visualRole": "COLUMN_HEADING",
+      "rowRelation": null,
+      "ownerVisual": null,
+      "physicalObservations": {
+        "candidateColumn": "right",
+        "alignmentWithPrecedingLine": "null: preceding line is the '23 財務省所管' ministry line above the heading row",
+        "alignmentWithOwner": "null: not a continuation candidate (no owner)",
+        "indentation": "heading text centered over its column",
+        "verticalProximity": "Directly below the ministry line and directly above the first list row",
+        "alignmentWithColumnHeading": "Is the column heading itself: right half shows 要求番号 / 区 分 / ページ",
+        "ruleOrLineSeparatorRelation": "Heading row bounded by horizontal rules above and below within the frame",
+        "surroundingRowPattern": "Heading row of a two-column list; page-number cells in list rows below are underlined"
+      },
+      "visibleText": "区 分 / ページ (right-half heading, 要求番号 at its left); title above: 令和6年度歳出概算要求額目次; ministry line: 23 財務省所管",
+      "confidence": "high",
+      "needsSecondReview": false,
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": null
+      },
+      "notes": "Locator is on physicalPage 2 of this PDF. Page-number numeral '1' small at top right outside the frame."
+    },
+    {
+      "sampleId": "PD-20",
+      "visualRole": "COLUMN_HEADING",
+      "rowRelation": null,
+      "ownerVisual": null,
+      "physicalObservations": {
+        "candidateColumn": "right",
+        "alignmentWithPrecedingLine": "A small page number '2' is visible above the table at upper left, outside the frame; the header row is the table's first row",
+        "alignmentWithOwner": null,
+        "indentation": "not indented; heading cells (要求番号 / 区 分 / ページ) are centered within their table-header cells",
+        "verticalProximity": "inside the boxed header row at the top of the table, directly above the first data row",
+        "alignmentWithColumnHeading": "is the column heading itself; right-half heading consisting of 要求番号 cell, 区 分 cell, ページ cell, mirroring the left-half heading",
+        "ruleOrLineSeparatorRelation": "enclosed by the table's horizontal rules above and below the header row; vertical rules separate 要求番号 / 区 分 / ページ cells",
+        "surroundingRowPattern": "followed by table data rows (request number, item name, page number) in two side-by-side column blocks"
+      },
+      "visibleText": "要求番号 | 区 分 | ページ (right block: 要求番号 | 区 分 | ページ); page number '2' above table at left",
+      "confidence": "high",
+      "needsSecondReview": false,
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": null
+      },
+      "notes": "Rendered page 4 at 110dpi. Located at right-half heading 区 分 / ページ. Not a data-row continuation."
+    }
+  ]
+}
