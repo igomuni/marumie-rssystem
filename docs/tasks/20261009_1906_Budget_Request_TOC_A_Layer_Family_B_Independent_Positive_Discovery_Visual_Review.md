@@ -170,8 +170,9 @@ confidence: high 17 / medium 3（PD-05, 13, 14）。needsSecondReview: 0 件。
 ## 10. outcome の整理（最終選択はしない）
 
 - **Outcome P0（新 continuation 0）**: 新 CONTINUATION は 0 件。
-- P1（新 continuation あり・機械特徴が H2/H7 と同型）・P2（新 continuation あり・別型）・PA（曖昧が支配的）は、観察上 CONTINUATION が 0 件、AMBIGUOUS/UNREADABLE が 0 件、second review 0 件のため、いずれも支持される根拠がない。
+- P1（新 continuation >= 1 かつ H2/H7 とは異なる mechanical morphology が存在 → Family B に一般化可能性あり、次は positive taxonomy / deeper failure isolation 候補）・P2（新 continuation >= 1 かつ H2/H7 と同じ特徴群に集中 → candidate hypothesis 形成可能性あり、ただし即 preregistration には進まない）・PA（AMBIGUOUS が多い → visual semantics 自体の安全性再検討）は、観察上 CONTINUATION が 0 件、AMBIGUOUS/UNREADABLE が 0 件、second review 0 件のため、いずれも支持される根拠がない。
 - P0 の含意（指示書の定義）: positive evidence remains H2/H7 only。Family B automation hypothesis は弱い。defer 候補。
+- **Documentation transcription error correction**: 本 doc の初版は P1/P2 の説明を実行契約と逆に記載していた（P1 を「H2/H7 と同型」、P2 を「別型」と誤記）。実行契約自体は正しく、visual result は P0 で P1/P2 は選択されていない。したがって research decision・result への影響はなく、上記は定義の転記訂正のみである。
 - 限界: 20 件は diversity sample で無作為ではなく、母集団 79 行のうち 20 行しか見ていない。prevalence・failure rate・expected recall は推定できない。「0 件だから positive は存在しない」「corpus に continuation はほぼ無い」とは言えない。
 
 ## 11. 解釈
