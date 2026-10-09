@@ -1,0 +1,268 @@
+{
+ "schema": "budget-request-toc-header-tokenless-visual-review-observations/v0",
+ "note": "exploratory な視覚観察の保存（GT ではない）。各 observation は blind reviewer の記録をそのまま保持し、要約・書き換えをしていない。renderFiles は再現不能な一時パスのため除去した",
+ "exploratory": true,
+ "notGroundTruth": true,
+ "blindReview": "reviewer は stratum・anchor/control の別・partition・機械特徴を知らされていない（locator の行位置と右 text のみ）。unblind は task doc の記述的比較で Phase 3 に行った",
+ "sampleSelection": "sample 選定は Phase 1 manifest freeze（commit 218cf34）より前に PDF を見ずに行い、freeze 後に差し替えていない",
+ "sourceManifest": {
+  "path": "tests/fixtures/budget-request-toc-header-tokenless-visual-failure-isolation/2024/review-sample-manifest.json",
+  "sha256": "d4afe8153e5b77379ce7ad6578c4060a670ddbbda69b97c50d25f375697ab01a"
+ },
+ "reviewerIds": [
+  "R1",
+  "R2",
+  "R3"
+ ],
+ "reviewerAssignment": {
+  "R1": [
+   "FB-01",
+   "FB-04",
+   "FB-07",
+   "FB-10"
+  ],
+  "R2": [
+   "FB-02",
+   "FB-05",
+   "FB-08",
+   "FB-11"
+  ],
+  "R3": [
+   "FB-03",
+   "FB-06",
+   "FB-09",
+   "FB-12"
+  ]
+ },
+ "renderConditions": "reviewer ファイルに dpi 等の render 条件の記録はない（renderFiles の一時パスのみで、除去済み）。render 条件は不明（UNRESOLVED）",
+ "observations": [
+  {
+   "sampleId": "FB-01",
+   "visualRole": "COLUMN_HEADING",
+   "rowRelation": null,
+   "ownerVisual": null,
+   "physicalObservations": {
+    "candidateColumn": "right",
+    "alignmentWithPrecedingLine": null,
+    "alignmentWithOwner": null,
+    "indentation": "none observed; centered label within right-half heading cell",
+    "verticalProximity": "sits in the same header band row as the left-half heading; directly below the ministry title line and directly above the first data row (令和6年度歳出概算要求額総表 / 19 20-06 ...)",
+    "alignmentWithColumnHeading": "this IS the column heading: right-half cell shows 要求番号 | 区 分 | ページ, mirroring left-half heading",
+    "ruleOrLineSeparatorRelation": "heading cells are enclosed by table frame rules (box above and below the heading band); the right-half cells (要求番号, 区 分, ページ) are separated by vertical rules",
+    "surroundingRowPattern": "heading band followed by data rows in two side-by-side halves; ministry title lines (令和６年度歳出概算要求額目次 / 19 内閣府所管（こども家庭庁）) above the table frame"
+   },
+   "visibleText": "右半分見出し: 要求番号 / 区　分 / ページ（左半分も同一の見出し）。上に『令和６年度歳出概算要求額目次』『19 内閣府所管（こども家庭庁）』。",
+   "confidence": "high",
+   "notes": "locator line (rightText 区 分 ページ) located as the right-half column heading cell on a heading band. Not a continuation."
+  },
+  {
+   "sampleId": "FB-02",
+   "visualRole": "OTHER",
+   "rowRelation": null,
+   "ownerVisual": null,
+   "physicalObservations": {
+    "candidateColumn": "right (outside the framed table, top-right corner)",
+    "alignmentWithPrecedingLine": null,
+    "alignmentWithOwner": null,
+    "indentation": null,
+    "verticalProximity": "above the table frame top edge, apart from the title; no preceding line",
+    "alignmentWithColumnHeading": "not aligned with any column heading; sits above/outside the frame near the right edge",
+    "ruleOrLineSeparatorRelation": "above and outside the table's outer top frame line",
+    "surroundingRowPattern": "next visible item below is the framed title row 令和６年度歳出概算要求額目次"
+   },
+   "visibleText": "1 (small page-number-like numeral at top-right, outside the frame)",
+   "confidence": "high",
+   "notes": "Only the numeral '1' is visible at that spot; no function is asserted beyond what is visible."
+  },
+  {
+   "sampleId": "FB-03",
+   "visualRole": "CONTINUATION",
+   "rowRelation": "UNIQUE_VISUAL_OWNER",
+   "ownerVisual": "右列の行「18 01-65 農業経営安定事業等の財源の食料安定供給特別会計農業経営安定勘定へ繰入れ」(ページ 115)",
+   "physicalObservations": {
+    "candidateColumn": "right",
+    "alignmentWithPrecedingLine": "直前の行(owner の1行目)の本文開始位置(「農業経営…」の頭)と左端が揃って見える",
+    "alignmentWithOwner": "owner 本文(01-65 の後ろの説明文)の開始位置と揃う。要求番号・コード列の下には入っていない",
+    "indentation": "owner 行の本文開始位置と同じ位置から始まる(追加のインデントは視認できない)",
+    "verticalProximity": "owner 1行目の直下に詰まって配置(通常の行間より狭い)。次の行(項 130 …)とは通常の行間以上に離れている",
+    "alignmentWithColumnHeading": "右列『区 分』見出しの下、本文領域内",
+    "ruleOrLineSeparatorRelation": "罫線との交差・接触なし。列を区切る縦罫線の右側",
+    "surroundingRowPattern": "右列は『(項) …』行と『番号 01-xx …』行が交互に並ぶ。この行は番号18行の2行目で、ページ数 115 は1行目と同じ段に1つだけ表示"
+   },
+   "visibleText": "に必要な経費",
+   "confidence": "high",
+   "notes": "同ページ右列の要求番号23行にも「れに必要な経費」という折返し行があるが、locator の前後行(115 ページ・項120/130)から番号18行の折返しと特定。"
+  },
+  {
+   "sampleId": "FB-04",
+   "visualRole": "OTHER",
+   "rowRelation": null,
+   "ownerVisual": null,
+   "physicalObservations": {
+    "candidateColumn": "right",
+    "alignmentWithPrecedingLine": "single isolated mark at top-right; no preceding line on page",
+    "alignmentWithOwner": null,
+    "indentation": "none; positioned above and outside the table frame, near its right edge",
+    "verticalProximity": "isolated; nearest content is the table's heading band just below it (要求番号 / 区 分 / ページ)",
+    "alignmentWithColumnHeading": "located above the right-most ページ heading cell, outside the frame",
+    "ruleOrLineSeparatorRelation": "lies above (outside) the top frame rule of the table",
+    "surroundingRowPattern": "top of page: lone numeral, then heading band, then data rows (（項） 020 林野庁施設費 first row on left)"
+   },
+   "visibleText": "3（ページ右上の単独数字＝ページ番号様の表示）",
+   "confidence": "high",
+   "notes": "locator charStart 113 / text '3' matched the lone numeral at the top-right above the table frame. It is not inside any table row. Visual role recorded as OTHER (page-number-like mark); not interpreted further."
+  },
+  {
+   "sampleId": "FB-05",
+   "visualRole": "COLUMN_HEADING",
+   "rowRelation": null,
+   "ownerVisual": null,
+   "physicalObservations": {
+    "candidateColumn": "right half of the table",
+    "alignmentWithPrecedingLine": null,
+    "alignmentWithOwner": null,
+    "indentation": null,
+    "verticalProximity": "in the framed heading band directly under the title block",
+    "alignmentWithColumnHeading": "is the column heading itself: 区(left) 分(centre-right) ページ(right edge) of the right half, with 要求番号 stacked at its left",
+    "ruleOrLineSeparatorRelation": "inside the heading band bounded by horizontal rules above and below; heading cells separated by vertical rules",
+    "surroundingRowPattern": "above: title 令和６年度歳出概算要求額目次 and 2610食料安定供給特別会計; below: data rows starting 令和６年度歳出概算要求額総表 (left) and （項）090 予備費 (right)"
+   },
+   "visibleText": "要求番号 | 区　分 | ページ (right half heading; left half has the same)",
+   "confidence": "high",
+   "notes": "Locator text '区 分 ページ' corresponds to the right-half heading cell."
+  },
+  {
+   "sampleId": "FB-06",
+   "visualRole": "COLUMN_HEADING",
+   "rowRelation": null,
+   "ownerVisual": null,
+   "physicalObservations": {
+    "candidateColumn": "spans_both",
+    "alignmentWithPrecedingLine": "直前に見えるのはページ番号「2」(枠の上、左寄り)のみ。揃いは判定対象外",
+    "alignmentWithOwner": null,
+    "indentation": null,
+    "verticalProximity": "表の最上段の見出し帯。直下に最初のデータ行(要求番号42)",
+    "alignmentWithColumnHeading": "自身が見出し行(左右の列それぞれに『要求番号|区 分|ページ』)。右半分の『区 分 ページ』が locator の rightText に対応して見える",
+    "ruleOrLineSeparatorRelation": "見出し帯は罫線で囲まれ、下に横罫線",
+    "surroundingRowPattern": "見出し行→データ行(番号付き行と(項)行)が続く"
+   },
+   "visibleText": "要求番号 | 区 分 | ページ | 要求番号 | 区 分 | ページ (ページ上端に「2」)",
+   "confidence": "high",
+   "notes": "locator の rightText『区 分 ページ』はこの見出し帯の文字として視認。"
+  },
+  {
+   "sampleId": "FB-07",
+   "visualRole": "OTHER",
+   "rowRelation": null,
+   "ownerVisual": null,
+   "physicalObservations": {
+    "candidateColumn": "right",
+    "alignmentWithPrecedingLine": "single isolated mark at top-right; no preceding line on page",
+    "alignmentWithOwner": null,
+    "indentation": "none; above and outside the table frame near right edge",
+    "verticalProximity": "isolated; nearest content is the heading band just below (要求番号 / 区 分 / ページ)",
+    "alignmentWithColumnHeading": "located above the right-most ページ heading cell, outside the frame",
+    "ruleOrLineSeparatorRelation": "lies above (outside) the top frame rule of the table",
+    "surroundingRowPattern": "top of page: lone numeral, then heading band, then data rows (83 01-13 科学技術・学術政策研究所に必要な経費 first row on left)"
+   },
+   "visibleText": "3（ページ右上の単独数字＝ページ番号様の表示）",
+   "confidence": "high",
+   "notes": "locator text '3' matched the lone numeral at top-right above the table frame; not inside a table row."
+  },
+  {
+   "sampleId": "FB-08",
+   "visualRole": "COLUMN_HEADING",
+   "rowRelation": null,
+   "ownerVisual": null,
+   "physicalObservations": {
+    "candidateColumn": "right half (heading cell at the start of the right half, left edge of right table half)",
+    "alignmentWithPrecedingLine": "second line of a two-line stacked cell: 要求 above 番号, centred",
+    "alignmentWithOwner": null,
+    "indentation": null,
+    "verticalProximity": "directly below 要求 within the same narrow heading cell",
+    "alignmentWithColumnHeading": "is part of the heading cell 要求/番号",
+    "ruleOrLineSeparatorRelation": "inside the heading band bounded by horizontal rules; cell bounded by vertical rules",
+    "surroundingRowPattern": "heading band at top of page; below it data rows beginning 113 01-25 中国残留邦人等の支援事業に必要な経費 / 114 ..."
+   },
+   "visibleText": "要求 / 番号 (stacked, right-half heading cell)  [locator 号 = last char of 番号]",
+   "confidence": "high",
+   "notes": "A page number '3' is visible at top-right outside the frame; the PDF page index per locator is 5. No title block on this page."
+  },
+  {
+   "sampleId": "FB-09",
+   "visualRole": "OTHER",
+   "rowRelation": null,
+   "ownerVisual": null,
+   "physicalObservations": {
+    "candidateColumn": "right",
+    "alignmentWithPrecedingLine": "直前行なし(ページ最上部)",
+    "alignmentWithOwner": null,
+    "indentation": null,
+    "verticalProximity": "外枠の上、右上隅。タイトル『令和６年度歳出概算要求額目次』とは別の段で離れている",
+    "alignmentWithColumnHeading": "どの列見出しとも対応しない(表の外)",
+    "ruleOrLineSeparatorRelation": "外枠の上辺より上に位置し、罫線の外側",
+    "surroundingRowPattern": "周囲に他の行なし。直下に外枠・タイトル行"
+   },
+   "visibleText": "1",
+   "confidence": "high",
+   "notes": "表外の右上隅にある小さな「1」(ページ番号と見える)。役割は視覚上ページ番号様の文字。"
+  },
+  {
+   "sampleId": "FB-10",
+   "visualRole": "COLUMN_HEADING",
+   "rowRelation": null,
+   "ownerVisual": null,
+   "physicalObservations": {
+    "candidateColumn": "right",
+    "alignmentWithPrecedingLine": null,
+    "alignmentWithOwner": null,
+    "indentation": "none observed; centered label within right-half heading cell",
+    "verticalProximity": "heading band directly under a lone numeral at top-left (above the frame) and directly above the first data row",
+    "alignmentWithColumnHeading": "this IS the column heading: right-half cell shows 要求番号 | 区 分 | ページ, mirroring left-half heading",
+    "ruleOrLineSeparatorRelation": "heading cells enclosed by table frame rules; vertical rules between 要求番号 / 区 分 / ページ cells",
+    "surroundingRowPattern": "lone numeral '2' above frame at top-left, heading band, then data rows in two side-by-side halves (first rows （項） 121 下水道防災事業費 left, 55 05-95 整備新幹線... right)"
+   },
+   "visibleText": "右半分見出し: 要求番号 / 区　分 / ページ。枠の上、左上に単独の『2』。",
+   "confidence": "high",
+   "notes": "locator line 1 (rightText 区 分 ページ) located as the right-half column heading; the preceding locator line '2' is the lone numeral above the frame. Not a continuation."
+  },
+  {
+   "sampleId": "FB-11",
+   "visualRole": "CONTINUATION",
+   "rowRelation": "UNIQUE_VISUAL_OWNER",
+   "ownerVisual": "23 | 41-20 公債等に係る償還及び発行に関する諸費財源の国債整理基金特別会計へ繰入れ (page 94)",
+   "physicalObservations": {
+    "candidateColumn": "right",
+    "alignmentWithPrecedingLine": "second line of a two-line wrapped entry; left edge visually matches the first line's text start (the 41-20 code is on the first line only, the second line starts under the 公債等 text)",
+    "alignmentWithOwner": "same left text edge as owner's text body; request number 23 and page 94 are in their own cells at the row level",
+    "indentation": "same text-left edge as first line; no extra indent",
+    "verticalProximity": "very tight to the first line above (smaller line gap than between separate rows); clearly further from next row 24 below",
+    "alignmentWithColumnHeading": "inside the 区分 column",
+    "ruleOrLineSeparatorRelation": "no rule between it and the line above; page cell underline 94 sits at its level, separating it from the next row",
+    "surroundingRowPattern": "right column: row 23 (two lines) then row 24 46-20 事務取扱いに必要な経費 (single line, page 95), row 25 ..."
+   },
+   "visibleText": "に必要な経費 (preceded visually by line '41-20 公債等に係る償還及び発行に関する諸費財源の国債整理基金特別会計へ繰入れ')",
+   "confidence": "medium",
+   "notes": "Page number 94 is vertically positioned near the second line; confident about the wrapped-entry reading, medium because ownership is judged by tightness only."
+  },
+  {
+   "sampleId": "FB-12",
+   "visualRole": "HEADER_OR_TITLE",
+   "rowRelation": null,
+   "ownerVisual": null,
+   "physicalObservations": {
+    "candidateColumn": "spans_both",
+    "alignmentWithPrecedingLine": "直前はページ番号「1」(右上隅の枠外)。揃いは無関係",
+    "alignmentWithOwner": null,
+    "indentation": null,
+    "verticalProximity": "タイトル帯内。直下に『19 内閣府所管』行",
+    "alignmentWithColumnHeading": "表の見出し帯より上のタイトル帯",
+    "ruleOrLineSeparatorRelation": "外枠の内側上部、タイトル帯の下に横罫線",
+    "surroundingRowPattern": "ページ番号→タイトル『令和６年度歳出概算要求額目次』→『19 内閣府所管』→列見出し帯"
+   },
+   "visibleText": "令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次(rightText『次』はタイトル末尾の文字)",
+   "confidence": "high",
+   "notes": "字間の広いタイトルの最後の字『次』として視認。"
+  }
+ ]
+}
