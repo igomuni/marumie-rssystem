@@ -1,0 +1,983 @@
+{
+ "schema": "budget-request-toc-human-review-failure-isolation-observations/v0",
+ "note": "read-only 観測（原因の確定は mechanism status で区別）。parser / H1 / GT / 評価 contract は変更していない",
+ "frozen": {
+  "full_corpus_h1_output_403_sha256": "7d31dbb5e03b5c1984b2aa1af2c7f2ae09d74d3d213f673ee9f5f65b3e4f2316"
+ },
+ "postReviewHumanCorrection": {
+  "id": "H7",
+  "kind": "POST_REVIEW_HUMAN_OBSERVATION_CORRECTION",
+  "supersedes": "最初の human review 記録: 「tokenless 名称 continuation は request 23 の 1 件のみ」（この記録は誤りだったが、履歴として残す）",
+  "correctedObservation": "追加の人間による PDF 原本の目視確認により、tokenless 名称 continuation は少なくとも 2 件: (1) request 18 の 2 行目「な経費」（owner は人間に一意。raw line 62 の左 column・parser の attach と整合）、(2) request 23（2 行目に row-start token なし。owner は人間に一意。continuation の開始位置は request 23 の名称開始位置とほぼ一致）",
+  "cause": "最初の human review 時の見落とし。PDF 側の ambiguity や raw representation loss ではない",
+  "effect": "直前の failure isolation で UNRESOLVED としていた H7 の human と raw の食い違い（F5）は「human review 時の見落とし」と確定し、解消した。raw representation・machine の attach（owner req18・line 62）は human observation と整合する",
+  "machineOutputChanged": false,
+  "gtChanged": false,
+  "frozenEvaluationArtifactsChanged": false,
+  "saved403OutputChanged": false,
+  "newVisualInspectionByAssistant": false,
+  "otherPagesMechanismStatusChanged": false
+ },
+ "pages": [
+  {
+   "id": "H1",
+   "localPdfPath": "data/download/jinji.go.jp/content/900024096.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "reproducesSaved403Output": true,
+   "pageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "rightBandEdge": null,
+   "pageAbstentionReason": null,
+   "unitCounts": {
+    "total": 29,
+    "LEFT": 0,
+    "RIGHT": 0,
+    "UNSPLIT": 29
+   },
+   "evidence": {
+    "bandMinEvidence": 2,
+    "bandToleranceChars": 2,
+    "requestTokenCandidatesAll": 4,
+    "requestTokenStartHistogram": {
+     "0": {
+      "all": 4,
+      "counted": 0
+     }
+    },
+    "countedEvidence": 0,
+    "countedEvidenceDetail": [],
+    "notCounted": 4,
+    "uncountedNonFirstTokens": [],
+    "notCountedByReason": {
+     "firstTokenOnLine": 4,
+     "notPrecededByDigitsAndWhitespace_nonFirst": 0
+    },
+    "markerCandidatesNotInBand": [],
+    "candidateE": null,
+    "clusterSpread": null
+   },
+   "fragmentAttachments": [],
+   "abstainedUnits": [
+    {
+     "column": "UNSPLIT",
+     "lineIndex": 30,
+     "reason": "FRAGMENT_WITH_PAGE_REF",
+     "slice": "令和６年度概算要求定員表                            93"
+    }
+   ],
+   "titleUnits": [
+    {
+     "column": "UNSPLIT",
+     "lineIndex": 0,
+     "slice": "1"
+    },
+    {
+     "column": "UNSPLIT",
+     "lineIndex": 2,
+     "slice": "令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次"
+    },
+    {
+     "column": "UNSPLIT",
+     "lineIndex": 3,
+     "slice": "05     内   閣    所 管 (人事院（人事院）)"
+    },
+    {
+     "column": "UNSPLIT",
+     "lineIndex": 4,
+     "slice": "要求                    区                 分   ページ 要求   区      "
+    },
+    {
+     "column": "UNSPLIT",
+     "lineIndex": 5,
+     "slice": "番号                                              番号"
+    },
+    {
+     "column": "UNSPLIT",
+     "lineIndex": 7,
+     "slice": "令和６年度歳出概算要求額総表                           1"
+    },
+    {
+     "column": "UNSPLIT",
+     "lineIndex": 8,
+     "slice": "令和６年度歳出概算要求額明細表                          3"
+    }
+   ],
+   "gt": {
+    "available": false
+   },
+   "rawLineCount": 29
+  },
+  {
+   "id": "H2",
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "physicalPage": 3,
+   "classifierSource": "DIRECT",
+   "reproducesSaved403Output": true,
+   "pageState": "ASSEMBLED_SPLIT",
+   "rightBandEdge": 55,
+   "pageAbstentionReason": null,
+   "unitCounts": {
+    "total": 69,
+    "LEFT": 32,
+    "RIGHT": 31,
+    "UNSPLIT": 6
+   },
+   "evidence": {
+    "bandMinEvidence": 2,
+    "bandToleranceChars": 2,
+    "requestTokenCandidatesAll": 33,
+    "requestTokenStartHistogram": {
+     "0": {
+      "all": 17,
+      "counted": 0
+     },
+     "55": {
+      "all": 16,
+      "counted": 5
+     }
+    },
+    "countedEvidence": 5,
+    "countedEvidenceDetail": [
+     {
+      "lineIndex": 9,
+      "charIndex": 55,
+      "token": "18   01‑65",
+      "isFirstTokenOnLine": false,
+      "precededByDigitsAndWhitespace": true,
+      "countedAsEvidence": true
+     },
+     {
+      "lineIndex": 19,
+      "charIndex": 55,
+      "token": "20   01‑65",
+      "isFirstTokenOnLine": false,
+      "precededByDigitsAndWhitespace": true,
+      "countedAsEvidence": true
+     },
+     {
+      "lineIndex": 23,
+      "charIndex": 55,
+      "token": "21   01‑65",
+      "isFirstTokenOnLine": false,
+      "precededByDigitsAndWhitespace": true,
+      "countedAsEvidence": true
+     },
+     {
+      "lineIndex": 27,
+      "charIndex": 55,
+      "token": "22   01‑41",
+      "isFirstTokenOnLine": false,
+      "precededByDigitsAndWhitespace": true,
+      "countedAsEvidence": true
+     },
+     {
+      "lineIndex": 31,
+      "charIndex": 55,
+      "token": "23   01‑46",
+      "isFirstTokenOnLine": false,
+      "precededByDigitsAndWhitespace": true,
+      "countedAsEvidence": true
+     }
+    ],
+    "notCounted": 28,
+    "uncountedNonFirstTokens": [],
+    "notCountedByReason": {
+     "firstTokenOnLine": 28,
+     "notPrecededByDigitsAndWhitespace_nonFirst": 0
+    },
+    "markerCandidatesNotInBand": [
+     {
+      "lineIndex": 7,
+      "charIndex": 62,
+      "token": "（項）"
+     },
+     {
+      "lineIndex": 17,
+      "charIndex": 62,
+      "token": "（項）"
+     },
+     {
+      "lineIndex": 21,
+      "charIndex": 62,
+      "token": "（項）"
+     },
+     {
+      "lineIndex": 25,
+      "charIndex": 62,
+      "token": "（項）"
+     },
+     {
+      "lineIndex": 29,
+      "charIndex": 62,
+      "token": "（項）"
+     }
+    ],
+    "candidateE": 55,
+    "clusterSpread": 0
+   },
+   "fragmentAttachments": [
+    {
+     "owner": {
+      "column": "RIGHT",
+      "sourceOrder": 3,
+      "rowKind": "REQUEST_NUMBER_ROW",
+      "rowStartTokenRaw": "19   01‑65",
+      "lineIndex": 14
+     },
+     "fragments": [
+      {
+       "lineIndex": 15,
+       "charStart": 66,
+       "charEnd": 72,
+       "text": "に必要な経費"
+      }
+     ]
+    },
+    {
+     "owner": {
+      "column": "RIGHT",
+      "sourceOrder": 11,
+      "rowKind": "REQUEST_NUMBER_ROW",
+      "rowStartTokenRaw": "23   01‑46",
+      "lineIndex": 31
+     },
+     "fragments": [
+      {
+       "lineIndex": 32,
+       "charStart": 66,
+       "charEnd": 73,
+       "text": "れに必要な経費"
+      }
+     ]
+    }
+   ],
+   "abstainedUnits": [],
+   "titleUnits": [
+    {
+     "column": "LEFT",
+     "lineIndex": 7,
+     "slice": "令和６年度歳出概算要求額総表                               1"
+    },
+    {
+     "column": "LEFT",
+     "lineIndex": 9,
+     "slice": "令和６年度歳出概算要求額明細表                              9"
+    },
+    {
+     "column": "UNSPLIT",
+     "lineIndex": 0,
+     "slice": "1"
+    },
+    {
+     "column": "UNSPLIT",
+     "lineIndex": 2,
+     "slice": "令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次"
+    },
+    {
+     "column": "UNSPLIT",
+     "lineIndex": 3,
+     "slice": "26     農林水産省所管"
+    },
+    {
+     "column": "UNSPLIT",
+     "lineIndex": 4,
+     "slice": "要求                  区                    分      ページ 要求      "
+    },
+    {
+     "column": "UNSPLIT",
+     "lineIndex": 5,
+     "slice": "番号                                                  番号"
+    },
+    {
+     "column": "UNSPLIT",
+     "lineIndex": 10,
+     "slice": "に必要な経費"
+    }
+   ],
+   "gt": {
+    "available": true,
+    "fragments": [
+     {
+      "fragmentId": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3:RIGHT:2+f1",
+      "ownerRowId": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3:RIGHT:2",
+      "ownerKey": "REQUEST 18",
+      "ownerColumn": "RIGHT",
+      "orderInOwner": 1
+     },
+     {
+      "fragmentId": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3:RIGHT:4+f1",
+      "ownerRowId": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3:RIGHT:4",
+      "ownerKey": "REQUEST 19",
+      "ownerColumn": "RIGHT",
+      "orderInOwner": 1
+     },
+     {
+      "fragmentId": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3:RIGHT:12+f1",
+      "ownerRowId": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3:RIGHT:12",
+      "ownerKey": "REQUEST 23",
+      "ownerColumn": "RIGHT",
+      "orderInOwner": 1
+     }
+    ],
+    "evaluation": {
+     "groupsNotOneToOne": [],
+     "pageOutcome": {
+      "state": "CORRECT",
+      "reason": "SPLIT_AND_GT_RIGHT_ROWS"
+     },
+     "rowStates": {
+      "CORRECT": 61,
+      "INCORRECT": 0,
+      "ABSTAINED": 0,
+      "UNRESOLVED": 0
+     },
+     "fragments": {
+      "gt": 3,
+      "correct": 2,
+      "incorrect": 1,
+      "abstained": 0,
+      "unresolved": 0,
+      "notComparable": 0,
+      "wrongAttachment": 0
+     },
+     "instances": [
+      {
+       "family": "OMITTED_SILENTLY_FRAGMENT",
+       "gtRowId": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3:RIGHT:2+f1",
+       "gtKey": null,
+       "parserUnit": null,
+       "state": "INCORRECT"
+      }
+     ]
+    }
+   },
+   "rawLineCount": 60
+  },
+  {
+   "id": "H3",
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "physicalPage": 4,
+   "classifierSource": "INHERITED",
+   "reproducesSaved403Output": true,
+   "pageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "rightBandEdge": null,
+   "pageAbstentionReason": null,
+   "unitCounts": {
+    "total": 28,
+    "LEFT": 0,
+    "RIGHT": 0,
+    "UNSPLIT": 28
+   },
+   "evidence": {
+    "bandMinEvidence": 2,
+    "bandToleranceChars": 2,
+    "requestTokenCandidatesAll": 13,
+    "requestTokenStartHistogram": {
+     "0": {
+      "all": 13,
+      "counted": 0
+     }
+    },
+    "countedEvidence": 0,
+    "countedEvidenceDetail": [],
+    "notCounted": 13,
+    "uncountedNonFirstTokens": [],
+    "notCountedByReason": {
+     "firstTokenOnLine": 13,
+     "notPrecededByDigitsAndWhitespace_nonFirst": 0
+    },
+    "markerCandidatesNotInBand": [],
+    "candidateE": null,
+    "clusterSpread": null
+   },
+   "fragmentAttachments": [
+    {
+     "owner": {
+      "column": "UNSPLIT",
+      "sourceOrder": 9,
+      "rowKind": "REQUEST_NUMBER_ROW",
+      "rowStartTokenRaw": "41    01‑63",
+      "lineIndex": 10
+     },
+     "fragments": [
+      {
+       "lineIndex": 11,
+       "charStart": 12,
+       "charEnd": 24,
+       "text": "勘定へ繰入れに必要な経費"
+      }
+     ]
+    },
+    {
+     "owner": {
+      "column": "UNSPLIT",
+      "sourceOrder": 12,
+      "rowKind": "MARKER_ROW",
+      "rowStartTokenRaw": "（項）",
+      "lineIndex": 15
+     },
+     "fragments": [
+      {
+       "lineIndex": 16,
+       "charStart": 16,
+       "charEnd": 26,
+       "text": "ー対策特別会計へ繰入"
+      }
+     ]
+    },
+    {
+     "owner": {
+      "column": "UNSPLIT",
+      "sourceOrder": 13,
+      "rowKind": "REQUEST_NUMBER_ROW",
+      "rowStartTokenRaw": "43    01‑63",
+      "lineIndex": 18
+     },
+     "fragments": [
+      {
+       "lineIndex": 19,
+       "charStart": 12,
+       "charEnd": 37,
+       "text": "ネルギー対策特別会計エネルギー需給勘定へ繰入れに必"
+      }
+     ]
+    },
+    {
+     "owner": {
+      "column": "UNSPLIT",
+      "sourceOrder": 14,
+      "rowKind": "MARKER_ROW",
+      "rowStartTokenRaw": "（項）",
+      "lineIndex": 21
+     },
+     "fragments": [
+      {
+       "lineIndex": 22,
+       "charStart": 16,
+       "charEnd": 18,
+       "text": "繰入"
+      }
+     ]
+    },
+    {
+     "owner": {
+      "column": "UNSPLIT",
+      "sourceOrder": 15,
+      "rowKind": "REQUEST_NUMBER_ROW",
+      "rowStartTokenRaw": "44    01‑63",
+      "lineIndex": 24
+     },
+     "fragments": [
+      {
+       "lineIndex": 25,
+       "charStart": 12,
+       "charEnd": 32,
+       "text": "会計電源開発促進勘定へ繰入れに必要な経費"
+      }
+     ]
+    }
+   ],
+   "abstainedUnits": [],
+   "titleUnits": [
+    {
+     "column": "UNSPLIT",
+     "lineIndex": 0,
+     "slice": "2"
+    },
+    {
+     "column": "UNSPLIT",
+     "lineIndex": 1,
+     "slice": "要求                      区                  分          ページ 要求"
+    },
+    {
+     "column": "UNSPLIT",
+     "lineIndex": 2,
+     "slice": "番号                                                        番号"
+    }
+   ],
+   "gt": {
+    "available": true,
+    "fragments": [
+     {
+      "fragmentId": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf#4:LEFT:7+f1",
+      "ownerRowId": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf#4:LEFT:7",
+      "ownerKey": "REQUEST 41",
+      "ownerColumn": "LEFT",
+      "orderInOwner": 1
+     },
+     {
+      "fragmentId": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf#4:LEFT:10+f1",
+      "ownerRowId": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf#4:LEFT:10",
+      "ownerKey": "MARKER （項） 030",
+      "ownerColumn": "LEFT",
+      "orderInOwner": 1
+     },
+     {
+      "fragmentId": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf#4:LEFT:11+f1",
+      "ownerRowId": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf#4:LEFT:11",
+      "ownerKey": "REQUEST 43",
+      "ownerColumn": "LEFT",
+      "orderInOwner": 1
+     },
+     {
+      "fragmentId": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf#4:LEFT:12+f1",
+      "ownerRowId": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf#4:LEFT:12",
+      "ownerKey": "MARKER （項） 040",
+      "ownerColumn": "LEFT",
+      "orderInOwner": 1
+     },
+     {
+      "fragmentId": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf#4:LEFT:13+f1",
+      "ownerRowId": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf#4:LEFT:13",
+      "ownerKey": "REQUEST 44",
+      "ownerColumn": "LEFT",
+      "orderInOwner": 1
+     }
+    ],
+    "evaluation": {
+     "groupsNotOneToOne": [
+      {
+       "key": "M|（項）|010",
+       "n": 2,
+       "m": 2,
+       "matched": 2,
+       "wrongColumn": 0,
+       "extras": 0,
+       "unmatchedState": null
+      },
+      {
+       "key": "M|（項）|030",
+       "n": 2,
+       "m": 2,
+       "matched": 2,
+       "wrongColumn": 0,
+       "extras": 0,
+       "unmatchedState": null
+      }
+     ],
+     "pageOutcome": {
+      "state": "NOT_COMPARABLE",
+      "reason": "UNSPLIT_AND_GT_RIGHT_BLANK"
+     },
+     "rowStates": {
+      "CORRECT": 25,
+      "INCORRECT": 0,
+      "ABSTAINED": 0,
+      "UNRESOLVED": 0
+     },
+     "fragments": {
+      "gt": 5,
+      "correct": 4,
+      "incorrect": 0,
+      "abstained": 0,
+      "unresolved": 2,
+      "notComparable": 0,
+      "wrongAttachment": 0
+     },
+     "instances": [
+      {
+       "family": "AMBIGUOUS_OWNER_GROUP",
+       "gtRowId": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf#4:LEFT:10+f1",
+       "gtKey": "M|（項）|030",
+       "parserUnit": null,
+       "state": "UNRESOLVED"
+      },
+      {
+       "family": "AMBIGUOUS_OWNER_GROUP",
+       "gtRowId": null,
+       "gtKey": "M|（項）|030",
+       "parserUnit": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf#4:UNSPLIT:12@line15",
+       "state": "UNRESOLVED"
+      }
+     ]
+    }
+   },
+   "rawLineCount": 33
+  },
+  {
+   "id": "H4",
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+   "physicalPage": 4,
+   "classifierSource": "INHERITED",
+   "reproducesSaved403Output": true,
+   "pageState": "PAGE_ABSTAINED",
+   "rightBandEdge": null,
+   "pageAbstentionReason": "RIGHT_EVIDENCE_INSUFFICIENT",
+   "unitCounts": {
+    "total": 0,
+    "LEFT": 0,
+    "RIGHT": 0,
+    "UNSPLIT": 0
+   },
+   "evidence": {
+    "bandMinEvidence": 2,
+    "bandToleranceChars": 2,
+    "requestTokenCandidatesAll": 20,
+    "requestTokenStartHistogram": {
+     "0": {
+      "all": 19,
+      "counted": 0
+     },
+     "51": {
+      "all": 1,
+      "counted": 1
+     }
+    },
+    "countedEvidence": 1,
+    "countedEvidenceDetail": [
+     {
+      "lineIndex": 6,
+      "charIndex": 51,
+      "token": "50   01‑98",
+      "isFirstTokenOnLine": false,
+      "precededByDigitsAndWhitespace": true,
+      "countedAsEvidence": true
+     }
+    ],
+    "notCounted": 19,
+    "uncountedNonFirstTokens": [],
+    "notCountedByReason": {
+     "firstTokenOnLine": 19,
+     "notPrecededByDigitsAndWhitespace_nonFirst": 0
+    },
+    "markerCandidatesNotInBand": [
+     {
+      "lineIndex": 4,
+      "charIndex": 58,
+      "token": "（項）"
+     }
+    ],
+    "candidateE": 51,
+    "clusterSpread": 0
+   },
+   "fragmentAttachments": [],
+   "abstainedUnits": [],
+   "titleUnits": [],
+   "gt": {
+    "available": true,
+    "fragments": [],
+    "evaluation": {
+     "groupsNotOneToOne": [],
+     "pageOutcome": {
+      "state": "ABSTAINED",
+      "reason": "RIGHT_EVIDENCE_INSUFFICIENT"
+     },
+     "rowStates": {
+      "CORRECT": 0,
+      "INCORRECT": 0,
+      "ABSTAINED": 38,
+      "UNRESOLVED": 0
+     },
+     "fragments": {
+      "gt": 0,
+      "correct": 0,
+      "incorrect": 0,
+      "abstained": 0,
+      "unresolved": 0,
+      "notComparable": 0,
+      "wrongAttachment": 0
+     },
+     "instances": []
+    }
+   },
+   "rawLineCount": 39
+  },
+  {
+   "id": "H5",
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 6,
+   "classifierSource": "INHERITED",
+   "reproducesSaved403Output": true,
+   "pageState": "PAGE_ABSTAINED",
+   "rightBandEdge": null,
+   "pageAbstentionReason": "RIGHT_EVIDENCE_INSUFFICIENT",
+   "unitCounts": {
+    "total": 0,
+    "LEFT": 0,
+    "RIGHT": 0,
+    "UNSPLIT": 0
+   },
+   "evidence": {
+    "bandMinEvidence": 2,
+    "bandToleranceChars": 2,
+    "requestTokenCandidatesAll": 50,
+    "requestTokenStartHistogram": {
+     "0": {
+      "all": 19,
+      "counted": 0
+     },
+     "53": {
+      "all": 1,
+      "counted": 1
+     },
+     "55": {
+      "all": 30,
+      "counted": 0
+     }
+    },
+    "countedEvidence": 1,
+    "countedEvidenceDetail": [
+     {
+      "lineIndex": 4,
+      "charIndex": 53,
+      "token": "147     05‑95",
+      "isFirstTokenOnLine": false,
+      "precededByDigitsAndWhitespace": true,
+      "countedAsEvidence": true
+     }
+    ],
+    "notCounted": 49,
+    "uncountedNonFirstTokens": [],
+    "notCountedByReason": {
+     "firstTokenOnLine": 49,
+     "notPrecededByDigitsAndWhitespace_nonFirst": 0
+    },
+    "markerCandidatesNotInBand": [],
+    "candidateE": 53,
+    "clusterSpread": 0
+   },
+   "fragmentAttachments": [],
+   "abstainedUnits": [],
+   "titleUnits": [],
+   "gt": {
+    "available": false
+   },
+   "rawLineCount": 74
+  },
+  {
+   "id": "H6",
+   "localPdfPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "physicalPage": 4,
+   "classifierSource": "INHERITED",
+   "reproducesSaved403Output": true,
+   "pageState": "PAGE_ABSTAINED",
+   "rightBandEdge": null,
+   "pageAbstentionReason": "RIGHT_EVIDENCE_INSUFFICIENT",
+   "unitCounts": {
+    "total": 0,
+    "LEFT": 0,
+    "RIGHT": 0,
+    "UNSPLIT": 0
+   },
+   "evidence": {
+    "bandMinEvidence": 2,
+    "bandToleranceChars": 2,
+    "requestTokenCandidatesAll": 23,
+    "requestTokenStartHistogram": {
+     "0": {
+      "all": 22,
+      "counted": 0
+     },
+     "57": {
+      "all": 1,
+      "counted": 1
+     }
+    },
+    "countedEvidence": 1,
+    "countedEvidenceDetail": [
+     {
+      "lineIndex": 4,
+      "charIndex": 57,
+      "token": "67   15‑35",
+      "isFirstTokenOnLine": false,
+      "precededByDigitsAndWhitespace": true,
+      "countedAsEvidence": true
+     }
+    ],
+    "notCounted": 22,
+    "uncountedNonFirstTokens": [],
+    "notCountedByReason": {
+     "firstTokenOnLine": 22,
+     "notPrecededByDigitsAndWhitespace_nonFirst": 0
+    },
+    "markerCandidatesNotInBand": [],
+    "candidateE": 57,
+    "clusterSpread": 0
+   },
+   "fragmentAttachments": [],
+   "abstainedUnits": [],
+   "titleUnits": [],
+   "gt": {
+    "available": true,
+    "fragments": [],
+    "evaluation": {
+     "groupsNotOneToOne": [],
+     "pageOutcome": {
+      "state": "ABSTAINED",
+      "reason": "RIGHT_EVIDENCE_INSUFFICIENT"
+     },
+     "rowStates": {
+      "CORRECT": 0,
+      "INCORRECT": 0,
+      "ABSTAINED": 37,
+      "UNRESOLVED": 0
+     },
+     "fragments": {
+      "gt": 0,
+      "correct": 0,
+      "incorrect": 0,
+      "abstained": 0,
+      "unresolved": 0,
+      "notComparable": 0,
+      "wrongAttachment": 0
+     },
+     "instances": []
+    }
+   },
+   "rawLineCount": 39
+  },
+  {
+   "id": "H7",
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "physicalPage": 2,
+   "classifierSource": "DIRECT",
+   "reproducesSaved403Output": true,
+   "pageState": "ASSEMBLED_SPLIT",
+   "rightBandEdge": 55,
+   "pageAbstentionReason": null,
+   "unitCounts": {
+    "total": 70,
+    "LEFT": 31,
+    "RIGHT": 32,
+    "UNSPLIT": 7
+   },
+   "evidence": {
+    "bandMinEvidence": 2,
+    "bandToleranceChars": 2,
+    "requestTokenCandidatesAll": 43,
+    "requestTokenStartHistogram": {
+     "0": {
+      "all": 22,
+      "counted": 0
+     },
+     "55": {
+      "all": 21,
+      "counted": 3
+     }
+    },
+    "countedEvidence": 3,
+    "countedEvidenceDetail": [
+     {
+      "lineIndex": 7,
+      "charIndex": 55,
+      "token": "23   41‑20",
+      "isFirstTokenOnLine": false,
+      "precededByDigitsAndWhitespace": true,
+      "countedAsEvidence": true
+     },
+     {
+      "lineIndex": 64,
+      "charIndex": 55,
+      "token": "42   01‑94",
+      "isFirstTokenOnLine": false,
+      "precededByDigitsAndWhitespace": true,
+      "countedAsEvidence": true
+     },
+     {
+      "lineIndex": 66,
+      "charIndex": 55,
+      "token": "43   01‑93",
+      "isFirstTokenOnLine": false,
+      "precededByDigitsAndWhitespace": true,
+      "countedAsEvidence": true
+     }
+    ],
+    "notCounted": 40,
+    "uncountedNonFirstTokens": [
+     {
+      "lineIndex": 62,
+      "charIndex": 55,
+      "token": "41   01‑35",
+      "isFirstTokenOnLine": false,
+      "precededByDigitsAndWhitespace": false,
+      "countedAsEvidence": false
+     }
+    ],
+    "notCountedByReason": {
+     "firstTokenOnLine": 39,
+     "notPrecededByDigitsAndWhitespace_nonFirst": 1
+    },
+    "markerCandidatesNotInBand": [
+     {
+      "lineIndex": 63,
+      "charIndex": 62,
+      "token": "（項）"
+     },
+     {
+      "lineIndex": 65,
+      "charIndex": 62,
+      "token": "（項）"
+     }
+    ],
+    "candidateE": 55,
+    "clusterSpread": 0
+   },
+   "fragmentAttachments": [
+    {
+     "owner": {
+      "column": "LEFT",
+      "sourceOrder": 26,
+      "rowKind": "REQUEST_NUMBER_ROW",
+      "rowStartTokenRaw": "18   16‑20",
+      "lineIndex": 61
+     },
+     "fragments": [
+      {
+       "lineIndex": 62,
+       "charStart": 11,
+       "charEnd": 14,
+       "text": "な経費"
+      }
+     ]
+    }
+   ],
+   "abstainedUnits": [],
+   "titleUnits": [
+    {
+     "column": "LEFT",
+     "lineIndex": 7,
+     "slice": "令和６年度歳出概算要求額総表                                1"
+    },
+    {
+     "column": "UNSPLIT",
+     "lineIndex": 0,
+     "slice": "1"
+    },
+    {
+     "column": "UNSPLIT",
+     "lineIndex": 2,
+     "slice": "令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次"
+    },
+    {
+     "column": "UNSPLIT",
+     "lineIndex": 3,
+     "slice": "23     財 務 省 所 管"
+    },
+    {
+     "column": "UNSPLIT",
+     "lineIndex": 4,
+     "slice": "要求                                                   要求"
+    },
+    {
+     "column": "UNSPLIT",
+     "lineIndex": 5,
+     "slice": "番号                    区                分         ページ 番号     "
+    },
+    {
+     "column": "UNSPLIT",
+     "lineIndex": 8,
+     "slice": "に必要な経費"
+    },
+    {
+     "column": "UNSPLIT",
+     "lineIndex": 9,
+     "slice": "令和６年度歳出概算要求額明細表                               5"
+    }
+   ],
+   "gt": {
+    "available": false
+   },
+   "rawLineCount": 65
+  }
+ ]
+}
