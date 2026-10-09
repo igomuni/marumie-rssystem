@@ -1,0 +1,1278 @@
+{
+ "schema": "budget-request-toc-human-review-queue/v0",
+ "note": "機械観測のみから抽出した次の human review の候補。priority・severity・next hypothesis は付けていない。候補理由は failure diagnosis ではない",
+ "candidateReasonEnum": [
+  "PAGE_ABSTAINED",
+  "UNSPLIT_WITH_GT_RIGHT_ROWS",
+  "SEVERE_DETECTED_POSTHOC",
+  "INCORRECT_ROW",
+  "OMITTED_SILENTLY",
+  "ORDER_INVERSION",
+  "OTHER_CODE_PRESENT",
+  "UNRESOLVED_PRESENT",
+  "FRAGMENT_UNRESOLVED_OR_WRONG",
+  "H1_TRIGGER_PRESENT",
+  "H1_NEGATIVE_CONTROL_PRESENT",
+  "KNOWN_TOKENLESS_FRAGMENT_RELEVANT"
+ ],
+ "pages": [
+  {
+   "localPdfPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+   "physicalPage": 3,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_TRIGGER_PRESENT",
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 46,
+     "LEFT": 31,
+     "RIGHT": 10,
+     "UNSPLIT": 5
+    },
+    "rowKinds": {
+     "TITLE_OR_HEADING": 7,
+     "MARKER_ROW": 14,
+     "REQUEST_NUMBER_ROW": 24,
+     "UNKNOWN_ABSTAINED": 1
+    },
+    "abstainedUnits": 1,
+    "fragmentsAttached": 2,
+    "h1TriggerLines": 2,
+    "h1NegativeControlLines": 3
+   },
+   "gtStatus": "GT_UNAVAILABLE",
+   "formalHistory": [
+    "development / explored（visual GT なし）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157010.pdf",
+   "physicalPage": 3,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_TRIGGER_PRESENT",
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 66,
+     "LEFT": 30,
+     "RIGHT": 31,
+     "UNSPLIT": 5
+    },
+    "rowKinds": {
+     "TITLE_OR_HEADING": 7,
+     "MARKER_ROW": 28,
+     "REQUEST_NUMBER_ROW": 31
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 6,
+    "h1TriggerLines": 2,
+    "h1NegativeControlLines": 3
+   },
+   "gtStatus": "GT_UNAVAILABLE",
+   "formalHistory": [
+    "development / explored（visual GT なし）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/env.go.jp/content/000157012.pdf",
+   "physicalPage": 3,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_TRIGGER_PRESENT",
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 46,
+     "LEFT": 31,
+     "RIGHT": 11,
+     "UNSPLIT": 4
+    },
+    "rowKinds": {
+     "TITLE_OR_HEADING": 6,
+     "MARKER_ROW": 19,
+     "REQUEST_NUMBER_ROW": 20,
+     "UNKNOWN_ABSTAINED": 1
+    },
+    "abstainedUnits": 1,
+    "fragmentsAttached": 4,
+    "h1TriggerLines": 2,
+    "h1NegativeControlLines": 2
+   },
+   "gtStatus": "GT_UNAVAILABLE",
+   "formalHistory": [
+    "development / explored（visual GT なし）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/jinji.go.jp/content/900024096.pdf",
+   "physicalPage": 3,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "candidateReasons": [
+    "OTHER_CODE_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 29,
+     "LEFT": 0,
+     "RIGHT": 0,
+     "UNSPLIT": 29
+    },
+    "rowKinds": {
+     "TITLE_OR_HEADING": 7,
+     "MARKER_ROW": 3,
+     "REQUEST_NUMBER_ROW": 4,
+     "OTHER_CODE": 14,
+     "UNKNOWN_ABSTAINED": 1
+    },
+    "abstainedUnits": 1,
+    "fragmentsAttached": 0,
+    "h1TriggerLines": 0,
+    "h1NegativeControlLines": 0
+   },
+   "gtStatus": "GT_UNAVAILABLE",
+   "formalHistory": [
+    "development / explored（visual GT なし）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "physicalPage": 3,
+   "partition": "FIRST_HELDOUT_POSTHOC",
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "FRAGMENT_UNRESOLVED_OR_WRONG",
+    "H1_TRIGGER_PRESENT",
+    "H1_NEGATIVE_CONTROL_PRESENT",
+    "KNOWN_TOKENLESS_FRAGMENT_RELEVANT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 69,
+     "LEFT": 32,
+     "RIGHT": 31,
+     "UNSPLIT": 6
+    },
+    "rowKinds": {
+     "TITLE_OR_HEADING": 8,
+     "MARKER_ROW": 28,
+     "REQUEST_NUMBER_ROW": 33
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 2,
+    "h1TriggerLines": 2,
+    "h1NegativeControlLines": 4
+   },
+   "gtStatus": "GT_AVAILABLE",
+   "formalHistory": [
+    "#396 first held-out（旧 parser #393 の formal result は STOP_SAFETY。不変）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "physicalPage": 4,
+   "partition": "NEW_HELDOUT_POSTHOC",
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 75,
+     "LEFT": 36,
+     "RIGHT": 36,
+     "UNSPLIT": 3
+    },
+    "rowKinds": {
+     "MARKER_ROW": 34,
+     "REQUEST_NUMBER_ROW": 38,
+     "TITLE_OR_HEADING": 3
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 0,
+    "h1TriggerLines": 0,
+    "h1NegativeControlLines": 1
+   },
+   "gtStatus": "GT_AVAILABLE",
+   "formalHistory": [
+    "#402 new held-out（H1 の one-shot formal result は SAFETY_PASS_COVERAGE_REPORTED。不変）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "physicalPage": 5,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 73,
+     "LEFT": 35,
+     "RIGHT": 35,
+     "UNSPLIT": 3
+    },
+    "rowKinds": {
+     "MARKER_ROW": 33,
+     "REQUEST_NUMBER_ROW": 37,
+     "TITLE_OR_HEADING": 3
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 2,
+    "h1TriggerLines": 0,
+    "h1NegativeControlLines": 3
+   },
+   "gtStatus": "GT_UNAVAILABLE",
+   "formalHistory": [
+    "development / explored（visual GT なし）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+   "physicalPage": 3,
+   "partition": "NEW_HELDOUT_POSTHOC",
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_TRIGGER_PRESENT",
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 46,
+     "LEFT": 32,
+     "RIGHT": 9,
+     "UNSPLIT": 5
+    },
+    "rowKinds": {
+     "TITLE_OR_HEADING": 7,
+     "MARKER_ROW": 11,
+     "REQUEST_NUMBER_ROW": 27,
+     "UNKNOWN_ABSTAINED": 1
+    },
+    "abstainedUnits": 1,
+    "fragmentsAttached": 1,
+    "h1TriggerLines": 2,
+    "h1NegativeControlLines": 3
+   },
+   "gtStatus": "GT_AVAILABLE",
+   "formalHistory": [
+    "#402 new held-out（H1 の one-shot formal result は SAFETY_PASS_COVERAGE_REPORTED。不変）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf",
+   "physicalPage": 3,
+   "partition": "NEW_HELDOUT_POSTHOC",
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_TRIGGER_PRESENT",
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 69,
+     "LEFT": 32,
+     "RIGHT": 32,
+     "UNSPLIT": 5
+    },
+    "rowKinds": {
+     "TITLE_OR_HEADING": 7,
+     "MARKER_ROW": 31,
+     "REQUEST_NUMBER_ROW": 31
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 0,
+    "h1TriggerLines": 2,
+    "h1NegativeControlLines": 3
+   },
+   "gtStatus": "GT_AVAILABLE",
+   "formalHistory": [
+    "#402 new held-out（H1 の one-shot formal result は SAFETY_PASS_COVERAGE_REPORTED。不変）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneju_o.pdf",
+   "physicalPage": 3,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_TRIGGER_PRESENT",
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 45,
+     "LEFT": 31,
+     "RIGHT": 10,
+     "UNSPLIT": 4
+    },
+    "rowKinds": {
+     "TITLE_OR_HEADING": 6,
+     "MARKER_ROW": 19,
+     "REQUEST_NUMBER_ROW": 20
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 4,
+    "h1TriggerLines": 2,
+    "h1NegativeControlLines": 2
+   },
+   "gtStatus": "GT_UNAVAILABLE",
+   "formalHistory": [
+    "development / explored（visual GT なし）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "physicalPage": 3,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_TRIGGER_PRESENT",
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 69,
+     "LEFT": 32,
+     "RIGHT": 32,
+     "UNSPLIT": 5
+    },
+    "rowKinds": {
+     "TITLE_OR_HEADING": 7,
+     "MARKER_ROW": 25,
+     "REQUEST_NUMBER_ROW": 37
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 1,
+    "h1TriggerLines": 2,
+    "h1NegativeControlLines": 3
+   },
+   "gtStatus": "GT_UNAVAILABLE",
+   "formalHistory": [
+    "development / explored（visual GT なし）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "physicalPage": 4,
+   "partition": "FIRST_HELDOUT_POSTHOC",
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE",
+   "candidateReasons": [
+    "FRAGMENT_UNRESOLVED_OR_WRONG"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 28,
+     "LEFT": 0,
+     "RIGHT": 0,
+     "UNSPLIT": 28
+    },
+    "rowKinds": {
+     "TITLE_OR_HEADING": 3,
+     "MARKER_ROW": 12,
+     "REQUEST_NUMBER_ROW": 13
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 5,
+    "h1TriggerLines": 0,
+    "h1NegativeControlLines": 0
+   },
+   "gtStatus": "GT_AVAILABLE",
+   "formalHistory": [
+    "#396 first held-out（旧 parser #393 の formal result は STOP_SAFETY。不変）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "physicalPage": 3,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_TRIGGER_PRESENT",
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 69,
+     "LEFT": 32,
+     "RIGHT": 32,
+     "UNSPLIT": 5
+    },
+    "rowKinds": {
+     "TITLE_OR_HEADING": 7,
+     "MARKER_ROW": 21,
+     "REQUEST_NUMBER_ROW": 41
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 0,
+    "h1TriggerLines": 2,
+    "h1NegativeControlLines": 3
+   },
+   "gtStatus": "GT_UNAVAILABLE",
+   "formalHistory": [
+    "development / explored（visual GT なし）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "physicalPage": 4,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 74,
+     "LEFT": 36,
+     "RIGHT": 35,
+     "UNSPLIT": 3
+    },
+    "rowKinds": {
+     "REQUEST_NUMBER_ROW": 41,
+     "MARKER_ROW": 30,
+     "TITLE_OR_HEADING": 3
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 2,
+    "h1TriggerLines": 0,
+    "h1NegativeControlLines": 1
+   },
+   "gtStatus": "GT_UNAVAILABLE",
+   "formalHistory": [
+    "development / explored（visual GT なし）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "physicalPage": 5,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 56,
+     "LEFT": 36,
+     "RIGHT": 17,
+     "UNSPLIT": 3
+    },
+    "rowKinds": {
+     "REQUEST_NUMBER_ROW": 31,
+     "MARKER_ROW": 22,
+     "TITLE_OR_HEADING": 3
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 0,
+    "h1TriggerLines": 0,
+    "h1NegativeControlLines": 3
+   },
+   "gtStatus": "GT_UNAVAILABLE",
+   "formalHistory": [
+    "development / explored（visual GT なし）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "physicalPage": 3,
+   "partition": "NEW_HELDOUT_POSTHOC",
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_TRIGGER_PRESENT",
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 69,
+     "LEFT": 32,
+     "RIGHT": 32,
+     "UNSPLIT": 5
+    },
+    "rowKinds": {
+     "TITLE_OR_HEADING": 7,
+     "MARKER_ROW": 17,
+     "REQUEST_NUMBER_ROW": 45
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 1,
+    "h1TriggerLines": 2,
+    "h1NegativeControlLines": 3
+   },
+   "gtStatus": "GT_AVAILABLE",
+   "formalHistory": [
+    "#402 new held-out（H1 の one-shot formal result は SAFETY_PASS_COVERAGE_REPORTED。不変）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "physicalPage": 4,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 74,
+     "LEFT": 36,
+     "RIGHT": 35,
+     "UNSPLIT": 3
+    },
+    "rowKinds": {
+     "REQUEST_NUMBER_ROW": 43,
+     "MARKER_ROW": 28,
+     "TITLE_OR_HEADING": 3
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 1,
+    "h1TriggerLines": 0,
+    "h1NegativeControlLines": 1
+   },
+   "gtStatus": "GT_UNAVAILABLE",
+   "formalHistory": [
+    "development / explored（visual GT なし）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "physicalPage": 5,
+   "partition": "FIRST_HELDOUT_POSTHOC",
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 74,
+     "LEFT": 36,
+     "RIGHT": 35,
+     "UNSPLIT": 3
+    },
+    "rowKinds": {
+     "REQUEST_NUMBER_ROW": 47,
+     "MARKER_ROW": 24,
+     "TITLE_OR_HEADING": 3
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 2,
+    "h1TriggerLines": 0,
+    "h1NegativeControlLines": 3
+   },
+   "gtStatus": "GT_AVAILABLE",
+   "formalHistory": [
+    "#396 first held-out（旧 parser #393 の formal result は STOP_SAFETY。不変）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "physicalPage": 6,
+   "partition": "FIRST_HELDOUT_POSTHOC",
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 75,
+     "LEFT": 36,
+     "RIGHT": 36,
+     "UNSPLIT": 3
+    },
+    "rowKinds": {
+     "MARKER_ROW": 32,
+     "REQUEST_NUMBER_ROW": 40,
+     "TITLE_OR_HEADING": 3
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 0,
+    "h1TriggerLines": 0,
+    "h1NegativeControlLines": 2
+   },
+   "gtStatus": "GT_AVAILABLE",
+   "formalHistory": [
+    "#396 first held-out（旧 parser #393 の formal result は STOP_SAFETY。不変）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "physicalPage": 7,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 60,
+     "LEFT": 35,
+     "RIGHT": 22,
+     "UNSPLIT": 3
+    },
+    "rowKinds": {
+     "MARKER_ROW": 24,
+     "REQUEST_NUMBER_ROW": 33,
+     "TITLE_OR_HEADING": 3
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 1,
+    "h1TriggerLines": 0,
+    "h1NegativeControlLines": 3
+   },
+   "gtStatus": "GT_UNAVAILABLE",
+   "formalHistory": [
+    "development / explored（visual GT なし）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+   "physicalPage": 3,
+   "partition": "NEW_HELDOUT_POSTHOC",
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_TRIGGER_PRESENT",
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 69,
+     "LEFT": 32,
+     "RIGHT": 32,
+     "UNSPLIT": 5
+    },
+    "rowKinds": {
+     "TITLE_OR_HEADING": 7,
+     "MARKER_ROW": 32,
+     "REQUEST_NUMBER_ROW": 30
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 0,
+    "h1TriggerLines": 2,
+    "h1NegativeControlLines": 3
+   },
+   "gtStatus": "GT_AVAILABLE",
+   "formalHistory": [
+    "#402 new held-out（H1 の one-shot formal result は SAFETY_PASS_COVERAGE_REPORTED。不変）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+   "physicalPage": 4,
+   "partition": "FIRST_HELDOUT_POSTHOC",
+   "classifierSource": "INHERITED",
+   "pageState": "PAGE_ABSTAINED",
+   "candidateReasons": [
+    "PAGE_ABSTAINED"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 0,
+     "LEFT": 0,
+     "RIGHT": 0,
+     "UNSPLIT": 0
+    },
+    "rowKinds": {},
+    "abstainedUnits": 0,
+    "fragmentsAttached": 0,
+    "h1TriggerLines": 0,
+    "h1NegativeControlLines": 0
+   },
+   "gtStatus": "GT_AVAILABLE",
+   "formalHistory": [
+    "#396 first held-out（旧 parser #393 の formal result は STOP_SAFETY。不変）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf",
+   "physicalPage": 3,
+   "partition": "FIRST_HELDOUT_POSTHOC",
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_TRIGGER_PRESENT",
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 69,
+     "LEFT": 32,
+     "RIGHT": 32,
+     "UNSPLIT": 5
+    },
+    "rowKinds": {
+     "TITLE_OR_HEADING": 7,
+     "MARKER_ROW": 32,
+     "REQUEST_NUMBER_ROW": 30
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 0,
+    "h1TriggerLines": 2,
+    "h1NegativeControlLines": 3
+   },
+   "gtStatus": "GT_AVAILABLE",
+   "formalHistory": [
+    "#396 first held-out（旧 parser #393 の formal result は STOP_SAFETY。不変）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630393.pdf",
+   "physicalPage": 3,
+   "partition": "NEW_HELDOUT_POSTHOC",
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_TRIGGER_PRESENT",
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 69,
+     "LEFT": 32,
+     "RIGHT": 32,
+     "UNSPLIT": 5
+    },
+    "rowKinds": {
+     "TITLE_OR_HEADING": 7,
+     "MARKER_ROW": 32,
+     "REQUEST_NUMBER_ROW": 30
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 0,
+    "h1TriggerLines": 2,
+    "h1NegativeControlLines": 3
+   },
+   "gtStatus": "GT_AVAILABLE",
+   "formalHistory": [
+    "#402 new held-out（H1 の one-shot formal result は SAFETY_PASS_COVERAGE_REPORTED。不変）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 3,
+   "partition": "FIRST_HELDOUT_POSTHOC",
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_TRIGGER_PRESENT",
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 69,
+     "LEFT": 32,
+     "RIGHT": 32,
+     "UNSPLIT": 5
+    },
+    "rowKinds": {
+     "TITLE_OR_HEADING": 7,
+     "MARKER_ROW": 26,
+     "REQUEST_NUMBER_ROW": 36
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 0,
+    "h1TriggerLines": 2,
+    "h1NegativeControlLines": 3
+   },
+   "gtStatus": "GT_AVAILABLE",
+   "formalHistory": [
+    "#396 first held-out（旧 parser #393 の formal result は STOP_SAFETY。不変）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 4,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 75,
+     "LEFT": 36,
+     "RIGHT": 36,
+     "UNSPLIT": 3
+    },
+    "rowKinds": {
+     "MARKER_ROW": 35,
+     "REQUEST_NUMBER_ROW": 37,
+     "TITLE_OR_HEADING": 3
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 0,
+    "h1TriggerLines": 0,
+    "h1NegativeControlLines": 1
+   },
+   "gtStatus": "GT_UNAVAILABLE",
+   "formalHistory": [
+    "development / explored（visual GT なし）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 5,
+   "partition": "FIRST_HELDOUT_POSTHOC",
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 75,
+     "LEFT": 36,
+     "RIGHT": 36,
+     "UNSPLIT": 3
+    },
+    "rowKinds": {
+     "REQUEST_NUMBER_ROW": 54,
+     "MARKER_ROW": 18,
+     "TITLE_OR_HEADING": 3
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 0,
+    "h1TriggerLines": 0,
+    "h1NegativeControlLines": 3
+   },
+   "gtStatus": "GT_AVAILABLE",
+   "formalHistory": [
+    "#396 first held-out（旧 parser #393 の formal result は STOP_SAFETY。不変）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 6,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "classifierSource": "INHERITED",
+   "pageState": "PAGE_ABSTAINED",
+   "candidateReasons": [
+    "PAGE_ABSTAINED"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 0,
+     "LEFT": 0,
+     "RIGHT": 0,
+     "UNSPLIT": 0
+    },
+    "rowKinds": {},
+    "abstainedUnits": 0,
+    "fragmentsAttached": 0,
+    "h1TriggerLines": 0,
+    "h1NegativeControlLines": 0
+   },
+   "gtStatus": "GT_UNAVAILABLE",
+   "formalHistory": [
+    "development / explored（visual GT なし）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 7,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 73,
+     "LEFT": 35,
+     "RIGHT": 35,
+     "UNSPLIT": 3
+    },
+    "rowKinds": {
+     "REQUEST_NUMBER_ROW": 35,
+     "MARKER_ROW": 35,
+     "TITLE_OR_HEADING": 3
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 3,
+    "h1TriggerLines": 0,
+    "h1NegativeControlLines": 3
+   },
+   "gtStatus": "GT_UNAVAILABLE",
+   "formalHistory": [
+    "development / explored（visual GT なし）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 8,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 75,
+     "LEFT": 36,
+     "RIGHT": 36,
+     "UNSPLIT": 3
+    },
+    "rowKinds": {
+     "MARKER_ROW": 31,
+     "REQUEST_NUMBER_ROW": 41,
+     "TITLE_OR_HEADING": 3
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 0,
+    "h1TriggerLines": 0,
+    "h1NegativeControlLines": 2
+   },
+   "gtStatus": "GT_UNAVAILABLE",
+   "formalHistory": [
+    "development / explored（visual GT なし）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "physicalPage": 9,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 48,
+     "LEFT": 35,
+     "RIGHT": 10,
+     "UNSPLIT": 3
+    },
+    "rowKinds": {
+     "MARKER_ROW": 19,
+     "REQUEST_NUMBER_ROW": 26,
+     "TITLE_OR_HEADING": 3
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 1,
+    "h1TriggerLines": 0,
+    "h1NegativeControlLines": 3
+   },
+   "gtStatus": "GT_UNAVAILABLE",
+   "formalHistory": [
+    "development / explored（visual GT なし）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "physicalPage": 3,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_TRIGGER_PRESENT",
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 69,
+     "LEFT": 32,
+     "RIGHT": 32,
+     "UNSPLIT": 5
+    },
+    "rowKinds": {
+     "TITLE_OR_HEADING": 7,
+     "MARKER_ROW": 18,
+     "REQUEST_NUMBER_ROW": 44
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 0,
+    "h1TriggerLines": 2,
+    "h1NegativeControlLines": 3
+   },
+   "gtStatus": "GT_UNAVAILABLE",
+   "formalHistory": [
+    "development / explored（visual GT なし）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "physicalPage": 4,
+   "partition": "FIRST_HELDOUT_POSTHOC",
+   "classifierSource": "INHERITED",
+   "pageState": "PAGE_ABSTAINED",
+   "candidateReasons": [
+    "PAGE_ABSTAINED"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 0,
+     "LEFT": 0,
+     "RIGHT": 0,
+     "UNSPLIT": 0
+    },
+    "rowKinds": {},
+    "abstainedUnits": 0,
+    "fragmentsAttached": 0,
+    "h1TriggerLines": 0,
+    "h1NegativeControlLines": 0
+   },
+   "gtStatus": "GT_AVAILABLE",
+   "formalHistory": [
+    "#396 first held-out（旧 parser #393 の formal result は STOP_SAFETY。不変）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "physicalPage": 2,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_TRIGGER_PRESENT",
+    "H1_NEGATIVE_CONTROL_PRESENT",
+    "KNOWN_TOKENLESS_FRAGMENT_RELEVANT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 70,
+     "LEFT": 31,
+     "RIGHT": 32,
+     "UNSPLIT": 7
+    },
+    "rowKinds": {
+     "TITLE_OR_HEADING": 8,
+     "MARKER_ROW": 19,
+     "REQUEST_NUMBER_ROW": 43
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 1,
+    "h1TriggerLines": 1,
+    "h1NegativeControlLines": 4
+   },
+   "gtStatus": "GT_UNAVAILABLE",
+   "formalHistory": [
+    "development / explored（visual GT なし）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "physicalPage": 3,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 43,
+     "LEFT": 36,
+     "RIGHT": 4,
+     "UNSPLIT": 3
+    },
+    "rowKinds": {
+     "MARKER_ROW": 17,
+     "REQUEST_NUMBER_ROW": 22,
+     "UNKNOWN_ABSTAINED": 1,
+     "TITLE_OR_HEADING": 3
+    },
+    "abstainedUnits": 1,
+    "fragmentsAttached": 0,
+    "h1TriggerLines": 0,
+    "h1NegativeControlLines": 1
+   },
+   "gtStatus": "GT_UNAVAILABLE",
+   "formalHistory": [
+    "development / explored（visual GT なし）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/mofa.go.jp/mofaj/files/100546568.pdf",
+   "physicalPage": 3,
+   "partition": "FIRST_HELDOUT_POSTHOC",
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_TRIGGER_PRESENT",
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 69,
+     "LEFT": 32,
+     "RIGHT": 32,
+     "UNSPLIT": 5
+    },
+    "rowKinds": {
+     "TITLE_OR_HEADING": 7,
+     "MARKER_ROW": 16,
+     "REQUEST_NUMBER_ROW": 46
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 0,
+    "h1TriggerLines": 2,
+    "h1NegativeControlLines": 3
+   },
+   "gtStatus": "GT_AVAILABLE",
+   "formalHistory": [
+    "#396 first held-out（旧 parser #393 の formal result は STOP_SAFETY。不変）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+   "physicalPage": 2,
+   "partition": "FIRST_HELDOUT_POSTHOC",
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_TRIGGER_PRESENT",
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 42,
+     "LEFT": 31,
+     "RIGHT": 6,
+     "UNSPLIT": 5
+    },
+    "rowKinds": {
+     "TITLE_OR_HEADING": 7,
+     "MARKER_ROW": 15,
+     "REQUEST_NUMBER_ROW": 19,
+     "UNKNOWN_ABSTAINED": 1
+    },
+    "abstainedUnits": 1,
+    "fragmentsAttached": 2,
+    "h1TriggerLines": 2,
+    "h1NegativeControlLines": 3
+   },
+   "gtStatus": "GT_AVAILABLE",
+   "formalHistory": [
+    "#396 first held-out（旧 parser #393 の formal result は STOP_SAFETY。不変）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "physicalPage": 3,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_TRIGGER_PRESENT",
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 68,
+     "LEFT": 31,
+     "RIGHT": 32,
+     "UNSPLIT": 5
+    },
+    "rowKinds": {
+     "TITLE_OR_HEADING": 7,
+     "MARKER_ROW": 27,
+     "REQUEST_NUMBER_ROW": 34
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 3,
+    "h1TriggerLines": 2,
+    "h1NegativeControlLines": 3
+   },
+   "gtStatus": "GT_UNAVAILABLE",
+   "formalHistory": [
+    "development / explored（visual GT なし）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "physicalPage": 4,
+   "partition": "FIRST_HELDOUT_POSTHOC",
+   "classifierSource": "INHERITED",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 74,
+     "LEFT": 36,
+     "RIGHT": 35,
+     "UNSPLIT": 3
+    },
+    "rowKinds": {
+     "REQUEST_NUMBER_ROW": 52,
+     "MARKER_ROW": 19,
+     "TITLE_OR_HEADING": 3
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 2,
+    "h1TriggerLines": 0,
+    "h1NegativeControlLines": 1
+   },
+   "gtStatus": "GT_AVAILABLE",
+   "formalHistory": [
+    "#396 first held-out（旧 parser #393 の formal result は STOP_SAFETY。不変）"
+   ]
+  },
+  {
+   "localPdfPath": "data/download/soumu.go.jp/main_content/000901372.pdf",
+   "physicalPage": 3,
+   "partition": "DEVELOPMENT_EXPLORED",
+   "classifierSource": "DIRECT",
+   "pageState": "ASSEMBLED_SPLIT",
+   "candidateReasons": [
+    "H1_TRIGGER_PRESENT",
+    "H1_NEGATIVE_CONTROL_PRESENT"
+   ],
+   "machineCounts": {
+    "units": {
+     "total": 68,
+     "LEFT": 31,
+     "RIGHT": 32,
+     "UNSPLIT": 5
+    },
+    "rowKinds": {
+     "TITLE_OR_HEADING": 7,
+     "MARKER_ROW": 27,
+     "REQUEST_NUMBER_ROW": 34
+    },
+    "abstainedUnits": 0,
+    "fragmentsAttached": 2,
+    "h1TriggerLines": 2,
+    "h1NegativeControlLines": 3
+   },
+   "gtStatus": "GT_UNAVAILABLE",
+   "formalHistory": [
+    "development / explored（visual GT なし）"
+   ]
+  }
+ ]
+}
