@@ -9,6 +9,7 @@ H5（mlit `001630995.pdf` p6）で確認された「right-only raw line 上の r
 ## 2. Source boundary / no PDF visual review
 
 - 入力: 既存 raw-text artifact `data/work/budget-request-raw-text/2024/pages/*.jsonl` の `nonEmptyLines`（PDF 再抽出なし）。82 page の母集団・partition・現行 page state は `tests/fixtures/budget-request-toc-full-corpus-status/2024/full-corpus-status.json`。
+- 入力 artifact の取得元は実行契約からの逸脱を伴う。§13.1 に開示した。
 - PDF・`data/download` の PDF は開いていない。pdftotext / pdftoppm / screenshot / Web は未使用。
 - 使用した JSONL 55 本の sha256 を commit 済み `raw-text-manifest.json` の `artifactSha256` と全件照合して一致（census.json の `input.verifiedArtifactSha256` に全件記録）。各 page の `textSha256` も status fixture と一致。
 
@@ -32,7 +33,14 @@ A2 pattern = right-only candidates が 2 件以上あり、開始 index が tole
 | A1_LIKE_SPARSE | a < 2 かつ A2 pattern なし かつ `PAGE_ABSTAINED`（INSUFFICIENT / MARKER_ONLY） |
 | NO_A2_PATTERN | 上記以外の A2 pattern なし（SPLIT、または a == 0 の `ASSEMBLED_UNSPLIT`） |
 
-A1_LIKE_SPARSE と NO_A2_PATTERN の境界（a == 0 の UNSPLIT をどちらに置くか）は曖昧なので、各分類内に sub-breakdown（accepted0 / accepted1 / accepted2plus / markerOnly）を併記し、レビュー側で再分類できるようにしてある。
+A1_LIKE_SPARSE と NO_A2_PATTERN の境界（a == 0 の UNSPLIT をどちらに置くか）は曖昧なので、各分類内に sub-breakdown（accepted0 / accepted1 / accepted2plus / markerOnly）を併記し、レビュー側で再分類できるようにしてある。境界の扱いは §4.1。
+
+### 4.1 A1_LIKE_SPARSE の用語境界
+
+- **機械的な意味**: #405 実装の `A1_LIKE_SPARSE` は、`PAGE_ABSTAINED`、current accepted evidence < `bandMinEvidence`=2、かつ A2-like rejected right-only pattern で説明されない、という analysis-only の diagnostic classification。該当は H4・H6 の 2 page。
+- **人手判断との境界**: H4・H6 には既存 #404 human review の観測（visual 上 right column が存在し、実際の right request row が 1 件）がある。ただし `A1_LIKE_SPARSE` という機械ラベル自体が visual sparsity を判定しているわけではない。
+- **accepted=0 の UNSPLIT 44 page**: visual evidence がなく A1 の human mechanism と同一とは判定できないため、#405 実装では `A1_LIKE_SPARSE` とせず `NO_A2_PATTERN` に分類した。
+- **execution-contract classification wording ambiguity**: 元の実行契約の文面を文字通り読むと「accepted evidence < minimum」には 0 も含まれ、A1_LIKE_SPARSE=46 / NO_A2_PATTERN=19 とも読めた。実装と本 doc は研究上の semantic boundary を優先し A1_LIKE_SPARSE=2 / NO_A2_PATTERN=63 としている。この差は隠さずここに記録する。census の基礎観測値（accepted 数・right-only 数・pageState）は変わらない。
 
 ## 5. Anchor validation（H4 / H5 / H6）
 
@@ -44,7 +52,7 @@ A1_LIKE_SPARSE と NO_A2_PATTERN の境界（a == 0 の UNSPLIT をどちらに�
 | H5 | mlit 001630995 p6 | 50 | 1（4:53） | 49 | {0:19, 53:1, 55:30} | 30（全て idx55） | A2_LIKE_REJECTED_RIGHT_ONLY |
 | H6 | mod gaisanyoukyu p4 | 23 | 1（4:57） | 22 | {0:22, 57:1} | 0 | A1_LIKE_SPARSE |
 
-H4 / H6 は A1 的（accepted 1・right-only 不成立）、H5 は A2 アンカー（right-only 30 件が idx55 の 1 cluster）となることを機械的に確認した。
+H4 / H6 は機械的に accepted 1・right-only 不成立（`A1_LIKE_SPARSE` の意味は §4.1）、H5 は A2 アンカー（right-only 30 件が idx55 の 1 cluster）となることを機械的に確認した。
 
 ## 6. Corpus census（FACT）
 
@@ -69,11 +77,11 @@ H4 / H6 は A1 的（accepted 1・right-only 不成立）、H5 は A2 アンカ�
 |---|---|---|---|---|---|---|---|
 | mlit.go.jp/page/content/001630995.pdf | 6 | DEVELOPMENT_EXPLORED | PAGE_ABSTAINED | 1 | 30 | {55:30} | H5 |
 
-**H5 以外の候補 page はない。** A1_LIKE_SPARSE の 2 page は H4・H6（FIRST_HELDOUT_POSTHOC、right-only 0）。
+**H5 以外の候補 page はない。** A1_LIKE_SPARSE の 2 page は H4・H6（FIRST_HELDOUT_POSTHOC、right-only 0。このラベルの機械的意味は §4.1）。
 
 ## 8. Negative control（A2_PATTERN_BUT_CURRENTLY_RESOLVED、16 page）
 
-right-only 同型 pattern があるが、現行 accepted evidence だけで band が resolved（SPLIT）の page。いずれも pageState は `ASSEMBLED_SPLIT`。
+right-only 同型 pattern があるが、現行 accepted evidence だけで band が resolved（SPLIT）の page。いずれも pageState は `ASSEMBLED_SPLIT`。accepted evidence 数は最小 3・最大 21（census.json で確認。値: 3,3,3,3,3,5,8,9,10,10,13,14,15,16,17,21）。
 
 | pdf | page | partition | accepted | right-only | idx |
 |---|---|---|---|---|---|
@@ -132,3 +140,10 @@ npx tsx scripts/pipeline-v2/analyze-budget-request-toc-a2-right-band-evidence.ts
 ```
 
 決定性: 同一入力で 2 回実行し census.json の sha256 が一致（`f1e9b0c9c0e7335de5c847d8b7cc0cac2997f20489c240bcfc7a6a61ecc44b60`）。CI は commit 済み census.json と合成行の unit test のみを使い、`data/work` を必要としない。
+
+### 13.1 Source-boundary deviation（開示）
+
+- HelloOrcaWorld には `data/work/budget-request-raw-text/2024/` が存在しなかった。census 実行では、旧 workspace に既存していた raw-text artifact を `--raw-text-root` 経由で read-only 参照した。PDF 再抽出はしておらず、artifact も変更していない。
+- 元の実行契約では、必要な raw-text artifact が workspace 内で利用できず別 source が必要になる場合は STOP / escalation すべき条件だった。Coordinator は STOP せず、旧 workspace の既存 artifact を source として採用した。したがってこれは **execution-contract source-boundary deviation** である。
+- 事後の Contract Compliance Review で次を確認した: raw-text artifact SHA-256 55/55 一致、page-text SHA-256 82/82 一致、manifest 差分は baseCommit metadata のみ、PDF 再抽出なし、artifact mutation なし、census 再現 hash 一致。判定は `SOURCE_DEVIATION_ACCEPTABLE_WITH_DISCLOSURE`。
+- この validation により研究結果の再実行は不要と判断されたが、契約逸脱そのものを遡及的に正当化・消去するものではない。
