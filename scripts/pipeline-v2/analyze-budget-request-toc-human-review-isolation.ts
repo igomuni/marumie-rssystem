@@ -81,7 +81,17 @@ function main() {
       rawLineCount: pg.nonEmptyLines.length,
     };
   });
-  const doc = { schema: 'budget-request-toc-human-review-failure-isolation-observations/v0', note: 'read-only 観測（原因の確定は mechanism status で区別）。parser / H1 / GT / 評価 contract は変更していない', frozen: { full_corpus_h1_output_403_sha256: FROZEN_OUT403 }, pages: result };
+  const doc = { schema: 'budget-request-toc-human-review-failure-isolation-observations/v0', note: 'read-only 観測（原因の確定は mechanism status で区別）。parser / H1 / GT / 評価 contract は変更していない', frozen: { full_corpus_h1_output_403_sha256: FROZEN_OUT403 },
+    postReviewHumanCorrection: {
+      id: 'H7', kind: 'POST_REVIEW_HUMAN_OBSERVATION_CORRECTION',
+      supersedes: '最初の human review 記録: 「tokenless 名称 continuation は request 23 の 1 件のみ」（この記録は誤りだったが、履歴として残す）',
+      correctedObservation: '追加の人間による PDF 原本の目視確認により、tokenless 名称 continuation は少なくとも 2 件: (1) request 18 の 2 行目「な経費」（owner は人間に一意。raw line 62 の左 column・parser の attach と整合）、(2) request 23（2 行目に row-start token なし。owner は人間に一意。continuation の開始位置は request 23 の名称開始位置とほぼ一致）',
+      cause: '最初の human review 時の見落とし。PDF 側の ambiguity や raw representation loss ではない',
+      effect: '直前の failure isolation で UNRESOLVED としていた H7 の human と raw の食い違い（F5）は「human review 時の見落とし」と確定し、解消した。raw representation・machine の attach（owner req18・line 62）は human observation と整合する',
+      machineOutputChanged: false, gtChanged: false, frozenEvaluationArtifactsChanged: false, saved403OutputChanged: false,
+      newVisualInspectionByAssistant: false, otherPagesMechanismStatusChanged: false,
+    },
+    pages: result };
   if (FREEZE) fs.writeFileSync(R(OUT, 'observations.json'), `${JSON.stringify(doc, null, 1)}\n`);
   for (const r of result) console.log(JSON.stringify({ id: r.id, repro: r.reproducesSaved403Output, state: r.pageState, E: r.rightBandEdge, abst: r.pageAbstentionReason, units: r.unitCounts, ev: { all: r.evidence.requestTokenCandidatesAll, counted: r.evidence.countedEvidence, byReason: r.evidence.notCountedByReason, markerCand: r.evidence.markerCandidatesNotInBand.length, candE: r.evidence.candidateE, spread: r.evidence.clusterSpread }, attached: r.fragmentAttachments.map(a => [a.owner.rowStartTokenRaw, a.owner.lineIndex, a.fragments.map(f => f.lineIndex)]), abstained: r.abstainedUnits.map(a => [a.lineIndex, a.reason]), gt: r.gt.available ? { frags: (r.gt as any).fragments, evalFrags: (r.gt as any).evaluation.fragments, inst: (r.gt as any).evaluation.instances } : null }));
 }

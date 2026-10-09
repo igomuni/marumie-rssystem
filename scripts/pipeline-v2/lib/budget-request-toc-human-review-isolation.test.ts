@@ -49,6 +49,14 @@ describe('human review failure isolation の観測（read-only。parser / H1 / G
     expect(p.titleUnits.some((t: { column: string; lineIndex: number; slice: string }) => t.column === 'UNSPLIT' && t.lineIndex === 8 && t.slice === 'に必要な経費')).toBe(true);
     expect(p.gt.available).toBe(false);
   });
+  it('H7 の human observation 訂正が履歴付きで記録され、machine 出力・GT・frozen artifact は変更されていない', () => {
+    const c = obs.postReviewHumanCorrection;
+    expect(c.kind).toBe('POST_REVIEW_HUMAN_OBSERVATION_CORRECTION');
+    expect(c.supersedes).toMatch(/1 件のみ/);
+    expect(c.correctedObservation).toMatch(/request 18/); expect(c.correctedObservation).toMatch(/request 23/);
+    expect(c.cause).toMatch(/見落とし/);
+    expect(c).toMatchObject({ machineOutputChanged: false, gtChanged: false, frozenEvaluationArtifactsChanged: false, saved403OutputChanged: false, newVisualInspectionByAssistant: false, otherPagesMechanismStatusChanged: false });
+  });
   it('H1: 右 column の evidence は 0 で UNSPLIT。parser は入力に geometry を持たない（text のみ）', () => {
     expect(P('H1').evidence.countedEvidence).toBe(0);
     const src = fs.readFileSync('scripts/pipeline-v2/lib/budget-request-toc-row-assembly.ts', 'utf8');

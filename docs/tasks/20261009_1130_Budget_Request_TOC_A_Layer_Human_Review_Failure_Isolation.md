@@ -16,7 +16,7 @@
 | H4 | mhlw 05-2b-01 p4 | 右列は `(項)090` と `50` の 2 行のみ | PAGE_ABSTAINED（`RIGHT_EVIDENCE_INSUFFICIENT`）。evidence 1 | min evidence 2 に対し 1 件（§5） | MECHANISTICALLY_EXPLAINED |
 | H5 | mlit 001630995 p6 | 右列 request 約 30 件・左端一直線 | PAGE_ABSTAINED。evidence 1（request token 50 件中 49 件が行頭＝右のみの raw line） | 約 30 件の右列 request は evidence に数えられない（§5） | MECHANISTICALLY_EXPLAINED |
 | H6 | mod gaisanyoukyu p4 | 右列は request 67 の 1 行のみ | PAGE_ABSTAINED。evidence 1 | H4 と同型（§5） | MECHANISTICALLY_EXPLAINED |
-| H7 | mof 2024ippan_2 p2 | req23 が 2 物理行（continuation 1 件のみ）。罫線の観察は visual のみ | SPLIT（E=55、evidence 3）。attach 1 件（owner は req18・line 62）。header zone の line 8 は whole-line TITLE。GT なし | machine の attach は human の req23 とは別物（§6） | PARTIALLY_EXPLAINED（human と raw の食い違いが UNRESOLVED） |
+| H7 | mof 2024ippan_2 p2 | 初回記録: req23 が 2 物理行（continuation 1 件のみ）→ **訂正（§11）: req18 と req23 の 2 件**。罫線の観察は visual のみ | SPLIT（E=55、evidence 3）。attach 1 件（owner は req18・line 62）。header zone の line 8 は whole-line TITLE。GT なし | machine の attach（req18）は訂正後の human observation（req18 の continuation）と整合。header zone の line 8 は req23 の continuation（§6, §11） | MECHANISTICALLY_EXPLAINED（human 訂正により、食い違いは human review 時の見落としと確定） |
 
 ## 2. Investigation A — page-number handling（コード根拠: `budget-request-toc-row-assembly.ts`）
 
@@ -74,7 +74,7 @@ wrong は 0。#2 は、この page に marker key `(項) 030` が 2 つあり（
 1. machine の fragment attachment は **visual req23 の continuation ではない**。attach は owner req18（line 61）の左 column の continuation「な経費」（line 62）。
 2. `KNOWN_TOKENLESS_FRAGMENT_RELEVANT` を発生させた raw line は **line 8（右 segment「に必要な経費」）**で、header zone の whole-line TITLE。これは human が見た req23 の continuation（line 7 の `23 41-20 …` の続き）と同じ raw line と整合する。
 3. したがって「machine の attach（line 62）」と「flag の根拠（line 8）」は別物。前者は req18 の 2 行目、後者は req23 の 2 行目。
-4. **UNRESOLVED**: human は continuation を req23 の 1 件のみと報告したが、raw には req18 の 2 行目（line 62）もある。human が見落としたのか、視覚上は別の形なのかは本 unit では判断できない（新しい visual 確認は行っていない）。再確認を依頼する。
+4. ~~UNRESOLVED: human は continuation を req23 の 1 件のみと報告したが、raw には req18 の 2 行目もある~~ → **解消（§11）**: 追加の人間目視で req18 の「な経費」も continuation と確認され、最初の human review 時の見落としと確定した（初回記録は誤りだったが、履歴として本文に残す）。
 5. 下部の水平罫線は current algorithm の入力ではない（入力は text のみ）。
 
 ## 7. 罫線 / geometry
@@ -89,7 +89,7 @@ wrong は 0。#2 は、この page に marker key `(項) 030` が 2 つあり（
 | F2 右のみの raw line の request token が evidence に数えられない | H5 | 30 件の右 request が evidence 0、数えられたのは 1 件 | MECHANISTICALLY_EXPLAINED（L22 / L98） |
 | F3 header zone の tokenless continuation が whole-line TITLE に入る | H2（req18）, H7（req23） | fragment 候補にならない | MECHANISTICALLY_EXPLAINED（L141-L142, L205-L209）。#398 の既知の二次限界と同型 |
 | F4 duplicate marker key による評価側の判定不能 | H3 | 1 fragment が unresolved（計 2 件に数える accounting） | MECHANISTICALLY_EXPLAINED（#395 の group 規則） |
-| F5 human と raw の食い違い | H7 | human は req23 のみ、raw には req18 の 2 行目もある | **UNRESOLVED**（human 再確認待ち） |
+| F5 human と raw の食い違い | H7 | 初回記録は req23 のみ、raw には req18 の 2 行目もあった | **RESOLVED（§11）**: human review 時の見落としと確定（追加の人間目視で訂正） |
 | F6 目視と整合する正常観測 | H1, H3 の UNSPLIT | 右 column 空と evidence 0 が一致 | OBSERVED（整合） |
 
 ## 9. 最終報告で答える質問
@@ -99,10 +99,19 @@ wrong は 0。#2 は、この page に marker key `(項) 030` が 2 つあり（
 3. **H3 の wrong / unresolved**: wrong 0。unresolved 1 件（owner が項 030）は duplicate key group（n=2, m=2）による評価側の判定不能。parser の owner は一致。
 4. **H4/H6 は min-evidence=2 で説明できるか**: できる（各 evidence 1 件）。
 5. **H5**: 右 column の約 30 件の request token は右のみの raw line にあり、行頭 token かつ直前の数字がないため evidence に数えられず、数えられた 1 件のみ（L22 / L98）。
-6. **H7 の flag と req23**: flag の根拠 line 8 は req23 の continuation と整合。machine の attach は別（req18）。
+6. **H7 の flag と req23**: flag の根拠 line 8 は req23 の continuation と整合。machine の attach は別（req18 の 2 行目・line 62）で、訂正後の human observation（req18 の continuation）とも整合する。
 7. **罫線 geometry**: 利用していない。
-8. **残った UNRESOLVED**: H7 の human 観測（req18 の 2 行目）との食い違い。それ以外の mechanism は確定。
+8. **残った UNRESOLVED**: なし（H7 の食い違いは §11 の human 訂正で解消）。
 
 ## 10. Next
 
 この unit では hypothesis・preregistration・実装へ進まない。結果のレビューは user と ChatGPT が行う。
+
+## 11. Post-review human correction（H7）
+
+追加の人間による PDF 原本の目視確認（assistant は新しい visual 確認をしていない）により、初回の human review 記録「tokenless 名称 continuation は request 23 の 1 件のみ」は**誤り**と判明し、撤回された（初回記録は上記 §1・§6 に履歴として残してある）。
+
+- 訂正後: H7 の tokenless 名称 continuation は少なくとも 2 件。(1) **request 18** の 2 行目「な経費」: owner は人間に一意で、raw line 62（左 column）・parser の attach（owner req18）と整合。(2) **request 23**: 2 行目に row-start token なし、owner は人間に一意、continuation の開始位置は request 23 の名称開始位置とほぼ一致（前回確認どおり）。
+- 原因: 最初の human review 時の見落とし。PDF 側の ambiguity や raw representation loss ではない。
+- 影響: 直前の H7 の UNRESOLVED（human と raw の食い違い）は解消。本訂正が直接影響する H7 の記述（§1 の H7 行・§6 の項 4・§8 の F5・§9 の回答 6 と 8）だけを更新した。他の page の観察・mechanism status・failure-family の分類は変更していない。
+- 変更していないもの: machine 出力（#403 の保存出力）・GT・frozen evaluation artifact・parser・評価 contract。`observations.json` には `postReviewHumanCorrection` を追記した（既存の観測値は不変）。
