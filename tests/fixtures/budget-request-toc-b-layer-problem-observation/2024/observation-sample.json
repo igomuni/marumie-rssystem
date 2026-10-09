@@ -1,0 +1,173 @@
+{
+  "schema": "budget-request-toc-b-layer-problem-observation/observation-sample/v1",
+  "exploratory": true,
+  "notGroundTruth": true,
+  "purpose": "B層(TOC上のsemantic/administrative hierarchy)のproblem observation用に観察したpageの記録。GTでもheld-outでも評価対象でもない。",
+  "selectionIndependence": "sample選定はcommit済みA層artifactの特徴量だけで、PDFを見る前・B層の観察結果を見る前に固定した規則で行った。観察後に差し替えていない。",
+  "selectionRule": {
+    "population": "TOC 82 page(full-corpus-status.json)",
+    "variationCount": 21,
+    "variations": [
+      "DIRECT",
+      "INHERITED",
+      "SPLIT",
+      "UNSPLIT",
+      "PAGE_ABSTAINED",
+      "DIRECT_SPLIT",
+      "DIRECT_UNSPLIT",
+      "INHERITED_SPLIT",
+      "INHERITED_UNSPLIT",
+      "INHERITED_PAGE_ABSTAINED",
+      "MARKER_RICH(marker unit>=30)",
+      "REQUEST_RICH(request unit>=45)",
+      "DUP_MARKER(census collisions>0)",
+      "FRAGMENT_ATTACHED(fragmentsAttached>0)",
+      "RIGHT_USED_GT",
+      "RIGHT_BLANK_GT",
+      "H1_TRIGGER(triggerLines>0)",
+      "UNIT_ABSTAINED(abstainedUnits>0)",
+      "partition(development/first-heldout/new-heldout)"
+    ],
+    "phase1": "greedy被覆: 未被覆variationを最も多く追加するpageを選ぶ。tieは(localPdfPath,physicalPage)辞書順の先頭。1 PDF 2 pageまで。追加0で停止(6 page)",
+    "phase2": "fill: 被覆が2回未満のvariationを最も多く追加するpageを同じtie規則・同じPDF上限で追加し合計8 pageまで(2 page)",
+    "joinKey": "localPdfPath#physicalPage",
+    "notCategorized": [
+      "OTHER_CODE unit(jinji 900024096 p3のみ)",
+      "circled request number"
+    ]
+  },
+  "pageStateNote": "pageStateは全82 pageのfull-corpus-h1-output.json(post-hoc再実行)のA層状態。DIRECT/INHERITEDはclassifierSource(page分類の由来)で行単位の継承ではない。",
+  "samples": [
+    {
+      "sampleId": "BS-01",
+      "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+      "physicalPage": 3,
+      "partition": "new25",
+      "pageState": "SPLIT",
+      "categories": [
+        "DIRECT",
+        "SPLIT",
+        "DIRECT_SPLIT",
+        "FRAGMENT_ATTACHED",
+        "RIGHT_USED_GT",
+        "H1_TRIGGER",
+        "UNIT_ABSTAINED",
+        "PART_NEW"
+      ],
+      "selectionRationale": "最大被覆(8 variation) [greedy#1]; 満たす variation: DIRECT, SPLIT, DIRECT_SPLIT, FRAGMENT_ATTACHED, RIGHT_USED_GT, H1_TRIGGER, UNIT_ABSTAINED, PART_NEW。値(feature): mk=11, rq=27, frag=1, h1Trigger=2, dupMarkerKeys=0, unitAbstained=1, gtRight=ROWS"
+    },
+    {
+      "sampleId": "BS-02",
+      "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 4,
+      "partition": "first23",
+      "pageState": "UNSPLIT",
+      "categories": [
+        "INHERITED",
+        "UNSPLIT",
+        "INHERITED_UNSPLIT",
+        "DUP_MARKER",
+        "FRAGMENT_ATTACHED",
+        "RIGHT_BLANK_GT",
+        "PART_FIRST"
+      ],
+      "selectionRationale": "greedy 2手目(未被覆 6) [greedy#2]; 満たす variation: INHERITED, UNSPLIT, INHERITED_UNSPLIT, DUP_MARKER, FRAGMENT_ATTACHED, RIGHT_BLANK_GT, PART_FIRST。値(feature): mk=12, rq=13, frag=5, h1Trigger=0, dupMarkerKeys=2, unitAbstained=0, gtRight=BLANK_NO_ROWS"
+    },
+    {
+      "sampleId": "BS-03",
+      "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "physicalPage": 5,
+      "partition": "dev34",
+      "pageState": "SPLIT",
+      "categories": [
+        "INHERITED",
+        "SPLIT",
+        "INHERITED_SPLIT",
+        "MARKER_RICH",
+        "DUP_MARKER",
+        "FRAGMENT_ATTACHED",
+        "PART_DEVELOPMENT"
+      ],
+      "selectionRationale": "greedy 3手目(未被覆 3) [greedy#3]; 満たす variation: INHERITED, SPLIT, INHERITED_SPLIT, MARKER_RICH, DUP_MARKER, FRAGMENT_ATTACHED, PART_DEVELOPMENT。値(feature): mk=33, rq=37, frag=2, h1Trigger=0, dupMarkerKeys=13, unitAbstained=0, gtRight=NO_GT"
+    },
+    {
+      "sampleId": "BS-04",
+      "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+      "physicalPage": 4,
+      "partition": "first23",
+      "pageState": "PAGE_ABSTAINED",
+      "categories": [
+        "INHERITED",
+        "PAGE_ABSTAINED",
+        "INHERITED_PAGE_ABSTAINED",
+        "RIGHT_USED_GT",
+        "PART_FIRST"
+      ],
+      "selectionRationale": "greedy 4手目(未被覆 2) [greedy#4]; 満たす variation: INHERITED, PAGE_ABSTAINED, INHERITED_PAGE_ABSTAINED, RIGHT_USED_GT, PART_FIRST。値(feature): mk=0, rq=0, frag=0, h1Trigger=0, dupMarkerKeys=0, unitAbstained=0, gtRight=ROWS"
+    },
+    {
+      "sampleId": "BS-05",
+      "localPdfPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_02.pdf",
+      "physicalPage": 3,
+      "partition": "first23",
+      "pageState": "UNSPLIT",
+      "categories": [
+        "DIRECT",
+        "UNSPLIT",
+        "DIRECT_UNSPLIT",
+        "RIGHT_BLANK_GT",
+        "UNIT_ABSTAINED",
+        "PART_FIRST"
+      ],
+      "selectionRationale": "greedy 5手目(未被覆 1) [greedy#5]; 満たす variation: DIRECT, UNSPLIT, DIRECT_UNSPLIT, RIGHT_BLANK_GT, UNIT_ABSTAINED, PART_FIRST。値(feature): mk=4, rq=1, frag=0, h1Trigger=0, dupMarkerKeys=0, unitAbstained=1, gtRight=BLANK_NO_ROWS"
+    },
+    {
+      "sampleId": "BS-06",
+      "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "physicalPage": 3,
+      "partition": "new25",
+      "pageState": "SPLIT",
+      "categories": [
+        "DIRECT",
+        "SPLIT",
+        "DIRECT_SPLIT",
+        "REQUEST_RICH",
+        "FRAGMENT_ATTACHED",
+        "RIGHT_USED_GT",
+        "H1_TRIGGER",
+        "PART_NEW"
+      ],
+      "selectionRationale": "greedy 6手目(未被覆 1) [greedy#6]; 満たす variation: DIRECT, SPLIT, DIRECT_SPLIT, REQUEST_RICH, FRAGMENT_ATTACHED, RIGHT_USED_GT, H1_TRIGGER, PART_NEW。値(feature): mk=17, rq=45, frag=1, h1Trigger=2, dupMarkerKeys=0, unitAbstained=0, gtRight=ROWS"
+    },
+    {
+      "sampleId": "BS-07",
+      "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+      "physicalPage": 4,
+      "partition": "dev34",
+      "pageState": "SPLIT",
+      "categories": [
+        "INHERITED",
+        "SPLIT",
+        "INHERITED_SPLIT",
+        "MARKER_RICH",
+        "FRAGMENT_ATTACHED",
+        "PART_DEVELOPMENT"
+      ],
+      "selectionRationale": "fill 規則 1手目(2 回未満の variation を最大数追加) [fill#7]; 満たす variation: INHERITED, SPLIT, INHERITED_SPLIT, MARKER_RICH, FRAGMENT_ATTACHED, PART_DEVELOPMENT。値(feature): mk=30, rq=41, frag=2, h1Trigger=0, dupMarkerKeys=0, unitAbstained=0, gtRight=NO_GT"
+    },
+    {
+      "sampleId": "BS-08",
+      "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+      "physicalPage": 6,
+      "partition": "dev34",
+      "pageState": "PAGE_ABSTAINED",
+      "categories": [
+        "INHERITED",
+        "PAGE_ABSTAINED",
+        "INHERITED_PAGE_ABSTAINED",
+        "PART_DEVELOPMENT"
+      ],
+      "selectionRationale": "fill 規則 2手目 [fill#8]; 満たす variation: INHERITED, PAGE_ABSTAINED, INHERITED_PAGE_ABSTAINED, PART_DEVELOPMENT。値(feature): mk=0, rq=0, frag=0, h1Trigger=0, dupMarkerKeys=0, unitAbstained=0, gtRight=NO_GT"
+    }
+  ]
+}

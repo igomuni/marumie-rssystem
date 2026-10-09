@@ -1,0 +1,1324 @@
+{
+  "schema": "budget-request-toc-b-layer-problem-observation/visual-observations/v1",
+  "exploratory": true,
+  "notGroundTruth": true,
+  "selectionIndependence": "sample選定はcommit済みA層evidenceだけでPDFを見る前に行い、観察後に差し替えていない。",
+  "renderConditions": "全sample 110dpi・cropなし(cropUsed=false)。各要素のrenderConditionsにreviewer記録をそのまま保持。",
+  "reviewerAssignment": {
+    "R1": [
+      "BS-01",
+      "BS-05"
+    ],
+    "R2": [
+      "BS-02",
+      "BS-06"
+    ],
+    "R3": [
+      "BS-03",
+      "BS-07"
+    ],
+    "R4": [
+      "BS-04",
+      "BS-08"
+    ]
+  },
+  "reviewerIndependence": "4名の視覚観察者が各2 pageを観察。観察者間の一貫性は検証していない。",
+  "transcription": "各observationはreviewerの記録をそのまま保持。唯一の改変: R3のcropReason(BS-03,BS-07)末尾の一時render fileの場所を示す断片(; render=…)を除去。",
+  "observations": [
+    {
+      "sampleId": "BS-01",
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": null
+      },
+      "pageLayout": "横長1ページ。上部に表題「令和6年度歳出概算要求額目次」と「9101 東日本大震災復興特別会計（農林水産省）」。その下に罫線で囲まれた2つの表枠(左右)。各枠は『要求番号 | 区分 | ページ』の3列見出し。左枠に32行(plain 2, 会計1, 所管1, 組織1, 項7, 要求番号付20)、右枠に9行(要求番号付8, 項1, plain 1)。左右とも行は上から下へ並ぶ。左枠は最下段まで埋まり、右枠は途中で終わる。要求番号列は最左(右枠は中央左)に数字、区分列は階層に応じてインデント(plain 行<会計<所管<組織<項<要求番号行 の順に左位置が右へずれる、ただし要求番号行は『要求番号列に番号＋区分列左端から code』で項より浅いインデント)。",
+      "O1_semanticRowKinds": [
+        {
+          "kind": "heading/page-title entry (非marker・ページ参照付き目次項目)",
+          "visibleMarkerToken": null,
+          "codeForm": null,
+          "nameExcerpt": "令和6年度歳出概算要求額総表 / 令和6年度歳出概算要求額明細表 / 令和6年度概算要求定員表",
+          "count": 3,
+          "notes": "左2件(ページ1,3)、右最下1件(ページ17)。区分列は最左インデント(会計より浅い)。A層では前2件が TITLE_OR_HEADING、右の1件は UNKNOWN_ABSTAINED(FRAGMENT_WITH_PAGE_REF)、GTは PLAIN_ROW。"
+        },
+        {
+          "kind": "account(会計)",
+          "visibleMarkerToken": "（会計）",
+          "codeForm": "2桁 01",
+          "nameExcerpt": "東日本大震災復興",
+          "count": 1,
+          "notes": "ページ参照3。ページ見出しの『9101 東日本大震災復興特別会計』とは別表記(code 01 vs 9101)。"
+        },
+        {
+          "kind": "jurisdiction(所管)",
+          "visibleMarkerToken": "（所管）",
+          "codeForm": "2桁 31",
+          "nameExcerpt": "復興庁",
+          "count": 1,
+          "notes": "見出しは『（農林水産省）』だが所管名は『復興庁』と視覚上表記。両者の関係はページ内に明示なし。"
+        },
+        {
+          "kind": "organization(組織)",
+          "visibleMarkerToken": "（組織）",
+          "codeForm": "3桁 010",
+          "nameExcerpt": "復興庁",
+          "count": 1,
+          "notes": "名称が所管と同一テキスト。"
+        },
+        {
+          "kind": "item(項)",
+          "visibleMarkerToken": "（項）",
+          "codeForm": "3桁 541,547,551,553,625,824,901,906",
+          "nameExcerpt": "農林水産省共通費 / 農林水産業復興政策費 / 東日本大震災復興事業費 / 東日本大震災災害復旧等事業費",
+          "count": 8,
+          "notes": "左7件(541,547,551,553,625,824,901)、右1件(906)。code は全て異なる(重複なし)。"
+        },
+        {
+          "kind": "request-number row(要求番号付き行)",
+          "visibleMarkerToken": "要求番号列の数字(1は丸数字①、2〜27は通常数字)。（…）形 marker なし",
+          "codeForm": "NN-NN(例 01-95, 03-65, 81-13, 10-46)",
+          "nameExcerpt": "農林水産省一般行政に必要な経費 / 食品の安全と消費者の信頼確保対策に必要な経費 / 漁港施設災害復旧事業に必要な経費",
+          "count": 27,
+          "notes": "左枠20件(要求番号1〜20)＋右枠7件(21〜27)。要求番号は項をまたいで連番。右枠の全unit数9=要求7+項1+定員表1。要求1のみ視覚上丸数字①。"
+        }
+      ],
+      "O2_hierarchyEvidence": [
+        {
+          "relationCandidate": "（会計）01 → （所管）31 → （組織）010 → （項）… が上位から下位の連鎖",
+          "observableEvidence": [
+            "(会計)(所管)(組織)(項)の各marker tokenが種別を明示",
+            "行の並び順が会計→所管→組織→項",
+            "区分列のインデントが段階的に右へずれる",
+            "同一ページ・同一左枠内で連続"
+          ],
+          "classification": "DERIVABLE_FROM_EXPLICIT_MARKERS(種別) + ORDER_DEPENDENT(親の特定は直前marker)",
+          "confidence": "medium"
+        },
+        {
+          "relationCandidate": "各 request-number row の親 = 直前の（項）",
+          "observableEvidence": [
+            "要求番号行は（項）行の直下に並ぶ",
+            "要求番号行にはmarker tokenがなく、親種別を明示するtokenがない",
+            "項が切り替わる位置(547,551,553,625,824,901,906)で次の要求番号行が続く",
+            "要求番号連番(1..27)は項をまたいで連続(項ごとに振り直されない)",
+            "インデントは項より浅い(区分列の左端寄り)"
+          ],
+          "classification": "ORDER_DEPENDENT",
+          "confidence": "medium"
+        },
+        {
+          "relationCandidate": "項541の下に要求1、項547の下に要求2〜15…項553の下に要求18、625下に19、824下に20",
+          "observableEvidence": [
+            "各項の直後に要求番号行が続き、次の項markerで区切り",
+            "項553/625/824の下はそれぞれ1行のみ"
+          ],
+          "classification": "ORDER_DEPENDENT",
+          "confidence": "high"
+        },
+        {
+          "relationCandidate": "右枠の要求21〜24の親 = 左枠最終行の（項）901(column をまたぐ継続)",
+          "observableEvidence": [
+            "左枠最終行が（項）901で、その直下(左枠内)に要求番号行がない",
+            "右枠先頭が要求番号行(21)で、右枠内に先行する（項）markerがない",
+            "右枠内の（項）906は要求24の後に現れる",
+            "罫線上は左右が別の枠"
+          ],
+          "classification": "CROSS_COLUMN_DEPENDENT + ORDER_DEPENDENT + PAGE_CONTEXT_DEPENDENT",
+          "confidence": "medium"
+        },
+        {
+          "relationCandidate": "右枠の要求25〜27の親 = 右枠内（項）906(直前marker)",
+          "observableEvidence": [
+            "（項）906の直下に25,26,27が続く"
+          ],
+          "classification": "ORDER_DEPENDENT",
+          "confidence": "high"
+        },
+        {
+          "relationCandidate": "（項）901は子要求を持たない(左枠内)／持つ(右枠先頭)の判定",
+          "observableEvidence": [
+            "左枠末尾にmarkerのみ、右枠先頭にmarkerなしの要求番号行",
+            "ページ内evidenceだけでは右枠21〜24が901に属するのか別の階層かをtokenからは決められない(marker token不在)",
+            "要求番号が20→21と連続している"
+          ],
+          "classification": "AMBIGUOUS(観察上は継続に見えるが明示tokenなし) / CROSS_COLUMN_DEPENDENT",
+          "confidence": "medium"
+        },
+        {
+          "relationCandidate": "（組織）010 復興庁 が（所管）31 復興庁 の子、（所管）が（会計）01 の子",
+          "observableEvidence": [
+            "並び順・インデント段階・markerの種別"
+          ],
+          "classification": "DERIVABLE_FROM_EXPLICIT_MARKERS + ORDER_DEPENDENT",
+          "confidence": "medium"
+        },
+        {
+          "relationCandidate": "ページ見出し『9101 東日本大震災復興特別会計（農林水産省）』と（会計）01 の関係",
+          "observableEvidence": [
+            "見出しはページ上部の表題領域、表枠の外",
+            "code 9101 と 01、名称『東日本大震災復興特別会計』と『東日本大震災復興』、括弧書き（農林水産省）と所管『復興庁』は表記が異なる",
+            "ページ内に両者の対応を示す明示tokenなし"
+          ],
+          "classification": "AMBIGUOUS / NOT_OBSERVABLE_FROM_A_LAYER(A層ではTITLE_OR_HEADINGとして保持、関係は未決)",
+          "confidence": "medium"
+        },
+        {
+          "relationCandidate": "総表・明細表・定員表(ページ参照付きplain行)と marker 階層の関係",
+          "observableEvidence": [
+            "markerなし、インデントは会計より浅い(最左)",
+            "総表/明細表は（会計）より前、定員表は最後(右枠末尾)",
+            "定員表は右枠の（項）906/要求27の後に位置し、インデントは総表・明細表と同じ最左"
+          ],
+          "classification": "LAYOUT_DEPENDENT + AMBIGUOUS(定員表が直前の項の子か最上位かはmarker tokenがなく、インデントで見る限り最上位側に見える)",
+          "confidence": "medium"
+        }
+      ],
+      "O3_scope": "（会計）01・（所管）31・（組織）010 は左枠の上部に1回ずつ現れ、以降ページ末尾(右枠)まで他の会計/所管/組織markerが現れないため、ページ内では以降の全行を覆うように見える(ただし終了を示すtokenはない)。各（項）は次の（項）marker(または枠/ページ末尾)まで子を支配するように見え、最後の（項）906は 要求27 まで。定員表(plain行・最左インデント)で項の支配がどこで終わるかは明示されず、インデントのみが手がかり。(項)901 は左枠末尾にあり、支配範囲が右枠先頭へ続くか否かはmarkerだけでは不明。",
+      "O4_columnInteraction": {
+        "value": "continuation of same hierarchy / page-order dependent (一部 ambiguous)",
+        "notes": "左枠は最下段まで満杯、右枠は先頭が要求21(親marker無し)で始まる。要求番号は左20→右21と連続し、項901が左末尾でmarkerのみ。右枠に（会計）等の上位marker無し。これらは右枠が左枠の続きである可能性を示すが、継続を明示するtokenは視覚上なし。ページ内evidence上は『左→右の読み順』に依存。右枠内でcontextがresetされるのか継続するのかを示すtoken自体は存在しない。"
+      },
+      "O5_pageBoundary": "ページ先頭(左枠上部)は 総表/明細表(plain) → （会計）→（所管）→（組織）→（項）の完全な上位階層から始まるため、ページ先頭は階層の途中ではなく起点に見える(この表自体が『目次』の1ページ目に相当する見出し構造を持つ。ただし前後ページの存在は前提としない)。ページ末尾(右枠末尾)は 要求27 の後に定員表(plain)で終わり、末尾に未完の項は見えない。ただし左枠末尾の（項）901 は子要求が左枠内に無く、列の切替で子が右枠先頭に現れるため『列境界での継続』の可能性はページ内にある。ページ番号表記『1』が右上に小さく見える。",
+      "O6_physicalVsSemantic": [
+        {
+          "description": "要求18(01-13)の名称が2行折返し。2行目『必要な経費』は要求番号・code・ページ参照を持たない続き行",
+          "aLayerUnits": "1 unit(sourceOrder26, REQUEST_NUMBER_ROW)にfragment1件(textRaw『必要な経費』, lineIndex43)としてFRAGMENT_ATTACHED",
+          "semanticBoundary": "視覚上1つの名称(『…運営費交付金に必要な経費』)。A層ではtitleRawは前半のみで、fragmentを連結しないと名称が完結しない。fragmentの付属先(要求18)は直前の行(同一行ブロック)という位置関係に基づく。"
+        },
+        {
+          "description": "要求番号行は『要求番号列の数字』『code』『名称』『ページ』の4要素が1つの視覚行。A層は rowStartTokenRaw に『1    01‑95』のように要求番号とcodeを連結",
+          "aLayerUnits": "1 unit(REQUEST_NUMBER_ROW)",
+          "semanticBoundary": "要求番号と code は別の視覚列(要求番号列/区分列)にある別要素。A層ではrowStartTokenに連結、codeRawは『01‑95』(non-breaking hyphen相当の字形)。視覚上①(丸数字)だったrequest 1はA層のtoken表記では『1』。"
+        },
+        {
+          "description": "（項）markerの行にはcode・名称・ページ参照が同居",
+          "aLayerUnits": "1 unit(MARKER_ROW)",
+          "semanticBoundary": "1 node = 1 unit で一致。"
+        },
+        {
+          "description": "ページ見出し領域(表題・9101…特別会計（農林水産省）・列見出し)",
+          "aLayerUnits": "右枠側のtitleUnit(UNSPLIT, 5件: '1','令 和…目 次','9101…','要求…','番号…')。通常行のLEFT/RIGHT unitとは別にUNSPLIT扱い",
+          "semanticBoundary": "表題2行・会計名見出し・列見出し(2行)が別units。ページ番号『1』もTITLEとして混入。『9101 東日本大震災復興特別会計（農林水産省）』は1 unit内に code、名称、括弧書きが同居。"
+        },
+        {
+          "description": "定員表行(plain, ページ17)",
+          "aLayerUnits": "1 unit UNKNOWN_ABSTAINED(FRAGMENT_WITH_PAGE_REF)。右枠末尾",
+          "semanticBoundary": "視覚上は総表/明細表と同種のページ参照付き見出し行。A層では総表/明細表はTITLE_OR_HEADINGに分類され、定員表だけABSTAINED。GTはPLAIN_ROW。"
+        }
+      ],
+      "O7_abstentionPropagation": "pageState=SPLIT(列分割済)で、1 unit(定員表行)だけ UNKNOWN_ABSTAINED(FRAGMENT_WITH_PAGE_REF)。B層が安全に言える: 左枠に（会計）01/（所管）31/（組織）010/（項）7件と要求番号行20件、右枠に要求番号行7件+（項）906が、A層のmarker/RN unitとして観測されること。要求18のfragmentが付いていること。言えない: 定員表行が何の種別か(見出し/項の子/最上位)はA層にtokenなし(ABSTAINEDのため保持する)。右枠先頭の要求21〜24の親(列をまたぐ継続)は A層evidenceのみでは確定せず(右枠に上位markerなし、継続を示すtokenなし)、これをA層に無い意味知識で補完できない。ページ見出し(9101…)と（会計）01 の対応も A層にはない。",
+      "markerSemantics": "（会計）（所管）（組織）（項）は括弧つきの種別tokenが種別名を明示している。codeはそれぞれ桁数が異なり(2/2/3/3桁)、会計01・所管31・組織010・項541…を識別するように見える(何のコード体系かはページ内に説明なし)。同一codeの再出現(duplicate marker)はこのページには無い(dupMarkerKeys=0)。（項）には親を示すtokenは含まれず、親は直前の上位marker(並び順)で決まるように見える。要求番号行にはmarker tokenが無く、種別は『要求番号列に数字がある行』という列位置情報に由来する(A層はrowStartTokenに『番号 code』を置く)。『01-95』のようなcode形式は項のcode(3桁)とは別形。同じ要求code『06-65』『01-13』『01-49』等はこのページ内では1回ずつ(重複なし)。",
+      "requestParentage": "要求の親は、観察上は『直前の（項）marker』(並び順)で決まるように見える。項ごとに要求番号が振り直されず連番(1..27)。親を示すtokenは要求行内には無い。直前markerだけで足りるのは左枠内と右枠の要求25〜27(項906直後)。右枠先頭の要求21〜24は右枠内に先行markerが無く、左枠最終行（項）901 を直前markerとして参照する必要があるように見える(column遷移でcontextがcontinueしているように見えるが、明示tokenはなくAMBIGUOUS)。要求18のfragmentは名称の完結に影響する(semantic identityの名称部分)が、親の決定には影響しない。要求番号が連番であることは、列をまたいだ継続の補助的観察(ただし番号から親を推測してはならない、という制約下では親決定の根拠にはしない)。",
+      "ambiguities": [
+        "右枠先頭の要求21〜24 の親（項）が左枠最終行の901か否か(marker tokenなし、列またぎ)",
+        "定員表行の階層位置(最上位かどうか)",
+        "ページ見出し『9101…特別会計（農林水産省）』と（会計）01/（所管）31 復興庁の対応",
+        "（所管）31『復興庁』・（組織）010『復興庁』が同名で2 node に見える点の意味は不明",
+        "右枠が左枠の継続である明示的tokenの欠如"
+      ],
+      "unreadable": [],
+      "visibleTextExcerpts": [
+        "令和6年度歳出概算要求額目次",
+        "9101東日本大震災復興特別会計（農林水産省）",
+        "（会計） 01 東日本大震災復興",
+        "（所管） 31 復興庁",
+        "（組織） 010 復興庁",
+        "（項） 541 農林水産省共通費",
+        "①01-95 農林水産省一般行政に必要な経費",
+        "（項） 553 東日本大震災復興国立研究開発法人水産研究・教育機構運営費",
+        "18 01-13 東日本大震災復興に係る国立研究開発法人水産研究・教育機構運営費交付金に／必要な経費",
+        "（項） 901 東日本大震災復興事業費",
+        "21 10-46 農業生産基盤整備事業に必要な経費",
+        "（項） 906 東日本大震災災害復旧等事業費",
+        "令和6年度概算要求定員表 17"
+      ],
+      "overallConfidence": "medium",
+      "notes": "左枠32行=plain2+marker10(会計1/所管1/組織1/項7)+要求20。A層unit46には見出し5件(UNSPLIT)を含む。要求1は視覚上丸数字『①』、他は通常数字(A層/GTはtoken『1』)。見出しの所管名(農林水産省)と（所管）31『復興庁』の不一致は視覚上そのまま。"
+    },
+    {
+      "sampleId": "BS-02",
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": null
+      },
+      "pageLayout": "横長ページ。上端に頁番号「2」、その下に2カラム枠の表ヘッダ(要求番号/区分/ページ が左右に各1組)。左カラムのみに行があり、右カラムはヘッダと罫線枠のみで行なし(視覚上空白)。左カラム内は行が上から下へ並び、下約1/4は空白。列は 要求番号(左端) / 区分(marker+code+名称、marker は段下げされインデント) / ページ。(組織)は約1段、(項)はさらに深い段にインデントされ、要求番号行は(項)より浅い位置に番号と codeが並ぶ。",
+      "O1_semanticRowKinds": [
+        {
+          "kind": "organization-marker row",
+          "visibleMarkerToken": "（組織）",
+          "codeForm": "3桁 040 / 060",
+          "nameExcerpt": "資源エネルギー庁 / 中小企業庁",
+          "count": 2,
+          "notes": "A層 MARKER_ROW (rowStartTokenRaw=（組織）)。pageRef 81/90 を持つ"
+        },
+        {
+          "kind": "item(項)-marker row",
+          "visibleMarkerToken": "（項）",
+          "codeForm": "3桁 010,015,020,030,040,050 / 010,030,063,080",
+          "nameExcerpt": "資源エネルギー庁共通費 / 中小企業庁共通費 / 鉱物資源安定供給確保費",
+          "count": 10,
+          "notes": "010 と 030 が(組織)040配下・060配下で各2回出現(duplicate marker)。名称が長い項は2行折返し(030,040 と 015 は1行)"
+        },
+        {
+          "kind": "request-number row",
+          "visibleMarkerToken": "なし(行頭は要求番号の数字。38 と 46 は丸囲み)",
+          "codeForm": "NN-NN 形式(01-95,06-95,11-95,01-63,04-60 等)+ 左端に連番 38〜50",
+          "nameExcerpt": "資源エネルギー庁一般行政に必要な経費 / 審議会に必要な経費",
+          "count": 13,
+          "notes": "A層 REQUEST_NUMBER_ROW、rowStartTokenRaw='38    01‑95'(番号+code)。丸囲み(38,46)は A層 rowStartTokenRaw に現れない。複数行折返しのものが 41,43,44 の3件"
+        },
+        {
+          "kind": "page heading / table header",
+          "visibleMarkerToken": "なし",
+          "codeForm": "頁番号「2」、「要求番号 区分 ページ」ヘッダ",
+          "nameExcerpt": "2 / 要求 区 分 ページ 要求 区 分 ページ / 番号 番号",
+          "count": 3,
+          "notes": "A層 TITLE_OR_HEADING 3 unit(ヘッダは2 unitに分割、左右2組が1 lineに連結)。なお本ページに府省庁名見出し・目次タイトルは視覚上なし"
+        }
+      ],
+      "O2_hierarchyEvidence": [
+        {
+          "relationCandidate": "（項）が直前の（組織）に属する",
+          "observableEvidence": [
+            "（組織）行の直後に（項）行が並ぶ",
+            "（項）は（組織）より深くインデント",
+            "（項）は次の（組織）が現れるまで続く"
+          ],
+          "classification": "ORDER_DEPENDENT",
+          "confidence": "high"
+        },
+        {
+          "relationCandidate": "要求番号行が直前の（項）に属する",
+          "observableEvidence": [
+            "（項）の直後に番号行が並ぶ",
+            "要求番号行は marker token を持たない",
+            "インデントは（項）より浅く、（組織）より深い位置から code が始まる(視覚的)",
+            "罫線による grouping はなし"
+          ],
+          "classification": "ORDER_DEPENDENT",
+          "confidence": "high",
+          "notes": "token/code 単体では親は決まらず直前 marker との並び順に依存。code の NN-NN は親項を指しているようには見えない(視覚上、項 code 010 と request code 01-95 の対応は観察できない)"
+        },
+        {
+          "relationCandidate": "（項）010/030 の同 code 再出現は別の親（組織）下の別 node",
+          "observableEvidence": [
+            "両者の間に（組織）040→060 の遷移がある",
+            "名称が異なる(資源エネルギー庁共通費 vs 中小企業庁共通費)"
+          ],
+          "classification": "ORDER_DEPENDENT",
+          "confidence": "high",
+          "notes": "code だけでは識別できず、直前（組織）との組が識別に必要。A層 census は precedingOrgCode を持つ"
+        },
+        {
+          "relationCandidate": "折返し fragment の所有者は直前の marker/request 行",
+          "observableEvidence": [
+            "視覚上、折返し行が所有行の直下で名称の続きとして同じインデント位置に出る",
+            "pageRef/番号/code は所有行側のみ"
+          ],
+          "classification": "LAYOUT_DEPENDENT",
+          "confidence": "high",
+          "notes": "census は 030 を FRAGMENT_OWNER_AMBIGUITY と分類(key 同一の2件のうち1件のみ fragment を持つ)。本ページの視覚上は 040 配下の 030 に fragment があり所有は明らか"
+        },
+        {
+          "relationCandidate": "丸囲み番号(38,46)の意味と親子関係",
+          "observableEvidence": [
+            "（組織）→最初の（項）→最初の要求番号行に丸囲みが付く(2/2)"
+          ],
+          "classification": "NOT_OBSERVABLE_FROM_A_LAYER",
+          "confidence": "medium",
+          "notes": "丸囲みは視覚上のみで A層 token には出ない。意味は本ページから不明、判定しない"
+        }
+      ],
+      "O3_scope": "（組織）040 は ページ先頭〜（組織）060 直前まで（項）010〜050 とその要求を支配するように見える。（組織）060 は 060 行〜ページ末尾(要求50)まで。各（項）は次の（項）または（組織）まで要求を支配。最後の（項）080 と要求50 の後ろに続きがあるかはページ内 evidence では不明。",
+      "O4_columnInteraction": {
+        "value": "1 column only(右カラムは視覚上空白。A層 UNSPLIT・NO_RIGHT_COLUMN_EVIDENCE と整合)",
+        "notes": "2カラム枠だが左のみ行あり。右の空白に意味を付けない。左→右への継続の有無はページ内 evidence なし"
+      },
+      "O5_pageBoundary": "先頭の行は（組織）040 で、親 marker を伴わない request ではない(先頭が階層の起点)。ただし要求番号が 38 から始まる(ページ内だけでは他の組織から続くかの evidence なし)。末尾は（項）080 → 要求50 で、ページ下部は広い空白、続きの有無はページ内からは判断不能。",
+      "O6_physicalVsSemantic": [
+        {
+          "description": "折返し名称が fragment として所有 unit に付く",
+          "aLayerUnits": "unit9(request 41)+fragment '勘定へ繰入れに必要な経費'、unit12((項)030)+'ー対策特別会計へ繰入'、unit13(43)、unit14((項)040)+'繰入'、unit15(44)",
+          "semanticBoundary": "1つの名称が2物理行だが 1 unit内に fragment として保持されており境界は一致。fragment の切れ方が語中('エネルギ|ー'、'繰|入')なので名称は連結しないと完結しない"
+        },
+        {
+          "description": "marker と code と名称は1 unit内に保持(分離なし)",
+          "aLayerUnits": "MARKER_ROW 12 unit",
+          "semanticBoundary": "1 unit=1 marker node で一致"
+        },
+        {
+          "description": "要求番号の連番と code が同一 unit 内に混在",
+          "aLayerUnits": "rowStartTokenRaw='38    01‑95'、codeRaw='01‑95'",
+          "semanticBoundary": "2種の識別子(連番と NN-NN)が1 token 内に合成。連番の丸囲みは落ちる"
+        },
+        {
+          "description": "ヘッダ・頁番号が TITLE unit に複数分割",
+          "aLayerUnits": "unit0-2(頁番号、ヘッダ2行)",
+          "semanticBoundary": "ヘッダ1つが2 unit、左右2組が1文字列に連結。意味 node ではない(heading として扱う根拠は A層 kind=TITLE_OR_HEADING のみ)"
+        }
+      ],
+      "O7_abstentionPropagation": "pageState=ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE、abstained unit 0、全 unit RESOLVED。B層が言えること: ページ内の marker 順序・code・名称・pageRef は全て A層 evidence として存在し、並び順から親子候補は列挙可能。言えないこと: 右カラムが本当に空か(A層は右カラム evidence なしと言うのみ、視覚では空白)、ページ外への継続、丸囲みの意味、同 code (項) の同一性は precedingOrg 文脈が必要。",
+      "markerSemantics": "token（組織）/（項）は semantic type を明示。code は 3桁で、同 code(010,030)が別(組織)下に再出現するため code 単独では識別せず、親(組織)と組になって識別するように見える(意味は本ページから断定しない)。要求の NN-NN code は同一ページ内で重複(01-95 が 38,42,45 / 01-63 が 41,43,44 / 01-60 が 46,48,50)し識別子でない。parent は token だけでは決まらず order が必要。",
+      "requestParentage": "request の親候補は直前の（項）だが、それは並び順のみに依存。marker token や code に親参照はない。単一カラムのため column transition なし。fragment は名称の一部で request 名称の完結に必要 → fragment attachment は名称 identity に影響し、parent には影響しない。",
+      "ambiguities": [
+        "丸囲み番号の意味(A層 token に出ない)",
+        "ページ末尾後の継続",
+        "右カラム空白の意味",
+        "(項) 030 の fragment owner(census 上は曖昧、視覚上は 040 配下の側)"
+      ],
+      "unreadable": [],
+      "visibleTextExcerpts": [
+        "（組織） 040 資源エネルギー庁 81",
+        "（項） 010 資源エネルギー庁共通費 81",
+        "38 01-95 資源エネルギー庁一般行政に必要な経費 81",
+        "（項） 030 石油石炭税財源燃料安定供給対策及エネルギー需給構造高度化対策費エネルギ|ー対策特別会計へ繰入",
+        "（組織） 060 中小企業庁 90",
+        "（項） 080 独立行政法人中小企業基盤整備機構運営費 102"
+      ],
+      "overallConfidence": "high",
+      "notes": "A層サマリと視覚内容は全行で対応(28 unit、marker 12 / request 13 / title 3)。「（項）」の個数は視覚上10、A層 MARKER_ROW 12 は組織2+項10 で一致。"
+    },
+    {
+      "sampleId": "BS-03",
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": "110dpiで全行判読可能のため crop 不要"
+      },
+      "pageLayout": "横長1ページ。上端に頁番号『3』。表ヘッダ『要求番号|区分|ページ』が左右2連(左右各々に要求番号列・区分列・ページ列)。左右は縦二重罫線で分離。各 column 内で、要求番号が左端の狭い列、marker 行は区分列内でインデント(右寄り)、request 行は番号列に番号+区分列左寄せ。罫線は表枠と列区切りのみで、親子を示す行間罫線は見えない。",
+      "O1_semanticRowKinds": [
+        {
+          "kind": "項 marker 行",
+          "visibleMarkerToken": "（項）",
+          "codeForm": "3桁数字(020,030…180左; 010,030…150右; 055 のみ非10刻み)",
+          "nameExcerpt": "林野庁施設費 / 水産庁共通費",
+          "count": "左17 + 右15 = 32",
+          "notes": "区分列でインデント、右端にページ番号"
+        },
+        {
+          "kind": "組織 marker 行",
+          "visibleMarkerToken": "（組織）",
+          "codeForm": "3桁数字 090",
+          "nameExcerpt": "水産庁",
+          "count": 1,
+          "notes": "右 column の中ほど(request 90 の次行)。左 column には組織 marker 無し"
+        },
+        {
+          "kind": "request 行",
+          "visibleMarkerToken": "なし(要求番号列の整数が行頭)",
+          "codeForm": "要求番号(72-108 の整数)+ 区分列に NN-NN 形式コード(01-95 等)",
+          "nameExcerpt": "林野庁施設整備に必要な経費",
+          "count": "左18(72-89)+右19(90-108)=37",
+          "notes": "request 91 は番号が丸囲み(⑨①様)で視認される(A層は '91' として RESOLVED)。丸囲みの意味は観察不能"
+        },
+        {
+          "kind": "表ヘッダ/頁番号",
+          "visibleMarkerToken": "なし",
+          "codeForm": "なし",
+          "nameExcerpt": "要求 区分 ページ / 3",
+          "count": "A層 TITLE 3 unit",
+          "notes": "表の列見出しで、semantic node ではなく列見出し・頁番号に見える(判断は B層に委ねる)"
+        }
+      ],
+      "O2_hierarchyEvidence": [
+        {
+          "relationCandidate": "request の親は直前の（項）(同一 column 内)",
+          "observableEvidence": [
+            "marker 行直後に request 行が続く行順",
+            "項 marker にはページ番号が付き、直後 request と同ページ番号が多い(例 項020/287 と request72/287)",
+            "インデント差(marker が深くインデント)"
+          ],
+          "classification": "ORDER_DEPENDENT",
+          "confidence": "medium"
+        },
+        {
+          "relationCandidate": "1つの（項）が複数 request を持つ(項050→75,76 / 項130→84,85 / 項010→91,92,93 / 項080→100,101)",
+          "observableEvidence": [
+            "marker を挟まず request 行が連続",
+            " 後続 request に marker が無い"
+          ],
+          "classification": "ORDER_DEPENDENT",
+          "confidence": "medium"
+        },
+        {
+          "relationCandidate": "右 column 最初の request 90 の親",
+          "observableEvidence": [
+            "request 90 の直前(同 column)に marker 無し",
+            "左 column 最後の行は（項）180 で request が未出現",
+            "request 90 の区分名が左（項）180 の名称と語幹一致(視覚)",
+            "要求番号 89→90 が column をまたいで連続"
+          ],
+          "classification": "CROSS_COLUMN_DEPENDENT",
+          "confidence": "medium"
+        },
+        {
+          "relationCandidate": "（項）の親は（組織）",
+          "observableEvidence": [
+            "右 column のみ: （組織）090 の直後に（項）010 が続く行順",
+            "左 column: ページ内に組織 marker 無し"
+          ],
+          "classification": "ORDER_DEPENDENT",
+          "confidence": "medium"
+        },
+        {
+          "relationCandidate": "左 column の（項）020..180 の組織所属",
+          "observableEvidence": [
+            "ページ内に左 column を支配する（組織）marker 無し",
+            "A層 census の precedingOrgCode = None"
+          ],
+          "classification": "NOT_OBSERVABLE_FROM_A_LAYER",
+          "confidence": "high"
+        },
+        {
+          "relationCandidate": "同コードの（項）030-150 が左右に出現しても別 node",
+          "observableEvidence": [
+            "同コード+同種 marker が左(組織marker無し)と右（組織）090 後に出現",
+            "名称は異なる(左: 森林研究・整備機構 / 右: 水産研究・教育機構 等)",
+            "A層 census: 13 duplicate key, GT 無し(NOT_EVALUABLE_NO_GT)"
+          ],
+          "classification": "PAGE_CONTEXT_DEPENDENT",
+          "confidence": "medium"
+        },
+        {
+          "relationCandidate": "組織コード090 と（項）090(左 column, 借入金利子…)が同コード",
+          "observableEvidence": [
+            "（組織）090 水産庁 と（項）090 借入金利子… で同じ 090 だが marker token が異なる"
+          ],
+          "classification": "DERIVABLE_FROM_EXPLICIT_MARKERS",
+          "confidence": "medium"
+        }
+      ],
+      "O3_scope": "左 column: 先頭〜末尾まで（項）が連続し、各（項）は次の（項）直前までの request を支配するように見える(行順)。左 column 全体を覆う（組織）は無い。右 column: request 90 は先頭で、（組織）090 がその次行に出現し、（項）010 が組織の下に続く。（組織）090 の支配範囲は右 column 末尾まで続くように見えるが、末尾に終端表示は無い(ページ内で閉じない)。左末尾（項）180 は request を持たないままページ内で column が切れる。",
+      "O4_columnInteraction": {
+        "value": "CROSS_COLUMN_DEPENDENT / page-order dependent (ambiguous)",
+        "notes": "2 column。要求番号が 72→89(左)、90→108(右)と連続し、左末尾が request 未出現の（項）180・右先頭が marker 無しの request 90 である。完全に独立した階層とは見えないが、continuation かは A層 evidence のみでは確定できない。右 column 内で（組織）090 が出現し、同じ 030-150 コードが左右に重複するため column 間でコード空間は共有されない。"
+      },
+      "O5_pageBoundary": "先頭: 左先頭は（項）020 で、直前の（組織）は同ページに無い→階層の途中から始まるように見える(組織 marker 欠如)。末尾: 左 column 末尾は request の無い（項）180、右 column 末尾は request 108(最終行)。右先頭は parent marker を伴わない request 90。ページ境界を越える continuation の可能性は、先頭の組織 marker 欠如と右先頭 request の marker 欠如の両方で示唆されるが、他ページ無しに確認不能。",
+      "O6_physicalVsSemantic": [
+        {
+          "description": "request 81 が2行(折返し)。A層は fragments[0]='へ繰入れに必要な経費' (lineIndex 26)",
+          "aLayerUnits": "L order18 REQUEST_NUMBER_ROW 1 unit + fragment 1",
+          "semanticBoundary": "視覚上 1 request の名称が2行。fragment が同 request に属する(attach は視覚的に確認可)"
+        },
+        {
+          "description": "request 102 も2行折返し(fragment 'に必要な経費')",
+          "aLayerUnits": "R order22 1 unit + fragment",
+          "semanticBoundary": "同上"
+        },
+        {
+          "description": "頁番号『3』と列見出し(要求/区分/ページ/番号)が TITLE unit 3 つ",
+          "aLayerUnits": "TITLE ×3 (lineIndex 0-2、各 unit は左右両見出しを1行に連結)",
+          "semanticBoundary": "左右の見出しが1 unit に結合されており、column 別に分離されていない"
+        },
+        {
+          "description": "（組織）090 水産庁 は A層上 MARKER_ROW として request 90 の次、（項）010 の前に位置",
+          "aLayerUnits": "R order1",
+          "semanticBoundary": "1 marker=1 unit で一致"
+        },
+        {
+          "description": "request 行: 要求番号と区分コードが1 unit に統合(rowStartTokenRaw に『72   01‑95』)",
+          "aLayerUnits": "REQUEST_NUMBER_ROW",
+          "semanticBoundary": "視覚上は『要求番号列』と『区分列内のコード』が別 column 位置。A層は rowStartToken に連結(番号とコードの分離は未提供=codeRaw は区分コードのみ)"
+        }
+      ],
+      "O7_abstentionPropagation": "pageState=ASSEMBLED_SPLIT、abstainedUnits 0、unit は全て RESOLVED。B層が安全に言えること: 各 unit の marker token・code・title・page ref・column・sourceOrder、fragment 有無。言えないこと: 左 column の組織所属(A層に組織情報なし)、request 90 の親、duplicate key(030-150)の同一性、column 間の継続性。これらは A層出力に無く、保持すべき不確実性。",
+      "markerSemantics": "（項）（組織）token は種別を明示する。code は marker 種別内の通し番号に見える(項は 010 刻み10、055 のみ例外)。同一 code(030-150)が左右で再出現し、token・code だけでは同一性や親は決まらず、どの column・どの組織の後かという位置文脈が必要(page-context dependent)。組織090と項090は token が異なるため区別できる。",
+      "requestParentage": "request 行は marker token を持たず、親候補は『同 column 内の直前の（項）』という行順のみ(ORDER_DEPENDENT)。直前 marker 単独で足りるかは、右先頭 request 90 のように直前 marker が同 column に無い場合に不足し、column transition で継続か reset かは A層だけでは不明。fragment は名称の一部で semantic identity(request 番号・code)は fragment に依らない。request number からの親推測は行っていない。",
+      "ambiguities": [
+        "request 90 の親(右 column 先頭、同 column に直前 marker 無し)",
+        "左 column の（組織）所属が不明",
+        "左右の重複 code 030-150 が同一 node か別 node か(A層 GT 無し)",
+        "request 91 の丸囲み表記の意味",
+        "TITLE unit の列見出しが semantic heading か否か"
+      ],
+      "unreadable": [
+        "request 91 の番号の丸囲み(⑨① に見える)。数字は 91 と読めるが丸囲みの意図は不明"
+      ],
+      "visibleTextExcerpts": [
+        "（項） 020 林野庁施設費 287",
+        "72 01-95 林野庁施設整備に必要な経費 287",
+        "（組織） 090 水産庁 320",
+        "（項） 055 国立研究開発法人水産研究・教育機構船舶建造費 332",
+        "90 01-49 山林施設災害復旧事業等工事諸費に必要な経費 318"
+      ],
+      "overallConfidence": "medium-high",
+      "notes": "A層サマリ(unitCount 73=左35+右35+TITLE3)と視覚が対応。GT 無し。左右 column の marker/request 件数は A層と一致。"
+    },
+    {
+      "sampleId": "BS-04",
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": "110dpiで全行判読可能のため不要"
+      },
+      "pageLayout": "横長ページ。上部に小さなページ番号『2』。二分割の表枠(左右各: 要求番号 / 区分 / ページ の列見出し)。左列は縦に36行ほど、右列は上端2行(項090・要求50)のみで以降は空白。各marker行は(項)+3桁code+名称、各request行は左端に要求番号・その右に『NN-NN』形式code+名称、右端にページ数。marker行は名称が字下げされ、request行は要求番号側から始まる(視覚上のindent差)。罫線は表外枠と列見出し下線のみで、行間の罫線なし。",
+      "O1_semanticRowKinds": [
+        {
+          "kind": "項marker行",
+          "visibleMarkerToken": "（項）",
+          "codeForm": "3桁数字(180,190,…,900,050,060,070,080,090)",
+          "nameExcerpt": "障害者職業能力開発支援費 / 予備費 / 業務取扱費",
+          "count": 17,
+          "notes": "左16+右1。『項』が視覚上の語。3桁codeは昇順だが050・060が900の後に再出現(勘定の後)。"
+        },
+        {
+          "kind": "勘定marker行",
+          "visibleMarkerToken": "（勘定）",
+          "codeForm": "1桁数字(3)",
+          "nameExcerpt": "徴収勘定",
+          "count": 1,
+          "notes": "(項)でない別tokenで、名称行のみ・request行を直接伴わず次行が(項)050。既存categoryに押し込まず別kindとして記録。"
+        },
+        {
+          "kind": "request行",
+          "visibleMarkerToken": null,
+          "codeForm": "要求番号(31〜50連番)+『NN-NN』code(例 10-08, 01-98, 20-20)",
+          "nameExcerpt": "障害者に対する職業能力の開発の支援に必要な経費 / 予備費",
+          "count": 20,
+          "notes": "marker tokenを持たず、要求番号の存在でrequest行と視認。『NN-NN』codeの意味は見た目からは不明。"
+        },
+        {
+          "kind": "列見出し/ページ番号",
+          "visibleMarkerToken": null,
+          "codeForm": "『要求番号』『区分』『ページ』/ 左上『2』",
+          "nameExcerpt": "区 分",
+          "count": 1,
+          "notes": "見出し行は各列に1回。ページ番号『2』は表枠外。"
+        }
+      ],
+      "O2_hierarchyEvidence": [
+        {
+          "relationCandidate": "request行の直前の（項）marker行が親候補",
+          "observableEvidence": [
+            "marker行の直後にrequest行が並ぶ",
+            "marker行とrequest行でページ列の数値が同一(例 556/556, 558/558, 616/616)",
+            "request行側の字下げがmarkerより浅い"
+          ],
+          "classification": "ORDER_DEPENDENT",
+          "confidence": "medium"
+        },
+        {
+          "relationCandidate": "1つの（項）の下に複数request(例 項240→35,36 / 項050→44,45,46)",
+          "observableEvidence": [
+            "(項)240行の後に要求番号35,36が連続し次の(項)245まで他marker無し",
+            "項050の後に44,45,46が連続",
+            "ページ数は項と最初のrequestで一致(617/617)、後続requestは異なる値(671,740,772)"
+          ],
+          "classification": "ORDER_DEPENDENT",
+          "confidence": "medium"
+        },
+        {
+          "relationCandidate": "（勘定）3は後続の（項）050/060/…の上位として働く可能性",
+          "observableEvidence": [
+            "(勘定)行の直後に(項)050が来る",
+            "code 050が先行する(項)900の後で再出現(codeの順序リセット)",
+            "(勘定)行と(項)050のページ数が同一(710)"
+          ],
+          "classification": "AMBIGUOUS",
+          "confidence": "low"
+        },
+        {
+          "relationCandidate": "（項）codeの再出現(050,060…が(勘定)後にあり、180〜900の系列とは別列として存在)",
+          "observableEvidence": [
+            "codeの数値昇順が900→050で戻る",
+            "間に(勘定)markerが介在"
+          ],
+          "classification": "ORDER_DEPENDENT",
+          "confidence": "medium"
+        },
+        {
+          "relationCandidate": "要求番号は列をまたいで連続(49→50)",
+          "observableEvidence": [
+            "左列末49、右列先頭50"
+          ],
+          "classification": "CROSS_COLUMN_DEPENDENT",
+          "confidence": "medium (連番はparentではなく順序証跡のみ)"
+        },
+        {
+          "relationCandidate": "右列(項)090とrequest50の関係",
+          "observableEvidence": [
+            "同一列内で連続",
+            "ページ数778同士"
+          ],
+          "classification": "DIRECTLY_OBSERVABLE",
+          "confidence": "medium"
+        }
+      ],
+      "O3_scope": "ページ内で(項)markerの支配範囲は次の(項)または(勘定)markerの直前まで。(項)050の範囲は44-46の3 request。(勘定)3の範囲は視覚的に区切る罫線・marker終端が無く、(項)050以降がページ内で何行まで及ぶか(ページ末まで/060以降を含むか)は不明。",
+      "O4_columnInteraction": {
+        "value": "page-order dependent(左→右の連番上は連続だが親関係はAMBIGUOUS)",
+        "notes": "左列は(項)080→要求49で終わり、右列は新(項)090で始まるため、このページ内ではcolumn跨ぎのrequestは存在しない。右列(項)090がページ内で完結。左右はキー列見出しが重複する同形式。'continuation of same hierarchy'か'independent'かは見た目だけでは区別不能(要求番号の連番49→50が連続性を示唆するが親関係は示さない)。"
+      },
+      "O5_pageBoundary": "ページ先頭は(項)180 marker行から始まる(parent markerを伴わないrequestで始まらない)。ただし(項)180の上位(省庁/組織/会計名等の見出し)はページ内に無く、見えない。ページ末はrequest50(項090下)で終了し、右列の下は空白(以降の行は無い)。次ページへ続くかはページ内evidenceからは不明。",
+      "O6_physicalVsSemantic": [
+        {
+          "description": "A層のunitは0件(PAGE_ABSTAINED)なのに、視覚上は2列計38行(marker18+request20)が存在。GT rowsは38行を保持。",
+          "aLayerUnits": "unitCount=0, units=[], pageAbstentionReason=RIGHT_EVIDENCE_INSUFFICIENT, rightBandEdge=null",
+          "semanticBoundary": "視覚上は右列に(項)090 + request50の2行が存在。A層は右列を行化していない。"
+        },
+        {
+          "description": "(項)markerとrequestは別physical rowだが同じページ列値を共有し、1つのsemantic群(項+配下request)に見える。",
+          "aLayerUnits": "GTではMARKER_ROWとREQUEST_NUMBER_ROWが別行",
+          "semanticBoundary": "semantic nodeは複数物理行に跨る"
+        }
+      ],
+      "O7_abstentionPropagation": "このページはPAGE_ABSTAINED(unit 0)。視覚では左右列とも明瞭だが、A層出力はunit/token/column/provenanceを一切持たないため、B層がこのページのsemantic hierarchyについて言えるのは『A層evidenceは無い』ことだけ。GT(視覚GT)はあるがこれはA層出力ではなくB層が参照できる情報ではない。右列の(項)090・request50の存在はA層からは言えない。abstentionを補完しない。",
+      "markerSemantics": "tokenは『（項）』『（勘定）』で種類を明示。ただしtoken自体が上下関係は明示しない。(項)codeは3桁、(勘定)codeは1桁で桁数が異なる。同一code再出現はこのページ内では(項)codeに無し(050,060,070,080,090は一度だけ)。親関係はtokenだけでは決まらず、並び順(直後request)と(勘定)の位置が必要。Family C的な重複markerは無し(census空)。",
+      "requestParentage": "requestの親候補は直前の(項)marker。ただし項240→35,36 / 項050→44,45,46のように複数requestが1markerに従う場合、2つ目以降のrequestは『直前のmarker行』ではなく『直前のrequest行』の次にあり、直前marker行だけでは親を決められず『直近のmarker』という順序文脈が必要。ページ列値はmarkerと最初のrequestで一致するが後続requestでは不一致。fragment(wrapped)はこのページに無く(wrappedFragmentCount=0)、fragment attachmentの影響なし。column遷移はこのページ内でrequestに影響しない。",
+      "ambiguities": [
+        "(勘定)3と(項)050以降の包含関係",
+        "(勘定)3の支配範囲(050〜090のどこまで)",
+        "左→右列が同一hierarchy継続か独立か",
+        "右列(項)090の上位が(勘定)3か否か",
+        "『NN-NN』codeが何を識別するか"
+      ],
+      "unreadable": [],
+      "visibleTextExcerpts": [
+        "（項） 180 障害者職業能力開発支援費",
+        "31 10-08 障害者に対する職業能力の開発の支援に必要な経費",
+        "（勘定） 3 徴収勘定",
+        "（項） 050 業務取扱費",
+        "（項） 090 予備費 / 50 01-98 予備費"
+      ],
+      "overallConfidence": "medium",
+      "notes": "GT行数(左36+右2)と視覚が一致。A層は空なので視覚観察のみ。"
+    },
+    {
+      "sampleId": "BS-05",
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": null
+      },
+      "pageLayout": "横長1ページ。BS-01と同形式の表題『令和6年度歳出概算要求額目次』『9101東日本大震災復興特別会計（内閣本府等）』と、左右2つの罫線枠(各『要求番号|区分|ページ』見出し)。左枠は上部に8行のみ、下は大きく空白。右枠は見出しのみで行が1つもなく完全に空白(罫線のみ)。",
+      "O1_semanticRowKinds": [
+        {
+          "kind": "heading/page-title entry (非marker・ページ参照付き)",
+          "visibleMarkerToken": null,
+          "codeForm": null,
+          "nameExcerpt": "令和6年度歳出概算要求額総表 / 令和6年度歳出概算要求額明細表 / 令和6年度概算要求定員表",
+          "count": 3,
+          "notes": "ページ参照 1,3,7。インデントは会計より浅い。A層では前2件 TITLE_OR_HEADING、定員表は UNKNOWN_ABSTAINED(FRAGMENT_WITH_PAGE_REF)、GTは3件ともPLAIN_ROW。"
+        },
+        {
+          "kind": "account(会計)",
+          "visibleMarkerToken": "（会計）",
+          "codeForm": "2桁 01",
+          "nameExcerpt": "東日本大震災復興",
+          "count": 1,
+          "notes": ""
+        },
+        {
+          "kind": "jurisdiction(所管)",
+          "visibleMarkerToken": "（所管）",
+          "codeForm": "2桁 31",
+          "nameExcerpt": "復興庁",
+          "count": 1,
+          "notes": "見出しは『（内閣本府等）』。"
+        },
+        {
+          "kind": "organization(組織)",
+          "visibleMarkerToken": "（組織）",
+          "codeForm": "3桁 010",
+          "nameExcerpt": "復興庁",
+          "count": 1,
+          "notes": ""
+        },
+        {
+          "kind": "item(項)",
+          "visibleMarkerToken": "（項）",
+          "codeForm": "3桁 155",
+          "nameExcerpt": "消費生活復興政策費",
+          "count": 1,
+          "notes": ""
+        },
+        {
+          "kind": "request-number row",
+          "visibleMarkerToken": "要求番号列の数字 1(通常数字)",
+          "codeForm": "01-95",
+          "nameExcerpt": "消費者政策に必要な経費",
+          "count": 1,
+          "notes": "ページ参照4。"
+        }
+      ],
+      "O2_hierarchyEvidence": [
+        {
+          "relationCandidate": "（会計）01→（所管）31→（組織）010→（項）155 の連鎖",
+          "observableEvidence": [
+            "括弧付種別token",
+            "並び順",
+            "区分列インデントの段階"
+          ],
+          "classification": "DERIVABLE_FROM_EXPLICIT_MARKERS + ORDER_DEPENDENT",
+          "confidence": "medium"
+        },
+        {
+          "relationCandidate": "要求1(01-95)の親 = 直前の（項）155",
+          "observableEvidence": [
+            "（項）155の直下行",
+            "要求行にmarker tokenなし",
+            "インデントは項より浅い"
+          ],
+          "classification": "ORDER_DEPENDENT",
+          "confidence": "high"
+        },
+        {
+          "relationCandidate": "定員表行の階層位置",
+          "observableEvidence": [
+            "要求1の直後、左枠最終行",
+            "インデントは総表/明細表と同じ最左で、要求行・項より浅い",
+            "markerなし"
+          ],
+          "classification": "LAYOUT_DEPENDENT + AMBIGUOUS(最上位に見えるがtoken無し)",
+          "confidence": "medium"
+        },
+        {
+          "relationCandidate": "総表・明細表行と（会計）等の関係",
+          "observableEvidence": [
+            "いずれもmarkerなし、最左インデント、（会計）より前に位置"
+          ],
+          "classification": "LAYOUT_DEPENDENT + AMBIGUOUS",
+          "confidence": "medium"
+        },
+        {
+          "relationCandidate": "ページ見出し『9101…特別会計（内閣本府等）』と（会計）01/（所管）31 の対応",
+          "observableEvidence": [
+            "見出しは表枠外",
+            "code 9101 vs 01、名称・括弧書きが異なる"
+          ],
+          "classification": "AMBIGUOUS / NOT_OBSERVABLE_FROM_A_LAYER",
+          "confidence": "medium"
+        },
+        {
+          "relationCandidate": "右枠の行が存在しない(空)ことが何を意味するか",
+          "observableEvidence": [
+            "右枠は罫線と列見出しのみ、行なし",
+            "A層はRIGHT column evidenceなし(pageState UNSPLIT, ASSEMBLED_UNSPLIT_NO_RIGHT_COLUMN_EVIDENCE)"
+          ],
+          "classification": "DIRECTLY_OBSERVABLE(右に行が無いこと) / 意味はNOT_OBSERVABLE",
+          "confidence": "high"
+        }
+      ],
+      "O3_scope": "（会計）01・（所管）31・（組織）010・（項）155 は各1回、左枠上部に現れ、直後の要求1が最後のRN。ページ内に後続の同階層markerはなく、各markerは以降の行(ページ末尾の定員表の直前まで)を覆うように見える。ただし定員表行(plain)が項155の支配下か否かは視覚上インデント以外の手がかりが無く不明。",
+      "O4_columnInteraction": {
+        "value": "1 column しか行を持たない(右枠は空白)",
+        "notes": "独立/継続の判定対象なし。右枠に継続行が無いことが視覚上確認できる。A層もUNSPLIT(右column evidence無し)で、視覚所見と整合。"
+      },
+      "O5_pageBoundary": "ページ先頭は 総表・明細表(plain)→（会計）→…と上位から始まり、先頭に親markerを伴わない要求行は無い。ページ末尾は 要求1の後に定員表(plain)で終わり、その後は空白。ページ内evidenceでは、この項155に続く要求2以降や次の項がこのページに無く、ページ内で階層が完結しているように見える(他ページの有無は前提としない)。",
+      "O6_physicalVsSemantic": [
+        {
+          "description": "要求1行は『要求番号列1』『code 01-95』『名称』『ページ4』が別視覚要素",
+          "aLayerUnits": "1 unit REQUEST_NUMBER_ROW、rowStartTokenRaw『1    01‑95』",
+          "semanticBoundary": "要求番号とcodeは別視覚列だがA層ではrowStartTokenに連結。1 node=1 unit。"
+        },
+        {
+          "description": "見出し領域(表題・9101特別会計・列見出し)とページ番号『1』",
+          "aLayerUnits": "UNSPLITのTITLE_OR_HEADING 7 unit(『1』、表題、9101…、要求/番号の列見出し行、総表、明細表 のうち見出し領域+総表・明細表)",
+          "semanticBoundary": "視覚上は表題領域と目次内の総表/明細表行(ページ参照付き)は別の場所だが、A層では同じTITLE_OR_HEADING。列見出し『要求/番号/区分/ページ』が2行に分割。"
+        },
+        {
+          "description": "定員表行(ページ参照7)",
+          "aLayerUnits": "UNKNOWN_ABSTAINED(FRAGMENT_WITH_PAGE_REF)",
+          "semanticBoundary": "視覚上は総表・明細表と同種の行。A層は総表/明細表はTITLE、定員表はABSTAINED。"
+        },
+        {
+          "description": "UNSPLITページ:行は全て column=UNSPLIT",
+          "aLayerUnits": "全13 unit が UNSPLIT",
+          "semanticBoundary": "視覚上は左枠だけに行が存在。LEFT/RIGHT の区別はA層に無いが、行の位置は左枠(罫線で確認)。"
+        }
+      ],
+      "O7_abstentionPropagation": "pageState=UNSPLIT(右column evidenceなし)かつ1 unit UNKNOWN_ABSTAINED。B層が安全に言える: UNSPLIT下でも会計01/所管31/組織010/項155/要求1 のmarker・RN unit が RESOLVED で並び順を保持して存在する。視覚上右枠は空で、UNSPLITと視覚所見は矛盾しない。言えない: 定員表行の種別・階層位置(ABSTAINED、marker無し)。見出し9101と会計01の関係。UNSPLITは『列が分割されていない』ことの表明であり『右に行が無い』ことの証明はA層evidenceには含まれない(視覚所見のみ)。",
+      "markerSemantics": "（会計）（所管）（組織）（項）は括弧付tokenが種別を明示。codeは桁数が2/2/3/3で、BS-01と同じ形式のため同じ書式として観察できる。duplicate markerなし。要求行はmarker tokenなし、要求番号列の数字で種別が分かる。親は並び順(直前marker)で決まるように見える。code『155』『01-95』は1回のみ。",
+      "requestParentage": "要求1の親は直前の（項）155(並び順)。column遷移は無い(右枠空)ためcontext reset/continueの問題は生じない。fragmentなし。要求番号が1のみ(1始まり)であることは親決定の根拠には使わない。",
+      "ambiguities": [
+        "定員表行の階層位置",
+        "見出し『9101…（内閣本府等）』と（会計）01/（所管）31 復興庁の対応",
+        "総表・明細表・定員表がmarker階層の外にある行か否か",
+        "右枠が空であることは視覚所見のみでA層evidenceは持たない"
+      ],
+      "unreadable": [],
+      "visibleTextExcerpts": [
+        "令和6年度歳出概算要求額目次",
+        "9101東日本大震災復興特別会計（内閣本府等）",
+        "（会計） 01 東日本大震災復興",
+        "（所管） 31 復興庁",
+        "（組織） 010 復興庁",
+        "（項） 155 消費生活復興政策費",
+        "1 01-95 消費者政策に必要な経費 4",
+        "令和6年度概算要求定員表 7"
+      ],
+      "overallConfidence": "high",
+      "notes": "BS-01と同系の表形式。A層サマリのunit(13件)とPDFの視覚行(左枠8行+見出し領域)の対応は取れた。見出し領域のunit数(7)に総表・明細表を含めた表記の数え方は A層summaryのtitleUnits(7件)による。"
+    },
+    {
+      "sampleId": "BS-06",
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": null
+      },
+      "pageLayout": "横長ページ。上端右に頁番号「1」、大きな表題「令和６年度歳出概算要求額目次」と「25 厚生労働省所管」、その下に罫線枠の2カラム表(要求番号/区分/ページ が左右各1組)。左右ともに行あり、左は上から下へ(組織)〜(項)028・要求22、右は要求23 から(項)072 まで。左右の行は行高が揃い、右カラム最終行は(項)072 で末尾。左カラム先頭に marker なしの2行(総表/明細表)。",
+      "O1_semanticRowKinds": [
+        {
+          "kind": "page title / ministry heading",
+          "visibleMarkerToken": "なし",
+          "codeForm": "『25』(所管番号に見える数字)",
+          "nameExcerpt": "令和６年度歳出概算要求額目次 / 25 厚生労働省所管",
+          "count": 2,
+          "notes": "A層 TITLE_OR_HEADING。表題は文字間が空いて A層では '令 和 ６ …' と分割して取得。'25' は A層で名称と同一 unit"
+        },
+        {
+          "kind": "table-of-contents entry (document-level, marker なし)",
+          "visibleMarkerToken": "なし",
+          "codeForm": "code なし、pageRef のみ(1, 13)",
+          "nameExcerpt": "令和６年度歳出概算要求額総表 / 明細表",
+          "count": 2,
+          "notes": "A層は TITLE_OR_HEADING にして pageRef を titleRaw 末尾に含め pageRefRaw=None。種類(heading / 目次項目)は見えたまま記録、既存 category に確定しない"
+        },
+        {
+          "kind": "organization-marker row",
+          "visibleMarkerToken": "（組織）",
+          "codeForm": "010",
+          "nameExcerpt": "厚生労働本省",
+          "count": 1,
+          "notes": ""
+        },
+        {
+          "kind": "item(項)-marker row",
+          "visibleMarkerToken": "（項）",
+          "codeForm": "3桁 001,005,010,020,023,025,028 / 029,030,051,055,060,062,065,070,072",
+          "nameExcerpt": "厚生労働本省共通費 / 医療提供体制確保対策費 / 原爆死没者追悼平和祈念館施設費",
+          "count": 16,
+          "notes": "左7+右9。重複 code なし(A層 dup census 空)"
+        },
+        {
+          "kind": "request-number row",
+          "visibleMarkerToken": "なし(連番+NN-NN)",
+          "codeForm": "連番 1〜45 + NN-NN(05-95 等)",
+          "nameExcerpt": "厚生労働本省一般行政に必要な経費 / 補充費（義務）",
+          "count": 45,
+          "notes": "左22(1〜22)右23(23〜45)。1 は丸囲み①。10 は2行折返し"
+        },
+        {
+          "kind": "table header",
+          "visibleMarkerToken": "なし",
+          "codeForm": "",
+          "nameExcerpt": "要求 区 分 ページ 要求 区 分 ページ / 番号 番号",
+          "count": 1,
+          "notes": "A層 UNSPLIT 末尾 unit として出力"
+        }
+      ],
+      "O2_hierarchyEvidence": [
+        {
+          "relationCandidate": "（項）が（組織）010 に属する(全16項)",
+          "observableEvidence": [
+            "（組織）行は左カラム1つだけ",
+            "以後ページ末まで（組織）の再出現なし",
+            "（項）は（組織）より深くインデント"
+          ],
+          "classification": "ORDER_DEPENDENT",
+          "confidence": "high"
+        },
+        {
+          "relationCandidate": "要求番号行が直前の（項）に属する(左カラム内)",
+          "observableEvidence": [
+            "（項）行の直後に番号行",
+            "marker token なし",
+            "項 code と request code に対応関係は見えない"
+          ],
+          "classification": "ORDER_DEPENDENT",
+          "confidence": "high"
+        },
+        {
+          "relationCandidate": "右カラム先頭の要求23 の親は左カラム末尾の（項）028",
+          "observableEvidence": [
+            "右カラム先頭行は marker を伴わない request 23",
+            "左末尾が要求22(項028配下)で、連番が 22→23 と連続",
+            "右カラムの先頭に（項）なし"
+          ],
+          "classification": "CROSS_COLUMN_DEPENDENT",
+          "confidence": "medium",
+          "notes": "連番連続は補助 evidence に見えるが request number から親を推測しない方針のため、親付けの根拠は左→右の読み順(PAGE-order)に依存。左右が independent なら親不明"
+        },
+        {
+          "relationCandidate": "右カラム最終（項）072 の配下 request",
+          "observableEvidence": [
+            "ページ内で（項）072 の後に行なし"
+          ],
+          "classification": "NOT_OBSERVABLE_FROM_A_LAYER",
+          "confidence": "high",
+          "notes": "ページ内に child なし。続きがあるかは不明"
+        },
+        {
+          "relationCandidate": "総表/明細表の2行と（組織）010 の関係",
+          "observableEvidence": [
+            "marker なしで（組織）の直前、インデントは（組織）より浅い",
+            "pageRef を持つ(1,13)"
+          ],
+          "classification": "AMBIGUOUS",
+          "confidence": "low",
+          "notes": "（組織）の親(兄弟/見出し/別種)かは observable から決まらない"
+        },
+        {
+          "relationCandidate": "丸囲み①の意味",
+          "observableEvidence": [
+            "（組織）→最初の（項）→最初の request に付く(BS-02 でも同様の位置)"
+          ],
+          "classification": "NOT_OBSERVABLE_FROM_A_LAYER",
+          "confidence": "medium",
+          "notes": "A層 rowStartTokenRaw は '1    05‑95' で丸囲みなし"
+        }
+      ],
+      "O3_scope": "（組織）010 はページ先頭付近から右カラム末尾まで全ての（項）を支配するように見える(組織再出現なし)。各（項）は次の（項）までの request を支配。（項）028 は左カラム末尾の要求22 から右カラム先頭の要求23,(24 は（項）029 の前の 23 のみ)まで跨ぐように見える(左右が連続読みの場合)。最後の（項）072 は子なしでページが終わる。",
+      "O4_columnInteraction": {
+        "value": "continuation of same hierarchy に見える(page-order dependent)。ただし AMBIGUOUS の余地あり",
+        "notes": "右カラムが marker なしの request で始まり、左末尾が（項）028 配下の request。連続読みでのみ右先頭の親が決まる。左右の行高・ヘッダは同形で、独立階層を示す視覚要素(別の（組織）等)はない。A層は SPLIT(rightBandEdge=56)で column=LEFT/RIGHT を付与、sourceOrder は各 column で 0 から再開"
+      },
+      "O5_pageBoundary": "先頭は表題＋所管＋総表/明細表の後に（組織）010→（項）001 で始まり、階層の起点がページ内にある(親 marker なし request で始まらない)。末尾は右カラム最終行（項）072 で子 request なし → 次ページへ継続する可能性があるが、ページ内 evidence は『子が後続していない』ことだけで継続の有無は不明。",
+      "O6_physicalVsSemantic": [
+        {
+          "description": "総表/明細表行が TITLE_OR_HEADING で pageRef を titleRaw に含む",
+          "aLayerUnits": "LEFT unit0-1(titleRaw に末尾 '1' / '13')",
+          "semanticBoundary": "名称と page が1 unit、pageRefRaw=None。marker 行と型が異なるため他 row 同様の page 取得不可"
+        },
+        {
+          "description": "表題・所管・ヘッダが全幅 UNSPLIT として LEFT/RIGHT 行と別 sourceOrder 系列で出力",
+          "aLayerUnits": "UNSPLIT unit0-4 が末尾",
+          "semanticBoundary": "物理的にページ上部だが A層の出力順は最後。順序に依存する判定は sourceOrder だけでは不可、lineIndex(0〜5)が必要"
+        },
+        {
+          "description": "折返し名称が fragment",
+          "aLayerUnits": "LEFT request 10 + fragment 'に伴う補充費'",
+          "semanticBoundary": "1 node=1 unit+fragment で一致(名称は語中でなく文節切り)"
+        },
+        {
+          "description": "LEFT/RIGHT で同一 lineIndex が両方に出現し、sourceOrder・lineIndex が column 毎に reset",
+          "aLayerUnits": "LEFT 0〜31 / RIGHT 0〜31 が lineIndex 7〜70 を共有",
+          "semanticBoundary": "1物理行に左右2 semantic row が同居(1 raw line 内の左右を分割したもの)。1 unit 1 row は成立"
+        },
+        {
+          "description": "表題『25 厚生労働省所管』の '25' と名称が同 unit",
+          "aLayerUnits": "UNSPLIT unit2",
+          "semanticBoundary": "数字と名称の分離は A層では行われない"
+        }
+      ],
+      "O7_abstentionPropagation": "pageState=ASSEMBLED_SPLIT、abstained unit 0、全 RESOLVED。B層が言えること: 左右カラムそれぞれの内部の marker/request の並び、親候補の列挙、（項）code の重複なし。言えないこと: 右先頭 request 23 の親が左末尾の（項）028 であること(column 間の連続は A層の evidence にない。左右の連続性は A層は主張しない)、総表/明細表の種類、丸囲みの意味、（項）072 の後続。",
+      "markerSemantics": "（組織）/（項）は semantic type を明示。code 3桁は（項）で同ページ内重複なし。request の NN-NN は多重出現(05-07,10-95,03-03 等)で識別子でなく、先頭の連番(1〜45)が一意に見える。parent は token だけでは決まらず order 必要。右先頭 request 23 は直前 marker が同 column にないため直前 marker だけでは不足(column をまたぐ context が必要)。",
+      "requestParentage": "同一 column 内では直前の（項）(order 依存)。column transition: 右先頭(要求23)で context が continue する可能性があるが A層 evidence では決まらず CROSS_COLUMN_DEPENDENT。fragment は名称 identity に影響し parent には影響しない(request 10 の1件のみ)。連番は 22→23 と連続するが request number からの親推測はしない。",
+      "ambiguities": [
+        "右先頭 request 23 の親(左末尾（項）028 を継続するか)",
+        "総表/明細表行の種類と位置付け",
+        "丸囲み①",
+        "（項）072 の後続",
+        "表題 '25' の意味(所管番号のように見えるが断定しない)"
+      ],
+      "unreadable": [],
+      "visibleTextExcerpts": [
+        "令和６年度歳出概算要求額目次",
+        "25 厚生労働省所管",
+        "（組織） 010 厚生労働本省 13",
+        "（項） 028 医療情報化等推進費 324",
+        "23 10-95 医療情報化等の推進に必要な経費 327",
+        "（項） 072 原爆死没者追悼平和祈念館施設費 537"
+      ],
+      "overallConfidence": "high(構造)/medium(column 連続性)",
+      "notes": "A層サマリ(unit 69、marker 17=組織1+項16、request 45、title 7)は視覚と一致。O3 の「（項）028 は…23 のみ」は右先頭の request 23 のみが 028 に属しうる、の意。"
+    },
+    {
+      "sampleId": "BS-07",
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": "110dpiで全行判読可能のため crop 不要"
+      },
+      "pageLayout": "BS-03 と同じ体裁(頁番号『2』、左右2連の要求番号|区分|ページ表、二重罫線で左右分離)。行間罫線なし。marker 行は区分列内インデント。左右とも1行目から表が始まる。",
+      "O1_semanticRowKinds": [
+        {
+          "kind": "項 marker 行",
+          "visibleMarkerToken": "（項）",
+          "codeForm": "3桁数字(左 280-430、右 440-620 と 010,020)",
+          "nameExcerpt": "国立大学法人施設整備費 / 国立教育政策研究所",
+          "count": "左13 + 右16 = 29",
+          "notes": "右 440 は名称が2行(fragment '繰入')"
+        },
+        {
+          "kind": "組織 marker 行",
+          "visibleMarkerToken": "（組織）",
+          "codeForm": "3桁数字 020",
+          "nameExcerpt": "文部科学本省所轄機関",
+          "count": 1,
+          "notes": "右 column 終盤。左には無し"
+        },
+        {
+          "kind": "request 行",
+          "visibleMarkerToken": "なし(要求番号列整数)",
+          "codeForm": "要求番号 42-82 + 区分内 NN-NN コード",
+          "nameExcerpt": "オープンサイエンス等の推進に必要な経費",
+          "count": "左23(42-64)+右18(65-82)=41",
+          "notes": "request 65 は2行(fragment)"
+        },
+        {
+          "kind": "表ヘッダ/頁番号",
+          "visibleMarkerToken": "なし",
+          "codeForm": "なし",
+          "nameExcerpt": "要求 区分 ページ / 2",
+          "count": "TITLE 3 unit",
+          "notes": "semantic node 性は未判断"
+        }
+      ],
+      "O2_hierarchyEvidence": [
+        {
+          "relationCandidate": "request の親は同 column の直前の（項）",
+          "observableEvidence": [
+            "marker 直後に request 行が続く",
+            "項 marker と後続 request のページ番号が近い/同じ(項280/686→44/687)"
+          ],
+          "classification": "ORDER_DEPENDENT",
+          "confidence": "medium"
+        },
+        {
+          "relationCandidate": "左先頭 request 42, 43 の親",
+          "observableEvidence": [
+            "左 column 先頭 2 行(42, 43)の前にページ内 marker 無し",
+            "項280 は 43 の次行に出現"
+          ],
+          "classification": "PAGE_CONTEXT_DEPENDENT",
+          "confidence": "high"
+        },
+        {
+          "relationCandidate": "1つの（項）が複数 request(項320→48-55 の8件、項580→74-76、項010→81,82)",
+          "observableEvidence": [
+            "marker を挟まず request が連続"
+          ],
+          "classification": "ORDER_DEPENDENT",
+          "confidence": "medium"
+        },
+        {
+          "relationCandidate": "右先頭（項）440 は左 request 64 の続き",
+          "observableEvidence": [
+            "要求番号 64→65 が column をまたいで連続",
+            "右先頭が marker で始まる"
+          ],
+          "classification": "CROSS_COLUMN_DEPENDENT",
+          "confidence": "low"
+        },
+        {
+          "relationCandidate": "（項）010,020 の親は（組織）020",
+          "observableEvidence": [
+            "右 column で（組織）020 の直後に（項）010、request 81,82、（項）020 が続く行順"
+          ],
+          "classification": "ORDER_DEPENDENT",
+          "confidence": "medium"
+        },
+        {
+          "relationCandidate": "（項）440-620 の組織所属",
+          "observableEvidence": [
+            "同ページ内に組織 marker が先行しない",
+            "A層 census の precedingOrgCode 情報なし(duplicate 無し)"
+          ],
+          "classification": "NOT_OBSERVABLE_FROM_A_LAYER",
+          "confidence": "high"
+        },
+        {
+          "relationCandidate": "（項）020(右末尾)の request",
+          "observableEvidence": [
+            "ページ内に request が続かない(最終行が marker)"
+          ],
+          "classification": "NOT_OBSERVABLE_FROM_A_LAYER",
+          "confidence": "high"
+        }
+      ],
+      "O3_scope": "左・右とも（項）単位で次の（項）直前まで request を支配するように見える。左 column 先頭 2 request(42,43)はページ内に親 marker が無い。（組織）020 は右 column 終盤で出現し、（項）010,020 が以降を支配するように見えるが、末尾（項）020 はページ内で request を持たない。",
+      "O4_columnInteraction": {
+        "value": "page-order dependent / continuation の可能性あり(ambiguous)",
+        "notes": "要求番号が左 42-64、右 65-82 と連続。左末尾は request 64、右先頭は marker（項）440 で、column 境界で marker 状態の継続/reset は見えない。項コードは左 280→430、右 440→620 と大きい順に続くが、これは観察した並びであり階層 rule とはしない。右では（組織）020 後に 010 に戻る。"
+      },
+      "O5_pageBoundary": "先頭: 左先頭は parent marker を伴わない request 42 から始まり、階層の途中から始まるように見える。末尾: 右末尾は request 無しの（項）020 で終わり、後続 request が次ページにある可能性を示唆(ページ内では確認不能)。他ページは未確認。",
+      "O6_physicalVsSemantic": [
+        {
+          "description": "（項）440 の名称が2行(『…エネルギー対策特別会計へ』+『繰入』)",
+          "aLayerUnits": "R order0 MARKER_ROW + fragment '繰入'(lineIndex 5)",
+          "semanticBoundary": "視覚上 1 marker の名称が2行"
+        },
+        {
+          "description": "request 65 の名称が2行",
+          "aLayerUnits": "R order1 + fragment",
+          "semanticBoundary": "1 request"
+        },
+        {
+          "description": "頁番号『2』と列見出しが TITLE 3 unit",
+          "aLayerUnits": "TITLE×3",
+          "semanticBoundary": "左右見出しが1 unit 内で連結"
+        },
+        {
+          "description": "request 43 と（項）280 が視覚上近接、43 のページ参照は 684、項は 686",
+          "aLayerUnits": "L order1(REQ), order2(MAR)",
+          "semanticBoundary": "1 row=1 unit で一致"
+        }
+      ],
+      "O7_abstentionPropagation": "pageState=ASSEMBLED_SPLIT、abstain 0、全 unit RESOLVED。B層が言えること: 各 unit の token/code/title/page/column/順序と fragment attach。言えないこと: 左先頭 request 42,43 の親、（項）440 以降の組織所属、末尾（項）020 配下の request、column 間の継続の確定。",
+      "markerSemantics": "（項）（組織）は種別を明示。code は種別内の番号に見える。このページの duplicate marker key は A層 census 上 0。（組織）020 と（項）020 が同コードで token が異なる(右 column 末尾の（項）020 と（組織）020)。左 request コードの 01-13 などは多数 request で再出現(区分コードで request 識別とは限らない)。",
+      "requestParentage": "親候補は同 column 内の直前（項）(ORDER_DEPENDENT)。左先頭 42,43 は直前 marker が無く親が決まらない。column transition での context 継続は、A層上は未決。fragment(request 65 の2行目)は名称を補うが request 番号・code は fragment に依らない。",
+      "ambiguities": [
+        "左先頭 request 42,43 の親",
+        "column 境界で context 継続か否か",
+        "（項）440 以降の組織所属",
+        "末尾（項）020 配下の request の有無"
+      ],
+      "unreadable": [],
+      "visibleTextExcerpts": [
+        "42 23-13 オープンサイエンス等の推進に必要な経費 667",
+        "（項） 280 国立大学法人施設整備費 686",
+        "（項） 440 電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ / 繰入 818",
+        "（組織） 020 文部科学本省所轄機関 904",
+        "（項） 020 科学技術・学術政策研究所 993"
+      ],
+      "overallConfidence": "medium-high",
+      "notes": "A層サマリ(unitCount 74=左36+右35+TITLE3)と視覚対応。GT 無し。"
+    },
+    {
+      "sampleId": "BS-08",
+      "renderConditions": {
+        "dpi": 110,
+        "cropUsed": false,
+        "cropRegion": null,
+        "cropReason": "110dpiで全行判読可能のため不要"
+      },
+      "pageLayout": "横長ページ。左上に小さな『4』。二分割の表枠で左右とも要求番号/区分/ページ列見出し。両列ともほぼ全高に行が並ぶ(左約37行、右約37行)。(項)marker行は字下げされた名称、request行は左端に要求番号、『NN-NN』code、名称、右端にページ数。右列147のrequestは名称が2行に折り返し。行間罫線なし。",
+      "O1_semanticRowKinds": [
+        {
+          "kind": "項marker行",
+          "visibleMarkerToken": "（項）",
+          "codeForm": "3桁数字(612,642,646,…,741,746,763,765,789)",
+          "nameExcerpt": "国立研究開発法人海上・港湾・航空技術研究所施設整備費 / 情報化推進費 / 河川整備事業費",
+          "count": 21,
+          "notes": "左17+右4。数値は左で昇順(612→741)、右746,763,765,789も昇順だが左の741の続き。"
+        },
+        {
+          "kind": "request行",
+          "visibleMarkerToken": null,
+          "codeForm": "要求番号(128〜177連番)+『NN-NN』code(例 01-13, 05-95, 99-48)",
+          "nameExcerpt": "国立研究開発法人海上・港湾・航空技術研究所運営費交付金に必要な経費 / 河川整備事業に必要な経費",
+          "count": 50,
+          "notes": "左19(128-146)、右31(147-177)。"
+        },
+        {
+          "kind": "列見出し/ページ番号",
+          "visibleMarkerToken": null,
+          "codeForm": "『要求番号』『区分』『ページ』/ 左上『4』",
+          "nameExcerpt": "区 分",
+          "count": 1,
+          "notes": ""
+        }
+      ],
+      "O2_hierarchyEvidence": [
+        {
+          "relationCandidate": "request129の親候補は直前の（項）612",
+          "observableEvidence": [
+            "marker612行の直後にrequest129",
+            "ページ列が同値(434/434)"
+          ],
+          "classification": "ORDER_DEPENDENT",
+          "confidence": "medium"
+        },
+        {
+          "relationCandidate": "ページ先頭のrequest128はmarker行を伴わない",
+          "observableEvidence": [
+            "左列最上段が要求番号128で(項)marker行の上に無い",
+            "request128のページ値434が次の(項)612と同じ"
+          ],
+          "classification": "PAGE_CONTEXT_DEPENDENT",
+          "confidence": "medium"
+        },
+        {
+          "relationCandidate": "左列末尾の(項)741のrequestは右列先頭147",
+          "observableEvidence": [
+            "左列最下段が(項)741 marker(ページ485)で後続requestが無い",
+            "右列最上段が要求番号147(ページ485)でmarker無し",
+            "ページ値が一致"
+          ],
+          "classification": "CROSS_COLUMN_DEPENDENT",
+          "confidence": "medium"
+        },
+        {
+          "relationCandidate": "(項)763の下に複数request(149〜176)が連続",
+          "observableEvidence": [
+            "(項)763の後、要求149-176が(項)765まで連続し間にmarkerなし",
+            "ページ値は486→492に推移"
+          ],
+          "classification": "ORDER_DEPENDENT",
+          "confidence": "medium"
+        },
+        {
+          "relationCandidate": "右列末尾の(項)789は後続requestを持たない",
+          "observableEvidence": [
+            "最下段が(項)789(ページ492)で後ろに行がない",
+            "直前request177のページ値も492"
+          ],
+          "classification": "AMBIGUOUS",
+          "confidence": "low"
+        },
+        {
+          "relationCandidate": "(項)765→request177の親子",
+          "observableEvidence": [
+            "marker直後にrequest",
+            "ページ値492/492"
+          ],
+          "classification": "ORDER_DEPENDENT",
+          "confidence": "medium"
+        }
+      ],
+      "O3_scope": "(項)markerの支配範囲は次の(項)の直前まで。(項)763は149〜176の28requestを支配するように見える。左列頭のrequest128は(項)の下にあるはずだが、このページ内にその親marker無し。右列頭のrequest147の親は左列末の(項)741と見えるが(ページ内の物理的連続のみ)。(項)789の範囲はページ末で打ち切られ空。",
+      "O4_columnInteraction": {
+        "value": "continuation of same hierarchy(視覚上)/ CROSS_COLUMN_DEPENDENT",
+        "notes": "左末の(項)741が右列頭のrequest147に接続して見える(ページ値485一致)。左末request146→(項)741、右頭147の流れが列をまたいで連続。両列はindependent hierarchyには見えないが、確証はページ値一致と並び順のみ。"
+      },
+      "O5_pageBoundary": "ページ先頭(左列最上)は要求番号128のrequest行で、parent markerを伴わない(continuationの可能性あり。ページ内に上位markerは無い)。ページ末(右列最下)は(項)789 marker行で終わりrequestが続かない(次ページへ続く可能性があるが、ページ内evidenceでは不明)。",
+      "O6_physicalVsSemantic": [
+        {
+          "description": "request147の名称が2 physical lineに折り返し(『…自動車安全特別会計自動車検査登録勘定へ繰入』/『れに必要な経費』)。",
+          "aLayerUnits": "該当unitは無い(unitCount=0)",
+          "semanticBoundary": "1 semantic request = 2 physical lines。fragment帰属が必要。"
+        },
+        {
+          "description": "(項)741 markerと、その配下request147は別column・別physical rowに分離。",
+          "aLayerUnits": "A層unit無し",
+          "semanticBoundary": "1つのsemantic群が列境界で分断される。"
+        },
+        {
+          "description": "A層unit 0に対し、視覚上は約71行が存在。",
+          "aLayerUnits": "unitCount=0, GT=null",
+          "semanticBoundary": "全行がA層外"
+        }
+      ],
+      "O7_abstentionPropagation": "PAGE_ABSTAINED(RIGHT_EVIDENCE_INSUFFICIENT, unit 0, GTなし)。A層出力にunit・token・fragment・provenanceが無いため、B層はこのページのmarker/request数・親子・column跨ぎ・折り返しfragment・ページ先頭/末尾の構造について何も言えない。上の視覚観察はA層evidenceではない。『ページ全体が不明』として扱い、request128/147の親、(項)789の子の有無は保持すべき不確実性。",
+      "markerSemantics": "『（項）』tokenがkindを明示。3桁codeが(項)を識別するように見える。このページ内ではcodeの再出現無し(全て一意)。Family C重複marker無し。親(項)の決定はtoken単独では不可で、並び順(直前marker)と、ページ頭・列跨ぎではページ/列文脈が必要。",
+      "requestParentage": "request親候補は直前の(項)。複数requestが1(項)に従うケース(763→149-176)は『直前のmarker』が遠くなり、順序文脈が必要。ページ先頭request128と右列頭147は直前marker無しで、前者はページ内に親無し(AMBIGUOUS/NOT_OBSERVABLE_FROM_A_LAYER)、後者は左列末markerが候補(CROSS_COLUMN_DEPENDENT)。column遷移でcontextがcontinueするように見える。折り返しfragment(request147)はsemantic request名の一部で、fragment attachmentの結果が名称に影響するがparentには影響しないように見える。",
+      "ambiguities": [
+        "request128の親(ページ内に無い)",
+        "(項)789配下requestの有無",
+        "左列末(項)741と右列頭147の連結が確定か(ページ値一致のみ)",
+        "『NN-NN』codeの意味"
+      ],
+      "unreadable": [],
+      "visibleTextExcerpts": [
+        "128 01-13 国立研究開発法人海上・港湾・航空技術研究所運営費交付金に必要な経費",
+        "（項） 612 国立研究開発法人海上・港湾・航空技術研究所施設整備費",
+        "（項） 741 自動車重量税取扱費自動車安全特別会計へ繰入",
+        "147 05-95 自動車重量税取扱費財源の自動車安全特別会計自動車検査登録勘定へ繰入/れに必要な経費",
+        "（項） 789 河川整備事業費"
+      ],
+      "overallConfidence": "medium",
+      "notes": "GTなし。ページ内件数は目視集計。"
+    }
+  ]
+}
