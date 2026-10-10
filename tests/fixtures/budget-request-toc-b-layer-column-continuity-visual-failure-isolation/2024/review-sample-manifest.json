@@ -1,0 +1,158 @@
+{
+  "schema": "budget-request-toc-b-column-continuity-review-sample-manifest/v1",
+  "selectionAlgorithm": "column-continuity-visual-sample/v1",
+  "sourceCensus": {
+    "path": "tests/fixtures/budget-request-toc-b-layer-scope-continuity-failure-isolation/2024/census.json",
+    "sha256": "c86db4878927403ee8419ced5e623b262730b33ddb26c69b5a847e562001a978"
+  },
+  "population": {
+    "p2Pages": 25,
+    "excludedBy411": 3,
+    "eligible": 22
+  },
+  "excluded": [
+    {
+      "sampleId411": "BS-01",
+      "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+      "physicalPage": 3,
+      "partition": "NEW_HELDOUT_POSTHOC"
+    },
+    {
+      "sampleId411": "BS-03",
+      "localPdfPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "physicalPage": 5,
+      "partition": "DEVELOPMENT_EXPLORED"
+    },
+    {
+      "sampleId411": "BS-06",
+      "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "physicalPage": 3,
+      "partition": "NEW_HELDOUT_POSTHOC"
+    }
+  ],
+  "eligibleComposition": {
+    "byPartition": {
+      "DEVELOPMENT_EXPLORED": 15,
+      "FIRST_HELDOUT_POSTHOC": 5,
+      "NEW_HELDOUT_POSTHOC": 2
+    },
+    "byClassifierSource": {
+      "DIRECT": 12,
+      "INHERITED": 10
+    },
+    "byLeftLastKind": {
+      "ITEM": 15,
+      "REQUEST": 7
+    },
+    "byStratum": {
+      "DIRECT/ITEM": 8,
+      "DIRECT/REQUEST": 4,
+      "INHERITED/ITEM": 7,
+      "INHERITED/REQUEST": 3
+    },
+    "byRightRequestsBeforeFirstItem": {
+      "1": 15,
+      "2": 5,
+      "3": 1,
+      "19": 1
+    }
+  },
+  "samples": [
+    {
+      "sampleId": "CC-01",
+      "localPdfPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "physicalPage": 3,
+      "pdfSha256": "49a975a4436da6d53319a32ca745e2d110c42839c441c6302a7361ed9a62e4cc",
+      "partition": "DEVELOPMENT_EXPLORED",
+      "classifierSource": "DIRECT",
+      "aLayerPageState": "ASSEMBLED_SPLIT",
+      "leftStreamLastSemanticKind": "REQUEST",
+      "rightLeadingRequestCount": 1,
+      "selectionStratum": "DIRECT/REQUEST",
+      "selectionReason": "LEXICOGRAPHIC_FIRST_IN_STRATUM(DIRECT/REQUEST)",
+      "overlap411": false
+    },
+    {
+      "sampleId": "CC-02",
+      "localPdfPath": "data/download/env.go.jp/content/000157010.pdf",
+      "physicalPage": 3,
+      "pdfSha256": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd",
+      "partition": "DEVELOPMENT_EXPLORED",
+      "classifierSource": "DIRECT",
+      "aLayerPageState": "ASSEMBLED_SPLIT",
+      "leftStreamLastSemanticKind": "ITEM",
+      "rightLeadingRequestCount": 1,
+      "selectionStratum": "DIRECT/ITEM",
+      "selectionReason": "LEXICOGRAPHIC_FIRST_IN_STRATUM(DIRECT/ITEM)",
+      "overlap411": false
+    },
+    {
+      "sampleId": "CC-03",
+      "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+      "physicalPage": 5,
+      "pdfSha256": "91b39e9902610e13aa7be445db2d2d2a3e38166fd5f449bd11f94cfe5fe3b6d5",
+      "partition": "DEVELOPMENT_EXPLORED",
+      "classifierSource": "INHERITED",
+      "aLayerPageState": "ASSEMBLED_SPLIT",
+      "leftStreamLastSemanticKind": "ITEM",
+      "rightLeadingRequestCount": 1,
+      "selectionStratum": "INHERITED/ITEM",
+      "selectionReason": "LEXICOGRAPHIC_FIRST_IN_STRATUM(INHERITED/ITEM)",
+      "overlap411": false
+    },
+    {
+      "sampleId": "CC-04",
+      "localPdfPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "physicalPage": 7,
+      "pdfSha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+      "partition": "DEVELOPMENT_EXPLORED",
+      "classifierSource": "INHERITED",
+      "aLayerPageState": "ASSEMBLED_SPLIT",
+      "leftStreamLastSemanticKind": "REQUEST",
+      "rightLeadingRequestCount": 1,
+      "selectionStratum": "INHERITED/REQUEST",
+      "selectionReason": "LEXICOGRAPHIC_FIRST_IN_STRATUM(INHERITED/REQUEST)",
+      "overlap411": false
+    },
+    {
+      "sampleId": "CC-05",
+      "localPdfPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+      "physicalPage": 5,
+      "pdfSha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+      "partition": "FIRST_HELDOUT_POSTHOC",
+      "classifierSource": "INHERITED",
+      "aLayerPageState": "ASSEMBLED_SPLIT",
+      "leftStreamLastSemanticKind": "REQUEST",
+      "rightLeadingRequestCount": 19,
+      "selectionStratum": "TOP_RIGHT_REQUESTS",
+      "selectionReason": "LARGEST_RIGHT_REQUESTS_BEFORE_FIRST_ITEM_EXCLUDING_SELECTED",
+      "overlap411": false
+    },
+    {
+      "sampleId": "CC-06",
+      "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+      "physicalPage": 2,
+      "pdfSha256": "6cc573bf64747e4ceb41597cc83e371f5d8144a02e3e9033501597d64cfbbc5e",
+      "partition": "DEVELOPMENT_EXPLORED",
+      "classifierSource": "DIRECT",
+      "aLayerPageState": "ASSEMBLED_SPLIT",
+      "leftStreamLastSemanticKind": "REQUEST",
+      "rightLeadingRequestCount": 3,
+      "selectionStratum": "TOP_RIGHT_REQUESTS",
+      "selectionReason": "LARGEST_RIGHT_REQUESTS_BEFORE_FIRST_ITEM_EXCLUDING_SELECTED",
+      "overlap411": false
+    }
+  ],
+  "coverage": {
+    "strataFilled": [
+      "DIRECT/ITEM",
+      "DIRECT/REQUEST",
+      "INHERITED/ITEM",
+      "INHERITED/REQUEST"
+    ],
+    "partitions": {
+      "DEVELOPMENT_EXPLORED": 5,
+      "FIRST_HELDOUT_POSTHOC": 1
+    }
+  }
+}

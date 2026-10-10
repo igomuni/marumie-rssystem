@@ -1,0 +1,2346 @@
+{
+  "schema": "budget-request-toc-b-column-continuity-visual-observations/v1",
+  "exploratory": true,
+  "notGroundTruth": true,
+  "note": "Phase 3 の視覚観察記録。探索的・非無作為 6 page。ground truth・resolver・rule・preregistration ではない。reviewer 記録は record にそのまま保持(要約・書き換え・誤字修正なし)。",
+  "manifest": {
+    "path": "tests/fixtures/budget-request-toc-b-layer-column-continuity-visual-failure-isolation/2024/review-sample-manifest.json",
+    "sha256": "50fc4d46e6d207bae1e9e014211433bf04a3c554bda85a01f41ea65ac475fac8",
+    "freezeCommit": "d5ba559ad81bf539e7d01d4b4ae68a62d8b5e0db"
+  },
+  "freezeStatement": "sample は Commit 1 (d5ba559) で PDF を見る前に freeze 済み。観察後に sample の差し替え・追加をしていない。",
+  "reviewerAssignment": {
+    "primary": {
+      "P1": [
+        "CC-01",
+        "CC-02"
+      ],
+      "P2": [
+        "CC-03",
+        "CC-04"
+      ],
+      "P3": [
+        "CC-05",
+        "CC-06"
+      ]
+    },
+    "second": {
+      "S1": [
+        "CC-06",
+        "CC-01"
+      ],
+      "S2": [
+        "CC-02",
+        "CC-03"
+      ],
+      "S3": [
+        "CC-04",
+        "CC-05"
+      ]
+    },
+    "judgmentsPerSample": 2
+  },
+  "independence": {
+    "blind": true,
+    "readEachOthersOutput": false,
+    "description": "primary と second は互いの出力を読まずに独立に判定。reviewer への配布物は blind locator のみ(stratum・classifierSource・左 column 情報を含まない)。"
+  },
+  "renderConditionsSummary": {
+    "renderer": "pdftoppm",
+    "dpi": 110,
+    "scope": "full_page",
+    "cropRegion": null,
+    "allJudgmentsSameConditions": true
+  },
+  "outcomeEnum": [
+    "UNIQUE_PAGE_LOCAL_CONTINUATION",
+    "AMBIGUOUS_PAGE_LOCAL_CONTINUATION",
+    "NO_PAGE_LOCAL_CONTEXT",
+    "EXPLICIT_RESET",
+    "UNREADABLE"
+  ],
+  "transcription": {
+    "method": "reviewer ファイル 6 本の該当 record をそのまま転記(フィールド単位で同一)",
+    "tmpPathFragmentsRemoved": [],
+    "note": "reviewer 記録に絶対パス・一時ディレクトリのパスは含まれておらず、除去箇所は 0。"
+  },
+  "samples": [
+    {
+      "sampleId": "CC-01",
+      "reviews": [
+        {
+          "role": "primary",
+          "reviewerId": "P1",
+          "record": {
+            "sampleId": "CC-01",
+            "reviewerId": "P1",
+            "renderConditions": {
+              "renderer": "pdftoppm (poppler)",
+              "dpi": 110,
+              "scope": "full_page",
+              "cropRegion": null,
+              "cropReason": null,
+              "rerenderConditions": "なし(110dpi full page で判読可能)"
+            },
+            "visualOutcome": "AMBIGUOUS_PAGE_LOCAL_CONTINUATION",
+            "pageLocalMarkers": [
+              {
+                "kind": "組織",
+                "code": "110",
+                "title": "こども家庭庁",
+                "column": "LEFT",
+                "verticalOrder": 1
+              },
+              {
+                "kind": "項",
+                "code": "001",
+                "title": "こども家庭庁共通費",
+                "column": "LEFT",
+                "verticalOrder": 2
+              },
+              {
+                "kind": "項",
+                "code": "015",
+                "title": "母子保健衛生対策費",
+                "column": "LEFT",
+                "verticalOrder": 3
+              },
+              {
+                "kind": "項",
+                "code": "025",
+                "title": "保育対策費",
+                "column": "LEFT",
+                "verticalOrder": 4
+              },
+              {
+                "kind": "項",
+                "code": "045",
+                "title": "こども安全対策費",
+                "column": "LEFT",
+                "verticalOrder": 5
+              },
+              {
+                "kind": "項",
+                "code": "050",
+                "title": "子ども・子育て支援年金特別会計へ繰入",
+                "column": "LEFT",
+                "verticalOrder": 6
+              },
+              {
+                "kind": "項",
+                "code": "055",
+                "title": "児童虐待防止等対策費",
+                "column": "LEFT",
+                "verticalOrder": 7
+              },
+              {
+                "kind": "項",
+                "code": "065",
+                "title": "国立児童自立支援施設",
+                "column": "LEFT",
+                "verticalOrder": 8
+              },
+              {
+                "kind": "項",
+                "code": "075",
+                "title": "国立児童自立支援施設整備費",
+                "column": "LEFT",
+                "verticalOrder": 9
+              },
+              {
+                "kind": "項",
+                "code": "085",
+                "title": "母子家庭等対策費",
+                "column": "LEFT",
+                "verticalOrder": 10
+              },
+              {
+                "kind": "項",
+                "code": "095",
+                "title": "障害児支援等対策費",
+                "column": "LEFT",
+                "verticalOrder": 11
+              },
+              {
+                "kind": "項",
+                "code": "110",
+                "title": "こども政策推進費",
+                "column": "RIGHT",
+                "verticalOrder": 1
+              },
+              {
+                "kind": "項",
+                "code": "120",
+                "title": "児童福祉施設等整備費",
+                "column": "RIGHT",
+                "verticalOrder": 2
+              },
+              {
+                "kind": "項",
+                "code": "125",
+                "title": "大学等修学支援費",
+                "column": "RIGHT",
+                "verticalOrder": 3
+              }
+            ],
+            "targetRequestsObserved": {
+              "count": 1,
+              "firstNumber": "19",
+              "lastNumber": "19",
+              "notes": "右 column 最上段の行 '19 20-06 障害児支援に必要な経費'(ページ欄134)のみ。直下に右 column 最初の marker（項）110 こども政策推進費 が来て群は終わる。locator と視覚は対応。"
+            },
+            "firstExplicitRightMarker": "（項）110 こども政策推進費(target の直下)",
+            "targetContext": null,
+            "whyNotOtherMarkers": null,
+            "candidateContexts": [
+              "（組織）110 こども家庭庁(LEFT 最上段)",
+              "左 column の（項）001〜095 の各項(10個、全て target より上に位置)",
+              "特定の 1 つを選ぶ視覚的手がかり(右 column 上端の marker・見出し・継続表示・罫線による結び付け)は見えない"
+            ],
+            "interruptionOrResetEvidence": "右 column 先頭に継続を示す見出し・'(続き)'表示・新 marker は無い。左右 column は縦の二重罫線で分かれるのみ。target 行の下に（項）110 が来るが、これは target の後に始まる marker で、target を新 context として開始するものではない。reset 証拠なし。",
+            "visibleTextExcerpts": [
+              "19 20-06 障害児支援に必要な経費 134",
+              "（項）110 こども政策推進費 135",
+              "（項）095 障害児支援等対策費 134(左 column 下方)",
+              "18 10-03 障害児医療に必要な経費 134(左 column 最下段)"
+            ],
+            "unreadable": [],
+            "confidence": "medium",
+            "notes": "ページ内に marker 候補は複数あり、target を特定の 1 つに結ぶ視覚要素が無い。左 column 最終 ITEM を親とする読み・ページ欄の数値一致・名称の類似による補完は禁止のため採用しない。判定は『視覚だけでは一意に決まらない』の意味。NO_PAGE_LOCAL_CONTEXT と迷ったが、ページ内に marker 自体は見えるため AMBIGUOUS。"
+          }
+        },
+        {
+          "role": "second",
+          "reviewerId": "S1",
+          "record": {
+            "sampleId": "CC-01",
+            "reviewerId": "S1",
+            "renderConditions": {
+              "renderer": "pdftoppm",
+              "dpi": 110,
+              "scope": "full_page",
+              "cropRegion": null,
+              "cropReason": null,
+              "rerenderConditions": "none (text legible at 110dpi)"
+            },
+            "visualOutcome": "AMBIGUOUS_PAGE_LOCAL_CONTINUATION",
+            "pageLocalMarkers": [
+              {
+                "kind": "組織",
+                "code": "110",
+                "title": "こども家庭庁",
+                "column": "left",
+                "verticalOrder": 1
+              },
+              {
+                "kind": "項",
+                "code": "001",
+                "title": "こども家庭庁共通費",
+                "column": "left",
+                "verticalOrder": 2
+              },
+              {
+                "kind": "項",
+                "code": "015",
+                "title": "母子保健衛生対策費",
+                "column": "left",
+                "verticalOrder": 3
+              },
+              {
+                "kind": "項",
+                "code": "025",
+                "title": "保育対策費",
+                "column": "left",
+                "verticalOrder": 4
+              },
+              {
+                "kind": "項",
+                "code": "045",
+                "title": "こども安全対策費",
+                "column": "left",
+                "verticalOrder": 5
+              },
+              {
+                "kind": "項",
+                "code": "050",
+                "title": "子ども・子育て支援年金特別会計へ繰入",
+                "column": "left",
+                "verticalOrder": 6
+              },
+              {
+                "kind": "項",
+                "code": "055",
+                "title": "児童虐待防止等対策費",
+                "column": "left",
+                "verticalOrder": 7
+              },
+              {
+                "kind": "項",
+                "code": "065",
+                "title": "国立児童自立支援施設",
+                "column": "left",
+                "verticalOrder": 8
+              },
+              {
+                "kind": "項",
+                "code": "075",
+                "title": "国立児童自立支援施設整備費",
+                "column": "left",
+                "verticalOrder": 9
+              },
+              {
+                "kind": "項",
+                "code": "085",
+                "title": "母子家庭等対策費",
+                "column": "left",
+                "verticalOrder": 10
+              },
+              {
+                "kind": "項",
+                "code": "095",
+                "title": "障害児支援等対策費",
+                "column": "left",
+                "verticalOrder": 11
+              },
+              {
+                "kind": "項",
+                "code": "110",
+                "title": "こども政策推進費",
+                "column": "right",
+                "verticalOrder": "2nd row, directly below request 19"
+              },
+              {
+                "kind": "項",
+                "code": "120",
+                "title": "児童福祉施設等整備費",
+                "column": "right",
+                "verticalOrder": "after 22"
+              },
+              {
+                "kind": "項",
+                "code": "125",
+                "title": "大学等修学支援費",
+                "column": "right",
+                "verticalOrder": "after 23"
+              }
+            ],
+            "targetRequestsObserved": {
+              "count": 1,
+              "firstNumber": "19",
+              "lastNumber": "19",
+              "notes": "Right column top row is 19 (20-06 障害児支援に必要な経費, p.134). Group ends at the (項) 110 marker on the next row; request 20 follows that marker. Locator matches visual."
+            },
+            "firstExplicitRightMarker": "(項) 110 こども政策推進費, the row immediately below request 19 (after the target, not before it)",
+            "targetContext": null,
+            "whyNotOtherMarkers": null,
+            "candidateContexts": [
+              "(項)095 障害児支援等対策費 (left, last marker on page, followed by requests 17-18)",
+              "(項)085 母子家庭等対策費 (left)",
+              "earlier left (項)/(組織)110 markers"
+            ],
+            "interruptionOrResetEvidence": "None before the target: no heading, rule or marker above request 19. A (項) 110 marker begins directly after 19, which starts a new (項) section for request 20 onward. Double vertical rule separates columns.",
+            "visibleTextExcerpts": [
+              "19 20-06 障害児支援に必要な経費 134",
+              "（項） 110 こども政策推進費 135",
+              "20 06-06 こども政策の推進に必要な経費 135",
+              "left tail: （項） 095 障害児支援等対策費 134 / 18 10-03 障害児医療に必要な経費 134"
+            ],
+            "unreadable": [],
+            "confidence": "medium",
+            "notes": "Request 19 sits at the top of the right column with no marker or visible link to any left-column marker; the page's own visual evidence does not select among the left-column markers. Deliberately not using left-last-marker assumption, title-text similarity or number correspondence. Same AMBIGUOUS vs NO_PAGE_LOCAL_CONTEXT caveat as CC-06."
+          }
+        }
+      ],
+      "agreement": {
+        "status": "REVIEWER_AGREEMENT",
+        "primaryOutcome": "AMBIGUOUS_PAGE_LOCAL_CONTINUATION",
+        "secondOutcome": "AMBIGUOUS_PAGE_LOCAL_CONTINUATION",
+        "resolution": null
+      }
+    },
+    {
+      "sampleId": "CC-02",
+      "reviews": [
+        {
+          "role": "primary",
+          "reviewerId": "P1",
+          "record": {
+            "sampleId": "CC-02",
+            "reviewerId": "P1",
+            "renderConditions": {
+              "renderer": "pdftoppm (poppler)",
+              "dpi": 110,
+              "scope": "full_page",
+              "cropRegion": null,
+              "cropReason": null,
+              "rerenderConditions": "なし(110dpi full page で判読可能)"
+            },
+            "visualOutcome": "AMBIGUOUS_PAGE_LOCAL_CONTINUATION",
+            "pageLocalMarkers": [
+              {
+                "kind": "組織",
+                "code": "010",
+                "title": "環境本省",
+                "column": "LEFT",
+                "verticalOrder": 1
+              },
+              {
+                "kind": "項",
+                "code": "005",
+                "title": "環境本省共通費",
+                "column": "LEFT",
+                "verticalOrder": 2
+              },
+              {
+                "kind": "項",
+                "code": "010",
+                "title": "環境本省施設費",
+                "column": "LEFT",
+                "verticalOrder": 3
+              },
+              {
+                "kind": "項",
+                "code": "017",
+                "title": "地球温暖化対策推進費",
+                "column": "LEFT",
+                "verticalOrder": 4
+              },
+              {
+                "kind": "項",
+                "code": "018",
+                "title": "脱炭素成長型経済構造移行推進対策費エネルギー対策特別会計へ繰入",
+                "column": "LEFT",
+                "verticalOrder": 5
+              },
+              {
+                "kind": "項",
+                "code": "019",
+                "title": "石油石炭税財源エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入",
+                "column": "LEFT",
+                "verticalOrder": 6
+              },
+              {
+                "kind": "項",
+                "code": "020",
+                "title": "地球環境保全費",
+                "column": "LEFT",
+                "verticalOrder": 7
+              },
+              {
+                "kind": "項",
+                "code": "050",
+                "title": "大気・水・土壌環境等保全費",
+                "column": "LEFT",
+                "verticalOrder": 8
+              },
+              {
+                "kind": "項",
+                "code": "060",
+                "title": "資源循環政策推進費",
+                "column": "LEFT",
+                "verticalOrder": 9
+              },
+              {
+                "kind": "項",
+                "code": "070",
+                "title": "廃棄物処理施設整備費",
+                "column": "LEFT",
+                "verticalOrder": 10
+              },
+              {
+                "kind": "項",
+                "code": "080",
+                "title": "生物多様性保全等推進費",
+                "column": "LEFT",
+                "verticalOrder": 11
+              },
+              {
+                "kind": "項",
+                "code": "090",
+                "title": "環境保全施設整備費",
+                "column": "LEFT",
+                "verticalOrder": 12
+              },
+              {
+                "kind": "項",
+                "code": "100",
+                "title": "自然公園等事業費",
+                "column": "LEFT",
+                "verticalOrder": 13
+              },
+              {
+                "kind": "項",
+                "code": "120",
+                "title": "化学物質対策推進費",
+                "column": "LEFT",
+                "verticalOrder": 14
+              },
+              {
+                "kind": "項",
+                "code": "130",
+                "title": "環境保健対策推進費",
+                "column": "RIGHT",
+                "verticalOrder": 1
+              },
+              {
+                "kind": "項",
+                "code": "135",
+                "title": "自動車重量税財源公害健康被害補償費",
+                "column": "RIGHT",
+                "verticalOrder": 2
+              },
+              {
+                "kind": "項",
+                "code": "170",
+                "title": "環境・経済・社会の統合的向上費",
+                "column": "RIGHT",
+                "verticalOrder": 3
+              },
+              {
+                "kind": "項",
+                "code": "180",
+                "title": "環境政策基盤整備費",
+                "column": "RIGHT",
+                "verticalOrder": 4
+              },
+              {
+                "kind": "項",
+                "code": "187",
+                "title": "環境調査研修所",
+                "column": "RIGHT",
+                "verticalOrder": 5
+              },
+              {
+                "kind": "項",
+                "code": "205",
+                "title": "独立行政法人環境再生保全機構運営費",
+                "column": "RIGHT",
+                "verticalOrder": 6
+              },
+              {
+                "kind": "項",
+                "code": "210",
+                "title": "独立行政法人国立環境研究所運営費",
+                "column": "RIGHT",
+                "verticalOrder": 7
+              },
+              {
+                "kind": "項",
+                "code": "220",
+                "title": "国立研究開発法人国立環境研究所施設整備費",
+                "column": "RIGHT",
+                "verticalOrder": 8
+              },
+              {
+                "kind": "項",
+                "code": "230",
+                "title": "地球環境保全等試験研究費",
+                "column": "RIGHT",
+                "verticalOrder": 9
+              },
+              {
+                "kind": "項",
+                "code": "240",
+                "title": "地域脱炭素推進費",
+                "column": "RIGHT",
+                "verticalOrder": 10
+              },
+              {
+                "kind": "項",
+                "code": "250",
+                "title": "石綿健康被害救済事務費労働保険特別会計へ繰入",
+                "column": "RIGHT",
+                "verticalOrder": 11
+              },
+              {
+                "kind": "項",
+                "code": "255",
+                "title": "廃棄物処理施設整備事業調査諸費",
+                "column": "RIGHT",
+                "verticalOrder": 12
+              },
+              {
+                "kind": "項",
+                "code": "260",
+                "title": "自然公園等事業工事諸費",
+                "column": "RIGHT",
+                "verticalOrder": 13
+              },
+              {
+                "kind": "項",
+                "code": "265",
+                "title": "廃棄物処理施設災害復旧事業費",
+                "column": "RIGHT",
+                "verticalOrder": 14
+              }
+            ],
+            "targetRequestsObserved": {
+              "count": 1,
+              "firstNumber": "15",
+              "lastNumber": "15",
+              "notes": "右 column 最上段の行 '15 05-95 化学物質対策の推進に必要な経費'(ページ欄76)のみ。直下に右 column 最初の marker（項）130 環境保健対策推進費 が来て群は終わる。locator と視覚は対応。"
+            },
+            "firstExplicitRightMarker": "（項）130 環境保健対策推進費(target の直下)",
+            "targetContext": null,
+            "whyNotOtherMarkers": null,
+            "candidateContexts": [
+              "（組織）010 環境本省(LEFT 最上段)",
+              "左 column の（項）005〜120 の各項(13個、全て target より上に位置)",
+              "特定の 1 つを選ぶ視覚的手がかり(右 column 上端の marker・見出し・継続表示・罫線による結び付け)は見えない"
+            ],
+            "interruptionOrResetEvidence": "右 column 先頭に継続を示す見出し・'(続き)'表示・新 marker は無い。左右 column は縦の二重罫線で分かれるのみ。target 行の下に（項）130 が来るが、target の後に始まる marker。reset 証拠なし。",
+            "visibleTextExcerpts": [
+              "15 05-95 化学物質対策の推進に必要な経費 76",
+              "（項）130 環境保健対策推進費 84",
+              "（項）120 化学物質対策推進費 76(左 column 最下段)",
+              "14 01-45 自然公園等事業に必要な経費 76(左 column)"
+            ],
+            "unreadable": [],
+            "confidence": "medium",
+            "notes": "一部の長い名称は複数行に折り返され、行末が読み取りにくい箇所がある(例: 項018・019 の title は 2 行表示、項019 の末尾は折返し)が target の判定には影響しない。左 column 最終 ITEM を親とする読み・ページ欄の数値一致・名称の類似による補完は禁止のため採用しない。"
+          }
+        },
+        {
+          "role": "second",
+          "reviewerId": "S2",
+          "record": {
+            "sampleId": "CC-02",
+            "reviewerId": "S2",
+            "renderConditions": {
+              "renderer": "pdftoppm",
+              "dpi": 110,
+              "scope": "full_page",
+              "cropRegion": null,
+              "cropReason": null,
+              "rerenderConditions": "なし(110dpi full page で判読可、再render不要)"
+            },
+            "visualOutcome": "AMBIGUOUS_PAGE_LOCAL_CONTINUATION",
+            "pageLocalMarkers": [
+              {
+                "kind": "組織",
+                "code": "010",
+                "title": "環境本省",
+                "column": "left",
+                "verticalOrder": "左上(2番目の見出し行)"
+              },
+              {
+                "kind": "項",
+                "code": "005",
+                "title": "環境本省共通費",
+                "column": "left",
+                "verticalOrder": "組織010直下"
+              },
+              {
+                "kind": "項",
+                "code": "010",
+                "title": "環境本省施設費",
+                "column": "left",
+                "verticalOrder": "要求2の下"
+              },
+              {
+                "kind": "項",
+                "code": "017",
+                "title": "地球温暖化対策推進費",
+                "column": "left",
+                "verticalOrder": "要求3の下"
+              },
+              {
+                "kind": "項",
+                "code": "018",
+                "title": "脱炭素成長型経済構造移行推進対策エネルギー対策特別会計へ繰入",
+                "column": "left",
+                "verticalOrder": "要求5の下"
+              },
+              {
+                "kind": "項",
+                "code": "019",
+                "title": "石油石炭税財源エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入",
+                "column": "left",
+                "verticalOrder": "要求6の下"
+              },
+              {
+                "kind": "項",
+                "code": "020",
+                "title": "地球環境保全費",
+                "column": "left",
+                "verticalOrder": "要求7の下"
+              },
+              {
+                "kind": "項",
+                "code": "050",
+                "title": "大気・水・土壌環境等保全費",
+                "column": "left",
+                "verticalOrder": "要求8の下"
+              },
+              {
+                "kind": "項",
+                "code": "060",
+                "title": "資源循環政策推進費",
+                "column": "left",
+                "verticalOrder": "要求9の下"
+              },
+              {
+                "kind": "項",
+                "code": "070",
+                "title": "廃棄物処理施設整備費",
+                "column": "left",
+                "verticalOrder": "要求10の下"
+              },
+              {
+                "kind": "項",
+                "code": "080",
+                "title": "生物多様性保全等推進費",
+                "column": "left",
+                "verticalOrder": "要求11の下"
+              },
+              {
+                "kind": "項",
+                "code": "090",
+                "title": "環境保全施設整備費",
+                "column": "left",
+                "verticalOrder": "要求12の下"
+              },
+              {
+                "kind": "項",
+                "code": "100",
+                "title": "自然公園等事業費",
+                "column": "left",
+                "verticalOrder": "要求13の下"
+              },
+              {
+                "kind": "項",
+                "code": "120",
+                "title": "化学物質対策推進費",
+                "column": "left",
+                "verticalOrder": "左column最下部(要求14の下)"
+              },
+              {
+                "kind": "項",
+                "code": "130",
+                "title": "環境保健対策推進費",
+                "column": "right",
+                "verticalOrder": "右1番目(要求15の下)"
+              },
+              {
+                "kind": "項",
+                "code": "135",
+                "title": "自動車重量税財源公害健康被害補償費",
+                "column": "right",
+                "verticalOrder": "右2番目(要求16の下)"
+              },
+              {
+                "kind": "項",
+                "code": "170",
+                "title": "環境・経済・社会の統合的向上費",
+                "column": "right",
+                "verticalOrder": "右3番目"
+              },
+              {
+                "kind": "項",
+                "code": "180",
+                "title": "環境政策基盤整備費",
+                "column": "right",
+                "verticalOrder": "右4番目"
+              },
+              {
+                "kind": "項",
+                "code": "187",
+                "title": "環境調査研修所",
+                "column": "right",
+                "verticalOrder": "右5番目"
+              },
+              {
+                "kind": "項",
+                "code": "205",
+                "title": "独立行政法人環境再生保全機構運営費",
+                "column": "right",
+                "verticalOrder": "右6番目"
+              },
+              {
+                "kind": "項",
+                "code": "210",
+                "title": "国立研究開発法人国立環境研究所運営費",
+                "column": "right",
+                "verticalOrder": "右7番目"
+              },
+              {
+                "kind": "項",
+                "code": "220〜265",
+                "title": "(220 国立環境研究所施設整備費/230 地球環境保全等試験研究費/240 地域脱炭素推進費/250 石綿健康被害救済事務費労働保険特別会計へ繰入/255 廃棄物処理施設整備事業調査諸費/260 自然公園等事業工事諸費/265 廃棄物処理施設災害復旧事業費)",
+                "column": "right",
+                "verticalOrder": "右8番目以降"
+              }
+            ],
+            "targetRequestsObserved": {
+              "count": 1,
+              "firstNumber": "15",
+              "lastNumber": "15",
+              "notes": "右column最上段の要求15「05-95 化学物質対策の推進に必要な経費」(ページ76)の1件のみ。直後の右column最初のmarkerは(項)130。locator(lineIndex 7)と視覚は対応。"
+            },
+            "firstExplicitRightMarker": {
+              "kind": "項",
+              "code": "130",
+              "title": "環境保健対策推進費",
+              "note": "target の下に位置する(target より前に右column内marker無し)"
+            },
+            "targetContext": null,
+            "whyNotOtherMarkers": null,
+            "candidateContexts": [
+              "左column内の全marker(組織010、項005〜項120)。右column先頭の要求15の上方・同一column内にはmarker・見出しが無く、継続元を示す視覚的な接続(罫線・インデント・継続表記)も無い。左column最下部の項120は位置が近いが、それを親とするのは禁止された決め打ち",
+              "右column内の項130は target の下側にあるため target の継続元としては視覚的に示されていない"
+            ],
+            "interruptionOrResetEvidence": "右column上端は表ヘッダー(要求番号/区分/ページ)直下で、新contextを示す見出し・罫線・marker無し。左右columnは二重縦線で区切られるのみ。",
+            "visibleTextExcerpts": [
+              "15 05-95 化学物質対策の推進に必要な経費 76",
+              "(項) 130 環境保健対策推進費 84",
+              "(項) 120 化学物質対策推進費 76(左最下)"
+            ],
+            "unreadable": [
+              "左column 要求6/7/(項)019等の長い名称は折り返しの一部が小さく読みづらいが target 判定に影響なし"
+            ],
+            "confidence": "medium",
+            "notes": "ページ番号列の数値は参照せず判定。右column先頭に explicit marker が無く、ページ内の複数marker のうち一意に指せる視覚的根拠が無いためAMBIGUOUS。"
+          }
+        }
+      ],
+      "agreement": {
+        "status": "REVIEWER_AGREEMENT",
+        "primaryOutcome": "AMBIGUOUS_PAGE_LOCAL_CONTINUATION",
+        "secondOutcome": "AMBIGUOUS_PAGE_LOCAL_CONTINUATION",
+        "resolution": null
+      }
+    },
+    {
+      "sampleId": "CC-03",
+      "reviews": [
+        {
+          "role": "primary",
+          "reviewerId": "P2",
+          "record": {
+            "sampleId": "CC-03",
+            "reviewerId": "P2",
+            "renderConditions": {
+              "renderer": "pdftoppm",
+              "dpi": 110,
+              "scope": "full_page",
+              "cropRegion": null,
+              "cropReason": null,
+              "rerenderConditions": null
+            },
+            "visualOutcome": "NO_PAGE_LOCAL_CONTEXT",
+            "pageLocalMarkers": [
+              {
+                "kind": "項",
+                "code": "030",
+                "title": "日本学士院",
+                "column": "left",
+                "verticalOrder": 1
+              },
+              {
+                "kind": "組織",
+                "code": "030",
+                "title": "文化庁",
+                "column": "left",
+                "verticalOrder": 2
+              },
+              {
+                "kind": "項",
+                "code": "010",
+                "title": "文化庁共通費",
+                "column": "left",
+                "verticalOrder": 3
+              },
+              {
+                "kind": "項",
+                "code": "020",
+                "title": "文化振興費",
+                "column": "left",
+                "verticalOrder": 4
+              },
+              {
+                "kind": "項",
+                "code": "030",
+                "title": "日本芸術院",
+                "column": "left",
+                "verticalOrder": 5
+              },
+              {
+                "kind": "項",
+                "code": "040",
+                "title": "独立行政法人国立美術館運営費",
+                "column": "left",
+                "verticalOrder": 6
+              },
+              {
+                "kind": "項",
+                "code": "050",
+                "title": "独立行政法人国立美術館施設整備費",
+                "column": "left",
+                "verticalOrder": 7
+              },
+              {
+                "kind": "項",
+                "code": "060",
+                "title": "独立行政法人日本芸術文化振興会運営費",
+                "column": "left",
+                "verticalOrder": 8
+              },
+              {
+                "kind": "項",
+                "code": "070",
+                "title": "独立行政法人日本芸術文化振興会施設整備費",
+                "column": "left",
+                "verticalOrder": 9
+              },
+              {
+                "kind": "項",
+                "code": "080",
+                "title": "文化財保存事業費",
+                "column": "left",
+                "verticalOrder": 10
+              },
+              {
+                "kind": "項",
+                "code": "090",
+                "title": "文化財保存施設整備費",
+                "column": "left",
+                "verticalOrder": 11
+              },
+              {
+                "kind": "項",
+                "code": "100",
+                "title": "独立行政法人国立文化財機構運営費",
+                "column": "left",
+                "verticalOrder": 12
+              },
+              {
+                "kind": "項",
+                "code": "110",
+                "title": "独立行政法人国立文化財機構施設整備費",
+                "column": "left",
+                "verticalOrder": 13
+              },
+              {
+                "kind": "項",
+                "code": "130",
+                "title": "文化振興基盤整備費",
+                "column": "left",
+                "verticalOrder": 14
+              },
+              {
+                "kind": "項",
+                "code": "140",
+                "title": "独立行政法人国立科学博物館運営費",
+                "column": "left",
+                "verticalOrder": 15
+              },
+              {
+                "kind": "項",
+                "code": "150",
+                "title": "独立行政法人国立科学博物館施設整備費",
+                "column": "left (last row of column)",
+                "verticalOrder": 16
+              },
+              {
+                "kind": "組織",
+                "code": "040",
+                "title": "スポーツ庁",
+                "column": "right",
+                "verticalOrder": 17
+              },
+              {
+                "kind": "項",
+                "code": "010",
+                "title": "スポーツ庁共通費",
+                "column": "right",
+                "verticalOrder": 18
+              },
+              {
+                "kind": "項",
+                "code": "060",
+                "title": "初等中等教育振興費",
+                "column": "right",
+                "verticalOrder": 19
+              },
+              {
+                "kind": "項",
+                "code": "220",
+                "title": "私立学校振興費",
+                "column": "right",
+                "verticalOrder": 20
+              },
+              {
+                "kind": "項",
+                "code": "530",
+                "title": "スポーツ振興費",
+                "column": "right",
+                "verticalOrder": 21
+              },
+              {
+                "kind": "項",
+                "code": "550",
+                "title": "独立行政法人日本スポーツ振興センター運営費",
+                "column": "right",
+                "verticalOrder": 22
+              }
+            ],
+            "targetRequestsObserved": {
+              "count": 1,
+              "firstNumber": "103",
+              "lastNumber": "103",
+              "notes": "右 column 最上段の行(要求番号103, 06-13 独立行政法人国立科学博物館施設整備に必要な経費, p.1267)。直後の行が (組織)040 スポーツ庁。locator と視覚は対応。"
+            },
+            "firstExplicitRightMarker": "(組織) 040 スポーツ庁(右 column 2行目、REQUEST 103 の直下)",
+            "targetContext": null,
+            "whyNotOtherMarkers": null,
+            "candidateContexts": [
+              "右 column 上端と103の上には marker 行が無い。ページ内の marker は左 column(最下段 (項)150 を含む)と右 column で103より下にあるもののみ。103と特定 marker を結ぶ視覚構造(罫線・字下げ・見出し)は無く、左右 column は罫線で分離。"
+            ],
+            "interruptionOrResetEvidence": "103 の直下に (組織)040 スポーツ庁 が現れる(新しい組織の開始に見えるが、103 自体より下)。column 間に二重罫線あり。ページ上端に独立の見出し行は無く、列ヘッダ(要求番号/区分/ページ)のみ。",
+            "visibleTextExcerpts": [
+              "103 06-13 独立行政法人国立科学博物館施設整備に必要な経費 1267",
+              "(組織) 040 スポーツ庁 1268",
+              "(項) 150 独立行政法人国立科学博物館施設整備費 1267 (左 column 最下行)"
+            ],
+            "unreadable": [],
+            "confidence": "medium",
+            "notes": "103 の上位に当たる marker は右 column 内に視覚的に存在しない。左 column 最下の(項)がその続きに見えるかは、LEFT→RIGHT の読み順を前提にしない限り視覚構造から結べないため、context 候補としては確定せず。"
+          }
+        },
+        {
+          "role": "second",
+          "reviewerId": "S2",
+          "record": {
+            "sampleId": "CC-03",
+            "reviewerId": "S2",
+            "renderConditions": {
+              "renderer": "pdftoppm",
+              "dpi": 110,
+              "scope": "full_page",
+              "cropRegion": null,
+              "cropReason": null,
+              "rerenderConditions": "なし(110dpi full page で判読可、再render不要)"
+            },
+            "visualOutcome": "AMBIGUOUS_PAGE_LOCAL_CONTINUATION",
+            "pageLocalMarkers": [
+              {
+                "kind": "項",
+                "code": "030",
+                "title": "日本学士院",
+                "column": "left",
+                "verticalOrder": "1(要求84の下)"
+              },
+              {
+                "kind": "組織",
+                "code": "030",
+                "title": "文化庁",
+                "column": "left",
+                "verticalOrder": "2(要求86の下)"
+              },
+              {
+                "kind": "項",
+                "code": "010",
+                "title": "文化庁共通費",
+                "column": "left",
+                "verticalOrder": "3"
+              },
+              {
+                "kind": "項",
+                "code": "020",
+                "title": "文化振興費",
+                "column": "left",
+                "verticalOrder": "4"
+              },
+              {
+                "kind": "項",
+                "code": "030",
+                "title": "日本芸術院",
+                "column": "left",
+                "verticalOrder": "5"
+              },
+              {
+                "kind": "項",
+                "code": "040",
+                "title": "独立行政法人国立美術館運営費",
+                "column": "left",
+                "verticalOrder": "6"
+              },
+              {
+                "kind": "項",
+                "code": "050",
+                "title": "独立行政法人国立美術館施設整備費",
+                "column": "left",
+                "verticalOrder": "7"
+              },
+              {
+                "kind": "項",
+                "code": "060",
+                "title": "独立行政法人日本芸術文化振興会運営費",
+                "column": "left",
+                "verticalOrder": "8"
+              },
+              {
+                "kind": "項",
+                "code": "070",
+                "title": "独立行政法人日本芸術文化振興会施設整備費",
+                "column": "left",
+                "verticalOrder": "9"
+              },
+              {
+                "kind": "項",
+                "code": "080",
+                "title": "文化財保存事業費",
+                "column": "left",
+                "verticalOrder": "10"
+              },
+              {
+                "kind": "項",
+                "code": "090",
+                "title": "文化財保存施設整備費",
+                "column": "left",
+                "verticalOrder": "11"
+              },
+              {
+                "kind": "項",
+                "code": "100",
+                "title": "独立行政法人国立文化財機構運営費",
+                "column": "left",
+                "verticalOrder": "12"
+              },
+              {
+                "kind": "項",
+                "code": "110",
+                "title": "独立行政法人国立文化財機構施設整備費",
+                "column": "left",
+                "verticalOrder": "13"
+              },
+              {
+                "kind": "項",
+                "code": "130",
+                "title": "文化振興基盤整備費",
+                "column": "left",
+                "verticalOrder": "14"
+              },
+              {
+                "kind": "項",
+                "code": "140",
+                "title": "独立行政法人国立科学博物館運営費",
+                "column": "left",
+                "verticalOrder": "15"
+              },
+              {
+                "kind": "項",
+                "code": "150",
+                "title": "独立行政法人国立科学博物館施設整備費",
+                "column": "left",
+                "verticalOrder": "16(左column最下部)"
+              },
+              {
+                "kind": "組織",
+                "code": "040",
+                "title": "スポーツ庁",
+                "column": "right",
+                "verticalOrder": "右1番目(要求103の下)"
+              },
+              {
+                "kind": "項",
+                "code": "010",
+                "title": "スポーツ庁共通費",
+                "column": "right",
+                "verticalOrder": "右2"
+              },
+              {
+                "kind": "項",
+                "code": "060",
+                "title": "初等中等教育振興費",
+                "column": "right",
+                "verticalOrder": "右3"
+              },
+              {
+                "kind": "項",
+                "code": "220",
+                "title": "私立学校振興費",
+                "column": "right",
+                "verticalOrder": "右4"
+              },
+              {
+                "kind": "項",
+                "code": "530",
+                "title": "スポーツ振興費",
+                "column": "right",
+                "verticalOrder": "右5"
+              },
+              {
+                "kind": "項",
+                "code": "550",
+                "title": "独立行政法人日本スポーツ振興センター運営費",
+                "column": "right",
+                "verticalOrder": "右6"
+              }
+            ],
+            "targetRequestsObserved": {
+              "count": 1,
+              "firstNumber": "103",
+              "lastNumber": "103",
+              "notes": "右column最上段の要求103「06-13 独立行政法人国立科学博物館施設整備に必要な経費」(ページ1267)の1件のみ。直後に(組織)040 スポーツ庁が来る。locatorと視覚は対応。"
+            },
+            "firstExplicitRightMarker": {
+              "kind": "組織",
+              "code": "040",
+              "title": "スポーツ庁",
+              "note": "target の直下に位置する"
+            },
+            "targetContext": null,
+            "whyNotOtherMarkers": null,
+            "candidateContexts": [
+              "左column内の各marker(項030〜項150、組織030文化庁)。右column先頭の要求103の上方にmarker・見出しは無く、継続を示す視覚的な接続表記も無い。左column最下部の項150は近接するが、それを親とするのは禁止された決め打ち",
+              "右column先頭の(組織)040 スポーツ庁は target の下にあり、target を内包するようには見えない(むしろ要求103の後に新しい組織が始まる)"
+            ],
+            "interruptionOrResetEvidence": "右column内で要求103の直後に(組織)040 スポーツ庁が出現し、以降の要求104〜はこの新組織配下の並びに見える。これは target の後の新context開始であり、target 自体の継続元を示すものではない。target の上には reset 証拠なし(表ヘッダー直下)。",
+            "visibleTextExcerpts": [
+              "103 06-13 独立行政法人国立科学博物館施設整備に必要な経費 1267",
+              "(組織) 040 スポーツ庁 1268",
+              "(項) 150 独立行政法人国立科学博物館施設整備費 1267(左最下)"
+            ],
+            "unreadable": [],
+            "confidence": "medium",
+            "notes": "ページ番号列・名称の語の一致は判定に使用せず。ページ内に複数marker があり視覚的に一意に指せないためAMBIGUOUS。"
+          }
+        }
+      ],
+      "agreement": {
+        "status": "REVIEWER_DISAGREEMENT",
+        "primaryOutcome": "NO_PAGE_LOCAL_CONTEXT",
+        "secondOutcome": "AMBIGUOUS_PAGE_LOCAL_CONTINUATION",
+        "resolution": "NOT_RESOLVED(両判定を保存。多数決・推測で解消しない)"
+      }
+    },
+    {
+      "sampleId": "CC-04",
+      "reviews": [
+        {
+          "role": "primary",
+          "reviewerId": "P2",
+          "record": {
+            "sampleId": "CC-04",
+            "reviewerId": "P2",
+            "renderConditions": {
+              "renderer": "pdftoppm",
+              "dpi": 110,
+              "scope": "full_page",
+              "cropRegion": null,
+              "cropReason": null,
+              "rerenderConditions": null
+            },
+            "visualOutcome": "NO_PAGE_LOCAL_CONTEXT",
+            "pageLocalMarkers": [
+              {
+                "kind": "組織",
+                "code": "050",
+                "title": "国立障害者リハビリテーションセンター",
+                "column": "left",
+                "verticalOrder": 1
+              },
+              {
+                "kind": "項",
+                "code": "003",
+                "title": "国立障害者リハビリテーションセンター共通費",
+                "column": "left",
+                "verticalOrder": 2
+              },
+              {
+                "kind": "項",
+                "code": "010",
+                "title": "国立障害者リハビリテーションセンター施設費",
+                "column": "left",
+                "verticalOrder": 3
+              },
+              {
+                "kind": "項",
+                "code": "020",
+                "title": "国立障害者リハビリテーションセンター運営費",
+                "column": "left",
+                "verticalOrder": 4
+              },
+              {
+                "kind": "項",
+                "code": "030",
+                "title": "防災対策推進東日本大震災復興特別会計へ繰入",
+                "column": "left",
+                "verticalOrder": 5
+              },
+              {
+                "kind": "組織",
+                "code": "070",
+                "title": "地方厚生局",
+                "column": "left",
+                "verticalOrder": 6
+              },
+              {
+                "kind": "項",
+                "code": "010",
+                "title": "地方厚生局共通費",
+                "column": "left",
+                "verticalOrder": 7
+              },
+              {
+                "kind": "項",
+                "code": "011",
+                "title": "地方厚生局施設費",
+                "column": "left",
+                "verticalOrder": 8
+              },
+              {
+                "kind": "項",
+                "code": "012",
+                "title": "保険医療機関等指導監督等実施費",
+                "column": "left",
+                "verticalOrder": 9
+              },
+              {
+                "kind": "項",
+                "code": "015",
+                "title": "医師等国家試験実施費",
+                "column": "left",
+                "verticalOrder": 10
+              },
+              {
+                "kind": "項",
+                "code": "020",
+                "title": "麻薬・覚醒剤等対策費",
+                "column": "left",
+                "verticalOrder": 11
+              },
+              {
+                "kind": "項",
+                "code": "025",
+                "title": "医療観察等実施費",
+                "column": "left",
+                "verticalOrder": 12
+              },
+              {
+                "kind": "組織",
+                "code": "080",
+                "title": "都道府県労働局",
+                "column": "left",
+                "verticalOrder": 13
+              },
+              {
+                "kind": "項",
+                "code": "010",
+                "title": "都道府県労働局共通費",
+                "column": "left (最終 marker、196の2行上)",
+                "verticalOrder": 14
+              },
+              {
+                "kind": "項",
+                "code": "015",
+                "title": "都道府県労働局施設費",
+                "column": "right",
+                "verticalOrder": 15
+              },
+              {
+                "kind": "項",
+                "code": "020",
+                "title": "労働条件確保・改善対策費",
+                "column": "right",
+                "verticalOrder": 16
+              },
+              {
+                "kind": "項",
+                "code": "025",
+                "title": "個別労働紛争対策費",
+                "column": "right",
+                "verticalOrder": 17
+              },
+              {
+                "kind": "項",
+                "code": "030",
+                "title": "職業紹介事業等実施費",
+                "column": "right",
+                "verticalOrder": 18
+              },
+              {
+                "kind": "項",
+                "code": "035",
+                "title": "高齢者等雇用安定・促進費",
+                "column": "right",
+                "verticalOrder": 19
+              },
+              {
+                "kind": "項",
+                "code": "040",
+                "title": "男女均等雇用対策費",
+                "column": "right",
+                "verticalOrder": 20
+              },
+              {
+                "kind": "項",
+                "code": "045",
+                "title": "若年者等職業能力開発支援費",
+                "column": "right",
+                "verticalOrder": 21
+              },
+              {
+                "kind": "組織",
+                "code": "090",
+                "title": "中央労働委員会",
+                "column": "right",
+                "verticalOrder": 22
+              },
+              {
+                "kind": "項",
+                "code": "010",
+                "title": "中央労働委員会共通費",
+                "column": "right",
+                "verticalOrder": 23
+              },
+              {
+                "kind": "項",
+                "code": "020",
+                "title": "労使関係等安定形成促進費",
+                "column": "right",
+                "verticalOrder": 24
+              }
+            ],
+            "targetRequestsObserved": {
+              "count": 1,
+              "firstNumber": "197",
+              "lastNumber": "197",
+              "notes": "右 column 最上段の行(197, 05-95 厚生労働統計調査に必要な経費, p.1618)。直後の行が (項)015 都道府県労働局施設費。locator と視覚は対応。"
+            },
+            "firstExplicitRightMarker": "(項) 015 都道府県労働局施設費(右 column 2行目、REQUEST 197 の直下)",
+            "targetContext": null,
+            "whyNotOtherMarkers": null,
+            "candidateContexts": [
+              "右 column 内で197の上には marker 行が無い。ページ内 marker は左 column(最下の marker は (項)010 都道府県労働局共通費)と、右 column で197より下のものだけ。197 と特定 marker を結ぶ視覚構造は無く、左右 column は罫線で分離。"
+            ],
+            "interruptionOrResetEvidence": "197 の直下に (項)015 が現れる(197 より下)。新しい(組織)は右 column 上部には無い。column 間に二重罫線。ページ上端に独立の見出し行は無し。",
+            "visibleTextExcerpts": [
+              "197 05-95 厚生労働統計調査に必要な経費 1618",
+              "(項) 015 都道府県労働局施設費 1618",
+              "(項) 010 都道府県労働局共通費 1595 (左 column 最終 marker)"
+            ],
+            "unreadable": [],
+            "confidence": "medium",
+            "notes": "197 に対応する marker は右 column 内に視覚的に存在しない。左 column の最終 marker を親とするのは読み順前提となるため行わず。"
+          }
+        },
+        {
+          "role": "second",
+          "reviewerId": "S3",
+          "record": {
+            "sampleId": "CC-04",
+            "reviewerId": "S3",
+            "renderConditions": {
+              "renderer": "pdftoppm (poppler)",
+              "dpi": 110,
+              "scope": "full_page",
+              "cropRegion": null,
+              "cropReason": null,
+              "rerenderConditions": "なし（full page 110dpi で判読可能）"
+            },
+            "visualOutcome": "NO_PAGE_LOCAL_CONTEXT",
+            "pageLocalMarkers": [
+              {
+                "kind": "組織",
+                "code": "050",
+                "title": "国立障害者リハビリテーションセンター",
+                "column": "LEFT",
+                "verticalOrder": 1
+              },
+              {
+                "kind": "項",
+                "code": "003",
+                "title": "国立障害者リハビリテーションセンター共通費",
+                "column": "LEFT",
+                "verticalOrder": 2
+              },
+              {
+                "kind": "項",
+                "code": "010",
+                "title": "国立障害者リハビリテーションセンター施設費",
+                "column": "LEFT",
+                "verticalOrder": 3
+              },
+              {
+                "kind": "項",
+                "code": "020",
+                "title": "国立障害者リハビリテーションセンター運営費",
+                "column": "LEFT",
+                "verticalOrder": 4
+              },
+              {
+                "kind": "項",
+                "code": "030",
+                "title": "防災対策推進東日本大震災復興特別会計へ繰入",
+                "column": "LEFT",
+                "verticalOrder": 5
+              },
+              {
+                "kind": "組織",
+                "code": "070",
+                "title": "地方厚生局",
+                "column": "LEFT",
+                "verticalOrder": 6
+              },
+              {
+                "kind": "項",
+                "code": "010",
+                "title": "地方厚生局共通費",
+                "column": "LEFT",
+                "verticalOrder": 7
+              },
+              {
+                "kind": "項",
+                "code": "011",
+                "title": "地方厚生局施設費",
+                "column": "LEFT",
+                "verticalOrder": 8
+              },
+              {
+                "kind": "項",
+                "code": "012",
+                "title": "保険医療機関等指導監督等実施費",
+                "column": "LEFT",
+                "verticalOrder": 9
+              },
+              {
+                "kind": "項",
+                "code": "015",
+                "title": "医師等国家試験実施費",
+                "column": "LEFT",
+                "verticalOrder": 10
+              },
+              {
+                "kind": "項",
+                "code": "020",
+                "title": "麻薬・覚醒剤等対策費",
+                "column": "LEFT",
+                "verticalOrder": 11
+              },
+              {
+                "kind": "項",
+                "code": "025",
+                "title": "医療観察等実施費",
+                "column": "LEFT",
+                "verticalOrder": 12
+              },
+              {
+                "kind": "組織",
+                "code": "080",
+                "title": "都道府県労働局",
+                "column": "LEFT",
+                "verticalOrder": 13
+              },
+              {
+                "kind": "項",
+                "code": "010",
+                "title": "都道府県労働局共通費",
+                "column": "LEFT",
+                "verticalOrder": 14
+              },
+              {
+                "kind": "項",
+                "code": "015",
+                "title": "都道府県労働局施設費",
+                "column": "RIGHT",
+                "verticalOrder": 1
+              },
+              {
+                "kind": "項",
+                "code": "020",
+                "title": "労働条件確保・改善対策費",
+                "column": "RIGHT",
+                "verticalOrder": 2
+              },
+              {
+                "kind": "項",
+                "code": "025",
+                "title": "個別労働紛争対策費",
+                "column": "RIGHT",
+                "verticalOrder": 3
+              },
+              {
+                "kind": "項",
+                "code": "030",
+                "title": "職業紹介事業等実施費",
+                "column": "RIGHT",
+                "verticalOrder": 4
+              },
+              {
+                "kind": "項",
+                "code": "035",
+                "title": "高齢者等雇用安定・促進費",
+                "column": "RIGHT",
+                "verticalOrder": 5
+              },
+              {
+                "kind": "項",
+                "code": "040",
+                "title": "男女均等雇用対策費",
+                "column": "RIGHT",
+                "verticalOrder": 6
+              },
+              {
+                "kind": "項",
+                "code": "045",
+                "title": "若年者等職業能力開発支援費",
+                "column": "RIGHT",
+                "verticalOrder": 7
+              },
+              {
+                "kind": "組織",
+                "code": "090",
+                "title": "中央労働委員会",
+                "column": "RIGHT",
+                "verticalOrder": 8
+              },
+              {
+                "kind": "項",
+                "code": "010",
+                "title": "中央労働委員会共通費",
+                "column": "RIGHT",
+                "verticalOrder": 9
+              },
+              {
+                "kind": "項",
+                "code": "020",
+                "title": "労使関係等安定形成促進費",
+                "column": "RIGHT",
+                "verticalOrder": 10
+              }
+            ],
+            "targetRequestsObserved": {
+              "count": 1,
+              "firstNumber": "197",
+              "lastNumber": "197",
+              "notes": "右 column 最上段の行が 197「05-95 厚生労働統計調査に必要な経費」。直後（次行）に右 column 最初の marker (項)015 が来て、その下に 198。locator の target(197 のみ)と視覚は対応。"
+            },
+            "firstExplicitRightMarker": {
+              "kind": "項",
+              "code": "015",
+              "title": "都道府県労働局施設費",
+              "position": "REQUEST 197 の直下（target より下）"
+            },
+            "targetContext": null,
+            "whyNotOtherMarkers": null,
+            "candidateContexts": [
+              "（参考・採用せず）左 column 末尾の (項)010 都道府県労働局共通費 / (組織)080 都道府県労働局：右 column 側に視覚的な接続（見出し・罫線・繰り越し表示）は無く、左→右の読み順を仮定しない限り候補として結び付けられない"
+            ],
+            "interruptionOrResetEvidence": "右 column 内で 197 より上に marker・見出し・罫線は無い。左右 column は二重縦罫線で分離。右 column 内には 197 の後に (項)015 が現れるのみで、reset を示す explicit evidence とまでは言えない。",
+            "visibleTextExcerpts": [
+              "197 05-95 厚生労働統計調査に必要な経費 1618",
+              "(項) 015 都道府県労働局施設費 1618",
+              "198 01-95 都道府県労働局施設整備に必要な経費 1618",
+              "(左末尾)(項) 010 都道府県労働局共通費 1595 / 195 / 196"
+            ],
+            "unreadable": [],
+            "confidence": "medium",
+            "notes": "右 column 先頭 REQUEST の上に context marker が視覚的に存在しない。左 column 末尾に marker 候補はあるが column をまたぐ視覚的連結が無いため採用しない。『項が REQUEST の直前に置かれる』ページ内の並びは見えるが、column 先頭にはそれが無い。左 column 末尾の marker を親とする判断は禁止事項のため行わない。"
+          }
+        }
+      ],
+      "agreement": {
+        "status": "REVIEWER_AGREEMENT",
+        "primaryOutcome": "NO_PAGE_LOCAL_CONTEXT",
+        "secondOutcome": "NO_PAGE_LOCAL_CONTEXT",
+        "resolution": null
+      }
+    },
+    {
+      "sampleId": "CC-05",
+      "reviews": [
+        {
+          "role": "primary",
+          "reviewerId": "P3",
+          "record": {
+            "sampleId": "CC-05",
+            "reviewerId": "P3",
+            "renderConditions": {
+              "renderer": "pdftoppm",
+              "dpi": 110,
+              "scope": "full_page",
+              "cropRegion": null,
+              "cropReason": null,
+              "rerenderConditions": "none (legible at 110dpi)"
+            },
+            "visualOutcome": "AMBIGUOUS_PAGE_LOCAL_CONTINUATION",
+            "pageLocalMarkers": [
+              {
+                "kind": "項",
+                "code": "322",
+                "title": "独立行政法人海技教育機構運営費",
+                "column": "left",
+                "verticalOrder": "after request 75"
+              },
+              {
+                "kind": "項",
+                "code": "325",
+                "title": "自動車運送業市場環境整備推進費",
+                "column": "left",
+                "verticalOrder": "after request 76"
+              },
+              {
+                "kind": "項",
+                "code": "326",
+                "title": "国土形成推進費",
+                "column": "left",
+                "verticalOrder": "after request 77"
+              },
+              {
+                "kind": "項",
+                "code": "327",
+                "title": "独立行政法人海技教育機構船舶建造費",
+                "column": "left",
+                "verticalOrder": "after request 78"
+              },
+              {
+                "kind": "項",
+                "code": "330",
+                "title": "官民連携基盤整備推進調査費",
+                "column": "left",
+                "verticalOrder": "after request 79"
+              },
+              {
+                "kind": "項",
+                "code": "351",
+                "title": "地理空間情報整備・活用推進費",
+                "column": "left",
+                "verticalOrder": "after request 80"
+              },
+              {
+                "kind": "項",
+                "code": "356",
+                "title": "離島振興費",
+                "column": "left",
+                "verticalOrder": "after request 81"
+              },
+              {
+                "kind": "項",
+                "code": "374",
+                "title": "附帯・受託工事費",
+                "column": "left",
+                "verticalOrder": "after request 84"
+              },
+              {
+                "kind": "項",
+                "code": "376",
+                "title": "離島振興事業費",
+                "column": "left",
+                "verticalOrder": "after request 86 (last left marker; requests 87-100 below it have no marker)"
+              },
+              {
+                "kind": "項",
+                "code": "395",
+                "title": "北海道総合開発推進費",
+                "column": "right",
+                "verticalOrder": "first right marker; after request 119, before request 120"
+              },
+              {
+                "kind": "項",
+                "code": "571",
+                "title": "技術研究開発推進費",
+                "column": "right",
+                "verticalOrder": "after request 120"
+              },
+              {
+                "kind": "項",
+                "code": "577",
+                "title": "国立研究開発法人土木研究所運営費",
+                "column": "right",
+                "verticalOrder": "after request 121"
+              },
+              {
+                "kind": "項",
+                "code": "582",
+                "title": "国立研究開発法人土木研究所施設整備費",
+                "column": "right",
+                "verticalOrder": "after request 122"
+              },
+              {
+                "kind": "項",
+                "code": "587",
+                "title": "国立研究開発法人建築研究所運営費",
+                "column": "right",
+                "verticalOrder": "after 123"
+              },
+              {
+                "kind": "項",
+                "code": "592",
+                "title": "国立研究開発法人建築研究所施設整備費",
+                "column": "right",
+                "verticalOrder": "after 124"
+              },
+              {
+                "kind": "項",
+                "code": "597",
+                "title": "独立行政法人自動車技術総合機構運営費",
+                "column": "right",
+                "verticalOrder": "after 125"
+              },
+              {
+                "kind": "項",
+                "code": "602",
+                "title": "独立行政法人自動車技術総合機構施設整備費",
+                "column": "right",
+                "verticalOrder": "after 126"
+              },
+              {
+                "kind": "項",
+                "code": "608",
+                "title": "国立研究開発法人海上・港湾・航空技術研究所運営費",
+                "column": "right",
+                "verticalOrder": "after 127 (page bottom)"
+              }
+            ],
+            "targetRequestsObserved": {
+              "count": 19,
+              "firstNumber": "101",
+              "lastNumber": "119",
+              "notes": "Right column top rows 101-119 (36-44 道路環境改善事業… to 96-47 奄美群島社会資本総合整備事業…) correspond to locator. No (項)/(組織) row among them; 101-119 contiguous with no rule or heading between. Page-number header '3' only at top right. Page has no ministry/organization header."
+            },
+            "firstExplicitRightMarker": "(項) 395 北海道総合開発推進費, positioned below request 119 and above request 120 (i.e. after, not before, the target group)",
+            "targetContext": null,
+            "whyNotOtherMarkers": null,
+            "candidateContexts": [
+              "(項) 376 離島振興事業費 (left column, last marker; 14 marker-less requests 87-100 follow it in left column before the column break; no visible link to right column)",
+              "(項) 395 北海道総合開発推進費 (right column, immediately below request 119; marker rows elsewhere on the page sit indented under a request row, so whether it relates to 119 or 120 is not visually determinable as a continuation of 101-119)",
+              "no marker above the target group in the right column"
+            ],
+            "interruptionOrResetEvidence": "None visible between 101 and 119. No new heading, rule or ministry title in the right column. Page-level column rule only.",
+            "visibleTextExcerpts": [
+              "101 36-44 道路環境改善事業に必要な経費",
+              "119 96-47 奄美群島社会資本総合整備事業に必要な経費",
+              "(項) 395 北海道総合開発推進費",
+              "120 05-95 北海道総合開発の推進に必要な経費"
+            ],
+            "unreadable": [],
+            "confidence": "medium: the choice between AMBIGUOUS and NO_PAGE_LOCAL_CONTEXT is judgment; no marker is visually attached above the target, and the only markers near it (376 left-last, 395 right-below) are not distinguishable as its context.",
+            "notes": "Many requests on this page (e.g. 82,83,87-100) have no marker row, so marker-less request runs are visibly normal on this page; this is only a page observation."
+          }
+        },
+        {
+          "role": "second",
+          "reviewerId": "S3",
+          "record": {
+            "sampleId": "CC-05",
+            "reviewerId": "S3",
+            "renderConditions": {
+              "renderer": "pdftoppm (poppler)",
+              "dpi": 110,
+              "scope": "full_page",
+              "cropRegion": null,
+              "cropReason": null,
+              "rerenderConditions": "なし（full page 110dpi で判読可能）"
+            },
+            "visualOutcome": "NO_PAGE_LOCAL_CONTEXT",
+            "pageLocalMarkers": [
+              {
+                "kind": "項",
+                "code": "322",
+                "title": "独立行政法人海技教育機構運営費",
+                "column": "LEFT",
+                "verticalOrder": 1
+              },
+              {
+                "kind": "項",
+                "code": "325",
+                "title": "自動車運送業市場環境整備推進費",
+                "column": "LEFT",
+                "verticalOrder": 2
+              },
+              {
+                "kind": "項",
+                "code": "326",
+                "title": "国土形成推進費",
+                "column": "LEFT",
+                "verticalOrder": 3
+              },
+              {
+                "kind": "項",
+                "code": "327",
+                "title": "独立行政法人海技教育機構船舶建造費",
+                "column": "LEFT",
+                "verticalOrder": 4
+              },
+              {
+                "kind": "項",
+                "code": "330",
+                "title": "官民連携基盤整備推進調査費",
+                "column": "LEFT",
+                "verticalOrder": 5
+              },
+              {
+                "kind": "項",
+                "code": "351",
+                "title": "地理空間情報整備・活用推進費",
+                "column": "LEFT",
+                "verticalOrder": 6
+              },
+              {
+                "kind": "項",
+                "code": "356",
+                "title": "離島振興費",
+                "column": "LEFT",
+                "verticalOrder": 7
+              },
+              {
+                "kind": "項",
+                "code": "374",
+                "title": "附帯・受託工事費",
+                "column": "LEFT",
+                "verticalOrder": 8
+              },
+              {
+                "kind": "項",
+                "code": "376",
+                "title": "離島振興事業費",
+                "column": "LEFT",
+                "verticalOrder": 9
+              },
+              {
+                "kind": "項",
+                "code": "395",
+                "title": "北海道総合開発推進費",
+                "column": "RIGHT",
+                "verticalOrder": 1
+              },
+              {
+                "kind": "項",
+                "code": "571",
+                "title": "技術研究開発推進費",
+                "column": "RIGHT",
+                "verticalOrder": 2
+              },
+              {
+                "kind": "項",
+                "code": "577",
+                "title": "国立研究開発法人土木研究所運営費",
+                "column": "RIGHT",
+                "verticalOrder": 3
+              },
+              {
+                "kind": "項",
+                "code": "582",
+                "title": "国立研究開発法人土木研究所施設整備費",
+                "column": "RIGHT",
+                "verticalOrder": 4
+              },
+              {
+                "kind": "項",
+                "code": "587",
+                "title": "国立研究開発法人建築研究所運営費",
+                "column": "RIGHT",
+                "verticalOrder": 5
+              },
+              {
+                "kind": "項",
+                "code": "592",
+                "title": "国立研究開発法人建築研究所施設整備費",
+                "column": "RIGHT",
+                "verticalOrder": 6
+              },
+              {
+                "kind": "項",
+                "code": "597",
+                "title": "独立行政法人自動車技術総合機構運営費",
+                "column": "RIGHT",
+                "verticalOrder": 7
+              },
+              {
+                "kind": "項",
+                "code": "602",
+                "title": "独立行政法人自動車技術総合機構施設整備費",
+                "column": "RIGHT",
+                "verticalOrder": 8
+              },
+              {
+                "kind": "項",
+                "code": "608",
+                "title": "国立研究開発法人海上・港湾・航空技術研究所運営費",
+                "column": "RIGHT",
+                "verticalOrder": 9
+              }
+            ],
+            "targetRequestsObserved": {
+              "count": 19,
+              "firstNumber": "101",
+              "lastNumber": "119",
+              "notes": "右 column 最上段から 101〜119 の 19 行が marker 無しで連続。119 の次行に (項)395 が現れ、その下に 120。locator の target(101〜113 以降を含む群)と視覚は対応（確認できたのは 101〜119 まで連番、群途中で context が変わる marker/罫線は無し）。ページ左上/右上の印字ページ番号は『3』で physicalPage 5 とは別（観察のみ）。"
+            },
+            "firstExplicitRightMarker": {
+              "kind": "項",
+              "code": "395",
+              "title": "北海道総合開発推進費",
+              "position": "REQUEST 119 の直下（target 群の後）"
+            },
+            "targetContext": null,
+            "whyNotOtherMarkers": null,
+            "candidateContexts": [
+              "（参考・採用せず）左 column 末尾付近の最後の marker (項)376 離島振興事業費（左 87〜100 の REQUEST 群の上）：右 column との視覚的接続は無く、左→右の読み順を仮定しない限り結び付けられない"
+            ],
+            "interruptionOrResetEvidence": "右 column 内の 101〜119 の間に marker・見出し・罫線の変化は無し。(項)395 は 119 の後に出現するが、これが新 context 開始か否かは視覚上の明示（見出し・罫線）では示されない。",
+            "visibleTextExcerpts": [
+              "101 36-44 道路環境改善事業に必要な経費 404",
+              "103 45-43 港湾事業に必要な経費 404",
+              "119 96-47 奄美群島社会資本総合整備事業に必要な経費 406",
+              "(項) 395 北海道総合開発推進費 406",
+              "120 05-95 北海道総合開発の推進に必要な経費 406"
+            ],
+            "unreadable": [],
+            "confidence": "medium",
+            "notes": "右 column 先頭の 19 件の上に context marker が視覚的に存在しない。左 column 側にも marker 候補はあるが column 間の視覚的連結が無い。"
+          }
+        }
+      ],
+      "agreement": {
+        "status": "REVIEWER_DISAGREEMENT",
+        "primaryOutcome": "AMBIGUOUS_PAGE_LOCAL_CONTINUATION",
+        "secondOutcome": "NO_PAGE_LOCAL_CONTEXT",
+        "resolution": "NOT_RESOLVED(両判定を保存。多数決・推測で解消しない)"
+      }
+    },
+    {
+      "sampleId": "CC-06",
+      "reviews": [
+        {
+          "role": "primary",
+          "reviewerId": "P3",
+          "record": {
+            "sampleId": "CC-06",
+            "reviewerId": "P3",
+            "renderConditions": {
+              "renderer": "pdftoppm",
+              "dpi": 110,
+              "scope": "full_page",
+              "cropRegion": null,
+              "cropReason": null,
+              "rerenderConditions": "none (legible at 110dpi)"
+            },
+            "visualOutcome": "AMBIGUOUS_PAGE_LOCAL_CONTINUATION",
+            "pageLocalMarkers": [
+              {
+                "kind": "組織",
+                "code": "010",
+                "title": "財務本省",
+                "column": "left",
+                "verticalOrder": "1st marker, below title rows, above request 1"
+              },
+              {
+                "kind": "項",
+                "code": "010",
+                "title": "財務本省共通費",
+                "column": "left",
+                "verticalOrder": "2nd, before request ①"
+              },
+              {
+                "kind": "項",
+                "code": "020",
+                "title": "財務本省施設費",
+                "column": "left",
+                "verticalOrder": "after request 5"
+              },
+              {
+                "kind": "項",
+                "code": "030",
+                "title": "財政健全化推進費",
+                "column": "left",
+                "verticalOrder": "after request 6"
+              },
+              {
+                "kind": "項",
+                "code": "040",
+                "title": "税制企画立案費",
+                "column": "left",
+                "verticalOrder": "after request 10"
+              },
+              {
+                "kind": "項",
+                "code": "050",
+                "title": "資産債務管理費",
+                "column": "left",
+                "verticalOrder": "after request 11"
+              },
+              {
+                "kind": "項",
+                "code": "070",
+                "title": "公務員宿舎施設費",
+                "column": "left",
+                "verticalOrder": "after request 15"
+              },
+              {
+                "kind": "項",
+                "code": "080",
+                "title": "国債費",
+                "column": "left",
+                "verticalOrder": "after request 16 (last left marker; requests 17-22 follow without marker)"
+              },
+              {
+                "kind": "項",
+                "code": "090",
+                "title": "貨幣製造及信用秩序制度等企画立案費",
+                "column": "right",
+                "verticalOrder": "first right marker, after request 25"
+              },
+              {
+                "kind": "項",
+                "code": "100",
+                "title": "関税制度等企画立案費",
+                "column": "right",
+                "verticalOrder": "after 27"
+              },
+              {
+                "kind": "項",
+                "code": "110",
+                "title": "経済協力費",
+                "column": "right",
+                "verticalOrder": "after 31"
+              },
+              {
+                "kind": "項",
+                "code": "120",
+                "title": "政策金融費",
+                "column": "right",
+                "verticalOrder": "after 32"
+              },
+              {
+                "kind": "項",
+                "code": "130",
+                "title": "国家公務員共済組合連合会等助成費",
+                "column": "right",
+                "verticalOrder": "after 34"
+              },
+              {
+                "kind": "項",
+                "code": "140",
+                "title": "特定国有財産整備費",
+                "column": "right",
+                "verticalOrder": "after 37"
+              },
+              {
+                "kind": "項",
+                "code": "150",
+                "title": "特定国有財産整備諸費",
+                "column": "right",
+                "verticalOrder": "after 38"
+              },
+              {
+                "kind": "項",
+                "code": "300",
+                "title": "復興事業費等東日本大震災復興特別会計へ繰入",
+                "column": "right",
+                "verticalOrder": "after 39"
+              },
+              {
+                "kind": "項",
+                "code": "320",
+                "title": "防衛力強化のための資金へ繰入",
+                "column": "right",
+                "verticalOrder": "after 40"
+              },
+              {
+                "kind": "項",
+                "code": "400",
+                "title": "新型コロナウイルス感染症及び原油価格・物価高騰対策予備費",
+                "column": "right",
+                "verticalOrder": "after 41"
+              },
+              {
+                "kind": "項",
+                "code": "405",
+                "title": "ウクライナ情勢経済緊急対応予備費",
+                "column": "right",
+                "verticalOrder": "after 42"
+              }
+            ],
+            "targetRequestsObserved": {
+              "count": 3,
+              "firstNumber": "23",
+              "lastNumber": "25",
+              "notes": "Right column top: 23 (41-20 公債等に係る償還及び発行に関する諸費財源の国債整理基金特別会計へ繰入れ / に必要な経費, two-line title), 24 (46-20 事務取扱いに必要な経費), 25 (51-20 決算上の剰余金の国債整理基金特別会計へ繰入れに必要な経費). Group ends at (項) 090 row directly below 25, then 26. Matches locator."
+            },
+            "firstExplicitRightMarker": "(項) 090 貨幣製造及信用秩序制度等企画立案費, directly below request 25 (after, not before, the target group)",
+            "targetContext": null,
+            "whyNotOtherMarkers": null,
+            "candidateContexts": [
+              "(項) 080 国債費 (left, last marker; requests 17-22 below it in left column; no visible link across the column break)",
+              "(項) 090 貨幣製造及信用秩序制度等企画立案費 (right, directly below request 25; relation to 23-25 not determinable from layout since marker rows sit under request rows throughout)",
+              "(組織) 010 財務本省 / page header '23 財務省所管' (organization-level context for the whole page only; does not identify a 項-level context)"
+            ],
+            "interruptionOrResetEvidence": "No reset between right-column top and 25. Page title block ('令和6年度歳出概算要求額目次', '23 財務省所管') spans the top of the page above both columns, not a reset inside the right column. No new marker above 23.",
+            "visibleTextExcerpts": [
+              "23 41-20 公債等に係る償還及び発行に関する諸費財源の国債整理基金特別会計へ繰入れ",
+              "25 51-20 決算上の剰余金の国債整理基金特別会計へ繰入れに必要な経費",
+              "(項) 090 貨幣製造及信用秩序制度等企画立案費",
+              "(項) 080 国債費"
+            ],
+            "unreadable": [],
+            "confidence": "medium: AMBIGUOUS vs NO_PAGE_LOCAL_CONTEXT is a judgment call; no marker is visually attached above the target.",
+            "notes": "Request numbers in left column rows 1,30,31 are circled; not interpreted. No semantic mapping between request codes and item codes was used."
+          }
+        },
+        {
+          "role": "second",
+          "reviewerId": "S1",
+          "record": {
+            "sampleId": "CC-06",
+            "reviewerId": "S1",
+            "renderConditions": {
+              "renderer": "pdftoppm",
+              "dpi": 110,
+              "scope": "full_page",
+              "cropRegion": null,
+              "cropReason": null,
+              "rerenderConditions": "none (text legible at 110dpi)"
+            },
+            "visualOutcome": "AMBIGUOUS_PAGE_LOCAL_CONTINUATION",
+            "pageLocalMarkers": [
+              {
+                "kind": "組織",
+                "code": "010",
+                "title": "財務本省",
+                "column": "left",
+                "verticalOrder": 1
+              },
+              {
+                "kind": "項",
+                "code": "010",
+                "title": "財務本省共通費",
+                "column": "left",
+                "verticalOrder": 2
+              },
+              {
+                "kind": "項",
+                "code": "020",
+                "title": "財務本省施設費",
+                "column": "left",
+                "verticalOrder": 3
+              },
+              {
+                "kind": "項",
+                "code": "030",
+                "title": "財政健全化推進費",
+                "column": "left",
+                "verticalOrder": 4
+              },
+              {
+                "kind": "項",
+                "code": "040",
+                "title": "税制企画立案費",
+                "column": "left",
+                "verticalOrder": 5
+              },
+              {
+                "kind": "項",
+                "code": "050",
+                "title": "資産債務管理費",
+                "column": "left",
+                "verticalOrder": 6
+              },
+              {
+                "kind": "項",
+                "code": "070",
+                "title": "公務員宿舎施設費",
+                "column": "left",
+                "verticalOrder": 7
+              },
+              {
+                "kind": "項",
+                "code": "080",
+                "title": "国債費",
+                "column": "left",
+                "verticalOrder": 8
+              },
+              {
+                "kind": "項",
+                "code": "090",
+                "title": "貨幣製造及信用秩序制度等企画立案費",
+                "column": "right",
+                "verticalOrder": "after request 25 (below target)"
+              },
+              {
+                "kind": "項",
+                "code": "100",
+                "title": "関税制度等企画立案費",
+                "column": "right",
+                "verticalOrder": "after 27"
+              },
+              {
+                "kind": "項",
+                "code": "110",
+                "title": "経済協力費",
+                "column": "right",
+                "verticalOrder": "after 31"
+              },
+              {
+                "kind": "項",
+                "code": "120",
+                "title": "政策金融費",
+                "column": "right",
+                "verticalOrder": "after 32"
+              },
+              {
+                "kind": "項",
+                "code": "130",
+                "title": "国家公務員共済組合連合会等助成費",
+                "column": "right",
+                "verticalOrder": "after 34"
+              },
+              {
+                "kind": "項",
+                "code": "140",
+                "title": "特定国有財産整備費",
+                "column": "right",
+                "verticalOrder": "after 37"
+              }
+            ],
+            "targetRequestsObserved": {
+              "count": 3,
+              "firstNumber": "23",
+              "lastNumber": "25",
+              "notes": "Right column top shows 23 (41-20 公債等に係る償還及び発行に関する諸費財源の国債整理基金特別会計へ繰入れに必要な経費, 2-line title), 24 (46-20 事務取扱いに必要な経費), 25 (51-20 決算上の剰余金の国債整理基金特別会計へ繰入れに必要な経費). Group ends where the first right-column (項) 090 marker appears directly under 25. Locator matches visual."
+            },
+            "firstExplicitRightMarker": "(項) 090 貨幣製造及信用秩序制度等企画立案費, immediately below request 25 (i.e. after the target group, not before it)",
+            "targetContext": null,
+            "whyNotOtherMarkers": null,
+            "candidateContexts": [
+              "(項)080 国債費 (left, last marker on page, followed by requests 17-22)",
+              "(項)070 公務員宿舎施設費 (left)",
+              "earlier left (項)/(組織)010 markers"
+            ],
+            "interruptionOrResetEvidence": "None before the target: no heading, rule or new marker above request 23 in the right column; the column header row (要求番号/区分/ページ) is repeated at the top of the right column as for any column. Only a boundary: a double vertical rule between the left and right columns. New marker (項)090 appears only after the target group.",
+            "visibleTextExcerpts": [
+              "23 41-20 公債等に係る償還及び発行に関する諸費財源の国債整理基金特別会計へ繰入れ に必要な経費 94",
+              "24 46-20 事務取扱いに必要な経費 95",
+              "25 51-20 決算上の剰余金の国債整理基金特別会計へ繰入れに必要な経費 97",
+              "（項） 090 貨幣製造及信用秩序制度等企画立案費 98",
+              "left tail: （項） 080 国債費 / 17 06-20 … / 22 39-20 …"
+            ],
+            "unreadable": [],
+            "confidence": "medium",
+            "notes": "Right column starts mid-stream with request rows and no marker or visible link (no rule/indent/heading) to any left-column marker. Several page-local markers precede in the left column; the page itself gives no visual mark selecting one. Deliberately not using left-last-marker assumption, title-text similarity or number correspondence. Confidence medium: choice between AMBIGUOUS and NO_PAGE_LOCAL_CONTEXT depends on whether left-column markers count as candidate contexts; I treated them as candidates."
+          }
+        }
+      ],
+      "agreement": {
+        "status": "REVIEWER_AGREEMENT",
+        "primaryOutcome": "AMBIGUOUS_PAGE_LOCAL_CONTINUATION",
+        "secondOutcome": "AMBIGUOUS_PAGE_LOCAL_CONTINUATION",
+        "resolution": null
+      }
+    }
+  ],
+  "agreementSummary": {
+    "reviewerAgreement": 4,
+    "reviewerDisagreement": 2
+  },
+  "outcomeCountsByJudgment": {
+    "UNIQUE_PAGE_LOCAL_CONTINUATION": 0,
+    "AMBIGUOUS_PAGE_LOCAL_CONTINUATION": 8,
+    "NO_PAGE_LOCAL_CONTEXT": 4,
+    "EXPLICIT_RESET": 0,
+    "UNREADABLE": 0,
+    "total": 12
+  }
+}
