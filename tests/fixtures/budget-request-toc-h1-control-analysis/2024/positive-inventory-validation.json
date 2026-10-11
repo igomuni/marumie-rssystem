@@ -1,0 +1,982 @@
+{
+  "schema": "budget-request-toc-positive-inventory-validation/v1",
+  "rowCount": 31,
+  "hypothesisCounts": {
+    "H1": 31
+  },
+  "ownershipCounts": {
+    "SAME_ITEM": 31
+  },
+  "uniqueObservationIds": true,
+  "sourcePrimitiveCount": 62,
+  "checks": {
+    "classificationSelectionExactly31": true,
+    "allPriorOwnershipLabelsSameItem": true,
+    "sourcePdfHashesMatchRawTextManifest": true,
+    "utf16RangesPreservedFromFrozenCandidateInventory": true,
+    "allSourcePagesHaveManifestHashes": true
+  },
+  "sources": [
+    {
+      "observationId": "asm-011b2b98b82c6ab13dad",
+      "sourcePdf": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "physicalPage": 3,
+      "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+      "manifestPdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+      "sourceTextPageSha256": "f0b018623a9b0ab5110b691cb5b29b723cb61b09255000aa995a078ccebad65a",
+      "primitiveIds": [
+        "prim-1c31eef7097de7823ec7",
+        "prim-cda5585f2a18fab15433"
+      ],
+      "lineIndexes": [
+        31,
+        32
+      ],
+      "rangesUtf16": [
+        [
+          51,
+          108
+        ],
+        [
+          51,
+          73
+        ]
+      ],
+      "rawTextFragments": [
+        "    23   01‑46 農業農村整備事業の財源の食料安定供給特別会計国営土地改良事業勘定へ繰入    124",
+        "               れに必要な経費"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-078825a7f8da1167b48b",
+      "sourcePdf": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+      "physicalPage": 2,
+      "pdfSha256": "efbfdfefbf4d6c4f85c1da1867348c96964a56fefe6d4c952291e2bf3448e837",
+      "manifestPdfSha256": "efbfdfefbf4d6c4f85c1da1867348c96964a56fefe6d4c952291e2bf3448e837",
+      "sourceTextPageSha256": "8775e8d0a995ecf83d40f02825d414731ca6b1085f0b02cfbc80492f9064dc40",
+      "primitiveIds": [
+        "prim-237240e4abd6fb16b418",
+        "prim-afbac8be2d27f899e1df"
+      ],
+      "lineIndexes": [
+        27,
+        28
+      ],
+      "rangesUtf16": [
+        [
+          0,
+          56
+        ],
+        [
+          0,
+          19
+        ]
+      ],
+      "rawTextFragments": [
+        "       （項） 065 交通反則者納金財源交通安全対策特別交付金等交付税及び譲与税配付金特別会    34",
+        "               計へ繰入"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-1b8b757e263f37f4fb88",
+      "sourcePdf": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneju_o.pdf",
+      "physicalPage": 3,
+      "pdfSha256": "2c1d6cb494a41dbb8d03a63099cc4154f31d70b966c7510bc6fce3501a70e7b6",
+      "manifestPdfSha256": "2c1d6cb494a41dbb8d03a63099cc4154f31d70b966c7510bc6fce3501a70e7b6",
+      "sourceTextPageSha256": "0bf62775ffaf94be47956ba6760d713f34a6a8b22e47d53f962df182c250516d",
+      "primitiveIds": [
+        "prim-99044bece664ba95a6fc",
+        "prim-accd71908cd63e86a72b"
+      ],
+      "lineIndexes": [
+        28,
+        29
+      ],
+      "rangesUtf16": [
+        [
+          0,
+          52
+        ],
+        [
+          0,
+          13
+        ]
+      ],
+      "rawTextFragments": [
+        "6    05‑63 国立研究開発法人新エネルギー・産業技術総合開発機構運営費交付金に必要な   エ 4",
+        "           経費"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-22ee515f5d10ea321c41",
+      "sourcePdf": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+      "physicalPage": 3,
+      "pdfSha256": "3be3fa49d24cc02ed680f0104d41405ff5e69bfb4a84290dccc8fe8205eaa1f1",
+      "manifestPdfSha256": "3be3fa49d24cc02ed680f0104d41405ff5e69bfb4a84290dccc8fe8205eaa1f1",
+      "sourceTextPageSha256": "cfb69f0aa58232c148c2445de66f716ad2482e6c1c27545f5570f6d7bec85952",
+      "primitiveIds": [
+        "prim-a66f767097554992aa76",
+        "prim-41c1425b733e70e1621b"
+      ],
+      "lineIndexes": [
+        42,
+        43
+      ],
+      "rangesUtf16": [
+        [
+          0,
+          52
+        ],
+        [
+          0,
+          16
+        ]
+      ],
+      "rawTextFragments": [
+        "18   01‑13 東日本大震災復興に係る国立研究開発法人水産研究・教育機構運営費交付金に    14",
+        "           必要な経費"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-2c517664d17417ed68e5",
+      "sourcePdf": "data/download/env.go.jp/content/000157012.pdf",
+      "physicalPage": 3,
+      "pdfSha256": "c71dd17f73464540ecb600d95d94104e59254e06b73efc2f282a5ecd8ba01823",
+      "manifestPdfSha256": "c71dd17f73464540ecb600d95d94104e59254e06b73efc2f282a5ecd8ba01823",
+      "sourceTextPageSha256": "0765ea5df8c6d7eae7d5ca592aafd45f401b595ee4d452392679aef68b4065eb",
+      "primitiveIds": [
+        "prim-291d29b85d37c6445ed4",
+        "prim-933112c41922db66f360"
+      ],
+      "lineIndexes": [
+        29,
+        30
+      ],
+      "rangesUtf16": [
+        [
+          0,
+          52
+        ],
+        [
+          0,
+          13
+        ]
+      ],
+      "rawTextFragments": [
+        "6    05‑63 国立研究開発法人新エネルギー・産業技術総合開発機構運営費交付金に必要な   エ 4",
+        "           経費"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-2e015c3fc8a1a9286725",
+      "sourcePdf": "data/download/env.go.jp/content/000157010.pdf",
+      "physicalPage": 3,
+      "pdfSha256": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd",
+      "manifestPdfSha256": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd",
+      "sourceTextPageSha256": "29c0f106f191102a5354954641e0b2c2996646e808553a21ec0b6b61ffc98de8",
+      "primitiveIds": [
+        "prim-8f823120ac92f1bb3752",
+        "prim-9ca2689554a075227024"
+      ],
+      "lineIndexes": [
+        32,
+        33
+      ],
+      "rangesUtf16": [
+        [
+          0,
+          56
+        ],
+        [
+          0,
+          56
+        ]
+      ],
+      "rawTextFragments": [
+        "6    01‑63 脱炭素成長型経済構造移行費用財源の脱炭素化産業成長促進対策に係るエネル        35",
+        "           ギー対策特別会計エネルギー需給勘定へ繰入に必要な経                    "
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-33636c62b06fa6a5e8c6",
+      "sourcePdf": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneju_o.pdf",
+      "physicalPage": 3,
+      "pdfSha256": "2c1d6cb494a41dbb8d03a63099cc4154f31d70b966c7510bc6fce3501a70e7b6",
+      "manifestPdfSha256": "2c1d6cb494a41dbb8d03a63099cc4154f31d70b966c7510bc6fce3501a70e7b6",
+      "sourceTextPageSha256": "0bf62775ffaf94be47956ba6760d713f34a6a8b22e47d53f962df182c250516d",
+      "primitiveIds": [
+        "prim-e7068d4452dea5fd8209",
+        "prim-baf3f751df30fea4e87a"
+      ],
+      "lineIndexes": [
+        47,
+        48
+      ],
+      "rangesUtf16": [
+        [
+          0,
+          52
+        ],
+        [
+          0,
+          13
+        ]
+      ],
+      "rawTextFragments": [
+        "14   05‑20 脱炭素成長型経済構造移行推進に係る国債整理基金特別会計へ繰入れに必要な   エ 9",
+        "           経費"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-3a59ef934ad10279d271",
+      "sourcePdf": "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf",
+      "physicalPage": 4,
+      "pdfSha256": "aaec655a87a74e2724ac35d81b6759697749c24e586a3b09934c46c4a4fca460",
+      "manifestPdfSha256": "aaec655a87a74e2724ac35d81b6759697749c24e586a3b09934c46c4a4fca460",
+      "sourceTextPageSha256": "8ae3415f7a52dd697011bd50c7b0ba51e32932888ac4d7c8cc3d202980c7b6be",
+      "primitiveIds": [
+        "prim-f7048c22512523b1dee7",
+        "prim-7e812b158273b8a363b7"
+      ],
+      "lineIndexes": [
+        15,
+        16
+      ],
+      "rangesUtf16": [
+        [
+          0,
+          57
+        ],
+        [
+          0,
+          17
+        ]
+      ],
+      "rawTextFragments": [
+        "        （項） 097 東日本大震災復興土地改良事業費負担金等収入東日本大震災復興特別会計へ繰    29",
+        "                入"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-3ab4b82a02993459c73c",
+      "sourcePdf": "data/download/env.go.jp/content/000157010.pdf",
+      "physicalPage": 3,
+      "pdfSha256": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd",
+      "manifestPdfSha256": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd",
+      "sourceTextPageSha256": "29c0f106f191102a5354954641e0b2c2996646e808553a21ec0b6b61ffc98de8",
+      "primitiveIds": [
+        "prim-cbf0e95850a5c3f3e883",
+        "prim-77cdbb8d4a24d8dc56c1"
+      ],
+      "lineIndexes": [
+        57,
+        58
+      ],
+      "rangesUtf16": [
+        [
+          56,
+          112
+        ],
+        [
+          56,
+          71
+        ]
+      ],
+      "rawTextFragments": [
+        "   29   05‑95 石綿健康被害救済事務の財源の労働保険特別会計徴収勘定へ繰入れに必要な経    129",
+        "              費"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-3aec73eaf5f4513bd612",
+      "sourcePdf": "data/download/env.go.jp/content/000157010.pdf",
+      "physicalPage": 3,
+      "pdfSha256": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd",
+      "manifestPdfSha256": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd",
+      "sourceTextPageSha256": "29c0f106f191102a5354954641e0b2c2996646e808553a21ec0b6b61ffc98de8",
+      "primitiveIds": [
+        "prim-771ecf41dbbfcd84b43c",
+        "prim-71ab5e04922e15363cd4"
+      ],
+      "lineIndexes": [
+        36,
+        37
+      ],
+      "rangesUtf16": [
+        [
+          56,
+          112
+        ],
+        [
+          56,
+          72
+        ]
+      ],
+      "rawTextFragments": [
+        "   24   11‑13 独立行政法人環境再生保全機構環境保全研究・技術開発運営費交付金に必要な    125",
+        "              経費"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-585bec8c9eb9235d287b",
+      "sourcePdf": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneju_o.pdf",
+      "physicalPage": 3,
+      "pdfSha256": "2c1d6cb494a41dbb8d03a63099cc4154f31d70b966c7510bc6fce3501a70e7b6",
+      "manifestPdfSha256": "2c1d6cb494a41dbb8d03a63099cc4154f31d70b966c7510bc6fce3501a70e7b6",
+      "sourceTextPageSha256": "0bf62775ffaf94be47956ba6760d713f34a6a8b22e47d53f962df182c250516d",
+      "primitiveIds": [
+        "prim-ff597fc4f06e493888c1",
+        "prim-4ae72303bb74dcabb5ff"
+      ],
+      "lineIndexes": [
+        39,
+        40
+      ],
+      "rangesUtf16": [
+        [
+          0,
+          52
+        ],
+        [
+          0,
+          12
+        ]
+      ],
+      "rawTextFragments": [
+        "11   05‑63 脱炭素成長型経済構造移行費用の財源の電源開発促進勘定へ繰入れに必要な経   エ 8",
+        "           費"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-58a31d107629ad95a5ad",
+      "sourcePdf": "data/download/env.go.jp/content/000157012.pdf",
+      "physicalPage": 3,
+      "pdfSha256": "c71dd17f73464540ecb600d95d94104e59254e06b73efc2f282a5ecd8ba01823",
+      "manifestPdfSha256": "c71dd17f73464540ecb600d95d94104e59254e06b73efc2f282a5ecd8ba01823",
+      "sourceTextPageSha256": "0765ea5df8c6d7eae7d5ca592aafd45f401b595ee4d452392679aef68b4065eb",
+      "primitiveIds": [
+        "prim-69b3b45eb46736dd01a7",
+        "prim-481cfa36841f14bb6816"
+      ],
+      "lineIndexes": [
+        40,
+        41
+      ],
+      "rangesUtf16": [
+        [
+          0,
+          52
+        ],
+        [
+          0,
+          12
+        ]
+      ],
+      "rawTextFragments": [
+        "11   05‑63 脱炭素成長型経済構造移行費用の財源の電源開発促進勘定へ繰入れに必要な経   エ 8",
+        "           費"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-5d167f09e4c4ec11ca6d",
+      "sourcePdf": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+      "physicalPage": 4,
+      "pdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+      "manifestPdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+      "sourceTextPageSha256": "361f4dc9ee487a6060136938614747ff113214a2cee2e7b86ad2072152c83317",
+      "primitiveIds": [
+        "prim-52df550902108171928c",
+        "prim-881ec047fe9cef5298ff"
+      ],
+      "lineIndexes": [
+        32,
+        33
+      ],
+      "rangesUtf16": [
+        [
+          50,
+          105
+        ],
+        [
+          50,
+          68
+        ]
+      ],
+      "rawTextFragments": [
+        "   76   05‑60 東日本大震災復興に係る独立行政法人中小企業基盤整備機構運営費交付金に必    78",
+        "              要な経費"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-5d9328605637d1b8851e",
+      "sourcePdf": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+      "physicalPage": 3,
+      "pdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+      "manifestPdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+      "sourceTextPageSha256": "8c22462a899952790b2eaefbdf6d97ee6332799e4845d549d949028f7db71315",
+      "primitiveIds": [
+        "prim-e1db1fe4b58f5ab56cac",
+        "prim-a97f223065632b98e3b0"
+      ],
+      "lineIndexes": [
+        30,
+        31
+      ],
+      "rangesUtf16": [
+        [
+          0,
+          52
+        ],
+        [
+          0,
+          52
+        ]
+      ],
+      "rawTextFragments": [
+        "3    21‑20 復興債に係る償還及び発行に関する諸費財源の国債整理基金特別会計へ繰入れ     7",
+        "           に必要な経費                                   "
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-5e674619e1e58c5b30bc",
+      "sourcePdf": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+      "physicalPage": 2,
+      "pdfSha256": "efbfdfefbf4d6c4f85c1da1867348c96964a56fefe6d4c952291e2bf3448e837",
+      "manifestPdfSha256": "efbfdfefbf4d6c4f85c1da1867348c96964a56fefe6d4c952291e2bf3448e837",
+      "sourceTextPageSha256": "8775e8d0a995ecf83d40f02825d414731ca6b1085f0b02cfbc80492f9064dc40",
+      "primitiveIds": [
+        "prim-a0441930f678430e119c",
+        "prim-10c7771eacd744c28636"
+      ],
+      "lineIndexes": [
+        30,
+        31
+      ],
+      "rangesUtf16": [
+        [
+          0,
+          56
+        ],
+        [
+          0,
+          26
+        ]
+      ],
+      "rawTextFragments": [
+        "10   01‑95 交通反則者納金財源の交通安全対策特別交付金等に係る交付税及び譲与税配付        34",
+        "           金特別会計へ繰入れに必要な経費"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-61fc1b99283a11b3a778",
+      "sourcePdf": "data/download/env.go.jp/content/000157010.pdf",
+      "physicalPage": 3,
+      "pdfSha256": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd",
+      "manifestPdfSha256": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd",
+      "sourceTextPageSha256": "29c0f106f191102a5354954641e0b2c2996646e808553a21ec0b6b61ffc98de8",
+      "primitiveIds": [
+        "prim-4ea16e238232a3f581eb",
+        "prim-aea81c9878a054f3649b"
+      ],
+      "lineIndexes": [
+        29,
+        30
+      ],
+      "rangesUtf16": [
+        [
+          0,
+          56
+        ],
+        [
+          0,
+          23
+        ]
+      ],
+      "rawTextFragments": [
+        "       （項） 018 脱炭素成長型経済構造移行費用財源脱炭素化産業成長促進対策費エネルギー対    35",
+        "               策特別会計へ繰入"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-6245d15c4c4dad5589c5",
+      "sourcePdf": "data/download/env.go.jp/content/000157012.pdf",
+      "physicalPage": 3,
+      "pdfSha256": "c71dd17f73464540ecb600d95d94104e59254e06b73efc2f282a5ecd8ba01823",
+      "manifestPdfSha256": "c71dd17f73464540ecb600d95d94104e59254e06b73efc2f282a5ecd8ba01823",
+      "sourceTextPageSha256": "0765ea5df8c6d7eae7d5ca592aafd45f401b595ee4d452392679aef68b4065eb",
+      "primitiveIds": [
+        "prim-3db9aec77414c8910fb6",
+        "prim-a3590d9ef1d6c55ec85b"
+      ],
+      "lineIndexes": [
+        15,
+        16
+      ],
+      "rangesUtf16": [
+        [
+          52,
+          107
+        ],
+        [
+          52,
+          73
+        ]
+      ],
+      "rawTextFragments": [
+        "   18   05‑20 脱炭素成長型経済構造移行推進に係る公債事務取扱費の財源の一般会計へ繰入   エ 9",
+        "              れに必要な経費"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-6820cfd8ee8983a0a2d2",
+      "sourcePdf": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+      "physicalPage": 3,
+      "pdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+      "manifestPdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+      "sourceTextPageSha256": "8c22462a899952790b2eaefbdf6d97ee6332799e4845d549d949028f7db71315",
+      "primitiveIds": [
+        "prim-939e1aee14f538dc948f",
+        "prim-5f96b08a18aa9432754e"
+      ],
+      "lineIndexes": [
+        19,
+        20
+      ],
+      "rangesUtf16": [
+        [
+          0,
+          52
+        ],
+        [
+          0,
+          12
+        ]
+      ],
+      "rawTextFragments": [
+        "1    01‑31 地方交付税交付金財源の交付税及び譲与税配付金特別会計へ繰入れに必要な経     7",
+        "           費"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-6e3f62232c38b031866e",
+      "sourcePdf": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 3,
+      "pdfSha256": "ba64c25df327161a33c293374a7255c203cc9a527130ece848574badefbf909a",
+      "manifestPdfSha256": "ba64c25df327161a33c293374a7255c203cc9a527130ece848574badefbf909a",
+      "sourceTextPageSha256": "601fe8ee0e2c018c39fe3cff86000fa116db60a39513f46e1c674908c14cbe44",
+      "primitiveIds": [
+        "prim-53de1d952ae001b0ef29",
+        "prim-17d65774a7c1e88e5be3"
+      ],
+      "lineIndexes": [
+        47,
+        48
+      ],
+      "rangesUtf16": [
+        [
+          0,
+          52
+        ],
+        [
+          0,
+          13
+        ]
+      ],
+      "rawTextFragments": [
+        "12   01‑13 国立研究開発法人新エネルギー・産業技術総合開発機構運営費交付金に必要な    25",
+        "           経費"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-7783e10023db9dfee30f",
+      "sourcePdf": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tousi_2.pdf",
+      "physicalPage": 2,
+      "pdfSha256": "be6b5bd2f3c0480bd8a5e9292a304e4eb37bd342deb21eb28b2464dfb5741ede",
+      "manifestPdfSha256": "be6b5bd2f3c0480bd8a5e9292a304e4eb37bd342deb21eb28b2464dfb5741ede",
+      "sourceTextPageSha256": "0100c718b68ea8f73e8ca6cd69021311c8d7565ebd9cb6094adc07a41334ebdf",
+      "primitiveIds": [
+        "prim-a6dac0ea7837a25340bf",
+        "prim-e16edddb25932fe521b7"
+      ],
+      "lineIndexes": [
+        19,
+        20
+      ],
+      "rangesUtf16": [
+        [
+          0,
+          54
+        ],
+        [
+          0,
+          16
+        ]
+      ],
+      "rawTextFragments": [
+        "5    01‑95 地方公共団体金融機構納付金収入交付税及び譲与税配付金特別会計へ繰入れに       8",
+        "           必要な経費"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-951cdf263f904d590471",
+      "sourcePdf": "data/download/env.go.jp/content/000157012.pdf",
+      "physicalPage": 3,
+      "pdfSha256": "c71dd17f73464540ecb600d95d94104e59254e06b73efc2f282a5ecd8ba01823",
+      "manifestPdfSha256": "c71dd17f73464540ecb600d95d94104e59254e06b73efc2f282a5ecd8ba01823",
+      "sourceTextPageSha256": "0765ea5df8c6d7eae7d5ca592aafd45f401b595ee4d452392679aef68b4065eb",
+      "primitiveIds": [
+        "prim-f6a048a1d2e707adfe44",
+        "prim-d9a4c203fba0708a914f"
+      ],
+      "lineIndexes": [
+        48,
+        49
+      ],
+      "rangesUtf16": [
+        [
+          0,
+          52
+        ],
+        [
+          0,
+          13
+        ]
+      ],
+      "rawTextFragments": [
+        "14   05‑20 脱炭素成長型経済構造移行推進に係る国債整理基金特別会計へ繰入れに必要な   エ 9",
+        "           経費"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-9b56ea2fa976d82ea21e",
+      "sourcePdf": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "physicalPage": 3,
+      "pdfSha256": "49a975a4436da6d53319a32ca745e2d110c42839c441c6302a7361ed9a62e4cc",
+      "manifestPdfSha256": "49a975a4436da6d53319a32ca745e2d110c42839c441c6302a7361ed9a62e4cc",
+      "sourceTextPageSha256": "f8e7a018e95cda9b5ba2053cd3aa1871110990369b74c88a92138f39ff36529d",
+      "primitiveIds": [
+        "prim-e04757288582da0a2d48",
+        "prim-d232e3a62b2fb292ba85"
+      ],
+      "lineIndexes": [
+        31,
+        32
+      ],
+      "rangesUtf16": [
+        [
+          0,
+          52
+        ],
+        [
+          0,
+          12
+        ]
+      ],
+      "rawTextFragments": [
+        "9    05‑06 特例給付等の財源の年金特別会計子ども・子育て支援勘定へ繰入れに必要な経    94",
+        "           費"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-a0c079b51ab757fa97b1",
+      "sourcePdf": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "physicalPage": 3,
+      "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+      "manifestPdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+      "sourceTextPageSha256": "f0b018623a9b0ab5110b691cb5b29b723cb61b09255000aa995a078ccebad65a",
+      "primitiveIds": [
+        "prim-3fb280affa3efa6dc29d",
+        "prim-798bcdff8abcbe16fbf8"
+      ],
+      "lineIndexes": [
+        14,
+        15
+      ],
+      "rangesUtf16": [
+        [
+          51,
+          108
+        ],
+        [
+          51,
+          72
+        ]
+      ],
+      "rawTextFragments": [
+        "    19   01‑65 共済掛金国庫負担金等の財源の食料安定供給特別会計農業再保険勘定へ繰入れ    116",
+        "               に必要な経費"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-a3f839ebb16d85a1520e",
+      "sourcePdf": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "physicalPage": 3,
+      "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+      "manifestPdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+      "sourceTextPageSha256": "f0b018623a9b0ab5110b691cb5b29b723cb61b09255000aa995a078ccebad65a",
+      "primitiveIds": [
+        "prim-b2af67931ce66c464eab",
+        "prim-3a11bfaf3ada25afda77"
+      ],
+      "lineIndexes": [
+        9,
+        10
+      ],
+      "rangesUtf16": [
+        [
+          51,
+          108
+        ],
+        [
+          51,
+          72
+        ]
+      ],
+      "rawTextFragments": [
+        "    18   01‑65 農業経営安定事業等の財源の食料安定供給特別会計農業経営安定勘定へ繰入れ    115",
+        "               に必要な経費"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-a4ef83972d28c2630ae6",
+      "sourcePdf": "data/download/env.go.jp/content/000157010.pdf",
+      "physicalPage": 3,
+      "pdfSha256": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd",
+      "manifestPdfSha256": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd",
+      "sourceTextPageSha256": "29c0f106f191102a5354954641e0b2c2996646e808553a21ec0b6b61ffc98de8",
+      "primitiveIds": [
+        "prim-858270ada54cb54b3d1c",
+        "prim-0fd88ac9796e87d45bb9"
+      ],
+      "lineIndexes": [
+        34,
+        35
+      ],
+      "rangesUtf16": [
+        [
+          0,
+          56
+        ],
+        [
+          0,
+          16
+        ]
+      ],
+      "rawTextFragments": [
+        "       （項） 019 石油石炭税財源エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰    35",
+        "               入"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-a770aa5a75a5b8ca11ad",
+      "sourcePdf": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+      "physicalPage": 4,
+      "pdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+      "manifestPdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+      "sourceTextPageSha256": "361f4dc9ee487a6060136938614747ff113214a2cee2e7b86ad2072152c83317",
+      "primitiveIds": [
+        "prim-fc6d9ab62eae907c41dd",
+        "prim-3a4edf9e5b0b8c7a4f41"
+      ],
+      "lineIndexes": [
+        9,
+        10
+      ],
+      "rangesUtf16": [
+        [
+          50,
+          105
+        ],
+        [
+          50,
+          69
+        ]
+      ],
+      "rawTextFragments": [
+        "   69   01‑13 東日本大震災復興に係る国立研究開発法人水産研究・教育機構運営費交付金に    74",
+        "              必要な経費"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-b23b110507f46759f3fd",
+      "sourcePdf": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "physicalPage": 3,
+      "pdfSha256": "49a975a4436da6d53319a32ca745e2d110c42839c441c6302a7361ed9a62e4cc",
+      "manifestPdfSha256": "49a975a4436da6d53319a32ca745e2d110c42839c441c6302a7361ed9a62e4cc",
+      "sourceTextPageSha256": "f8e7a018e95cda9b5ba2053cd3aa1871110990369b74c88a92138f39ff36529d",
+      "primitiveIds": [
+        "prim-028636cfec987049fc08",
+        "prim-d38715ab3023d54e82ba"
+      ],
+      "lineIndexes": [
+        28,
+        29
+      ],
+      "rangesUtf16": [
+        [
+          0,
+          52
+        ],
+        [
+          0,
+          16
+        ]
+      ],
+      "rawTextFragments": [
+        "8    01‑05 子ども・子育て支援の財源の年金特別会計子ども・子育て支援勘定へ繰入れに    94",
+        "           必要な経費"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-bf8d8a2d58eb2d72cb40",
+      "sourcePdf": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+      "physicalPage": 3,
+      "pdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+      "manifestPdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+      "sourceTextPageSha256": "8c22462a899952790b2eaefbdf6d97ee6332799e4845d549d949028f7db71315",
+      "primitiveIds": [
+        "prim-c26e3825534a6460f3c1",
+        "prim-065c5f6b1aedd3d8fbe8"
+      ],
+      "lineIndexes": [
+        43,
+        44
+      ],
+      "rangesUtf16": [
+        [
+          52,
+          107
+        ],
+        [
+          52,
+          73
+        ]
+      ],
+      "rawTextFragments": [
+        "   24   01‑63 東日本大震災復興に係る国立研究開発法人日本原子力研究開発機構運営費交付    34",
+        "              金に必要な経費"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-c26020732d61e8ea23d6",
+      "sourcePdf": "data/download/env.go.jp/content/000157010.pdf",
+      "physicalPage": 3,
+      "pdfSha256": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd",
+      "manifestPdfSha256": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd",
+      "sourceTextPageSha256": "29c0f106f191102a5354954641e0b2c2996646e808553a21ec0b6b61ffc98de8",
+      "primitiveIds": [
+        "prim-6c42a471bd28f9038d88",
+        "prim-8d37bd8537fb37c13af9"
+      ],
+      "lineIndexes": [
+        37,
+        38
+      ],
+      "rangesUtf16": [
+        [
+          0,
+          56
+        ],
+        [
+          0,
+          31
+        ]
+      ],
+      "rawTextFragments": [
+        "7    01‑63 石油石炭税財源のエネルギー需給構造高度化対策に係るエネルギー対策特別会        35",
+        "           計エネルギー需給勘定へ繰入れに必要な経費"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-c9498b51b0c9c44416be",
+      "sourcePdf": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/fukko_o.pdf",
+      "physicalPage": 3,
+      "pdfSha256": "17c0efdce49fb24a188a08ecef5a3340ea3e76f9c6ccef10539eefd69e8d8363",
+      "manifestPdfSha256": "17c0efdce49fb24a188a08ecef5a3340ea3e76f9c6ccef10539eefd69e8d8363",
+      "sourceTextPageSha256": "98d5c9b036a82fddb39f2dde0223c7299398fa74d4c19b09dbc63f8eb7d7a445",
+      "primitiveIds": [
+        "prim-0b6fdeb9a383ac41dccb",
+        "prim-1b0c9778c6867fcff299"
+      ],
+      "lineIndexes": [
+        20,
+        21
+      ],
+      "rangesUtf16": [
+        [
+          0,
+          52
+        ],
+        [
+          0,
+          15
+        ]
+      ],
+      "rawTextFragments": [
+        "6    05‑60 東日本大震災復興に係る独立行政法人中小企業基盤整備機構運営費交付金に必     6",
+        "           要な経費"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    },
+    {
+      "observationId": "asm-e6e91715fe29ebaee71f",
+      "sourcePdf": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneju_o.pdf",
+      "physicalPage": 3,
+      "pdfSha256": "2c1d6cb494a41dbb8d03a63099cc4154f31d70b966c7510bc6fce3501a70e7b6",
+      "manifestPdfSha256": "2c1d6cb494a41dbb8d03a63099cc4154f31d70b966c7510bc6fce3501a70e7b6",
+      "sourceTextPageSha256": "0bf62775ffaf94be47956ba6760d713f34a6a8b22e47d53f962df182c250516d",
+      "primitiveIds": [
+        "prim-daa275ce7e62c8d88124",
+        "prim-dc95b75c3a5fdef2f26a"
+      ],
+      "lineIndexes": [
+        15,
+        16
+      ],
+      "rangesUtf16": [
+        [
+          52,
+          107
+        ],
+        [
+          52,
+          73
+        ]
+      ],
+      "rawTextFragments": [
+        "   18   05‑20 脱炭素成長型経済構造移行推進に係る公債事務取扱費の財源の一般会計へ繰入   エ 9",
+        "              れに必要な経費"
+      ],
+      "utf16RangesPreservedFromFrozenCandidateInventory": true
+    }
+  ]
+}

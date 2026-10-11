@@ -1,0 +1,96 @@
+{
+  "schema": "budget-request-toc-positive-inventory-manifest/v1",
+  "selection": {
+    "sourceClassification": "tests/fixtures/budget-request-toc-ownership-failure-isolation/2024/ownership-classification.csv",
+    "sourceCandidateInventory": "tests/fixtures/budget-request-toc-ownership-failure-isolation/2024/candidate-unresolved-inventory.csv",
+    "hypothesis": "H1",
+    "ownership": "SAME_ITEM",
+    "rowCount": 31
+  },
+  "sourceRawTextManifest": {
+    "path": "tests/fixtures/budget-request-raw-text/2024/raw-text-manifest.json",
+    "sha256": "d58e048b43a38b29d035ff07dbd2d664ad5bea28c50fed4e0c30c61052c3573c"
+  },
+  "inventory": {
+    "path": "positive-inventory.csv",
+    "sha256": "e07044788a429113b07fada2df5bf98bf6ac0af5c2fb926bd8451cf2541a8a7d"
+  },
+  "sourceFiles": [
+    [
+      "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "49a975a4436da6d53319a32ca745e2d110c42839c441c6302a7361ed9a62e4cc"
+    ],
+    [
+      "data/download/env.go.jp/content/000157010.pdf",
+      "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd"
+    ],
+    [
+      "data/download/env.go.jp/content/000157012.pdf",
+      "c71dd17f73464540ecb600d95d94104e59254e06b73efc2f282a5ecd8ba01823"
+    ],
+    [
+      "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e"
+    ],
+    [
+      "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+      "3be3fa49d24cc02ed680f0104d41405ff5e69bfb4a84290dccc8fe8205eaa1f1"
+    ],
+    [
+      "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf",
+      "aaec655a87a74e2724ac35d81b6759697749c24e586a3b09934c46c4a4fca460"
+    ],
+    [
+      "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneju_o.pdf",
+      "2c1d6cb494a41dbb8d03a63099cc4154f31d70b966c7510bc6fce3501a70e7b6"
+    ],
+    [
+      "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/fukko_o.pdf",
+      "17c0efdce49fb24a188a08ecef5a3340ea3e76f9c6ccef10539eefd69e8d8363"
+    ],
+    [
+      "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "ba64c25df327161a33c293374a7255c203cc9a527130ece848574badefbf909a"
+    ],
+    [
+      "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tousi_2.pdf",
+      "be6b5bd2f3c0480bd8a5e9292a304e4eb37bd342deb21eb28b2464dfb5741ede"
+    ],
+    [
+      "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+      "efbfdfefbf4d6c4f85c1da1867348c96964a56fefe6d4c952291e2bf3448e837"
+    ],
+    [
+      "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+      "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c"
+    ]
+  ],
+  "sourcePageTextHashes": {
+    "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf#3": "f0b018623a9b0ab5110b691cb5b29b723cb61b09255000aa995a078ccebad65a",
+    "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf#2": "8775e8d0a995ecf83d40f02825d414731ca6b1085f0b02cfbc80492f9064dc40",
+    "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneju_o.pdf#3": "0bf62775ffaf94be47956ba6760d713f34a6a8b22e47d53f962df182c250516d",
+    "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf#3": "cfb69f0aa58232c148c2445de66f716ad2482e6c1c27545f5570f6d7bec85952",
+    "data/download/env.go.jp/content/000157012.pdf#3": "0765ea5df8c6d7eae7d5ca592aafd45f401b595ee4d452392679aef68b4065eb",
+    "data/download/env.go.jp/content/000157010.pdf#3": "29c0f106f191102a5354954641e0b2c2996646e808553a21ec0b6b61ffc98de8",
+    "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf#4": "8ae3415f7a52dd697011bd50c7b0ba51e32932888ac4d7c8cc3d202980c7b6be",
+    "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf#4": "361f4dc9ee487a6060136938614747ff113214a2cee2e7b86ad2072152c83317",
+    "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf#3": "8c22462a899952790b2eaefbdf6d97ee6332799e4845d549d949028f7db71315",
+    "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf#3": "601fe8ee0e2c018c39fe3cff86000fa116db60a39513f46e1c674908c14cbe44",
+    "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tousi_2.pdf#2": "0100c718b68ea8f73e8ca6cd69021311c8d7565ebd9cb6094adc07a41334ebdf",
+    "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf#3": "f8e7a018e95cda9b5ba2053cd3aa1871110990369b74c88a92138f39ff36529d",
+    "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/fukko_o.pdf#3": "98d5c9b036a82fddb39f2dde0223c7299398fa74d4c19b09dbc63f8eb7d7a445"
+  },
+  "deterministicOrder": "observation_id ascending",
+  "checks": {
+    "allOwnershipSameItem": true,
+    "uniqueObservationIds": true,
+    "primitiveIdsAndSpansRetained": true,
+    "sourcePdfHashesMatchRawTextManifest": true,
+    "sha256": "e07044788a429113b07fada2df5bf98bf6ac0af5c2fb926bd8451cf2541a8a7d"
+  },
+  "observationIds": {
+    "count": 31,
+    "canonicalization": "UTF-8 IDs sorted ascending, one ID per line with final LF",
+    "sha256": "7aeff2bae9289af29a81cb28c05662833c962f3ccbf7d9494d9befac9853d73c"
+  }
+}
