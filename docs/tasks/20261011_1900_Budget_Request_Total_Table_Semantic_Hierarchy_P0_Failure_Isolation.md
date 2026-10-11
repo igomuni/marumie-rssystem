@@ -209,11 +209,9 @@ coverage を上げるために、`AMBIGUOUS` を `RESOLVED` に寄せること�
 
 precision と coverage は分けて扱い、`AMBIGUOUS` を誤答として数えない。制約の整合性を正解の代わりにせず、coverage を上げるための推測もしない。
 
-### 次の段階
+### 次の段階: H1 — Structural hierarchy reconstruction preregistration + GT freeze
 
-**H1 — Structural hierarchy reconstruction preregistration + GT freeze**
-
-次の段階で行うこと:
+行うこと:
 
 1. 仮説の正式な preregistration
 2. resolver の入出力の契約
