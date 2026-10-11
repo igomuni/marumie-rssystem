@@ -117,3 +117,111 @@ npx tsx scripts/pipeline-v2/analyze-budget-request-total-table-hierarchy-p0.ts
 ## 研究上の推奨
 
 **evidence partially supports but ambiguity remains.** 字下げ単独の階層仮説は棄却される。CONTEXT・行の順序・TOTAL・加算関係を組み合わせる仮説を preregistration の候補とするかどうか、また env・jinji の目の段をスコープに入れるかどうかは、ChatGPT／ユーザーの判断に戻す。
+
+## Post-P0 research decision
+
+2026-10-11 に ChatGPT／ユーザーが確定した判断の記録。上の P0 の観察・件数・結論は変更していない。
+
+### P0 の判定: GO
+
+- GO は、字下げで階層を決める単純な仮説を採用するという意味ではない。字下げだけ、またはコード幅だけで階層を復元する仮説は、P0 で棄却された。
+- `CONTEXT + 行の順序 + TOTAL の境界 + 抽出済み金額の加算関係` を組み合わせる方向は、次の仮説候補として検証する価値がある。
+- 4択の評価は `evidence partially supports but ambiguity remains` のまま。
+
+### H1 と H2 を分ける
+
+- **H1 — Structural hierarchy reconstruction**: 意味ラベルを付けずに、論理行の間の親子関係だけを決定的に復元できるかを検証する。組織・項・会計・府省・目といったラベルは H1 では確定しない。
+- **H2 — Semantic role labeling**: H1 が成立した後の別研究として、所管・特別会計・勘定・組織・項・目・要求経費などへの対応付けを検証する。
+- H1 と H2 を、同じ実装・同じ評価の中に混ぜない。
+
+### H1 の出力区分
+
+| status | 意味 |
+|---|---|
+| `RESOLVED` | source の証拠と凍結した制約から、親子関係が一意に決まる |
+| `AMBIGUOUS` | 候補が複数残り、一意に決まらない |
+| `NO_PARENT` | 構造上の根などで、親がない |
+| `NOT_APPLICABLE` | 親子関係の評価対象外 |
+
+coverage を上げるために、`AMBIGUOUS` を `RESOLVED` に寄せることはしない。
+
+### DETAIL → CODE3 は対象に含める
+
+- 環境省・人事院で観察された `DETAIL └ CODE3`（DETAIL の内訳として CODE3 が続く構造）は、H1 の対象に含める。
+- ただし、この CODE3 に `目` というラベルは付けない。目という役割の確定は H2 まで保留する。
+
+### 否定条件（H1 preregistration で凍結する）
+
+1. **字下げだけで親を決めない。** 根拠:
+   - 組織と項が同じ列に並ぶ例がある（61/83件）。
+   - DETAIL と CODE3 の相対的な列位置がページによって揺れる。
+   - ページ境界で列位置がずれる（80/95か所）。
+2. **コード幅だけで意味上の役割を決めない。** 根拠:
+   - CODE3 は、組織・項・DETAIL の内訳のいずれにも同じ書式で現れる。
+   - HIER は、会計名に相当する行にも府省名に相当する行にも同じ書式で現れる。
+3. **金額の一致だけで親を決めない。** 根拠:
+   - 子が1つしかない親は、子と同額になる。
+   - 金額がすべて0の行（171行）では、多くの候補が同額になる。
+   - 加算関係は、構造上の制約の一部としてだけ使う。
+
+### H1 preregistration で決めておく事項
+
+1. **precision には、独立した正解データ（GT）が必要。**
+   - 制約に矛盾がないことを precision の代わりにしない。
+   - H1 の実装前に、人がレビューした GT を凍結する。
+   - GT の層には少なくとも次を含める:
+     - 単純な CODE3 → DETAIL
+     - 入れ子の CODE3
+     - DETAIL → CODE3
+     - HIER を含むブロック
+     - ページをまたぐ親の引き継ぎ
+     - 組織計
+     - 所管計
+     - 会計計
+     - 金額がすべて0の行
+     - 単一の子による縮退
+   - 主指標は、GT 上で resolver が `RESOLVED` を出した関係の precision とする。`AMBIGUOUS` は precision の分母に入れず、coverage と曖昧率として別に評価する。制約違反も、precision とは別の指標にする。
+2. **TOTAL の範囲は、複数の証拠がそろった場合だけ確定する。**
+   - `RESOLVED` の候補にするのは、次がすべて成り立つ範囲だけとする:
+     - 同じ CONTEXT・同じブロックの中にある。
+     - 行の順序の上で連続している。
+     - TOTAL の直前にある、構造上の候補範囲である。
+     - 既知の TOTAL やブロック境界と矛盾しない。
+     - 直接の子の候補が持つ7つの金額セルを合計すると、TOTAL と一致する。
+   - 同じ条件を満たす範囲が複数あれば `AMBIGUOUS` とする。
+   - 単一の子で同額であることは、それだけでは親の証拠にしない。P0 では、組織計が2段目の CODE3 と同額になる縮退を2件観察している。
+3. **合計するのは直接の子だけ。**
+   - 構造の検証でも金額の制約でも、加算するのは直接の子に限り、孫以下を重複して足さない。
+   - `DETAIL └ CODE3` の場合、上位の親の合計に、DETAIL とその子の CODE3 を同時に加えない。
+   - P0 で DETAIL の合計が CODE3 と合わなかった26件は、この入れ子構造に関係する。
+   - これは特定府省の例外ではなく、H1 全体に適用する不変条件とする。
+4. **重複ブロックは運用上は両方残し、主な precision では1つとして数える。**
+   - 既知の重複は、環境省と経済産業省に重複掲載されている40行と30行のブロック。
+   - 運用・source に忠実な指標（status の件数、coverage、曖昧率、source ごとの挙動）は、69ブロック全件を分母とし、重複も両方数える。
+   - GT の主 precision では、block fingerprint が完全に同じブロックを1つの評価単位とし、同じ構造が precision に2回寄与しないようにする。必要なら、source で重み付けした precision を副指標として併記する。
+
+### H1 の評価軸
+
+1. GT に基づく resolved precision
+2. coverage
+3. 曖昧率
+4. 制約違反率
+
+precision と coverage は分けて扱い、`AMBIGUOUS` を誤答として数えない。制約の整合性を正解の代わりにせず、coverage を上げるための推測もしない。
+
+### 次の段階
+
+**H1 — Structural hierarchy reconstruction preregistration + GT freeze**
+
+次の段階で行うこと:
+
+1. 仮説の正式な preregistration
+2. resolver の入出力の契約
+3. 制約の優先順位と、候補が並んだときの扱い
+4. 評価指標
+5. 層別の GT 抽出計画
+6. 人がレビューした GT の作成
+7. GT の凍結とハッシュの記録
+8. STOP / GO 基準
+
+resolver の実装はこの段階では行わず、GT と preregistration を凍結した後に別タスクとして行う。
