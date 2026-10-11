@@ -1,0 +1,25 @@
+{
+  "schema": "budget-request-toc-minimal-assembly-expected-v1",
+  "source": "fixture.json",
+  "expectations": [
+    { "caseId": "H1-D1", "hypothesis": "H1", "statusCounts": { "CANDIDATE_UNRESOLVED": 1 }, "candidateSourceLinePairs": [[28, 29]], "resolvedCount": 0, "requiredReasons": ["OWNERSHIP_NOT_ENCODED"] },
+    { "caseId": "H1-D2", "hypothesis": "H1", "statusCounts": { "CANDIDATE_UNRESOLVED": 1 }, "candidateSourceLinePairs": [[0, 1]], "resolvedCount": 0, "requiredReasons": ["OWNERSHIP_NOT_ENCODED"] },
+    { "caseId": "H1-D3", "hypothesis": "H1", "statusCounts": { "UNMATCHED": 2 }, "candidateSourceLinePairs": [], "resolvedCount": 0, "requiredReasons": ["NO_SAME_SIDE_COUNTERPART"] },
+    { "caseId": "H1-D4", "hypothesis": "H1", "statusCounts": { "CANDIDATE_UNRESOLVED": 1 }, "candidateSourceLinePairs": [[0, 1]], "resolvedCount": 0, "requiredReasons": ["OWNERSHIP_NOT_ENCODED"] },
+    { "caseId": "H1-D5", "hypothesis": "H1", "statusCounts": { "CANDIDATE_UNRESOLVED": 1, "UNMATCHED": 1 }, "candidateSourceLinePairs": [[1, 2]], "blockedSourceLinePairs": [[0, 2]], "resolvedCount": 0, "requiredReasons": ["INTERVENING_SAME_SIDE_ITEM", "OWNERSHIP_NOT_ENCODED"] },
+    { "caseId": "H1-D6", "hypothesis": "H1", "statusCounts": { "UNMATCHED": 2 }, "candidateSourceLinePairs": [], "barrierLineIndexes": [1], "resolvedCount": 0, "requiredReasons": ["UNRESOLVED_BARRIER"] },
+    { "caseId": "H2-D1", "hypothesis": "H2", "statusCounts": { "CANDIDATE_UNRESOLVED": 1 }, "candidateSourceLinePairs": [[25, 26]], "resolvedCount": 0, "requiredReasons": ["SIDE_UNKNOWN", "OWNERSHIP_NOT_ENCODED"] },
+    { "caseId": "H2-D2", "hypothesis": "H2", "statusCounts": { "CANDIDATE_UNRESOLVED": 1 }, "candidateSourceLinePairs": [[0, 1]], "resolvedCount": 0, "requiredReasons": ["OWNERSHIP_NOT_ENCODED"] },
+    { "caseId": "H2-D3", "hypothesis": "H2", "statusCounts": { "CANDIDATE_UNRESOLVED": 1 }, "candidateSourceLinePairs": [[0, 1]], "resolvedCount": 0, "requiredReasons": ["SIDE_UNKNOWN", "OWNERSHIP_NOT_ENCODED"] },
+    { "caseId": "H2-D4", "hypothesis": "H2", "statusCounts": { "AMBIGUOUS": 2 }, "candidateSourceLinePairs": [[0, 1], [0, 1]], "resolvedCount": 0, "requiredReasons": ["MULTIPLE_COUNTERPARTS", "SIDE_UNKNOWN"] },
+    { "caseId": "H2-D5", "hypothesis": "H2", "statusCounts": { "UNMATCHED": 1 }, "candidateSourceLinePairs": [], "resolvedCount": 0, "requiredReasons": ["NO_COUNTERPART"] }
+  ],
+  "globalInvariants": [
+    "No source primitive is deleted or mutated.",
+    "No joined title string is emitted for CANDIDATE_UNRESOLVED or AMBIGUOUS observations.",
+    "Every assembly observation references source primitive IDs from its own case, PDF, and physical page.",
+    "No primitive participates in a RESOLVED assembly.",
+    "H1 and H2 results are computed independently and conflicts are preserved.",
+    "All source range lengths equal the UTF-16 length of the corresponding rawText."
+  ]
+}

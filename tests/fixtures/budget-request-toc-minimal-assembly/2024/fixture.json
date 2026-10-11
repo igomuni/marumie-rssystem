@@ -1,0 +1,456 @@
+{
+  "schema": "budget-request-toc-minimal-assembly-fixture-v1",
+  "source": {
+    "rawManifest": "tests/fixtures/budget-request-raw-text/2024/raw-text-manifest.json",
+    "structureInventory": "tests/fixtures/budget-request-cover-toc-structure/2024/structure-inventory.json",
+    "primitiveModule": "scripts/research/toc-column-primitives-v1.ts",
+    "assemblyPreregistration": "tests/fixtures/budget-request-toc-minimal-assembly/2024/preregistration.md"
+  },
+  "cases": [
+    {
+      "caseId": "H1-D1",
+      "family": "H1",
+      "kind": "SOURCE_DERIVED",
+      "sourcePdf": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "pdfSha256": "49a975a4436da6d53319a32ca745e2d110c42839c441c6302a7361ed9a62e4cc",
+      "physicalPage": 3,
+      "pageTextSha256": "f8e7a018e95cda9b5ba2053cd3aa1871110990369b74c88a92138f39ff36529d",
+      "primitives": [
+        {
+          "lineIndex": 28,
+          "lineStartUtf16": 1579,
+          "side": "left",
+          "kind": "title_page",
+          "titleText": "8    01‑05 子ども・子育て支援の財源の年金特別会計子ども・子育て支援勘定へ繰入れに",
+          "pageRef": "94",
+          "sourceRangeUtf16": [
+            0,
+            52
+          ],
+          "rawText": "8    01‑05 子ども・子育て支援の財源の年金特別会計子ども・子育て支援勘定へ繰入れに    94",
+          "sourceLineRawText": "8    01‑05 子ども・子育て支援の財源の年金特別会計子ども・子育て支援勘定へ繰入れに    94"
+        },
+        {
+          "lineIndex": 29,
+          "lineStartUtf16": 1632,
+          "side": "left",
+          "kind": "title_only_candidate",
+          "titleText": "必要な経費",
+          "pageRef": null,
+          "sourceRangeUtf16": [
+            0,
+            16
+          ],
+          "rawText": "           必要な経費",
+          "sourceLineRawText": "           必要な経費"
+        }
+      ],
+      "evidenceNote": "The adjacent same-left-column observations support a possible continuation, but #416 does not distinguish it from a separate title-only item. Row 9 has a similar wrap pattern, so this case does not establish a general ownership rule."
+    },
+    {
+      "caseId": "H1-D2",
+      "family": "H1",
+      "kind": "SYNTHETIC",
+      "sourcePdf": "synthetic/h1-known-side.txt",
+      "physicalPage": 1,
+      "primitives": [
+        {
+          "lineIndex": 0,
+          "lineStartUtf16": 0,
+          "side": "left",
+          "kind": "title_page",
+          "titleText": "TITLE",
+          "pageRef": "7",
+          "sourceRangeUtf16": [
+            0,
+            8
+          ],
+          "rawText": "TITLE  7",
+          "sourceLineRawText": "TITLE  7"
+        },
+        {
+          "lineIndex": 1,
+          "lineStartUtf16": 9,
+          "side": "left",
+          "kind": "title_only_candidate",
+          "titleText": "CONTINUATION",
+          "pageRef": null,
+          "sourceRangeUtf16": [
+            0,
+            12
+          ],
+          "rawText": "CONTINUATION",
+          "sourceLineRawText": "CONTINUATION"
+        }
+      ],
+      "purpose": "Known-side unique adjacency is positive candidate evidence, while testing that it is not silently promoted to ownership."
+    },
+    {
+      "caseId": "H1-D3",
+      "family": "H1",
+      "kind": "SYNTHETIC",
+      "sourcePdf": "synthetic/h1-cross-side.txt",
+      "physicalPage": 1,
+      "primitives": [
+        {
+          "lineIndex": 0,
+          "lineStartUtf16": 0,
+          "side": "left",
+          "kind": "title_page",
+          "titleText": "LEFT ITEM",
+          "pageRef": "8",
+          "sourceRangeUtf16": [
+            0,
+            12
+          ],
+          "rawText": "LEFT ITEM  8",
+          "sourceLineRawText": "LEFT ITEM  8      RIGHT HEADING"
+        },
+        {
+          "lineIndex": 0,
+          "lineStartUtf16": 0,
+          "side": "right",
+          "kind": "title_only_candidate",
+          "titleText": "RIGHT HEADING",
+          "pageRef": null,
+          "sourceRangeUtf16": [
+            12,
+            31
+          ],
+          "rawText": "      RIGHT HEADING",
+          "sourceLineRawText": "LEFT ITEM  8      RIGHT HEADING"
+        }
+      ]
+    },
+    {
+      "caseId": "H1-D4",
+      "family": "H1",
+      "kind": "SYNTHETIC",
+      "sourcePdf": "synthetic/h1-heading-control.txt",
+      "physicalPage": 1,
+      "primitives": [
+        {
+          "lineIndex": 0,
+          "lineStartUtf16": 0,
+          "side": "left",
+          "kind": "title_page",
+          "titleText": "PRECEDING ITEM",
+          "pageRef": "9",
+          "sourceRangeUtf16": [
+            0,
+            17
+          ],
+          "rawText": "PRECEDING ITEM  9",
+          "sourceLineRawText": "PRECEDING ITEM  9"
+        },
+        {
+          "lineIndex": 1,
+          "lineStartUtf16": 18,
+          "side": "left",
+          "kind": "title_only_candidate",
+          "titleText": "INDEPENDENT HEADING",
+          "pageRef": null,
+          "sourceRangeUtf16": [
+            0,
+            19
+          ],
+          "rawText": "INDEPENDENT HEADING",
+          "sourceLineRawText": "INDEPENDENT HEADING"
+        }
+      ],
+      "purpose": "The assembly input shape is intentionally indistinguishable from H1-D2; a primitive-only resolver must not merge either case."
+    },
+    {
+      "caseId": "H1-D5",
+      "family": "H1",
+      "kind": "SYNTHETIC",
+      "sourcePdf": "synthetic/h1-intervening-item.txt",
+      "physicalPage": 1,
+      "primitives": [
+        {
+          "lineIndex": 0,
+          "lineStartUtf16": 0,
+          "side": "left",
+          "kind": "title_page",
+          "titleText": "ITEM A",
+          "pageRef": "10",
+          "sourceRangeUtf16": [
+            0,
+            10
+          ],
+          "rawText": "ITEM A  10",
+          "sourceLineRawText": "ITEM A  10"
+        },
+        {
+          "lineIndex": 1,
+          "lineStartUtf16": 11,
+          "side": "left",
+          "kind": "title_page",
+          "titleText": "ITEM B",
+          "pageRef": "11",
+          "sourceRangeUtf16": [
+            0,
+            10
+          ],
+          "rawText": "ITEM B  11",
+          "sourceLineRawText": "ITEM B  11"
+        },
+        {
+          "lineIndex": 2,
+          "lineStartUtf16": 22,
+          "side": "left",
+          "kind": "title_only_candidate",
+          "titleText": "FRAGMENT",
+          "pageRef": null,
+          "sourceRangeUtf16": [
+            0,
+            8
+          ],
+          "rawText": "FRAGMENT",
+          "sourceLineRawText": "FRAGMENT"
+        }
+      ]
+    },
+    {
+      "caseId": "H1-D6",
+      "family": "H1",
+      "kind": "SYNTHETIC",
+      "sourcePdf": "synthetic/h1-unsafe-barrier.txt",
+      "physicalPage": 1,
+      "primitives": [
+        {
+          "lineIndex": 0,
+          "lineStartUtf16": 0,
+          "side": "left",
+          "kind": "title_page",
+          "titleText": "ITEM",
+          "pageRef": "12",
+          "sourceRangeUtf16": [
+            0,
+            8
+          ],
+          "rawText": "ITEM  12",
+          "sourceLineRawText": "ITEM  12"
+        },
+        {
+          "lineIndex": 1,
+          "lineStartUtf16": 9,
+          "side": "unknown",
+          "kind": "unresolved",
+          "titleText": null,
+          "pageRef": null,
+          "sourceRangeUtf16": [
+            0,
+            20
+          ],
+          "rawText": "unsafe crossing line",
+          "reason": "UNRESOLVED_BOUNDARY_CUT",
+          "sourceLineRawText": "unsafe crossing line"
+        },
+        {
+          "lineIndex": 2,
+          "lineStartUtf16": 30,
+          "side": "left",
+          "kind": "title_only_candidate",
+          "titleText": "FRAGMENT",
+          "pageRef": null,
+          "sourceRangeUtf16": [
+            0,
+            8
+          ],
+          "rawText": "FRAGMENT",
+          "sourceLineRawText": "FRAGMENT"
+        }
+      ]
+    },
+    {
+      "caseId": "H2-D1",
+      "family": "H2",
+      "kind": "SOURCE_DERIVED",
+      "sourcePdf": "data/download/ndl.go.jp/jp/aboutus/outline/r06_budgetrequest.pdf",
+      "pdfSha256": "cb0442175d186f3041d6b3df93c46139760920b2c0162ae5a61c3abedf0a60e5",
+      "physicalPage": 2,
+      "pageTextSha256": "d6685ff95fd2c30f2ae9022aa80d92ff3c119fd5cf42d45d777ed4ef48366b6a",
+      "primitives": [
+        {
+          "lineIndex": 25,
+          "lineStartUtf16": 759,
+          "side": "unknown",
+          "kind": "page_only",
+          "titleText": null,
+          "pageRef": "国(国)13",
+          "sourceRangeUtf16": [
+            0,
+            51
+          ],
+          "rawText": "                                             国(国)13",
+          "sourceLineRawText": "                                             国(国)13"
+        },
+        {
+          "lineIndex": 26,
+          "lineStartUtf16": 811,
+          "side": "unknown",
+          "kind": "title_only_candidate",
+          "titleText": "令和６年度概算要求定員表",
+          "pageRef": null,
+          "sourceRangeUtf16": [
+            0,
+            17
+          ],
+          "rawText": "     令和６年度概算要求定員表",
+          "sourceLineRawText": "     令和６年度概算要求定員表"
+        }
+      ],
+      "evidenceNote": "PDF inspection places these observations within the same left table block, but #416 has no page-local column boundary; geometry is not an automatic assembly input. The link inventory does not link these two strings."
+    },
+    {
+      "caseId": "H2-D2",
+      "family": "H2",
+      "kind": "SYNTHETIC",
+      "sourcePdf": "synthetic/h2-known-side.txt",
+      "physicalPage": 1,
+      "primitives": [
+        {
+          "lineIndex": 0,
+          "lineStartUtf16": 0,
+          "side": "left",
+          "kind": "page_only",
+          "titleText": null,
+          "pageRef": "13",
+          "sourceRangeUtf16": [
+            0,
+            2
+          ],
+          "rawText": "13",
+          "sourceLineRawText": "13"
+        },
+        {
+          "lineIndex": 1,
+          "lineStartUtf16": 3,
+          "side": "left",
+          "kind": "title_only_candidate",
+          "titleText": "STAFFING TABLE",
+          "pageRef": null,
+          "sourceRangeUtf16": [
+            0,
+            14
+          ],
+          "rawText": "STAFFING TABLE",
+          "sourceLineRawText": "STAFFING TABLE"
+        }
+      ],
+      "purpose": "Known side and unique adjacency produce a candidate, but ownership remains unresolved without an independent relation signal."
+    },
+    {
+      "caseId": "H2-D3",
+      "family": "H2",
+      "kind": "SYNTHETIC",
+      "sourcePdf": "synthetic/h2-unknown-side.txt",
+      "physicalPage": 1,
+      "primitives": [
+        {
+          "lineIndex": 0,
+          "lineStartUtf16": 0,
+          "side": "unknown",
+          "kind": "page_only",
+          "titleText": null,
+          "pageRef": "エ 9",
+          "sourceRangeUtf16": [
+            0,
+            3
+          ],
+          "rawText": "エ 9",
+          "sourceLineRawText": "エ 9"
+        },
+        {
+          "lineIndex": 1,
+          "lineStartUtf16": 4,
+          "side": "unknown",
+          "kind": "title_only_candidate",
+          "titleText": "TITLE",
+          "pageRef": null,
+          "sourceRangeUtf16": [
+            0,
+            5
+          ],
+          "rawText": "TITLE",
+          "sourceLineRawText": "TITLE"
+        }
+      ]
+    },
+    {
+      "caseId": "H2-D4",
+      "family": "H2",
+      "kind": "SYNTHETIC",
+      "sourcePdf": "synthetic/h2-multiple-title-candidates.txt",
+      "physicalPage": 1,
+      "primitives": [
+        {
+          "lineIndex": 0,
+          "lineStartUtf16": 0,
+          "side": "unknown",
+          "kind": "page_only",
+          "titleText": null,
+          "pageRef": "15",
+          "sourceRangeUtf16": [
+            0,
+            2
+          ],
+          "rawText": "15",
+          "sourceLineRawText": "15"
+        },
+        {
+          "lineIndex": 1,
+          "lineStartUtf16": 3,
+          "side": "left",
+          "kind": "title_only_candidate",
+          "titleText": "TITLE A",
+          "pageRef": null,
+          "sourceRangeUtf16": [
+            0,
+            7
+          ],
+          "rawText": "TITLE A",
+          "sourceLineRawText": "TITLE A    TITLE B"
+        },
+        {
+          "lineIndex": 1,
+          "lineStartUtf16": 3,
+          "side": "right",
+          "kind": "title_only_candidate",
+          "titleText": "TITLE B",
+          "pageRef": null,
+          "sourceRangeUtf16": [
+            11,
+            18
+          ],
+          "rawText": "TITLE B",
+          "sourceLineRawText": "TITLE A    TITLE B"
+        }
+      ]
+    },
+    {
+      "caseId": "H2-D5",
+      "family": "H2",
+      "kind": "SYNTHETIC",
+      "sourcePdf": "synthetic/h2-unmatched.txt",
+      "physicalPage": 1,
+      "primitives": [
+        {
+          "lineIndex": 0,
+          "lineStartUtf16": 0,
+          "side": "left",
+          "kind": "page_only",
+          "titleText": null,
+          "pageRef": "21",
+          "sourceRangeUtf16": [
+            0,
+            2
+          ],
+          "rawText": "21",
+          "sourceLineRawText": "21"
+        }
+      ]
+    }
+  ]
+}
