@@ -1,0 +1,76 @@
+{
+  "schema": "toc-source-token-mapping-p3-prefreeze-validation/v1",
+  "status": "PASS",
+  "researchPosition": "pre-matching freeze validation; exploratory development only; not held-out",
+  "validatedAtLocal": "2026-10-11T22:51:08+09:00",
+  "baseCommit": "9c9ba611a9047480166a92601f94f3034f9ddc7f",
+  "branch": "igomuni/research-toc-source-span-pdf-token-mapping-p3",
+  "worktree": "/Users/igomuni/orca/workspaces/marumie-rssystem/research-toc-source-span-pdf-token-mapping-p3",
+  "selectionRule": "first five KNOWN_POSITIVE by ascending original candidate_id; all PRIOR_REVIEW_DISAGREEMENT; all PRIOR_REVIEW_AGREEMENT_CONTROL",
+  "selectedCandidateIds": [
+    "asm-011b2b98b82c6ab13dad",
+    "asm-078825a7f8da1167b48b",
+    "asm-1b8b757e263f37f4fb88",
+    "asm-22ee515f5d10ea321c41",
+    "asm-2c517664d17417ed68e5",
+    "h1pair-03931478543d4889f24e8e7ade66309b5efdfc2362b79ce85fb4a2aca2f0ddb1",
+    "h1pair-04fc8d2c7e412743930c9d7f23804b9d989d8dd73649d5bb0720eee9b114fd3b",
+    "h1pair-0907aa3c8596786e2ee2c621cdb9ba89bcd54f6662d0a2eaa25d89504e8b122d",
+    "h1pair-1e59379aa03db01822e23ad4b6e59965ab3575dc339d331feaa1ec57e78fd21c",
+    "h1pair-21e7774ca5cc4a9de9ccf9ba08f389f3782ead50d775400eee44bbf2148e98b8",
+    "h1pair-31452f9dba6e3dcf8fd7ba84a26d16a8991a884543c0b36c42294b4940fa6377",
+    "h1pair-35d9c7016a73b50c0ee301532127b35cc591bfc0e436348f5de42c2a37a0caaa"
+  ],
+  "sourceValidation": {
+    "candidateCount": 12,
+    "fragmentCount": 24,
+    "groupCounts": {
+      "KNOWN_POSITIVE": 5,
+      "PRIOR_REVIEW_DISAGREEMENT": 3,
+      "PRIOR_REVIEW_AGREEMENT_CONTROL": 4
+    },
+    "uniquePdfCount": 8,
+    "uniquePdfPageCount": 8,
+    "uniqueRawTextFileCount": 8,
+    "allPdfHashesMatched": true,
+    "allRawTextFileHashesMatched": true,
+    "allRawTextPageHashesRecomputedAndMatched": true,
+    "allUtf16SourceSpansMatched": true,
+    "validatedSourceSpanCount": 24,
+    "sourceRoots": {
+      "pdfRoot": "/Users/igomuni/MyGitHub/marumie-rssystem",
+      "rawTextRoot": "/Users/igomuni/orca/workspaces/marumie-rssystem/HelloOrcaWorld/data/work/budget-request-plain-text/2024",
+      "access": "read-only external source roots; repository worktrees unchanged"
+    }
+  },
+  "deterministicRegeneration": {
+    "runs": 2,
+    "developmentInventorySha256": "c66c671a04fcbd5d34f7f5f31ace35d776e73fd38f6958268df0ff10a6678b56",
+    "blindedMappingInputSha256": "fe06aafaaf989f63090b8714e0df454cf2f09bb6ad488c683a13579661692ef1",
+    "byteIdentical": true
+  },
+  "independentOrcaReview": {
+    "review": "PASS; freeze safe before matching",
+    "reviewerCouldNotReplayExternalSourceFiles": true,
+    "limitation": "Reviewer checkout lacked ignored data/ sources; coordinator population generation did recheck all PDF, TXT, page hashes and 24 UTF-16 spans using the stated read-only roots.",
+    "noMatchingOrPdfRenderingPerformed": true
+  },
+  "matchingExecuted": false,
+  "inputArtifactHashes": {
+    "candidateInventory": "0dcf19a039de8ae79258405b3e1464dae63fb3b0b3f118a5a924f3e95723b438",
+    "candidateInventoryManifest": "83ef9495efff3f15af84db3005d8e79b84b22180b0d55958ab0503266396e7ed",
+    "rawTextManifest": "d58e048b43a38b29d035ff07dbd2d664ad5bea28c50fed4e0c30c61052c3573c",
+    "structureInventory": "d2b2311cb6cbcb0974816706be1126d07e2a062614ac5b7cefee62be2b5ebc2d",
+    "p2FreezeDocument": "c9ce012cd9c52240bd92d1067ec9d809189c9c19af209d8c721a89397fc5cdbb",
+    "p1IndependentReviewSource": "70c6df24dea9cae95b620c618187a07af6876e70726ffa7e180a96c1f6b92190"
+  },
+  "frozenFileHashes": {
+    "contract": "49939e8ee1b5cec2367873f0295963a1678f22e1db6d87aa114b584b8f47ef27",
+    "populationGenerator": "6486ab3bbd366b13c7d25fac774369b7477d1856a8e6701767d1b09d42382f67",
+    "developmentInventory": "c66c671a04fcbd5d34f7f5f31ace35d776e73fd38f6958268df0ff10a6678b56",
+    "blindedMappingInput": "fe06aafaaf989f63090b8714e0df454cf2f09bb6ad488c683a13579661692ef1"
+  },
+  "existingP2ArtifactsModified": false,
+  "oldWorktreesOrTerminalsModified": false,
+  "mainWorktreeModified": false
+}

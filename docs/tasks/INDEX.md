@@ -3,6 +3,9 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261011_Budget_Request_TOC_Source_Token_Mapping_P3_Results.md](20261011_Budget_Request_TOC_Source_Token_Mapping_P3_Results.md) — M0 text-only 17 unique/26 multiple、M1 same-line context 12 unique/11 multiple/20 context-not-matched。57件の独立source correspondence reviewはCONFIRMED 29・AMBIGUOUS 17・UNDETERMINABLE 11。所有関係・Assembly評価なし、development evidence。
+- [20261011_Budget_Request_TOC_Source_Token_Mapping_P3.md](20261011_Budget_Request_TOC_Source_Token_Mapping_P3.md) — P2 frozen inventoryから12候補/24 fragmentを選定し、Raw Text span→PDF text occurrenceのM0/M1契約をmatching前にfreeze。held-outではない。
+
 - [20261011_Budget_Request_TOC_PDF_Row_Region_PR422_Integration_Audit.md](20261011_Budget_Request_TOC_PDF_Row_Region_PR422_Integration_Audit.md) — PR #422の3 commitを最新main上へ順に再構成。INDEX競合を限定解消し、185 segment集計の独立再現と凍結prior ownership列のprovenance欠落を監査・補正（元branch不変更）。
 
 - [20261011_1900_Budget_Request_Total_Table_Semantic_Hierarchy_P0_Failure_Isolation.md](20261011_1900_Budget_Request_Total_Table_Semantic_Hierarchy_P0_Failure_Isolation.md) — 総表v0(3,531行)の階層evidenceをread-onlyで全量survey。CONTEXTは1ブロック1行(所管40/特別会計29)、TOTALは141件全て加算で範囲特定、字下げ単独の親決定は棄却(組織/項が同列61/83・境界で列ずれ80/95)、CODE3/HIERは同書式で複数役割。曖昧1,286件 → partially supports, ambiguity remains
