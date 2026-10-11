@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261011_1831_Budget_Request_Total_Table_RawText_to_CSV_v0.md](20261011_1831_Budget_Request_Total_Table_RawText_to_CSV_v0.md) — 概算要求 plain text zip から総表をdeterministicにCSV化（v0）。9要素ヘッダ署名で164p/69ブロック、論理行3,531（DETAIL1,723/CODE3 1,598/TOTAL141/HIER69）、継続行736、unresolved 0、検算不一致0、2回実行でhash一致。env/metiの重複ブロック・CODE3入れ子は後段課題
 - [20261011_Budget_Request_TOC_Minimal_Assembly_v0.md](20261011_Budget_Request_TOC_Minimal_Assembly_v0.md) — #416のSimple PrimitivesからH1/H2の対応候補を抽出する独立PoC。82ページ探索でRESOLVED 0、候補109、未照合2,423。所有関係はprimitiveから確定できず、source provenanceを保持して保留
 - [20261011_Budget_Request_TOC_Column_Primitives_v1.md](20261011_Budget_Request_TOC_Column_Primitives_v1.md) — Simple Primitives v1 freeze rev2でD12/D9を整合後、独立PoCを実装。D1–D12/D12-N pass、TOC82ページ探索（formal held-outではない）
 
