@@ -3,6 +3,8 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261011_Budget_Request_TOC_PDF_Row_Region_Relation_Failure_Isolation_P2_Results.md](20261011_Budget_Request_TOC_PDF_Row_Region_Relation_Failure_Isolation_P2_Results.md) — P2凍結50候補(15 PDF・17ページ)の幾何source feasibility。全17ページnative text、入力hash一致。185 segment中113がテキスト照合で非一意、全fragment一意は0/50のため凍結条件に従い全候補のgeometry収集を停止。Layer B/Cの新規判断なし。
+
 - [20261011_2107_Budget_Request_TOC_PDF_Row_Region_Tool_Assessment_P2.md](20261011_2107_Budget_Request_TOC_PDF_Row_Region_Tool_Assessment_P2.md) — P2凍結50候補(15PDF・17page)のPDF text/geometryツールとpage性質の事前評価。native text 17/17・A4横/Rotate0/CropBox=MediaBox・pdfjs 5.4.296とpoppler 26.09.0のbbox一致。断片照合は最長セグメント50/50一意、短い継続断片は非一意（geometry収集は未実施）
 - [20261011_Budget_Request_TOC_H1_Positive_Negative_Failure_Isolation_P1.md](20261011_Budget_Request_TOC_H1_Positive_Negative_Failure_Isolation_P1.md) — #418のH1 positive 31件を固定し、TOC全82ページのRaw Text近似候補からNegative/near-missを事前定義手順で探索するpost-hoc ownership failure isolation（自動結合規則・精度評価なし）
 
