@@ -6,6 +6,7 @@ import { REGEX_SOURCE, segmentPage, type Primitive, type SourceLine } from './to
 const root = path.join('tests', 'fixtures', 'budget-request-toc-column-primitives', '2024');
 const fixture = JSON.parse(fs.readFileSync(path.join(root, 'fixture.json'), 'utf8'));
 const expected = JSON.parse(fs.readFileSync(path.join(root, 'expected-results.json'), 'utf8'));
+const postHoc = JSON.parse(fs.readFileSync(path.join('tests', 'fixtures', 'budget-request-toc-column-primitives-posthoc', '2024', 'no-boundary-mixed-lines.json'), 'utf8'));
 const byId = (items: any[], id: string) => items.find(x => x.caseId === id);
 const asLine = (x: any): SourceLine => ({ lineIndex: x.rawLineIndex, lineStartUtf16: x.lineStartUtf16, rawText: x.rawText });
 const flat = (lines: ReturnType<typeof segmentPage>): Primitive[] => lines.flatMap(l => l.primitive ? [l.primitive] : l.segments.flatMap(s => s.primitive ? [s.primitive] : []));
@@ -99,5 +100,32 @@ describe('frozen TOC column segmentation and primitive extraction contract', () 
     const continuation = flat(result).find(p => p.sourceLineIndex === 29)!;
     expect(continuation).toMatchObject({ kind: 'title_only_candidate', side: 'left', titleText: '必要な経費', pageRef: null, sourceLineIndex: 29 });
     expect(continuation.rawText).toBe('           必要な経費');
+  });
+  it('post-hoc MOF p2 mixed lines remain unsplit and emit no whole-line primitive without a page-local boundary', () => {
+    expect(postHoc.status).toBe('POST_HOC_DEVELOPMENT_REGRESSION');
+    expect(postHoc.cases).toHaveLength(6);
+    for (const item of postHoc.cases) {
+      expect(item.visualReview).toBe('CONFIRMED_MIXED');
+      const sourceLine: SourceLine = {
+        lineIndex: item.rawLineIndex,
+        lineStartUtf16: item.lineStartUtf16,
+        rawText: item.rawText,
+      };
+      const result = segmentPage([sourceLine], [])[0];
+      expect(result.lineStatus).toBe('NO_PAGE_LOCAL_BOUNDARY');
+      expect(result.boundaryUtf16Column).toBeNull();
+      expect(result.segments).toEqual([]);
+      expect(result.primitive).toBeNull();
+      expect(result.sourceLine.rawText).toBe(item.rawText);
+      expect(result.sourceLine.lineIndex).toBe(item.rawLineIndex);
+      expect(result.sourceLine.lineStartUtf16).toBe(item.lineStartUtf16);
+    }
+  });
+  it('post-hoc single item with request number and code remains a whole-line candidate', () => {
+    const control = postHoc.controls.find((item: any) => item.caseId === 'R4-SINGLE-CODED-ITEM');
+    const sourceLine: SourceLine = { lineIndex: 0, lineStartUtf16: 0, rawText: control.rawText };
+    const result = segmentPage([sourceLine], [])[0];
+    expect(result.lineStatus).toBe('NO_PAGE_LOCAL_BOUNDARY');
+    expect(result.primitive).toMatchObject({ kind: 'title_page', side: 'unknown', titleText: control.expectedTitle, pageRef: control.expectedPage });
   });
 });

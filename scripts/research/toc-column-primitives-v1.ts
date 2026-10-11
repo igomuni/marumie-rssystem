@@ -15,6 +15,7 @@ const pageOnlyRe = new RegExp(REGEX_SOURCE.PAGE_ONLY_REGEX, 'u');
 const titlePageRe = new RegExp(REGEX_SOURCE.TITLE_PAGE_REGEX, 'u');
 const unknownTailRe = new RegExp(REGEX_SOURCE.UNKNOWN_PAGE_TAIL_REGEX, 'u');
 const knownSpanRe = new RegExp(REGEX_SOURCE.KNOWN_PAGE_REF_SPAN_REGEX, 'gu');
+const titlePageSeparatorAtEndRe = new RegExp(`${REGEX_SOURCE.TITLE_PAGE_SEPARATOR_REGEX}$`, 'u');
 const nonblankCutRe = new RegExp(REGEX_SOURCE.NONBLANK_BOUNDARY_CUT_REGEX, 'u');
 const edgeWsRe = new RegExp(REGEX_SOURCE.TITLE_EDGE_WS_REGEX, 'gu');
 
@@ -52,6 +53,29 @@ export function extractPrimitive(rawText: string, side: Side, sourceLine: Source
   return { ...base, kind: 'title_only_candidate', titleText: rawText.replace(edgeWsRe, ''), pageRef: null };
 }
 
+/**
+ * A terminal whole-line title/page match can mask adjacent-column content when
+ * the page-local boundary is unavailable. Treat repeated, separator-delimited
+ * known page-reference candidates as ambiguous; do not split or choose one.
+ * This reuses the frozen token and separator regexes and only suppresses the
+ * whole-line primitive.
+ */
+function hasRepeatedSeparatedPageCandidates(rawText: string): boolean {
+  const candidates = [...rawText.matchAll(knownSpanRe)];
+  knownSpanRe.lastIndex = 0;
+  let separatedCandidateCount = 0;
+  for (const candidate of candidates) {
+    const beforeCandidate = rawText.slice(0, candidate.index as number);
+    const separator = titlePageSeparatorAtEndRe.exec(beforeCandidate);
+    if (!separator) continue;
+    const precedingText = beforeCandidate.slice(0, separator.index);
+    if (!precedingText.trim()) continue;
+    separatedCandidateCount++;
+    if (separatedCandidateCount > 1) return true;
+  }
+  return false;
+}
+
 /** Segmentation is page-local and does not carry state across calls or lines. */
 export function segmentPage(lines: SourceLine[], headerLines: string[]): SegmentedLine[] {
   const boundary = boundaryOfHeaderLines(headerLines);
@@ -69,12 +93,13 @@ export function segmentPage(lines: SourceLine[], headerLines: string[]): Segment
         return !!text.slice(end).trim();
       });
       const hasClearTerminalPagePrimitive = wholeLine?.kind === 'title_page' || wholeLine?.kind === 'page_only';
+      const hasAmbiguousRepeatedPageCandidates = wholeLine?.kind === 'title_page' && hasRepeatedSeparatedPageCandidates(text);
       return {
         lineStatus: 'NO_PAGE_LOCAL_BOUNDARY',
         boundaryUtf16Column: null,
         sourceLine,
         segments: [],
-        primitive: hasNonterminalPageRef && !hasClearTerminalPagePrimitive ? null : wholeLine,
+        primitive: hasAmbiguousRepeatedPageCandidates || (hasNonterminalPageRef && !hasClearTerminalPagePrimitive) ? null : wholeLine,
       };
     }
     const cut = Math.min(boundary, text.length);
