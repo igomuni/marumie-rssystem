@@ -7,6 +7,7 @@ import {
   renderCoverEntriesCsv,
   renderTocCsv,
   tocPage,
+  offsetCoverProvenance,
   type AuditFragment,
   type SourceTrace,
 } from './lib/budget-request-plain-text-csv';
@@ -42,7 +43,7 @@ if (new Set(tocSelections.map((p: any) => `${p.localPdfPath}|${p.physicalPage}`)
 
 fs.mkdirSync(outputRoot, { recursive: true });
 for (const name of fs.readdirSync(outputRoot)) {
-  if (/^(?:cover(?:_entries)?|toc-.+|audit|record-provenance|development-validation)\.(?:csv|tsv|json)$/u.test(name)) fs.rmSync(path.join(outputRoot, name));
+  if (/^(?:cover(?:_entries|-.*)?|toc-.+|audit|record-provenance|development-validation)\.(?:csv|tsv|json)$/u.test(name)) fs.rmSync(path.join(outputRoot, name));
 }
 const coverRecords: ReturnType<typeof coverTables>['cover'][] = [];
 const coverEntries: ReturnType<typeof coverTables>['entries'] = [];
@@ -68,10 +69,12 @@ function verifiedPage(pdfPath: string, physicalPage: number, expectedPdf?: strin
 for (const page of coverPages) {
   const { pageText } = verifiedPage(page.localPdfPath, page.physicalPage);
   const parsed = coverTables(pageText, page.localPdfPath, page.physicalPage);
+  const coverRecordOffset = coverRecords.length;
+  const entryRecordOffset = coverEntries.length;
   coverRecords.push(parsed.cover);
   coverEntries.push(...parsed.entries);
   audits.push(...parsed.audit);
-  traces.push(...parsed.provenance);
+  traces.push(...offsetCoverProvenance(parsed.provenance, coverRecordOffset, entryRecordOffset));
   pageValidation.push({ kind: 'cover', sourcePdf: page.localPdfPath, physicalPage: page.physicalPage, entries: parsed.entries.length, auditEntries: parsed.audit.length, unresolved: parsed.audit.filter(a => !a.reason.startsWith('excluded:')).length });
 }
 for (const selection of tocSelections) {

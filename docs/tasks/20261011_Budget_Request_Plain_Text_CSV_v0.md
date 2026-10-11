@@ -49,7 +49,8 @@ The page header supplies the observed separator between column regions. Rows are
 ## Audit and provenance
 
 - `audit.csv` records excluded header/title/blank lines and unresolved source fragments with PDF, physical page, zero-based raw line index, JSON-escaped raw text, and reason.
-- `record-provenance.csv` maps output row numbers to source line indexes and, for TOC, left/right side. Cover header/title fields and Cover entry lines have separate record types.
+- `record-provenance.csv` maps output data-row numbers to source line indexes and, for TOC, left/right side. Cover header/title fields and Cover entry lines have separate record types.
+- `csv_record_index` is a 1-based data-row number in the corresponding integrated CSV (`cover.csv` or `cover_entries.csv`); it does not restart on each Cover page. TOC indexes refer to the page-specific TOC CSV.
 - `development-validation.json` records per-page row, side, audit, and unresolved counts. Counts are descriptive for these already explored development pages.
 
 ## Current development validation
@@ -58,8 +59,8 @@ The runner targets 69 Cover pages and six TOC pages. In the current run it emitt
 
 The CAO PDF `data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf` yields 11 separate Cover rows for physical pages 1, 6, 8, 10, 12, 14, 16, 18, 20, 22, and 24. The Cover title is sourced from the year/title line and does not use the `1. ...総表` reference line. Physical page 10 retains the two source lines for `科学技術・イノベーション` and `推進事務局` as one Cover entry candidate, with both source lines linked in provenance.
 
-Development failure regression checks cover Reconstruction Agency marker rows, Environment Ministry same-line left/right content and wrapped text, National Personnel Authority three-digit items, MHLW marker/request separation, and MLIT H5 `（項）` and right-side continuation. They do not establish corpus-wide generalization.
+Development failure regression checks cover Reconstruction Agency marker rows, Environment Ministry same-line left/right content and wrapped text, National Personnel Authority three-digit items, MHLW marker/request separation, and MLIT H5 `（項）` and right-side continuation. A rerun removes legacy `cover-*.csv` files from the generated output directory. These checks do not establish corpus-wide generalization.
 
 ## Tests
 
-The single continuous artificial TXT fixture still covers all 16 left/right R/I/C/E state combinations. Its header lines model the observed dual-column header; its hand-authored expected CSV uses left-column-then-right-column order. Additional tests cover same-line starts, marker/table/three-digit standalone rows, same-line continuation, the six-page development failures, the 11-page CAO Cover PDF, two-/four-digit header codes, and title/reference separation.
+The single continuous artificial TXT fixture still covers all 16 left/right R/I/C/E state combinations. Its header lines model the observed dual-column header; its hand-authored expected CSV uses left-column-then-right-column order. Additional tests cover integrated Cover provenance offsets, same-line starts, marker/table/three-digit standalone rows, same-line continuation, the six-page development failures, the 11-page CAO Cover PDF, two-/four-digit header codes, and title/reference separation. The focused suite passes 15 tests.

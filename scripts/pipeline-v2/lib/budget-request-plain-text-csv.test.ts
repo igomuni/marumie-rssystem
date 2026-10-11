@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
-import { coverTables, renderCoverCsv, renderCoverEntriesCsv, renderTocCsv, tocPage } from './budget-request-plain-text-csv';
+import { coverTables, offsetCoverProvenance, renderCoverCsv, renderCoverEntriesCsv, renderTocCsv, tocPage } from './budget-request-plain-text-csv';
 import { deterministicPdfSlug } from './budget-request-plain-text';
 
 const fixtureDir = path.join(process.cwd(), 'tests/fixtures/budget-request-plain-text-csv/2024');
@@ -13,6 +13,15 @@ const tocText = (pdf: string, page: number) => {
 const page = (pdf: string, physicalPage: number) => tocText(pdf, physicalPage);
 
 describe('plain text CSV v0', () => {
+  it('offsets Cover provenance to the integrated CSV data-row sequence', () => {
+    const traces = [
+      { sourcePdf: 'a.pdf', page: 10, rawLineIndex: 0, csvRecordIndex: 0, scope: 'cover' as const, role: 'header-fields', recordType: 'cover' as const },
+      { sourcePdf: 'a.pdf', page: 10, rawLineIndex: 1, csvRecordIndex: 0, scope: 'cover' as const, role: 'entry', recordType: 'cover_entry' as const },
+      { sourcePdf: 'a.pdf', page: 10, rawLineIndex: 2, csvRecordIndex: 1, scope: 'cover' as const, role: 'entry', recordType: 'cover_entry' as const },
+    ];
+    expect(offsetCoverProvenance(traces, 5, 15).map(trace => trace.csvRecordIndex + 1)).toEqual([6, 16, 17]);
+  });
+
   it('parses one continuous artificial TXT against independently maintained expected CSV', () => {
     const input = fs.readFileSync(path.join(fixtureDir, 'continuous-artificial.txt'), 'utf8');
     const result = tocPage(input, 'fixture.pdf', 1);

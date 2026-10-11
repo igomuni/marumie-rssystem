@@ -24,6 +24,16 @@ export type CoverEntry = {
   ページ: string;
 };
 export type SourceTrace = { sourcePdf: string; page: number; rawLineIndex: number; side?: 'left' | 'right'; csvRecordIndex: number; scope: 'cover' | 'toc'; role: string; recordType?: 'cover' | 'cover_entry' | 'toc' };
+export function offsetCoverProvenance(traces: SourceTrace[], coverRecordOffset: number, entryRecordOffset: number) {
+  return traces.map(trace => ({
+    ...trace,
+    csvRecordIndex: trace.recordType === 'cover'
+      ? trace.csvRecordIndex + coverRecordOffset
+      : trace.recordType === 'cover_entry'
+        ? trace.csvRecordIndex + entryRecordOffset
+        : trace.csvRecordIndex,
+  }));
+}
 const csv = (v: string) => `"${v.replace(/"/g, '""')}"`;
 const codePattern = '\\d{2}[‐‑-]\\d{2}';
 const markerPattern = '（(?:項|組織|所管|会計|勘定)）';
