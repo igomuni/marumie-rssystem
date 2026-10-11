@@ -28,7 +28,7 @@
       "side": null,
       "primitive": {
         "kind": "title_page",
-        "side": null,
+        "side": "unknown",
         "titleText": "4    05-03 Synthetic request title",
         "pageRef": "88",
         "rawText": "4    05-03 Synthetic request title                         88"
@@ -40,7 +40,7 @@
       "side": null,
       "primitive": {
         "kind": "title_page",
-        "side": null,
+        "side": "unknown",
         "titleText": "Synthetic title page",
         "pageRef": "7",
         "rawText": "       Synthetic title page                         7"
@@ -218,7 +218,7 @@
       "side": null,
       "primitive": {
         "kind": "page_only",
-        "side": null,
+        "side": "unknown",
         "pageRef": "17",
         "rawText": "      17"
       }
@@ -229,7 +229,7 @@
       "side": null,
       "primitive": {
         "kind": "title_only_candidate",
-        "side": null,
+        "side": "unknown",
         "titleText": "Title without a printed page",
         "pageRef": null,
         "rawText": "       Title without a printed page"
@@ -386,14 +386,16 @@
           "pageRef": "国 1",
           "rawText": "     令和６年度歳出概算要求額総表                           国 1",
           "sourceLineIndex": 7,
-          "sourceLineStartUtf16": 289
+          "sourceLineStartUtf16": 289,
+          "side": "unknown"
         },
         {
           "kind": "page_only",
           "pageRef": "国(国)13",
           "rawText": "                                             国(国)13",
           "sourceLineIndex": 25,
-          "sourceLineStartUtf16": 759
+          "sourceLineStartUtf16": 759,
+          "side": "unknown"
         }
       ],
       "assertions": [
@@ -429,40 +431,83 @@
     {
       "caseId": "D12",
       "lineStatus": "SPLIT_AT_HEADER_BOUNDARY",
-      "boundaryUtf16Column": 20,
+      "boundaryUtf16Column": 12,
       "sourceLinePreserved": true,
       "segments": [
         {
           "side": "left",
           "sourceRangeUtf16": [
             0,
-            20
+            12
           ],
-          "rawText": "LEFT 88             ",
+          "rawText": "LEFT      88",
           "primitive": {
             "kind": "title_page",
             "titleText": "LEFT",
             "pageRef": "88",
-            "rawText": "LEFT 88             "
+            "rawText": "LEFT      88"
           }
         },
         {
           "side": "right",
           "sourceRangeUtf16": [
-            20,
-            29
+            12,
+            35
           ],
-          "rawText": "RIGHT 145",
+          "rawText": "             RIGHT  145",
           "primitive": {
             "kind": "title_page",
             "titleText": "RIGHT",
             "pageRef": "145",
-            "rawText": "RIGHT 145"
+            "rawText": "             RIGHT  145"
           }
         }
       ],
       "assertions": [
-        "left/right contamination is prohibited"
+        "both segments independently match frozen TITLE_PAGE_REGEX",
+        "left contains no RIGHT or 145",
+        "right contains no LEFT or 88",
+        "boundary 12 follows the left page token and lies in the horizontal gap"
+      ]
+    },
+    {
+      "caseId": "D12-N",
+      "lineStatus": "SPLIT_AT_HEADER_BOUNDARY",
+      "boundaryUtf16Column": 12,
+      "sourceLinePreserved": true,
+      "segments": [
+        {
+          "side": "left",
+          "sourceRangeUtf16": [
+            0,
+            12
+          ],
+          "rawText": "LEFT 88     ",
+          "primitive": {
+            "kind": "title_only_candidate",
+            "titleText": "LEFT 88",
+            "pageRef": null,
+            "rawText": "LEFT 88     "
+          }
+        },
+        {
+          "side": "right",
+          "sourceRangeUtf16": [
+            12,
+            29
+          ],
+          "rawText": "        RIGHT 145",
+          "primitive": {
+            "kind": "title_only_candidate",
+            "titleText": "RIGHT 145",
+            "pageRef": null,
+            "rawText": "        RIGHT 145"
+          }
+        }
+      ],
+      "assertions": [
+        "one-space title/page separators do not match frozen TITLE_PAGE_REGEX",
+        "neither segment emits a page-reference primitive"
       ]
     }
   ],
@@ -621,5 +666,7 @@
     "qualifyingHeaderPageCount": 72,
     "noHeaderPageCount": 10,
     "independentCheck": "Applied the literal HEADER_REGEX to every non-empty source TXT line on the physical page identified by each of the 82 inventory records; cross-checked each result against the inventory localPdfPath, physicalPage, classifierSource, PDF SHA-256, and page text SHA-256. Identity keys are unique; the ten listed pages are exactly the pages with zero matches."
-  }
+  },
+  "freezeRevision": 1,
+  "supersedesFreezeCommit": "a792b5d0d682cdc76099dc8b709967788265c898"
 }

@@ -53,10 +53,23 @@ Header detection searches source lines for `HEADER_REGEX`; the header markers ar
 | D9 | NDL source examples `国 1` and `国(国)13`, preserving distinct spellings. |
 | D10 | Synthetic boundary crossing a page token; preserve whole line as `unresolved`. |
 | D11 | Synthetic no page-local header; unknown side and no split. |
-| D12 | Synthetic left/right contamination guard; no primitive may leak across sides. |
+| D12 | Synthetic positive left/right contamination guard; each side meets the frozen title/page separator and no primitive may leak across sides. |
+| D12-N | Synthetic negative control preserving the original one-space separators; neither side is expected to match `TITLE_PAGE_REGEX`. |
 
 The qualifying page-local header regex occurs on 72 of 82 inventory pages. The exact ten pages without a match are listed in `expected-results.json` under `noHeaderInventoryPages`; the list is keyed by source PDF path and physical page and includes inventory classification source plus the relevant raw TXT header lines. It was enumerated by checking the exact regex against each physical page in the 82-page frozen structure inventory and cross-checking page identity and text SHA-256 against the corresponding source TXT page. The listed pages are unknown-side and never force a split. Unrelated physical-page 94/95 observations are excluded; the CFA case references physical p3 and printed-page token 94. Frozen kinds are exactly `title_page`, `page_only`, `title_only_candidate`, and `unresolved`. `expected-results.json` is a manually authored expected-output contract, not a parser run or evaluation. It repeats the exact regex strings so the fixture and preregistration freeze the same recognition and boundary rules before implementation. Synthetic cases exercise only segmentation safety; source-derived cases establish raw source evidence, not ground truth for any downstream semantic use.
 
 ## Explicit non-goals
 
 No assembly, row reconstruction, title continuation, page-reference normalization, semantic classification, cross-page state, inferred columns, geometry-derived boundaries, PDF-coordinate offsets, implementation, tests, or evaluation results are in this iteration. Any ambiguous boundary or unsupported terminal page form remains unresolved for coordinator review.
+
+## Freeze revision 1 — post-STOP contract-alignment correction
+
+This section is a versioned correction after the original freeze commit `a792b5d0d682cdc76099dc8b709967788265c898`; that commit and its negative result remain unchanged in history. The correction follows the development failures observed before implementation validation and does not change the research hypothesis, regex source strings, segmentation formula, assembly exclusion, or acceptance criteria. This remains development evidence, not formal held-out evaluation.
+
+### D12 fixture correction
+
+D12 is synthetic. Its original raw line was `LEFT 88             RIGHT 145`, which places only one horizontal space between each title and page token and therefore contradicts the frozen `TITLE_PAGE_REGEX` requirement of at least two spaces (or a permitted leader). The positive fixture now uses `LEFT      88             RIGHT  145`. Its synthetic header yields the frozen midpoint cut at UTF-16 column 12, immediately after the left page token and within the horizontal gap before the right title. Both source slices independently match the unchanged regex. The original one-space line is retained as D12-N, a negative case expected not to produce either `title_page` primitive.
+
+### Side representation clarification
+
+`side: null` denotes page-level boundary metadata when no page-local boundary is available. It is not a valid `Primitive.side` value. Every primitive uses exactly `left`, `right`, or `unknown`; a whole-line primitive observed without a determinable column has `side: unknown`. The pre-revision expected output encoded `null` on several no-boundary primitives and omitted `side` from D9 primitive expectations, while the D9 test compared it. The expected shape is corrected consistently for D1, D2, D6, D7, and D9; page-level no-boundary metadata remains `null`. This clarifies the already stated distinction between unavailable page boundary and unknown primitive side and adds no new extraction or assembly rule.
