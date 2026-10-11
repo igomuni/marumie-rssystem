@@ -1,0 +1,70 @@
+{
+  "note": "Verbatim physical-line subsets of budget-request-plain-text/2024 pages (zip sha256 268f1020…e533). Each excerpt page ends with \"\\n\" + Form Feed like pdftotext output. Line indexes are 0-based within the original page.",
+  "excerpts": {
+    "mext-02.txt": [
+      {
+        "source_file": "budget-request-plain-text/2024/mext.go.jp__content__20230914-mxt_kaikesou01-000031817_02.txt",
+        "source_page": 1,
+        "line_indexes": "0-31"
+      },
+      {
+        "source_file": "budget-request-plain-text/2024/mext.go.jp__content__20230914-mxt_kaikesou01-000031817_02.txt",
+        "source_page": 2,
+        "line_indexes": "0-21"
+      },
+      {
+        "source_file": "budget-request-plain-text/2024/mext.go.jp__content__20230914-mxt_kaikesou01-000031817_02.txt",
+        "source_page": 7,
+        "line_indexes": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          24
+        ]
+      },
+      {
+        "source_file": "budget-request-plain-text/2024/mext.go.jp__content__20230914-mxt_kaikesou01-000031817_02.txt",
+        "source_page": 8,
+        "line_indexes": "0-8"
+      }
+    ],
+    "env-000157010.txt": [
+      {
+        "source_file": "budget-request-plain-text/2024/env.go.jp__content__000157010.txt",
+        "source_page": 18,
+        "line_indexes": "0-39"
+      }
+    ],
+    "env-000157012.txt": [
+      {
+        "source_file": "budget-request-plain-text/2024/env.go.jp__content__000157012.txt",
+        "source_page": 6,
+        "line_indexes": "0-35"
+      }
+    ],
+    "env-000157013.txt": [
+      {
+        "source_file": "budget-request-plain-text/2024/env.go.jp__content__000157013.txt",
+        "source_page": 5,
+        "line_indexes": "0-51"
+      }
+    ],
+    "meti-enegen.txt": [
+      {
+        "source_file": "budget-request-plain-text/2024/meti.go.jp__main__yosangaisan__fy2024__pdf__enegen_o.txt",
+        "source_page": 5,
+        "line_indexes": "0-26"
+      }
+    ]
+  }
+}
