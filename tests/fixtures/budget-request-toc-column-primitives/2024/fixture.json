@@ -1,6 +1,6 @@
 {
   "schema": "budget-request-toc-column-primitives-development-fixture/v1",
-  "fixtureId": "fy2024-toc-column-primitives-v1-r1-d1-d12n",
+  "fixtureId": "fy2024-toc-column-primitives-v1-r2-d1-d12n",
   "status": "frozen",
   "scope": "manually selected source observations plus synthetic boundary-safety inputs; no parser output",
   "offsetUnit": "UTF-16 code units; offsets are zero-based",
@@ -327,21 +327,19 @@
       "candidateBoundaryUtf16Column": 12,
       "rawLineIndex": 0,
       "lineStartUtf16": 0,
-      "rawText": "LEFT      88             RIGHT  145",
-      "headerLines": []
+      "rawText": "LEFT      88             RIGHT  145"
     },
     {
       "caseId": "D12-N",
       "origin": "SYNTHETIC",
       "purpose": "negative separator case: one space does not satisfy frozen TITLE_PAGE_REGEX",
-      "headerLine": "要求 区 分 ページ    要求",
-      "candidateBoundaryUtf16Column": 12,
+      "headerLine": "要求 区 分 ページ                    要求",
+      "candidateBoundaryUtf16Column": 20,
       "rawLineIndex": 1,
       "lineStartUtf16": 0,
-      "rawText": "LEFT 88             RIGHT 145",
-      "headerLines": []
+      "rawText": "LEFT 88             RIGHT 145"
     }
   ],
-  "freezeRevision": 1,
+  "freezeRevision": 2,
   "supersedesFreezeCommit": "a792b5d0d682cdc76099dc8b709967788265c898"
 }

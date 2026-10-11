@@ -473,35 +473,35 @@
     {
       "caseId": "D12-N",
       "lineStatus": "SPLIT_AT_HEADER_BOUNDARY",
-      "boundaryUtf16Column": 12,
+      "boundaryUtf16Column": 20,
       "sourceLinePreserved": true,
       "segments": [
         {
           "side": "left",
           "sourceRangeUtf16": [
             0,
-            12
+            20
           ],
-          "rawText": "LEFT 88     ",
+          "rawText": "LEFT 88             ",
           "primitive": {
             "kind": "title_only_candidate",
             "titleText": "LEFT 88",
             "pageRef": null,
-            "rawText": "LEFT 88     "
+            "rawText": "LEFT 88             "
           }
         },
         {
           "side": "right",
           "sourceRangeUtf16": [
-            12,
+            20,
             29
           ],
-          "rawText": "        RIGHT 145",
+          "rawText": "RIGHT 145",
           "primitive": {
             "kind": "title_only_candidate",
             "titleText": "RIGHT 145",
             "pageRef": null,
-            "rawText": "        RIGHT 145"
+            "rawText": "RIGHT 145"
           }
         }
       ],
@@ -667,6 +667,6 @@
     "noHeaderPageCount": 10,
     "independentCheck": "Applied the literal HEADER_REGEX to every non-empty source TXT line on the physical page identified by each of the 82 inventory records; cross-checked each result against the inventory localPdfPath, physicalPage, classifierSource, PDF SHA-256, and page text SHA-256. Identity keys are unique; the ten listed pages are exactly the pages with zero matches."
   },
-  "freezeRevision": 1,
+  "freezeRevision": 2,
   "supersedesFreezeCommit": "a792b5d0d682cdc76099dc8b709967788265c898"
 }
