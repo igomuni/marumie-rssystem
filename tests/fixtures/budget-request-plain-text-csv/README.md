@@ -1,0 +1,3 @@
+# Artificial TXT fixture provenance
+
+`2024/continuous-artificial.txt` is a hand-authored artificial two-page TXT fixture; it contains no source-document text. Its 16 consecutive R/I/C/E combinations are listed in the test in row-major order across the two pages. Each pair has two explicit parent records immediately before it, so every continuation has exactly one same-side parent. The expected CSV is a separately frozen expected result, reviewed against the fixture and parser contract; tests compare the full multi-page output through one parser call and separately assert continuation attachment and side isolation.
