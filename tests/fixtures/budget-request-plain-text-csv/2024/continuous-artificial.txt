@@ -1,4 +1,4 @@
-要求番号 区分 ページ
+要求                    区                    分     ページ 要求                      区                     分      ページ
 
 1
 orphan string survives audit
@@ -33,7 +33,7 @@ orphan string survives audit
 98 05‐13 parentL8 7
                                                             98 05‐95 parentR8 8
 （項） 608 I8 項目 9
-                                                            要求番号 区分 ページ
+                                                            要求                    区                    分     ページ 要求                      区                     分      ページ
 
 2
 99 05‐13 parentL9 7

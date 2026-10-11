@@ -2,6 +2,8 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261011_Budget_Request_Plain_Text_CSV_v0.md](20261011_Budget_Request_Plain_Text_CSV_v0.md) — PR #415のTXT→Cover 2表/TOC 3列CSV v0。Cover 69ページ・TOC既定development 6ページを検証し、marker/独立数字行・左→右順序・未解決監査を追加
+- [20261011_Budget_Request_Plain_Text_Corpus.md](20261011_Budget_Request_Plain_Text_Corpus.md) — FY2024概算要求PDFのbyte-preserving plain-text producerを追加。将来のCSV分析向けの共存入力で、既存JSONL producer/consumerは維持しcaller migrationは対象外
 - [20261008_2023_Budget_Request_TOC_A_Layer_Header_Zone_Right_Row_H1_Preregistration.md](20261008_2023_Budget_Request_TOC_A_Layer_Header_Zone_Right_Row_H1_Preregistration.md) — #397の単一familyへの修正仮説H1(ASSEMBLED_SPLITのheader zone行でE以右がrow-start tokenで始まる場合のみLEFT/RIGHT分割)を事前固定。token無しfragmentは対象外・#396の23pageはpost-hoc専用 → READY_FOR_HEADER_ZONE_RIGHT_ROW_H1_DEVELOPMENT_IMPLEMENTATION
 - [20261010_1054_Budget_Request_TOC_B_Layer_Column_Continuity_Visual_Failure_Isolation.md](20261010_1054_Budget_Request_TOC_B_Layer_Column_Continuity_Visual_Failure_Isolation.md) — #412のP2(右column先頭REQUEST・25page)から#411除外の22pageを母集団に、層(source×left末尾kind)+右先頭REQUEST数の規則で6pageをPDF未閲覧のままfreeze(Phase 1)。Phase 2/3: 6page×独立2判定(blind)を観察。UNIQUE 0・AMBIGUOUS 8・NO_CONTEXT 4(不一致2件は未解消)。GT・resolverではない。
 - [20261010_0659_Budget_Request_TOC_B_Layer_Scope_Continuity_Failure_Isolation.md](20261010_0659_Budget_Request_TOC_B_Layer_Scope_Continuity_Failure_Isolation.md) — B層scope continuityのmechanical census(82page・目視/parent resolverなし)。同一column内のnearest preceding ITEMは観測可(SPLIT request 1,232中1,168)、右column先頭requestが右内に先行ITEMなし25page/53件・page先頭request UNSPLIT 6page、LEFT↔RIGHTはORDER_NOT_ESTABLISHED。#411 sample 8pageと27/27整合 → outcome選択なし
@@ -265,5 +267,3 @@ task doc を新規作成したら本索引に1行追記する（新しいもの�
 - [20260612_0628_悪意あるユーザー対策_DoS設計.md](20260612_0628_悪意あるユーザー対策_DoS設計.md) — 検索API/生JSON直リンクのDoS対策・多層防御設計
 - [20260611_2038_APIセキュリティ基準調査_動作確認.md](20260611_2038_APIセキュリティ基準調査_動作確認.md) — AIフレンドリーAPIの動作確認とセキュリティ基準洗い出し
 - [20260611_0720_AIフレンドリー化SG1-5実装計画.md](20260611_0720_AIフレンドリー化SG1-5実装計画.md) — llms.txt/検索API/支出先逆引き等SG-1〜5実装計画
-- [20261011_Budget_Request_Plain_Text_Corpus.md](20261011_Budget_Request_Plain_Text_Corpus.md) — FY2024概算要求PDFのbyte-preserving plain-text producerを追加。将来のCSV分析向けの共存入力で、既存JSONL producer/consumerは維持しcaller migrationは対象外
-- [20261011_Budget_Request_Plain_Text_CSV_v0.md](20261011_Budget_Request_Plain_Text_CSV_v0.md) — 開発専用のTXT→Cover/TOC CSV v0。既存development sampleの5所管6 TOCページとCAO Coverを検証し、ソース/ページSHAを照合、未解決行をTSV監査出力
