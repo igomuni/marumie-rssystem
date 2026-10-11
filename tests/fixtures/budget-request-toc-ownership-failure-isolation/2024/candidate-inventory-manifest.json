@@ -1,0 +1,112 @@
+{
+  "schema": "budget-request-toc-ownership-candidate-inventory/v0",
+  "researchScope": "post-hoc development source review; not held-out evaluation or gold labels",
+  "sourceRun": {
+    "pr": 417,
+    "head": "cf1b3934d534fa7b51b6dfdf3f964fcb1b64e9dc",
+    "freezeCommit": "d2ac1e6a8e7fd1da1667633d67af4e7ca784991c",
+    "outputZip": "data/work/exports/20261011_1756_FY2024_TOC_Minimal_Assembly_v0.zip",
+    "outputZipSha256": "ae2392ecb25f7457be9c8cccb68622d4193c544e48e62bf9583524578936ea79"
+  },
+  "frozenArtifacts": {
+    "preregistrationSha256": "4d01e896e4ae1f6d1f8261252f84e2bf4da89f26a9d32a4cb3cf75c276e971d3",
+    "fixtureSha256": "69a68e1f6edf8b571af74dcca6cdb0397d2c3be15a24c5e1d59fbcbbef7851ba",
+    "expectedResultsSha256": "cc3cc25032e0d2137b8255f4b68c7d3b58f123119b93b4e229bdb221bc95ac10"
+  },
+  "sourceManifest": {
+    "path": "tests/fixtures/budget-request-raw-text/2024/raw-text-manifest.json",
+    "sha256": "d58e048b43a38b29d035ff07dbd2d664ad5bea28c50fed4e0c30c61052c3573c"
+  },
+  "candidateInventory": {
+    "path": "tests/fixtures/budget-request-toc-ownership-failure-isolation/2024/candidate-unresolved-inventory.csv",
+    "sha256": "3808c1698e6671589e5edda1292bb49c61fa623d569e8ed11f18a274c629289d",
+    "rowsByHypothesis": {
+      "H1": 31,
+      "H2": 78
+    },
+    "totalObservations": 109,
+    "uniqueObservationIds": 109,
+    "uniqueSourcePrimitives": 218,
+    "uniquePhysicalPages": 79,
+    "uniqueSourcePdfs": 52,
+    "sourceRawFragmentsVerified": 218,
+    "rawPageHashesVerified": 79,
+    "sourcePdfHashesVerified": 52
+  },
+  "inventoryValidation": {
+    "path": "data/work/exports/20261011_1817_FY2024_TOC_Ownership_Failure_Isolation/inventory-validation.json",
+    "sha256": "a4851e09696c51fa2f1c1590a346eab0f247586bc660fd634d76c83097930cb4",
+    "checks": {
+      "archiveCandidateCsvMatchesSource": true,
+      "frozenValidationInputHashesVerified": true,
+      "expectedCandidateCounts": true,
+      "uniqueObservationIds": true,
+      "allPrimitiveIdsResolve": true,
+      "lineIndicesAndUtf16SpansMatchSourceText": true,
+      "embeddedSummaryMatchesInventory": true,
+      "candidatePageTextHashesMatchRawTextManifest": true,
+      "candidatePdfHashesMatchRawTextManifest": true
+    }
+  },
+  "classificationContract": "docs/tasks/20261011_Budget_Request_TOC_Ownership_Failure_Isolation_P0.md",
+  "reviewState": "inventory frozen before semantic ownership review",
+  "coordinatorAdjudications": {
+    "path": "tests/fixtures/budget-request-toc-ownership-failure-isolation/2024/coordinator-adjudications.json",
+    "sha256": "d41d213831730af286108d5658bc88fb7355508b87737ee3d76693b5c35b1a12",
+    "count": 31
+  },
+  "classificationResults": {
+    "ownershipClassification": {
+      "path": "tests/fixtures/budget-request-toc-ownership-failure-isolation/2024/ownership-classification.csv",
+      "sha256": "4b93f03e45d029063ea50a2220a474baa1e631bc6c120c5bbdc494db95618dad",
+      "rows": 109
+    },
+    "evidenceReview": {
+      "path": "tests/fixtures/budget-request-toc-ownership-failure-isolation/2024/evidence-review.csv",
+      "sha256": "4196da9a4c4470ea6d856bd73bf0a7c2c11dbf0818ebd97c0a89a46347fbdeaa",
+      "rows": 109
+    },
+    "failureFamilySummary": {
+      "path": "tests/fixtures/budget-request-toc-ownership-failure-isolation/2024/failure-family-summary.csv",
+      "sha256": "ee762f177c8cb68921ab8e7eec0106deb5257083864e27056d8f6c41a4cb9f34",
+      "families": 7
+    },
+    "H1Summary": {
+      "path": "tests/fixtures/budget-request-toc-ownership-failure-isolation/2024/h1-summary.json",
+      "sha256": "e7c86595413a7ce495da6b8bee8fc3864d221232299e20f80314771e999bd808"
+    },
+    "H2Summary": {
+      "path": "tests/fixtures/budget-request-toc-ownership-failure-isolation/2024/h2-summary.json",
+      "sha256": "90f063049df672aa6498efc9e26fb44290c1f16310299fa2290e052981a60e4b"
+    }
+  },
+  "finalCounts": {
+    "ownership": {
+      "SAME_ITEM": 32,
+      "DISTINCT_ITEMS": 77,
+      "AMBIGUOUS": 0,
+      "UNDETERMINABLE": 0
+    },
+    "evidenceSufficiency": {
+      "RAW_TEXT_SUFFICIENT": 0,
+      "RAW_TEXT_INSUFFICIENT": 0,
+      "PDF_VISUAL_REQUIRED": 109,
+      "STILL_UNDETERMINABLE": 0
+    },
+    "primaryFailureFamilies": {
+      "F1_TRUE_CONTINUATION_OWNERSHIP_MISSING": 31,
+      "F2_INDEPENDENT_HEADING_NON_ITEM": 77,
+      "F6_INSUFFICIENT_PRIMITIVE_RELATION": 1
+    },
+    "uniquePages": 79,
+    "uniquePdfs": 52
+  },
+  "validation": {
+    "path": "tests/fixtures/budget-request-toc-ownership-failure-isolation/2024/validation.json",
+    "sha256": "6d00efaa0f249e5d1cbf81ff6682c1c93be3b780bd63e101ec743da12b9112f0"
+  },
+  "input-output-hashes": {
+    "path": "tests/fixtures/budget-request-toc-ownership-failure-isolation/2024/input-output-hashes.json",
+    "sha256": "ca8b8a54e29bd14d72c429ed96295c1212101a6c7c3d5a383dff767cf9fcfa25"
+  }
+}

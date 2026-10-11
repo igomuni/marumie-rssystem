@@ -1,0 +1,228 @@
+{
+  "schema": "budget-request-toc-ownership-coordinator-adjudications/v0",
+  "contract": "docs/tasks/20261011_Budget_Request_TOC_Ownership_Failure_Isolation_P0.md",
+  "scope": "Preserve source reviewer values; record evidence-backed taxonomy/ownership reconciliation without changing the frozen classification contract.",
+  "adjudications": [
+    {
+      "observationId": "asm-61fc1b99283a11b3a778",
+      "field": "primary_family",
+      "reviewerValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "finalValue": "F1_TRUE_CONTINUATION_OWNERSHIP_MISSING",
+      "reason": "The visual observation states the title_page and following title-only fragment are successive baselines of the same continued (項) printed entry. Under the frozen F2 definition, a title-only non-item is not the observed relationship; F1 describes the ownership-missing true continuation. Ownership remains SAME_ITEM."
+    },
+    {
+      "observationId": "asm-a4ef83972d28c2630ae6",
+      "field": "primary_family",
+      "reviewerValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "finalValue": "F1_TRUE_CONTINUATION_OWNERSHIP_MISSING",
+      "reason": "The visual observation states the title_page and following title-only fragment are successive baselines of the same continued (項) printed entry. Under the frozen F2 definition, a title-only non-item is not the observed relationship; F1 describes the ownership-missing true continuation. Ownership remains SAME_ITEM."
+    },
+    {
+      "observationId": "asm-3a59ef934ad10279d271",
+      "field": "primary_family",
+      "reviewerValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "finalValue": "F1_TRUE_CONTINUATION_OWNERSHIP_MISSING",
+      "reason": "The visual observation states the title_page and following title-only fragment are successive baselines of the same continued (項) printed entry. Under the frozen F2 definition, a title-only non-item is not the observed relationship; F1 describes the ownership-missing true continuation. Ownership remains SAME_ITEM."
+    },
+    {
+      "observationId": "asm-078825a7f8da1167b48b",
+      "field": "primary_family",
+      "reviewerValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "finalValue": "F1_TRUE_CONTINUATION_OWNERSHIP_MISSING",
+      "reason": "The visual observation states the title_page and following title-only fragment are successive baselines of the same continued (項) printed entry. Under the frozen F2 definition, a title-only non-item is not the observed relationship; F1 describes the ownership-missing true continuation. Ownership remains SAME_ITEM."
+    },
+    {
+      "observationId": "asm-059a6635035652de86f7",
+      "field": "primary_family",
+      "reviewerValue": "F3_SEPARATE_ITEM_ADJACENCY",
+      "finalValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "reason": "The reviewed first primitive is a physical page folio and the second is a document/TOC heading or table column header, outside/above the TOC entry grid. F3 is reserved for distinct printed items; these are a folio paired with a non-item heading/header. Ownership remains DISTINCT_ITEMS."
+    },
+    {
+      "observationId": "asm-f436bb085e14ba886c11",
+      "field": "primary_family",
+      "reviewerValue": "F3_SEPARATE_ITEM_ADJACENCY",
+      "finalValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "reason": "The reviewed first primitive is a physical page folio and the second is a document/TOC heading or table column header, outside/above the TOC entry grid. F3 is reserved for distinct printed items; these are a folio paired with a non-item heading/header. Ownership remains DISTINCT_ITEMS."
+    },
+    {
+      "observationId": "asm-756b2b46703f949427f2",
+      "field": "primary_family",
+      "reviewerValue": "F3_SEPARATE_ITEM_ADJACENCY",
+      "finalValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "reason": "The reviewed first primitive is a physical page folio and the second is a document/TOC heading or table column header, outside/above the TOC entry grid. F3 is reserved for distinct printed items; these are a folio paired with a non-item heading/header. Ownership remains DISTINCT_ITEMS."
+    },
+    {
+      "observationId": "asm-dc11159aa26b960a4c7f",
+      "field": "primary_family",
+      "reviewerValue": "F3_SEPARATE_ITEM_ADJACENCY",
+      "finalValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "reason": "The reviewed first primitive is a physical page folio and the second is a document/TOC heading or table column header, outside/above the TOC entry grid. F3 is reserved for distinct printed items; these are a folio paired with a non-item heading/header. Ownership remains DISTINCT_ITEMS."
+    },
+    {
+      "observationId": "asm-8e44c62d557f82823a71",
+      "field": "primary_family",
+      "reviewerValue": "F3_SEPARATE_ITEM_ADJACENCY",
+      "finalValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "reason": "The reviewed first primitive is a physical page folio and the second is a document/TOC heading or table column header, outside/above the TOC entry grid. F3 is reserved for distinct printed items; these are a folio paired with a non-item heading/header. Ownership remains DISTINCT_ITEMS."
+    },
+    {
+      "observationId": "asm-41bf9f90cffb90d3d5bd",
+      "field": "primary_family",
+      "reviewerValue": "F3_SEPARATE_ITEM_ADJACENCY",
+      "finalValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "reason": "The reviewed first primitive is a physical page folio and the second is a document/TOC heading or table column header, outside/above the TOC entry grid. F3 is reserved for distinct printed items; these are a folio paired with a non-item heading/header. Ownership remains DISTINCT_ITEMS."
+    },
+    {
+      "observationId": "asm-33428d9e438b2195221b",
+      "field": "primary_family",
+      "reviewerValue": "F3_SEPARATE_ITEM_ADJACENCY",
+      "finalValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "reason": "The reviewed first primitive is a physical page folio and the second is a document/TOC heading or table column header, outside/above the TOC entry grid. F3 is reserved for distinct printed items; these are a folio paired with a non-item heading/header. Ownership remains DISTINCT_ITEMS."
+    },
+    {
+      "observationId": "asm-dc565e05a237d5ec7d2e",
+      "field": "primary_family",
+      "reviewerValue": "F3_SEPARATE_ITEM_ADJACENCY",
+      "finalValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "reason": "The reviewed first primitive is a physical page folio and the second is a document/TOC heading or table column header, outside/above the TOC entry grid. F3 is reserved for distinct printed items; these are a folio paired with a non-item heading/header. Ownership remains DISTINCT_ITEMS."
+    },
+    {
+      "observationId": "asm-0278cdb18adf7a38582a",
+      "field": "primary_family",
+      "reviewerValue": "F3_SEPARATE_ITEM_ADJACENCY",
+      "finalValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "reason": "The reviewed first primitive is a physical page folio and the second is a document/TOC heading or table column header, outside/above the TOC entry grid. F3 is reserved for distinct printed items; these are a folio paired with a non-item heading/header. Ownership remains DISTINCT_ITEMS."
+    },
+    {
+      "observationId": "asm-f0c4c01bc6bdfff4d6af",
+      "field": "primary_family",
+      "reviewerValue": "F3_SEPARATE_ITEM_ADJACENCY",
+      "finalValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "reason": "The reviewed first primitive is a physical page folio and the second is a document/TOC heading or table column header, outside/above the TOC entry grid. F3 is reserved for distinct printed items; these are a folio paired with a non-item heading/header. Ownership remains DISTINCT_ITEMS."
+    },
+    {
+      "observationId": "asm-bb5030171304f2a1f06c",
+      "field": "primary_family",
+      "reviewerValue": "F3_SEPARATE_ITEM_ADJACENCY",
+      "finalValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "reason": "The reviewed first primitive is a physical page folio and the second is a document/TOC heading or table column header, outside/above the TOC entry grid. F3 is reserved for distinct printed items; these are a folio paired with a non-item heading/header. Ownership remains DISTINCT_ITEMS."
+    },
+    {
+      "observationId": "asm-57ff17aca667be6ae707",
+      "field": "primary_family",
+      "reviewerValue": "F3_SEPARATE_ITEM_ADJACENCY",
+      "finalValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "reason": "The reviewed first primitive is a physical page folio and the second is a document/TOC heading or table column header, outside/above the TOC entry grid. F3 is reserved for distinct printed items; these are a folio paired with a non-item heading/header. Ownership remains DISTINCT_ITEMS."
+    },
+    {
+      "observationId": "asm-69f91e45f342d2211b4e",
+      "field": "primary_family",
+      "reviewerValue": "F3_SEPARATE_ITEM_ADJACENCY",
+      "finalValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "reason": "The reviewed first primitive is a physical page folio and the second is a document/TOC heading or table column header, outside/above the TOC entry grid. F3 is reserved for distinct printed items; these are a folio paired with a non-item heading/header. Ownership remains DISTINCT_ITEMS."
+    },
+    {
+      "observationId": "asm-c10c0bf46473808f5163",
+      "field": "primary_family",
+      "reviewerValue": "F3_SEPARATE_ITEM_ADJACENCY",
+      "finalValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "reason": "The reviewed first primitive is a physical page folio and the second is a document/TOC heading or table column header, outside/above the TOC entry grid. F3 is reserved for distinct printed items; these are a folio paired with a non-item heading/header. Ownership remains DISTINCT_ITEMS."
+    },
+    {
+      "observationId": "asm-37b5dd5bc93f2886ef26",
+      "field": "primary_family",
+      "reviewerValue": "F3_SEPARATE_ITEM_ADJACENCY",
+      "finalValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "reason": "The reviewed first primitive is a physical page folio and the second is a document/TOC heading or table column header, outside/above the TOC entry grid. F3 is reserved for distinct printed items; these are a folio paired with a non-item heading/header. Ownership remains DISTINCT_ITEMS."
+    },
+    {
+      "observationId": "asm-c658f244c1bd4f63b6ff",
+      "field": "primary_family",
+      "reviewerValue": "F3_SEPARATE_ITEM_ADJACENCY",
+      "finalValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "reason": "The reviewed first primitive is a physical page folio and the second is a document/TOC heading or table column header, outside/above the TOC entry grid. F3 is reserved for distinct printed items; these are a folio paired with a non-item heading/header. Ownership remains DISTINCT_ITEMS."
+    },
+    {
+      "observationId": "asm-2b2d0eed944315873108",
+      "field": "primary_family",
+      "reviewerValue": "F3_SEPARATE_ITEM_ADJACENCY",
+      "finalValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "reason": "The reviewed first primitive is a physical page folio and the second is a document/TOC heading or table column header, outside/above the TOC entry grid. F3 is reserved for distinct printed items; these are a folio paired with a non-item heading/header. Ownership remains DISTINCT_ITEMS."
+    },
+    {
+      "observationId": "asm-d362e99ce27d5c06cf7c",
+      "field": "primary_family",
+      "reviewerValue": "F3_SEPARATE_ITEM_ADJACENCY",
+      "finalValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "reason": "The reviewed first primitive is a physical page folio and the second is a document/TOC heading or table column header, outside/above the TOC entry grid. F3 is reserved for distinct printed items; these are a folio paired with a non-item heading/header. Ownership remains DISTINCT_ITEMS."
+    },
+    {
+      "observationId": "asm-718f029763bf76b369fd",
+      "field": "primary_family",
+      "reviewerValue": "F3_SEPARATE_ITEM_ADJACENCY",
+      "finalValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "reason": "The reviewed first primitive is a physical page folio and the second is a document/TOC heading or table column header, outside/above the TOC entry grid. F3 is reserved for distinct printed items; these are a folio paired with a non-item heading/header. Ownership remains DISTINCT_ITEMS."
+    },
+    {
+      "observationId": "asm-e158b4c90f10ef03e699",
+      "field": "primary_family",
+      "reviewerValue": "F3_SEPARATE_ITEM_ADJACENCY",
+      "finalValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "reason": "The reviewed first primitive is a physical page folio and the second is a document/TOC heading or table column header, outside/above the TOC entry grid. F3 is reserved for distinct printed items; these are a folio paired with a non-item heading/header. Ownership remains DISTINCT_ITEMS."
+    },
+    {
+      "observationId": "asm-599fb9fe4e5089e00c8f",
+      "field": "primary_family",
+      "reviewerValue": "F3_SEPARATE_ITEM_ADJACENCY",
+      "finalValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "reason": "The reviewed first primitive is a physical page folio and the second is a document/TOC heading or table column header, outside/above the TOC entry grid. F3 is reserved for distinct printed items; these are a folio paired with a non-item heading/header. Ownership remains DISTINCT_ITEMS."
+    },
+    {
+      "observationId": "asm-9fc799e61d0e94b350aa",
+      "field": "primary_family",
+      "reviewerValue": "F3_SEPARATE_ITEM_ADJACENCY",
+      "finalValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "reason": "The reviewed first primitive is a physical page folio and the second is a document/TOC heading or table column header, outside/above the TOC entry grid. F3 is reserved for distinct printed items; these are a folio paired with a non-item heading/header. Ownership remains DISTINCT_ITEMS."
+    },
+    {
+      "observationId": "asm-6379e6bd6e41f2ca6616",
+      "field": "primary_family",
+      "reviewerValue": "F3_SEPARATE_ITEM_ADJACENCY",
+      "finalValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "reason": "The reviewed first primitive is a physical page folio and the second is a document/TOC heading or table column header, outside/above the TOC entry grid. F3 is reserved for distinct printed items; these are a folio paired with a non-item heading/header. Ownership remains DISTINCT_ITEMS."
+    },
+    {
+      "observationId": "asm-be2e63ed8a232fe2c521",
+      "field": "primary_family",
+      "reviewerValue": "F3_SEPARATE_ITEM_ADJACENCY",
+      "finalValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "reason": "The reviewed first primitive is a physical page folio and the second is a document/TOC heading or table column header, outside/above the TOC entry grid. F3 is reserved for distinct printed items; these are a folio paired with a non-item heading/header. Ownership remains DISTINCT_ITEMS."
+    },
+    {
+      "observationId": "asm-3b6367b9c6c8ee2c3584",
+      "field": "primary_family",
+      "reviewerValue": "F3_SEPARATE_ITEM_ADJACENCY",
+      "finalValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "reason": "The reviewed first primitive is a physical page folio and the second is a document/TOC heading or table column header, outside/above the TOC entry grid. F3 is reserved for distinct printed items; these are a folio paired with a non-item heading/header. Ownership remains DISTINCT_ITEMS."
+    },
+    {
+      "observationId": "asm-3981b68de5b835236155",
+      "field": "primary_family",
+      "reviewerValue": "F3_SEPARATE_ITEM_ADJACENCY",
+      "finalValue": "F2_INDEPENDENT_HEADING_NON_ITEM",
+      "reason": "The reviewed first primitive is a physical page folio and the second is a document/TOC heading or table column header, outside/above the TOC entry grid. F3 is reserved for distinct printed items; these are a folio paired with a non-item heading/header. Ownership remains DISTINCT_ITEMS."
+    },
+    {
+      "observationId": "asm-1eb71c98aa77c7bd0cc4",
+      "field": "ownership_and_primary_family",
+      "reviewerValue": "DISTINCT_ITEMS / F2_INDEPENDENT_HEADING_NON_ITEM",
+      "secondReviewerValue": "SAME_ITEM / F6_INSUFFICIENT_PRIMITIVE_RELATION",
+      "finalValue": "SAME_ITEM / F6_INSUFFICIENT_PRIMITIVE_RELATION",
+      "secondaryFactors": [
+        "F4_COLUMN_ATTRIBUTION_FAILURE"
+      ],
+      "reason": "Independent coordinator and second reviewer inspection of rendered NDL physical page 2 shows 国(国)13 in the TOC table ページ column aligned on the same final row as 令和６年度概算要求定員表 in 区分. The first review conflated this printed TOC page reference with the separate physical folio at the upper page margin. The two source lines are distinct Raw Text primitives, but visual row alignment establishes the same printed item. Column side remains unknown in the frozen primitive data."
+    }
+  ]
+}
