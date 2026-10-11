@@ -1,0 +1,121 @@
+{
+  "status": "POST_HOC_DEVELOPMENT_REGRESSION",
+  "contract": "No page-local boundary: preserve unsplit mixed lines as unresolved; do not emit a whole-line primitive. Visual notes are exploratory source evidence, not frozen GT.",
+  "sourcePdfSha256": "6cc573bf64747e4ceb41597cc83e371f5d8144a02e3e9033501597d64cfbbc5e",
+  "sourcePageTextSha256": "3e398e82d5ac63d33117036443b58502efbc394e62e1d83a5b0233ebe10eab98",
+  "cases": [
+    {
+      "caseId": "MOF-P2-L7",
+      "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+      "physicalPage": 2,
+      "pdfSha256": "6cc573bf64747e4ceb41597cc83e371f5d8144a02e3e9033501597d64cfbbc5e",
+      "pageTextSha256": "3e398e82d5ac63d33117036443b58502efbc394e62e1d83a5b0233ebe10eab98",
+      "rawLineIndex": 7,
+      "lineStartUtf16": 354,
+      "rawText": "     令和６年度歳出概算要求額総表                                1   23   41‑20 公債等に係る償還及び発行に関する諸費財源の国債整理基金特別会計へ繰入れ     94",
+      "visualReview": "CONFIRMED_MIXED",
+      "visualObservation": "CONFIRMED_MIXED: left printed total-table entry ending in page 1 and right request 23 item ending in page 94 share the same visual row band.",
+      "expectedNoBoundaryPrimitive": null,
+      "expectedStatus": "NO_PAGE_LOCAL_BOUNDARY"
+    },
+    {
+      "caseId": "MOF-P2-L62",
+      "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+      "physicalPage": 2,
+      "pdfSha256": "6cc573bf64747e4ceb41597cc83e371f5d8144a02e3e9033501597d64cfbbc5e",
+      "pageTextSha256": "3e398e82d5ac63d33117036443b58502efbc394e62e1d83a5b0233ebe10eab98",
+      "rawLineIndex": 62,
+      "lineStartUtf16": 4801,
+      "rawText": "           な経費                                         41   01‑35 防衛力強化のための資金へ繰入れに必要な経費                  128",
+      "visualReview": "CONFIRMED_MIXED",
+      "visualObservation": "CONFIRMED_MIXED: left continuation of request 18 and right request 41 item share the same visual row band.",
+      "expectedNoBoundaryPrimitive": null,
+      "expectedStatus": "NO_PAGE_LOCAL_BOUNDARY"
+    },
+    {
+      "caseId": "MOF-P2-L63",
+      "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+      "physicalPage": 2,
+      "pdfSha256": "6cc573bf64747e4ceb41597cc83e371f5d8144a02e3e9033501597d64cfbbc5e",
+      "pageTextSha256": "3e398e82d5ac63d33117036443b58502efbc394e62e1d83a5b0233ebe10eab98",
+      "rawLineIndex": 63,
+      "lineStartUtf16": 4910,
+      "rawText": "19   29‑20 年金特例公債償還財源の国債整理基金特別会計へ繰入れに必要な経費        90          （項） 400 新型コロナウイルス感染症及び原油価格・物価高騰対策予備費       129",
+      "visualReview": "CONFIRMED_MIXED",
+      "visualObservation": "CONFIRMED_MIXED: left request 19 item and right （項）400 item share the same visual row band.",
+      "expectedNoBoundaryPrimitive": null,
+      "expectedStatus": "NO_PAGE_LOCAL_BOUNDARY"
+    },
+    {
+      "caseId": "MOF-P2-L64",
+      "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+      "physicalPage": 2,
+      "pdfSha256": "6cc573bf64747e4ceb41597cc83e371f5d8144a02e3e9033501597d64cfbbc5e",
+      "pageTextSha256": "3e398e82d5ac63d33117036443b58502efbc394e62e1d83a5b0233ebe10eab98",
+      "rawLineIndex": 64,
+      "lineStartUtf16": 5019,
+      "rawText": "20   31‑20 その他公債等償還財源の国債整理基金特別会計へ繰入れに必要な経費        91   42   01‑94 新型コロナウイルス感染症及び原油価格・物価高騰対策予備費           129",
+      "visualReview": "CONFIRMED_MIXED",
+      "visualObservation": "CONFIRMED_MIXED: left request 20 item and right request 42 item share the same visual row band.",
+      "expectedNoBoundaryPrimitive": null,
+      "expectedStatus": "NO_PAGE_LOCAL_BOUNDARY"
+    },
+    {
+      "caseId": "MOF-P2-L65",
+      "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+      "physicalPage": 2,
+      "pdfSha256": "6cc573bf64747e4ceb41597cc83e371f5d8144a02e3e9033501597d64cfbbc5e",
+      "pageTextSha256": "3e398e82d5ac63d33117036443b58502efbc394e62e1d83a5b0233ebe10eab98",
+      "rawLineIndex": 65,
+      "lineStartUtf16": 5128,
+      "rawText": "21   36‑20 公債利子等の支払財源の国債整理基金特別会計へ繰入れに必要な経費        92          （項） 405 ウクライナ情勢経済緊急対応予備費                   130",
+      "visualReview": "CONFIRMED_MIXED",
+      "visualObservation": "CONFIRMED_MIXED: left request 21 item and right （項）405 item share the same visual row band.",
+      "expectedNoBoundaryPrimitive": null,
+      "expectedStatus": "NO_PAGE_LOCAL_BOUNDARY"
+    },
+    {
+      "caseId": "MOF-P2-L66",
+      "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+      "physicalPage": 2,
+      "pdfSha256": "6cc573bf64747e4ceb41597cc83e371f5d8144a02e3e9033501597d64cfbbc5e",
+      "pageTextSha256": "3e398e82d5ac63d33117036443b58502efbc394e62e1d83a5b0233ebe10eab98",
+      "rawLineIndex": 66,
+      "lineStartUtf16": 5237,
+      "rawText": "22   39‑20 年金特例公債利子の支払財源の国債整理基金特別会計へ繰入れに必要な経費     93   43   01‑93 ウクライナ情勢経済緊急対応予備費                       130",
+      "visualReview": "CONFIRMED_MIXED",
+      "visualObservation": "CONFIRMED_MIXED: left request 22 item and right request 43 item share the same visual row band.",
+      "expectedNoBoundaryPrimitive": null,
+      "expectedStatus": "NO_PAGE_LOCAL_BOUNDARY"
+    }
+  ],
+  "controls": [
+    {
+      "caseId": "R4-SINGLE-CODED-ITEM",
+      "origin": "SYNTHETIC",
+      "rawText": "4    05-03 項目名                         88",
+      "headerLines": [],
+      "expectedKind": "title_page",
+      "expectedTitle": "4    05-03 項目名",
+      "expectedPage": "88"
+    },
+    {
+      "caseId": "R5-PAGE-ONLY",
+      "origin": "FROZEN_D6_REFERENCE",
+      "expectedKind": "page_only",
+      "expectedPage": "145",
+      "expectedSide": "unknown"
+    },
+    {
+      "caseId": "R5-TITLE-ONLY",
+      "origin": "FROZEN_D7_REFERENCE",
+      "expectedKind": "title_only_candidate",
+      "expectedSide": "unknown"
+    },
+    {
+      "caseId": "R6-NDL",
+      "origin": "FROZEN_D9_REFERENCE",
+      "expected": "Keep 国 1 and 国(国)13 as separate unknown-side observations; do not assemble them."
+    }
+  ]
+}

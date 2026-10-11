@@ -2,6 +2,8 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261011_Budget_Request_TOC_Column_Primitives_v1.md](20261011_Budget_Request_TOC_Column_Primitives_v1.md) — Simple Primitives v1 freeze rev2でD12/D9を整合後、独立PoCを実装。D1–D12/D12-N pass、TOC82ページ探索（formal held-outではない）
+
 - [20261011_Budget_Request_Plain_Text_CSV_v0.md](20261011_Budget_Request_Plain_Text_CSV_v0.md) — PR #415のTXT→Cover 2表/TOC 3列CSV v0。Cover 69ページ・TOC既定development 6ページを検証し、marker/独立数字行・左→右順序・未解決監査を追加
 - [20261011_Budget_Request_Plain_Text_Corpus.md](20261011_Budget_Request_Plain_Text_Corpus.md) — FY2024概算要求PDFのbyte-preserving plain-text producerを追加。将来のCSV分析向けの共存入力で、既存JSONL producer/consumerは維持しcaller migrationは対象外
 - [20261008_2023_Budget_Request_TOC_A_Layer_Header_Zone_Right_Row_H1_Preregistration.md](20261008_2023_Budget_Request_TOC_A_Layer_Header_Zone_Right_Row_H1_Preregistration.md) — #397の単一familyへの修正仮説H1(ASSEMBLED_SPLITのheader zone行でE以右がrow-start tokenで始まる場合のみLEFT/RIGHT分割)を事前固定。token無しfragmentは対象外・#396の23pageはpost-hoc専用 → READY_FOR_HEADER_ZONE_RIGHT_ROW_H1_DEVELOPMENT_IMPLEMENTATION

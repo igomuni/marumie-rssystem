@@ -1,0 +1,345 @@
+{
+  "schema": "budget-request-toc-column-primitives-development-fixture/v1",
+  "fixtureId": "fy2024-toc-column-primitives-v1-r2-d1-d12n",
+  "status": "frozen",
+  "scope": "manually selected source observations plus synthetic boundary-safety inputs; no parser output",
+  "offsetUnit": "UTF-16 code units; offsets are zero-based",
+  "regexContract": {
+    "HEADER_REGEX": "^要求[ \\t]+区[ \\t]+分[ \\t]+(?<page>ページ)[ \\t]+(?<secondRequest>要求)",
+    "PAGE_REF_REGEX": "^(?:[0-9]{1,4}|エ[ \\t]+[0-9]{1,4}|電[ \\t]+[0-9]{1,4}|原[ \\t]+[0-9]{1,4}|国[ \\t]+[0-9]{1,4}|国\\(国\\)[ \\t]?[0-9]{1,4})$",
+    "PAGE_ONLY_REGEX": "^[ \\t]*(?:[0-9]{1,4}|エ[ \\t]+[0-9]{1,4}|電[ \\t]+[0-9]{1,4}|原[ \\t]+[0-9]{1,4}|国[ \\t]+[0-9]{1,4}|国\\(国\\)[ \\t]?[0-9]{1,4})[ \\t]*$",
+    "TITLE_PAGE_REGEX": "^(.*?)(?:[ \\t]{2,}|[.・…･·。]{2,})([0-9]{1,4}|エ[ \\t]+[0-9]{1,4}|電[ \\t]+[0-9]{1,4}|原[ \\t]+[0-9]{1,4}|国[ \\t]+[0-9]{1,4}|国\\(国\\)[ \\t]?[0-9]{1,4})$",
+    "UNKNOWN_PAGE_TAIL_REGEX": "^(.*?)(?:[ \\t]{2,}|[.・…･·。]{2,})([^ \\t]*[0-9]{5,}|[^ \\t]+[ \\t]+[0-9]+)$",
+    "KNOWN_PAGE_REF_SPAN_REGEX": "(?<![^ \\t])(?:[0-9]{1,4}|エ[ \\t]+[0-9]{1,4}|電[ \\t]+[0-9]{1,4}|原[ \\t]+[0-9]{1,4}|国[ \\t]+[0-9]{1,4}|国\\(国\\)[ \\t]?[0-9]{1,4})(?![^ \\t])",
+    "NONBLANK_BOUNDARY_CUT_REGEX": "(?<=\\S)(?=\\S)",
+    "TITLE_PAGE_SEPARATOR_REGEX": "(?:[ \\t]{2,}|[.・…･·。]{2,})",
+    "TITLE_EDGE_WS_REGEX": "^[ \\t]+|[ \\t]+$"
+  },
+  "cases": [
+    {
+      "caseId": "D1",
+      "origin": "SYNTHETIC",
+      "purpose": "synthetic single-line title_page with request-like prefix and printed page",
+      "headerLine": "",
+      "candidateBoundaryUtf16Column": 61,
+      "rawLineIndex": 0,
+      "lineStartUtf16": 0,
+      "rawText": "4    05-03 Synthetic request title                         88",
+      "headerLines": []
+    },
+    {
+      "caseId": "D2",
+      "origin": "SYNTHETIC",
+      "purpose": "synthetic single-line title_page without a request number",
+      "headerLine": "",
+      "candidateBoundaryUtf16Column": 53,
+      "rawLineIndex": 0,
+      "lineStartUtf16": 0,
+      "rawText": "       Synthetic title page                         7",
+      "headerLines": []
+    },
+    {
+      "caseId": "D3",
+      "origin": "SYNTHETIC",
+      "purpose": "same raw line yields two distinct primitives",
+      "headerLine": "要求 区 分 ページ                                          要求",
+      "candidateBoundaryUtf16Column": 31,
+      "rawLineIndex": 0,
+      "lineStartUtf16": 0,
+      "rawText": "Left synthetic title         88             Right synthetic title           143"
+    },
+    {
+      "caseId": "D4",
+      "origin": "SOURCE_DERIVED",
+      "purpose": "CFA p3 physical lines 19 and 21 demonstrate separate left/right title_page primitives (88/143 and 88/145)",
+      "source": {
+        "localPdfPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+        "pdfSha256": "49a975a4436da6d53319a32ca745e2d110c42839c441c6302a7361ed9a62e4cc",
+        "physicalPage": 3,
+        "textSha256": "f8e7a018e95cda9b5ba2053cd3aa1871110990369b74c88a92138f39ff36529d",
+        "headerLineIndex": 4,
+        "headerLine": "要求                  区                  分         ページ 要求                     区           分   ページ",
+        "candidateBoundaryUtf16Column": 52,
+        "boundaryCalculation": {
+          "pageMarkerEnd": 52,
+          "secondRequestStart": 53,
+          "floorMidpoint": 52
+        },
+        "rawLines": [
+          {
+            "localPdfPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+            "pdfSha256": "49a975a4436da6d53319a32ca745e2d110c42839c441c6302a7361ed9a62e4cc",
+            "physicalPage": 3,
+            "textSha256": "f8e7a018e95cda9b5ba2053cd3aa1871110990369b74c88a92138f39ff36529d",
+            "headerLineIndex": 4,
+            "headerLine": "要求                  区                  分         ページ 要求                     区           分   ページ",
+            "candidateBoundaryUtf16Column": 52,
+            "boundaryCalculation": {
+              "pageMarkerEnd": 52,
+              "secondRequestStart": 53,
+              "floorMidpoint": 52
+            },
+            "rawLineIndex": 19,
+            "lineStartUtf16": 1118,
+            "rawText": "4    05‑03 未熟児養育医療等に必要な経費                         88    24   05‑05 大学等における修学の支援に必要な経費        143"
+          },
+          {
+            "localPdfPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+            "pdfSha256": "49a975a4436da6d53319a32ca745e2d110c42839c441c6302a7361ed9a62e4cc",
+            "physicalPage": 3,
+            "textSha256": "f8e7a018e95cda9b5ba2053cd3aa1871110990369b74c88a92138f39ff36529d",
+            "headerLineIndex": 4,
+            "headerLine": "要求                  区                  分         ページ 要求                     区           分   ページ",
+            "candidateBoundaryUtf16Column": 52,
+            "boundaryCalculation": {
+              "pageMarkerEnd": 52,
+              "secondRequestStart": 53,
+              "floorMidpoint": 52
+            },
+            "rawLineIndex": 21,
+            "lineStartUtf16": 1216,
+            "rawText": "5    10‑06 母子保健衛生対策に必要な経費                         88         令和６年度概算要求定員表                    145"
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "D5",
+      "origin": "SOURCE_DERIVED",
+      "purpose": "CFA p3 printed page 94 followed by separate title_only_candidate 必要な経費; physical page differs from printed reference",
+      "source": {
+        "localPdfPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+        "pdfSha256": "49a975a4436da6d53319a32ca745e2d110c42839c441c6302a7361ed9a62e4cc",
+        "physicalPage": 3,
+        "textSha256": "f8e7a018e95cda9b5ba2053cd3aa1871110990369b74c88a92138f39ff36529d",
+        "candidateBoundaryUtf16Column": 52,
+        "sourceLines": [
+          {
+            "rawLineIndex": 28,
+            "lineStartUtf16": 1579,
+            "rawText": "8    01‑05 子ども・子育て支援の財源の年金特別会計子ども・子育て支援勘定へ繰入れに    94",
+            "slicesUtf16": {
+              "cutUtf16Column": 52,
+              "left": {
+                "requestedRange": "[0,52)",
+                "sourceRange": [
+                  0,
+                  52
+                ],
+                "rawText": "8    01‑05 子ども・子育て支援の財源の年金特別会計子ども・子育て支援勘定へ繰入れに    94"
+              },
+              "right": {
+                "requestedRange": "[52,end)",
+                "sourceRange": [
+                  52,
+                  52
+                ],
+                "rawText": ""
+              }
+            }
+          },
+          {
+            "rawLineIndex": 29,
+            "lineStartUtf16": 1632,
+            "rawText": "           必要な経費",
+            "slicesUtf16": {
+              "cutUtf16Column": 52,
+              "left": {
+                "requestedRange": "[0,52)",
+                "sourceRange": [
+                  0,
+                  16
+                ],
+                "rawText": "           必要な経費"
+              },
+              "right": {
+                "requestedRange": "[52,end)",
+                "sourceRange": [
+                  16,
+                  16
+                ],
+                "rawText": ""
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "D6",
+      "origin": "SYNTHETIC",
+      "purpose": "synthetic standalone page_only",
+      "headerLine": "",
+      "candidateBoundaryUtf16Column": 8,
+      "rawLineIndex": 0,
+      "lineStartUtf16": 0,
+      "rawText": "      17",
+      "headerLines": []
+    },
+    {
+      "caseId": "D7",
+      "origin": "SYNTHETIC",
+      "purpose": "synthetic title_only_candidate",
+      "headerLine": "",
+      "candidateBoundaryUtf16Column": 35,
+      "rawLineIndex": 0,
+      "lineStartUtf16": 0,
+      "rawText": "       Title without a printed page",
+      "headerLines": []
+    },
+    {
+      "caseId": "D8",
+      "origin": "SOURCE_DERIVED",
+      "purpose": "METI source examples for エ 9, 電 1, 原 1; preserve both resulting side segments on each mixed line",
+      "source": {
+        "examples": [
+          {
+            "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneju_o.pdf",
+            "pdfSha256": "2c1d6cb494a41dbb8d03a63099cc4154f31d70b966c7510bc6fce3501a70e7b6",
+            "physicalPage": 3,
+            "textSha256": "0bf62775ffaf94be47956ba6760d713f34a6a8b22e47d53f962df182c250516d",
+            "headerLineIndex": 2,
+            "headerLine": "要求                    区                   分      ページ 要求                     区                    分      ページ",
+            "candidateBoundaryUtf16Column": 52,
+            "boundaryCalculation": {
+              "pageMarkerEnd": 52,
+              "secondRequestStart": 53,
+              "floorMidpoint": 52
+            },
+            "rawLineIndex": 5,
+            "lineStartUtf16": 268,
+            "rawText": "     令和６年度歳出概算要求額総表                                1          （項） 130 予備費                               エ 9"
+          },
+          {
+            "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneden_o.pdf",
+            "pdfSha256": "d9ca160f33481511b3a484853f105375895f765a01535ed6bcae4b348eba6383",
+            "physicalPage": 3,
+            "textSha256": "31f3afdc32944db085c71a08e46e66219e5690aa7a2d5ce957e5f212c741d6a5",
+            "headerLineIndex": 2,
+            "headerLine": "要求                    区                 分     ページ 要求    区       分   ページ",
+            "candidateBoundaryUtf16Column": 49,
+            "boundaryCalculation": {
+              "pageMarkerEnd": 49,
+              "secondRequestStart": 50,
+              "floorMidpoint": 49
+            },
+            "rawLineIndex": 8,
+            "lineStartUtf16": 379,
+            "rawText": "      （勘定） 2     電源開発促進勘定                     電 1"
+          },
+          {
+            "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/enegen_o.pdf",
+            "pdfSha256": "fbbeb3df06555205ae839e9849f460d3017d4b95cf1bfd3bf2aacb389a67e70f",
+            "physicalPage": 3,
+            "textSha256": "20fd016f275968d08c7f7c01dd913f37d7a5c7e9fdf4b1b977d92760f4f0edcc",
+            "headerLineIndex": 2,
+            "headerLine": "要求                  区                     分   ページ 要求    区       分   ページ",
+            "candidateBoundaryUtf16Column": 49,
+            "boundaryCalculation": {
+              "pageMarkerEnd": 49,
+              "secondRequestStart": 50,
+              "floorMidpoint": 49
+            },
+            "rawLineIndex": 8,
+            "lineStartUtf16": 379,
+            "rawText": "      （勘定） 3    原子力損害賠償支援勘定                   原 1"
+          }
+        ],
+        "segmentAccounting": {
+          "eneju_o": [
+            "left title_page: 1",
+            "right title_page: エ 9"
+          ],
+          "eneden_o": [
+            "left title_page: 電 1",
+            "right slice empty at cut 49"
+          ],
+          "enegen_o": [
+            "left title_page: 原 1",
+            "right slice empty at cut 49"
+          ]
+        }
+      },
+      "assertions": [
+        "all segments on every listed line are accounted for",
+        "exact spellings エ 9, 電 1, 原 1 are retained"
+      ]
+    },
+    {
+      "caseId": "D9",
+      "origin": "SOURCE_DERIVED",
+      "purpose": "NDL p2 source spellings 国 1 and 国(国)13 remain distinct",
+      "source": {
+        "examples": [
+          {
+            "localPdfPath": "data/download/ndl.go.jp/jp/aboutus/outline/r06_budgetrequest.pdf",
+            "pdfSha256": "cb0442175d186f3041d6b3df93c46139760920b2c0162ae5a61c3abedf0a60e5",
+            "physicalPage": 2,
+            "textSha256": "d6685ff95fd2c30f2ae9022aa80d92ff3c119fd5cf42d45d777ed4ef48366b6a",
+            "boundaryStatus": "NO_PAGE_LOCAL_BOUNDARY",
+            "rawLineIndex": 7,
+            "lineStartUtf16": 289,
+            "rawText": "     令和６年度歳出概算要求額総表                           国 1"
+          },
+          {
+            "localPdfPath": "data/download/ndl.go.jp/jp/aboutus/outline/r06_budgetrequest.pdf",
+            "pdfSha256": "cb0442175d186f3041d6b3df93c46139760920b2c0162ae5a61c3abedf0a60e5",
+            "physicalPage": 2,
+            "textSha256": "d6685ff95fd2c30f2ae9022aa80d92ff3c119fd5cf42d45d777ed4ef48366b6a",
+            "boundaryStatus": "NO_PAGE_LOCAL_BOUNDARY",
+            "rawLineIndex": 25,
+            "lineStartUtf16": 759,
+            "rawText": "                                             国(国)13"
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "D10",
+      "origin": "SYNTHETIC",
+      "purpose": "candidate boundary crosses a known page-reference token; preserve whole line unresolved",
+      "headerLine": "要求 区 分 ページ 要求",
+      "candidateBoundaryUtf16Column": 10,
+      "rawLineIndex": 0,
+      "lineStartUtf16": 0,
+      "rawText": "LLLLLLL 143 right-side synthetic text",
+      "cutThroughSpanUtf16": [
+        8,
+        11
+      ]
+    },
+    {
+      "caseId": "D11",
+      "origin": "SYNTHETIC",
+      "purpose": "synthetic page without a page-local header; unknown side and no split",
+      "headerLine": "",
+      "candidateBoundaryUtf16Column": null,
+      "rawLineIndex": 0,
+      "lineStartUtf16": 0,
+      "rawText": "left title      7      right title",
+      "headerLines": []
+    },
+    {
+      "caseId": "D12",
+      "origin": "SYNTHETIC",
+      "purpose": "synthetic positive left/right contamination guard with frozen two-space title/page separators",
+      "headerLine": "要求 区 分 ページ    要求",
+      "candidateBoundaryUtf16Column": 12,
+      "rawLineIndex": 0,
+      "lineStartUtf16": 0,
+      "rawText": "LEFT      88             RIGHT  145"
+    },
+    {
+      "caseId": "D12-N",
+      "origin": "SYNTHETIC",
+      "purpose": "negative separator case: one space does not satisfy frozen TITLE_PAGE_REGEX",
+      "headerLine": "要求 区 分 ページ                    要求",
+      "candidateBoundaryUtf16Column": 20,
+      "rawLineIndex": 1,
+      "lineStartUtf16": 0,
+      "rawText": "LEFT 88             RIGHT 145"
+    }
+  ],
+  "freezeRevision": 2,
+  "supersedesFreezeCommit": "a792b5d0d682cdc76099dc8b709967788265c898"
+}

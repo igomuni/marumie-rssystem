@@ -1,0 +1,672 @@
+{
+  "schema": "budget-request-toc-column-primitives-development-expected/v1",
+  "fixtureId": "fy2024-toc-column-primitives-v1-d1-d12",
+  "authorship": "manually specified from fixture literals and independently checked source TXT pages before any implementation",
+  "status": "frozen",
+  "regexContract": {
+    "HEADER_REGEX": "^要求[ \\t]+区[ \\t]+分[ \\t]+(?<page>ページ)[ \\t]+(?<secondRequest>要求)",
+    "PAGE_REF_REGEX": "^(?:[0-9]{1,4}|エ[ \\t]+[0-9]{1,4}|電[ \\t]+[0-9]{1,4}|原[ \\t]+[0-9]{1,4}|国[ \\t]+[0-9]{1,4}|国\\(国\\)[ \\t]?[0-9]{1,4})$",
+    "PAGE_ONLY_REGEX": "^[ \\t]*(?:[0-9]{1,4}|エ[ \\t]+[0-9]{1,4}|電[ \\t]+[0-9]{1,4}|原[ \\t]+[0-9]{1,4}|国[ \\t]+[0-9]{1,4}|国\\(国\\)[ \\t]?[0-9]{1,4})[ \\t]*$",
+    "TITLE_PAGE_REGEX": "^(.*?)(?:[ \\t]{2,}|[.・…･·。]{2,})([0-9]{1,4}|エ[ \\t]+[0-9]{1,4}|電[ \\t]+[0-9]{1,4}|原[ \\t]+[0-9]{1,4}|国[ \\t]+[0-9]{1,4}|国\\(国\\)[ \\t]?[0-9]{1,4})$",
+    "UNKNOWN_PAGE_TAIL_REGEX": "^(.*?)(?:[ \\t]{2,}|[.・…･·。]{2,})([^ \\t]*[0-9]{5,}|[^ \\t]+[ \\t]+[0-9]+)$",
+    "KNOWN_PAGE_REF_SPAN_REGEX": "(?<![^ \\t])(?:[0-9]{1,4}|エ[ \\t]+[0-9]{1,4}|電[ \\t]+[0-9]{1,4}|原[ \\t]+[0-9]{1,4}|国[ \\t]+[0-9]{1,4}|国\\(国\\)[ \\t]?[0-9]{1,4})(?![^ \\t])",
+    "NONBLANK_BOUNDARY_CUT_REGEX": "(?<=\\S)(?=\\S)",
+    "TITLE_PAGE_SEPARATOR_REGEX": "(?:[ \\t]{2,}|[.・…･·。]{2,})",
+    "TITLE_EDGE_WS_REGEX": "^[ \\t]+|[ \\t]+$"
+  },
+  "boundaryContract": {
+    "candidateFormula": "floor((first matched ページ end + first 要求 start after that ページ) / 2)",
+    "measurement": "UTF-16 column from the start of the header line; reuse as a column position in body lines",
+    "noPageHeader": "NO_PAGE_LOCAL_BOUNDARY; preserve line unsplit and side null",
+    "cutThroughNonblankOrKnownPageRef": "UNRESOLVED_BOUNDARY_CUT; preserve raw source line and emit no side-assigned primitives",
+    "safeCut": "left slice [0, cut), right slice [cut, line end); all offsets point into the unchanged source line"
+  },
+  "results": [
+    {
+      "caseId": "D1",
+      "lineStatus": "NO_PAGE_LOCAL_BOUNDARY",
+      "side": null,
+      "primitive": {
+        "kind": "title_page",
+        "side": "unknown",
+        "titleText": "4    05-03 Synthetic request title",
+        "pageRef": "88",
+        "rawText": "4    05-03 Synthetic request title                         88"
+      }
+    },
+    {
+      "caseId": "D2",
+      "lineStatus": "NO_PAGE_LOCAL_BOUNDARY",
+      "side": null,
+      "primitive": {
+        "kind": "title_page",
+        "side": "unknown",
+        "titleText": "Synthetic title page",
+        "pageRef": "7",
+        "rawText": "       Synthetic title page                         7"
+      }
+    },
+    {
+      "caseId": "D3",
+      "lineStatus": "SPLIT_AT_HEADER_BOUNDARY",
+      "boundaryUtf16Column": 31,
+      "sourceLinePreserved": true,
+      "segments": [
+        {
+          "side": "left",
+          "sourceRangeUtf16": [
+            0,
+            31
+          ],
+          "rawText": "Left synthetic title         88",
+          "primitive": {
+            "kind": "title_page",
+            "titleText": "Left synthetic title",
+            "pageRef": "88",
+            "rawText": "Left synthetic title         88"
+          }
+        },
+        {
+          "side": "right",
+          "sourceRangeUtf16": [
+            31,
+            79
+          ],
+          "rawText": "             Right synthetic title           143",
+          "primitive": {
+            "kind": "title_page",
+            "titleText": "Right synthetic title",
+            "pageRef": "143",
+            "rawText": "             Right synthetic title           143"
+          }
+        }
+      ],
+      "assertions": [
+        "two distinct primitives share one original line",
+        "no source slice or page reference is copied across sides"
+      ]
+    },
+    {
+      "caseId": "D4",
+      "lineStatus": "SPLIT_AT_HEADER_BOUNDARY",
+      "boundaryUtf16Column": 52,
+      "primitives": [
+        {
+          "kind": "title_page",
+          "side": "left",
+          "titleText": "4    05‑03 未熟児養育医療等に必要な経費",
+          "pageRef": "88",
+          "rawText": "4    05‑03 未熟児養育医療等に必要な経費                         88",
+          "sourceLineIndex": 19,
+          "sourceLineStartUtf16": 1118
+        },
+        {
+          "kind": "title_page",
+          "side": "right",
+          "titleText": "24   05‑05 大学等における修学の支援に必要な経費",
+          "pageRef": "143",
+          "rawText": "    24   05‑05 大学等における修学の支援に必要な経費        143",
+          "sourceLineIndex": 19,
+          "sourceLineStartUtf16": 1118
+        },
+        {
+          "kind": "title_page",
+          "side": "left",
+          "titleText": "5    10‑06 母子保健衛生対策に必要な経費",
+          "pageRef": "88",
+          "rawText": "5    10‑06 母子保健衛生対策に必要な経費                         88",
+          "sourceLineIndex": 21,
+          "sourceLineStartUtf16": 1216
+        },
+        {
+          "kind": "title_page",
+          "side": "right",
+          "titleText": "令和６年度概算要求定員表",
+          "pageRef": "145",
+          "rawText": "         令和６年度概算要求定員表                    145",
+          "sourceLineIndex": 21,
+          "sourceLineStartUtf16": 1216
+        }
+      ],
+      "assertions": [
+        "CFA physical p3 line indices 19 and 21 retained",
+        "left and right records stay distinct with no leakage"
+      ]
+    },
+    {
+      "caseId": "D5",
+      "lineStatus": "SPLIT_AT_HEADER_BOUNDARY",
+      "boundaryUtf16Column": 52,
+      "primitives": [
+        {
+          "kind": "title_page",
+          "side": "left",
+          "pageRef": "94",
+          "rawText": "8    01‑05 子ども・子育て支援の財源の年金特別会計子ども・子育て支援勘定へ繰入れに    94",
+          "sourceLineIndex": 28,
+          "sourceLineStartUtf16": 1579
+        },
+        {
+          "kind": "title_only_candidate",
+          "side": "left",
+          "pageRef": null,
+          "rawText": "           必要な経費",
+          "sourceLineIndex": 29,
+          "sourceLineStartUtf16": 1632
+        }
+      ],
+      "assertions": [
+        "line 29 必要な経費 remains a separate title_only_candidate",
+        "94 is printed page reference on physical CFA page 3"
+      ],
+      "sourceLineSlicesUtf16": [
+        {
+          "sourceLineIndex": 28,
+          "rawLineLengthUtf16": 52,
+          "slices": [
+            {
+              "side": "left",
+              "sourceRangeUtf16": [
+                0,
+                52
+              ],
+              "rawText": "8    01‑05 子ども・子育て支援の財源の年金特別会計子ども・子育て支援勘定へ繰入れに    94",
+              "requestedRange": "[0,52)"
+            },
+            {
+              "side": "right",
+              "sourceRangeUtf16": [
+                52,
+                52
+              ],
+              "rawText": "",
+              "requestedRange": "[52,end)"
+            }
+          ],
+          "cutUtf16Column": 52
+        },
+        {
+          "sourceLineIndex": 29,
+          "rawLineLengthUtf16": 16,
+          "slices": [
+            {
+              "side": "left",
+              "sourceRangeUtf16": [
+                0,
+                16
+              ],
+              "rawText": "           必要な経費",
+              "requestedRange": "[0,52)"
+            },
+            {
+              "side": "right",
+              "sourceRangeUtf16": [
+                16,
+                16
+              ],
+              "rawText": "",
+              "requestedRange": "[52,end)"
+            }
+          ],
+          "cutUtf16Column": 52
+        }
+      ]
+    },
+    {
+      "caseId": "D6",
+      "lineStatus": "NO_PAGE_LOCAL_BOUNDARY",
+      "side": null,
+      "primitive": {
+        "kind": "page_only",
+        "side": "unknown",
+        "pageRef": "17",
+        "rawText": "      17"
+      }
+    },
+    {
+      "caseId": "D7",
+      "lineStatus": "NO_PAGE_LOCAL_BOUNDARY",
+      "side": null,
+      "primitive": {
+        "kind": "title_only_candidate",
+        "side": "unknown",
+        "titleText": "Title without a printed page",
+        "pageRef": null,
+        "rawText": "       Title without a printed page"
+      }
+    },
+    {
+      "caseId": "D8",
+      "lineStatus": "SPLIT_AT_HEADER_BOUNDARY",
+      "primitives": [
+        {
+          "kind": "title_page",
+          "side": "left",
+          "pageRef": "1",
+          "rawText": "     令和６年度歳出概算要求額総表                                1",
+          "sourceLineIndex": 5,
+          "sourceLineStartUtf16": 268
+        },
+        {
+          "kind": "title_page",
+          "side": "right",
+          "pageRef": "エ 9",
+          "rawText": "          （項） 130 予備費                               エ 9",
+          "sourceLineIndex": 5,
+          "sourceLineStartUtf16": 268
+        },
+        {
+          "kind": "title_page",
+          "side": "left",
+          "pageRef": "電 1",
+          "rawText": "      （勘定） 2     電源開発促進勘定                     電 1",
+          "sourceLineIndex": 8,
+          "sourceLineStartUtf16": 379
+        },
+        {
+          "kind": "title_page",
+          "side": "left",
+          "pageRef": "原 1",
+          "rawText": "      （勘定） 3    原子力損害賠償支援勘定                   原 1",
+          "sourceLineIndex": 8,
+          "sourceLineStartUtf16": 379
+        }
+      ],
+      "assertions": [
+        "all non-empty resulting segments are listed",
+        "the エ 9 mixed line includes the left-side printed page 1",
+        "the 電 1 and 原 1 examples each retain their left-side primitive",
+        "exact spelling is retained for every listed page reference"
+      ],
+      "sourceLines": [
+        {
+          "lineIndex": 5,
+          "lineStartUtf16": 268,
+          "boundaryUtf16Column": 52,
+          "segments": [
+            {
+              "side": "left",
+              "sourceRangeUtf16": [
+                0,
+                52
+              ],
+              "rawText": "     令和６年度歳出概算要求額総表                                1",
+              "primitive": {
+                "kind": "title_page",
+                "titleText": "令和６年度歳出概算要求額総表",
+                "pageRef": "1",
+                "rawText": "     令和６年度歳出概算要求額総表                                1"
+              }
+            },
+            {
+              "side": "right",
+              "sourceRangeUtf16": [
+                52,
+                107
+              ],
+              "rawText": "          （項） 130 予備費                               エ 9",
+              "primitive": {
+                "kind": "title_page",
+                "titleText": "（項） 130 予備費",
+                "pageRef": "エ 9",
+                "rawText": "          （項） 130 予備費                               エ 9"
+              }
+            }
+          ]
+        },
+        {
+          "lineIndex": 8,
+          "lineStartUtf16": 379,
+          "boundaryUtf16Column": 49,
+          "segments": [
+            {
+              "side": "left",
+              "sourceRangeUtf16": [
+                0,
+                49
+              ],
+              "rawText": "      （勘定） 2     電源開発促進勘定                     電 1",
+              "primitive": {
+                "kind": "title_page",
+                "titleText": "（勘定） 2     電源開発促進勘定",
+                "pageRef": "電 1",
+                "rawText": "      （勘定） 2     電源開発促進勘定                     電 1"
+              }
+            },
+            {
+              "side": "right",
+              "sourceRangeUtf16": [
+                49,
+                49
+              ],
+              "rawText": "",
+              "primitive": null
+            }
+          ]
+        },
+        {
+          "lineIndex": 8,
+          "lineStartUtf16": 379,
+          "boundaryUtf16Column": 49,
+          "segments": [
+            {
+              "side": "left",
+              "sourceRangeUtf16": [
+                0,
+                49
+              ],
+              "rawText": "      （勘定） 3    原子力損害賠償支援勘定                   原 1",
+              "primitive": {
+                "kind": "title_page",
+                "titleText": "（勘定） 3    原子力損害賠償支援勘定",
+                "pageRef": "原 1",
+                "rawText": "      （勘定） 3    原子力損害賠償支援勘定                   原 1"
+              }
+            },
+            {
+              "side": "right",
+              "sourceRangeUtf16": [
+                49,
+                49
+              ],
+              "rawText": "",
+              "primitive": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "D9",
+      "lineStatus": "NO_PAGE_LOCAL_BOUNDARY",
+      "side": null,
+      "primitives": [
+        {
+          "kind": "title_page",
+          "pageRef": "国 1",
+          "rawText": "     令和６年度歳出概算要求額総表                           国 1",
+          "sourceLineIndex": 7,
+          "sourceLineStartUtf16": 289,
+          "side": "unknown"
+        },
+        {
+          "kind": "page_only",
+          "pageRef": "国(国)13",
+          "rawText": "                                             国(国)13",
+          "sourceLineIndex": 25,
+          "sourceLineStartUtf16": 759,
+          "side": "unknown"
+        }
+      ],
+      "assertions": [
+        "国 1 and 国(国)13 remain distinct spellings"
+      ]
+    },
+    {
+      "caseId": "D10",
+      "lineStatus": "UNRESOLVED_BOUNDARY_CUT",
+      "boundaryUtf16Column": 10,
+      "sideAssignedPrimitives": [],
+      "preservedRawLine": "LLLLLLL 143 right-side synthetic text",
+      "cutEvidence": {
+        "knownPageRef": "143",
+        "lineRelativeSpanUtf16": [
+          8,
+          11
+        ],
+        "cutFallsInsideSpan": true
+      }
+    },
+    {
+      "caseId": "D11",
+      "lineStatus": "NO_PAGE_LOCAL_BOUNDARY",
+      "boundaryUtf16Column": null,
+      "side": null,
+      "sideAssignedPrimitives": [],
+      "preservedRawLine": "left title      7      right title",
+      "assertions": [
+        "no header means unknown side and no split"
+      ]
+    },
+    {
+      "caseId": "D12",
+      "lineStatus": "SPLIT_AT_HEADER_BOUNDARY",
+      "boundaryUtf16Column": 12,
+      "sourceLinePreserved": true,
+      "segments": [
+        {
+          "side": "left",
+          "sourceRangeUtf16": [
+            0,
+            12
+          ],
+          "rawText": "LEFT      88",
+          "primitive": {
+            "kind": "title_page",
+            "titleText": "LEFT",
+            "pageRef": "88",
+            "rawText": "LEFT      88"
+          }
+        },
+        {
+          "side": "right",
+          "sourceRangeUtf16": [
+            12,
+            35
+          ],
+          "rawText": "             RIGHT  145",
+          "primitive": {
+            "kind": "title_page",
+            "titleText": "RIGHT",
+            "pageRef": "145",
+            "rawText": "             RIGHT  145"
+          }
+        }
+      ],
+      "assertions": [
+        "both segments independently match frozen TITLE_PAGE_REGEX",
+        "left contains no RIGHT or 145",
+        "right contains no LEFT or 88",
+        "boundary 12 follows the left page token and lies in the horizontal gap"
+      ]
+    },
+    {
+      "caseId": "D12-N",
+      "lineStatus": "SPLIT_AT_HEADER_BOUNDARY",
+      "boundaryUtf16Column": 20,
+      "sourceLinePreserved": true,
+      "segments": [
+        {
+          "side": "left",
+          "sourceRangeUtf16": [
+            0,
+            20
+          ],
+          "rawText": "LEFT 88             ",
+          "primitive": {
+            "kind": "title_only_candidate",
+            "titleText": "LEFT 88",
+            "pageRef": null,
+            "rawText": "LEFT 88             "
+          }
+        },
+        {
+          "side": "right",
+          "sourceRangeUtf16": [
+            20,
+            29
+          ],
+          "rawText": "RIGHT 145",
+          "primitive": {
+            "kind": "title_only_candidate",
+            "titleText": "RIGHT 145",
+            "pageRef": null,
+            "rawText": "RIGHT 145"
+          }
+        }
+      ],
+      "assertions": [
+        "one-space title/page separators do not match frozen TITLE_PAGE_REGEX",
+        "neither segment emits a page-reference primitive"
+      ]
+    }
+  ],
+  "globalAssertions": [
+    "No case performs assembly or cross-line continuation.",
+    "CFA left/right outputs do not leak text or page references across columns.",
+    "Source-derived raw lines and offsets map to fixture source records and PDF/page hashes.",
+    "Every page reference retains its exact source spelling.",
+    "The ten inventory pages without a qualifying page-local header remain unknown-side and are never forced to split."
+  ],
+  "noHeaderInventoryPages": [
+    {
+      "sourcePdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+      "physicalPage": 2,
+      "classificationSource": "DIRECT",
+      "evidenceBasis": {
+        "rawTxtHeaderLines": [
+          "要求                                                   要求",
+          "番号                    区                分         ページ 番号                    区                     分      ページ"
+        ],
+        "finding": "Neither line matches HEADER_REGEX; the first is a split/continuation header with two 要求 tokens on one line and the column labels on the next line."
+      },
+      "inventoryTextSha256": "3e398e82d5ac63d33117036443b58502efbc394e62e1d83a5b0233ebe10eab98",
+      "inventoryPdfSha256": "6cc573bf64747e4ceb41597cc83e371f5d8144a02e3e9033501597d64cfbbc5e"
+    },
+    {
+      "sourcePdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024jisinn_2.pdf",
+      "physicalPage": 2,
+      "classificationSource": "DIRECT",
+      "evidenceBasis": {
+        "rawTxtHeaderLines": [
+          "要求                                          要求",
+          "番号                    区         分       ページ 番号    区       分   ページ"
+        ],
+        "finding": "Neither line matches HEADER_REGEX; the first is a split/continuation header with two 要求 tokens on one line and the column labels on the next line."
+      },
+      "inventoryTextSha256": "181e880cc766bfc5065ab14403c634ac3516c6690325f737216d5c4b6d9f96c2",
+      "inventoryPdfSha256": "9b7690b4b4b8818949abd386ccf2375c79f95dff70d38934624de5ffca5e0fe5"
+    },
+    {
+      "sourcePdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024kokusaiseirikikinn_2.pdf",
+      "physicalPage": 2,
+      "classificationSource": "DIRECT",
+      "evidenceBasis": {
+        "rawTxtHeaderLines": [
+          "要求                                                 要求",
+          "番号                  区                  分       ページ 番号   区    分   ページ"
+        ],
+        "finding": "Neither line matches HEADER_REGEX; the first is a split/continuation header with two 要求 tokens on one line and the column labels on the next line."
+      },
+      "inventoryTextSha256": "d2a267c8503707f6a3f4767a868b236d424c3ab090a4cf1817410de4a3aa5e35",
+      "inventoryPdfSha256": "bd0715a0585b04879c8796504d6841b91c612297299934d9298cb875cee55145"
+    },
+    {
+      "sourcePdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024gaitame_2.pdf",
+      "physicalPage": 2,
+      "classificationSource": "DIRECT",
+      "evidenceBasis": {
+        "rawTxtHeaderLines": [
+          "要求                                                要求",
+          "番号                    区                  分    ページ 番号    区       分   ページ"
+        ],
+        "finding": "Neither line matches HEADER_REGEX; the first is a split/continuation header with two 要求 tokens on one line and the column labels on the next line."
+      },
+      "inventoryTextSha256": "9cfc1f73e947b9067b14e119a6ba16c0f9c50a5aa7a3b16605a098fffe7bda77",
+      "inventoryPdfSha256": "4993fdf151fd6f0b5b568be1eb0cd1d42e6a1d34e88a1aeba48410ea80f9dfdf"
+    },
+    {
+      "sourcePdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024zaiyuu_2.pdf",
+      "physicalPage": 2,
+      "classificationSource": "DIRECT",
+      "evidenceBasis": {
+        "rawTxtHeaderLines": [
+          "要求                                                要求",
+          "番号                    区                 分     ページ 番号    区       分   ページ"
+        ],
+        "finding": "Neither line matches HEADER_REGEX; the first is a split/continuation header with two 要求 tokens on one line and the column labels on the next line."
+      },
+      "inventoryTextSha256": "21e8d687af8808b77b8980a7c2ebbf25ea9b6a13ea138f423a45da51c0489b55",
+      "inventoryPdfSha256": "f8ebf4dfcfbfa3b4ae0636554e2f3e5462190db71d406de0b87fc45f12d36485"
+    },
+    {
+      "sourcePdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tousi_2.pdf",
+      "physicalPage": 2,
+      "classificationSource": "DIRECT",
+      "evidenceBasis": {
+        "rawTxtHeaderLines": [
+          "要求                                                     要求",
+          "番号                      区              分           ページ 番号   区   分   ページ"
+        ],
+        "finding": "Neither line matches HEADER_REGEX; the first is a split/continuation header with two 要求 tokens on one line and the column labels on the next line."
+      },
+      "inventoryTextSha256": "0100c718b68ea8f73e8ca6cd69021311c8d7565ebd9cb6094adc07a41334ebdf",
+      "inventoryPdfSha256": "be6b5bd2f3c0480bd8a5e9292a304e4eb37bd342deb21eb28b2464dfb5741ede"
+    },
+    {
+      "sourcePdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tokuzai_2.pdf",
+      "physicalPage": 2,
+      "classificationSource": "DIRECT",
+      "evidenceBasis": {
+        "rawTxtHeaderLines": [
+          "要求                                               要求",
+          "番号                   区               分       ページ 番号    区       分   ページ"
+        ],
+        "finding": "Neither line matches HEADER_REGEX; the first is a split/continuation header with two 要求 tokens on one line and the column labels on the next line."
+      },
+      "inventoryTextSha256": "b65761f585f373ec60c0862c01bda41e7899b45a07ce4a28545cdb32db21a3b5",
+      "inventoryPdfSha256": "5744d1f8670a9a72d52e67771be8266e7d3d102ad35c102eb92b6c2eb5a84d75"
+    },
+    {
+      "sourcePdfPath": "data/download/ndl.go.jp/jp/aboutus/outline/r06_budgetrequest.pdf",
+      "physicalPage": 2,
+      "classificationSource": "DIRECT",
+      "evidenceBasis": {
+        "rawTxtHeaderLines": [
+          "要求                                               要求",
+          "番号                  区                分       ページ 番号    区       分   ページ"
+        ],
+        "finding": "Neither line matches HEADER_REGEX; the first is a split/continuation header with two 要求 tokens on one line and the column labels on the next line."
+      },
+      "inventoryTextSha256": "d6685ff95fd2c30f2ae9022aa80d92ff3c119fd5cf42d45d777ed4ef48366b6a",
+      "inventoryPdfSha256": "cb0442175d186f3041d6b3df93c46139760920b2c0162ae5a61c3abedf0a60e5"
+    },
+    {
+      "sourcePdfPath": "data/download/jcrc.go.jp/content/000001746.pdf",
+      "physicalPage": 3,
+      "classificationSource": "DIRECT",
+      "evidenceBasis": {
+        "rawTxtHeaderLines": [
+          "要求                                             要求",
+          "番号                  区              分       ページ 番号    区       分   ページ"
+        ],
+        "finding": "Neither line matches HEADER_REGEX; the first is a split/continuation header with two 要求 tokens on one line and the column labels on the next line."
+      },
+      "inventoryTextSha256": "5a5bab00d6161ccc360f07b6e1a3d02218f5141bdd7b54f1343d34cb2f4f0f6d",
+      "inventoryPdfSha256": "7632ed4048799b0f9b2001fef9a7ff94883885ff07e1145d55a4cd335f10583d"
+    },
+    {
+      "sourcePdfPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_02.pdf",
+      "physicalPage": 3,
+      "classificationSource": "DIRECT",
+      "evidenceBasis": {
+        "rawTxtHeaderLines": [
+          "要求                                         要求",
+          "番号                    区        分       ページ 番号    区       分   ページ"
+        ],
+        "finding": "Neither line matches HEADER_REGEX; the first is a split/continuation header with two 要求 tokens on one line and the column labels on the next line."
+      },
+      "inventoryTextSha256": "3a0770a4eb93e813e900f9b490c29f386e34eade1131f61fb90b6363d5c75691",
+      "inventoryPdfSha256": "69e170e83244c869cd1190d191b02b9d5cf4b5bca1388b57e20fa539bc08ca60"
+    }
+  ],
+  "noHeaderInventoryEnumeration": {
+    "inventoryPath": "tests/fixtures/budget-request-toc-column-structure/2024/machine-inventory.json",
+    "inventoryPageCount": 82,
+    "qualifyingHeaderPageCount": 72,
+    "noHeaderPageCount": 10,
+    "independentCheck": "Applied the literal HEADER_REGEX to every non-empty source TXT line on the physical page identified by each of the 82 inventory records; cross-checked each result against the inventory localPdfPath, physicalPage, classifierSource, PDF SHA-256, and page text SHA-256. Identity keys are unique; the ten listed pages are exactly the pages with zero matches."
+  },
+  "freezeRevision": 2,
+  "supersedesFreezeCommit": "a792b5d0d682cdc76099dc8b709967788265c898"
+}
