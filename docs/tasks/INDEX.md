@@ -266,3 +266,4 @@ task doc を新規作成したら本索引に1行追記する（新しいもの�
 - [20260611_2038_APIセキュリティ基準調査_動作確認.md](20260611_2038_APIセキュリティ基準調査_動作確認.md) — AIフレンドリーAPIの動作確認とセキュリティ基準洗い出し
 - [20260611_0720_AIフレンドリー化SG1-5実装計画.md](20260611_0720_AIフレンドリー化SG1-5実装計画.md) — llms.txt/検索API/支出先逆引き等SG-1〜5実装計画
 - [20261011_Budget_Request_Plain_Text_Corpus.md](20261011_Budget_Request_Plain_Text_Corpus.md) — FY2024概算要求PDFのbyte-preserving plain-text producerを追加。将来のCSV分析向けの共存入力で、既存JSONL producer/consumerは維持しcaller migrationは対象外
+- [20261011_Budget_Request_Plain_Text_CSV_v0.md](20261011_Budget_Request_Plain_Text_CSV_v0.md) — 開発専用のTXT→Cover/TOC CSV v0。既存development sampleの5所管6 TOCページとCAO Coverを検証し、ソース/ページSHAを照合、未解決行をTSV監査出力
