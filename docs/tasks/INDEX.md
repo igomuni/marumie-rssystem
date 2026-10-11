@@ -275,3 +275,4 @@ task doc を新規作成したら本索引に1行追記する（新しいもの�
 - [20260612_0628_悪意あるユーザー対策_DoS設計.md](20260612_0628_悪意あるユーザー対策_DoS設計.md) — 検索API/生JSON直リンクのDoS対策・多層防御設計
 - [20260611_2038_APIセキュリティ基準調査_動作確認.md](20260611_2038_APIセキュリティ基準調査_動作確認.md) — AIフレンドリーAPIの動作確認とセキュリティ基準洗い出し
 - [20260611_0720_AIフレンドリー化SG1-5実装計画.md](20260611_0720_AIフレンドリー化SG1-5実装計画.md) — llms.txt/検索API/支出先逆引き等SG-1〜5実装計画
+- [20261011 FY2024 TOC PDF Row / Region Relation Failure Isolation P2](20261011_Budget_Request_TOC_PDF_Row_Region_Relation_Failure_Isolation_P2.md) — PDF geometry and ownership relation failure isolation.
