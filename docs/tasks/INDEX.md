@@ -3,7 +3,11 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261011_Budget_Request_TOC_PDF_Row_Region_PR422_Integration_Audit.md](20261011_Budget_Request_TOC_PDF_Row_Region_PR422_Integration_Audit.md) — PR #422の3 commitを最新main上へ順に再構成。INDEX競合を限定解消し、185 segment集計の独立再現と凍結prior ownership列のprovenance欠落を監査・補正（元branch不変更）。
+
 - [20261011_1900_Budget_Request_Total_Table_Semantic_Hierarchy_P0_Failure_Isolation.md](20261011_1900_Budget_Request_Total_Table_Semantic_Hierarchy_P0_Failure_Isolation.md) — 総表v0(3,531行)の階層evidenceをread-onlyで全量survey。CONTEXTは1ブロック1行(所管40/特別会計29)、TOTALは141件全て加算で範囲特定、字下げ単独の親決定は棄却(組織/項が同列61/83・境界で列ずれ80/95)、CODE3/HIERは同書式で複数役割。曖昧1,286件 → partially supports, ambiguity remains
+- [20261011_Budget_Request_TOC_PDF_Row_Region_Relation_Failure_Isolation_P2_Results.md](20261011_Budget_Request_TOC_PDF_Row_Region_Relation_Failure_Isolation_P2_Results.md) — P2凍結50候補(15 PDF・17ページ)の幾何source feasibility。全17ページnative text、入力hash一致。185 segment中113がテキスト照合で非一意、全fragment一意は0/50のため凍結条件に従い全候補のgeometry収集を停止。Layer B/Cの新規判断なし。
+- [20261011_2107_Budget_Request_TOC_PDF_Row_Region_Tool_Assessment_P2.md](20261011_2107_Budget_Request_TOC_PDF_Row_Region_Tool_Assessment_P2.md) — P2凍結50候補(15PDF・17page)のPDF text/geometryツールとpage性質の事前評価。native text 17/17・A4横/Rotate0/CropBox=MediaBox・pdfjs 5.4.296とpoppler 26.09.0のbbox一致。断片照合は最長セグメント50/50一意、短い継続断片は非一意（geometry収集は未実施）
 - [20261011_Budget_Request_TOC_H1_Positive_Negative_Failure_Isolation_P1.md](20261011_Budget_Request_TOC_H1_Positive_Negative_Failure_Isolation_P1.md) — #418のH1 positive 31件を固定し、TOC全82ページのRaw Text近似候補からNegative/near-missを事前定義手順で探索するpost-hoc ownership failure isolation（自動結合規則・精度評価なし）
 
 - [20261011_1831_Budget_Request_Total_Table_RawText_to_CSV_v0.md](20261011_1831_Budget_Request_Total_Table_RawText_to_CSV_v0.md) — 概算要求 plain text zip から総表をdeterministicにCSV化（v0）。9要素ヘッダ署名で164p/69ブロック、論理行3,531（DETAIL1,723/CODE3 1,598/TOTAL141/HIER69）、継続行736、unresolved 0、検算不一致0、2回実行でhash一致。env/metiの重複ブロック・CODE3入れ子は後段課題
@@ -276,3 +280,4 @@ task doc を新規作成したら本索引に1行追記する（新しいもの�
 - [20260612_0628_悪意あるユーザー対策_DoS設計.md](20260612_0628_悪意あるユーザー対策_DoS設計.md) — 検索API/生JSON直リンクのDoS対策・多層防御設計
 - [20260611_2038_APIセキュリティ基準調査_動作確認.md](20260611_2038_APIセキュリティ基準調査_動作確認.md) — AIフレンドリーAPIの動作確認とセキュリティ基準洗い出し
 - [20260611_0720_AIフレンドリー化SG1-5実装計画.md](20260611_0720_AIフレンドリー化SG1-5実装計画.md) — llms.txt/検索API/支出先逆引き等SG-1〜5実装計画
+- [20261011 FY2024 TOC PDF Row / Region Relation Failure Isolation P2](20261011_Budget_Request_TOC_PDF_Row_Region_Relation_Failure_Isolation_P2.md) — PDF geometry and ownership relation failure isolation.

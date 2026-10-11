@@ -1,0 +1,45 @@
+{
+  "schema": "toc-pdf-row-region-relation-study-population/v1",
+  "researchPosition": "development failure isolation; not held-out evaluation or gold labels",
+  "upstream": {
+    "pr": 421,
+    "mergedCommit": "a1702d58e9e880fd100cc03426f2607a2f43b3ee",
+    "positiveInventorySha256": "e07044788a429113b07fada2df5bf98bf6ac0af5c2fb926bd8451cf2541a8a7d",
+    "p1NearControlExportSha256": "3815cf26240ba87d2926dd8fd831c5a5b95c7e6bfb577d7c7f5f1b49abda714d",
+    "p1IndependentReviewExportSha256": "70c6df24dea9cae95b620c618187a07af6876e70726ffa7e180a96c1f6b92190",
+    "p1OutputZipSha256": "fa220c2f84d597874701e70014ba92298fc671d17415239d7f169edf84be8bdd"
+  },
+  "input": {
+    "rawTextManifestSha256": "d58e048b43a38b29d035ff07dbd2d664ad5bea28c50fed4e0c30c61052c3573c",
+    "rawTextCorpusDigestSha256": "7c6d2dcec1f4bec0ca37a1b3aa391adce7d99b93ac4642c74cab7a328dac4052",
+    "structureInventorySha256": "d2b2311cb6cbcb0974816706be1126d07e2a062614ac5b7cefee62be2b5ebc2d",
+    "tocPages": 82,
+    "pdfs": 55,
+    "directPages": 55,
+    "inheritedPages": 27
+  },
+  "population": {
+    "positive": 31,
+    "priorReviewDisagreement": 3,
+    "priorIndependentAgreementControls": 4,
+    "additionalControls": 12,
+    "totalCandidateObservations": 50,
+    "uniquePdfs": 15,
+    "uniquePhysicalPages": 17,
+    "selectedAdditionalByStratum": {
+      "KNOWN_SIDE_MISMATCH": 3,
+      "SAME_SIDE_INTERVENING_PRIMITIVE": 3,
+      "SAME_SIDE_INTERVENING_BARRIER": 3,
+      "UNKNOWN_SIDE": 3
+    }
+  },
+  "frozenFiles": {
+    "candidate-inventory.csv": "0dcf19a039de8ae79258405b3e1464dae63fb3b0b3f118a5a924f3e95723b438",
+    "control-selection-audit.csv": "672ffd51160b65496ede5d9a710e8a661d4db082c74f45a2312a2ff563ecb3cc",
+    "p1-independent-review-source.csv": "70c6df24dea9cae95b620c618187a07af6876e70726ffa7e180a96c1f6b92190",
+    "p1-near-control-source.csv": "3815cf26240ba87d2926dd8fd831c5a5b95c7e6bfb577d7c7f5f1b49abda714d",
+    "p1-ownership-review-source.csv": "1c378464dc2f49b7e81d237592372efa2645c47d181d66a8128c97c090f3bb1d"
+  },
+  "selectionRule": "Within each prescribed P1 stratum, sort the 67 P1 near controls by pair ID; remove the three P1 disagreements and four prior independent-review agreements; select the first three remaining IDs. No cross-stratum replacement.",
+  "geometryReviewStarted": false
+}
