@@ -1,0 +1,19 @@
+{
+  "schema": "toc-h1-control-census-validation/v1",
+  "inputIntegrity": true,
+  "populationAccounting": true,
+  "archiveHashMatchesFrozen": true,
+  "sourcePdfAndTxtHashesMatchFrozenArchive": true,
+  "pageHashesAndClassificationMatchInventory": true,
+  "pairIdsUnique": true,
+  "exactH1ReconcilesWithFixedPositiveSet": true,
+  "selectedPairsUnique": true,
+  "nearSampleCapRespected": true,
+  "assemblyOrOwnershipDecisionMade": false,
+  "files": {
+    "ordered-pair-census.jsonl": "c75a7bf34dad932ea50bb2faa373eb52f3c0cd81144d4eef75f50d0beaf0ea5c",
+    "selected-near-controls.jsonl": "394153dbcb6468323869d384a562c101de1ae2e3251f26d0c4216456508397a4",
+    "second-review-sample.txt": "28d42b67ad405a2597060e87a025f68d4603c2c1d05ec8074d18b0cfe25b2bb7",
+    "census-summary.json": "1fba0084fecc982fe532d19652ea20b07e54f751866143276bf67442085d3887"
+  }
+}
