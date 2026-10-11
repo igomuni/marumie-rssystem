@@ -24,6 +24,7 @@ The population is unchanged: 31 known H1 positives, 3 prior review disagreements
 - The 100 frozen source fragments were reconstructed exactly from Poppler layout text using their frozen UTF-16 ranges.
 - Existing `budget-request-pdf-page.ts` uses pinned pdfjs-dist 5.4.296 and exposes text items with bounding boxes and transforms. Poppler 26.09.0 `-bbox-layout` also exposes word boxes. Their sampled token boxes agree within 0.001 pt. Neither source provides character-level boxes; pdf.js `hasEOL` is content-stream metadata, not a semantic row boundary.
 - A feasibility audit split the 50 candidates into 185 whitespace-delimited text segments. 72 segments had a unique text match in the pdf.js item stream, 113 had multiple matches, and none were unmatched. The longest segment matched uniquely for 50/50 candidates, but all-fragment uniqueness held for 0/50 candidates.
+- An independent read-only rerun reproduced the aggregate 185 / 72 / 113 / 0 using the documented outline: split candidate fragments at runs of at least two whitespace characters, compare against pdf.js text items concatenated in content-stream order, and ignore whitespace while normalizing the observed nonbreaking-hyphen / ASCII-hyphen difference. The original scratch script is unavailable, so its exact normalization details and a byte-for-byte rerun of that implementation remain unverified. The aggregate is reproduced under this documented reconstruction, not proven to match every detail of the original script.
 - Repeated short fragments such as `経費`, `費`, `入`, and repeated page references account for the non-unique matches. The report did not choose the longest fragment as a substitute mapping rule: the frozen contract requires candidate geometry collection to stop when source-to-PDF matching is non-unique.
 - Poppler layout line indices and y-coordinate clusters did not map 1:1 in the feasibility audit. No deterministic raw-line-to-PDF-row rule was established.
 
@@ -40,6 +41,12 @@ The existing SourceToken layer retains pdf.js item text, page, bbox, transform, 
 ## Limits and next decision
 
 The outcome is a feasibility stop for this frozen mapping protocol. To proceed with geometry, a separate reviewed protocol would need to define how a complete raw-text span maps to PDF source tokens when short fragments repeat, while avoiding the use of the ownership relation being studied to select the match. That protocol may use line-level or row-level alignment, but this report does not propose or adopt one. Alternatively, the study can retain all 50 candidates as unresolved under the current protocol.
+
+## Integration audit correction
+
+The run artifact's stop inventory originally used the output field name `prior_integrated_ownership`, while the frozen input calls it `previous_integrated_ownership`. The mismatch left the audit column empty. The export helper now copies the frozen value verbatim, and validation confirms all 50 rows match their input labels (31 `SAME_ITEM`, 16 `DISTINCT_ITEMS`, 3 `AMBIGUOUS`). This corrects provenance only; it does not revise prior judgments or P2 findings. The artifact ZIP and output hash manifest were refreshed.
+
+Corrected ZIP SHA-256: `c02500e61178535699c377d431272814460043d310b1e3151e0f12c336da78f4`.
 
 No parser, assembly rule, regex, fixture, GT, or production pipeline was changed. No final TOC CSV or held-out evaluation was produced.
 
