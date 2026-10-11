@@ -1,0 +1,16 @@
+{
+  "hypothesis": "H1",
+  "candidate_observations": 31,
+  "ownership": {
+    "SAME_ITEM": 31
+  },
+  "evidence_sufficiency": {
+    "PDF_VISUAL_REQUIRED": 31
+  },
+  "primary_failure_family": {
+    "F1_TRUE_CONTINUATION_OWNERSHIP_MISSING": 31
+  },
+  "unique_source_primitives": 62,
+  "unique_source_pdfs": 12,
+  "unique_physical_pages": 13
+}

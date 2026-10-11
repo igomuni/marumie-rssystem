@@ -1,0 +1,18 @@
+{
+  "hypothesis": "H2",
+  "candidate_observations": 78,
+  "ownership": {
+    "DISTINCT_ITEMS": 77,
+    "SAME_ITEM": 1
+  },
+  "evidence_sufficiency": {
+    "PDF_VISUAL_REQUIRED": 78
+  },
+  "primary_failure_family": {
+    "F2_INDEPENDENT_HEADING_NON_ITEM": 77,
+    "F6_INSUFFICIENT_PRIMITIVE_RELATION": 1
+  },
+  "unique_source_primitives": 156,
+  "unique_source_pdfs": 50,
+  "unique_physical_pages": 77
+}
