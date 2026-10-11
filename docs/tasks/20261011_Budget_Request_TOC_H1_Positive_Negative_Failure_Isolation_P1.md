@@ -33,3 +33,16 @@ Git管理下にPositive inventory、探索契約、全pair censusと選択一覧
 ## Review status
 
 前提確認とPositive inventoryを完了し、Discovery contractの独立read-onlyレビューが通過した。Positive inventoryと探索契約をfreezeするcommit後にのみnegative candidate enumerationを開始する。
+
+## Mechanical candidate census freeze (before PDF review)
+
+- 82/82 TOC pages and 55/55 PDFs accounted for; DIRECT 55 / INHERITED 27.
+- All source PDF/TXT hashes matched the frozen #417 archive and inventory page hashes.
+- Full ordered-pair census: 1,001 pairs: EXACT_H1_SHAPE 31, UNKNOWN_SIDE 21, KNOWN_SIDE_MISMATCH 439, SAME_SIDE_INTERVENING_BARRIER 72, SAME_SIDE_INTERVENING_PRIMITIVE 438, OUTSIDE_H1_SHAPE 0.
+- Exact H1 pair membership equals the frozen 31 positives. Therefore N1 is unobservable by definition in this frozen exact-shape set; this is not evidence of safety or discrimination.
+- Fixed visual sample: 67 near-shape pairs: UNKNOWN_SIDE 4, KNOWN_SIDE_MISMATCH 32, SAME_SIDE_INTERVENING_BARRIER 7, SAME_SIDE_INTERVENING_PRIMITIVE 24. The independent second-review sample contains 7 IDs (ceil(10% of 67)). No visual ownership review had started at the time this census was frozen.
+- Census SHA-256: `c75a7bf34dad932ea50bb2faa373eb52f3c0cd81144d4eef75f50d0beaf0ea5c`.
+- Selected-list SHA-256: `394153dbcb6468323869d384a562c101de1ae2e3251f26d0c4216456508397a4`.
+- Second-review list SHA-256: `28d42b67ad405a2597060e87a025f68d4603c2c1d05ec8074d18b0cfe25b2bb7`.
+- The generated census, sample list, second-review list, summary, and validation reproduced byte-for-byte on a second run. An independent mechanical audit found and prompted correction of a validation predicate that initially checked census size instead of selected-sample size; it then confirmed all selection counts and hashes.
+- Reproduction utility: `scripts/research/toc-h1-control-census.py`. It reads the frozen #417 ZIP and verifies source PDF/TXT hashes; it does not inspect PDFs visually or make ownership decisions.

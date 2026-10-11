@@ -1,0 +1,79 @@
+{
+  "schema": "toc-h1-control-census/v1",
+  "sourceCommit": "9f83a9abbbce49af3e4be8eb3034c00805af602e",
+  "archiveSha256": "ae2392ecb25f7457be9c8cccb68622d4193c544e48e62bf9583524578936ea79",
+  "rawTextManifestSha256": "d58e048b43a38b29d035ff07dbd2d664ad5bea28c50fed4e0c30c61052c3573c",
+  "structureInventorySha256": "d2b2311cb6cbcb0974816706be1126d07e2a062614ac5b7cefee62be2b5ebc2d",
+  "positiveInventorySha256": "e07044788a429113b07fada2df5bf98bf6ac0af5c2fb926bd8451cf2541a8a7d",
+  "population": {
+    "tocPages": 82,
+    "pdfs": 55,
+    "DIRECT": 55,
+    "INHERITED": 27
+  },
+  "orderedPairCount": 1001,
+  "shapeCounts": {
+    "EXACT_H1_SHAPE": 31,
+    "KNOWN_SIDE_MISMATCH": 439,
+    "OUTSIDE_H1_SHAPE": 0,
+    "SAME_SIDE_INTERVENING_BARRIER": 72,
+    "SAME_SIDE_INTERVENING_PRIMITIVE": 438,
+    "UNKNOWN_SIDE": 21
+  },
+  "selectedNearPairCount": 67,
+  "selectedCountsBySignature": {
+    "KNOWN_SIDE_MISMATCH": 32,
+    "SAME_SIDE_INTERVENING_BARRIER": 7,
+    "SAME_SIDE_INTERVENING_PRIMITIVE": 24,
+    "UNKNOWN_SIDE": 4
+  },
+  "selectedCountsByPageAndSignature": {
+    "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf;3;KNOWN_SIDE_MISMATCH": 2,
+    "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf;3;SAME_SIDE_INTERVENING_PRIMITIVE": 2,
+    "data/download/env.go.jp/content/000157010.pdf;3;KNOWN_SIDE_MISMATCH": 2,
+    "data/download/env.go.jp/content/000157010.pdf;3;SAME_SIDE_INTERVENING_PRIMITIVE": 2,
+    "data/download/env.go.jp/content/000157012.pdf;3;KNOWN_SIDE_MISMATCH": 2,
+    "data/download/env.go.jp/content/000157012.pdf;3;SAME_SIDE_INTERVENING_PRIMITIVE": 2,
+    "data/download/env.go.jp/content/000157013.pdf;3;SAME_SIDE_INTERVENING_BARRIER": 2,
+    "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf;3;KNOWN_SIDE_MISMATCH": 2,
+    "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf;3;SAME_SIDE_INTERVENING_PRIMITIVE": 2,
+    "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf;3;KNOWN_SIDE_MISMATCH": 2,
+    "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf;3;SAME_SIDE_INTERVENING_PRIMITIVE": 2,
+    "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf;4;SAME_SIDE_INTERVENING_PRIMITIVE": 2,
+    "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneju_o.pdf;3;KNOWN_SIDE_MISMATCH": 2,
+    "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneju_o.pdf;3;SAME_SIDE_INTERVENING_PRIMITIVE": 2,
+    "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/fukko_o.pdf;3;SAME_SIDE_INTERVENING_PRIMITIVE": 2,
+    "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf;3;KNOWN_SIDE_MISMATCH": 2,
+    "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf;3;SAME_SIDE_INTERVENING_PRIMITIVE": 2,
+    "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf;4;SAME_SIDE_INTERVENING_BARRIER": 2,
+    "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf;3;KNOWN_SIDE_MISMATCH": 2,
+    "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf;3;KNOWN_SIDE_MISMATCH": 2,
+    "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf;3;SAME_SIDE_INTERVENING_BARRIER": 1,
+    "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf;3;KNOWN_SIDE_MISMATCH": 2,
+    "data/download/mlit.go.jp/page/content/001630995.pdf;7;KNOWN_SIDE_MISMATCH": 2,
+    "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf;3;KNOWN_SIDE_MISMATCH": 2,
+    "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tousi_2.pdf;2;UNKNOWN_SIDE": 2,
+    "data/download/ndl.go.jp/jp/aboutus/outline/r06_budgetrequest.pdf;2;UNKNOWN_SIDE": 2,
+    "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf;2;KNOWN_SIDE_MISMATCH": 2,
+    "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf;2;SAME_SIDE_INTERVENING_PRIMITIVE": 2,
+    "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf;3;KNOWN_SIDE_MISMATCH": 2,
+    "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf;3;SAME_SIDE_INTERVENING_PRIMITIVE": 2,
+    "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf;4;KNOWN_SIDE_MISMATCH": 2,
+    "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf;4;SAME_SIDE_INTERVENING_PRIMITIVE": 2,
+    "data/download/soumu.go.jp/main_content/000901372.pdf;3;KNOWN_SIDE_MISMATCH": 2,
+    "data/download/soumu.go.jp/main_content/000901372.pdf;3;SAME_SIDE_INTERVENING_BARRIER": 2
+  },
+  "secondReviewCount": 7,
+  "secondReviewCountsBySignature": {
+    "KNOWN_SIDE_MISMATCH": 2,
+    "SAME_SIDE_INTERVENING_PRIMITIVE": 4,
+    "UNKNOWN_SIDE": 1
+  },
+  "hashes": {
+    "orderedPairCensusSha256": "c75a7bf34dad932ea50bb2faa373eb52f3c0cd81144d4eef75f50d0beaf0ea5c",
+    "selectedNearControlsSha256": "394153dbcb6468323869d384a562c101de1ae2e3251f26d0c4216456508397a4",
+    "secondReviewSampleSha256": "28d42b67ad405a2597060e87a025f68d4603c2c1d05ec8074d18b0cfe25b2bb7"
+  },
+  "n1Status": "N1_NOT_OBSERVED_IN_FROZEN_CORPUS",
+  "note": "EXACT_H1_SHAPE must equal the fixed #418 H1 positive set; this is definitional and is not negative discrimination evidence."
+}
