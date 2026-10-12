@@ -2,12 +2,15 @@
  * H1 structural hierarchy: deterministic GT sampling frame + A/B annotation comparison (no resolver).
  *
  *   npx tsx scripts/pipeline-v2/prepare-budget-request-total-table-h1-gt.ts prepare [zipPath] [outputDir]
- *   npx tsx scripts/pipeline-v2/prepare-budget-request-total-table-h1-gt.ts compare [zipPath] [outputDir]
+ *   npx tsx scripts/pipeline-v2/prepare-budget-request-total-table-h1-gt.ts compare [zipPath] [outputDir] [--annotators=a,b]
+ *   npx tsx scripts/pipeline-v2/prepare-budget-request-total-table-h1-gt.ts stability [zipPath] [outputDir] --pairs=a:a2,b:b2
  *
  * prepare: re-parses the frozen archive with v0 + P0 survey (unchanged), canonicalizes exact duplicate blocks,
  *          writes review/sample-manifest.csv and the annotator input package (annotation-input/).
- * compare: reads annotation-a/ and annotation-b/ (written by two isolated annotators) and writes the human review
+ * compare: reads annotation-<x>/ and annotation-<y>/ (two isolated annotators; default a,b) and writes the human review
  *          package under review/. Human decision fields are always left empty.
+ * stability: diagnostic only (never GT input). Agreement between annotation rounds of the same role, written to
+ *          review/stability.json.
  * Spec of v0: docs/budget-request-total-table-csv.md
  */
 import * as fs from 'fs';
@@ -22,12 +25,17 @@ import {
   type RelationAnnotation, type SampleUnit, type TotalAnnotation,
 } from './lib/budget-request-total-table-h1-gt-sampling';
 
-const mode = process.argv[2];
-const zipPath = process.argv[3] ?? 'data/work/budget-request-plain-text.zip';
-const root = process.argv[4] ?? 'data/work/budget-request-total-table-h1-gt/2024';
+const positional = process.argv.slice(2).filter(a => !a.startsWith('--'));
+const flag = (name: string) => process.argv.slice(2).find(a => a.startsWith(`--${name}=`))?.slice(name.length + 3);
+const mode = positional[0];
+const zipPath = positional[1] ?? 'data/work/budget-request-plain-text.zip';
+const root = positional[2] ?? 'data/work/budget-request-total-table-h1-gt/2024';
+const annotators = (flag('annotators') ?? 'a,b').split(',');
+const ANNOTATOR_ID = /^[a-z][a-z0-9]*$/u;
+if (annotators.length !== 2 || annotators[0] === annotators[1] || !annotators.every(a => ANNOTATOR_ID.test(a))) throw new Error('--annotators must name two distinct ids, e.g. a2,b2');
 const FROZEN_ZIP_SHA256 = '268f1020957b58362e1b224197b16944855c139efa1524c343a77abdf754e533';
 const FROZEN = { sources: 82, blocks: 69, rows: 3531, ambiguities: 1286 };
-if (mode !== 'prepare' && mode !== 'compare') throw new Error('usage: prepare|compare [zipPath] [outputDir]');
+if (mode !== 'prepare' && mode !== 'compare' && mode !== 'stability') throw new Error('usage: prepare|compare|stability [zipPath] [outputDir] [--annotators=a,b] [--pairs=a:a2,b:b2]');
 
 const toCsv = <T extends object>(items: T[], columns?: (keyof T)[]) => {
   const cols = columns ?? (items.length ? Object.keys(items[0]) as (keyof T)[] : []);
@@ -190,23 +198,27 @@ if (mode === 'prepare') {
   console.log(JSON.stringify(summary, null, 2));
 }
 
-if (mode === 'compare') {
+const readAnnotations = (who: string) => {
   const read = (rel: string) => parseCsv(fs.readFileSync(path.join(root, rel), 'utf8'));
+  return {
+    rel: read(`annotation-${who}/relation-annotation-${who}.csv`) as unknown as RelationAnnotation[],
+    tot: read(`annotation-${who}/total-scope-annotation-${who}.csv`) as unknown as TotalAnnotation[],
+  };
+};
+
+if (mode === 'compare') {
   const manifestIds = parseCsv(fs.readFileSync(path.join(root, 'review/sample-manifest.csv'), 'utf8'));
   if (sha256(toCsv(units)) !== sha256(fs.readFileSync(path.join(root, 'review/sample-manifest.csv'), 'utf8'))) throw new Error('sample manifest differs from the frozen sampling rule');
   const relIds = manifestIds.filter(u => u.unit_kind !== 'TOTAL_SCOPE').map(u => u.sample_id);
   const totIds = manifestIds.filter(u => u.unit_kind === 'TOTAL_SCOPE').map(u => u.sample_id);
-  const ann = (who: 'a' | 'b') => ({
-    rel: read(`annotation-${who}/relation-annotation-${who}.csv`) as unknown as RelationAnnotation[],
-    tot: read(`annotation-${who}/total-scope-annotation-${who}.csv`) as unknown as TotalAnnotation[],
-  });
-  const A = ann('a');
-  const B = ann('b');
+  const [whoA, whoB] = annotators;
+  const A = readAnnotations(whoA);
+  const B = readAnnotations(whoB);
   const errors = [
-    ...validateAnnotations(A.rel, relIds, r => r.status, STATUSES).map(e => `A relation ${e}`),
-    ...validateAnnotations(B.rel, relIds, r => r.status, STATUSES).map(e => `B relation ${e}`),
-    ...validateAnnotations(A.tot, totIds, r => r.scope_status, SCOPE_STATUSES).map(e => `A total ${e}`),
-    ...validateAnnotations(B.tot, totIds, r => r.scope_status, SCOPE_STATUSES).map(e => `B total ${e}`),
+    ...validateAnnotations(A.rel, relIds, r => r.status, STATUSES).map(e => `${whoA} relation ${e}`),
+    ...validateAnnotations(B.rel, relIds, r => r.status, STATUSES).map(e => `${whoB} relation ${e}`),
+    ...validateAnnotations(A.tot, totIds, r => r.scope_status, SCOPE_STATUSES).map(e => `${whoA} total ${e}`),
+    ...validateAnnotations(B.tot, totIds, r => r.scope_status, SCOPE_STATUSES).map(e => `${whoB} total ${e}`),
   ];
   if (errors.length) throw new Error(`annotation validation failed:\n${errors.join('\n')}`);
 
@@ -232,7 +244,7 @@ if (mode === 'compare') {
   };
 
   const files: (readonly [string, string])[] = [];
-  for (const who of ['a', 'b'] as const) {
+  for (const who of annotators) {
     for (const kind of ['relation', 'total-scope'] as const) {
       files.push(write(`review/${kind}-annotation-${who}.csv`, fs.readFileSync(path.join(root, `annotation-${who}/${kind}-annotation-${who}.csv`), 'utf8')));
     }
@@ -270,7 +282,33 @@ if (mode === 'compare') {
   const all = Object.fromEntries([...Object.entries(prepare).filter(([k]) => k.startsWith('review/')), ...files].sort(([a], [b]) => (a < b ? -1 : 1)));
   const content = JSON.stringify(all, null, 2) + '\n';
   write('review/package-manifest.json', content);
-  console.log(JSON.stringify({ ...stats, packageManifestSha256: sha256(content) }, null, 2));
+  console.log(JSON.stringify({ ...stats, annotators: { a: whoA, b: whoB }, packageManifestSha256: sha256(content) }, null, 2));
+}
+
+if (mode === 'stability') {
+  // Diagnostic only: how stable each annotator role is across rounds. Never an input to GT or to the human review.
+  const pairs = (flag('pairs') ?? '').split(',').filter(Boolean).map(p => p.split(':'));
+  if (!pairs.length || pairs.some(p => p.length !== 2 || !p.every(a => ANNOTATOR_ID.test(a)))) throw new Error('--pairs must look like a:a2,b:b2');
+  const result = Object.fromEntries(pairs.map(([x, y]) => {
+    const X = readAnnotations(x);
+    const Y = readAnnotations(y);
+    const yR = new Map(Y.rel.map(r => [r.sample_id, r]));
+    const yT = new Map(Y.tot.map(r => [r.sample_id, r]));
+    const rel = X.rel.filter(r => yR.has(r.sample_id));
+    const tot = X.tot.filter(r => yT.has(r.sample_id));
+    const transitions = countBy([
+      ...rel.map(r => `${r.status}->${yR.get(r.sample_id)!.status}`),
+      ...tot.map(r => `SCOPE_${r.scope_status}->SCOPE_${yT.get(r.sample_id)!.scope_status}`),
+    ]);
+    return [`${x}:${y}`, {
+      units: rel.length + tot.length,
+      agreement: rel.filter(r => relationAgreement(r, yR.get(r.sample_id)!)).length + tot.filter(r => totalAgreement(r, yT.get(r.sample_id)!)).length,
+      transitions,
+    }];
+  }));
+  const content = JSON.stringify({ diagnosticOnly: true, pairs: result }, null, 2) + '\n';
+  write('review/stability.json', content);
+  console.log(content);
 }
 
 function countBy(xs: string[]) {

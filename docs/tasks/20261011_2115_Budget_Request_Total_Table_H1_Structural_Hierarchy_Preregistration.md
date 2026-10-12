@@ -2,7 +2,7 @@
 
 指示書: `docs/chats/20261011_1820_総表CSV化/20261011_2108_Orca_H1_Structural_Hierarchy_Preregistration_GT_Review_Package.md`（ローカル、git 管理外）。前提: v0（#419）、P0 と Post-P0 research decision（#420、`20261011_1900_Budget_Request_Total_Table_Semantic_Hierarchy_P0_Failure_Isolation.md`）。
 
-**状態: `PENDING_HUMAN_GT_REVIEW`。** GT は凍結していない。resolver は実装していない。
+**状態: `PENDING_HUMAN_GT_REVIEW`（round 2 の注釈待ち）。** GT は凍結していない。resolver は実装していない。round 1 の注釈者 B が確認しきれずに AMBIGUOUS を出したため、作業手段だけを改訂して A2/B2 で再注釈する（§12）。判定基準・標本・入力は変えていない。
 
 ## 1. 仮説（H1）
 
@@ -243,3 +243,92 @@ npx tsx scripts/pipeline-v2/prepare-budget-request-total-table-h1-gt.ts compare 
 | `package-manifest.json` | `2e76c85e04c4c2c957d235708dbd3858852c130a8a1bfb814cdebd133cd49589` |
 
 compare を2回実行し、`package-manifest.json` が一致した。最終 GT の SHA-256 は、人によるレビューが終わってから記入する（未記入）。
+
+## 12. 注釈手順の改訂（round 2）
+
+注釈の実行前に記録する（2026-10-12）。round 1 の結果（§11）を Coordinator が見たうえでの改訂だが、**変えるのは作業手段だけで、判定基準は変えない。** ユーザーと合意済み。
+
+### 12.1 理由（round 1 の観測）
+
+- A と B は、同じ起動プロンプトで起動した。どちらも Claude Opus 5.5 の通常サブエージェントだった。
+- A は約14分で終わり、スクリプトは書いていない。
+- B は約84分かかり、Coordinator が打ち切らせた。B は、親子の割り当てを総当たりして金額の加算を照合するソルバを書いては止めることを、少なくとも5回繰り返していた。
+- 起動プロンプトには計算手段と作業量の上限がなかった。そのため、一意性を列挙で証明する戦略が許されていた。
+- その結果、B の「確認しきれなかった」AMBIGUOUS が31件出た。不一致41件のうち30件がこれに由来し、A/B の比較が判断の違いを表していない。
+
+### 12.2 変えないもの
+
+- 仮説、制約 C0〜C7、status の定義、評価指標、GO/STOP 基準（§1〜§9）
+- 標本（`sample-manifest.csv` SHA-256 `f324854e…f8aa`）と、`annotation-input/`（`annotation-guide.md` を含む）。prepare は再実行しない。
+- 一致の定義、監査（`ceil(n/4)`）、escalation、GT の凍結条件（§6）
+- 使ってよい証拠と、使ってはいけない証拠
+
+### 12.3 変えるもの
+
+- **注釈者の作り直し:** A と B の両方を、新しい注釈者 A2 と B2 で作り直す。
+  - round 1 の注釈と review package は `review-r1/` に記録として残す（`package-manifest.json` SHA-256 `2e76c85e…9589`）。GT の候補には使わない。
+- **起動方法:**
+  - Orca Orchestration の `worker-start` で、Orca の既定エージェントである Codex を2体起動する。
+  - 置き場所は Coordinator の worktree（`--worktree current`）とする。
+  - 2体には、同じ Task 仕様を与える（§12.4。注釈者 ID だけが違う）。
+  - round 1 で使った通常サブエージェントは使わない。
+- **注釈の手段の制約（Task 仕様に追加）:**
+  - 割り当てや部分集合を総当たりで探すスクリプトを書かない。スクリプトは、決めた候補集合の7セルを検算するときだけ使う。
+  - RESOLVED にする根拠は、行順・CONTEXT・TOTAL・書式から局所的に述べる。
+  - AMBIGUOUS の notes の先頭に、`MULTI:`（候補が複数残る）か `NONDISC:`（全0・単一の子で同額など、金額が非判別的）を付ける。
+  - 「確認しきれない」は出さず、全単位を判定し終える。
+  - 作業量の目安は、ツール呼び出し約100回、1スクリプト30秒まで。
+- **比較:**
+  - `compare --annotators=a2,b2` で、人によるレビュー用パッケージを `review/` に作る。
+  - `stability --pairs=a:a2,b:b2` は診断としてだけ出す。GT の入力にもレビューの入力にもしない。
+  - round 1 は Claude、round 2 は Codex で、手順も違う。そのため、この診断ではモデルの差と手順の差を分離できない。
+- **時間管理:**
+  - 40分を超えても、片方だけを打ち切らない。Coordinator が両方の状態を確認し、ユーザーに報告する。
+
+### 12.4 Task 仕様（A2/B2 共通。`<X>` は `a2` または `b2`）
+
+```text
+You are independent annotator <X> for a research ground-truth (GT) labeling task. Work alone.
+
+Working directory: the current Orca worktree (repository root).
+
+## Isolation (strict)
+- READ ONLY files under data/work/budget-request-total-table-h1-gt/2024/annotation-input/.
+- WRITE ONLY under data/work/budget-request-total-table-h1-gt/2024/annotation-<X>/ (create it; helper scripts go in annotation-<X>/work/).
+- Do NOT read anything else: not other annotation-*/ directories, not review/ or review-r1/, not repository code/docs/tests,
+  not docs/chats, not git history, not the web, not PDFs. Do not use external budget knowledge or memory about
+  Japanese budget structure. Do not decide from semantic labels (e.g. "this must be a 項/組織/目").
+- Run Python with `python3 -I` if you use Python.
+
+## Task
+1. Read annotation-input/annotation-guide.md first and follow it exactly (Japanese).
+2. annotation-input/units.csv lists 146 units (RELATION, CONTEXT_ROOT, TOTAL_SCOPE). For each unit, open its block files
+   (blocks/<block>.rows.csv and blocks/<block>.raw.txt) and decide using only the allowed evidence.
+   - RELATION: the direct structural parent of the target row (`context` or `row:<row_index>`), or AMBIGUOUS etc.
+   - CONTEXT_ROOT: NO_PARENT if the CONTEXT line is the block root, else AMBIGUOUS with a note.
+   - TOTAL_SCOPE: RESOLVED with the exact set of DIRECT children whose 7 amount cells sum to the TOTAL row, or AMBIGUOUS.
+3. Mark RESOLVED only when the evidence leaves exactly one candidate. Equal amounts alone, all-zero rows, single-child
+   equal amounts, indentation alone, or code width alone are NOT sufficient.
+
+## Method constraints (round 2)
+- Do NOT write scripts that enumerate or search over parent assignments or child subsets (no brute force, no DFS/solver).
+  Scripts are allowed only to check the arithmetic of a candidate set you have already chosen by reading the rows.
+- Justify each RESOLVED locally from row order, CONTEXT, TOTAL rows and line format. If you cannot state why exactly one
+  candidate remains, mark AMBIGUOUS.
+- Every AMBIGUOUS note must start with `MULTI:` (more than one candidate remains) or `NONDISC:` (amounts are
+  non-discriminating, e.g. all-zero or single child with equal amount), followed by one short sentence.
+- Never output "not verified" / "could not check". Decide every unit.
+- Budget: about 100 tool calls in total; any single script must finish within 30 seconds.
+
+## Output
+Write exactly two CSV files (UTF-8, header exactly as given, one row per unit, every sample_id exactly once, quote fields
+containing commas; `;` separates multiple evidence codes and child indices):
+- annotation-<X>/relation-annotation-<X>.csv — header `sample_id,status,parent_ref,evidence_codes,notes`
+  — all RELATION and CONTEXT_ROOT units (122 rows).
+- annotation-<X>/total-scope-annotation-<X>.csv — header `sample_id,scope_status,direct_child_row_indices,evidence_codes,notes`
+  — all TOTAL_SCOPE units (24 rows).
+
+## Done
+Report via worker_done: counts per status, counts per scope_status, number of tool calls used, and the sample_ids you
+found difficult. Do not otherwise summarize the data.
+```
