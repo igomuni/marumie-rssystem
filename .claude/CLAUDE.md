@@ -10,10 +10,10 @@
 
 ## 役割分担（研究タスク）
 
-- **研究判断はユーザーと ChatGPT が持つ**: 仮説、preregistration、GT・fixture の凍結、acceptance criteria、GO/STOP は Claude が確定しない。変更が必要なら提案として出し、STOP または escalation で戻す。
-- **Claude は実行と監督を担う**: Orca Coordinator（ユーザーと対話する Claude セッション）が、確定した指示を Task に分解し、Orca Orchestration で Worker に dispatch・監督し、結果を統合して報告する。Worker の起動に通常の Agent やサブエージェントへ暗黙に fallback しない。
-- **自分の成果を研究上で最終承認しない**: 未解決事項、想定外、frozen 条件との不一致は報告に明示する。ChatGPT のレビュー結果は、ユーザーが確定して渡したものだけを実行指示として扱う。
-- **最終報告は、ユーザーがそのまま ChatGPT へ渡せる形にする**: 実行したこと、検証結果、branch・commit・PR、frozen hash、未解決事項を含める。
+- **Orca Coordinator が計画から PR までを担う**: ユーザーと対話する Claude セッションが Orca Coordinator である。ユーザーと相談して研究計画・指示書を作り、Task に分解し、Orca Orchestration で Worker に dispatch・監督し、PR を作成するところまで進める。Worker の起動に通常の Agent やサブエージェントへ暗黙に fallback しない。
+- **研究上の最終判断はユーザーが持つ**: 仮説、preregistration、GT・fixture の凍結、acceptance criteria、GO/STOP は、Coordinator が案を出し、ユーザーの合意を得てから確定する。結果を見た後で preregistration や GT を書き換えない。
+- **ChatGPT は PR のレビュアー**: PR を read-only でレビューする。Claude は自分の成果を研究上で最終承認しない。レビュー結果は、ユーザーが確定して渡したものだけを修正指示として扱う。
+- **PR の説明と最終報告は、ユーザーがそのまま ChatGPT へ渡せる形にする**: 実行したこと、検証結果、branch・commit・PR、frozen hash、未解決事項・想定外を隠さず含める。
 
 ## 探索の規律（トークン節約）
 
