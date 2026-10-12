@@ -136,60 +136,84 @@ describe('left-region text that is not a name continuation', () => {
 });
 
 describe('備考 on the same physical line is not read', () => {
-  const zone = fixture('context').split('\n');
+  // A real header (the 'edges' page): the three amount columns end in these windows (from the header words only).
+  const zone = fixture('edges').split('\n');
   const hb = headerBoundary(zone)!;
   const header = zone.slice(0, hb.headerEnd + 1).join('\n');
-  // Right edges of the three amount columns on a synthetic page (left of the 備考 heading), and a column well right of the 比較 column.
-  const E = [hb.boundary + 10, hb.boundary + 18, hb.boundary + 26];
-  const REMARK_COL = E[2] + 12;
-  const line = (head: string, cells: (string | null)[], remark = '', remarkCol = REMARK_COL) => {
+  const E = hb.windows.map(([lo, hi]) => Math.round((lo + hi) / 2)); // exclusive right end of each amount column
+  const FAR = hb.windows[2][1] + 4; // 備考 text well right of the 比較 window
+  const NEAR = E[2] + 2; // 備考 text starting right after the 比較 column
+  const line = (head: string, cells: (string | null)[], remark = '', remarkCol = FAR) => {
     const arr: string[] = Array(Math.max(remarkCol + remark.length, E[2]) + 1).fill(' ');
     [...head].forEach((ch, i) => { arr[8 + i] = ch; });
-    cells.forEach((c, k) => { if (c !== null) [...c].forEach((ch, i) => { arr[E[k] - c.length + 1 + i] = ch; }); });
+    cells.forEach((c, k) => { if (c !== null) [...c].forEach((ch, i) => { arr[E[k] - c.length + i] = ch; }); });
     [...remark].forEach((ch, i) => { arr[remarkCol + i] = ch; });
     return arr.join('').trimEnd();
   };
-  // Three calibration rows (three amounts, arithmetic OK) so that the page edges can be measured.
-  const calibration = [
+  const normal = (n: number) => [
     line('95016‑2111‑05‑0710 手当', ['574', '574', '0']),
     line('95016‑2122‑08‑2010 旅費', ['1,979', '1,988', '9']),
     line('95016‑2123‑09‑1010 庁費', ['58,861', '64,193', '5,332']),
-  ];
-  const page = (...body: string[]) => `${header}\n${[...calibration, ...body].join('\n')}\n\f`;
-  const rowsOf = (text: string) => parseDetailSource(text, 'synthetic');
+  ].slice(0, n);
+  const page = (genuine: number, ...body: string[]) => `${header}\n${[...normal(genuine), ...body].join('\n')}\n\f`;
+  const parse = (text: string) => parseDetailSource(text, 'synthetic');
+  const named = (r: ReturnType<typeof parse>, prefix: string) => r.rows.filter(x => x.matter_raw.startsWith(prefix));
+  const hasAmounts = (r: DetailRow) => cellsOf(r).some(c => c !== '');
 
-  it('does not read numbers in 備考 as amounts when the left part is a heading', () => {
-    const r = rowsOf(page(line('011 経常事務費', [], '1 2 1')));
-    const heading = r.rows.find(x => x.matter_raw.startsWith('011'))!;
-    expect(cellsOf(heading)).toEqual(['', '', '']);
+  it('reads the synthetic page as designed: the three amounts end in their header windows', () => {
+    const r = parse(page(3));
+    expect(r.rows.map(x => cellsOf(x))).toEqual([['574', '574', '0'], ['1,979', '1,988', '9'], ['58,861', '64,193', '5,332']]);
     expect(r.unresolved).toEqual([]);
   });
 
+  it('does not read numbers in 備考 as amounts when the left part is a heading', () => {
+    for (const col of [FAR, NEAR]) {
+      const r = parse(page(3, line('011 経常事務費', [], '1 2 1', col)));
+      expect(named(r, '011').some(hasAmounts), `remark at ${col}`).toBe(false);
+    }
+  });
+
+  it('does not let 備考 numbers that satisfy the arithmetic shape the calibration or become amounts (page with too few genuine rows)', () => {
+    for (const genuine of [0, 1]) {
+      for (const col of [FAR, NEAR]) {
+        // fewer than three genuine three-amount rows (not enough to measure the page), three headings whose 備考 has
+        // "100 150 50" (it satisfies the arithmetic), and a genuine two-amount row whose blank cell can only be
+        // placed if the page was measured
+        const r = parse(page(genuine,
+          line('011 経常事務費', [], '100 150 50', col),
+          line('012 一般事務費', [], '100 150 50', col),
+          line('013 特別事務費', [], '100 150 50', col),
+          line('95016‑2129‑06‑0110 諸謝金', ['136', null, '136'])));
+        const at = `${genuine} genuine rows, remark at ${col}`;
+        expect(['011', '012', '013'].flatMap(p => named(r, p)).some(hasAmounts), at).toBe(false);
+        expect(r.rows.some(x => x.parse_status === 'AMOUNTS_PLACED_BY_PAGE_EDGES'), at).toBe(false);
+        expect(r.unresolved.some(u => u.reason === 'BLANK_CELL_COLUMN_UNDETERMINED' && u.raw_text.includes('95016‑2129‑06‑0110')), at).toBe(true);
+        expect(r.arithmeticMismatchRows, at).toEqual([]);
+      }
+    }
+  });
+
   it('does not mix 備考 numbers into the cells of a row that has one or two amounts', () => {
-    const one = rowsOf(page(line('95016‑2129‑17‑1010 交際費', ['8,262', null, null], '5 5 0')));
-    expect(one.rows.filter(x => x.row_type !== 'CONTEXT').length).toBe(3); // only the calibration rows; the one-amount row is unresolved
+    const one = parse(page(3, line('95016‑2129‑17‑1010 交際費', ['8,262', null, null], '5 5 0')));
+    expect(named(one, '95016‑2129‑17‑1010')).toEqual([]);
     expect(one.unresolved.map(u => u.reason)).toEqual(['UNEXPECTED_AMOUNT_COUNT']);
-    const two = rowsOf(page(line('95016‑2129‑06‑0110 諸謝金', [null, '136', '136'], '7 8 9')));
-    expect(cellsOf(two.rows.find(x => x.matter_raw.startsWith('95016‑2129‑06‑0110'))!)).toEqual(['', '136', '136']);
+    const two = parse(page(3, line('95016‑2129‑06‑0110 諸謝金', [null, '136', '136'], '7 8 9')));
+    expect(cellsOf(named(two, '95016‑2129‑06‑0110')[0])).toEqual(['', '136', '136']);
   });
 
-  it('does not read 備考 numbers that happen to satisfy the arithmetic', () => {
-    const r = rowsOf(page(line('011 経常事務費', [], '100 150 50')));
-    expect(cellsOf(r.rows.find(x => x.matter_raw.startsWith('011'))!)).toEqual(['', '', '']);
-    const withAmounts = rowsOf(page(line('006 事務処理費', ['69,676', '75,017', '5,341'], '100 150 50')));
-    expect(cellsOf(withAmounts.rows.find(x => x.matter_raw.startsWith('006'))!)).toEqual(['69,676', '75,017', '5,341']);
-    expect(withAmounts.arithmeticMismatchRows).toEqual([]);
+  it('keeps the three amounts of a row and does not read a 備考 number or text after them', () => {
+    for (const remark of ['100 150 50', '1 既定分', '内国旅費']) {
+      for (const col of [FAR, NEAR]) {
+        const r = parse(page(3, line('006 事務処理費', ['69,676', '75,017', '5,341'], remark, col)));
+        expect(cellsOf(named(r, '006')[0]), `${remark} at ${col}`).toEqual(['69,676', '75,017', '5,341']);
+        expect(r.arithmeticMismatchRows).toEqual([]);
+      }
+    }
   });
 
-  it('keeps the three amounts when 備考 text starts only a few columns right of the 比較 column (left of the 備考 heading)', () => {
-    expect(E[2] + 3).toBeLessThan(hb.remarksStart);
-    const r = rowsOf(page(line('006 事務処理費', ['69,676', '75,017', '5,341'], '内国旅費', E[2] + 3)));
-    expect(cellsOf(r.rows.find(x => x.matter_raw.startsWith('006'))!)).toEqual(['69,676', '75,017', '5,341']);
-  });
-
-  it('leaves a heading unresolved rather than reading 備考 numbers that start right after the 比較 column as amounts', () => {
-    const r = rowsOf(page(line('011 経常事務費', [], '1 2 1', E[2] + 3)));
-    expect(r.rows.some(x => x.matter_raw.startsWith('011') && cellsOf(x).some(c => c !== ''))).toBe(false);
+  it('takes the amount windows from the header words only', () => {
+    expect(hb.windows.every(([lo, hi], k) => lo < hi && (k === 0 || lo > hb.windows[k - 1][0]))).toBe(true);
+    expect(hb.windows[2][1]).toBeLessThan(hb.remarksStart);
   });
 });
 

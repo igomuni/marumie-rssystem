@@ -6,7 +6,10 @@
  * text (inner whitespace, △ spacing); blank cells stay blank (no 0, no sign completion, no value from other rows/pages).
  * Where a blank cell is in a 2-amount row, the amounts are placed by column position only (recorded in parse_status);
  * rows whose columns cannot be determined from the position go to unresolved. The arithmetic is used only as a check
- * after extraction, never to decide which column holds a value. 備考 is cut off by the right edge of the amount columns.
+ * after extraction, never to decide which column holds a value.
+ *
+ * 備考 on the same physical line is not read: a number is an amount only if it ends in the window of an amount column
+ * (from the header words, or the page's measured edges once enough consistent rows that pass the header windows exist).
  *
  * Grammar and its FY2024 corpus evidence: docs/budget-request-detail-table-csv.md.
  */
@@ -25,13 +28,28 @@ export function isDetailTablePage(pageText: string): boolean {
 
 const HEADER_2 = /番\s*号.*予\s*算\s*額.*比\s*較/u;
 
+/** [lo, hi] columns (inclusive) where the right end of an amount in a column may lie. */
+export type Window = [number, number];
+
+/**
+ * Where the right edge of each amount column lies relative to the right end of its heading word on the second heading
+ * line (FY2024, 4,376 pages measured from their rows): 前年度 −2…+3 (予算額), 要求額 0…+14 (概算要求額),
+ * 比較 +2…+14 (比較増△減); a margin of 2 is added. This is header geometry only; it does not read any body row, so a
+ * 備考 number can never influence it.
+ */
+const HEADER_WORD_WINDOWS: readonly [RegExp, Window][] = [
+  [/予\s*算\s*額/u, [-4, 5]],
+  [/概算要求額/u, [-2, 16]],
+  [/比\s*較\s*(?:増\s*△?\s*減?)?/u, [0, 16]],
+];
+
 /**
  * Geometry taken from the two heading lines. `boundary` = column where the 前年度予算額 heading starts (everything that
  * starts at or right of it belongs to the amount columns or to 備考; names of the left part end before it).
- * `remarksStart` = column where the 備考 heading starts. `headerRight` = right end of the second heading line
- * (the 比較増△減 heading), which is 2–14 columns left of the right edge of the amount columns (FY2024).
+ * `remarksStart` = column where the 備考 heading starts. `windows` = the columns where the three amounts may end.
+ * A page whose second heading line lacks one of the three heading words has no boundary.
  */
-export function headerBoundary(lines: string[]): { boundary: number; remarksStart: number; headerRight: number; headerEnd: number } | null {
+export function headerBoundary(lines: string[]): { boundary: number; remarksStart: number; windows: Window[]; headerEnd: number } | null {
   const first = lines.findIndex(l => {
     const c = compact(l);
     if (!(c.includes('事項') && c.includes('前年度') && c.includes('備考'))) return false;
@@ -41,7 +59,14 @@ export function headerBoundary(lines: string[]): { boundary: number; remarksStar
   if (first < 0) return null;
   const end = lines.findIndex((l, i) => i >= first && HEADER_2.test(l));
   if (end < 0) return null;
-  return { boundary: lines[first].indexOf('前'), remarksStart: lines[first].indexOf('備'), headerRight: lines[end].trimEnd().length, headerEnd: end };
+  const windows: Window[] = [];
+  for (const [re, [lo, hi]] of HEADER_WORD_WINDOWS) {
+    const m = re.exec(lines[end]);
+    if (!m) return null;
+    const wordEnd = m.index + m[0].length;
+    windows.push([wordEnd + lo, wordEnd + hi]);
+  }
+  return { boundary: lines[first].indexOf('前'), remarksStart: lines[first].indexOf('備'), windows, headerEnd: end };
 }
 
 // ---------- amounts ----------
@@ -168,13 +193,15 @@ export interface SourceResult {
 
 const EDGE_TOLERANCE = 3;
 /**
- * Columns right of the amount columns hold 備考. The 備考 heading starts far right of where 備考 text on a body line
- * starts (FY2024: 99.9% of the 備考 text on a row line starts left of it), so the heading column alone cannot separate
- * them. The amount tokens of a line must therefore also end within the right edge of the 比較 column: its page median
- * (+ spread allowance) when the page has enough rows to measure it, else the second heading line's right end + 14 + 3.
+ * 備考 on the same physical line must not be read as amounts. Its heading starts far right of where 備考 text starts
+ * (FY2024: 99.9% of the 備考 text on a row line starts left of it), so the 備考 heading cannot be the cut. A number is
+ * an amount only if its right end lies in the window of an amount column (the measured right edge ±3 when the page has
+ * enough consistent rows, else the header-geometry window), taking the columns in order. The measured edges are
+ * calibrated only from rows that pass this same header-window test, so 備考 numbers cannot shape the calibration.
  */
-const EDGE_SPREAD_ALLOWANCE = 6;
-const HEADER_TO_EDGE_MAX = 14 + 3;
+const EDGE_SPREAD_MAX = 5;
+/** A measured edge accepts an amount whose right end is within the observed spread of it (placement of a blank cell is stricter: ±EDGE_TOLERANCE). */
+const EDGE_ACCEPT = EDGE_SPREAD_MAX + 1;
 const median = (xs: number[]) => {
   const s = [...xs].sort((a, b) => a - b);
   const m = s.length >> 1;
@@ -193,16 +220,37 @@ interface ParsedLine {
 }
 
 /**
- * `limit`: amount tokens must end at or left of this column; numbers further right are 備考 and are not amounts.
- * (The line is tokenized as a whole and then filtered: cutting the string would create an artificial line end and
- * change how a number right at the cut is tokenized.)
+ * Keeps the amounts of a run: tokens are assigned in order to distinct amount columns, each token's right end having to
+ * lie in the window of its column; the first token that fits no remaining column (and everything after it) is 備考.
+ * A run of 備考 numbers cannot pass: its first number would have to end in the 前年度 window (or the next ones in the
+ * following windows), which lie far left of where 備考 starts.
  */
-function parseHeadLine(index: number, line: string, limit = line.length): ParsedLine | null {
+export function acceptAmounts(tokens: AmountToken[], offset: number, windows: Window[]): AmountToken[] {
+  const out: AmountToken[] = [];
+  let col = -1;
+  for (const t of tokens) {
+    const end = offset + t.end;
+    let next = -1;
+    for (let k = col + 1; k < windows.length; k++) {
+      if (end >= windows[k][0] && end <= windows[k][1]) { next = k; break; }
+    }
+    if (next < 0) break;
+    out.push(t);
+    col = next;
+  }
+  return out;
+}
+
+/**
+ * `windows`: the columns where the amounts of this page may end. The line is tokenized as a whole and then filtered;
+ * cutting the string would create an artificial line end and change how a number right at the cut is tokenized.
+ */
+function parseHeadLine(index: number, line: string, windows: Window[]): ParsedLine | null {
   const head = HEAD.exec(line);
   if (!head) return null;
   const restStart = head.indices![4][0];
   const split = splitTail(line.slice(restStart));
-  const tokens = split.tokens.filter(t => restStart + t.end <= limit);
+  const tokens = acceptAmounts(split.tokens, restStart, windows);
   return { index, line, head, tokens, nameEnd: restStart + split.nameEnd, ends: tokens.map(t => restStart + t.end) };
 }
 
@@ -242,19 +290,24 @@ export function parseDetailSource(text: string, sourceFile: string): SourceResul
       lines.forEach((l, i) => { if (l.trim() !== '') unresolved(i, 'PAGE_WITHOUT_HEADER_BOUNDARY'); });
       return;
     }
-    const { boundary: q, remarksStart, headerRight, headerEnd } = hb;
+    const { boundary: q, remarksStart, windows: headerWindows, headerEnd } = hb;
 
-    // Column right edges of this page, from rows whose three amounts are all present and satisfy the arithmetic.
+    // Column right edges of this page, measured from rows whose three amounts pass the header-window test and the
+    // arithmetic. Only if there are at least three such rows and their edges agree (spread ≤ 5) is the page measured;
+    // the measured edges (±3) then replace the header windows. The windows never reach right of the 備考 heading.
+    const clamp = (w: Window): Window => [Math.min(w[0], remarksStart), Math.min(w[1], remarksStart)];
+    const guard = headerWindows.map(clamp);
     const edgeSamples: number[][] = [[], [], []];
     lines.forEach((l, i) => {
       if (i <= headerEnd || l.trim() === '' || l.length - l.trimStart().length >= q) return;
-      const p = parseHeadLine(i, l);
+      const p = parseHeadLine(i, l, guard);
       if (p && p.tokens.length === 3 && signedValue(p.tokens[2].raw) === signedValue(p.tokens[1].raw) - signedValue(p.tokens[0].raw)) {
         p.ends.forEach((e, k) => edgeSamples[k].push(e));
       }
     });
-    const edges = edgeSamples[0].length >= 3 ? edgeSamples.map(median) : null;
-    const amountLimit = Math.min(remarksStart, edges ? Math.round(edges[2]) + EDGE_SPREAD_ALLOWANCE : headerRight + HEADER_TO_EDGE_MAX);
+    const measurable = edgeSamples[0].length >= 3 && edgeSamples.every(xs => Math.max(...xs) - Math.min(...xs) <= EDGE_SPREAD_MAX);
+    const edges = measurable ? edgeSamples.map(median) : null;
+    const pageWindows: Window[] = edges ? edges.map(e => clamp([e - EDGE_ACCEPT, e + EDGE_ACCEPT])) : guard;
 
     const firstNonBlank = lines.findIndex(l => l.trim() !== '');
     let open: { row: DetailRow; nameStart: number; lastLine: number } | null = null;
@@ -284,7 +337,7 @@ export function parseDetailSource(text: string, sourceFile: string): SourceResul
       if (indent >= q) { tally('RIGHT_REGION'); return; }
 
       const crosses = l.length > q && l[q - 1].trim() !== '' && l[q].trim() !== '';
-      const p = parseHeadLine(i, l, amountLimit);
+      const p = parseHeadLine(i, l, pageWindows);
 
       if (!p) {
         // Left-region text without a code: a continuation of the name of the row on the physical line right above
