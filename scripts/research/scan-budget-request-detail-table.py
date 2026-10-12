@@ -4,8 +4,9 @@
   python3 -I scripts/research/scan-budget-request-detail-table.py [plain-text.zip]
 
 備考列を除く左側（要求番号・事項・前年度予算額・６年度概算要求額・対前年度比較増△減）を、raw text だけから
-CSV にできるかを数える。抽出器ではない。判定はすべて「行の文法」と「検算（要求額−前年度＝増減）」だけで、
-補完・推測・外部知識は使わない。結果の読み方は docs/tasks の同名の調査記録を参照。
+CSV にできるかを数える。抽出器ではない。判定は「行の文法」と「検算（要求額−前年度＝増減）」で行い、値の補完・
+外部知識は使わない。ただし、2金額行の空欄の列を算術で診断する集計（blank_cell_by_arithmetic）は、列の所属の推定
+であり、値を置くための判定には使わない（診断として数えるだけ）。結果の読み方は docs/tasks の同名の調査記録を参照。
 """
 import collections
 import json
@@ -66,6 +67,34 @@ def header_cols(page):
     return None
 
 
+# 表頭の2行目の見出しの語の右端から、各列の金額の右端がどこにあるか（FY2024 の4,376ページの実測 + 余裕2文字）。
+# 本文の行を読まない（備考の数字が窓に影響しない）。
+HEADER_WORD_WINDOWS = [(r'予\s*算\s*額', (-4, 5)), (r'概算要求額', (-2, 16)), (r'比\s*較\s*(?:増\s*△?\s*減?)?', (0, 16))]
+EDGE_SPREAD_MAX = 5
+EDGE_ACCEPT = EDGE_SPREAD_MAX + 1
+
+
+def header_windows(second_heading_line, remarks_start):
+    out = []
+    for pat, (lo, hi) in HEADER_WORD_WINDOWS:
+        m = re.search(pat, second_heading_line)
+        if not m:
+            return None
+        out.append((min(m.end() + lo, remarks_start), min(m.end() + hi, remarks_start)))
+    return out
+
+
+def accept_amounts(tokens, ends, windows):
+    """数字を左から順に、まだ使っていない列のうち、窓に右端が入る最初の列に割り当てる。入らない数字と、それ以降は備考。"""
+    kept, col = 0, -1
+    for e in ends:
+        nxt = next((k for k in range(col + 1, len(windows)) if windows[k][0] <= e <= windows[k][1]), -1)
+        if nxt < 0:
+            break
+        kept, col = kept + 1, nxt
+    return tokens[:kept]
+
+
 def is_detail_page(page):
     c = compact(page)
     detail = all(w in c for w in ['事項', '前年度', '比較増', '備考', '予算額', '概算要求額'])
@@ -84,7 +113,7 @@ def main():
             corpus[n.split('/')[-1][:-4]] = parts
     out = {'corpus': {}, 'lines': collections.Counter(), 'head_forms': collections.Counter(),
            'blank_cell_by_arithmetic(diagnosis only, not used to place values)': collections.Counter(), 'blank_cell_by_page_edges': collections.Counter(),
-           'edge_spread_chars': {}, 'continuation': collections.Counter(), 'amount_limit_effect': collections.Counter(), 'remark_geometry': {}}
+           'edge_spread_chars': {}, 'continuation': collections.Counter(), 'amount_window_effect': collections.Counter(), 'remark_geometry': {}}
     rem_minus_b, rem_minus_e3 = [], []
     detail_sources, no_text = set(), []
     pages_total = sum(len(v) for v in corpus.values())
@@ -105,9 +134,13 @@ def main():
             q, b_col = hc
             page_lines = p.split('\n')
             header_end = next((k for k, x in enumerate(page_lines) if re.search(r'番\s*号.*予\s*算\s*額.*比\s*較', x)), -1)
-            # 備考 on the same physical line: amount tokens must end within the right edge of the 比較 column.
-            # Page median of the third amount column of valid rows (+6), else the second heading line's right end + 17; never beyond the 備考 heading.
-            first_pass = []
+            hw = header_windows(page_lines[header_end], b_col)
+            if hw is None:
+                out['lines']['page without all three header words'] += 1
+                continue
+            # 備考 on the same physical line: a number is an amount only if its right end lies in the window of an amount
+            # column (header words only). Edges measured from rows that pass this same test replace the windows.
+            samples = [[], [], []]
             for li0, l0 in enumerate(page_lines):
                 if li0 <= header_end or not l0.strip() or len(l0) - len(l0.lstrip()) >= q:
                     continue
@@ -115,10 +148,14 @@ def main():
                 if not h0:
                     continue
                 nm0, tk0, _ = split_tail(h0.group(4))
-                if len(tk0) == 3 and value(tk0[1]) - value(tk0[0]) == value(tk0[2]):
-                    base0 = h0.start(4) + len(nm0)
-                    first_pass.append([base0 + m.end() for m in re.finditer(NUM, l0[base0:])][2])
-            amount_limit = min(b_col, (round(statistics.median(first_pass)) + 6) if len(first_pass) >= 3 else len(page_lines[header_end].rstrip()) + 17)
+                base0 = h0.start(4) + len(nm0)
+                te0 = [base0 + m.end() for m in re.finditer(NUM, l0[base0:])][:len(tk0)]
+                acc0 = accept_amounts(tk0, te0, hw)
+                if len(acc0) == 3 and value(acc0[1]) - value(acc0[0]) == value(acc0[2]):
+                    for k in range(3):
+                        samples[k].append(te0[k])
+            measurable = len(samples[0]) >= 3 and all(max(x) - min(x) <= EDGE_SPREAD_MAX for x in samples)
+            page_windows = [(round(statistics.median(x)) - EDGE_ACCEPT, round(statistics.median(x)) + EDGE_ACCEPT) for x in samples] if measurable else hw
             ends = [[], [], []]
             item2 = []
             last_head_name_col = None
@@ -159,10 +196,10 @@ def main():
                 name, toks_all, remark = split_tail(h.group(4))
                 base = h.start(4) + len(name)
                 tok_ends = [base + m.end() for m in re.finditer(NUM, line[base:])][:len(toks_all)]
-                toks = toks_all[:sum(1 for e in tok_ends if e <= amount_limit)]
+                toks = accept_amounts(toks_all, tok_ends, page_windows)
                 if len(toks) != len(toks_all):
-                    out['amount_limit_effect']['lines with numbers right of the amount limit (read as 備考, not as amounts)'] += 1
-                    out['amount_limit_effect'][f'  {len(toks_all)} tokens -> {len(toks)} tokens'] += 1
+                    out['amount_window_effect']['lines with numbers outside the amount windows (read as 備考, not as amounts)'] += 1
+                    out['amount_window_effect'][f'  {len(toks_all)} tokens -> {len(toks)} tokens'] += 1
                 if len(toks) == 3 and remark and len(tok_ends) >= 3:
                     rs = line.find(remark, tok_ends[2])
                     if rs >= 0:
@@ -230,7 +267,7 @@ def main():
         'median_max_spread_prev_req_diff': [statistics.median(sp) for sp in spreads],
         'max_spread_prev_req_diff': [max(sp) for sp in spreads],
     }
-    for k in ('lines', 'head_forms', 'blank_cell_by_arithmetic(diagnosis only, not used to place values)', 'blank_cell_by_page_edges', 'continuation', 'amount_limit_effect'):
+    for k in ('lines', 'head_forms', 'blank_cell_by_arithmetic(diagnosis only, not used to place values)', 'blank_cell_by_page_edges', 'continuation', 'amount_window_effect'):
         out[k] = dict(sorted(out[k].items(), key=lambda kv: -kv[1]))
     print(json.dumps(out, ensure_ascii=False, indent=2))
 
