@@ -2,7 +2,7 @@
 
 指示書: `docs/chats/20261011_1820_総表CSV化/20261011_2108_Orca_H1_Structural_Hierarchy_Preregistration_GT_Review_Package.md`（ローカル、git 管理外）。前提: v0（#419）、P0 と Post-P0 research decision（#420、`20261011_1900_Budget_Request_Total_Table_Semantic_Hierarchy_P0_Failure_Isolation.md`）。
 
-**状態: `PENDING_HUMAN_GT_REVIEW`（round 2 の注釈待ち）。** GT は凍結していない。resolver は実装していない。round 1 の注釈者 B が確認しきれずに AMBIGUOUS を出したため、作業手段だけを改訂して A2/B2 で再注釈する（§12）。判定基準・標本・入力は変えていない。
+**状態: `PENDING_HUMAN_GT_REVIEW`（round 2 完了、人によるレビュー待ち）。** GT は凍結していない。resolver は実装していない。round 1 の注釈者 B が確認しきれずに AMBIGUOUS を出したため、作業手段だけを改訂して A2/B2 で再注釈した（§12）。判定基準・標本・入力は変えていない。round 2 は一致113・不一致33で、両者とも RESOLVED なのに親や範囲が違う単位が17件あった（§12.7）。
 
 ## 1. 仮説（H1）
 
@@ -433,3 +433,79 @@ equal amount, ...). Never write "not verified" / "could not check".
 Report via worker_done: counts per status, counts per scope_status, and the sample_ids you found difficult.
 Do not otherwise summarize the data.
 ```
+
+### 12.7 2回目の結果（GT ではない）
+
+Run `run_97915207aade` で、§12.6 の仕様を使って Codex（gpt-6-luna、effort high）を2体起動した（`--worktree current`、09:37 JST に開始）。
+
+| | A2 | B2 |
+|---|---|---|
+| 所要時間 | 約28分 | 約16分 |
+| ツール呼び出し | 257 | 164 |
+| 関係（122） | RESOLVED 109・AMBIGUOUS 5・NO_PARENT 8 | RESOLVED 108・AMBIGUOUS 6・NO_PARENT 8 |
+| TOTAL の範囲（24） | RESOLVED 11・AMBIGUOUS 13 | RESOLVED 22・AMBIGUOUS 2 |
+
+**Coordinator による検証**（判定の妥当性は見ていない。仕様に従ったかだけを確認した）:
+
+- 2体とも、`work/decisions.md` に146単位を重複なく書き、CSV の status・親と一致した。
+- AMBIGUOUS には、すべて `MULTI:` か `NONDISC:` が付いていた。notes には、すべて row_index が入っていた。
+- スクリプトは、表示と、判定ログを CSV に変換するものだけだった。ラベルを計算するコードは無かった。
+- 実行したコマンドに、読み取りが禁止された場所（他の注釈、review、コード、git、Web）への参照は無かった。
+
+**compare（`--annotators=a2,b2`）:**
+
+- 146単位のうち一致は113、不一致は33。
+- 人によるレビューが必要な単位は70件（不一致33、一致した単位の監査29、CONTEXT 8）。
+- prepare と compare を2回実行し、`package-manifest.json` が一致した。
+
+| 不一致の種類 | 件数 |
+|---|---|
+| 両者とも RESOLVED で、親や範囲が違う | **17** |
+| 一方だけ RESOLVED（A2 が AMBIGUOUS、B2 が RESOLVED） | 13 |
+| 一方だけ RESOLVED（A2 が RESOLVED、B2 が AMBIGUOUS） | 3 |
+
+- **両者 RESOLVED で食い違った17件（round 1 は0件）:**
+  - 関係12件: R2-008, R2-010, R3-005, R4-004, R5-002, R7-001, R7-002, R7-004, R7-015, R7-019, R8-009, R8-011。このうち9件は、一方がブロック先頭の上位行（row:1）を親とし、もう一方がより近い上位行（row:2 など）を親としている。入れ子になった上位行のどれを直接の親とするかの違いである。
+  - TOTAL の範囲5件: T1-001, T1-005, T1-006, T1-007, T2-008。多くは、直前の同額の1行を範囲とするか、その子たちを範囲とするかの違い。round 1 では、A も B もこれを AMBIGUOUS としていた。
+  - 少なくとも一方が、候補を1つに絞れない単位を RESOLVED にしている。人によるレビューで、すべて裁定する。
+- **層ごとの不一致:**
+
+| 層 | 不一致 |
+|---|---|
+| S1 | 0/12 |
+| S2 | 2/12 |
+| S3 | 3/18 |
+| S4 | 1/12 |
+| S5 | 2/12 |
+| S6 | 0/12 |
+| S7 | 5/24 |
+| S8 | 2/12 |
+| 組織計 | 8/8 |
+| 所管計 | 8/8 |
+| 会計計 | 2/8 |
+| CONTEXT | 0/8 |
+
+**診断（`stability`。GT にもレビューにも使わない。モデルの差と手順の差を分離できない）:**
+
+| 組 | 一致 |
+|---|---|
+| A と A2 | 112/146 |
+| B と B2 | 69/146 |
+| A2 と B2 | 113/146 |
+
+- B から B2 で、AMBIGUOUS から RESOLVED に変わった関係が52件あった。
+
+**round 1 の package との関係:** round 1 の package は `review-r1/` に、そのままの形で残っている（`2e76c85e…9589`）。round 2 の `review/` を作る前に、round 1 由来の注釈者別ファイルは `review/` から取り除いた。prepare 由来の `sample-manifest.csv`・`duplicate-groups.csv`・`sampling-summary.json` は変えていない。
+
+| ファイル | SHA-256 |
+|---|---|
+| `annotation-a2/relation-annotation-a2.csv` | `c18a19b908a450acca8c0a880598156a1011635dd7f30b003828446591b69f27` |
+| `annotation-a2/total-scope-annotation-a2.csv` | `4162633b1c6132a225410950b9725eff9c8dfe19be671494ee78ef72d002d019` |
+| `annotation-b2/relation-annotation-b2.csv` | `57da53ca9e435b5b2de3609be01cf2314622b89ebe0e22ac31150c563c8e0233` |
+| `annotation-b2/total-scope-annotation-b2.csv` | `f8c25c10f170b9b91d11e1ac6c8c38a6d2280e430dc6d5d8cd649a7cbd12f49b` |
+| `annotation-a2/work/decisions.md` | `06dff9111e76d94f67c3601ade3122417438219289d16087c1c6dbd44d68a4f7` |
+| `annotation-b2/work/decisions.md` | `35f1529e39c58b003a52a126117890dfd68b6ce1dc19ec7296e292fd4b411075` |
+| `review/package-manifest.json` | `9a4005102e8afdd662e579d905dcaf298d12f515d1044b03e7d175c2bd95a15e` |
+| `review/stability.json` | `abfed56037ca78cca894246925efa0a1d0829bd8d1d5b497ad2f61f93dcaca00` |
+
+**次:** `review/human-review.csv` の人によるレビュー（70件）。手引きは `review/review-guide.md`。監査の結果を見て escalation を判定し、すべて裁定したうえで GT を凍結する。
