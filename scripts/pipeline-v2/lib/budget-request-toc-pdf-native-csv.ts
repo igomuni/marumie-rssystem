@@ -340,10 +340,14 @@ export function convertTocPage(input: PageInput, params: TocParams = DEFAULT_TOC
 
   const leftTokens: SourceToken[] = [];
   const rightTokens: SourceToken[] = [];
+  const straddlers: SourceToken[] = [];
   for (const t of body) {
     if (t.bbox.xMax <= evidence.boundaryX) leftTokens.push(t);
     else if (t.bbox.xMin >= evidence.boundaryX) rightTokens.push(t);
-    else newAudit('COLUMN_STRADDLE', null, null, [t], `token が列境界 x=${evidence.boundaryX.toFixed(2)} をまたぐ`);
+    else {
+      straddlers.push(t);
+      newAudit('COLUMN_STRADDLE', null, null, [t], `token が列境界 x=${evidence.boundaryX.toFixed(2)} をまたぐ`);
+    }
   }
 
   for (const [side, colTokens] of [['left', leftTokens], ['right', rightTokens]] as const) {
@@ -353,14 +357,23 @@ export function convertTocPage(input: PageInput, params: TocParams = DEFAULT_TOC
     // rows は y 昇順（gapGroups が昇順にソート）
     geometricRows[side] = rows.length;
     const colMap = new Map(colTokens.map(t => [t.index, t]));
-    const parsed = rows.map((row, ord) => parseRow(row, colMap, side, `R-${idBase}-${side[0]}${ord}`, ord, evidence, colFs, params));
+    const parsed = rows.map((row, ord): ParsedRow => {
+      const p = parseRow(row, colMap, side, `R-${idBase}-${side[0]}${ord}`, ord, evidence, colFs, params);
+      // 境界をまたぐ token と同じ高さ（行クラスタリングと同じ許容差）の行は、またぐ token が区分/タイトルの一部かもしれないので出さない
+      const crossing = straddlers.filter(t => Math.abs(baselineTopOf(t, meta) - row.baselineY) <= params.rowToleranceFactor * colFs);
+      if (crossing.length === 0) return p;
+      return { ...p, kind: 'UNRESOLVED', auditKind: 'COLUMN_STRADDLE', detail: `同じ高さに列境界をまたぐ token がある（item ${crossing.map(t => t.index).join(',')}）。行のタイトルが欠けている可能性がある` };
+    });
+    const isIncompleteStructured = (r?: ParsedRow) => !!r && r.kind === 'UNRESOLVED' && (r.auditKind === 'NO_PAGE_REF' || r.auditKind === 'NO_TITLE_TEXT');
     const entryIdOf = (p: ParsedRow) => `E-${idBase}-${side[0]}${p.rowOrdinal}`;
 
     parsed.forEach((p, i) => {
       const prev = parsed[i - 1];
       const next = parsed[i + 1];
       if (p.kind === 'UNRESOLVED') {
-        newAudit(p.auditKind!, side, p.rowId, p.tokens, p.detail ?? '');
+        // 番号のない NO_PAGE_REF / NO_TITLE_TEXT 行は、直前のページ付き行の折り返しの続きかもしれない（候補の行IDだけ残す）
+        const maybeTail = isIncompleteStructured(p) && !p.requestNumber && prev && prev.kind === 'ENTRY_CANDIDATE';
+        newAudit(p.auditKind!, side, p.rowId, p.tokens, p.detail ?? '', maybeTail ? { rowId: prev.rowId, entryId: null } : undefined);
         return;
       }
       if (p.kind === 'FRAGMENT') {
@@ -370,12 +383,12 @@ export function convertTocPage(input: PageInput, params: TocParams = DEFAULT_TOC
         return;
       }
       // ENTRY_CANDIDATE
-      if (next && next.kind === 'FRAGMENT') {
-        newAudit('HOLD_INCOMPLETE_TITLE', side, p.rowId, p.tokens, 'ページ付きの行の直後に所有者不明の断片行がある。タイトルが完結しているか独立の根拠がない', { rowId: next.rowId, entryId: null });
+      if (next && (next.kind === 'FRAGMENT' || (isIncompleteStructured(next) && !next.requestNumber))) {
+        newAudit('HOLD_INCOMPLETE_TITLE', side, p.rowId, p.tokens, 'ページ付きの行の直後に所有者不明の断片行（または番号のない未完の構造行）がある。タイトルが完結しているか独立の根拠がない', { rowId: next.rowId, entryId: null });
         return;
       }
-      if (p.shape === 'TITLE_PAGE' && prev && prev.kind === 'FRAGMENT') {
-        newAudit('HOLD_POSSIBLE_CONTINUATION_TAIL', side, p.rowId, p.tokens, '番号・コードを持たない行の直前に断片行がある。折り返しの末尾の可能性があり単独の項目と断定できない', { rowId: prev.rowId, entryId: null });
+      if (p.shape === 'TITLE_PAGE' && prev && (prev.kind === 'FRAGMENT' || isIncompleteStructured(prev))) {
+        newAudit('HOLD_POSSIBLE_CONTINUATION_TAIL', side, p.rowId, p.tokens, '番号・コードを持たない行の直前に断片行または未完の構造行（ページ参照なし）がある。折り返しの末尾の可能性があり単独の項目と断定できない', { rowId: prev.rowId, entryId: null });
         return;
       }
       const entry: TocEntry = {

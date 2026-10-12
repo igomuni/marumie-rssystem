@@ -40,3 +40,11 @@ P6 との照合: P6 の 17 ページ・6,655 item について、`(PDF SHA-256, 
 - 想定外: 旧 Raw Text では見出し境界が 72/82 ページでしか取れなかったが、PDF-native では 82/82 ページで `要求`・`ページ` 見出しを検出できた（件数の観測であり、境界の正しさの主張ではない）。
 - 生成物は Git 管理外。出力ハッシュ: `summary.json` `8363f571f796833d46572159297a9f907a1325222d44fca5d7b516b84d554fb7`、`output-hashes.json` `bca205bf202e2ea7c4f696d905a5291b097e6fe96215ab8164dbb9db20837d1f`、`unresolved.csv` `5548c51444187a3fbc812dde0804f31410d8ac509509f393889b25b8393e0123`、`token-ledger.csv` `0fb3291fb62e800acf2f722449df9681abb8a3a424aef4aa35e1c884eb84a36c`、`entry-provenance.csv` `6652458d61fb69c9dfa96a03496d593ea051bdb82b39cf34bbf3e719fda2c77a`。入力 inventory `d2b2311cb6cbcb0974816706be1126d07e2a062614ac5b7cefee62be2b5ebc2d`。
 - 恒久アーカイブはコーディネーターが正本の `data/work/exports/` へコピーする（worker は正本に書かない）。ローカルの準備物: `data/work/exports/20261013_0804_FY2024_TOC_PDF_Native_CSV_v0.zip`（SHA-256 `d7c77c4eaaa05767b2980f160cdeb49d58cd45593edf213a1437ac2641f0f83b`、64 ファイル、CRC-32 は同名 `.zip.crc32.txt`、中身は `manifest.json` に SHA-256）。ZIP 自体は時刻を含むためバイト再現しない（中の各ファイルは再現する）。
+
+## 追補: レビュー指摘2件の修正（FINAL）
+
+- **境界をまたぐ token**: またぐ item と同じ高さ（行許容差）の左右の行を entry にせず `COLUMN_STRADDLE` にする。またぐ item の ledger は1回のまま。
+- **折り返しの保留の拡張**: 構造行（`NO_PAGE_REF` / `NO_TITLE_TEXT`）の直後にページ付きの番号なし `TITLE_PAGE` 行がある場合（ページ参照が折り返しの最終行）は後ろの行を `HOLD_POSSIBLE_CONTINUATION_TAIL`。ページ付きの行の直後に番号のない `NO_PAGE_REF` / `NO_TITLE_TEXT` 行がある場合は前の行を `HOLD_INCOMPLETE_TITLE`。結合・所有判断はせず候補の行IDだけを残す。
+- テスト 23 → 27（またぐ token の同高さ行、ページ参照が最終行、番号なしの構造風断片、番号付きの次行は保留しない）。tsc・ESLint・`git diff --check` 通過。
+- 全82ページの件数は**変化なし**（main 2,864 / audit 116 / item 26,317 の内訳も同じ）。2回再生成で `diff -r` 一致。コードのハッシュが変わったので `summary.json` `68fbf4eed17fbba88103819797327bf979e9417e49421fe2c91fe70c52815901`、`output-hashes.json` `426b78364631451b9611a581dcaab37c560b94951a46cb24fed3b9c4bed0ce24`。
+- FINAL アーカイブ: `data/work/exports/20261013_0808_FY2024_TOC_PDF_Native_CSV_v0_FINAL.zip`（SHA-256 `10fae8de1cc49513367757eb8b849a6cdaadd0f710a3a4da2a744520e6acf44c`、64 ファイル、CRC-32 は `.zip.crc32.txt`）。前のアーカイブ（`..._v0.zip`）は破棄してよい（上書きはしていない）。

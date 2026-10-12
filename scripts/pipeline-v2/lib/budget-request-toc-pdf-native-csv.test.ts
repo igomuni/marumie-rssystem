@@ -83,6 +83,17 @@ describe('列分離と行', () => {
     expect(r.entries).toHaveLength(1);
   });
 
+  it('同じ高さに列境界をまたぐ token がある行は、ページ参照が揃っていても左右とも entry にしない（ledger は token ごとに1回）', () => {
+    const left = [tok(20, '1', 38, 110, 41.4), tok(21, '01-95', 55, 110, 72.6), tok(22, '左の前半', 79.4, 110), tok(24, '10', 400, 110, 411)];
+    const right = [tok(30, '2', 419, 110, 426), tok(31, '06-95', 438, 110, 456), tok(32, '右の経費', 462, 110), tok(33, '11', 783, 110, 794)];
+    const straddle = tok(23, '続きの題名', 380, 110, 440);
+    const r = page([...header(0), ...left, ...right, straddle, ...leftRow(40, 124, '3', '11-95', '別の行', '12')]);
+    expect(texts(r)).toEqual([['3', '11-95 別の行', '12']]);
+    expect(r.audits.filter(a => a.kind === 'COLUMN_STRADDLE').flatMap(a => a.tokenIndexes).sort((x, y) => x - y)).toEqual([20, 21, 22, 23, 24, 30, 31, 32, 33]);
+    expect(r.ledger.filter(l => l.tokenIndex === 23)).toHaveLength(1);
+    expect(r.ledger.find(l => l.tokenIndex === 23)!.disposition).toBe('UNRESOLVED');
+  });
+
   it('見出し（組織/項）はコードと空白1個で連結し、タイトル token 同士は原文のまま連結する', () => {
     const r = page([...header(0), tok(20, '（項）', 69, 110, 90), tok(21, '010', 97, 110, 107), tok(22, '財務本省', 114, 110, 142), tok(23, '共通費', 142, 110, 160), tok(24, '5', 407, 110, 411)]);
     expect(texts(r)).toEqual([['', '（項） 010 財務本省共通費', '5']]);
@@ -192,6 +203,34 @@ describe('折り返し・継続の保留', () => {
     expect(frag.rawTexts).toEqual(['必要な経費']);
     expect(frag.candidateOwnerEntryId).toBeNull(); // 保留行は entry ではない
     expect(r.entries.some(e => e.label.includes('必要な経費'))).toBe(false);
+  });
+
+  it('構造行（ページ参照なし）の次の行にページ参照がある（ページ参照が最終行にある折り返し）とき、後ろの行を単独 entry にしない', () => {
+    const r = page([
+      ...header(0),
+      tok(20, '4', 38, 110, 41.4), tok(21, '01-95', 55, 110, 72.6), tok(22, '長い区分の前半', 79.4, 110),
+      tok(30, '後半の経費', 79.4, 117), tok(31, '12', 403, 117, 411),
+    ]);
+    expect(r.entries).toHaveLength(0);
+    expect(r.audits.map(a => a.kind).sort()).toEqual(['HOLD_POSSIBLE_CONTINUATION_TAIL', 'NO_PAGE_REF']);
+    const tail = r.audits.find(a => a.kind === 'HOLD_POSSIBLE_CONTINUATION_TAIL')!;
+    expect(tail.rawTexts).toEqual(['後半の経費', '12']);
+    expect(tail.candidateOwnerRowId).toBe(r.audits.find(a => a.kind === 'NO_PAGE_REF')!.rowId);
+  });
+
+  it('ページ付きの行の直後に、番号のない構造風の断片（NO_PAGE_REF）が続くときは前の行を保留し、断片は候補つきで audit に残す', () => {
+    const r = page([...header(0), ...leftRow(20, 110, '8', '01-05', '前半', '94'), tok(30, '010', 55, 117, 65), tok(31, '続きの語', 79.4, 117)]);
+    expect(r.entries).toHaveLength(0);
+    const hold = r.audits.find(a => a.kind === 'HOLD_INCOMPLETE_TITLE')!;
+    const frag = r.audits.find(a => a.kind === 'NO_PAGE_REF')!;
+    expect(hold.candidateOwnerRowId).toBe(frag.rowId);
+    expect(frag.candidateOwnerRowId).toBe(hold.rowId);
+  });
+
+  it('次の行が独自の要求番号を持つ NO_PAGE_REF なら、前のページ付き行は保留しない', () => {
+    const r = page([...header(0), ...leftRow(20, 110, '8', '01-05', '前', '94'), tok(30, '9', 38, 124, 41.4), tok(31, '02-05', 55, 124, 72.6), tok(32, '次', 79.4, 124)]);
+    expect(texts(r)).toEqual([['8', '01-05 前', '94']]);
+    expect(r.audits.map(a => a.kind)).toEqual(['NO_PAGE_REF']);
   });
 
   it('断片の後ろの番号なし行（折り返し末尾の可能性）は単独 entry にせず保留する', () => {
