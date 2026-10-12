@@ -1,0 +1,61 @@
+{
+  "note": "Verbatim whole pages of budget-request-plain-text/2024 (zip sha256 268f1020957b58362e1b224197b16944855c139efa1524c343a77abdf754e533). Each fixture page is followed by a Form Feed like pdftotext output. Line indexes are 0-based within the original page.",
+  "excerpts": {
+    "context.txt": [
+      {
+        "source_file": "budget-request-plain-text/2024/npa.go.jp__policies__budget__r6__gaisanyokyu__hukkoutokubetukaikei.txt",
+        "source_page": 5,
+        "line_indexes": "0-11"
+      }
+    ],
+    "continuation.txt": [
+      {
+        "source_file": "budget-request-plain-text/2024/mlit.go.jp__page__content__001630395.txt",
+        "source_page": 10,
+        "line_indexes": "0-6"
+      }
+    ],
+    "wide-triangle.txt": [
+      {
+        "source_file": "budget-request-plain-text/2024/mlit.go.jp__page__content__001630995.txt",
+        "source_page": 1068,
+        "line_indexes": "0-5"
+      }
+    ],
+    "edges.txt": [
+      {
+        "source_file": "budget-request-plain-text/2024/reconstruction.go.jp__files__user__topics__2023_fukkochougaisansaisyutsu.txt",
+        "source_page": 103,
+        "line_indexes": "0-30"
+      }
+    ],
+    "arith.txt": [
+      {
+        "source_file": "budget-request-plain-text/2024/cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__585bb95a__20230907_policies_budget_04.txt",
+        "source_page": 91,
+        "line_indexes": "0-14"
+      }
+    ],
+    "undetermined.txt": [
+      {
+        "source_file": "budget-request-plain-text/2024/mlit.go.jp__page__content__001630995.txt",
+        "source_page": 533,
+        "line_indexes": "0-16"
+      }
+    ],
+    "not-aligned.txt": [
+      {
+        "source_file": "budget-request-plain-text/2024/mext.go.jp__content__20230914-mxt_kaikesou01-000031817_03.txt",
+        "source_page": 1128,
+        "line_indexes": "0-44"
+      }
+    ],
+    "no-boundary.txt": [
+      {
+        "source_file": "budget-request-plain-text/2024/mext.go.jp__content__20230914-mxt_kaikesou01-000031817_03.txt",
+        "source_page": 1,
+        "line_indexes": "0-15"
+      }
+    ]
+  }
+}

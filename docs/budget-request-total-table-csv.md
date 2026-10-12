@@ -46,7 +46,7 @@ DETAIL_PAGE   = [^\s0-9,△] \s* [0-9]+  |  [0-9]+        # 例: 131, エ 9, 電
 TAIL          = SIGNED_AMOUNT (\s+ SIGNED_AMOUNT){6} (\s+ DETAIL_PAGE)? \s*$
 ```
 
-- `△` は差額列に限らず、どのセルにも付きうる（例: `定員合理化に伴う経費` の前年度・要求額）。各セルを `*_sign_raw` / `*_amount_raw` に分けて保持する。
+- `△` は差額列に限らず、どのセルにも付きうる（例: `定員合理化に伴う経費` の前年度・要求額）。各セルを `*_sign_raw` / `*_amount_raw` に分けて内部（`LogicalRow`）に保持する。CSV には結合して出力する（下記）。
 - 数値トークンが9個以上並ぶ行（head が数字で終わる）は `NUMERIC_TAIL_AMBIGUOUS_HEAD_ENDS_WITH_NUMBER` とする。
 - **残る曖昧さ**: 数値トークンが8個のときは「7セル＋頁」と読む。名称が ASCII 数字で終わる「頁なしの行」とはテキストだけでは区別できない。FY2024 では名称中の ASCII 数字が0件（数字は全角）で、検算の不一致も0件のため、この読み方で列ずれは起きていない。
 
@@ -75,18 +75,36 @@ TAIL          = SIGNED_AMOUNT (\s+ SIGNED_AMOUNT){6} (\s+ DETAIL_PAGE)? \s*$
 
 | ファイル | 内容 |
 |---|---|
-| `total-table.csv` | 全 source の論理行（source のファイル名順、行順） |
-| `sources/<slug>.csv` | 総表ブロックを持つ source ごとの CSV（同じ列構成） |
+| `sources/<slug>.csv` | 総表ブロックを持つ source ごとの CSV（行順。全 source を1つにまとめた CSV は出力しない） |
 | `unresolved.csv` | `source_file, source_page, source_line_start, source_line_end, table_block_id, raw_text, reason` |
 | `line-audit.csv` | 総表ページの非空物理行すべてのクラス（取りこぼしがないことの証跡） |
 | `arithmetic-diagnostics.csv` | 検算（一般＋その他＝計、要求計−前年計＝増減、`△` を負として計算）の不一致。抽出値は書き換えない |
 | `summary.json` | 件数集計、source 別・ブロック別の内訳、凍結 manifest とのページハッシュ照合結果 |
 | `output-manifest.json` | 上記ファイルの SHA-256（決定性の確認用） |
 
-main CSV の列: `source_file, source_page, source_line_start, source_line_end, table_block_id, row_index, row_type, request_no_raw, code_raw, name_raw, name_compact, {previous_general, previous_other, previous_total, request_general, request_other, request_total, difference}_{sign_raw, amount_raw}, detail_page_raw, parse_status`。`row_index` はブロック内の1始まりの連番。金額はカンマを含む原文表記のまま。
+### main CSV の列
+
+総表の見出し（原本の表頭の語）を列名にする。2段の見出しは「上段_下段」とし、行の出所をたどる列は末尾に置く。
+
+| 列 | 内容 |
+|---|---|
+| `要求番号` | 原文の要求番号。無い行は空 |
+| `区分` | コードと名称を半角空白でつないだもの。名称は文字間の空白（均等割付）を除いたもの（継続行は連結済み）。TOTAL は名称だけ（`組織計` など） |
+| `前年度予算額_一般行政経費` `前年度予算額_その他の経費` `前年度予算額_計` | 金額の原文 |
+| `６年度概算要求額_一般行政経費` `６年度概算要求額_その他の経費` `６年度概算要求額_計` | 金額の原文 |
+| `増△減` | 金額の原文 |
+| `明細書頁数` | 原文。TOTAL は空 |
+| `source_file` `source_page` `source_line_start` `source_line_end` `table_block_id` `row_index` `row_type` `parse_status` | 行の出所と物理文法の分類（総表の列ではない）。`row_index` はブロック内の1始まりの連番 |
+
+- 金額のセルは原文表記のまま（カンマを含む文字列）。`△` は金額の前に付ける（原文では `△` の後ろに空白があるが、詰める）。数値化はしない。
+- 字下げ（行頭の空白）は、継続行の判定にだけ使い、出力しない。元の plain text は `source_file` と `source_line_start` から引ける。
+- 文字間の空白を含む名称の原文と、金額の符号と数字の分割は出力しない。どちらも plain text から再生成できる（`LogicalRow` の `name_raw`、`cells` に保持している）。
 
 ## 既知の後段課題（v0 の対象外）
 
-- 同一の総表が別 source に重複して掲載されている（環境省と経済産業省のエネルギー対策特別会計2勘定）。`total-table.csv` は source 単位で出力するため、重複を除いていない。
+- **空白を加工しない方針への変更（記録のみ。未対応）。** `区分` の文字間の空白と `△` の後ろの空白を詰めているが、明細表の CSV（[budget-request-detail-table-csv.md](budget-request-detail-table-csv.md)）は空白を加工しない。総表も、空白を加工しない方針に直したい。
+- **`source_file` 列は不要と判断済み（記録のみ。未対応）。** 文字数が多くなりがちで、ソース別 CSV のファイル名（`sources/<slug>.csv`）で判別できる。明細表の CSV は、すでに持たない。総表の CSV からも、空白の方針の見直しと合わせて外す。複数の source をまとめる `unresolved.csv` などには、`source_file` 列を残す。
+
+- 同一の総表が別 source に重複して掲載されている（環境省と経済産業省のエネルギー対策特別会計2勘定）。`sources/` は source 単位で出力するため、重複を除いていない。
 - `CONTEXT` 行（所管・会計）と HIER/CODE3/DETAIL の意味的な階層の再構成。
 - 金額の数値化（符号付き整数への変換）。
