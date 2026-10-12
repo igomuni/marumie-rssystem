@@ -44,9 +44,9 @@ description: フィーチャーブランチを作成してPRを出す
 
 8. **プッシュ**: リモートにプッシュする（`git push -u origin <branch-name>`）
 
-9. **PR作成**: PRは**必ずdraft（下書き）として作成する**。`--base main` を指定する。（CodeRabbitAIのRateLimit対策。ready for review への切り替えはユーザーが任意のタイミングで行う）作成手段は環境によって異なるが、**手段に関わらずdraftを保証すること**：
+9. **PR作成**: PRは**必ずdraft（下書き）として作成する**。`--base main` を指定する。（PR は ChatGPT が read-only でレビューする。ready for review への切り替えとマージはユーザーが行う）作成手段は環境によって異なるが、**手段に関わらずdraftを保証すること**：
    - **デスクトップ版（`gh` CLIが使える場合）**: `gh pr create --draft`
-   - **Web版（GitHub MCPツールしか使えない場合）**: `mcp__github__create_pull_request` を呼び、**`draft: true` を明示的に指定する**（省略すると通常PRとして作成され、CodeRabbitAIのレビューが即座に走ってしまうため注意）
+   - **Web版（GitHub MCPツールしか使えない場合）**: `mcp__github__create_pull_request` を呼び、**`draft: true` を明示的に指定する**（省略すると通常PRとして作成されるため注意）
 
    PR本文には以下を含める：
    - 変更の目的（Why）

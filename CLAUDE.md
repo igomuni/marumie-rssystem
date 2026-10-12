@@ -63,9 +63,8 @@ npx tsc --noEmit         # TypeScript 型チェック
 
 - **指示された範囲を、指示された粒度でやる。** 定型的な判断は自分で決めてよいが、解釈違いで成果物が大きく変わる場合だけ確認を取る。依頼が誤っていると思ったら1〜2文で指摘したうえで、依頼どおりに進める（黙って範囲を狭めたり広げたり作り替えたりしない）。着手した範囲は最後まで終わらせ、できなかった部分は明示して報告する。
 - **コミットメッセージにセッション URL を含めないこと。** `https://claude.ai/code/session_...` 形式の URL はコミットメッセージに追記しない。
-- **PR は必ずユーザーの明示的な許可を得てから作成すること。** 実装・修正が完了しても、ユーザーから「PR を出してください」「PR お願いします」などの指示がない限り、自律的に PR を作成・プッシュしてはならない。
-- コミットは実装完了のタイミングで行ってよいが、プッシュ・PR 作成は指示待ちとする。
-- **PR は draft（下書き）で作成すること。** 実行手段に関わらず draft を保証する：デスクトップ版は `gh pr create --draft`、Web版（`gh` が無い環境）は GitHub MCP ツール `mcp__github__create_pull_request` に **`draft: true` を明示指定**する（省略すると通常PRになり CodeRabbitAI のレビューが即走るため注意）。CodeRabbitAI のレビューが RateLimit を持つため、ある程度まとめてから ready for review に切り替える運用とする（ready 化はユーザーが任意のタイミングで行う）。
+- **実装・検証が完了したら、commit・push・PR 作成まで進めてよい。** 以前は CodeRabbitAI の自動レビューが PR 作成と同時に走ったため、PR 作成をユーザーの指示待ちにしていた。現在は自動レビューを設定で止めているので、この制限は不要になった。`main` への直接 push は禁止。
+- **PR は draft（下書き）で作成すること。** 実行手段に関わらず draft を保証する：デスクトップ版は `gh pr create --draft`、Web版（`gh` が無い環境）は GitHub MCP ツール `mcp__github__create_pull_request` に **`draft: true` を明示指定**する。PR は ChatGPT が read-only でレビューし、ready for review への切り替えとマージはユーザーが行う。
 
 ## Documentation Standards
 
