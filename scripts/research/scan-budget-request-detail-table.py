@@ -83,7 +83,9 @@ def main():
                 parts.pop()
             corpus[n.split('/')[-1][:-4]] = parts
     out = {'corpus': {}, 'lines': collections.Counter(), 'head_forms': collections.Counter(),
-           'blank_cell_by_arithmetic': collections.Counter(), 'blank_cell_by_page_edges': collections.Counter(), 'edge_spread_chars': {}, 'continuation': collections.Counter()}
+           'blank_cell_by_arithmetic(diagnosis only, not used to place values)': collections.Counter(), 'blank_cell_by_page_edges': collections.Counter(),
+           'edge_spread_chars': {}, 'continuation': collections.Counter(), 'amount_limit_effect': collections.Counter(), 'remark_geometry': {}}
+    rem_minus_b, rem_minus_e3 = [], []
     detail_sources, no_text = set(), []
     pages_total = sum(len(v) for v in corpus.values())
     detail_pages = 0
@@ -100,9 +102,23 @@ def main():
             if not hc:
                 out['lines']['page without header columns'] += 1
                 continue
-            q, _ = hc
+            q, b_col = hc
             page_lines = p.split('\n')
             header_end = next((k for k, x in enumerate(page_lines) if re.search(r'番\s*号.*予\s*算\s*額.*比\s*較', x)), -1)
+            # 備考 on the same physical line: amount tokens must end within the right edge of the 比較 column.
+            # Page median of the third amount column of valid rows (+6), else the second heading line's right end + 17; never beyond the 備考 heading.
+            first_pass = []
+            for li0, l0 in enumerate(page_lines):
+                if li0 <= header_end or not l0.strip() or len(l0) - len(l0.lstrip()) >= q:
+                    continue
+                h0 = HEAD.match(l0)
+                if not h0:
+                    continue
+                nm0, tk0, _ = split_tail(h0.group(4))
+                if len(tk0) == 3 and value(tk0[1]) - value(tk0[0]) == value(tk0[2]):
+                    base0 = h0.start(4) + len(nm0)
+                    first_pass.append([base0 + m.end() for m in re.finditer(NUM, l0[base0:])][2])
+            amount_limit = min(b_col, (round(statistics.median(first_pass)) + 6) if len(first_pass) >= 3 else len(page_lines[header_end].rstrip()) + 17)
             ends = [[], [], []]
             item2 = []
             last_head_name_col = None
@@ -140,7 +156,18 @@ def main():
                         else:
                             out['continuation']['not aligned'] += 1
                     continue
-                name, toks, _ = split_tail(h.group(4))
+                name, toks_all, remark = split_tail(h.group(4))
+                base = h.start(4) + len(name)
+                tok_ends = [base + m.end() for m in re.finditer(NUM, line[base:])][:len(toks_all)]
+                toks = toks_all[:sum(1 for e in tok_ends if e <= amount_limit)]
+                if len(toks) != len(toks_all):
+                    out['amount_limit_effect']['lines with numbers right of the amount limit (read as 備考, not as amounts)'] += 1
+                    out['amount_limit_effect'][f'  {len(toks_all)} tokens -> {len(toks)} tokens'] += 1
+                if len(toks) == 3 and remark and len(tok_ends) >= 3:
+                    rs = line.find(remark, tok_ends[2])
+                    if rs >= 0:
+                        rem_minus_b.append(rs - b_col)
+                        rem_minus_e3.append(rs - tok_ends[2])
                 n = len(toks)
                 last_head_name_col, seen_head = h.start(4), True
                 kind = code_kind(h.group(3))
@@ -153,7 +180,7 @@ def main():
                     base = h.start(4) + len(name)
                     item2.append(([base + m.end() for m in re.finditer(NUM, line[base:])][:2], x == y == 0))
                     eq, neg = x == y, x == -y
-                    out['blank_cell_by_arithmetic']['prev blank (x==y)' if eq and not neg else 'request blank (x==-y)' if neg and not eq
+                    out['blank_cell_by_arithmetic(diagnosis only, not used to place values)']['prev blank (x==y)' if eq and not neg else 'request blank (x==-y)' if neg and not eq
                                                     else 'x=y=0 (either)' if eq and neg else 'neither'] += 1
                 elif n == 0:
                     label = 'HEADING: code + name, no amounts'
@@ -192,12 +219,18 @@ def main():
         'sources_without_detail_table': len(corpus) - len(detail_sources),
         'sources_with_no_text_layer(page_count)': sorted(no_text),
     }
+    out['remark_geometry'] = {
+        'row_lines_with_three_amounts_and_remark_text': len(rem_minus_b),
+        'remark_text_starts_left_of_the_備考_heading': sum(1 for x in rem_minus_b if x < 0),
+        'median_remark_start_minus_備考_heading_column': statistics.median(rem_minus_b),
+        'median_remark_start_minus_right_edge_of_第3_amount': statistics.median(rem_minus_e3),
+    }
     out['edge_spread_chars'] = {
         'pages_with_at_least_3_valid_items': len(spreads[0]),
         'median_max_spread_prev_req_diff': [statistics.median(sp) for sp in spreads],
         'max_spread_prev_req_diff': [max(sp) for sp in spreads],
     }
-    for k in ('lines', 'head_forms', 'blank_cell_by_arithmetic', 'blank_cell_by_page_edges', 'continuation'):
+    for k in ('lines', 'head_forms', 'blank_cell_by_arithmetic(diagnosis only, not used to place values)', 'blank_cell_by_page_edges', 'continuation', 'amount_limit_effect'):
         out[k] = dict(sorted(out[k].items(), key=lambda kv: -kv[1]))
     print(json.dumps(out, ensure_ascii=False, indent=2))
 
