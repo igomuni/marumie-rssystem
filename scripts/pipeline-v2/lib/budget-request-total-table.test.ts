@@ -158,12 +158,35 @@ describe('unresolved rules (synthetic, built on a real header zone)', () => {
 });
 
 describe('CSV output', () => {
-  it('uses the v0 schema and quotes multi-line names and comma amounts', () => {
+  const rowsOf = (csv: string) => csv.trimEnd().split('\n').slice(1);
+
+  it('uses the source table headings as column names, with provenance columns last', () => {
     const csv = renderRowsCsv(parseFixture('mext-02').rows);
     expect(csv.split('\n')[0].split(',')).toEqual([...TOTAL_TABLE_CSV_COLUMNS]);
-    expect(TOTAL_TABLE_CSV_COLUMNS).toContain('previous_general_sign_raw');
-    expect(csv).toContain('"客観的根拠に基づく教育政策立案の推進に必\n要な経費"');
+    expect([...TOTAL_TABLE_CSV_COLUMNS].slice(0, 10)).toEqual([
+      '要求番号', '区分',
+      '前年度予算額_一般行政経費', '前年度予算額_その他の経費', '前年度予算額_計',
+      '６年度概算要求額_一般行政経費', '６年度概算要求額_その他の経費', '６年度概算要求額_計',
+      '増△減', '明細書頁数',
+    ]);
+    expect([...TOTAL_TABLE_CSV_COLUMNS].slice(10)).toEqual(['source_file', 'source_page', 'source_line_start', 'source_line_end', 'table_block_id', 'row_index', 'row_type', 'parse_status']);
+  });
+
+  it('writes 区分 as code + name without letter spacing, and amounts as the source text', () => {
+    const csv = renderRowsCsv(parseFixture('mext-02').rows);
+    expect(csv).toContain('客観的根拠に基づく教育政策立案の推進に必要な経費');
+    expect(csv).not.toContain('\n要な経費');
     expect(csv).toContain(',"95,208,241",');
+    const row = parseFixture('mext-02').rows.find(r => r.cells.difference.sign_raw === '△')!;
+    expect(rowsOf(renderRowsCsv([row]))[0]).toContain(`,"△${row.cells.difference.amount_raw}",`);
+  });
+
+  it('keeps 区分 as the name only for TOTAL rows and leaves absent values empty', () => {
+    const rows = parseFixture('mext-02').rows;
+    const total = rows.find(r => r.row_type === 'TOTAL')!;
+    expect(rowsOf(renderRowsCsv([total]))[0].split(',')[1]).toBe(total.name_compact);
+    expect(total.request_no_raw).toBe('');
+    expect(rowsOf(renderRowsCsv([total]))[0].startsWith(',')).toBe(true);
   });
 
   it('is deterministic', () => {

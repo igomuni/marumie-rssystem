@@ -78,7 +78,6 @@ for (const r of results) {
   if (r.blocks.length === 0) continue;
   write(`sources/${path.basename(r.source_file, '.txt')}.csv`, renderRowsCsv(r.rows));
 }
-write('total-table.csv', renderRowsCsv(allRows));
 write('unresolved.csv', renderUnresolvedCsv(allUnresolved));
 write('line-audit.csv', renderAuditCsv(results.flatMap(r => r.audit)));
 
