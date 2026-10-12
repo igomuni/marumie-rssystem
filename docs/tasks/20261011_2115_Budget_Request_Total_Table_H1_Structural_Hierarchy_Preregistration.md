@@ -2,7 +2,7 @@
 
 指示書: `docs/chats/20261011_1820_総表CSV化/20261011_2108_Orca_H1_Structural_Hierarchy_Preregistration_GT_Review_Package.md`（ローカル、git 管理外）。前提: v0（#419）、P0 と Post-P0 research decision（#420、`20261011_1900_Budget_Request_Total_Table_Semantic_Hierarchy_P0_Failure_Isolation.md`）。
 
-**状態: `PENDING_HUMAN_GT_REVIEW`（round 2 完了、人によるレビュー待ち）。** GT は凍結していない。resolver は実装していない。round 1 の注釈者 B が確認しきれずに AMBIGUOUS を出したため、作業手段だけを改訂して A2/B2 で再注釈した（§12）。判定基準・標本・入力は変えていない。round 2 は一致113・不一致33で、両者とも RESOLVED なのに親や範囲が違う単位が17件あった（§12.7）。
+**状態: `GT_FROZEN`（2026-10-12）。** round 2 の人によるレビューが終わり、GT を凍結した（§13）。resolver は実装していない。round 1 の注釈者 B が確認しきれずに AMBIGUOUS を出したため、作業手段だけを改訂して A2/B2 で再注釈し（§12）、人によるレビューで裁定した。判定基準・標本・入力は変えていない。
 
 ## 1. 仮説（H1）
 
@@ -511,3 +511,58 @@ Run `run_97915207aade` で、§12.6 の仕様を使って Codex（gpt-6-luna、e
 **次:** `review/human-review.csv` の人によるレビュー（70件）。手引きは `review/review-guide.md`。監査の結果を見て escalation を判定し、すべて裁定したうえで GT を凍結する。
 
 **レビュー補助:** `scripts/pipeline-v2/build-budget-request-total-table-h1-review-aid.ts` で `review/human-review.html` を生成する。内容は、raw text の該当範囲（等幅、対象行と注釈が挙げた行を強調）、ブロックの行と7セル、TOTAL の範囲の検算、A2/B2 の判定と `decisions.md` の根拠、round 1 の参考、契約の要点。書き出しは `human-review.csv` と同じ形式。証拠の範囲は raw text のままとし、PDF の画像は載せない。Coordinator の示唆は初期状態で非表示にし、判定は人が行う。
+
+## 13. GT の凍結（2026-10-12）
+
+### 13.1 凍結したもの
+
+- 場所: `tests/fixtures/budget-request-total-table-h1-gt/2024/`。生成は `scripts/pipeline-v2/freeze-budget-request-total-table-h1-gt.ts`（再現可能。2回実行して `gt-manifest.json` が一致）。
+- **GT の構成:**
+  - 人によるレビューの対象になった単位（不一致33、一致した単位の監査29、CONTEXT 8、escalation 4の計74）は、人の判定を GT とした（`gt_source = HUMAN`）。
+  - 残る72単位は、A2/B2 の判定が一致し、監査の対象にならなかったため、一致した判定のまま GT とした（`gt_source = CONSENSUS_UNAUDITED`）。
+- 集計: 関係（CONTEXT を含む122）は RESOLVED 109・AMBIGUOUS 5・NO_PARENT 8。TOTAL の範囲（24）は RESOLVED 24。
+
+| ファイル | SHA-256 |
+|---|---|
+| `gt-relation.csv` | `1fc47b10f28257fd2bed7242cd3ea5eea0ccfa4ff4903a4770ebd3db6d827062` |
+| `gt-total-scope.csv` | `b34af6ee2245d2df296cf666a1d2fd49dc80cdc074e947724db759662ab9b331` |
+| `gt-manifest.json` | `aee41eb54c7be9c6972440a061d62b9ec675c157a55c2947a8ff245b4710981e` |
+| `sample-manifest.csv` | `f324854ee932728a1edee33dd4972cf1fe4be3fd1694db655443cbfc6296f8aa` |
+| `human-review-submission-3-final.csv` | `2d80149a2c4c9a571a1a7ca4e2c6aa60af68b4ff62a0c416e9c9a2caf5ca9049` |
+
+### 13.2 検証（スクリプトが、失敗したら停止する形で行った。補正はしていない）
+
+- 最終の提出（3回目）の74件が、すべて REVIEWED で、判定値が有効だった。
+- 親と範囲は、すべて正規の形（`row:N`・`context`・`N;N`）だった。
+- TOTAL の範囲の RESOLVED 24件は、選んだ直接の子の7セルの合計が、TOTAL 行と完全に一致した。親は、すべて対象行より前の行だった。
+- 判定以外の列に変更が無かった（追加した4件の `review_required_reason = ESCALATION` を除く）。
+- 最終の提出は、byte-identical で保存した。
+
+### 13.3 経緯（プロトコル上の逸脱を含む。後知恵で補正しない）
+
+人によるレビューの提出は3回あり、すべて保存した。
+
+| 提出 | SHA-256 | 内容 |
+|---|---|---|
+| 1回目 | `666af8fc…93a7` | 70件。親の欄に、表の行をそのまま貼り付けていた。監査の不一致5件（R3-011・R6-001・R8-008・T3-006・T3-007）。うち3件は、対象行そのものが貼り付けられていた（貼り間違い） |
+| 2回目 | `3a194994…19d0` | 70件。貼り間違いが直り、CONTEXT 8件は NO_PARENT になった。監査の不一致は T3-006・T3-007 の2件（人は AMBIGUOUS、2人は RESOLVED で一致） |
+| 3回目（最終） | `2d80149a…9049` | 74件。監査の不一致は0件 |
+
+- **escalation:** 2回目の提出で、会計計の層（T_会計計）に監査の誤りが見つかり、§6 に従って、その層の未レビュー4単位（T3-001・T3-002・T3-003・T3-008）を追加でレビューした。層 S3・S6・S8 は、貼り間違いを直したので対象にならなかった。
+- **逸脱 1（レビュー手段の変更）:**
+  - 親と範囲の入力は、1回目と2回目では、自由記述の欄に表の行を貼り付ける形だった。直接の子の集合を表せない方式だった。
+  - その後、行をクリックして選び、選んだ行の7セルの合計が TOTAL と一致するかをその場で表示する画面に変えた。
+  - **3回目の提出では、TOTAL の11件（T1-003、T2-001〜T2-005、T2-007、T3-004〜T3-007）が、AMBIGUOUS から RESOLVED に変わった。** この画面の合計表示が判断に影響した可能性を、排除できない。
+  - 合計が一致することは範囲の条件だが、他の範囲が一致しないことは示さない。2回目の提出での AMBIGUOUS の理由は「対となる会計が判別つかない」だった。
+- **逸脱 2（監査の結果）:** T3-006・T3-007 は、最初の提出では監査の誤りだった。最終の提出が2人の判定と一致したのは、レビュー手段の変更後の再判断による。「監査の誤りが0件」という最終の結果は、この経緯のうえで読む必要がある。
+- **TOTAL の範囲の解釈:**
+  - TOTAL の RESOLVED 24件のうち、同額の1行（組織の集計行そのもの）を範囲とするものと、その子たちを範囲とするものが混在している。
+  - 例: T1-001・T1-002・T1-004・T1-005 は1行で、T1-006・T1-007 は複数の子。
+  - round 1 では、A と B はほぼすべての TOTAL を AMBIGUOUS としていた。
+  - この GT は、人の判定をそのまま保存している。H1 の評価結果を読むときは、この点を併せて記録する。
+- 診断の `stability`（GT の入力ではない）は §12.7 のとおり。
+
+### 13.4 held-out の規律（§7 の再掲）
+
+- 凍結後、H1 を実装する worker には、最終 GT・人のレビュー結果・不一致の裁定を見せない。見せてよいのは、この preregistration、`sample-manifest.csv`、P0 の事実。
+- GT の fixture はリポジトリに置いたが、実装の worker への指示には、読んではいけないパスとして含める。
