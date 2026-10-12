@@ -1,0 +1,47 @@
+{
+  "schema": "budget-request-toc-pdf-source-token-first-p6-prefreeze-validation/v1",
+  "status": "PASS",
+  "freezeBoundary": "No P6 text extraction, PDF rendering, visual observation, or primitive feasibility output was inspected before this validation.",
+  "p2Population": {
+    "candidateRows": 50,
+    "uniquePdfs": 15,
+    "physicalPages": 17,
+    "expectedCandidateRows": 50,
+    "expectedPdfs": 15,
+    "expectedPhysicalPages": 17
+  },
+  "frozenHashes": {
+    "candidateInventory": "0dcf19a039de8ae79258405b3e1464dae63fb3b0b3f118a5a924f3e95723b438",
+    "candidateInventoryManifest": "83ef9495efff3f15af84db3005d8e79b84b22180b0d55958ab0503266396e7ed",
+    "p2FreezeDocument": "c9ce012cd9c52240bd92d1067ec9d809189c9c19af209d8c721a89397fc5cdbb"
+  },
+  "populationInventorySha256": "015e3da0aea9e854f2464570ad09d43926e145b3fb21b3615dacd833171b4273",
+  "blindedPacketSha256": "536b34d2b3aec7931b369ecc2e3180f2dd2fb9315cc567a3ca6679188c955ae6",
+  "protocolSha256": "43a1cdaf275aa06d49001619a1e815a6c6c225d4feb455c42636fd0042a44652",
+  "populationBuilderSha256": "ff4e0f09c5597a47ac23e0e40f9daaa239dade8c40726157f73e2342a552e9f9",
+  "sourcePdfHashes": {
+    "canonicalOriginalsChecked": 15,
+    "matches": 15,
+    "mismatches": 0,
+    "method": "Independent worker rehashed all unique source_pdf/source_pdf_sha256 pairs against /Users/igomuni/MyGitHub/marumie-rssystem; coordinator builder independently rehashed the same 15 files."
+  },
+  "independentProtocolReview": {
+    "status": "PASS",
+    "dispatch": "ctx_f72f944e95fd",
+    "result": "50 rows → 15 PDFs / 17 pages and packet blinding/protocol gates passed; reviewer could not access canonical source PDFs from P6 worktree."
+  },
+  "independentSourceHashReview": {
+    "status": "PASS",
+    "dispatch": "ctx_0faec6cb416c",
+    "result": "15/15 canonical PDF hashes matched; no extraction, rendering, or edits."
+  },
+  "blinding": {
+    "packetRows": 17,
+    "containsOwnershipOrRawText": false
+  },
+  "observationStarted": false,
+  "freezeCommit": "to be recorded in git history; this validation is committed before any P6 observation",
+  "worktreeBase": "c1acc89b4c205e6c5dffb53c561bf21082853724",
+  "originMainObservedAfterCreation": "8c89566cbb9ea2c0d761ca598d55752ed673b0a4",
+  "originMainUpdateAvoided": true
+}

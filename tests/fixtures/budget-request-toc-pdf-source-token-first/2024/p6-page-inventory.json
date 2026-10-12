@@ -1,0 +1,256 @@
+{
+  "schema": "budget-request-toc-pdf-source-token-first-p6-population/v1",
+  "researchPosition": "post-hoc development feasibility; not held-out evaluation",
+  "selectionRule": "Every unique (source_pdf_sha256, physical_page) in the immutable P2 candidate inventory; deduplicate only page extraction and retain all candidate IDs as provenance.",
+  "p2CandidateRows": 50,
+  "uniquePdfs": 15,
+  "uniquePhysicalPages": 17,
+  "frozenInputHashes": {
+    "candidateInventory": "0dcf19a039de8ae79258405b3e1464dae63fb3b0b3f118a5a924f3e95723b438",
+    "candidateInventoryManifest": "83ef9495efff3f15af84db3005d8e79b84b22180b0d55958ab0503266396e7ed",
+    "p2FreezeDocument": "c9ce012cd9c52240bd92d1067ec9d809189c9c19af209d8c721a89397fc5cdbb"
+  },
+  "pageKey": [
+    "sourcePdfSha256",
+    "physicalPage"
+  ],
+  "pages": [
+    {
+      "pageId": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd:p3",
+      "sourcePdf": "data/download/env.go.jp/content/000157010.pdf",
+      "sourcePdfSha256": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd",
+      "physicalPage": 3,
+      "sourceCandidateIds": [
+        "asm-2e015c3fc8a1a9286725",
+        "asm-3ab4b82a02993459c73c",
+        "asm-3aec73eaf5f4513bd612",
+        "asm-61fc1b99283a11b3a778",
+        "asm-a4ef83972d28c2630ae6",
+        "asm-c26020732d61e8ea23d6",
+        "h1pair-00184cfca0fb2f69bfa226f0c3180d831b61b378be366ddd675d5ee9ca6220a6"
+      ],
+      "pageDimensions": null,
+      "rotation": null,
+      "selectionReason": "All distinct (source_pdf_sha256, physical_page) keys in frozen P2 inventory; no extraction or geometry used."
+    },
+    {
+      "pageId": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e:p3",
+      "sourcePdf": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "sourcePdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+      "physicalPage": 3,
+      "sourceCandidateIds": [
+        "asm-011b2b98b82c6ab13dad",
+        "asm-a0c079b51ab757fa97b1",
+        "asm-a3f839ebb16d85a1520e",
+        "h1pair-1e59379aa03db01822e23ad4b6e59965ab3575dc339d331feaa1ec57e78fd21c"
+      ],
+      "pageDimensions": null,
+      "rotation": null,
+      "selectionReason": "All distinct (source_pdf_sha256, physical_page) keys in frozen P2 inventory; no extraction or geometry used."
+    },
+    {
+      "pageId": "17c0efdce49fb24a188a08ecef5a3340ea3e76f9c6ccef10539eefd69e8d8363:p3",
+      "sourcePdf": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/fukko_o.pdf",
+      "sourcePdfSha256": "17c0efdce49fb24a188a08ecef5a3340ea3e76f9c6ccef10539eefd69e8d8363",
+      "physicalPage": 3,
+      "sourceCandidateIds": [
+        "asm-c9498b51b0c9c44416be",
+        "h1pair-31452f9dba6e3dcf8fd7ba84a26d16a8991a884543c0b36c42294b4940fa6377"
+      ],
+      "pageDimensions": null,
+      "rotation": null,
+      "selectionReason": "All distinct (source_pdf_sha256, physical_page) keys in frozen P2 inventory; no extraction or geometry used."
+    },
+    {
+      "pageId": "2c1d6cb494a41dbb8d03a63099cc4154f31d70b966c7510bc6fce3501a70e7b6:p3",
+      "sourcePdf": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneju_o.pdf",
+      "sourcePdfSha256": "2c1d6cb494a41dbb8d03a63099cc4154f31d70b966c7510bc6fce3501a70e7b6",
+      "physicalPage": 3,
+      "sourceCandidateIds": [
+        "asm-1b8b757e263f37f4fb88",
+        "asm-33636c62b06fa6a5e8c6",
+        "asm-585bec8c9eb9235d287b",
+        "asm-e6e91715fe29ebaee71f",
+        "h1pair-03931478543d4889f24e8e7ade66309b5efdfc2362b79ce85fb4a2aca2f0ddb1"
+      ],
+      "pageDimensions": null,
+      "rotation": null,
+      "selectionReason": "All distinct (source_pdf_sha256, physical_page) keys in frozen P2 inventory; no extraction or geometry used."
+    },
+    {
+      "pageId": "3be3fa49d24cc02ed680f0104d41405ff5e69bfb4a84290dccc8fe8205eaa1f1:p3",
+      "sourcePdf": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+      "sourcePdfSha256": "3be3fa49d24cc02ed680f0104d41405ff5e69bfb4a84290dccc8fe8205eaa1f1",
+      "physicalPage": 3,
+      "sourceCandidateIds": [
+        "asm-22ee515f5d10ea321c41",
+        "h1pair-35d9c7016a73b50c0ee301532127b35cc591bfc0e436348f5de42c2a37a0caaa"
+      ],
+      "pageDimensions": null,
+      "rotation": null,
+      "selectionReason": "All distinct (source_pdf_sha256, physical_page) keys in frozen P2 inventory; no extraction or geometry used."
+    },
+    {
+      "pageId": "49a975a4436da6d53319a32ca745e2d110c42839c441c6302a7361ed9a62e4cc:p3",
+      "sourcePdf": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "sourcePdfSha256": "49a975a4436da6d53319a32ca745e2d110c42839c441c6302a7361ed9a62e4cc",
+      "physicalPage": 3,
+      "sourceCandidateIds": [
+        "asm-9b56ea2fa976d82ea21e",
+        "asm-b23b110507f46759f3fd"
+      ],
+      "pageDimensions": null,
+      "rotation": null,
+      "selectionReason": "All distinct (source_pdf_sha256, physical_page) keys in frozen P2 inventory; no extraction or geometry used."
+    },
+    {
+      "pageId": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217:p7",
+      "sourcePdf": "data/download/mlit.go.jp/page/content/001630995.pdf",
+      "sourcePdfSha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+      "physicalPage": 7,
+      "sourceCandidateIds": [
+        "h1pair-01428c1e18718f580b5514395d911732becd24481e50447ec2c85529a2914285"
+      ],
+      "pageDimensions": null,
+      "rotation": null,
+      "selectionReason": "All distinct (source_pdf_sha256, physical_page) keys in frozen P2 inventory; no extraction or geometry used."
+    },
+    {
+      "pageId": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c:p3",
+      "sourcePdf": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+      "sourcePdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+      "physicalPage": 3,
+      "sourceCandidateIds": [
+        "asm-5d9328605637d1b8851e",
+        "asm-6820cfd8ee8983a0a2d2",
+        "asm-bf8d8a2d58eb2d72cb40",
+        "h1pair-0907aa3c8596786e2ee2c621cdb9ba89bcd54f6662d0a2eaa25d89504e8b122d"
+      ],
+      "pageDimensions": null,
+      "rotation": null,
+      "selectionReason": "All distinct (source_pdf_sha256, physical_page) keys in frozen P2 inventory; no extraction or geometry used."
+    },
+    {
+      "pageId": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c:p4",
+      "sourcePdf": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+      "sourcePdfSha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+      "physicalPage": 4,
+      "sourceCandidateIds": [
+        "asm-5d167f09e4c4ec11ca6d",
+        "asm-a770aa5a75a5b8ca11ad",
+        "h1pair-00c59ebed3fe5364175866b71befbf7db8284e487913020218fed298c9bd7909"
+      ],
+      "pageDimensions": null,
+      "rotation": null,
+      "selectionReason": "All distinct (source_pdf_sha256, physical_page) keys in frozen P2 inventory; no extraction or geometry used."
+    },
+    {
+      "pageId": "aaec655a87a74e2724ac35d81b6759697749c24e586a3b09934c46c4a4fca460:p4",
+      "sourcePdf": "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf",
+      "sourcePdfSha256": "aaec655a87a74e2724ac35d81b6759697749c24e586a3b09934c46c4a4fca460",
+      "physicalPage": 4,
+      "sourceCandidateIds": [
+        "asm-3a59ef934ad10279d271",
+        "h1pair-00689d84035f85d0b52dc089d7039c1a706a275bfc9b1ce937d0e0b92281cd39"
+      ],
+      "pageDimensions": null,
+      "rotation": null,
+      "selectionReason": "All distinct (source_pdf_sha256, physical_page) keys in frozen P2 inventory; no extraction or geometry used."
+    },
+    {
+      "pageId": "ba64c25df327161a33c293374a7255c203cc9a527130ece848574badefbf909a:p3",
+      "sourcePdf": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourcePdfSha256": "ba64c25df327161a33c293374a7255c203cc9a527130ece848574badefbf909a",
+      "physicalPage": 3,
+      "sourceCandidateIds": [
+        "asm-6e3f62232c38b031866e"
+      ],
+      "pageDimensions": null,
+      "rotation": null,
+      "selectionReason": "All distinct (source_pdf_sha256, physical_page) keys in frozen P2 inventory; no extraction or geometry used."
+    },
+    {
+      "pageId": "ba64c25df327161a33c293374a7255c203cc9a527130ece848574badefbf909a:p4",
+      "sourcePdf": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourcePdfSha256": "ba64c25df327161a33c293374a7255c203cc9a527130ece848574badefbf909a",
+      "physicalPage": 4,
+      "sourceCandidateIds": [
+        "h1pair-02100154b32654c49f1f18501ed8ce627209e98321ab20b84dfed9c58aa1cef2",
+        "h1pair-0518793151acf3b50fcb55d3a8a0d61df288dbddae9ad031d05d468d20369867"
+      ],
+      "pageDimensions": null,
+      "rotation": null,
+      "selectionReason": "All distinct (source_pdf_sha256, physical_page) keys in frozen P2 inventory; no extraction or geometry used."
+    },
+    {
+      "pageId": "be6b5bd2f3c0480bd8a5e9292a304e4eb37bd342deb21eb28b2464dfb5741ede:p2",
+      "sourcePdf": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tousi_2.pdf",
+      "sourcePdfSha256": "be6b5bd2f3c0480bd8a5e9292a304e4eb37bd342deb21eb28b2464dfb5741ede",
+      "physicalPage": 2,
+      "sourceCandidateIds": [
+        "asm-7783e10023db9dfee30f",
+        "h1pair-21e7774ca5cc4a9de9ccf9ba08f389f3782ead50d775400eee44bbf2148e98b8",
+        "h1pair-26fbc80f26b0849634e7a732e137f6165d3c26c35038b90c481be1f1a2f59335"
+      ],
+      "pageDimensions": null,
+      "rotation": null,
+      "selectionReason": "All distinct (source_pdf_sha256, physical_page) keys in frozen P2 inventory; no extraction or geometry used."
+    },
+    {
+      "pageId": "c71dd17f73464540ecb600d95d94104e59254e06b73efc2f282a5ecd8ba01823:p3",
+      "sourcePdf": "data/download/env.go.jp/content/000157012.pdf",
+      "sourcePdfSha256": "c71dd17f73464540ecb600d95d94104e59254e06b73efc2f282a5ecd8ba01823",
+      "physicalPage": 3,
+      "sourceCandidateIds": [
+        "asm-2c517664d17417ed68e5",
+        "asm-58a31d107629ad95a5ad",
+        "asm-6245d15c4c4dad5589c5",
+        "asm-951cdf263f904d590471",
+        "h1pair-01fc7bef6d1deda4eac0c7f2c0fa34ff69e0d20a9d79c35286f8f51acad3d4c1"
+      ],
+      "pageDimensions": null,
+      "rotation": null,
+      "selectionReason": "All distinct (source_pdf_sha256, physical_page) keys in frozen P2 inventory; no extraction or geometry used."
+    },
+    {
+      "pageId": "cb0442175d186f3041d6b3df93c46139760920b2c0162ae5a61c3abedf0a60e5:p2",
+      "sourcePdf": "data/download/ndl.go.jp/jp/aboutus/outline/r06_budgetrequest.pdf",
+      "sourcePdfSha256": "cb0442175d186f3041d6b3df93c46139760920b2c0162ae5a61c3abedf0a60e5",
+      "physicalPage": 2,
+      "sourceCandidateIds": [
+        "h1pair-19c4d63b468f79fc680165028c18d5a4bfa50c791dd6e66c85e8a8c4361fb127",
+        "h1pair-4a715b3fa168201b25555b250d90dd54f28c3205156cd0ea86e93d562c575e2c"
+      ],
+      "pageDimensions": null,
+      "rotation": null,
+      "selectionReason": "All distinct (source_pdf_sha256, physical_page) keys in frozen P2 inventory; no extraction or geometry used."
+    },
+    {
+      "pageId": "cc54dbe5f689116619a1f8453747d47bca5b960137f90869ead26954d651703b:p3",
+      "sourcePdf": "data/download/soumu.go.jp/main_content/000901372.pdf",
+      "sourcePdfSha256": "cc54dbe5f689116619a1f8453747d47bca5b960137f90869ead26954d651703b",
+      "physicalPage": 3,
+      "sourceCandidateIds": [
+        "h1pair-011f331213d3108c03764bb97c655787db07fed6ad6bbaf9757de4881a9cf417",
+        "h1pair-03b299ea0b8096cd47f2c008ce400c64b635051138ba04ff1053f8d9840568c2"
+      ],
+      "pageDimensions": null,
+      "rotation": null,
+      "selectionReason": "All distinct (source_pdf_sha256, physical_page) keys in frozen P2 inventory; no extraction or geometry used."
+    },
+    {
+      "pageId": "efbfdfefbf4d6c4f85c1da1867348c96964a56fefe6d4c952291e2bf3448e837:p2",
+      "sourcePdf": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+      "sourcePdfSha256": "efbfdfefbf4d6c4f85c1da1867348c96964a56fefe6d4c952291e2bf3448e837",
+      "physicalPage": 2,
+      "sourceCandidateIds": [
+        "asm-078825a7f8da1167b48b",
+        "asm-5e674619e1e58c5b30bc",
+        "h1pair-04fc8d2c7e412743930c9d7f23804b9d989d8dd73649d5bb0720eee9b114fd3b"
+      ],
+      "pageDimensions": null,
+      "rotation": null,
+      "selectionReason": "All distinct (source_pdf_sha256, physical_page) keys in frozen P2 inventory; no extraction or geometry used."
+    }
+  ]
+}
