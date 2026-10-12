@@ -102,6 +102,9 @@ TAIL          = SIGNED_AMOUNT (\s+ SIGNED_AMOUNT){6} (\s+ DETAIL_PAGE)? \s*$
 
 ## 既知の後段課題（v0 の対象外）
 
+- **空白を加工しない方針への変更（記録のみ。未対応）。** `区分` の文字間の空白と `△` の後ろの空白を詰めているが、明細表の CSV（[budget-request-detail-table-csv.md](budget-request-detail-table-csv.md)）は空白を加工しない。総表も、空白を加工しない方針に直したい。
+- **`source_file` 列は不要と判断済み（記録のみ。未対応）。** 文字数が多くなりがちで、ソース別 CSV のファイル名（`sources/<slug>.csv`）で判別できる。明細表の CSV は、すでに持たない。総表の CSV からも、空白の方針の見直しと合わせて外す。複数の source をまとめる `unresolved.csv` などには、`source_file` 列を残す。
+
 - 同一の総表が別 source に重複して掲載されている（環境省と経済産業省のエネルギー対策特別会計2勘定）。`sources/` は source 単位で出力するため、重複を除いていない。
 - `CONTEXT` 行（所管・会計）と HIER/CODE3/DETAIL の意味的な階層の再構成。
 - 金額の数値化（符号付き整数への変換）。
