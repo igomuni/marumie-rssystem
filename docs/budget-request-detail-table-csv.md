@@ -120,7 +120,7 @@ npx tsx scripts/pipeline-v2/build-budget-request-detail-table-csv.ts [zipPath] [
 
 ## 既知の後段課題（v0 の対象外）
 
-- **総表 CSV との表記の差（記録のみ。対応は別途）。** 総表の CSV（[budget-request-total-table-csv.md](budget-request-total-table-csv.md)）は、`区分` の文字間の空白と、`△` の後ろの空白を詰めている。明細表は、空白を加工しない方針で、そのまま残す。総表も、空白を加工しない方針に直したい（未対応）。
+- **総表 CSV との表記の差（記録のみ。対応は別途）。** 総表の CSV（[budget-request-total-table-csv.md](budget-request-total-table-csv.md)）は、`区分` の文字間の空白と、`△` の後ろの空白を詰めている。明細表は、空白を加工しない方針で、そのまま残す。総表も、空白を加工しない方針に直したい（未対応）。あわせて、総表の CSV の `source_file` 列も、不要と判断済みで、外す予定（未対応）。
 - **左側の未解決の行（記録のみ。別途確認する）。** `unresolved.csv` の、継続行の条件に合わない左側の行（FY2024 は1,313行）は、備考の表の一部が多いと見られるが、全件は確かめていない。
 
 - 備考。
