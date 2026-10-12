@@ -343,10 +343,13 @@ export function parseDetailSource(text: string, sourceFile: string): SourceResul
 
 // ---------- CSV rendering ----------
 
-/** 明細表の見出し（表頭の原文。文字間の空白は除く）を列名にし、行の出所をたどる列を末尾に置く。 */
+/**
+ * 明細表の見出し（表頭の原文。文字間の空白は除く）を列名にし、行の出所をたどる列を末尾に置く。
+ * source_file 列は持たない（ソース別 CSV のファイル名 `<slug>.csv` で判別する）。
+ */
 export const DETAIL_TABLE_CSV_COLUMNS = [
   '要求番号', '事項', '前年度予算額', '６年度概算要求額', '対前年度比較増△減',
-  'source_file', 'source_page', 'source_line_start', 'source_line_end', 'row_index', 'row_type', 'parse_status',
+  'source_page', 'source_line_start', 'source_line_end', 'row_index', 'row_type', 'parse_status',
 ] as const;
 
 export const UNRESOLVED_CSV_COLUMNS = ['source_file', 'source_page', 'source_line_start', 'source_line_end', 'raw_text', 'reason'] as const;
@@ -360,7 +363,7 @@ const csvLine = (values: unknown[]) => values.map(csvCell).join(',');
 export function renderRowsCsv(rows: DetailRow[]): string {
   const body = rows.map(r => csvLine([
     r.request_no_raw, r.matter_raw, r.cells.previous, r.cells.request, r.cells.difference,
-    r.source_file, r.source_page, r.source_line_start, r.source_line_end, r.row_index, r.row_type, r.parse_status,
+    r.source_page, r.source_line_start, r.source_line_end, r.row_index, r.row_type, r.parse_status,
   ]));
   return [DETAIL_TABLE_CSV_COLUMNS.join(','), ...body].join('\n') + '\n';
 }

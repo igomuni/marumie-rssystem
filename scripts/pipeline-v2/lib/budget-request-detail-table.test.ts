@@ -147,8 +147,9 @@ describe('accounting and CSV output', () => {
   it('uses the source table headings as column names, with provenance columns last', () => {
     expect([...DETAIL_TABLE_CSV_COLUMNS]).toEqual([
       '要求番号', '事項', '前年度予算額', '６年度概算要求額', '対前年度比較増△減',
-      'source_file', 'source_page', 'source_line_start', 'source_line_end', 'row_index', 'row_type', 'parse_status',
+      'source_page', 'source_line_start', 'source_line_end', 'row_index', 'row_type', 'parse_status',
     ]);
+    expect(DETAIL_TABLE_CSV_COLUMNS).not.toContain('source_file');
     const csv = renderRowsCsv(parseFixture('edges').rows);
     expect(csv.split('\n')[0].split(',')).toEqual([...DETAIL_TABLE_CSV_COLUMNS]);
   });

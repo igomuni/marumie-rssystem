@@ -102,8 +102,9 @@ npx tsx scripts/pipeline-v2/build-budget-request-detail-table-csv.ts [zipPath] [
 | `要求番号` | 原文。無い行は空 |
 | `事項` | コード＋名称を、raw text のまま（文字間の空白を含む）。継続行は `\n` で連結。`CONTEXT` は行の全文 |
 | `前年度予算額` `６年度概算要求額` `対前年度比較増△減` | 金額のセルを、raw text のまま（`△` と数字の間の空白、カンマを含む）。空欄は空 |
-| `source_file` `source_page` `source_line_start` `source_line_end` `row_index` `row_type` `parse_status` | 行の出所（ファイルの物理行番号、1始まり）、source 内の連番、コードの形、金額の置き方（`PARSED` / `AMOUNTS_PLACED_BY_PAGE_EDGES` / `AMOUNTS_PLACED_BY_ARITHMETIC`） |
+| `source_page` `source_line_start` `source_line_end` `row_index` `row_type` `parse_status` | 行の出所（ページと、ファイルの物理行番号。1始まり）、source 内の連番、コードの形、金額の置き方（`PARSED` / `AMOUNTS_PLACED_BY_PAGE_EDGES` / `AMOUNTS_PLACED_BY_ARITHMETIC`） |
 
+- **`source_file` 列は持たない。** source は、ソース別 CSV のファイル名（`sources/<slug>.csv`。`<slug>` は plain text のファイル名から `.txt` を除いたもの）で判別する。複数の source をまとめる `unresolved.csv` と `arithmetic-diagnostics.csv` には `source_file` 列を残す。
 - 字下げ（行頭の空白）は出力しない。元の plain text は `source_file` と `source_line_start` から引ける。
 - 備考は出力しない。
 
@@ -118,6 +119,9 @@ npx tsx scripts/pipeline-v2/build-budget-request-detail-table-csv.ts [zipPath] [
 - main CSV の全行について、`事項` と各セルが、`source_file` の `source_line_start` の物理行に、順序どおり、そのままの文字で含まれることを、実装とは別の確認（Python。スクリプトはコミットしていない）で確かめた。
 
 ## 既知の後段課題（v0 の対象外）
+
+- **総表 CSV との表記の差（記録のみ。対応は別途）。** 総表の CSV（[budget-request-total-table-csv.md](budget-request-total-table-csv.md)）は、`区分` の文字間の空白と、`△` の後ろの空白を詰めている。明細表は、空白を加工しない方針で、そのまま残す。総表も、空白を加工しない方針に直したい（未対応）。
+- **左側の未解決の行（記録のみ。別途確認する）。** `unresolved.csv` の、継続行の条件に合わない左側の行（FY2024 は1,313行）は、備考の表の一部が多いと見られるが、全件は確かめていない。
 
 - 備考。
 - 階層（組織・項・事項・目）の復元と意味付け。`CONTEXT` 行、`row_type`、行の順序が素材になる。
