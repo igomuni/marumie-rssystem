@@ -324,11 +324,21 @@ export function parseSource(text: string, sourceFile: string, blockPrefix: strin
 
 // ---------- CSV rendering ----------
 
+/** 総表の見出しの語（表頭の原文。文字間の空白は除く）。2段の見出しは「上段_下段」。 */
+const AMOUNT_HEADERS: Record<AmountField, string> = {
+  previous_general: '前年度予算額_一般行政経費',
+  previous_other: '前年度予算額_その他の経費',
+  previous_total: '前年度予算額_計',
+  request_general: '６年度概算要求額_一般行政経費',
+  request_other: '６年度概算要求額_その他の経費',
+  request_total: '６年度概算要求額_計',
+  difference: '増△減',
+};
+
+/** 総表の列（原本の見出し）を先頭に、行の出所をたどる列を末尾に置く。 */
 export const TOTAL_TABLE_CSV_COLUMNS = [
-  'source_file', 'source_page', 'source_line_start', 'source_line_end', 'table_block_id', 'row_index',
-  'row_type', 'request_no_raw', 'code_raw', 'name_raw', 'name_compact',
-  ...AMOUNT_FIELDS.flatMap(f => [`${f}_sign_raw`, `${f}_amount_raw`]),
-  'detail_page_raw', 'parse_status',
+  '要求番号', '区分', ...AMOUNT_FIELDS.map(f => AMOUNT_HEADERS[f]), '明細書頁数',
+  'source_file', 'source_page', 'source_line_start', 'source_line_end', 'table_block_id', 'row_index', 'row_type', 'parse_status',
 ] as const;
 
 export const UNRESOLVED_CSV_COLUMNS = ['source_file', 'source_page', 'source_line_start', 'source_line_end', 'table_block_id', 'raw_text', 'reason'] as const;
@@ -341,10 +351,13 @@ const csvLine = (values: unknown[]) => values.map(csvCell).join(',');
 
 export function renderRowsCsv(rows: LogicalRow[]): string {
   const body = rows.map(r => csvLine([
-    r.source_file, r.source_page, r.source_line_start, r.source_line_end, r.table_block_id, r.row_index,
-    r.row_type, r.request_no_raw, r.code_raw, r.name_raw, r.name_compact,
-    ...AMOUNT_FIELDS.flatMap(f => [r.cells[f].sign_raw, r.cells[f].amount_raw]),
-    r.detail_page_raw, r.parse_status,
+    r.request_no_raw,
+    // 区分 = コード + 名称（名称は文字間の空白を除いたもの）。TOTAL は名称だけ。
+    [r.code_raw, r.name_compact].filter(Boolean).join(' '),
+    // 金額は原文のまま。△は金額の前に付ける。
+    ...AMOUNT_FIELDS.map(f => `${r.cells[f].sign_raw}${r.cells[f].amount_raw}`),
+    r.detail_page_raw,
+    r.source_file, r.source_page, r.source_line_start, r.source_line_end, r.table_block_id, r.row_index, r.row_type, r.parse_status,
   ]));
   return [TOTAL_TABLE_CSV_COLUMNS.join(','), ...body].join('\n') + '\n';
 }
