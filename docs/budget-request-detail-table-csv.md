@@ -1,0 +1,126 @@
+# 概算要求 明細表（備考を除く）raw text → CSV（v0）
+
+令和6年度歳出概算要求額明細表の、**備考を除く左側**（要求番号・事項・前年度予算額・６年度概算要求額・対前年度比較増△減）を、PDF から生成済みの plain text（pdftotext 出力、Form Feed でページ区切り）から deterministic に CSV 化する。LLM・OCR・他資料による補完は行わない。備考（予算額の推移、要求要旨、積算の内訳）は対象外。
+
+- 実装: `scripts/pipeline-v2/lib/budget-request-detail-table.ts`（pure）、`scripts/pipeline-v2/build-budget-request-detail-table-csv.ts`（runner）
+- テスト: `scripts/pipeline-v2/lib/budget-request-detail-table.test.ts`、fixture は `tests/fixtures/budget-request-detail-table/2024/`（実ページの全文。出典は `excerpts.json`）
+- 総表は別の仕様: [budget-request-total-table-csv.md](budget-request-total-table-csv.md)
+
+```bash
+npx tsx scripts/pipeline-v2/build-budget-request-detail-table-csv.ts [zipPath] [outputDir]
+# 既定: data/work/budget-request-plain-text.zip → data/work/budget-request-csv/2024/detail-table/
+```
+
+## 原則
+
+- raw text に存在する値だけを抽出する。空欄を `0` にしない、`△` を補完しない、他の行・他のページから値を補わない。
+- **セルの文字は、raw text の表記のまま保つ**（名称の文字間の空白、`△` と数字の間の空白、カンマ）。数値化・空白の除去・字下げの正規化はしない。空欄は空欄のまま出力する。
+- 判断できない行は main CSV に入れず、`unresolved.csv` に生の行と理由を残す。
+- コードの形（`row_type`）は物理文法であり、組織・項・事項・目などの意味付けはしない。同じ3桁コードが異なる階層に現れる。
+- 親子関係の復元はしない（行の順序と、`row_type`、出所の行番号から後段で行う）。
+
+## 文法
+
+### ページ
+
+- **明細表のページ**: 空白を除去したページ本文に `事項` `前年度` `比較増` `備考` `予算額` `概算要求額` がすべて含まれ、かつ総表のページ（`一般行政経費` `その他の経費` `明細書` がすべて含まれる）でないもの。明細表の表頭は、備考側を含め、各ページに繰り返し出る（FY2024 は8,585ページのうち8,574ページで境が決まる）。
+- **text layer の無い source**: 全ページが空の source（FY2024 は法務省 737ページ、金融庁 77ページ）は、明細表のページが検出されず、出力しない（`summary.json` の `sourcesWithNoTextLayer` に記録する）。
+
+### 左側と備考側の境
+
+- 表頭の1行目（`事項` `前年度` `備考` を含む行）にある、見出し `前年度` の開始桁（`前` の位置）を、そのページの境（`q`）とする。2行目（`番号 … 予算額 … 比較…` の行）までをヘッダ領域とする。
+- 本文の行は、行頭の位置（先頭の空白の数）が `q` 以上なら備考側とし、読まない（`RIGHT_REGION`）。`q` より左で始まる行だけを左側として読む。
+- 境が見つからないページ（FY2024 は11ページ）は、推測せず、全行を `unresolved.csv`（`PAGE_WITHOUT_HEADER_BOUNDARY`）に残す。
+
+### ヘッダ領域の行
+
+| クラス | 判定 | 出力 |
+|---|---|---|
+| `TABLE_HEADER` | 空白除去後が表頭の語（`要求` `番号` `事項` `前年度` `６年度` `予算額` `概算要求額` `対前年度` `比較増△減` `備考`、途切れた `比較増△` `比較` を含む）だけ | 出さない |
+| `TABLE_TITLE` | `概算要求額明細表` を含む | 出さない |
+| `UNIT` | `単位` を含む | 出さない |
+| `CONTEXT` | 1〜4桁の数字で始まり、`所管` または `会計` を含む（例: `19 内閣府所管(官房総務課（総務課）)`、`9101 東日本大震災復興特別会計（警察庁）`） | **行として出す**（`row_type = CONTEXT`、`事項` に行の全文、金額は空欄） |
+| `PAGE_LABEL` | ページの最初の非空行で、上のどれでもないもの（例: `内（本）`、`厚（本） 313`） | 出さない |
+| 上以外 | | `unresolved.csv`（`UNKNOWN_HEADER_ZONE_LINE`） |
+
+本文の末尾にある日時の行（`2023/09/12 20:27:48`）は `FOOTER_TIMESTAMP` として出さない。
+
+### 行頭（左側の本文）
+
+`[字下げ] [要求番号] コード 名称 [金額 金額 金額] [備考側の文字]`
+
+| `row_type` | コードの形 |
+|---|---|
+| `DETAIL` | 要求番号（1〜3桁）に続く `NN‑NN`（例: `1  01‑95`） |
+| `CODE_5_4_2_4` | `95016‑2111‑05‑0710`（桁の途中が空白で割れる行がある。例: `95016‑   2‑08‑2010`。raw text のまま保持する） |
+| `CODE_NN_NNNN` | 略記 `02‑0100` |
+| `CODE_NN_NN` | 要求番号なしの `NN‑NN` |
+| `CODE3` / `CODE2` / `CODE1` | 3桁 / 2桁 / 1桁 |
+
+- 先頭の数字を要求番号とみなすのは、その後ろに `NN‑NN` の形のコードが続くときだけ。
+- 金額は ASCII の数字だけ（全角数字は名称や備考の一部）。金額の列は、2つ以上の空白（または `△` の直前）の後ろから始まるものとする。`△` は金額から離れて付くことがある（例: `△    32,160`）。前の金額の直後に付くこともある（例: `0△    32,160`）。
+- 金額が0個の行は見出し行（金額は空欄）。このとき、`事項` は境の左にある文字だけ（境より右は備考）。
+
+### 金額のセルと空欄
+
+- 金額が3つ: 前年度予算額・６年度概算要求額・対前年度比較増△減の順に、raw text のまま入れる。
+- **金額が2つ（1つが空欄）**: 空欄のセルは空欄のまま、2つの金額を次の順で列に置く。置き方は `parse_status` に残す。
+  1. ページ内の列の位置（`AMOUNTS_PLACED_BY_PAGE_EDGES`）。そのページの、金額3つで `要求額−前年度＝増減` が成り立つ行（3行以上）の、3列の右端の位置（中央値）に、各金額の右端が±3文字で一意に合う場合。
+  2. 検算（`AMOUNTS_PLACED_BY_ARITHMETIC`）。2つの金額を x, y として、`x＝y≠0` なら前年度が空欄、`x＝−y≠0` なら要求額が空欄。
+  3. 1と2の両方が決まり、食い違う場合（`BLANK_CELL_PLACEMENT_CONFLICT`）、またはどちらも決まらない場合（`0 0` など。`BLANK_CELL_COLUMN_UNDETERMINED`）は、`unresolved.csv` に残す。
+- 金額が1つ、または4つ以上の行は `unresolved.csv`（`UNEXPECTED_AMOUNT_COUNT`）。
+- 検算（`要求額−前年度＝増減`、`△` を負として計算）は、金額が3つの行だけで行い、不一致を `arithmetic-diagnostics.csv` に残す。**値は書き換えない。**
+
+### 名称の継続行
+
+左側にあり、コードで始まらない行は、次をすべて満たすとき、直前の行の `事項` に `\n` で連結する。
+
+- 境の左だけで読める（境をまたぐ行は連結しない）。
+- 物理行が、行（または、その行の直前の継続行）の**すぐ下**にある。空行や備考側だけの行を挟まない。
+- 行頭の位置が、直前の行の名称の開始位置と±1文字で揃う。
+
+備考の表は、左側の領域から始まることがある（例: 事務事業別内訳表）。連結の条件を厳しくして、備考の内容を名称に取り込まない。条件に合わない行は `unresolved.csv` に残す（`LEFT_FRAGMENT_NOT_ADJACENT` / `LEFT_FRAGMENT_NOT_ALIGNED` / `LEFT_FRAGMENT_WITHOUT_PRECEDING_ROW_ON_PAGE`、境をまたぐ行は `LEFT_TEXT_CROSSES_BOUNDARY`）。
+
+## 出力（`data/work/budget-request-csv/2024/detail-table/`）
+
+| ファイル | 内容 |
+|---|---|
+| `sources/<slug>.csv` | 明細表を持つ source ごとの CSV（行順。全 source を1つにまとめた CSV は出力しない） |
+| `unresolved.csv` | `source_file, source_page, source_line_start, source_line_end, raw_text, reason` |
+| `arithmetic-diagnostics.csv` | 金額が3つの行の検算の不一致。抽出値は書き換えない |
+| `summary.json` | 件数集計、source 別の内訳、行のクラス別の件数、凍結 manifest とのページハッシュ照合結果 |
+| `output-manifest.json` | 上記ファイルの SHA-256（決定性の確認用） |
+
+行のクラス（`ROW` `CONTINUATION` `RIGHT_REGION` `TABLE_HEADER` `PAGE_LABEL` `TABLE_TITLE` `UNIT` `FOOTER_TIMESTAMP` `UNRESOLVED`）の件数の合計が、明細表のページの非空の物理行の数と一致することを、runner が検査する（取りこぼしがない証跡）。
+
+### main CSV の列
+
+総表の方針と同じく、明細表の見出しを日本語のまま列名にし、行の出所をたどる列を末尾に置く。
+
+| 列 | 内容 |
+|---|---|
+| `要求番号` | 原文。無い行は空 |
+| `事項` | コード＋名称を、raw text のまま（文字間の空白を含む）。継続行は `\n` で連結。`CONTEXT` は行の全文 |
+| `前年度予算額` `６年度概算要求額` `対前年度比較増△減` | 金額のセルを、raw text のまま（`△` と数字の間の空白、カンマを含む）。空欄は空 |
+| `source_file` `source_page` `source_line_start` `source_line_end` `row_index` `row_type` `parse_status` | 行の出所（ファイルの物理行番号、1始まり）、source 内の連番、コードの形、金額の置き方（`PARSED` / `AMOUNTS_PLACED_BY_PAGE_EDGES` / `AMOUNTS_PLACED_BY_ARITHMETIC`） |
+
+- 字下げ（行頭の空白）は出力しない。元の plain text は `source_file` と `source_line_start` から引ける。
+- 備考は出力しない。
+
+## FY2024 の実測（記述的な件数。精度の評価ではない）
+
+- 82 source のうち、明細表のページを持つのは73 source・8,585ページ。残りの9 source は、明細表の表頭が無い7 source（表紙・目次・総表など）と、text layer の無い2 source（法務省、金融庁）。
+- 行は47,888行（`CONTEXT` 62、見出し行 7,599、金額3つ 39,274、金額2つ 953）。`row_type` は `CODE_5_4_2_4` 24,864、`CODE3` 10,936、`CODE_NN_NNNN` 8,424、`CODE2` 1,933、`DETAIL` 1,643、`CODE1` 26。
+- **金額が3つの行は全行で検算が通る（不一致0）。**
+- 金額が2つの行は1,097行で、953行は置けた（列の位置612、検算341）。144行は決まらず unresolved。
+- 名称の継続行は22,042行を連結した。
+- 未解決は1,861行: 境が無いページ 397、金額2つで空欄の列が決まらない 144、継続行の条件に合わない左側の行 1,313（隣接しない 708、境をまたぐ 314、揃わない 16、そのページに直前の行が無い 275）、金額の数が合わない 7。抜き取りで見た範囲では、備考の表の一部が多い。
+- main CSV の全行について、`事項` と各セルが、`source_file` の `source_line_start` の物理行に、順序どおり、そのままの文字で含まれることを、実装とは別の確認（Python。スクリプトはコミットしていない）で確かめた。
+
+## 既知の後段課題（v0 の対象外）
+
+- 備考。
+- 階層（組織・項・事項・目）の復元と意味付け。`CONTEXT` 行、`row_type`、行の順序が素材になる。
+- 金額の数値化。
+- text layer の無い2 source（OCR が別途必要）。
+- 備考の表が左側の領域から始まるページで、境をまたぐ行や、連結の条件に合わない行（unresolved に残している）。

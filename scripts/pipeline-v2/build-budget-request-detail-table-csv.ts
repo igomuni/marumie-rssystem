@@ -1,0 +1,137 @@
+/**
+ * Build 令和6年度歳出概算要求額明細表 CSVs (excluding 備考) from the plain-text archive (read-only input).
+ *
+ *   npx tsx scripts/pipeline-v2/build-budget-request-detail-table-csv.ts [zipPath] [outputDir]
+ *
+ * Defaults: data/work/budget-request-plain-text.zip → data/work/budget-request-csv/2024/detail-table/
+ * Spec: docs/budget-request-detail-table-csv.md
+ */
+import * as fs from 'fs';
+import * as path from 'path';
+import { execFileSync } from 'child_process';
+import { createHash } from 'crypto';
+import {
+  csvCell,
+  parseDetailSource,
+  renderRowsCsv,
+  renderUnresolvedCsv,
+  type DetailRow,
+  type SourceResult,
+} from './lib/budget-request-detail-table';
+
+const zipPath = process.argv[2] ?? 'data/work/budget-request-plain-text.zip';
+const outputRoot = process.argv[3] ?? 'data/work/budget-request-csv/2024/detail-table';
+const manifestPath = 'tests/fixtures/budget-request-raw-text/2024/raw-text-manifest.json';
+const ENTRY = /^budget-request-plain-text\/2024\/[^/]+\.txt$/u;
+const sha256 = (v: Buffer | string) => createHash('sha256').update(v).digest('hex');
+
+if (!fs.existsSync(zipPath)) throw new Error(`input archive not found: ${zipPath}`);
+const zipBytes = fs.readFileSync(zipPath);
+const entries = execFileSync('unzip', ['-Z1', zipPath], { encoding: 'utf8', maxBuffer: 1 << 26 })
+  .split('\n').filter(e => ENTRY.test(e)).sort();
+if (entries.length === 0) throw new Error('no budget-request-plain-text/2024/*.txt entries in archive');
+
+// Frozen raw-text manifest: integrity diagnostic only (the archive is the source of truth for this parser).
+const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+const manifestBySlug = new Map<string, { pageCount: number; pageTextSha256: string[] }>(
+  manifest.documents
+    .filter((d: { status: string }) => d.status === 'EXTRACTED')
+    .map((d: { localPdfPath: string; pageCount: number; pageTextSha256: string[] }) => [
+      d.localPdfPath.replace(/^data\/download\//u, '').replace(/\.pdf$/iu, '').replace(/\//gu, '__'), d,
+    ]),
+);
+
+const decoder = new TextDecoder('utf-8', { fatal: true });
+const results: SourceResult[] = [];
+const integrity: { source_file: string; status: string }[] = [];
+const noTextLayer: { source_file: string; pageCount: number }[] = [];
+for (const entry of entries) {
+  const pattern = entry.replace(/[[\]*?\\]/gu, '\\$&');
+  const bytes = execFileSync('unzip', ['-p', zipPath, pattern], { maxBuffer: 1 << 28 });
+  const text = decoder.decode(bytes);
+  const slug = path.basename(entry, '.txt');
+  const result = parseDetailSource(text, entry);
+  results.push(result);
+
+  const frozen = manifestBySlug.get(slug);
+  const pages = text.split('\f');
+  if (text.endsWith('\f')) pages.pop();
+  if (pages.every(p => p.trim() === '')) noTextLayer.push({ source_file: entry, pageCount: pages.length });
+  integrity.push({
+    source_file: entry,
+    status: !frozen ? 'NOT_IN_FROZEN_MANIFEST'
+      : frozen.pageCount !== pages.length ? 'PAGE_COUNT_MISMATCH'
+        : pages.every((p, i) => sha256(p) === frozen.pageTextSha256[i]) ? 'MATCH' : 'PAGE_HASH_MISMATCH',
+  });
+}
+
+// ---------- write outputs (directory is owned by this script and fully regenerated) ----------
+fs.rmSync(outputRoot, { recursive: true, force: true });
+fs.mkdirSync(path.join(outputRoot, 'sources'), { recursive: true });
+const written: string[] = [];
+const write = (rel: string, content: string) => { fs.writeFileSync(path.join(outputRoot, rel), content); written.push(rel); };
+
+const allRows: DetailRow[] = results.flatMap(r => r.rows);
+const allUnresolved = results.flatMap(r => r.unresolved);
+for (const r of results) {
+  if (r.detailPages.length === 0) continue;
+  write(`sources/${path.basename(r.source_file, '.txt')}.csv`, renderRowsCsv(r.rows));
+}
+write('unresolved.csv', renderUnresolvedCsv(allUnresolved));
+const mismatches = results.flatMap(r => r.arithmeticMismatchRows);
+write('arithmetic-diagnostics.csv', [
+  'source_file,source_page,source_line_start,row_index,request_total-previous_total=difference,expected_from_other_cells,extracted_value',
+  ...mismatches.map(r => [r.source_file, r.source_page, r.source_line_start, r.row_index, 'request-previous=difference', '', `${r.cells.previous} / ${r.cells.request} / ${r.cells.difference}`].map(csvCell).join(',')),
+].join('\n') + '\n');
+
+const count = <T>(items: T[], key: (t: T) => string) =>
+  Object.fromEntries([...items.reduce((m, t) => m.set(key(t), (m.get(key(t)) ?? 0) + 1), new Map<string, number>())].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)));
+const classCounts: Record<string, number> = {};
+for (const r of results) for (const [k, v] of Object.entries(r.lineClassCounts)) classCounts[k] = (classCounts[k] ?? 0) + v;
+const accounted = Object.values(classCounts).reduce((a, b) => a + b, 0);
+const nonBlank = results.reduce((n, r) => n + r.nonBlankLinesInDetailPages, 0);
+// Every non-blank physical line of a detail page is either a row, a continuation, a recognised furniture/備考 line or unresolved.
+// (A CONTEXT row and the physical line it comes from are one line; a continuation line is one physical line.)
+if (accounted !== nonBlank) throw new Error(`line accounting mismatch: classified ${accounted} != non-blank ${nonBlank}`);
+
+const summary = {
+  scope: 'FY2024 令和6年度歳出概算要求額明細表 (excluding 備考) raw text → logical rows (v0 deterministic parser; descriptive counts, not an accuracy score)',
+  input: { zipPath, zipSha256: sha256(zipBytes), txtEntries: entries.length },
+  frozenManifestIntegrity: count(integrity, i => i.status),
+  frozenManifestIntegrityDetail: integrity.filter(i => i.status !== 'MATCH'),
+  sourceFileCount: results.length,
+  detailTableSourceCount: results.filter(r => r.detailPages.length > 0).length,
+  detailTablePageCount: results.reduce((n, r) => n + r.detailPages.length, 0),
+  sourcesWithoutDetailTable: results.filter(r => r.detailPages.length === 0).length,
+  sourcesWithNoTextLayer: noTextLayer,
+  pagesWithoutHeaderBoundary: results.reduce((n, r) => n + r.pagesWithoutBoundary.length, 0),
+  nonBlankLinesInDetailPages: nonBlank,
+  lineClassCounts: classCounts,
+  logicalRowCount: allRows.length,
+  rowTypeCounts: count(allRows, r => r.row_type),
+  parseStatusCounts: count(allRows, r => r.parse_status),
+  rowsByBlankCells: count(allRows, r => `blank:${(['previous', 'request', 'difference'] as const).filter(c => r.cells[c] === '').join('+') || 'none'}`),
+  rowsWithContinuation: allRows.filter(r => r.continuationLines > 0).length,
+  unresolvedCount: allUnresolved.length,
+  unresolvedByReason: count(allUnresolved, u => u.reason),
+  arithmeticDiagnostics: { rowsWithMismatch: mismatches.length },
+  sources: results.filter(r => r.detailPages.length > 0).map(r => ({
+    source_file: r.source_file,
+    pageCount: r.pageCount,
+    detailPages: r.detailPages.length,
+    pagesWithoutBoundary: r.pagesWithoutBoundary,
+    rows: r.rows.length,
+    unresolved: r.unresolved.length,
+    lineClassCounts: r.lineClassCounts,
+  })),
+};
+write('summary.json', JSON.stringify(summary, null, 2) + '\n');
+fs.writeFileSync(path.join(outputRoot, 'output-manifest.json'), JSON.stringify(
+  Object.fromEntries(written.sort().map(rel => [rel, sha256(fs.readFileSync(path.join(outputRoot, rel)))])), null, 2) + '\n');
+
+console.log(JSON.stringify({
+  outputRoot, sources: summary.sourceFileCount, detailSources: summary.detailTableSourceCount, detailPages: summary.detailTablePageCount,
+  rows: summary.logicalRowCount, rowTypes: summary.rowTypeCounts, parseStatus: summary.parseStatusCounts,
+  unresolved: summary.unresolvedCount, unresolvedByReason: summary.unresolvedByReason, arithmeticMismatchRows: mismatches.length,
+  lineClassCounts: classCounts, integrity: summary.frozenManifestIntegrity,
+}, null, 1));
