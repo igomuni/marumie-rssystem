@@ -1,0 +1,69 @@
+{
+  "state": "GT_FROZEN",
+  "units": 146,
+  "gtSource": {
+    "CONSENSUS_UNAUDITED": 72,
+    "HUMAN": 74
+  },
+  "relationStatus": {
+    "AMBIGUOUS": 5,
+    "NO_PARENT": 8,
+    "RESOLVED": 109
+  },
+  "totalScopeStatus": {
+    "RESOLVED": 24
+  },
+  "escalatedStrata": [
+    "T_会計計"
+  ],
+  "escalationUnitsAdded": [
+    "T3-001",
+    "T3-002",
+    "T3-003",
+    "T3-008"
+  ],
+  "submissions": [
+    {
+      "file": "human-reviewのコピー.csv",
+      "sha256": "666af8fc704babda2cb97b3cd222c400fcca400218f17bed3ee89065761f93a7",
+      "reviewedUnits": 70,
+      "auditedUnits": 29,
+      "auditMismatches": [
+        "R3-011",
+        "R6-001",
+        "R8-008",
+        "T3-006",
+        "T3-007"
+      ]
+    },
+    {
+      "file": "human-reviewのコピー2.csv",
+      "sha256": "3a194994d951411c5694627aa5084eedf67103dadbd90068600759f8822c19d0",
+      "reviewedUnits": 70,
+      "auditedUnits": 29,
+      "auditMismatches": [
+        "T3-006",
+        "T3-007"
+      ]
+    },
+    {
+      "file": "human-reviewのコピー3.csv",
+      "sha256": "2d80149a2c4c9a571a1a7ca4e2c6aa60af68b4ff62a0c416e9c9a2caf5ca9049",
+      "reviewedUnits": 74,
+      "auditedUnits": 29,
+      "auditMismatches": []
+    }
+  ],
+  "workDirHashes": {
+    "review/package-manifest.json": "9a4005102e8afdd662e579d905dcaf298d12f515d1044b03e7d175c2bd95a15e",
+    "prepare-manifest.json": "380215818e0e24aa5cd3d189887a332531a729272f4115ef521a5fb09b448899"
+  },
+  "files": {
+    "human-review-submission-1.csv": "666af8fc704babda2cb97b3cd222c400fcca400218f17bed3ee89065761f93a7",
+    "human-review-submission-2.csv": "3a194994d951411c5694627aa5084eedf67103dadbd90068600759f8822c19d0",
+    "human-review-submission-3-final.csv": "2d80149a2c4c9a571a1a7ca4e2c6aa60af68b4ff62a0c416e9c9a2caf5ca9049",
+    "sample-manifest.csv": "f324854ee932728a1edee33dd4972cf1fe4be3fd1694db655443cbfc6296f8aa",
+    "gt-relation.csv": "1fc47b10f28257fd2bed7242cd3ea5eea0ccfa4ff4903a4770ebd3db6d827062",
+    "gt-total-scope.csv": "b34af6ee2245d2df296cf666a1d2fd49dc80cdc074e947724db759662ab9b331"
+  }
+}
