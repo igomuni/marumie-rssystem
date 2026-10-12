@@ -4,8 +4,9 @@
  * Input is pdftotext plain text (pages separated by Form Feed). Only the left part of the table is read:
  * 要求番号, 事項, 前年度予算額, ６年度概算要求額, 対前年度比較増△減. Cell text is kept as it appears in the raw
  * text (inner whitespace, △ spacing); blank cells stay blank (no 0, no sign completion, no value from other rows/pages).
- * Where a blank cell is in a 2-amount row, the amounts are placed by column position (or, when that is not
- * available, by the arithmetic) and the way is recorded in parse_status; rows that cannot be placed go to unresolved.
+ * Where a blank cell is in a 2-amount row, the amounts are placed by column position only (recorded in parse_status);
+ * rows whose columns cannot be determined from the position go to unresolved. The arithmetic is used only as a check
+ * after extraction, never to decide which column holds a value. 備考 is cut off by the right edge of the amount columns.
  *
  * Grammar and its FY2024 corpus evidence: docs/budget-request-detail-table-csv.md.
  */
@@ -25,10 +26,12 @@ export function isDetailTablePage(pageText: string): boolean {
 const HEADER_2 = /番\s*号.*予\s*算\s*額.*比\s*較/u;
 
 /**
- * Column where the 前年度予算額 heading starts on the first header line. Everything that starts at or right of it
- * belongs to the amount columns or to 備考; names of the left part end before it.
+ * Geometry taken from the two heading lines. `boundary` = column where the 前年度予算額 heading starts (everything that
+ * starts at or right of it belongs to the amount columns or to 備考; names of the left part end before it).
+ * `remarksStart` = column where the 備考 heading starts. `headerRight` = right end of the second heading line
+ * (the 比較増△減 heading), which is 2–14 columns left of the right edge of the amount columns (FY2024).
  */
-export function headerBoundary(lines: string[]): { boundary: number; headerEnd: number } | null {
+export function headerBoundary(lines: string[]): { boundary: number; remarksStart: number; headerRight: number; headerEnd: number } | null {
   const first = lines.findIndex(l => {
     const c = compact(l);
     if (!(c.includes('事項') && c.includes('前年度') && c.includes('備考'))) return false;
@@ -38,7 +41,7 @@ export function headerBoundary(lines: string[]): { boundary: number; headerEnd: 
   if (first < 0) return null;
   const end = lines.findIndex((l, i) => i >= first && HEADER_2.test(l));
   if (end < 0) return null;
-  return { boundary: lines[first].indexOf('前'), headerEnd: end };
+  return { boundary: lines[first].indexOf('前'), remarksStart: lines[first].indexOf('備'), headerRight: lines[end].trimEnd().length, headerEnd: end };
 }
 
 // ---------- amounts ----------
@@ -115,7 +118,6 @@ export type UnresolvedReason =
   | 'UNKNOWN_HEADER_ZONE_LINE'
   | 'UNEXPECTED_AMOUNT_COUNT'
   | 'BLANK_CELL_COLUMN_UNDETERMINED'
-  | 'BLANK_CELL_PLACEMENT_CONFLICT'
   | 'LEFT_TEXT_CROSSES_BOUNDARY'
   | 'LEFT_FRAGMENT_NOT_ADJACENT'
   | 'LEFT_FRAGMENT_NOT_ALIGNED'
@@ -138,7 +140,7 @@ export interface DetailRow {
   matter_raw: string;
   /** Cell text as in the raw text; '' = the cell is blank in the raw text. */
   cells: Record<AmountColumn, string>;
-  parse_status: 'PARSED' | 'AMOUNTS_PLACED_BY_PAGE_EDGES' | 'AMOUNTS_PLACED_BY_ARITHMETIC';
+  parse_status: 'PARSED' | 'AMOUNTS_PLACED_BY_PAGE_EDGES';
   continuationLines: number;
 }
 
@@ -165,6 +167,14 @@ export interface SourceResult {
 }
 
 const EDGE_TOLERANCE = 3;
+/**
+ * Columns right of the amount columns hold 備考. The 備考 heading starts far right of where 備考 text on a body line
+ * starts (FY2024: 99.9% of the 備考 text on a row line starts left of it), so the heading column alone cannot separate
+ * them. The amount tokens of a line must therefore also end within the right edge of the 比較 column: its page median
+ * (+ spread allowance) when the page has enough rows to measure it, else the second heading line's right end + 14 + 3.
+ */
+const EDGE_SPREAD_ALLOWANCE = 6;
+const HEADER_TO_EDGE_MAX = 14 + 3;
 const median = (xs: number[]) => {
   const s = [...xs].sort((a, b) => a - b);
   const m = s.length >> 1;
@@ -182,12 +192,18 @@ interface ParsedLine {
   ends: number[];
 }
 
-function parseHeadLine(index: number, line: string): ParsedLine | null {
+/**
+ * `limit`: amount tokens must end at or left of this column; numbers further right are 備考 and are not amounts.
+ * (The line is tokenized as a whole and then filtered: cutting the string would create an artificial line end and
+ * change how a number right at the cut is tokenized.)
+ */
+function parseHeadLine(index: number, line: string, limit = line.length): ParsedLine | null {
   const head = HEAD.exec(line);
   if (!head) return null;
   const restStart = head.indices![4][0];
-  const { nameEnd, tokens } = splitTail(line.slice(restStart));
-  return { index, line, head, tokens, nameEnd: restStart + nameEnd, ends: tokens.map(t => restStart + t.end) };
+  const split = splitTail(line.slice(restStart));
+  const tokens = split.tokens.filter(t => restStart + t.end <= limit);
+  return { index, line, head, tokens, nameEnd: restStart + split.nameEnd, ends: tokens.map(t => restStart + t.end) };
 }
 
 /** Parse one source text. `sourceFile` is a stable identifier (archive entry path). */
@@ -226,7 +242,7 @@ export function parseDetailSource(text: string, sourceFile: string): SourceResul
       lines.forEach((l, i) => { if (l.trim() !== '') unresolved(i, 'PAGE_WITHOUT_HEADER_BOUNDARY'); });
       return;
     }
-    const { boundary: q, headerEnd } = hb;
+    const { boundary: q, remarksStart, headerRight, headerEnd } = hb;
 
     // Column right edges of this page, from rows whose three amounts are all present and satisfy the arithmetic.
     const edgeSamples: number[][] = [[], [], []];
@@ -238,6 +254,7 @@ export function parseDetailSource(text: string, sourceFile: string): SourceResul
       }
     });
     const edges = edgeSamples[0].length >= 3 ? edgeSamples.map(median) : null;
+    const amountLimit = Math.min(remarksStart, edges ? Math.round(edges[2]) + EDGE_SPREAD_ALLOWANCE : headerRight + HEADER_TO_EDGE_MAX);
 
     const firstNonBlank = lines.findIndex(l => l.trim() !== '');
     let open: { row: DetailRow; nameStart: number; lastLine: number } | null = null;
@@ -267,7 +284,7 @@ export function parseDetailSource(text: string, sourceFile: string): SourceResul
       if (indent >= q) { tally('RIGHT_REGION'); return; }
 
       const crosses = l.length > q && l[q - 1].trim() !== '' && l[q].trim() !== '';
-      const p = parseHeadLine(i, l);
+      const p = parseHeadLine(i, l, amountLimit);
 
       if (!p) {
         // Left-region text without a code: a continuation of the name of the row on the physical line right above
@@ -301,25 +318,20 @@ export function parseDetailSource(text: string, sourceFile: string): SourceResul
         if (n === 3) {
           cells = { previous: p.tokens[0].raw, request: p.tokens[1].raw, difference: p.tokens[2].raw };
         } else if (n === 2) {
-          const [x, y] = p.tokens.map(t => signedValue(t.raw));
-          // By position: each token's right edge must be within ±3 characters of exactly one column of this page.
-          let byEdges: AmountColumn[] | null = null;
+          // A blank cell is placed only by what the raw text shows: each token's right edge must be within ±3
+          // characters of exactly one amount column of this page. The arithmetic is never used to decide which
+          // column holds a value (it is only a check after extraction).
+          let placed: AmountColumn[] | null = null;
           if (edges) {
             const cols = p.ends.map(e => {
               const near = [0, 1, 2].filter(k => Math.abs(e - edges[k]) <= EDGE_TOLERANCE);
               return near.length === 1 ? near[0] : -1;
             });
-            if (cols[0] >= 0 && cols[1] >= 0 && cols[0] !== cols[1]) byEdges = cols.map(k => AMOUNT_COLUMNS[k]);
+            if (cols[0] >= 0 && cols[1] >= 0 && cols[0] !== cols[1]) placed = cols.map(k => AMOUNT_COLUMNS[k]);
           }
-          // By arithmetic: x==y → 前年度 blank (tokens are 要求額, 増減); x==−y → 要求額 blank (tokens are 前年度, 増減).
-          let byArithmetic: AmountColumn[] | null = null;
-          if (x === y && x !== BigInt(0)) byArithmetic = ['request', 'difference'];
-          else if (x === -y && x !== BigInt(0)) byArithmetic = ['previous', 'difference'];
-          if (byEdges && byArithmetic && byEdges.join() !== byArithmetic.join()) { unresolved(i, 'BLANK_CELL_PLACEMENT_CONFLICT'); open = null; return; }
-          const placed = byEdges ?? byArithmetic;
           if (!placed) { unresolved(i, 'BLANK_CELL_COLUMN_UNDETERMINED'); open = null; return; }
           placed.forEach((col, k) => { cells[col] = p.tokens[k].raw; });
-          status = byEdges ? 'AMOUNTS_PLACED_BY_PAGE_EDGES' : 'AMOUNTS_PLACED_BY_ARITHMETIC';
+          status = 'AMOUNTS_PLACED_BY_PAGE_EDGES';
         } else {
           unresolved(i, 'UNEXPECTED_AMOUNT_COUNT');
           open = null;

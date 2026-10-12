@@ -96,13 +96,14 @@ describe('amounts', () => {
     expect(row.parse_status).toBe('AMOUNTS_PLACED_BY_PAGE_EDGES');
   });
 
-  it('places two amounts by the arithmetic only when it decides, and records that', () => {
-    const row = parseFixture('arith').rows[0];
-    expect(cellsOf(row)).toEqual(['', '274', '274']);
-    expect(row.parse_status).toBe('AMOUNTS_PLACED_BY_ARITHMETIC');
+  it('never uses the arithmetic to decide which column holds a value: a two-amount row without a position match is unresolved', () => {
+    const r = parseFixture('arith');
+    expect(r.rows).toEqual([]);
+    expect(r.unresolved.map(u => u.reason)).toEqual(['BLANK_CELL_COLUMN_UNDETERMINED']);
+    expect(r.unresolved[0].raw_text).toContain('95016‑2122‑08‑2010');
   });
 
-  it('sends a two-amount row to unresolved when neither position nor arithmetic decides (0 0), never filling 0', () => {
+  it('sends a two-amount row to unresolved when the position does not decide (e.g. 0 0), never filling 0', () => {
     const r = parseFixture('undetermined');
     expect(r.unresolved.map(u => u.reason)).toEqual(['BLANK_CELL_COLUMN_UNDETERMINED', 'BLANK_CELL_COLUMN_UNDETERMINED']);
     expect(r.rows.every(row => row.row_type === 'CODE3')).toBe(true);
@@ -131,6 +132,64 @@ describe('left-region text that is not a name continuation', () => {
     const headerEnd = lines.findIndex(l => /番\s*号.*予\s*算\s*額/u.test(l));
     const orphan = `${lines.slice(0, headerEnd + 1).join('\n')}\n                必要な経費\n\f`;
     expect(parseDetailSource(orphan, 'synthetic').unresolved.map(u => u.reason)).toEqual(['LEFT_FRAGMENT_WITHOUT_PRECEDING_ROW_ON_PAGE']);
+  });
+});
+
+describe('備考 on the same physical line is not read', () => {
+  const zone = fixture('context').split('\n');
+  const hb = headerBoundary(zone)!;
+  const header = zone.slice(0, hb.headerEnd + 1).join('\n');
+  // Right edges of the three amount columns on a synthetic page (left of the 備考 heading), and a column well right of the 比較 column.
+  const E = [hb.boundary + 10, hb.boundary + 18, hb.boundary + 26];
+  const REMARK_COL = E[2] + 12;
+  const line = (head: string, cells: (string | null)[], remark = '', remarkCol = REMARK_COL) => {
+    const arr: string[] = Array(Math.max(remarkCol + remark.length, E[2]) + 1).fill(' ');
+    [...head].forEach((ch, i) => { arr[8 + i] = ch; });
+    cells.forEach((c, k) => { if (c !== null) [...c].forEach((ch, i) => { arr[E[k] - c.length + 1 + i] = ch; }); });
+    [...remark].forEach((ch, i) => { arr[remarkCol + i] = ch; });
+    return arr.join('').trimEnd();
+  };
+  // Three calibration rows (three amounts, arithmetic OK) so that the page edges can be measured.
+  const calibration = [
+    line('95016‑2111‑05‑0710 手当', ['574', '574', '0']),
+    line('95016‑2122‑08‑2010 旅費', ['1,979', '1,988', '9']),
+    line('95016‑2123‑09‑1010 庁費', ['58,861', '64,193', '5,332']),
+  ];
+  const page = (...body: string[]) => `${header}\n${[...calibration, ...body].join('\n')}\n\f`;
+  const rowsOf = (text: string) => parseDetailSource(text, 'synthetic');
+
+  it('does not read numbers in 備考 as amounts when the left part is a heading', () => {
+    const r = rowsOf(page(line('011 経常事務費', [], '1 2 1')));
+    const heading = r.rows.find(x => x.matter_raw.startsWith('011'))!;
+    expect(cellsOf(heading)).toEqual(['', '', '']);
+    expect(r.unresolved).toEqual([]);
+  });
+
+  it('does not mix 備考 numbers into the cells of a row that has one or two amounts', () => {
+    const one = rowsOf(page(line('95016‑2129‑17‑1010 交際費', ['8,262', null, null], '5 5 0')));
+    expect(one.rows.filter(x => x.row_type !== 'CONTEXT').length).toBe(3); // only the calibration rows; the one-amount row is unresolved
+    expect(one.unresolved.map(u => u.reason)).toEqual(['UNEXPECTED_AMOUNT_COUNT']);
+    const two = rowsOf(page(line('95016‑2129‑06‑0110 諸謝金', [null, '136', '136'], '7 8 9')));
+    expect(cellsOf(two.rows.find(x => x.matter_raw.startsWith('95016‑2129‑06‑0110'))!)).toEqual(['', '136', '136']);
+  });
+
+  it('does not read 備考 numbers that happen to satisfy the arithmetic', () => {
+    const r = rowsOf(page(line('011 経常事務費', [], '100 150 50')));
+    expect(cellsOf(r.rows.find(x => x.matter_raw.startsWith('011'))!)).toEqual(['', '', '']);
+    const withAmounts = rowsOf(page(line('006 事務処理費', ['69,676', '75,017', '5,341'], '100 150 50')));
+    expect(cellsOf(withAmounts.rows.find(x => x.matter_raw.startsWith('006'))!)).toEqual(['69,676', '75,017', '5,341']);
+    expect(withAmounts.arithmeticMismatchRows).toEqual([]);
+  });
+
+  it('keeps the three amounts when 備考 text starts only a few columns right of the 比較 column (left of the 備考 heading)', () => {
+    expect(E[2] + 3).toBeLessThan(hb.remarksStart);
+    const r = rowsOf(page(line('006 事務処理費', ['69,676', '75,017', '5,341'], '内国旅費', E[2] + 3)));
+    expect(cellsOf(r.rows.find(x => x.matter_raw.startsWith('006'))!)).toEqual(['69,676', '75,017', '5,341']);
+  });
+
+  it('leaves a heading unresolved rather than reading 備考 numbers that start right after the 比較 column as amounts', () => {
+    const r = rowsOf(page(line('011 経常事務費', [], '1 2 1', E[2] + 3)));
+    expect(r.rows.some(x => x.matter_raw.startsWith('011') && cellsOf(x).some(c => c !== ''))).toBe(false);
   });
 });
 
