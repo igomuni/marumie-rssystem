@@ -1,0 +1,25 @@
+{
+  "schema": "toc-source-correspondence-p5-a1-a2-hashes/v1",
+  "inputs": {
+    "p3ArchiveSha256": "73e231ec306c6d017d3acb2720ea92428d90b89353e2d315e053c44789d7a62c",
+    "p5PopulationSha256": "734bdc4749a77c9e7486730b639410c469caceda8a54461a671ff08a8cf0258f",
+    "pdfs": {
+      "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+      "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf": "efbfdfefbf4d6c4f85c1da1867348c96964a56fefe6d4c952291e2bf3448e837",
+      "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneju_o.pdf": "2c1d6cb494a41dbb8d03a63099cc4154f31d70b966c7510bc6fce3501a70e7b6",
+      "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf": "3be3fa49d24cc02ed680f0104d41405ff5e69bfb4a84290dccc8fe8205eaa1f1",
+      "data/download/env.go.jp/content/000157012.pdf": "c71dd17f73464540ecb600d95d94104e59254e06b73efc2f282a5ecd8ba01823",
+      "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+      "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tousi_2.pdf": "be6b5bd2f3c0480bd8a5e9292a304e4eb37bd342deb21eb28b2464dfb5741ede",
+      "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/fukko_o.pdf": "17c0efdce49fb24a188a08ecef5a3340ea3e76f9c6ccef10539eefd69e8d8363"
+    }
+  },
+  "outputs": {
+    "a1-text-occurrence-evidence.jsonl": "7a89b2bd6fe550518524eb0c215f4004ff3f7d56180142b932b70b1b89ed5239",
+    "a2-pdf-token-items.jsonl": "11a3b53a962cdc150ab3d48af71048b5fd3fc2dfab60a2358eb0ea5b2f88297a"
+  },
+  "segmentCount": 17,
+  "distinctPdfCount": 8,
+  "distinctPhysicalPages": 8,
+  "characterBboxCount": 0
+}
