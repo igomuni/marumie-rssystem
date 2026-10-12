@@ -1,13 +1,17 @@
 /**
  * H1 GT human review aid: one self-contained HTML page for filling review/human-review.csv.
  *
- *   npx tsx scripts/pipeline-v2/build-budget-request-total-table-h1-review-aid.ts [outputDir] [--annotators=a2,b2] [--reference=a,b]
+ *   npx tsx scripts/pipeline-v2/build-budget-request-total-table-h1-review-aid.ts [outputDir] [--annotators=a2,b2] [--reference=a,b] [--prefill=<csv under review/>]
  *
  * Reads only files already under outputDir (annotation-input/, review/, annotation-<x>/). Writes review/human-review.html.
  * The page shows, per unit: the raw text window (monospace, target and cited rows highlighted), the block rows with the
  * 7 amount cells, sum checks for cited TOTAL scopes, the annotators' decisions and rationales, and the relevant contract
  * clauses. Coordinator hints are hidden by default. The human decides; the page exports a filled human-review.csv.
  * No PDF images: the evidence scope is raw text only (preregistration §6).
+ * Parent / scope are chosen by clicking rows (radio for RELATION, checkboxes with a live sum for TOTAL_SCOPE).
+ * --prefill loads a previously submitted human-review CSV (pasted row text is normalized to row:N / N;N) and, for strata
+ * where a consensus candidate was contradicted in the AGREEMENT_AUDIT, adds the remaining units of that stratum with
+ * review_required_reason ESCALATION (preregistration §6). The input CSV files are never modified.
  */
 import * as fs from 'fs';
 import * as path from 'path';
@@ -23,6 +27,29 @@ const AMOUNT_COLUMNS = ['previous_general', 'previous_other', 'previous_total', 
 const read = (rel: string) => fs.readFileSync(path.join(root, rel), 'utf8');
 const exists = (rel: string) => fs.existsSync(path.join(root, rel));
 const review = parseCsv(read('review/human-review.csv'));
+const prefillName = flag('prefill');
+const normalizeRef = (kind: string, raw: string) => {
+  const lead = raw.split('\t')[0].trim();
+  if (kind === 'TOTAL_SCOPE') return /^\d+(;\d+)*$/u.test(raw.trim()) ? raw.trim() : /^\d+$/u.test(lead) ? lead : '';
+  return raw.trim() === 'context' || /^row:\d+$/u.test(raw.trim()) ? raw.trim() : /^\d+$/u.test(lead) ? `row:${lead}` : '';
+};
+const escalation: { strata: string[]; mismatches: string[] } = { strata: [], mismatches: [] };
+if (prefillName) {
+  const submitted = new Map(parseCsv(read(`review/${prefillName}`)).map(x => [x.sample_id, x]));
+  for (const r of review) {
+    const x = submitted.get(r.sample_id);
+    if (!x || !x.human_review_status) continue;
+    r.human_decision = x.human_decision;
+    r.human_parent_or_scope = x.human_decision === 'RESOLVED' ? normalizeRef(r.unit_kind, x.human_parent_or_scope) : '';
+    r.human_notes = x.human_notes;
+    r.human_review_status = x.human_review_status;
+    if (r.review_required_reason === 'AGREEMENT_AUDIT') {
+      const label = r.human_decision === 'RESOLVED' ? (r.unit_kind === 'TOTAL_SCOPE' ? `RESOLVED [${r.human_parent_or_scope}]` : `RESOLVED ${r.human_parent_or_scope}`) : r.human_decision;
+      if (label !== r.consensus_candidate) { escalation.mismatches.push(r.sample_id); if (!escalation.strata.includes(r.stratum)) escalation.strata.push(r.stratum); }
+    }
+  }
+  for (const r of review) if (!r.review_required_reason && escalation.strata.includes(r.stratum)) r.review_required_reason = 'ESCALATION';
+}
 const units = new Map(parseCsv(read('annotation-input/units.csv')).map(u => [u.sample_id, u]));
 
 const decisionLines = (who: string) => {
@@ -118,6 +145,8 @@ const items = review.map(r => {
   return {
     review: r,
     unit: u,
+    targetAmounts: targetRow ? amounts(targetRow) : [],
+    targetIndex,
     rows: shown.map(x => ({ ...x, cited: citedRows.includes(Number(x.row_index)), target: Number(x.row_index) === targetIndex })),
     rawLines,
     sums,
@@ -128,7 +157,7 @@ const items = review.map(r => {
 });
 
 const columns = Object.keys(review[0]);
-const data = { columns, items, annotators: { a: whoA, b: whoB }, amountColumns: AMOUNT_COLUMNS };
+const data = { columns, items, annotators: { a: whoA, b: whoB }, amountColumns: AMOUNT_COLUMNS, usePrefill: !!prefillName };
 const html = `<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>H1 GT human review</title>
 <style>
 body{font-family:system-ui,sans-serif;margin:0;display:flex;height:100vh;color:#222}
@@ -144,7 +173,7 @@ label{margin-right:12px}input[type=text]{width:420px}textarea{width:100%;height:
 <div id="list"></div><div id="main"></div>
 <script>
 const D=${JSON.stringify(data).replace(/</gu, '\\u003c')};
-const KEY='h1-gt-human-review-v1';
+const KEY=D.usePrefill?'h1-gt-human-review-v2':'h1-gt-human-review-v1';
 const saved=JSON.parse(localStorage.getItem(KEY)||'{}');
 for(const it of D.items){const s=saved[it.review.sample_id];if(s)Object.assign(it.review,s);}
 let cur=0,filter='required';
@@ -152,12 +181,15 @@ const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 const visible=()=>D.items.map((it,i)=>[it,i]).filter(([it])=>filter==='all'||(filter==='required'?it.review.review_required_reason:!it.review.human_review_status&&it.review.review_required_reason));
 function save(){const o={};for(const it of D.items){const r=it.review;if(r.human_decision||r.human_parent_or_scope||r.human_notes||r.human_review_status)o[r.sample_id]={human_decision:r.human_decision,human_parent_or_scope:r.human_parent_or_scope,human_notes:r.human_notes,human_review_status:r.human_review_status};}localStorage.setItem(KEY,JSON.stringify(o));}
 function list(){const v=visible();const done=D.items.filter(it=>it.review.review_required_reason&&it.review.human_review_status==='REVIEWED').length;const req=D.items.filter(it=>it.review.review_required_reason).length;
-document.getElementById('list').innerHTML='<div><select id=f><option value=required>要レビュー</option><option value=todo>未完了</option><option value=all>全146</option></select> '+done+'/'+req+'<br><button id=exp>CSVを書き出す</button> <button id=hb>示唆の表示切替</button></div>'+v.map(([it,i])=>'<div data-i='+i+' class="'+(i===cur?'sel ':'')+(it.review.human_review_status?'done':'')+'">'+esc(it.review.sample_id)+' '+esc(it.review.review_required_reason||'-')+'</div>').join('');
+document.getElementById('list').innerHTML='<div><select id=f><option value=required>要レビュー（追加分を含む）</option><option value=todo>未完了</option><option value=all>全146</option></select> '+done+'/'+req+'<br><button id=exp>CSVを書き出す</button> <button id=hb>示唆の表示切替</button></div>'+v.map(([it,i])=>'<div data-i='+i+' class="'+(i===cur?'sel ':'')+(it.review.human_review_status?'done':'')+'">'+esc(it.review.sample_id)+' '+esc(it.review.review_required_reason||'-')+'</div>').join('');
 const f=document.getElementById('f');f.value=filter;f.onchange=e=>{filter=e.target.value;list();};
 document.getElementById('exp').onclick=exportCsv;document.getElementById('hb').onclick=()=>document.body.classList.toggle('showhints');
 for(const d of document.querySelectorAll('#list div[data-i]'))d.onclick=()=>{cur=+d.dataset.i;render();};}
 function render(){const it=D.items[cur],r=it.review;
-const rows='<table><tr><th>row</th><th>type</th><th>code</th><th class=l>name</th><th>p</th><th>L</th>'+D.amountColumns.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr>'+it.rows.map(x=>'<tr class="'+(x.target?'target':x.cited?'cited':'')+'"><td>'+esc(x.row_index)+'</td><td class=l>'+esc(x.row_type)+'</td><td class=l>'+esc(x.code_raw)+'</td><td class=l>'+esc(x.name_compact)+'</td><td>'+esc(x.source_page)+'</td><td>'+esc(x.source_line_start)+'</td>'+D.amountColumns.map(c=>'<td>'+Number(x[c]||0).toLocaleString()+'</td>').join('')+'</tr>').join('')+'</table>';
+const isTot=it.unit.unit_kind==='TOTAL_SCOPE';const sel=new Set(String(r.human_parent_or_scope).split(';').map(x=>x.replace('row:','').trim()).filter(Boolean));
+const pick=x=>{const before=it.targetIndex===null||Number(x.row_index)<it.targetIndex;if(!before||it.targetIndex===null&&!isTot)return '';return isTot?'<input type=checkbox class=pk value='+esc(x.row_index)+(sel.has(String(x.row_index))?' checked':'')+'>':'<input type=radio name=pk class=pk value='+esc(x.row_index)+(sel.has(String(x.row_index))?' checked':'')+'>';};
+const rows='<table><tr><th>'+(isTot?'直接の子':'親')+'</th><th>row</th><th>type</th><th>code</th><th class=l>name</th><th>p</th><th>L</th>'+D.amountColumns.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr>'+it.rows.map(x=>'<tr class="'+(x.target?'target':x.cited?'cited':'')+'"><td>'+pick(x)+'</td><td>'+esc(x.row_index)+'</td><td class=l>'+esc(x.row_type)+'</td><td class=l>'+esc(x.code_raw)+'</td><td class=l>'+esc(x.name_compact)+'</td><td>'+esc(x.source_page)+'</td><td>'+esc(x.source_line_start)+'</td>'+D.amountColumns.map(c=>'<td>'+Number(x[c]||0).toLocaleString()+'</td>').join('')+'</tr>').join('')+'</table>';
+const liveSum=isTot?'<div id=live></div>':'';
 const sums=it.sums.map(s=>'<div class="'+(s.ok?'ok':'ng')+'">'+esc(s.label)+': 直接の子の合計 '+(s.ok?'＝':'≠')+' TOTAL ['+s.sum.join(', ')+'] / ['+s.total.join(', ')+']</div>').join('');
 document.getElementById('main').innerHTML='<h2>'+esc(r.sample_id)+' <small>'+esc(r.unit_kind)+' / '+esc(r.stratum)+' / '+esc(r.review_required_reason||'レビュー不要')+'</small></h2>'
 +'<div>'+esc(r.table_block_id)+'　<b>対象: '+esc(r.target)+'</b></div>'
@@ -166,11 +198,18 @@ document.getElementById('main').innerHTML='<h2>'+esc(r.sample_id)+' <small>'+esc
 +'<div class="box hint"><b>Coordinator の示唆（参考。判定は raw text と契約で行う）</b><ul>'+(it.hints.length?it.hints.map(h=>'<li>'+esc(h)+'</li>').join(''):'<li>特になし</li>')+'</ul></div>'
 +'<h3>raw text（黄＝対象行、緑＝注釈が挙げた行）</h3><pre>'+it.rawLines.map(l=>l.mark?'<span class='+l.mark+'>'+esc(l.text)+'</span>':esc(l.text)).join('\\n')+'</pre>'+rows
 +'<div class=box><b>判定</b><br>'+(r.unit_kind==='TOTAL_SCOPE'?['RESOLVED','AMBIGUOUS']:['RESOLVED','AMBIGUOUS','NO_PARENT','NOT_APPLICABLE']).map(v=>'<label><input type=radio name=d value='+v+(r.human_decision===v?' checked':'')+'>'+v+'</label>').join('')
-+'<br>親 / 範囲（RESOLVED のとき。RELATION は context か row:N、TOTAL は直接の子を ; 区切り）<br><input type=text id=p value="'+esc(r.human_parent_or_scope)+'">'
++'<br>親 / 範囲（RESOLVED のとき。表の「'+(isTot?'直接の子':'親')+'」欄をクリックして選ぶ。'+(isTot?'複数選択できる。下に合計の検算が出る。':'ブロックの根（CONTEXT）が親なら「context」を入れる。')+'）'+(isTot?'':' <button id=ctx>context にする</button>')+'<br><input type=text id=p value="'+esc(r.human_parent_or_scope)+'" size=40>'+liveSum
 +'<br>根拠<br><textarea id=n>'+esc(r.human_notes)+'</textarea><br><label><input type=checkbox id=s'+(r.human_review_status==='REVIEWED'?' checked':'')+'> REVIEWED</label> <button id=nx>保存して次へ</button></div>'
 +'<details><summary>契約の要点（§3・§4）</summary><pre>C1 親は対象行より前。C2 TOTAL で閉じた範囲をまたいで親候補を引き継がない。\\nC3 TOTAL の範囲: 直接の子だけの7セル合計が一致する範囲。複数の範囲が満たせば AMBIGUOUS。単一の子で同額はそれだけでは証拠にしない。\\nC4 合計は直接の子だけ（DETAIL とその下の CODE3 を同時に足さない）。C5 ページ境界は階層の境界ではない。\\nC6 書式は証拠に使ってよいが、コード幅だけで役割を決めない。C7 字下げは補助証拠だけ。\\n§4 RESOLVED は硬い制約の後で候補がちょうど1つのときだけ。\\n禁止する決め手（単独では不可）: 字下げが浅い方／コード幅／最も近い行／金額が一致する方／府省別の規則。</pre></details>';
 const upd=()=>{const d=document.querySelector('input[name=d]:checked');r.human_decision=d?d.value:'';r.human_parent_or_scope=document.getElementById('p').value.trim();r.human_notes=document.getElementById('n').value.trim();r.human_review_status=document.getElementById('s').checked?'REVIEWED':'';save();};
-for(const e of document.querySelectorAll('#main input,#main textarea'))e.onchange=()=>{upd();list();};
+const live=()=>{const el=document.getElementById('live');if(!el)return;const ids=document.getElementById('p').value.split(';').map(x=>x.trim()).filter(Boolean);if(!ids.length){el.textContent='選んだ行の合計: （未選択）';return;}
+const picked=it.rows.filter(x=>ids.includes(String(x.row_index)));const sum=D.amountColumns.map(c=>picked.reduce((a,x)=>a+Number(x[c]||0),0));const ok=sum.every((v,i)=>v===it.targetAmounts[i]);
+el.innerHTML='<span class="'+(ok?'ok':'ng')+'">選んだ行（'+esc(ids.join(', '))+'）の合計 '+(ok?'＝':'≠')+' TOTAL</span><br><small>['+sum.map(v=>v.toLocaleString()).join(', ')+'] / TOTAL ['+it.targetAmounts.map(v=>v.toLocaleString()).join(', ')+']</small>';};
+const fromPicks=()=>{const ids=[...document.querySelectorAll('.pk:checked')].map(e=>e.value);document.getElementById('p').value=isTot?ids.join(';'):(ids[0]?'row:'+ids[0]:'');const dd=document.querySelector('input[name=d][value=RESOLVED]');if(dd)dd.checked=true;live();upd();list();};
+for(const e of document.querySelectorAll('.pk'))e.onchange=fromPicks;
+const cx=document.getElementById('ctx');if(cx)cx.onclick=e=>{e.preventDefault();for(const k of document.querySelectorAll('.pk'))k.checked=false;document.getElementById('p').value='context';const dd=document.querySelector('input[name=d][value=RESOLVED]');if(dd)dd.checked=true;upd();list();};
+live();
+for(const e of document.querySelectorAll('#main input:not(.pk),#main textarea'))e.onchange=()=>{live();upd();list();};
 document.getElementById('nx').onclick=()=>{upd();const v=visible().map(([,i])=>i);const k=v.indexOf(cur);cur=v[k+1]??cur;render();};
 list();}
 function exportCsv(){const cell=v=>{v=String(v??'');return /[",\\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
