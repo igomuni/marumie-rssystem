@@ -74,7 +74,14 @@ def is_detail_page(page):
 
 def main():
     z = zipfile.ZipFile(ZIP)
-    corpus = {n.split('/')[-1][:-4]: z.read(n).decode('utf-8').split('\f') for n in sorted(z.namelist()) if ENTRY.match(n)}
+    corpus = {}
+    for n in sorted(z.namelist()):
+        if ENTRY.match(n):
+            text = z.read(n).decode('utf-8')
+            parts = text.split('\f')
+            if text.endswith('\f'):
+                parts.pop()
+            corpus[n.split('/')[-1][:-4]] = parts
     out = {'corpus': {}, 'lines': collections.Counter(), 'head_forms': collections.Counter(),
            'blank_cell_by_arithmetic': collections.Counter(), 'blank_cell_by_page_edges': collections.Counter(), 'edge_spread_chars': {}, 'continuation': collections.Counter()}
     detail_sources, no_text = set(), []
@@ -94,12 +101,17 @@ def main():
                 out['lines']['page without header columns'] += 1
                 continue
             q, _ = hc
+            page_lines = p.split('\n')
+            header_end = next((k for k, x in enumerate(page_lines) if re.search(r'番\s*号.*予\s*算\s*額.*比\s*較', x)), -1)
             ends = [[], [], []]
             item2 = []
             last_head_name_col = None
             seen_head = False
-            for line in p.split('\n'):
+            for li, line in enumerate(page_lines):
                 if not line.strip():
+                    continue
+                if li <= header_end:
+                    out['lines']['header zone (page label / title / context / unit / table heading)'] += 1
                     continue
                 st = len(line) - len(line.lstrip())
                 h = HEAD.match(line)
