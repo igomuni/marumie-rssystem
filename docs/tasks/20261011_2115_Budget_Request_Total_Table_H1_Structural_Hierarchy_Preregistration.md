@@ -332,3 +332,104 @@ containing commas; `;` separates multiple evidence codes and child indices):
 Report via worker_done: counts per status, counts per scope_status, number of tool calls used, and the sample_ids you
 found difficult. Do not otherwise summarize the data.
 ```
+
+### 12.5 1回目の結果: STOP（2026-10-12）
+
+Run `run_97915207aade` で、§12.4 の仕様を使って Codex（gpt-6-luna、effort medium）を2体起動した（`--worktree current`）。2体とも約1分で終わり、どちらの出力も1単位ずつの判定になっていなかった。GT の候補には使わず、compare も実行していない。
+
+| | A2 | B2 |
+|---|---|---|
+| 報告 | `failed` | `succeeded` |
+| 内容 | 入力を読んだ後、CONTEXT 以外の全単位を機械的に AMBIGUOUS で埋めた。「個別に判定していない」と報告した | 「直前にある、決まった型の行を親とする」規則をスクリプトで全単位に一括適用し、110件を RESOLVED にした。AMBIGUOUS の notes には、後から機械的に `MULTI:` を付けた |
+| ツール呼び出し | 8 | 10（報告は5） |
+
+- B2 の規則は、行の型（コード桁数に由来する）で親を決めている。ガイドと §12.4 の「スクリプトは検算にだけ使う」に反する。
+- **観測された要因:**
+  - 2体とも、50ブロックを1回の出力で読もうとし、出力が切り捨てられていた（例: 26,208 トークン中の一部だけが表示された）。
+  - Codex の基本指示は、まとめて処理する方向に寄っている（「行動を優先」「独立した読み取りは1回にまとめる」）。
+  - リポジトリに AGENTS.md がなく、研究規律は Task 仕様からしか届かない。
+  - §12.4 は、ラベルをプログラムで生成することを明示的には禁じていなかった。ツール呼び出しの目安（約100回）も、146単位を1つずつ判定するには少なかった。
+- 出力は `annotation-a2-attempt1/`・`annotation-b2-attempt1/` に退避した。
+
+| ファイル | SHA-256 |
+|---|---|
+| `annotation-a2-attempt1/relation-annotation-a2.csv` | `50a2cd0143e1b4fcc01c763cd17ff8dec4c0da5ed8248278aad0ef7193879bfa` |
+| `annotation-a2-attempt1/total-scope-annotation-a2.csv` | `a48df2fab423d06b2cb08696287f388b186bd632f8dde8455b087aff676d96a0` |
+| `annotation-b2-attempt1/relation-annotation-b2.csv` | `8700e96747b706faea758fa1190fbf5e8d075fcb13315f00ef967333701fdbf5` |
+| `annotation-b2-attempt1/total-scope-annotation-b2.csv` | `4372ff670a034f59ac655560c34797d534d694dabcfeefeb5337fb30f08e0412` |
+
+### 12.6 2回目の Task 仕様（A2/B2 共通。§12.4 を置き換える）
+
+§12.2 の「変えないもの」は維持する。判定基準は変えず、作業の進め方だけを次のように改める。
+
+- 1単位ずつ判定させ、判定ログ（`work/decisions.md`）を先に書かせる。CSV は、そのログを整形して作る。
+- 状態・親・範囲をデータから計算するコードを禁止する。禁止する理由（この GT は規則ベースの resolver を評価するためのもの）も仕様に書く。
+- ブロックは小さな範囲に分けて読ませ、出力の切り捨てを検知したら読み直させる。
+- notes に、根拠とした row_index を必ず書かせる。
+- ツール呼び出し回数の目安は外し、速さは目標ではないと明記する。
+- 起動時に `--model gpt-6-luna --effort high` を指定する。
+
+```text
+You are independent annotator <X> for a research ground-truth (GT) labeling task. Work alone and carefully.
+Speed is not a goal: this task is expected to take 30-90 minutes of careful reading. Do not shortcut it.
+
+## Why this matters
+These labels become ground truth for evaluating a future rule-based parent resolver. If you derive labels by
+applying a rule (for example "parent = the nearest preceding row of type X") to many units, the GT just copies
+a resolver and becomes worthless. Each label must be your own judgment of that unit's evidence.
+
+## Isolation (strict)
+- Working directory: the current Orca worktree (repository root).
+- READ ONLY files under data/work/budget-request-total-table-h1-gt/2024/annotation-input/.
+- WRITE ONLY under data/work/budget-request-total-table-h1-gt/2024/annotation-<X>/ (create it; scratch files go in
+  annotation-<X>/work/).
+- Do NOT read anything else: not other annotation-* directories (including *-attempt1), not review/ or review-r1/,
+  not repository code/docs/tests, not docs/chats, not git history, not the web, not PDFs. Do not use external budget
+  knowledge or memory about Japanese budget structure. Do not decide from semantic labels (e.g. "this must be a 項").
+- Do not spawn sub-agents. Run Python with `python3 -I` if you use Python.
+
+## Read the evidence properly
+1. Read annotation-input/annotation-guide.md in full first (Japanese) and follow it exactly.
+2. Read annotation-input/units.csv (146 units).
+3. Work block by block. For each block, read its rows.csv and the relevant part of its raw.txt in small pieces
+   (at most about 80 lines per read, e.g. `sed -n '120,200p' <file>`). Never print several blocks at once.
+   If any tool output says it was truncated, re-read that part in smaller pieces before deciding anything.
+
+## Decide each unit yourself
+For every unit, in order:
+- RELATION: identify the target row, list the candidate parent rows (earlier rows in the same block: HIER / CODE3 /
+  DETAIL, or `context`), and eliminate candidates using the allowed evidence (row order, CONTEXT, TOTAL rows and their
+  scope, line format, the 7 amount cells, page boundaries). RESOLVED only if exactly one candidate survives.
+- CONTEXT_ROOT: NO_PARENT if the CONTEXT line is the block root, else AMBIGUOUS.
+- TOTAL_SCOPE: RESOLVED only if exactly one set of DIRECT children sums (all 7 cells) to the TOTAL row and the
+  evidence excludes the alternatives; otherwise AMBIGUOUS.
+Rules from the guide still apply: equal amounts alone, all-zero rows, single-child equal amounts, indentation alone,
+row type or code width alone are NOT sufficient.
+
+Before writing any CSV, append one entry per unit to annotation-<X>/work/decisions.md:
+  `<sample_id> | candidates: <row_index list or context> | decision: <status> <parent_ref or child list> | why: <one sentence citing row_index evidence>`
+
+## Hard prohibitions
+- Do NOT write code that computes a status, a parent or a scope from the row data, and do NOT apply any rule in bulk.
+  Allowed scripts: displaying a line range of a file, summing the 7 amount cells of a candidate set you have already
+  chosen, and finally converting your written decisions.md into the two CSV files. Each script must finish within
+  30 seconds.
+- Do NOT fill units with placeholder labels. If you cannot finish every unit, stop, keep decisions.md, do not write
+  the CSVs, and report --outcome failed listing the units done.
+
+## Output
+After decisions.md covers all 146 units, write exactly two CSV files (UTF-8, header exactly as given, one row per
+unit, every sample_id exactly once, quote fields containing commas; `;` separates multiple evidence codes and child
+indices):
+- annotation-<X>/relation-annotation-<X>.csv — header `sample_id,status,parent_ref,evidence_codes,notes`
+  — all RELATION and CONTEXT_ROOT units (122 rows).
+- annotation-<X>/total-scope-annotation-<X>.csv — header `sample_id,scope_status,direct_child_row_indices,evidence_codes,notes`
+  — all TOTAL_SCOPE units (24 rows).
+Notes: one short sentence citing the row_index evidence. Every AMBIGUOUS note starts with `MULTI:` followed by the
+remaining candidate row_indexes, or `NONDISC:` followed by the non-discriminating fact (all-zero, single child with
+equal amount, ...). Never write "not verified" / "could not check".
+
+## Done
+Report via worker_done: counts per status, counts per scope_status, and the sample_ids you found difficult.
+Do not otherwise summarize the data.
+```
