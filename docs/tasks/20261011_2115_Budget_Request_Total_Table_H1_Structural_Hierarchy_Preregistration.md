@@ -509,3 +509,5 @@ Run `run_97915207aade` で、§12.6 の仕様を使って Codex（gpt-6-luna、e
 | `review/stability.json` | `abfed56037ca78cca894246925efa0a1d0829bd8d1d5b497ad2f61f93dcaca00` |
 
 **次:** `review/human-review.csv` の人によるレビュー（70件）。手引きは `review/review-guide.md`。監査の結果を見て escalation を判定し、すべて裁定したうえで GT を凍結する。
+
+**レビュー補助:** `scripts/pipeline-v2/build-budget-request-total-table-h1-review-aid.ts` で `review/human-review.html` を生成する。内容は、raw text の該当範囲（等幅、対象行と注釈が挙げた行を強調）、ブロックの行と7セル、TOTAL の範囲の検算、A2/B2 の判定と `decisions.md` の根拠、round 1 の参考、契約の要点。書き出しは `human-review.csv` と同じ形式。証拠の範囲は raw text のままとし、PDF の画像は載せない。Coordinator の示唆は初期状態で非表示にし、判定は人が行う。
