@@ -169,7 +169,8 @@ describe('CSV output', () => {
       '６年度概算要求額_一般行政経費', '６年度概算要求額_その他の経費', '６年度概算要求額_計',
       '増△減', '明細書頁数',
     ]);
-    expect([...TOTAL_TABLE_CSV_COLUMNS].slice(10)).toEqual(['source_file', 'source_page', 'source_line_start', 'source_line_end', 'table_block_id', 'row_index', 'row_type', 'parse_status']);
+    expect([...TOTAL_TABLE_CSV_COLUMNS].slice(10)).toEqual(['source_page', 'source_line_start', 'source_line_end', 'table_block_id', 'row_index', 'row_type', 'parse_status']);
+    expect(TOTAL_TABLE_CSV_COLUMNS).not.toContain('source_file');
   });
 
   it('writes 区分 as code + name without letter spacing, and amounts as the source text', () => {

@@ -2,8 +2,11 @@
  * 令和6年度歳出概算要求額明細表 raw text → logical row parser (v0, deterministic, no LLM). 備考 is out of scope.
  *
  * Input is pdftotext plain text (pages separated by Form Feed). Only the left part of the table is read:
- * 要求番号, 事項, 前年度予算額, ６年度概算要求額, 対前年度比較増△減. Cell text is kept as it appears in the raw
- * text (inner whitespace, △ spacing); blank cells stay blank (no 0, no sign completion, no value from other rows/pages).
+ * 要求番号, 事項, 前年度予算額, ６年度概算要求額, 対前年度比較増△減. Names and amounts have their whitespace removed (the
+ * letter spacing of a name and the spaces between △ and the digits carry no information), like the total table. The
+ * code is kept exactly as in the raw text: a shortened middle group with spaces (e.g. `95016‑ 815‑16‑7878`) is an
+ * extraction defect that must stay visible, not be "repaired". Blank cells stay blank (no 0, no sign completion, no
+ * value from other rows/pages).
  * Where a blank cell is in a 2-amount row, the amounts are placed by column position only (recorded in parse_status);
  * rows whose columns cannot be determined from the position go to unresolved. The arithmetic is used only as a check
  * after extraction, never to decide which column holds a value.
@@ -161,9 +164,12 @@ export interface DetailRow {
   row_index: number;
   row_type: RowType;
   request_no_raw: string;
-  /** Code + name as in the raw text (inner whitespace kept); continuation segments are joined with "\n". */
-  matter_raw: string;
-  /** Cell text as in the raw text; '' = the cell is blank in the raw text. */
+  /**
+   * Code as in the raw text (inner whitespace kept) + one space + the name without whitespace. Continuation lines are
+   * appended to the name without a separator (the lines are in source_line_start..source_line_end).
+   */
+  matter: string;
+  /** Amount text without whitespace (△ kept in front of the digits); '' = the cell is blank in the raw text. */
   cells: Record<AmountColumn, string>;
   parse_status: 'PARSED' | 'AMOUNTS_PLACED_BY_PAGE_EDGES';
   continuationLines: number;
@@ -192,6 +198,10 @@ export interface SourceResult {
 }
 
 const EDGE_TOLERANCE = 3;
+/** Whitespace-free text (amounts, names). */
+const squeeze = (s: string): string => s.replace(/[\s　]+/gu, '');
+/** `code name`: the code is kept as in the raw text, the name loses its letter spacing. */
+const joinMatter = (code: string, name: string): string => (compact(name) === '' ? code : `${code} ${compact(name)}`);
 /**
  * 備考 on the same physical line must not be read as amounts. Its heading starts far right of where 備考 text starts
  * (FY2024: 99.9% of the 備考 text on a row line starts left of it), so the 備考 heading cannot be the cut. A number is
@@ -324,7 +334,7 @@ export function parseDetailSource(text: string, sourceFile: string): SourceResul
         else if ((c.includes('所管') || c.includes('会計')) && CONTEXT_LINE.test(l)) {
           result.rows.push({
             source_file: sourceFile, source_page: pageNo, source_line_start: firstLineNo + i, source_line_end: firstLineNo + i,
-            row_index: ++rowIndex, row_type: 'CONTEXT', request_no_raw: '', matter_raw: l.trim(),
+            row_index: ++rowIndex, row_type: 'CONTEXT', request_no_raw: '', matter: joinMatter(l.trim().match(/^[0-9]{1,4}/u)![0], l.trim().replace(/^[0-9]{1,4}\s+/u, '')),
             cells: { previous: '', request: '', difference: '' }, parse_status: 'PARSED', continuationLines: 0,
           });
           tally('ROW');
@@ -347,7 +357,7 @@ export function parseDetailSource(text: string, sourceFile: string): SourceResul
         if (!open) { unresolved(i, 'LEFT_FRAGMENT_WITHOUT_PRECEDING_ROW_ON_PAGE'); return; }
         if (open.lastLine !== i - 1) { unresolved(i, 'LEFT_FRAGMENT_NOT_ADJACENT'); return; }
         if (Math.abs(indent - open.nameStart) > 1) { unresolved(i, 'LEFT_FRAGMENT_NOT_ALIGNED'); return; }
-        open.row.matter_raw += `\n${l.slice(0, q).trim()}`;
+        open.row.matter += compact(l.slice(0, q));
         open.row.source_line_end = firstLineNo + i;
         open.row.continuationLines++;
         open.lastLine = i;
@@ -369,7 +379,7 @@ export function parseDetailSource(text: string, sourceFile: string): SourceResul
       } else {
         matterEnd = p.nameEnd;
         if (n === 3) {
-          cells = { previous: p.tokens[0].raw, request: p.tokens[1].raw, difference: p.tokens[2].raw };
+          cells = { previous: squeeze(p.tokens[0].raw), request: squeeze(p.tokens[1].raw), difference: squeeze(p.tokens[2].raw) };
         } else if (n === 2) {
           // A blank cell is placed only by what the raw text shows: each token's right edge must be within ±3
           // characters of exactly one amount column of this page. The arithmetic is never used to decide which
@@ -383,7 +393,7 @@ export function parseDetailSource(text: string, sourceFile: string): SourceResul
             if (cols[0] >= 0 && cols[1] >= 0 && cols[0] !== cols[1]) placed = cols.map(k => AMOUNT_COLUMNS[k]);
           }
           if (!placed) { unresolved(i, 'BLANK_CELL_COLUMN_UNDETERMINED'); open = null; return; }
-          placed.forEach((col, k) => { cells[col] = p.tokens[k].raw; });
+          placed.forEach((col, k) => { cells[col] = squeeze(p.tokens[k].raw); });
           status = 'AMOUNTS_PLACED_BY_PAGE_EDGES';
         } else {
           unresolved(i, 'UNEXPECTED_AMOUNT_COUNT');
@@ -395,7 +405,7 @@ export function parseDetailSource(text: string, sourceFile: string): SourceResul
       const row: DetailRow = {
         source_file: sourceFile, source_page: pageNo, source_line_start: firstLineNo + i, source_line_end: firstLineNo + i,
         row_index: ++rowIndex, row_type: classifyCode(p.head[3], requestNo !== ''), request_no_raw: requestNo,
-        matter_raw: l.slice(codeStart, matterEnd).trimEnd(), cells, parse_status: status, continuationLines: 0,
+        matter: joinMatter(p.head[3], l.slice(p.head.indices![4][0], matterEnd)), cells, parse_status: status, continuationLines: 0,
       };
       result.rows.push(row);
       tally('ROW');
@@ -427,7 +437,7 @@ const csvLine = (values: unknown[]) => values.map(csvCell).join(',');
 
 export function renderRowsCsv(rows: DetailRow[]): string {
   const body = rows.map(r => csvLine([
-    r.request_no_raw, r.matter_raw, r.cells.previous, r.cells.request, r.cells.difference,
+    r.request_no_raw, r.matter, r.cells.previous, r.cells.request, r.cells.difference,
     r.source_page, r.source_line_start, r.source_line_end, r.row_index, r.row_type, r.parse_status,
   ]));
   return [DETAIL_TABLE_CSV_COLUMNS.join(','), ...body].join('\n') + '\n';

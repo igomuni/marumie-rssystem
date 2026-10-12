@@ -44,32 +44,33 @@ describe('page detection and the left/備考 boundary', () => {
 });
 
 describe('rows', () => {
-  it('keeps the context line, headings (blank amounts) and items as they are in the raw text', () => {
+  it('keeps the context line, headings (blank amounts) and items; the name loses its letter spacing', () => {
     const rows = parseFixture('context').rows;
-    expect(rows.map(r => [r.row_type, r.matter_raw, cellsOf(r)])).toEqual([
-      ['CONTEXT', '9101 東 日 本 大 震 災 復 興 特 別 会 計 （警察庁）', ['', '', '']],
-      ['CODE2', '01    東 日 本 大 震 災 復 興', ['', '', '']],
-      ['CODE2', '31    復         興   庁', ['', '', '']],
-      ['CODE3', '010 復       興      庁', ['232,621', '316,018', '83,397']],
+    expect(rows.map(r => [r.row_type, r.matter, cellsOf(r)])).toEqual([
+      ['CONTEXT', '9101 東日本大震災復興特別会計（警察庁）', ['', '', '']],
+      ['CODE2', '01 東日本大震災復興', ['', '', '']],
+      ['CODE2', '31 復興庁', ['', '', '']],
+      ['CODE3', '010 復興庁', ['232,621', '316,018', '83,397']],
     ]);
   });
 
-  it('joins name continuation lines with a newline and keeps the request number separate', () => {
+  it('joins name continuation lines without a separator and keeps the request number separate', () => {
     const row = parseFixture('edges').rows.find(r => r.request_no_raw === '101')!;
     expect(row.row_type).toBe('DETAIL');
-    expect(row.matter_raw).toBe('12‑49 農業施設災害関連事業に\n必要な経費');
+    expect(row.matter).toBe('12‑49 農業施設災害関連事業に必要な経費');
     expect(row.source_line_end - row.source_line_start).toBe(1);
-    expect(parseFixture('continuation').rows[0].matter_raw).toBe('49053‑ 825‑00‑5190 河川等災害復旧\n事業費補助');
+    // the code is kept as in the raw text: the middle group is shortened and preceded by spaces (an extraction defect)
+    expect(parseFixture('continuation').rows[0].matter).toBe('49053‑ 825‑00‑5190 河川等災害復旧事業費補助');
   });
 
-  it('keeps cell text as it appears, including the spaces between △ and the digits', () => {
-    expect(cellsOf(parseFixture('wide-triangle').rows[0])).toEqual(['2,653,302', '2,012,269', '△   641,033']);
-    expect(cellsOf(parseFixture('edges').rows[0])).toEqual(['434,640', '0', '△    434,640']);
+  it('removes the spaces between △ and the digits and keeps the amount text otherwise', () => {
+    expect(cellsOf(parseFixture('wide-triangle').rows[0])).toEqual(['2,653,302', '2,012,269', '△641,033']);
+    expect(cellsOf(parseFixture('edges').rows[0])).toEqual(['434,640', '0', '△434,640']);
   });
 
   it('does not read 備考 text into the left part', () => {
     const r = parseFixture('arith');
-    expect(r.rows.every(row => !/[(（]/u.test(row.matter_raw))).toBe(true);
+    expect(r.rows.every(row => !/[(（]/u.test(row.matter))).toBe(true);
     expect(r.lineClassCounts.RIGHT_REGION).toBe(4);
   });
 
@@ -91,7 +92,7 @@ describe('amounts', () => {
   });
 
   it('leaves a blank cell blank and places two amounts by column position when the page has enough rows to calibrate', () => {
-    const row = parseFixture('edges').rows.find(r => r.matter_raw.startsWith('49053‑ 825‑00‑5170'))!;
+    const row = parseFixture('edges').rows.find(r => r.matter.startsWith('49053‑ 825‑00‑5170'))!;
     expect(cellsOf(row)).toEqual(['', '136,000', '136,000']);
     expect(row.parse_status).toBe('AMOUNTS_PLACED_BY_PAGE_EDGES');
   });
@@ -113,7 +114,7 @@ describe('amounts', () => {
     const src = fixture('wide-triangle').replace('2,012,269', '2,012,270');
     const r = parseDetailSource(src, 'synthetic');
     expect(r.arithmeticMismatchRows.length).toBe(1);
-    expect(cellsOf(r.arithmeticMismatchRows[0])).toEqual(['2,653,302', '2,012,270', '△   641,033']);
+    expect(cellsOf(r.arithmeticMismatchRows[0])).toEqual(['2,653,302', '2,012,270', '△641,033']);
     expect(parseFixture('wide-triangle').arithmeticMismatchRows).toEqual([]);
   });
 });
@@ -121,7 +122,7 @@ describe('amounts', () => {
 describe('left-region text that is not a name continuation', () => {
   it('attaches a fragment only when it is on the physical line right below the row and starts at the name column', () => {
     const r = parseFixture('not-aligned');
-    expect(r.rows[0].matter_raw).toBe('100   外国人に対する日本語教\n育の推進');
+    expect(r.rows[0].matter).toBe('100 外国人に対する日本語教育の推進');
     const reasons = r.unresolved.map(u => u.reason);
     expect(reasons.filter(x => x === 'LEFT_FRAGMENT_NOT_ADJACENT').length).toBeGreaterThan(20);
     expect(reasons).toContain('LEFT_FRAGMENT_NOT_ALIGNED');
@@ -157,7 +158,7 @@ describe('備考 on the same physical line is not read', () => {
   ].slice(0, n);
   const page = (genuine: number, ...body: string[]) => `${header}\n${[...normal(genuine), ...body].join('\n')}\n\f`;
   const parse = (text: string) => parseDetailSource(text, 'synthetic');
-  const named = (r: ReturnType<typeof parse>, prefix: string) => r.rows.filter(x => x.matter_raw.startsWith(prefix));
+  const named = (r: ReturnType<typeof parse>, prefix: string) => r.rows.filter(x => x.matter.startsWith(prefix));
   const hasAmounts = (r: DetailRow) => cellsOf(r).some(c => c !== '');
 
   it('reads the synthetic page as designed: the three amounts end in their header windows', () => {
@@ -237,11 +238,12 @@ describe('accounting and CSV output', () => {
     expect(csv.split('\n')[0].split(',')).toEqual([...DETAIL_TABLE_CSV_COLUMNS]);
   });
 
-  it('writes blank cells empty, raw cell text quoted, and multi-line cells quoted', () => {
+  it('writes blank cells empty and amounts without spaces, quoting only cells that contain a comma', () => {
     const lines = renderRowsCsv(parseFixture('edges').rows).split('\n');
-    expect(lines.some(l => l.includes(',"△    434,640",'))).toBe(true);
-    expect(lines.some(l => l.startsWith(',"49053‑ 825‑00‑5170 漁港施設災害復\n') || l.startsWith(',"49053‑ 825‑00‑5170 漁港施設災害復'))).toBe(true);
+    expect(lines.some(l => l.includes(',"△434,640",'))).toBe(true);
+    expect(lines.some(l => l.startsWith(',49053‑ 825‑00‑5170 漁港施設災害復旧事業費補助,'))).toBe(true);
     expect(renderRowsCsv(parseFixture('edges').rows)).toContain(',,"136,000","136,000",');
+    expect(renderRowsCsv(parseFixture('edges').rows)).not.toContain('\n"');
   });
 
   it('is deterministic and keeps unresolved raw text', () => {

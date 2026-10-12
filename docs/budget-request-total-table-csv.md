@@ -94,16 +94,15 @@ TAIL          = SIGNED_AMOUNT (\s+ SIGNED_AMOUNT){6} (\s+ DETAIL_PAGE)? \s*$
 | `６年度概算要求額_一般行政経費` `６年度概算要求額_その他の経費` `６年度概算要求額_計` | 金額の原文 |
 | `増△減` | 金額の原文 |
 | `明細書頁数` | 原文。TOTAL は空 |
-| `source_file` `source_page` `source_line_start` `source_line_end` `table_block_id` `row_index` `row_type` `parse_status` | 行の出所と物理文法の分類（総表の列ではない）。`row_index` はブロック内の1始まりの連番 |
+| `source_page` `source_line_start` `source_line_end` `table_block_id` `row_index` `row_type` `parse_status` | 行の出所と物理文法の分類（総表の列ではない）。`row_index` はブロック内の1始まりの連番 |
 
 - 金額のセルは原文表記のまま（カンマを含む文字列）。`△` は金額の前に付ける（原文では `△` の後ろに空白があるが、詰める）。数値化はしない。
-- 字下げ（行頭の空白）は、継続行の判定にだけ使い、出力しない。元の plain text は `source_file` と `source_line_start` から引ける。
+- **`source_file` 列は持たない。** 文字数が多くなりがちで、source は、ソース別 CSV のファイル名（`sources/<slug>.csv`）で判別できる。複数の source をまとめる `unresolved.csv` などには、`source_file` 列を残す。
+- 名称と金額の空白は除く（明細表の CSV も同じ扱い。明細表のコードは raw text のまま）。
+- 字下げ（行頭の空白）は、継続行の判定にだけ使い、出力しない。元の plain text は、ソース別 CSV のファイル名と `source_line_start` から引ける。
 - 文字間の空白を含む名称の原文と、金額の符号と数字の分割は出力しない。どちらも plain text から再生成できる（`LogicalRow` の `name_raw`、`cells` に保持している）。
 
 ## 既知の後段課題（v0 の対象外）
-
-- **空白を加工しない方針への変更（記録のみ。未対応）。** `区分` の文字間の空白と `△` の後ろの空白を詰めているが、明細表の CSV（[budget-request-detail-table-csv.md](budget-request-detail-table-csv.md)）は空白を加工しない。総表も、空白を加工しない方針に直したい。
-- **`source_file` 列は不要と判断済み（記録のみ。未対応）。** 文字数が多くなりがちで、ソース別 CSV のファイル名（`sources/<slug>.csv`）で判別できる。明細表の CSV は、すでに持たない。総表の CSV からも、空白の方針の見直しと合わせて外す。複数の source をまとめる `unresolved.csv` などには、`source_file` 列を残す。
 
 - 同一の総表が別 source に重複して掲載されている（環境省と経済産業省のエネルギー対策特別会計2勘定）。`sources/` は source 単位で出力するため、重複を除いていない。
 - `CONTEXT` 行（所管・会計）と HIER/CODE3/DETAIL の意味的な階層の再構成。

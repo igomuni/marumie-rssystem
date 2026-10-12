@@ -335,10 +335,13 @@ const AMOUNT_HEADERS: Record<AmountField, string> = {
   difference: '増△減',
 };
 
-/** 総表の列（原本の見出し）を先頭に、行の出所をたどる列を末尾に置く。 */
+/**
+ * 総表の列（原本の見出し）を先頭に、行の出所をたどる列を末尾に置く。
+ * source_file 列は持たない（ソース別 CSV のファイル名 `<slug>.csv` で判別する）。
+ */
 export const TOTAL_TABLE_CSV_COLUMNS = [
   '要求番号', '区分', ...AMOUNT_FIELDS.map(f => AMOUNT_HEADERS[f]), '明細書頁数',
-  'source_file', 'source_page', 'source_line_start', 'source_line_end', 'table_block_id', 'row_index', 'row_type', 'parse_status',
+  'source_page', 'source_line_start', 'source_line_end', 'table_block_id', 'row_index', 'row_type', 'parse_status',
 ] as const;
 
 export const UNRESOLVED_CSV_COLUMNS = ['source_file', 'source_page', 'source_line_start', 'source_line_end', 'table_block_id', 'raw_text', 'reason'] as const;
@@ -357,7 +360,7 @@ export function renderRowsCsv(rows: LogicalRow[]): string {
     // 金額は原文のまま。△は金額の前に付ける。
     ...AMOUNT_FIELDS.map(f => `${r.cells[f].sign_raw}${r.cells[f].amount_raw}`),
     r.detail_page_raw,
-    r.source_file, r.source_page, r.source_line_start, r.source_line_end, r.table_block_id, r.row_index, r.row_type, r.parse_status,
+    r.source_page, r.source_line_start, r.source_line_end, r.table_block_id, r.row_index, r.row_type, r.parse_status,
   ]));
   return [TOTAL_TABLE_CSV_COLUMNS.join(','), ...body].join('\n') + '\n';
 }
