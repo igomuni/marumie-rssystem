@@ -177,7 +177,7 @@ export interface DetailRow {
   page_label: string;
   /** Amount text without whitespace (△ kept in front of the digits); '' = the cell is blank in the raw text. */
   cells: Record<AmountColumn, string>;
-  parse_status: 'PARSED' | 'AMOUNTS_PLACED_BY_PAGE_EDGES';
+  parse_status: 'PARSED' | 'AMOUNTS_PLACED_BY_PAGE_EDGES' | 'AMOUNTS_PLACED_BY_HEADER_WINDOWS';
   continuationLines: number;
 }
 
@@ -399,9 +399,18 @@ export function parseDetailSource(text: string, sourceFile: string): SourceResul
             });
             if (cols[0] >= 0 && cols[1] >= 0 && cols[0] !== cols[1]) placed = cols.map(k => AMOUNT_COLUMNS[k]);
           }
+          if (placed) status = 'AMOUNTS_PLACED_BY_PAGE_EDGES';
+          else {
+            // No measured page edges decided it: use the header-word windows alone. Each token's right end must lie in
+            // exactly one window (the windows overlap near their borders) and the two columns must differ.
+            const cols = p.ends.map(e => {
+              const near = [0, 1, 2].filter(k => e >= guard[k][0] && e <= guard[k][1]);
+              return near.length === 1 ? near[0] : -1;
+            });
+            if (cols[0] >= 0 && cols[1] >= 0 && cols[0] !== cols[1]) { placed = cols.map(k => AMOUNT_COLUMNS[k]); status = 'AMOUNTS_PLACED_BY_HEADER_WINDOWS'; }
+          }
           if (!placed) { unresolved(i, 'BLANK_CELL_COLUMN_UNDETERMINED'); open = null; return; }
           placed.forEach((col, k) => { cells[col] = squeeze(p.tokens[k].raw); });
-          status = 'AMOUNTS_PLACED_BY_PAGE_EDGES';
         } else {
           unresolved(i, 'UNEXPECTED_AMOUNT_COUNT');
           open = null;
