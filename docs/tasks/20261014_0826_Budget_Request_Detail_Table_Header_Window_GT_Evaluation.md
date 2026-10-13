@@ -1,6 +1,7 @@
 # 明細表: 表頭の窓による列配置の評価結果（凍結GT 140行）
 
 状態: 評価完了。結論: **事前登録の判定は GO（RESOLVED 139件すべて正しい、誤配置0）。** 実装はまだ（別PR、ユーザー判断）。
+入力 zip: `data/work/budget-request-plain-text.zip`（SHA-256 `268f1020…e533`、評価前に固定。スクリプトが検証し、一致で同じ結果 139/139 を再確認）。
 GT: `final/gt.csv`（SHA-256 `66483999…97ea`、凍結 `gt-freeze.json`、pre-freeze review は ChatGPT が GO）。評価: `python3 -I scripts/research/evaluate-detail-table-window-gt.py`。
 
 | 項目 | 件数 |
