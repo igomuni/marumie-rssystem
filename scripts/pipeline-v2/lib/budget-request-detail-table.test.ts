@@ -188,7 +188,10 @@ describe('備考 on the same physical line is not read', () => {
         const at = `${genuine} genuine rows, remark at ${col}`;
         expect(['011', '012', '013'].flatMap(p => named(r, p)).some(hasAmounts), at).toBe(false);
         expect(r.rows.some(x => x.parse_status === 'AMOUNTS_PLACED_BY_PAGE_EDGES'), at).toBe(false);
-        expect(r.unresolved.some(u => u.reason === 'BLANK_CELL_COLUMN_UNDETERMINED' && u.raw_text.includes('95016‑2129‑06‑0110')), at).toBe(true);
+        // the page cannot be measured, so the genuine row is not placed by page edges; the header windows alone place it
+        const genuineRow = r.rows.find(x => x.matter.startsWith('95016‑2129‑06‑0110'))!;
+        expect(cellsOf(genuineRow), at).toEqual(['136', '', '136']);
+        expect(genuineRow.parse_status, at).toBe('AMOUNTS_PLACED_BY_HEADER_WINDOWS');
         expect(r.arithmeticMismatchRows, at).toEqual([]);
       }
     }
