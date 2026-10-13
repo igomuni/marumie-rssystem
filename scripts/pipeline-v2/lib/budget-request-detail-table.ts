@@ -169,6 +169,12 @@ export interface DetailRow {
    * appended to the name without a separator (the lines are in source_line_start..source_line_end).
    */
   matter: string;
+  /**
+   * The printed page label of the page the row is on (the first non-blank line of the page: a page number with a
+   * section mark, e.g. `厚（本）13`, `14厚（本）`, `1058国（保）`, `97`), without whitespace; '' = the page has no label.
+   * The total table's 明細書頁数 refers to these page numbers.
+   */
+  page_label: string;
   /** Amount text without whitespace (△ kept in front of the digits); '' = the cell is blank in the raw text. */
   cells: Record<AmountColumn, string>;
   parse_status: 'PARSED' | 'AMOUNTS_PLACED_BY_PAGE_EDGES';
@@ -320,6 +326,7 @@ export function parseDetailSource(text: string, sourceFile: string): SourceResul
     const pageWindows: Window[] = edges ? edges.map(e => clamp([e - EDGE_ACCEPT, e + EDGE_ACCEPT])) : guard;
 
     const firstNonBlank = lines.findIndex(l => l.trim() !== '');
+    let pageLabel = '';
     let open: { row: DetailRow; nameStart: number; lastLine: number } | null = null;
 
     lines.forEach((l, i) => {
@@ -334,12 +341,12 @@ export function parseDetailSource(text: string, sourceFile: string): SourceResul
         else if ((c.includes('所管') || c.includes('会計')) && CONTEXT_LINE.test(l)) {
           result.rows.push({
             source_file: sourceFile, source_page: pageNo, source_line_start: firstLineNo + i, source_line_end: firstLineNo + i,
-            row_index: ++rowIndex, row_type: 'CONTEXT', request_no_raw: '', matter: joinMatter(l.trim().match(/^[0-9]{1,4}/u)![0], l.trim().replace(/^[0-9]{1,4}\s+/u, '')),
+            row_index: ++rowIndex, row_type: 'CONTEXT', request_no_raw: '', page_label: pageLabel, matter: joinMatter(l.trim().match(/^[0-9]{1,4}/u)![0], l.trim().replace(/^[0-9]{1,4}\s+/u, '')),
             cells: { previous: '', request: '', difference: '' }, parse_status: 'PARSED', continuationLines: 0,
           });
           tally('ROW');
           open = null;
-        } else if (i === firstNonBlank) tally('PAGE_LABEL');
+        } else if (i === firstNonBlank) { pageLabel = squeeze(l); tally('PAGE_LABEL'); }
         else unresolved(i, 'UNKNOWN_HEADER_ZONE_LINE');
         return;
       }
@@ -404,7 +411,7 @@ export function parseDetailSource(text: string, sourceFile: string): SourceResul
 
       const row: DetailRow = {
         source_file: sourceFile, source_page: pageNo, source_line_start: firstLineNo + i, source_line_end: firstLineNo + i,
-        row_index: ++rowIndex, row_type: classifyCode(p.head[3], requestNo !== ''), request_no_raw: requestNo,
+        row_index: ++rowIndex, row_type: classifyCode(p.head[3], requestNo !== ''), request_no_raw: requestNo, page_label: pageLabel,
         matter: joinMatter(p.head[3], l.slice(p.head.indices![4][0], matterEnd)), cells, parse_status: status, continuationLines: 0,
       };
       result.rows.push(row);
@@ -423,7 +430,7 @@ export function parseDetailSource(text: string, sourceFile: string): SourceResul
  * source_file 列は持たない（ソース別 CSV のファイル名 `<slug>.csv` で判別する）。
  */
 export const DETAIL_TABLE_CSV_COLUMNS = [
-  '要求番号', '事項', '前年度予算額', '６年度概算要求額', '対前年度比較増△減',
+  '要求番号', '事項', '前年度予算額', '６年度概算要求額', '対前年度比較増△減', '頁',
   'source_page', 'source_line_start', 'source_line_end', 'row_index', 'row_type', 'parse_status',
 ] as const;
 
@@ -437,7 +444,7 @@ const csvLine = (values: unknown[]) => values.map(csvCell).join(',');
 
 export function renderRowsCsv(rows: DetailRow[]): string {
   const body = rows.map(r => csvLine([
-    r.request_no_raw, r.matter, r.cells.previous, r.cells.request, r.cells.difference,
+    r.request_no_raw, r.matter, r.cells.previous, r.cells.request, r.cells.difference, r.page_label,
     r.source_page, r.source_line_start, r.source_line_end, r.row_index, r.row_type, r.parse_status,
   ]));
   return [DETAIL_TABLE_CSV_COLUMNS.join(','), ...body].join('\n') + '\n';

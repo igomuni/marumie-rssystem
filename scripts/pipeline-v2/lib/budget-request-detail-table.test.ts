@@ -218,6 +218,34 @@ describe('備考 on the same physical line is not read', () => {
   });
 });
 
+describe('printed page label (頁)', () => {
+  const labels = (name: string) => [...new Set(parseFixture(name).rows.map(r => r.page_label))];
+
+  it('takes the first non-blank line of the page, without whitespace, whichever side the number is on', () => {
+    expect(labels('context')).toEqual(['復興特3']);
+    expect(labels('continuation')).toEqual(['6復興特']);
+    expect(labels('wide-triangle')).toEqual(['1058国（保）']);
+    expect(labels('undetermined')).toEqual(['国（総）523']);
+    expect(labels('not-aligned')).toEqual(['1136文（文）']);
+  });
+
+  it('keeps a bare number as the label, and gives the CONTEXT row of the page the same label', () => {
+    expect(labels('edges')).toEqual(['97']);
+    const rows = parseFixture('context').rows;
+    expect(rows[0].row_type).toBe('CONTEXT');
+    expect(rows.every(r => r.page_label === '復興特3')).toBe(true);
+  });
+
+  it('leaves the label empty when the page has no label line, and writes it as the 頁 column', () => {
+    const lines = fixture('continuation').split('\n');
+    const withoutLabel = lines.filter((l, i) => !(i === lines.findIndex(x => x.trim() !== ''))).join('\n');
+    expect(parseDetailSource(withoutLabel, 'synthetic').rows.map(r => r.page_label)).toEqual(['']);
+    const csv = renderRowsCsv(parseFixture('edges').rows).split('\n');
+    expect(csv[0].split(',')[5]).toBe('頁');
+    expect(csv[1]).toContain(',97,');
+  });
+});
+
 describe('accounting and CSV output', () => {
   const names = ['context', 'continuation', 'wide-triangle', 'edges', 'arith', 'undetermined', 'not-aligned', 'no-boundary'];
 
@@ -230,7 +258,7 @@ describe('accounting and CSV output', () => {
 
   it('uses the source table headings as column names, with provenance columns last', () => {
     expect([...DETAIL_TABLE_CSV_COLUMNS]).toEqual([
-      '要求番号', '事項', '前年度予算額', '６年度概算要求額', '対前年度比較増△減',
+      '要求番号', '事項', '前年度予算額', '６年度概算要求額', '対前年度比較増△減', '頁',
       'source_page', 'source_line_start', 'source_line_end', 'row_index', 'row_type', 'parse_status',
     ]);
     expect(DETAIL_TABLE_CSV_COLUMNS).not.toContain('source_file');
