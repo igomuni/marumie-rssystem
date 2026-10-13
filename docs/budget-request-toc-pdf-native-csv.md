@@ -8,13 +8,15 @@
 
 ```bash
 npx tsx scripts/pipeline-v2/build-budget-request-toc-pdf-native-csv.ts \
-  --source-root=<data/download に相当するディレクトリ> --out-dir=<出力先> [--inventory=<structure-inventory.json>]
+  --source-root=<data/download に相当するディレクトリ> [--out-dir=<出力先>] [--inventory=<structure-inventory.json>]
 # npm run pipeline:v2:build:budget-request-toc-pdf-native-csv -- --source-root=... --out-dir=...
 ```
 
 - 入力集合: 既定は `tests/fixtures/budget-request-cover-toc-structure/2024/structure-inventory.json` の `classifierPageType=TOC`（82物理ページ・55 PDF）。`localPdfPath` の先頭 `data/download/` を `--source-root` に読み替える。リポジトリルートから実行する（ソースハッシュを相対パスで記録するため）。
 - PDF は読み取り専用。SHA-256 が inventory と一致しない PDF が1つでもあれば、成果物を書かずに停止する。`--out-dir` が `--source-root` の中なら停止する。
 - 経過時間は標準出力のみで、成果物に入れない。同じ入力・同じコードなら成果物はバイト一致する。
+
+`--out-dir` を省略すると、実行ディレクトリからの相対パス `data/work/budget-request-csv/2024/toc/` に出力する。任意の出力先を明示指定することもできる。
 
 ## 出力
 
