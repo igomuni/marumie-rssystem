@@ -13,6 +13,7 @@
   B. 総表の `明細書頁数` から明細表の `頁` が見つからない行の原因
   C. 印刷された頁のラベルの内訳（全明細表ページ）
 判定は、行の文字・位置・前後の行だけで行う。補完・推測・外部知識は使わない。
+例外は B の「参考診断（推定）」1か所だけ（ラベルとページ位置の差の最頻値からの位置予測）。出力のキーに「推定」と付け、原因の確定には使わない。
 """
 import bisect
 import collections
@@ -186,9 +187,9 @@ def main():
     A['by_family'] = dict(sorted(fam.items()))
     a_note = sum(v for k, v in fam.items() if k[:2] in ('A1', 'A2', 'A3', 'A4', 'A5') or k.startswith('A6a'))
     A['notes_from_families'] = {
-        '備考の内容（左側から始まるが、表の左側ではない）': a_note,
+        '規則上、備考由来と分類された（A1〜A3、A5、A6a。判定は文字の特徴と前後の行による）': a_note,
         '直前の見出し行が unresolved の連鎖（その行を取れれば、名称の継続行として連結できる候補）': sum(v for k, v in fam.items() if k.startswith('A6b')),
-        'どちらでもない': sum(v for k, v in fam.items() if k.startswith('A6c')),
+        'どちらでもない（A6c。根拠が弱く、備考由来とは言い切らない）': sum(v for k, v in fam.items() if k.startswith('A6c')),
     }
 
     # --- 連鎖の根本原因: BLANK_CELL_COLUMN_UNDETERMINED の行（表頭の窓だけで置けるか）
@@ -284,13 +285,16 @@ def main():
                 B['      その source の明細表ページに、数字のあるラベルが1つも無い'] += 1
             else:
                 pred = int(num(v)) + mode
-                B['      数字のあるラベルがある source。予測の位置の頁は、明細表ページではない' if pred not in detpages[slug]
-                  else '      数字のあるラベルがある source。予測の位置の頁は、別の番号のラベルの頁'] += 1
+                B['      （推定・参考診断）数字のあるラベルがある source。ラベルとページ位置の差の最頻値から予測した位置は、明細表ページではない' if pred not in detpages[slug]
+                  else '      （推定・参考診断）数字のあるラベルがある source。予測した位置は、別の番号のラベルの頁'] += 1
                 if len(examples['pred']) < 3:
                     examples['pred'].append([slug[:30], r['row_type'], v, pred])
     out['B_page_not_found'] = {'counts': dict(sorted(B.items())),
                                 'sources_with_unfound_rows': dict(detail_of_unfound.most_common()),
-                                'examples_pred_not_a_detail_page': examples['pred']}
+                                'examples_inferred_position_not_a_detail_page': examples['pred'],
+                                'label_line_kinds_of_detail_pages_in_sources_with_unfound_rows': {
+                                    sl: dict(collections.Counter('ラベルの行が無い' if l is None else ('数字のあるラベル' if re.search(r'[0-9]', l) else '数字のないラベル') for l in detpages[sl].values()))
+                                    for sl in detail_of_unfound}}
     print(json.dumps(out, ensure_ascii=False, indent=2))
 
 
