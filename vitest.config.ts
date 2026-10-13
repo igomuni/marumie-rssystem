@@ -10,6 +10,7 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['**/*.test.ts'],
-    exclude: ['node_modules', '.next'],
+    // data/ holds local work products (data/work may be a symlink into another checkout): never scan it for tests
+    exclude: ['node_modules', '.next', 'data/**'],
   },
 });
