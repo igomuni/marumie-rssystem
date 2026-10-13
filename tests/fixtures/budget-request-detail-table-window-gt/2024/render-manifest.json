@@ -1,0 +1,226 @@
+{
+  "candidates_csv_sha256": "5eb726cff22311c4b3c3262a27c00fa863d18931ebd4b36a3ecefab6bc4bd52f",
+  "command_template": "pdftoppm -r 150 -png -f N -l N -singlefile <pdf> <out-without-extension>",
+  "dpi": 150,
+  "items": [
+    {
+      "pdf_sha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+      "png": "maff.go.jp__j__budget__attach__pdf__230901-2__p0139.png",
+      "png_sha256": "2e59d4ec9e4b964a86b7c7f577077230579ef3821c8afb67a1a14a4f7071fc5c",
+      "source_file": "maff.go.jp__j__budget__attach__pdf__230901-2",
+      "source_page": 139
+    },
+    {
+      "pdf_sha256": "3be3fa49d24cc02ed680f0104d41405ff5e69bfb4a84290dccc8fe8205eaa1f1",
+      "png": "maff.go.jp__j__budget__attach__pdf__230901-4__p0020.png",
+      "png_sha256": "b9b938e84d8f9a16696a4cd496abafa568ae5876173ec562864cf72be26bc359",
+      "source_file": "maff.go.jp__j__budget__attach__pdf__230901-4",
+      "source_page": 20
+    },
+    {
+      "pdf_sha256": "ba64c25df327161a33c293374a7255c203cc9a527130ece848574badefbf909a",
+      "png": "meti.go.jp__main__yosangaisan__fy2024__pdf__ippan_o__p0057.png",
+      "png_sha256": "dbd73aaf9a54d4a93bdfef796c60a2b72c1f07846ceafb65bac13df4a4b62df8",
+      "source_file": "meti.go.jp__main__yosangaisan__fy2024__pdf__ippan_o",
+      "source_page": 57
+    },
+    {
+      "pdf_sha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+      "png": "mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-1b-01__p0243.png",
+      "png_sha256": "3b36b1fda5ba60b8b8700450538374bed5a04ca424fae369a09e7c919ff69953",
+      "source_file": "mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-1b-01",
+      "source_page": 243
+    },
+    {
+      "pdf_sha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+      "png": "mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-1b-01__p0410.png",
+      "png_sha256": "199585ea1eb3637c9ff9ed41bdfc0670dd0fc5280bffaa187d1c06426bc4ed4e",
+      "source_file": "mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-1b-01",
+      "source_page": 410
+    },
+    {
+      "pdf_sha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+      "png": "mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-1b-01__p0428.png",
+      "png_sha256": "598eddd1f8b99af2d9be1c14338a855bdffc731878b1ed054ffd386bc6af2286",
+      "source_file": "mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-1b-01",
+      "source_page": 428
+    },
+    {
+      "pdf_sha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+      "png": "mlit.go.jp__page__content__001630995__p0100.png",
+      "png_sha256": "f9fa7b0bf82c3864ddb4d5fec7ace68c3e9c3447d65b02366a567d89bc7b15de",
+      "source_file": "mlit.go.jp__page__content__001630995",
+      "source_page": 100
+    },
+    {
+      "pdf_sha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+      "png": "mlit.go.jp__page__content__001630995__p0155.png",
+      "png_sha256": "2f55b16519cd0545435ea72bf25a19a68da7a6be20e0f4e4cbe5f93dcce0791a",
+      "source_file": "mlit.go.jp__page__content__001630995",
+      "source_page": 155
+    },
+    {
+      "pdf_sha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+      "png": "mlit.go.jp__page__content__001630995__p0213.png",
+      "png_sha256": "49fadede388f02dfb669b59030bca259b233ae84d9493449b59d00004d94fb97",
+      "source_file": "mlit.go.jp__page__content__001630995",
+      "source_page": 213
+    },
+    {
+      "pdf_sha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+      "png": "mlit.go.jp__page__content__001630995__p0220.png",
+      "png_sha256": "6bda263c9885b660f8ff10bc19f036cd832bef3a00e1548b64fe3cafb42c356f",
+      "source_file": "mlit.go.jp__page__content__001630995",
+      "source_page": 220
+    },
+    {
+      "pdf_sha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+      "png": "mlit.go.jp__page__content__001630995__p0236.png",
+      "png_sha256": "9c4ff20357685fc010571efe270c06f6de3374d80837a3c7ce70548f24f2ebe0",
+      "source_file": "mlit.go.jp__page__content__001630995",
+      "source_page": 236
+    },
+    {
+      "pdf_sha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+      "png": "mlit.go.jp__page__content__001630995__p0269.png",
+      "png_sha256": "8415b6bb119563d7ef76f764e33770a4ac13871388e52b7c296e0aeaf95a57f5",
+      "source_file": "mlit.go.jp__page__content__001630995",
+      "source_page": 269
+    },
+    {
+      "pdf_sha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+      "png": "mlit.go.jp__page__content__001630995__p0328.png",
+      "png_sha256": "aa3e1ade1967e58b0f11e49a02dd8d4553a12fe05cb185663641ca262435a1d7",
+      "source_file": "mlit.go.jp__page__content__001630995",
+      "source_page": 328
+    },
+    {
+      "pdf_sha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+      "png": "mlit.go.jp__page__content__001630995__p0330.png",
+      "png_sha256": "abdfea7a5d58a40299a37995a67e7840a83b57f841bf98470d7e92e6a3c636d9",
+      "source_file": "mlit.go.jp__page__content__001630995",
+      "source_page": 330
+    },
+    {
+      "pdf_sha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+      "png": "mlit.go.jp__page__content__001630995__p0336.png",
+      "png_sha256": "350b6cc25b68f9a342ed66c7806fcb238b34b67334c2fc2b400ccf6d824eb203",
+      "source_file": "mlit.go.jp__page__content__001630995",
+      "source_page": 336
+    },
+    {
+      "pdf_sha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+      "png": "mlit.go.jp__page__content__001630995__p0342.png",
+      "png_sha256": "ebb19b41ed0ee92f8a3436ee4d4b33db87da804cc062f682d29f6e7b794c18ab",
+      "source_file": "mlit.go.jp__page__content__001630995",
+      "source_page": 342
+    },
+    {
+      "pdf_sha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+      "png": "mlit.go.jp__page__content__001630995__p0358.png",
+      "png_sha256": "4160a49bce04a1ba695c1caa37aaf368819d2b5f597b0e7db02752281e3e443f",
+      "source_file": "mlit.go.jp__page__content__001630995",
+      "source_page": 358
+    },
+    {
+      "pdf_sha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+      "png": "mlit.go.jp__page__content__001630995__p0359.png",
+      "png_sha256": "7966dd5d9d825bd588e83427c4e6b63c1cf7e1e2969234123811235b903a834d",
+      "source_file": "mlit.go.jp__page__content__001630995",
+      "source_page": 359
+    },
+    {
+      "pdf_sha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+      "png": "mlit.go.jp__page__content__001630995__p0361.png",
+      "png_sha256": "0d04c868668773d744dcaf6e919f6e4975b10914ed31dfc83ed6ddc953e32299",
+      "source_file": "mlit.go.jp__page__content__001630995",
+      "source_page": 361
+    },
+    {
+      "pdf_sha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+      "png": "mlit.go.jp__page__content__001630995__p0448.png",
+      "png_sha256": "ab1c0b7c1c52b929ff137ec46746379413f8691f7353953ef43f06699ecb5676",
+      "source_file": "mlit.go.jp__page__content__001630995",
+      "source_page": 448
+    },
+    {
+      "pdf_sha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+      "png": "mlit.go.jp__page__content__001630995__p0878.png",
+      "png_sha256": "15624bc0c05f91581f54e3b9e5c7989c63f34fd6ff28f349d1fe2ede1f245f37",
+      "source_file": "mlit.go.jp__page__content__001630995",
+      "source_page": 878
+    },
+    {
+      "pdf_sha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+      "png": "mlit.go.jp__page__content__001630995__p0887.png",
+      "png_sha256": "788835bdc9c232661bc1fc7f33c555500616536d01aea77134b0c4a5fd37cd14",
+      "source_file": "mlit.go.jp__page__content__001630995",
+      "source_page": 887
+    },
+    {
+      "pdf_sha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+      "png": "mlit.go.jp__page__content__001630995__p0982.png",
+      "png_sha256": "329fcbe7baf0fb84700445182167559e00ac5fa4c37825530d7e4d97d0bf6437",
+      "source_file": "mlit.go.jp__page__content__001630995",
+      "source_page": 982
+    },
+    {
+      "pdf_sha256": "85781ba1f867aaab4130b2c463c588c4fc9ca6211d097cedfd495c56bf024b55",
+      "png": "mofa.go.jp__mofaj__files__100546568__p0135.png",
+      "png_sha256": "6ec9a96469bf4c07d23fab412875c08474ad84b343fdfa2c3d8a28a6e0f17684",
+      "source_file": "mofa.go.jp__mofaj__files__100546568",
+      "source_page": 135
+    },
+    {
+      "pdf_sha256": "85781ba1f867aaab4130b2c463c588c4fc9ca6211d097cedfd495c56bf024b55",
+      "png": "mofa.go.jp__mofaj__files__100546568__p0143.png",
+      "png_sha256": "51c830a92722fa46da7497ebbc9a463d2bd19a46df3e519d92760482f20da421",
+      "source_file": "mofa.go.jp__mofaj__files__100546568",
+      "source_page": 143
+    },
+    {
+      "pdf_sha256": "85781ba1f867aaab4130b2c463c588c4fc9ca6211d097cedfd495c56bf024b55",
+      "png": "mofa.go.jp__mofaj__files__100546568__p0161.png",
+      "png_sha256": "e9e6eb67dba54134ce149cffbbf2a6aceb4792ab3a1b6d1b7e51dfe25bcdf7af",
+      "source_file": "mofa.go.jp__mofaj__files__100546568",
+      "source_page": 161
+    },
+    {
+      "pdf_sha256": "85781ba1f867aaab4130b2c463c588c4fc9ca6211d097cedfd495c56bf024b55",
+      "png": "mofa.go.jp__mofaj__files__100546568__p0196.png",
+      "png_sha256": "d75a6d340d38cbca7aca0a5a919a2f1fd3f25c1467d0e27b62f3e87d94e41073",
+      "source_file": "mofa.go.jp__mofaj__files__100546568",
+      "source_page": 196
+    },
+    {
+      "pdf_sha256": "85781ba1f867aaab4130b2c463c588c4fc9ca6211d097cedfd495c56bf024b55",
+      "png": "mofa.go.jp__mofaj__files__100546568__p0243.png",
+      "png_sha256": "fb5518f6660d29f5b1279bed28f7ad76d08618b726bf8f8e28e4aa9badca11a9",
+      "source_file": "mofa.go.jp__mofaj__files__100546568",
+      "source_page": 243
+    },
+    {
+      "pdf_sha256": "85781ba1f867aaab4130b2c463c588c4fc9ca6211d097cedfd495c56bf024b55",
+      "png": "mofa.go.jp__mofaj__files__100546568__p0307.png",
+      "png_sha256": "b325ca9cdf3408013ad6f152aacad590c7e9dbea842f844667a19d66ecff83d0",
+      "source_file": "mofa.go.jp__mofaj__files__100546568",
+      "source_page": 307
+    },
+    {
+      "pdf_sha256": "85781ba1f867aaab4130b2c463c588c4fc9ca6211d097cedfd495c56bf024b55",
+      "png": "mofa.go.jp__mofaj__files__100546568__p0314.png",
+      "png_sha256": "3392d078784cfc4a5319cf15511b0f43d1e4fc5c5c473914edd7c1d2bf8f087e",
+      "source_file": "mofa.go.jp__mofaj__files__100546568",
+      "source_page": 314
+    },
+    {
+      "pdf_sha256": "cc54dbe5f689116619a1f8453747d47bca5b960137f90869ead26954d651703b",
+      "png": "soumu.go.jp__main_content__000901372__p0386.png",
+      "png_sha256": "3a404c57a244d4979c557709fd1afe935970d659f8ec83858aa071f6e71690e7",
+      "source_file": "soumu.go.jp__main_content__000901372",
+      "source_page": 386
+    }
+  ],
+  "pages": 31,
+  "tool": "pdftoppm version 26.09.0"
+}
