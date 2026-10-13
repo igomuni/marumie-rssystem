@@ -3,7 +3,7 @@
 
   python3 -I scripts/research/evaluate-detail-table-window-gt.py
 
-GT の SHA-256 が gt-freeze.json と違えば STOP。窓の規則は build-detail-table-window-gt-candidates.py と同じ。
+GT・candidates・plain text zip の SHA-256 が凍結値と違えば STOP。窓の規則は build-detail-table-window-gt-candidates.py と同じ。
 1 unit は、第1金額の列・第2金額の列・空欄列の3つ全部が一致して初めて correct。RESOLVED のみが分母。
 """
 import csv, hashlib, importlib.util, json, re, sys, zipfile
@@ -15,6 +15,8 @@ ns = {'__name__': 'cand'}; exec(compile(src, 'cand', 'exec'), ns)
 fr = json.load(open(f'{FIX}/final/gt-freeze.json', encoding='utf-8'))
 if hashlib.sha256(open(f'{FIX}/final/gt.csv', 'rb').read()).hexdigest() != fr['gt_sha256']: sys.exit('STOP: GT changed after freeze')
 if hashlib.sha256(open(f'{FIX}/candidates.csv', 'rb').read()).hexdigest() != fr['candidates_csv_sha256']: sys.exit('STOP: candidates changed')
+ZIP_SHA256 = '268f1020957b58362e1b224197b16944855c139efa1524c343a77abdf754e533'  # 評価前に固定した plain text zip
+if hashlib.sha256(open(ns['ZIP'], 'rb').read()).hexdigest() != ZIP_SHA256: sys.exit('STOP: plain text zip differs from the frozen input')
 gt = list(csv.DictReader(open(f'{FIX}/final/gt.csv', encoding='utf-8')))
 z = zipfile.ZipFile(ns['ZIP']); cache = {}
 def pages(slug):
