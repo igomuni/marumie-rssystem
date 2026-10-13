@@ -2,7 +2,7 @@
  * 概算要求PDFの目次(TOC)ページ → CSV（PDF-native v0）のランナー。仕様・限界は docs/budget-request-toc-pdf-native-csv.md。
  *
  * 使い方:
- *   npx tsx scripts/pipeline-v2/build-budget-request-toc-pdf-native-csv.ts --source-root=<data/download の場所> --out-dir=<出力先>
+ *   npx tsx scripts/pipeline-v2/build-budget-request-toc-pdf-native-csv.ts --source-root=<data/download の場所> [--out-dir=<出力先>]
  *     [--inventory=<structure-inventory.json>]
  *
  * 入力は凍結済みの目次ページ集合（既定: tests/fixtures/budget-request-cover-toc-structure/2024/structure-inventory.json の
@@ -28,9 +28,10 @@ import {
 } from './lib/budget-request-toc-pdf-native-csv';
 
 const DEFAULT_INVENTORY = 'tests/fixtures/budget-request-cover-toc-structure/2024/structure-inventory.json';
-const USAGE = `usage: build-budget-request-toc-pdf-native-csv.ts --source-root=<dir> --out-dir=<dir> [--inventory=<json>]
+const DEFAULT_OUT_DIR = 'data/work/budget-request-csv/2024/toc';
+const USAGE = `usage: build-budget-request-toc-pdf-native-csv.ts --source-root=<dir> [--out-dir=<dir>] [--inventory=<json>]
   --source-root=  inventory の localPdfPath の先頭 "data/download/" に相当するディレクトリ（読み取り専用）
-  --out-dir=      出力先（source-root の外）。既存ファイルのうちこのツールの成果物名のものだけ上書きする
+  --out-dir=      出力先（既定: ${DEFAULT_OUT_DIR}、source-root の外）。既存ファイルのうちこのツールの成果物名のものだけ上書きする
   --inventory=    既定: ${DEFAULT_INVENTORY}`;
 
 const sha256 = (data: Buffer | string): string => createHash('sha256').update(data).digest('hex');
@@ -46,8 +47,8 @@ function parseArgs(argv: string[]): { sourceRoot: string; outDir: string; invent
   }
   if (unknown.length > 0) throw new Error(`unknown argument: ${unknown.join(' ')}\n${USAGE}`);
   const sourceRoot = opt('source-root');
-  const outDir = opt('out-dir');
-  if (!sourceRoot || !outDir) throw new Error(`--source-root と --out-dir は必須です\n${USAGE}`);
+  const outDir = opt('out-dir') ?? DEFAULT_OUT_DIR;
+  if (!sourceRoot || !outDir) throw new Error(`--source-root は必須、--out-dir の明示指定は空文字不可です\n${USAGE}`);
   return { sourceRoot: path.resolve(sourceRoot), outDir: path.resolve(outDir), inventory: path.resolve(opt('inventory') ?? DEFAULT_INVENTORY) };
 }
 
