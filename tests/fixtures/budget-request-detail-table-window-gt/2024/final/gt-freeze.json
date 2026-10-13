@@ -1,0 +1,11 @@
+{
+  "state": "GT_FROZEN",
+  "gt": "final/gt.csv",
+  "gt_sha256": "66483999edff05d9e08023c23a20747f81e78772e42142f2d79641ef180a97ea",
+  "rows": 140,
+  "states": {"RESOLVED": 139, "AMBIGUOUS": 1, "UNREADABLE": 0},
+  "candidates_csv_sha256": "5eb726cff22311c4b3c3262a27c00fa863d18931ebd4b36a3ecefab6bc4bd52f",
+  "annotation_targets_sha256": "7f294ddde96b56c2846d40284673b988389f4e21bbf38b2cbb229655e4a005d9",
+  "pre_freeze_review": "ChatGPT read-only, GO (hash, 140 rows, 9 columns, 139/1/0, 14 adjudications reflected)",
+  "note": "GT is not to be modified before the window evaluation. Evaluation follows the preregistration (precision 100% on RESOLVED, one misplacement = STOP)."
+}
