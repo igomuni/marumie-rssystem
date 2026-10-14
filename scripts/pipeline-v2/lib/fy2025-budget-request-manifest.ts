@@ -9,7 +9,8 @@
  *   url-confirmed = 掲載ページ上のURLまで（調査時にbot遮断等でPDF応答を確認できず、acquisitionPolicy=manual-required）。
  *
  * FY2024にあって、FY2025の掲載ページで確認できていないもの（欠落として残す。後から都合よく足さない）:
- *   - 衆議院（概要のみで歳出概算要求書なし）、参議院（掲載ページ404）、内閣官房（掲載ページ404）
+ *   - 衆議院（概要のみで歳出概算要求書なし）、参議院（掲載ページ404。FY2024でもlive 404）
+ * 内閣官房は、worker調査が同サイトのUA依存404で見落としたため、corpus凍結前の取得元の補完として追加した（評価の結果を見た追加ではない）。
  *   - こども家庭庁の年金特別会計、法務省の復興特別会計
  * jcrc.go.jp はMOF一覧の「カジノ管理委員会」のリンク（publisherAuthority修正済み。調査依頼文の「公害等調整委員会」は依頼側の誤記）。
  * 総務省の特別会計リンクは、PDF本文（22頁）の表題「9502 交付税及び譲与税配付金特別会計」で会計を確認済み。
@@ -101,6 +102,185 @@ export const FY2025_BUDGET_REQUEST_MANIFEST: BudgetRequestManifest = {
       ],
       notes:
         "MOF FY2025掲載ページからリンクされた公式掲載ページ。 / 曖昧: 同ページの歳入概算見積書・概要説明・要望一覧は対象外として除外。",
+    },
+    {
+      publisherAuthority: "内閣官房",
+      publisherDomain: "cas.go.jp",
+      landingPageUrl: "https://www.cas.go.jp/jp/yosan/gaisan_youkyuu_r7.html",
+      logicalDocuments: [
+        {
+          accountType: "general",
+          account: "一般会計",
+          documentType: "budget-request-expenditure",
+          files: [
+            file(
+              "https://www.cas.go.jp/jp/yosan/pdf/r7_01.pdf",
+              "pdf-confirmed",
+              {
+                role: "cover",
+                title: "令和７年度歳出概算要求書",
+                notes: "2頁",
+              },
+            ),
+            file(
+              "https://www.cas.go.jp/jp/yosan/pdf/r7_02.pdf",
+              "pdf-confirmed",
+              {
+                role: "detail-02",
+                title: "（１）令和７年度歳出概算要求額明細表（総務課）",
+                notes: "1頁",
+              },
+            ),
+            file(
+              "https://www.cas.go.jp/jp/yosan/pdf/r7_03.pdf",
+              "pdf-confirmed",
+              {
+                role: "detail-03",
+                title: "（２）令和７年度歳出概算要求額明細表（会計課）",
+                notes: "5頁",
+              },
+            ),
+            file(
+              "https://www.cas.go.jp/jp/yosan/pdf/r7_04.pdf",
+              "pdf-confirmed",
+              {
+                role: "detail-04",
+                title: "（３）令和７年度歳出概算要求額明細表（官邸事務所）",
+                notes: "3頁",
+              },
+            ),
+            file(
+              "https://www.cas.go.jp/jp/yosan/pdf/r7_05.pdf",
+              "pdf-confirmed",
+              {
+                role: "detail-05",
+                title: "（４）令和７年度歳出概算要求額明細表（厚生管理官室）",
+                notes: "1頁",
+              },
+            ),
+            file(
+              "https://www.cas.go.jp/jp/yosan/pdf/r7_06.pdf",
+              "pdf-confirmed",
+              {
+                role: "detail-06",
+                title:
+                  "（５）令和７年度歳出概算要求額明細表（内閣官房・人に伴う経費）",
+                notes: "4頁",
+              },
+            ),
+            file(
+              "https://www.cas.go.jp/jp/yosan/pdf/r7_07.pdf",
+              "pdf-confirmed",
+              {
+                role: "detail-07",
+                title: "令和７年度歳出概算要求額明細表",
+                notes: "24頁",
+              },
+            ),
+            file(
+              "https://www.cas.go.jp/jp/yosan/pdf/r7_08.pdf",
+              "pdf-confirmed",
+              {
+                role: "detail-08",
+                title: "令和７年度歳出概算要求額明細表",
+                notes: "3頁",
+              },
+            ),
+            file(
+              "https://www.cas.go.jp/jp/yosan/pdf/r7_09.pdf",
+              "pdf-confirmed",
+              {
+                role: "detail-09",
+                title: "令和７年度歳出概算要求額明細表",
+                notes: "2頁",
+              },
+            ),
+            file(
+              "https://www.cas.go.jp/jp/yosan/pdf/r7_10.pdf",
+              "pdf-confirmed",
+              {
+                role: "detail-10",
+                title: "令和７年度歳出概算要求額明細表",
+                notes: "4頁",
+              },
+            ),
+            file(
+              "https://www.cas.go.jp/jp/yosan/pdf/r7_11.pdf",
+              "pdf-confirmed",
+              {
+                role: "detail-11",
+                title: "令和７年度歳出概算要求額明細表",
+                notes: "18頁",
+              },
+            ),
+            file(
+              "https://www.cas.go.jp/jp/yosan/pdf/r7_12.pdf",
+              "pdf-confirmed",
+              {
+                role: "detail-12",
+                title: "令和７年度歳出概算要求額明細表",
+                notes: "3頁",
+              },
+            ),
+            file(
+              "https://www.cas.go.jp/jp/yosan/pdf/r7_13.pdf",
+              "pdf-confirmed",
+              {
+                role: "detail-13",
+                title: "令和７年度歳出概算要求額明細表",
+                notes: "2頁",
+              },
+            ),
+            file(
+              "https://www.cas.go.jp/jp/yosan/pdf/r7_14.pdf",
+              "pdf-confirmed",
+              {
+                role: "detail-14",
+                title: "令和７年度歳出概算要求額明細表",
+                notes: "2頁",
+              },
+            ),
+            file(
+              "https://www.cas.go.jp/jp/yosan/pdf/r7_15.pdf",
+              "pdf-confirmed",
+              {
+                role: "detail-15",
+                title: "令和７年度歳出概算要求額明細表",
+                notes: "2頁",
+              },
+            ),
+          ],
+        },
+        {
+          accountType: "special",
+          account: "東日本大震災復興特別会計",
+          documentType: "budget-request-expenditure",
+          relatedAuthority: "内閣官房",
+          files: [
+            file(
+              "https://www.cas.go.jp/jp/yosan/pdf/r7_16.pdf",
+              "pdf-confirmed",
+              {
+                role: "cover",
+                title: "令和７年度歳出概算要求書（東日本大震災復興特別会計）",
+                notes: "2頁",
+              },
+            ),
+            file(
+              "https://www.cas.go.jp/jp/yosan/pdf/r7_17.pdf",
+              "pdf-confirmed",
+              {
+                role: "detail",
+                title:
+                  "令和７年度歳出概算要求額明細表（東日本大震災復興特別会計）",
+                notes: "1頁",
+              },
+            ),
+          ],
+        },
+      ],
+      notes:
+        "FY2025の掲載ページ gaisan_youkyuu_r7.html（MOF一覧のリンク先 cas.go.jp/jp/yosan/index.html とは別。curl既定のUAでは404を返す＝UA依存）から、17 PDF（r7_01〜r7_17）を取得時に確認（HTTP 200、application/pdf、先頭bytes %PDF）。概要資料は対象外。FY2025調査worker 4体は同サイトの404（UA依存）で見落としたため、Coordinator（および ChatGPT のWeb確認）が補完した。",
     },
     {
       publisherAuthority: "内閣法制局",
