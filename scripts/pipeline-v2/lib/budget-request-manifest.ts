@@ -13,6 +13,7 @@
  * 実取得成功時にmanifestを自動で書き換えて昇格させることはしない。
  */
 import { FY2024_BUDGET_REQUEST_MANIFEST } from './fy2024-budget-request-manifest';
+import { FY2025_BUDGET_REQUEST_MANIFEST } from './fy2025-budget-request-manifest';
 
 export type VerificationStatus =
   | 'pdf-confirmed' // PDF本文まで確認済み
@@ -114,6 +115,7 @@ export interface BudgetRequestManifest {
 
 const MANIFESTS: Record<number, BudgetRequestManifest> = {
   2024: FY2024_BUDGET_REQUEST_MANIFEST,
+  2025: FY2025_BUDGET_REQUEST_MANIFEST,
 };
 
 /** manifest未定義の年度はURLを推測せずエラーにする */
