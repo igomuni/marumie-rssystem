@@ -41,7 +41,7 @@
 
 ## 追補（lib の変更の許可後）
 
-追補の事前登録: `docs/tasks/20261014_2125_FY2025_Total_Table_Year_Literal_and_TOC_Source_Errors_Preregistration.md`（commit `37b42be`）。
+追補の事前登録: `docs/tasks/20261014_2107_FY2025_Total_Table_Year_Literal_and_TOC_Source_Errors_Preregistration.md`（commit `37b42be`）。
 
 ### 変更
 - 総表の lib（`lib/budget-request-total-table.ts`）: 頁の判定の必須語・表頭の語彙・表題の「６」を、年度に依存しない形（`[０-９]{1,2}年度概算要求額` など）にした。CSV の列名の年度の数字を引数にした（既定「６」）。runner は年度から全角の数字を作って渡す（2025 → 「７」）。単体テストを2件追加した（「７年度」の頁を総表と判定すること、列名の年度の数字）。
