@@ -1,14 +1,14 @@
 /**
- * FY2024 概算要求 PDF の Raw Text corpus を生成する（Layer 1: physical PDF → PageRawText[]）。意味付けはしない。
+ * 概算要求 PDF の Raw Text corpus を年度ごとに生成する（Layer 1: physical PDF → PageRawText[]）。意味付けはしない。
  * manifest の physical PDF すべてに `pdftotext -layout` を同一条件で適用し、page ごとの raw text を保存する。
  * 抽出に失敗した PDF を別方式で救済しない。page 数が合わない PDF は FAILED として記録する。
  *
- * 使い方: npx tsx scripts/pipeline-v2/build-budget-request-raw-text.ts [--out-root=<dir>] [--freeze-fixture]
+ * 使い方: npx tsx scripts/pipeline-v2/build-budget-request-raw-text.ts [--year=2024] [--out-root=<dir>] [--freeze-fixture]
  * 既定は data/work 側だけを再生成し、frozen fixture（baseCommit を含む）は変更しない。fixture を書くのは明示的な --freeze-fixture のときだけ。
  * 出力:
- *   data/work/budget-request-raw-text/2024/pages/<slug>.jsonl   全 page の PageRawText（git 管理外・~40MB）
- *   tests/fixtures/budget-request-raw-text/2024/raw-text-manifest.json   (--freeze-fixture のみ) frozen input record + page 単位 hash（git 管理）
- *   tests/fixtures/budget-request-raw-text/2024/representative-pages.json   (--freeze-fixture のみ) 代表 page の raw text 抜粋（git 管理）
+ *   data/work/budget-request-raw-text/{year}/pages/<slug>.jsonl   全 page の PageRawText（git 管理外・~40MB）
+ *   tests/fixtures/budget-request-raw-text/{year}/raw-text-manifest.json   (--freeze-fixture のみ) frozen input record + page 単位 hash（git 管理）
+ *   tests/fixtures/budget-request-raw-text/{year}/representative-pages.json   (--freeze-fixture のみ) 代表 page の raw text 抜粋（git 管理。代表 page の一覧は FY2024 だけ）
  */
 import * as fs from 'fs';
 import * as path from 'path';
@@ -18,11 +18,13 @@ import { localPathFor, DEFAULT_BASE_DIR } from './lib/budget-request-download';
 import { buildDocumentPages, documentStatusOf, sha256Hex, type PageRawText } from './lib/budget-request-raw-text';
 
 const arg = (k: string) => process.argv.find(a => a.startsWith(`--${k}=`))?.slice(k.length + 3);
-const OUT_ROOT = arg('out-root') ?? path.join('data', 'work', 'budget-request-raw-text', '2024');
-const FIXTURE_DIR = path.join('tests', 'fixtures', 'budget-request-raw-text', '2024');
+const YEAR = Number(arg('year') ?? '2024');
+if (!/^\d{4}$/.test(String(YEAR))) throw new Error(`--year must be a 4-digit fiscal year: ${arg('year')}`);
+const OUT_ROOT = arg('out-root') ?? path.join('data', 'work', 'budget-request-raw-text', String(YEAR));
+const FIXTURE_DIR = path.join('tests', 'fixtures', 'budget-request-raw-text', String(YEAR));
 const WRITE_FIXTURE = process.argv.includes('--freeze-fixture');
 const MANIFEST_FILES = [
-  path.join('scripts', 'pipeline-v2', 'lib', 'fy2024-budget-request-manifest.ts'),
+  path.join('scripts', 'pipeline-v2', 'lib', `fy${YEAR}-budget-request-manifest.ts`),
   path.join('scripts', 'pipeline-v2', 'lib', 'budget-request-manifest.ts'),
 ];
 const PDFTOTEXT_ARGS = ['-layout', '-enc', 'UTF-8'];
@@ -32,14 +34,14 @@ const slugOf = (p: string) => p.replace(/^data\/download\//, '').replace(/\.pdf$
 const git = (...a: string[]) => execFileSync('git', a, { encoding: 'utf8' }).trim();
 
 // 代表 page: 表紙形式の違い・全 EMPTY 文書・複数 page 文書の先頭を機械的に選ぶ（内容の良し悪しでは選ばない）
-const REPRESENTATIVE: { localPdfPath: string; pages: number[] }[] = [
+const REPRESENTATIVE: { localPdfPath: string; pages: number[] }[] = YEAR !== 2024 ? [] : [
   { localPdfPath: 'data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf', pages: [1, 2] },
   { localPdfPath: 'data/download/moj.go.jp/content/001402818.pdf', pages: [1, 3] },
   { localPdfPath: 'data/download/fsa.go.jp/common/budget/yosan/6youkyuu-2/01.pdf', pages: [1, 2] },
 ];
 
 function main() {
-  const manifest = getBudgetRequestManifest(2024);
+  const manifest = getBudgetRequestManifest(YEAR);
   const pagesDir = path.join(OUT_ROOT, 'pages');
   fs.rmSync(OUT_ROOT, { recursive: true, force: true });
   fs.mkdirSync(pagesDir, { recursive: true });
@@ -109,7 +111,7 @@ function main() {
 
   const out = {
     schema: 'budget-request-raw-text-manifest/v0',
-    scope: 'FY2024 概算要求 PDF の page 単位 Raw Text（source observation）。意味付け・分類・照合は含まない',
+    scope: `FY${YEAR} 概算要求 PDF の page 単位 Raw Text（source observation）。意味付け・分類・照合は含まない`,
     generator: 'scripts/pipeline-v2/build-budget-request-raw-text.ts',
     frozenInput: {
       baseCommit: git('rev-parse', 'HEAD'),

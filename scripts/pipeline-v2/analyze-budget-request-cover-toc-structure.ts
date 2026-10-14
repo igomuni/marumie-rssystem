@@ -3,11 +3,14 @@
  * parser ではない。logical row・semantic field は確定しない。label-independent に計測できる量だけを保存する。
  * OCR・Route C・MOF・manifest role の section semantics 利用なし。manifest は acquisition metadata（publisher / account / jurisdiction / file 数）にだけ使う。
  *
- * 使い方: npx tsx scripts/pipeline-v2/analyze-budget-request-cover-toc-structure.ts [--freeze-fixture]
+ * 使い方: npx tsx scripts/pipeline-v2/analyze-budget-request-cover-toc-structure.ts [--year=2024] [--freeze-fixture]
+ * FY2024 以外: 凍結 digest はその年度の凍結済み raw-text manifest と頁分類 manifest から取る。development sample の選定と目視の記録は
+ * FY2024 の作業記録なので書かない（structure-inventory.json だけ）。
  * 入力: data/work の Raw Text pages・Page Classification 出力（frozen implementation builder の出力）、Raw Text manifest
- * 出力: tests/fixtures/budget-request-cover-toc-structure/2024/structure-inventory.json（--freeze-fixture のとき）
- *       tests/fixtures/budget-request-cover-toc-structure/2024/development-sample-selection.json（同上）
- *       data/work/budget-request-cover-toc-structure/2024/sample-pages.json（目視用の page text。git 管理外）
+ * 出力: tests/fixtures/budget-request-cover-toc-structure/{year}/structure-inventory.json（--freeze-fixture のとき）
+ *       tests/fixtures/budget-request-cover-toc-structure/2024/development-sample-selection.json（同上、FY2024 のみ）
+ *       data/work/budget-request-cover-toc-structure/{year}/structure-inventory.json（常に。git 管理外）
+ *       data/work/budget-request-cover-toc-structure/2024/sample-pages.json（目視用の page text。git 管理外、FY2024 のみ）
  */
 import * as fs from 'fs';
 import * as path from 'path';
@@ -17,14 +20,17 @@ import { sha256Hex } from './lib/budget-request-raw-text';
 import type { PageClassificationRecord } from './lib/budget-request-page-classification';
 
 const FREEZE = process.argv.includes('--freeze-fixture');
-const OUT_DIR = path.join('tests', 'fixtures', 'budget-request-cover-toc-structure', '2024');
-const WORK_DIR = path.join('data', 'work', 'budget-request-cover-toc-structure', '2024');
-const CLS = path.join('data', 'work', 'budget-request-page-classification', '2024', 'page-classification.jsonl');
-const PAGES_DIR = path.join('data', 'work', 'budget-request-raw-text', '2024', 'pages');
-const RAW_MANIFEST = path.join('tests', 'fixtures', 'budget-request-raw-text', '2024', 'raw-text-manifest.json');
-const CLS_MANIFEST = path.join('tests', 'fixtures', 'budget-request-page-classification', '2024', 'page-classification-v0-implementation-manifest.json');
-const FROZEN_RAW_DIGEST = '7c6d2dcec1f4bec0ca37a1b3aa391adce7d99b93ac4642c74cab7a328dac4052';
-const FROZEN_CLS_DIGEST = '39464fc76b1b83272d5852d3db1db776e22bb570ee0f6b7ca4d1da64de4a5ecc';
+const YEAR = process.argv.find(a => a.startsWith('--year='))?.slice('--year='.length) ?? '2024';
+if (!/^\d{4}$/.test(YEAR)) throw new Error(`--year must be a 4-digit fiscal year: ${YEAR}`);
+const IS_FY2024 = YEAR === '2024';
+const OUT_DIR = path.join('tests', 'fixtures', 'budget-request-cover-toc-structure', YEAR);
+const WORK_DIR = path.join('data', 'work', 'budget-request-cover-toc-structure', YEAR);
+const CLS = path.join('data', 'work', 'budget-request-page-classification', YEAR, 'page-classification.jsonl');
+const PAGES_DIR = path.join('data', 'work', 'budget-request-raw-text', YEAR, 'pages');
+const RAW_MANIFEST = path.join('tests', 'fixtures', 'budget-request-raw-text', YEAR, 'raw-text-manifest.json');
+const CLS_MANIFEST = path.join('tests', 'fixtures', 'budget-request-page-classification', YEAR, 'page-classification-v0-implementation-manifest.json');
+const FROZEN_FY2024_RAW_DIGEST = '7c6d2dcec1f4bec0ca37a1b3aa391adce7d99b93ac4642c74cab7a328dac4052';
+const FROZEN_FY2024_CLS_DIGEST = '39464fc76b1b83272d5852d3db1db776e22bb570ee0f6b7ca4d1da64de4a5ecc';
 export const SAMPLE_SEED = 'budget-request-cover-toc-structure-dev-exploration-20261007';
 const PER_STRATUM = 2;
 /** 作業者が実際に render 画像まで確認した sample page（sample の昇順 1-based index）。それ以外は Raw Text（先頭の最大 12〜14 line）のみ確認 */
@@ -41,8 +47,10 @@ interface RawPage { page: number; text: string; textSha256: string; status: stri
 
 function main() {
   const rawManifest = readJson<{ frozenInput: { corpusDigestSha256: string }; documents: { localPdfPath: string; pdfSha256: string; pageCount: number; artifactPath: string; pageTextSha256: string[]; publisherDomain: string; logicalDocumentIndex: number }[] }>(RAW_MANIFEST);
+  const FROZEN_RAW_DIGEST = IS_FY2024 ? FROZEN_FY2024_RAW_DIGEST : rawManifest.frozenInput.corpusDigestSha256;
   if (rawManifest.frozenInput.corpusDigestSha256 !== FROZEN_RAW_DIGEST) throw new Error('raw text digest mismatch');
   const clsManifest = readJson<{ summary: { corpusClassificationDigestSha256: string } }>(CLS_MANIFEST);
+  const FROZEN_CLS_DIGEST = IS_FY2024 ? FROZEN_FY2024_CLS_DIGEST : clsManifest.summary.corpusClassificationDigestSha256;
   const clsBody = fs.readFileSync(CLS, 'utf8');
   if (clsManifest.summary.corpusClassificationDigestSha256 !== FROZEN_CLS_DIGEST || sha256Hex(clsBody) !== FROZEN_CLS_DIGEST) throw new Error('classification digest mismatch');
   const cls = clsBody.split('\n').filter(l => l).map(l => JSON.parse(l) as PageClassificationRecord);
@@ -51,7 +59,7 @@ function main() {
   // acquisition metadata（manifest）: physical file ごと
   const meta = new Map<string, { publisherAuthority: string; accountType: string; account: string; budgetJurisdiction: string | null; logicalAuthority: string | null; filesInLogicalDocument: number; logicalDocumentIndex: number }>();
   let li = 0;
-  for (const src of getBudgetRequestManifest(2024).sources) for (const ld of src.logicalDocuments) {
+  for (const src of getBudgetRequestManifest(Number(YEAR)).sources) for (const ld of src.logicalDocuments) {
     const idx = li++;
     for (const f of ld.files) meta.set(localPathFor(f.url, src.publisherDomain, DEFAULT_BASE_DIR).split(path.sep).join('/'), { publisherAuthority: src.publisherAuthority, accountType: ld.accountType, account: ld.account, budgetJurisdiction: ld.budgetJurisdiction ?? null, logicalAuthority: ld.logicalAuthority ?? null, filesInLogicalDocument: ld.files.length, logicalDocumentIndex: idx });
   }
@@ -214,13 +222,17 @@ function main() {
     seed: SAMPLE_SEED, hashRule: 'sha256("{seed}|{stratum}|{localPdfPath}|{physicalPage}") 昇順の先頭 N', perStratum: PER_STRATUM,
     poolSizes, sampleSize: sample.length, sample,
   };
+  fs.mkdirSync(WORK_DIR, { recursive: true });
+  fs.writeFileSync(path.join(WORK_DIR, 'structure-inventory.json'), `${JSON.stringify(out, null, 1)}\n`);
   if (FREEZE) {
     fs.mkdirSync(OUT_DIR, { recursive: true });
     fs.writeFileSync(path.join(OUT_DIR, 'structure-inventory.json'), `${JSON.stringify(out, null, 1)}\n`);
-    fs.writeFileSync(path.join(OUT_DIR, 'development-sample-selection.json'), `${JSON.stringify(sel, null, 1)}\n`);
-    fs.writeFileSync(path.join(OUT_DIR, 'development-explored-pages.json'), `${JSON.stringify(ledger, null, 1)}\n`);
+    if (IS_FY2024) {
+      fs.writeFileSync(path.join(OUT_DIR, 'development-sample-selection.json'), `${JSON.stringify(sel, null, 1)}\n`);
+      fs.writeFileSync(path.join(OUT_DIR, 'development-explored-pages.json'), `${JSON.stringify(ledger, null, 1)}\n`);
+    }
   }
-  fs.mkdirSync(WORK_DIR, { recursive: true });
+  if (!IS_FY2024) { console.log(JSON.stringify({ summary }, null, 1)); return; }
   fs.writeFileSync(path.join(WORK_DIR, 'sample-pages.json'), JSON.stringify(sample.map(s => ({ ...s, text: rawPages(String(s.localPdfPath))[Number(s.physicalPage) - 1].text }))));
   console.log(JSON.stringify({ summary, poolSizes, sampleSize: sample.length }, null, 1));
 }
