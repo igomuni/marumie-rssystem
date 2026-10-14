@@ -24,6 +24,9 @@ def verify_inputs():
     if sha(MANIFEST) != FROZEN_MANIFEST_SHA: sys.exit('STOP: output-manifest.json SHA-256 mismatch')
     man = json.load(open(MANIFEST, encoding='utf-8'))
     files = sorted(glob.glob(D + '*.csv'))
+    actual = {os.path.relpath(f, os.path.dirname(MANIFEST)) for f in files}
+    listed = {k for k in man if k.startswith('sources/') and k.endswith('.csv')}
+    if actual != listed: sys.exit(f'STOP: sources/*.csv set differs from manifest (missing={sorted(listed - actual)}, extra={sorted(actual - listed)})')
     for f in files:
         key = os.path.relpath(f, os.path.dirname(MANIFEST))
         if key not in man: sys.exit(f'STOP: {key} not in manifest')
