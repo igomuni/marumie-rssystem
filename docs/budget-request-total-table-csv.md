@@ -6,8 +6,8 @@
 - テスト: `scripts/pipeline-v2/lib/budget-request-total-table.test.ts`、fixture は `tests/fixtures/budget-request-total-table/2024/`（原文の物理行を抜粋。出典は `excerpts.json`）
 
 ```bash
-npx tsx scripts/pipeline-v2/build-budget-request-total-table-csv.ts [zipPath] [outputDir]
-# 既定: data/work/budget-request-plain-text.zip → data/work/budget-request-csv/2024/total-table/
+npx tsx scripts/pipeline-v2/build-budget-request-total-table-csv.ts [zipPath] [outputDir] [--year=2024]
+# 既定: data/work/budget-request-plain-text.zip → data/work/budget-request-csv/{year}/total-table/
 ```
 
 ## 原則
@@ -20,7 +20,7 @@ npx tsx scripts/pipeline-v2/build-budget-request-total-table-csv.ts [zipPath] [o
 
 ### ページとブロック
 
-- **総表ページ**: 空白を除去したページ本文に、`前年度予算額` `６年度概算要求額` `一般行政経費` `その他の経費` `対前年度` `比較` `増△減` `明細書` `頁数` の9要素がすべて含まれるページ。タイトル `令和６年度歳出概算要求額総表` は目次・表紙にも出るため、判定には使わない（タイトルのみのページは `titleOnlyPages` として記録する）。
+- **総表ページ**: 空白を除去したページ本文に、`前年度予算額` `６年度概算要求額` `一般行政経費` `その他の経費` `対前年度` `比較` `増△減` `明細書` `頁数` の9要素がすべて含まれるページ（`６年度概算要求額` は年度によらず `[０-９]{1,2}年度概算要求額` として照合する）。タイトル `令和６年度歳出概算要求額総表` は目次・表紙にも出るため、判定には使わない（タイトルのみのページは `titleOnlyPages` として記録する）。
 - **ブロック**: 連続する総表ページの並びを1ブロックとする。総表でないページを挟んだら別ブロックになる（例: 内閣府 `cao…__0` は組織ごとに表紙と総表が交互に並ぶ）。`table_block_id = <slug>#b<n>`。
 
 ### ページ内の行分類
@@ -29,7 +29,7 @@ npx tsx scripts/pipeline-v2/build-budget-request-total-table-csv.ts [zipPath] [o
    - `PAGE_LABEL`: ページ最初の非空行で、空白除去後に `数字* 非数字{0,3} 数字*` の形（例: `文 1` `2 文` `復興特 1` `6`）
    - `TABLE_TITLE`
    - `UNIT`: `(単位:千円)`
-   - `TABLE_HEADER`: 空白除去後が表頭語彙（`要求` `番号` `区分` `前年度予算額` `６年度概算要求額` `一般行政経費` `その他の経費` `計` `対前年度` `比較` `明細書` `増△減` `（Ｂ−Ａ）` `頁数` `(A)` `(B)`）だけで構成される行
+   - `TABLE_HEADER`: 空白除去後が表頭語彙（`要求` `番号` `区分` `前年度予算額` `６年度概算要求額`（年度の数字は任意） `一般行政経費` `その他の経費` `計` `対前年度` `比較` `明細書` `増△減` `（Ｂ−Ａ）` `頁数` `(A)` `(B)`）だけで構成される行
    - `CONTEXT`: 2〜4桁コードで始まる所管・会計行（例: `24 文部科学省所管`、`9101 東日本大震災復興特別会計（…）`）。行としては出力せず、`summary.json` のブロック情報に残す。
 2. **本文**: 次の順に判定する。空行は継続行の連続を切る。
    - 末尾数値列あり → 行頭（head）を判定。どれにも当たらなければ `UNMATCHED_NUMERIC_HEAD`
@@ -91,7 +91,7 @@ TAIL          = SIGNED_AMOUNT (\s+ SIGNED_AMOUNT){6} (\s+ DETAIL_PAGE)? \s*$
 | `要求番号` | 原文の要求番号。無い行は空 |
 | `区分` | コードと名称を半角空白でつないだもの。名称は文字間の空白（均等割付）を除いたもの（継続行は連結済み）。TOTAL は名称だけ（`組織計` など） |
 | `前年度予算額_一般行政経費` `前年度予算額_その他の経費` `前年度予算額_計` | 金額の原文 |
-| `６年度概算要求額_一般行政経費` `６年度概算要求額_その他の経費` `６年度概算要求額_計` | 金額の原文 |
+| `６年度概算要求額_一般行政経費` `６年度概算要求額_その他の経費` `６年度概算要求額_計` | 金額の原文（列名の年度の数字は `--year` から作る。FY2025 は `７年度概算要求額_…`） |
 | `増△減` | 金額の原文 |
 | `明細書頁数` | 原文。TOTAL は空 |
 | `source_page` `source_line_start` `source_line_end` `table_block_id` `row_index` `row_type` `parse_status` | 行の出所と物理文法の分類（総表の列ではない）。`row_index` はブロック内の1始まりの連番 |
