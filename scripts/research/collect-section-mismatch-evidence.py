@@ -66,7 +66,7 @@ def main(sec24_path, out):
     prev = {(r['source'], r['row_index']): r for r in csv.DictReader(open(f'{D25}/detail-table-mof-match/matches.csv', encoding='utf-8'))}
     rows25, rows24 = general_rows(D25), general_rows(D24)
     triple = {(r['source'], r['row_index']): r for r in csv.DictReader(open(MATCH, encoding='utf-8'))}
-    rec = lambda m: {k: m[k] for k in ('sectionCode', 'sectionName', 'jikouName', 'col4Raw', 'previousAmountYen', 'amountYen', 'page')}
+    rec = lambda m: {**{k: m[k] for k in ('sectionCode', 'sectionName', 'jikouName', 'col4Raw', 'previousAmountYen', 'amountYen')}, 'page': m['page'] if 'page' in m else m['sourceLocator']['page']}  # FY2024 V2 は page が sourceLocator の中
     result = []
     for key in TARGETS:
         t = triple[key]
