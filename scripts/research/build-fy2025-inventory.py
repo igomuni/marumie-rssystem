@@ -108,6 +108,7 @@ def main(out):
     os.makedirs(out, exist_ok=True)
     write(f'{out}/toc-entries.csv', ['source', 'csv_row', 'role', 'code', 'name', 'request_no', 'page_ref', 'ctx_shokan', 'ctx_kaikei', 'ctx_kanjo', 'ctx_soshiki'], toc_rows)
     roles = collections.Counter(r[2] for r in toc_rows)
+    n_toc_sources = len(role_by_src)  # 後で全 slug を参照して defaultdict が膨らむので、ここで数える
     kou = [r for r in toc_rows if r[2] == '項']
 
     # ---- total table, detail table
@@ -115,6 +116,7 @@ def main(out):
     for f in sorted(glob.glob(f'{D}/total-table/sources/*.csv')):
         s = os.path.basename(f)[:-4]; assert s in all_slugs, s
         for r in read(f): total_rt[s][r['row_type']] += 1
+    n_total_sources = len(total_rt)
     sections = {(r['source'], r['detail_row_index']): r for r in read(SECTIONS)}
     prev = {(r['source'], r['row_index']): r for r in read(f'{D}/detail-table-mof-match/matches.csv')}
     mof = [json.loads(l) for l in open(MOF, encoding='utf-8') if l.strip()]
@@ -151,6 +153,7 @@ def main(out):
             'confirmed_section_code', 'confirmed_section_name', 'section_status', 'x_section_agrees', 'k2_status', 'mof_same_name_records']
     write(f'{out}/detail-items.csv', cols, [[i[c] for c in cols] for i in items])
 
+    n_detail_sources = len(detail_rt)
     # ---- per-source ledger
     sec_by_src = collections.defaultdict(collections.Counter)
     for i in items: sec_by_src[i['source']][i['section_status']] += 1
@@ -174,12 +177,12 @@ def main(out):
     summary = {
         'fiscalYear': 2025,
         'inputs': {os.path.relpath(p): h for p, h in FROZEN.items()} | {'script_sha256': sha(__file__)},
-        'toc': {'rows': len(toc_rows), 'rowsByRole': dict(sorted(roles.items())), 'sources': len(role_by_src), 'pdfsWithoutToc': len(all_slugs) - len(role_by_src),
+        'toc': {'rows': len(toc_rows), 'rowsByRole': dict(sorted(roles.items())), 'sources': n_toc_sources, 'pdfsWithoutToc': len(all_slugs) - n_toc_sources,
                 'kou': {'rows': len(kou),
                         'unique_source_ctx_code_name': len({tuple(r[0:1] + r[7:11] + r[3:5]) for r in kou}),
                         'unique_code_name': len({(r[3], r[4]) for r in kou})}},
-        'totalTable': {'sources': len(total_rt), 'rows': sum(sum(c.values()) for c in total_rt.values()), 'rowsByType': dict(sorted(sum(total_rt.values(), collections.Counter()).items()))},
-        'detailTable': {'sources': len(detail_rt), 'rows': sum(sum(c.values()) for c in detail_rt.values()), 'rowsByType': dict(sorted(sum(detail_rt.values(), collections.Counter()).items())),
+        'totalTable': {'sources': n_total_sources, 'rows': sum(sum(c.values()) for c in total_rt.values()), 'rowsByType': dict(sorted(sum(total_rt.values(), collections.Counter()).items()))},
+        'detailTable': {'sources': n_detail_sources, 'rows': sum(sum(c.values()) for c in detail_rt.values()), 'rowsByType': dict(sorted(sum(detail_rt.values(), collections.Counter()).items())),
                         'detailRowsByScope': dict(sorted(collections.Counter(i['scope'] for i in items).items()))},
         'funnel': {'toc_item_rows': roles['事項'], 'total_table_DETAIL_rows': sum(c['DETAIL'] for c in total_rt.values()), 'detail_table_DETAIL_rows': len(items),
                    'detail_rows_with_toc_total_section': sum(1 for i in items if i['section_status'] == 'CANDIDATE_CSV_CONSISTENT'),
