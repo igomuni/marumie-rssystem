@@ -11,18 +11,21 @@
 
 // ---------- page / block detection ----------
 
-/** Every token must appear in the whitespace-removed page text. Title alone is NOT used (it also appears on cover/TOC pages). */
-export const TOTAL_TABLE_HEADER_SIGNATURE = [
-  '前年度予算額', '６年度概算要求額', '一般行政経費', 'その他の経費', '対前年度', '比較', '増△減', '明細書', '頁数',
-] as const;
+/**
+ * Every token must appear in the whitespace-removed page text. Title alone is NOT used (it also appears on cover/TOC pages).
+ * The request-year heading is printed with the fiscal year (令和6年度 → `６年度概算要求額`), so it is matched year-agnostically.
+ */
+export const TOTAL_TABLE_HEADER_SIGNATURE: readonly (string | RegExp)[] = [
+  '前年度予算額', /[０-９]{1,2}年度概算要求額/u, '一般行政経費', 'その他の経費', '対前年度', '比較', '増△減', '明細書', '頁数',
+];
 
-export const TOTAL_TABLE_TITLE = /令\s*和\s*[６6]\s*年\s*度\s*歳\s*出\s*概\s*算\s*要\s*求\s*額\s*総\s*表/u;
+export const TOTAL_TABLE_TITLE = /令\s*和\s*[０-９0-9]{1,2}\s*年\s*度\s*歳\s*出\s*概\s*算\s*要\s*求\s*額\s*総\s*表/u;
 
 export const compact = (s: string): string => s.replace(/[\s　]+/gu, '');
 
 export function isTotalTablePage(pageText: string): boolean {
   const c = compact(pageText);
-  return TOTAL_TABLE_HEADER_SIGNATURE.every(token => c.includes(token));
+  return TOTAL_TABLE_HEADER_SIGNATURE.every(token => (typeof token === 'string' ? c.includes(token) : token.test(c)));
 }
 
 /** Split on Form Feed. pdftotext ends every page with FF, so the trailing empty chunk is not a page. */
@@ -128,7 +131,7 @@ const CONTINUABLE: ReadonlySet<RowType> = new Set(['DETAIL', 'CODE3']);
 
 // ---------- header-zone line classes ----------
 
-const HEADER_VOCABULARY = /^(?:要求|番号|区分|前年度予算額|６年度概算要求額|一般行政経費|その他の経費|計|対前年度|比較|明細書|増△減|（Ｂ−Ａ）|頁数|\(A\)|\(B\))+$/u;
+const HEADER_VOCABULARY = /^(?:要求|番号|区分|前年度予算額|[０-９]{1,2}年度概算要求額|一般行政経費|その他の経費|計|対前年度|比較|明細書|増△減|（Ｂ−Ａ）|頁数|\(A\)|\(B\))+$/u;
 const UNIT_LINE = /^[（(]単位[:：]千円[)）]$/u;
 /** Jurisdiction / account context line, e.g. "24 文部科学省所管", "9101 東日本大震災復興特別会計（…）". */
 const CONTEXT_LINE = /^\s*[0-9]{2,4}\s+\S/u;
@@ -324,25 +327,34 @@ export function parseSource(text: string, sourceFile: string, blockPrefix: strin
 
 // ---------- CSV rendering ----------
 
+/** 要求年度の見出しの年度の数字（原本どおり全角。令和6年度 → `６`）。既定は FY2024 */
+export const DEFAULT_REQUEST_YEAR_LABEL = '６';
+
+/** 令和の年度の数字を全角にしたもの（2025 → `７`、2028 → `１０`） */
+export const requestYearLabel = (fiscalYear: number): string =>
+  String(fiscalYear - 2018).replace(/[0-9]/gu, d => String.fromCharCode(d.charCodeAt(0) + 0xfee0));
+
 /** 総表の見出しの語（表頭の原文。文字間の空白は除く）。2段の見出しは「上段_下段」。 */
-const AMOUNT_HEADERS: Record<AmountField, string> = {
+const amountHeaders = (yearLabel: string): Record<AmountField, string> => ({
   previous_general: '前年度予算額_一般行政経費',
   previous_other: '前年度予算額_その他の経費',
   previous_total: '前年度予算額_計',
-  request_general: '６年度概算要求額_一般行政経費',
-  request_other: '６年度概算要求額_その他の経費',
-  request_total: '６年度概算要求額_計',
+  request_general: `${yearLabel}年度概算要求額_一般行政経費`,
+  request_other: `${yearLabel}年度概算要求額_その他の経費`,
+  request_total: `${yearLabel}年度概算要求額_計`,
   difference: '増△減',
-};
+});
 
 /**
  * 総表の列（原本の見出し）を先頭に、行の出所をたどる列を末尾に置く。
  * source_file 列は持たない（ソース別 CSV のファイル名 `<slug>.csv` で判別する）。
  */
-export const TOTAL_TABLE_CSV_COLUMNS = [
-  '要求番号', '区分', ...AMOUNT_FIELDS.map(f => AMOUNT_HEADERS[f]), '明細書頁数',
+export const totalTableCsvColumns = (yearLabel: string = DEFAULT_REQUEST_YEAR_LABEL): string[] => [
+  '要求番号', '区分', ...AMOUNT_FIELDS.map(f => amountHeaders(yearLabel)[f]), '明細書頁数',
   'source_page', 'source_line_start', 'source_line_end', 'table_block_id', 'row_index', 'row_type', 'parse_status',
-] as const;
+];
+
+export const TOTAL_TABLE_CSV_COLUMNS = totalTableCsvColumns();
 
 export const UNRESOLVED_CSV_COLUMNS = ['source_file', 'source_page', 'source_line_start', 'source_line_end', 'table_block_id', 'raw_text', 'reason'] as const;
 
@@ -352,7 +364,7 @@ export const csvCell = (v: unknown): string => {
 };
 const csvLine = (values: unknown[]) => values.map(csvCell).join(',');
 
-export function renderRowsCsv(rows: LogicalRow[]): string {
+export function renderRowsCsv(rows: LogicalRow[], yearLabel: string = DEFAULT_REQUEST_YEAR_LABEL): string {
   const body = rows.map(r => csvLine([
     r.request_no_raw,
     // 区分 = コード + 名称（名称は文字間の空白を除いたもの）。TOTAL は名称だけ。
@@ -362,7 +374,7 @@ export function renderRowsCsv(rows: LogicalRow[]): string {
     r.detail_page_raw,
     r.source_page, r.source_line_start, r.source_line_end, r.table_block_id, r.row_index, r.row_type, r.parse_status,
   ]));
-  return [TOTAL_TABLE_CSV_COLUMNS.join(','), ...body].join('\n') + '\n';
+  return [totalTableCsvColumns(yearLabel).join(','), ...body].join('\n') + '\n';
 }
 
 /** raw_text is the physical line verbatim except a leading Form Feed. */

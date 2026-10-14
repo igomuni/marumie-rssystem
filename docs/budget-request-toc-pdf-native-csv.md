@@ -8,9 +8,11 @@
 
 ```bash
 npx tsx scripts/pipeline-v2/build-budget-request-toc-pdf-native-csv.ts \
-  --source-root=<data/download に相当するディレクトリ> [--out-dir=<出力先>] [--inventory=<structure-inventory.json>]
+  --source-root=<data/download に相当するディレクトリ> [--out-dir=<出力先>] [--inventory=<structure-inventory.json>] [--allow-source-errors]
 # npm run pipeline:v2:build:budget-request-toc-pdf-native-csv -- --source-root=... --out-dir=...
 ```
+
+既定では、処理できない PDF が1本でもあれば何も書き出さない。`--allow-source-errors` を付けると、その PDF を `source-errors.csv`（`localPdfPath, message`）に記録し、残りの PDF の成果物を書き出す。FY2025 では宮内庁 `r07-03.pdf` の目次頁が90度回転していて未対応のため、このオプションで実行している。年度ごとの入力は `--inventory=tests/fixtures/budget-request-cover-toc-structure/{year}/structure-inventory.json` で切り替える。
 
 - 入力集合: 既定は `tests/fixtures/budget-request-cover-toc-structure/2024/structure-inventory.json` の `classifierPageType=TOC`（82物理ページ・55 PDF）。`localPdfPath` の先頭 `data/download/` を `--source-root` に読み替える。リポジトリルートから実行する（ソースハッシュを相対パスで記録するため）。
 - PDF は読み取り専用。SHA-256 が inventory と一致しない PDF が1つでもあれば、成果物を書かずに停止する。`--out-dir` が `--source-root` の中なら停止する。

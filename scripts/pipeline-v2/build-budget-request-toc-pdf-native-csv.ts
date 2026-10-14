@@ -3,12 +3,14 @@
  *
  * 使い方:
  *   npx tsx scripts/pipeline-v2/build-budget-request-toc-pdf-native-csv.ts --source-root=<data/download の場所> [--out-dir=<出力先>]
- *     [--inventory=<structure-inventory.json>]
+ *     [--inventory=<structure-inventory.json>] [--allow-source-errors]
  *
  * 入力は凍結済みの目次ページ集合（既定: tests/fixtures/budget-request-cover-toc-structure/2024/structure-inventory.json の
  * classifierPageType=TOC。localPdfPath の `data/download/` を --source-root に読み替える）。PDF は読み取り専用で、
  * SHA-256 が inventory と一致しなければ停止する。出力先は source-root の外でなければならない。
  * 経過時間は標準出力にのみ出し、成果物には入れない（再実行でバイト一致させるため）。
+ * 既定では、処理できない PDF が1本でもあれば何も書き出さない。--allow-source-errors のときは、その PDF を source-errors.csv に記録し、
+ * 残りの PDF の成果物を書き出す（変換の規則は同じ）。
  */
 import * as fs from 'fs';
 import * as path from 'path';
@@ -32,15 +34,16 @@ const DEFAULT_OUT_DIR = 'data/work/budget-request-csv/2024/toc';
 const USAGE = `usage: build-budget-request-toc-pdf-native-csv.ts --source-root=<dir> [--out-dir=<dir>] [--inventory=<json>]
   --source-root=  inventory の localPdfPath の先頭 "data/download/" に相当するディレクトリ（読み取り専用）
   --out-dir=      出力先（既定: ${DEFAULT_OUT_DIR}、source-root の外）。既存ファイルのうちこのツールの成果物名のものだけ上書きする
-  --inventory=    既定: ${DEFAULT_INVENTORY}`;
+  --inventory=    既定: ${DEFAULT_INVENTORY}
+  --allow-source-errors  処理できない PDF を source-errors.csv に記録し、残りを書き出す（既定: 1本でも失敗したら何も書かない）`;
 
 const sha256 = (data: Buffer | string): string => createHash('sha256').update(data).digest('hex');
 
 type InventoryPage = { localPdfPath: string; pdfSha256: string; physicalPage: number; classifierPageType: string; classifierSource: string };
 
-function parseArgs(argv: string[]): { sourceRoot: string; outDir: string; inventory: string } {
+function parseArgs(argv: string[]): { sourceRoot: string; outDir: string; inventory: string; allowSourceErrors: boolean } {
   const opt = (name: string) => argv.find(a => a.startsWith(`--${name}=`))?.slice(name.length + 3);
-  const unknown = argv.filter(a => !/^--(source-root|out-dir|inventory)=/.test(a));
+  const unknown = argv.filter(a => !/^--(source-root|out-dir|inventory)=/.test(a) && a !== '--allow-source-errors');
   if (argv.includes('--help') || argv.includes('-h')) {
     console.log(USAGE);
     process.exit(0);
@@ -49,13 +52,13 @@ function parseArgs(argv: string[]): { sourceRoot: string; outDir: string; invent
   const sourceRoot = opt('source-root');
   const outDir = opt('out-dir') ?? DEFAULT_OUT_DIR;
   if (!sourceRoot || !outDir) throw new Error(`--source-root は必須、--out-dir の明示指定は空文字不可です\n${USAGE}`);
-  return { sourceRoot: path.resolve(sourceRoot), outDir: path.resolve(outDir), inventory: path.resolve(opt('inventory') ?? DEFAULT_INVENTORY) };
+  return { sourceRoot: path.resolve(sourceRoot), outDir: path.resolve(outDir), inventory: path.resolve(opt('inventory') ?? DEFAULT_INVENTORY), allowSourceErrors: argv.includes('--allow-source-errors') };
 }
 
 const csvFile = (headers: string[], rows: (string | number | null)[][]) => renderCsv(headers, rows);
 
 async function main(): Promise<void> {
-  const { sourceRoot, outDir, inventory } = parseArgs(process.argv.slice(2));
+  const { sourceRoot, outDir, inventory, allowSourceErrors } = parseArgs(process.argv.slice(2));
   const rel = path.relative(sourceRoot, outDir);
   if (rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel))) throw new Error(`out-dir は source-root の外にしてください: ${outDir}`);
   if (!fs.statSync(sourceRoot).isDirectory()) throw new Error(`source-root がディレクトリではありません: ${sourceRoot}`);
@@ -92,7 +95,7 @@ async function main(): Promise<void> {
   }
   if (sourceErrors.length > 0) {
     for (const e of sourceErrors) console.error(`[source error] ${e.localPdfPath}: ${e.message}`);
-    throw new Error(`${sourceErrors.length} 個の PDF を処理できませんでした。成果物は書きません`);
+    if (!allowSourceErrors) throw new Error(`${sourceErrors.length} 個の PDF を処理できませんでした。成果物は書きません`);
   }
 
   // ---- 出力 ----
@@ -149,6 +152,7 @@ async function main(): Promise<void> {
     sourceRows.push([slug, localPdfPath, sha, pdfResults.length, pdfResults.map(r => r.physicalPage).join(';'), all.length, pdfResults.reduce((n, r) => n + r.audits.length, 0)]);
   }
 
+  if (allowSourceErrors) files.set('source-errors.csv', csvFile(['localPdfPath', 'message'], sourceErrors.map(e => [e.localPdfPath, e.message])));
   files.set('sources.csv', csvFile(['source_slug', 'source_pdf', 'pdf_sha256', 'toc_pages', 'physical_pages', 'entries', 'audit_records'], sourceRows));
   files.set('entry-provenance.csv', csvFile(['entry_id', 'source_slug', 'source_pdf', 'csv_row', 'pdf_sha256', 'physical_page', 'pdfjs_version', 'extraction_options_id', 'side', 'row_id', 'shape', 'request_number_item_indexes', 'label_item_indexes', 'page_ref_item_indexes'], provenanceRows));
   files.set('unresolved.csv', csvFile(['audit_id', 'source_slug', 'source_pdf', 'pdf_sha256', 'physical_page', 'kind', 'side', 'row_id', 'candidate_owner_row_id', 'candidate_owner_entry_id', 'item_indexes', 'raw_texts_json', 'detail'], auditRows));

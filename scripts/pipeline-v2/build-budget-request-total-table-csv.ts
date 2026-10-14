@@ -1,9 +1,11 @@
 /**
- * Build 令和6年度歳出概算要求額総表 CSVs from the plain-text archive (read-only input).
+ * Build 歳出概算要求額総表 CSVs from the plain-text archive (read-only input). --year selects the archive entries, the frozen
+ * manifest used for the integrity diagnostic, the default output directory, the scope label and the request-year digit in
+ * the amount column names (令和7年度 → `７年度概算要求額_…`). The parser matches the request-year heading year-agnostically.
  *
- *   npx tsx scripts/pipeline-v2/build-budget-request-total-table-csv.ts [zipPath] [outputDir]
+ *   npx tsx scripts/pipeline-v2/build-budget-request-total-table-csv.ts [zipPath] [outputDir] [--year=2024]
  *
- * Defaults: data/work/budget-request-plain-text.zip → data/work/budget-request-csv/2024/total-table/
+ * Defaults: data/work/budget-request-plain-text.zip → data/work/budget-request-csv/{year}/total-table/
  * Spec: docs/budget-request-total-table-csv.md
  */
 import * as fs from 'fs';
@@ -17,22 +19,29 @@ import {
   parseSource,
   renderAuditCsv,
   renderRowsCsv,
+  requestYearLabel,
   renderUnresolvedCsv,
   type LogicalRow,
   type SourceResult,
 } from './lib/budget-request-total-table';
 
-const zipPath = process.argv[2] ?? 'data/work/budget-request-plain-text.zip';
-const outputRoot = process.argv[3] ?? 'data/work/budget-request-csv/2024/total-table';
-const manifestPath = 'tests/fixtures/budget-request-raw-text/2024/raw-text-manifest.json';
-const ENTRY = /^budget-request-plain-text\/2024\/[^/]+\.txt$/u;
+const yearArg = process.argv.find(a => a.startsWith('--year='))?.slice('--year='.length) ?? '2024';
+if (!/^\d{4}$/u.test(yearArg)) throw new Error(`--year must be a 4-digit fiscal year: ${yearArg}`);
+const year = Number(yearArg);
+const positional = process.argv.slice(2).filter(a => !a.startsWith('--'));
+const zipPath = positional[0] ?? 'data/work/budget-request-plain-text.zip';
+const outputRoot = positional[1] ?? `data/work/budget-request-csv/${year}/total-table`;
+const manifestPath = year === 2024
+  ? 'tests/fixtures/budget-request-raw-text/2024/raw-text-manifest.json'
+  : `tests/fixtures/budget-request-plain-text/${year}/plain-text-manifest.json`;
+const ENTRY = new RegExp(`^budget-request-plain-text/${year}/[^/]+\\.txt$`, 'u');
 const sha256 = (v: Buffer | string) => createHash('sha256').update(v).digest('hex');
 
 if (!fs.existsSync(zipPath)) throw new Error(`input archive not found: ${zipPath}`);
 const zipBytes = fs.readFileSync(zipPath);
 const entries = execFileSync('unzip', ['-Z1', zipPath], { encoding: 'utf8', maxBuffer: 1 << 26 })
   .split('\n').filter(e => ENTRY.test(e)).sort();
-if (entries.length === 0) throw new Error('no budget-request-plain-text/2024/*.txt entries in archive');
+if (entries.length === 0) throw new Error(`no budget-request-plain-text/${year}/*.txt entries in archive`);
 
 // Frozen raw-text manifest: integrity diagnostic only (the archive is the source of truth for this parser).
 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
@@ -76,7 +85,7 @@ const allRows = results.flatMap(r => r.rows);
 const allUnresolved = results.flatMap(r => r.unresolved);
 for (const r of results) {
   if (r.blocks.length === 0) continue;
-  write(`sources/${path.basename(r.source_file, '.txt')}.csv`, renderRowsCsv(r.rows));
+  write(`sources/${path.basename(r.source_file, '.txt')}.csv`, renderRowsCsv(r.rows, requestYearLabel(year)));
 }
 write('unresolved.csv', renderUnresolvedCsv(allUnresolved));
 write('line-audit.csv', renderAuditCsv(results.flatMap(r => r.audit)));
@@ -94,7 +103,7 @@ const signedCellsByColumn = Object.fromEntries(AMOUNT_FIELDS.map(f => [f, allRow
 const detailPageShape = count(allRows, (r: LogicalRow) => (r.detail_page_raw === '' ? '<blank>' : r.detail_page_raw.replace(/[0-9]+/gu, 'N')));
 
 const summary = {
-  scope: 'FY2024 令和6年度歳出概算要求額総表 raw text → logical rows (v0 deterministic parser; descriptive counts, not an accuracy score)',
+  scope: `FY${year} 令和${year - 2018}年度歳出概算要求額総表 raw text → logical rows (v0 deterministic parser; descriptive counts, not an accuracy score)`,
   input: { zipPath, zipSha256: sha256(zipBytes), txtEntries: entries.length },
   frozenManifestIntegrity: count(integrity, i => i.status),
   frozenManifestIntegrityDetail: integrity.filter(i => i.status !== 'MATCH'),

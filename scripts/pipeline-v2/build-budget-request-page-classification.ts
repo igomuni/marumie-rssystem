@@ -1,12 +1,14 @@
 /**
- * FY2024 概算要求 Page Classification v0 を frozen Raw Text corpus 全 9,899 page に適用する builder（frozen v0 specification の literal implementation）。
+ * 概算要求 Page Classification v0 を、年度ごとの frozen Raw Text corpus の全 page に適用する builder（frozen v0 specification の literal implementation）。FY2024 は 9,899 page。
  * rule の追加・変更なし。GT（v0/v1/v2/v3）は読まない。入力: Raw Text manifest・data/work の Raw Text pages・Phase A EMPTY isolation fixture。
  * 加えて conformance として、v0/v1/v2 の candidate fixture に freeze 済みの machine observation（directResult / activeStateFamily）と実装出力を照合する（GT は読まない）。
+ * FY2024 以外: raw text の digest はその年度の凍結 raw-text manifest から取る。Phase A（空白頁の目視分類）と candidate fixture は FY2024 にしか無いので、
+ * 空白頁はすべて UNRESOLVED_EMPTY とし、conformance は省略する（規則は変えない）。
  *
- * 使い方: npx tsx scripts/pipeline-v2/build-budget-request-page-classification.ts [--freeze-fixture]
- * 出力: data/work/budget-request-page-classification/2024/page-classification.jsonl（git 管理外）
- *       tests/fixtures/budget-request-page-classification/2024/page-classification-v0-implementation-manifest.json（--freeze-fixture のときだけ）
- *       tests/fixtures/budget-request-page-classification/2024/page-classification-v0-implementation-representative.json（同上）
+ * 使い方: npx tsx scripts/pipeline-v2/build-budget-request-page-classification.ts [--year=2024] [--freeze-fixture]
+ * 出力: data/work/budget-request-page-classification/{year}/page-classification.jsonl（git 管理外）
+ *       tests/fixtures/budget-request-page-classification/{year}/page-classification-v0-implementation-manifest.json（--freeze-fixture のときだけ）
+ *       tests/fixtures/budget-request-page-classification/{year}/page-classification-v0-implementation-representative.json（同上）
  */
 import * as fs from 'fs';
 import * as path from 'path';
@@ -14,14 +16,17 @@ import { sha256Hex } from './lib/budget-request-raw-text';
 import { CLASSIFIER_SPEC_VERSION, classifyDocument, documentDigest, recordLine, verifyHashes, type ClassifierPageInput, type EmptyKind, type PageClassificationRecord } from './lib/budget-request-page-classification';
 
 const FREEZE = process.argv.includes('--freeze-fixture');
-const DIR = path.join('tests', 'fixtures', 'budget-request-page-classification', '2024');
-const RAW_MANIFEST = path.join('tests', 'fixtures', 'budget-request-raw-text', '2024', 'raw-text-manifest.json');
+const YEAR_ARG = process.argv.find(a => a.startsWith('--year='))?.slice('--year='.length) ?? '2024';
+if (!/^\d{4}$/.test(YEAR_ARG)) throw new Error(`--year must be a 4-digit fiscal year: ${YEAR_ARG}`);
+const IS_FY2024 = YEAR_ARG === '2024';
+const DIR = path.join('tests', 'fixtures', 'budget-request-page-classification', YEAR_ARG);
+const RAW_MANIFEST = path.join('tests', 'fixtures', 'budget-request-raw-text', YEAR_ARG, 'raw-text-manifest.json');
 const PHASE_A = path.join(DIR, 'empty-page-failure-isolation.json');
-const PAGES_DIR = path.join('data', 'work', 'budget-request-raw-text', '2024');
-const WORK_OUT = path.join('data', 'work', 'budget-request-page-classification', '2024', 'page-classification.jsonl');
+const PAGES_DIR = path.join('data', 'work', 'budget-request-raw-text', YEAR_ARG);
+const WORK_OUT = path.join('data', 'work', 'budget-request-page-classification', YEAR_ARG, 'page-classification.jsonl');
 const MANIFEST_OUT = path.join(DIR, 'page-classification-v0-implementation-manifest.json');
 const REP_OUT = path.join(DIR, 'page-classification-v0-implementation-representative.json');
-const FROZEN_DIGEST = '7c6d2dcec1f4bec0ca37a1b3aa391adce7d99b93ac4642c74cab7a328dac4052';
+const FROZEN_FY2024_DIGEST = '7c6d2dcec1f4bec0ca37a1b3aa391adce7d99b93ac4642c74cab7a328dac4052';
 const IMPL_FILES = ['scripts/pipeline-v2/lib/budget-request-page-classification.ts', 'scripts/pipeline-v2/lib/budget-request-page-classification-direct.ts', 'scripts/pipeline-v2/build-budget-request-page-classification.ts'];
 const CANDIDATES = { v0: 'page-classification-v0-candidates.json', v1: 'page-classification-v1-eval-candidates.json', v2: 'page-classification-v2-candidates.json' } as const;
 
@@ -30,9 +35,10 @@ const readJson = <T>(f: string) => JSON.parse(fs.readFileSync(f, 'utf8')) as T;
 const count = (rs: PageClassificationRecord[], f: (r: PageClassificationRecord) => string) => { const o: Record<string, number> = {}; for (const r of rs) o[f(r)] = (o[f(r)] ?? 0) + 1; return Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1))); };
 
 function main() {
-  const raw = readJson<{ frozenInput: { corpusDigestSha256: string }; documents: Doc[] }>(RAW_MANIFEST);
+  const raw = readJson<{ frozenInput: { corpusDigestSha256: string; physicalPages: number }; documents: Doc[] }>(RAW_MANIFEST);
+  const FROZEN_DIGEST = IS_FY2024 ? FROZEN_FY2024_DIGEST : raw.frozenInput.corpusDigestSha256;
   if (raw.frozenInput.corpusDigestSha256 !== FROZEN_DIGEST) throw new Error('raw text corpus digest mismatch');
-  const phaseA = readJson<{ pages: { localPdfPath: string; physicalPage: number; isolationCategory: string }[] }>(PHASE_A);
+  const phaseA = IS_FY2024 ? readJson<{ pages: { localPdfPath: string; physicalPage: number; isolationCategory: string }[] }>(PHASE_A) : { pages: [] };
   const emptyKind = new Map(phaseA.pages.map(p => [`${p.localPdfPath}#${p.physicalPage}`, (p.isolationCategory === 'VISUALLY_BLANK' ? 'VISUALLY_BLANK' : 'RASTER') as EmptyKind]));
 
   const all: PageClassificationRecord[] = [];
@@ -53,12 +59,13 @@ function main() {
     perPdf.push({ localPdfPath: d.localPdfPath, pageCount: d.pageCount, classificationDigestSha256: documentDigest(rs) });
   }
   const keys = new Set(all.map(r => `${r.localPdfPath}#${r.physicalPage}`));
-  if (all.length !== 9899 || keys.size !== all.length) throw new Error(`page loss/duplicate: ${all.length}/${keys.size}`);
+  const expectedPages = IS_FY2024 ? 9899 : raw.frozenInput.physicalPages;
+  if (all.length !== expectedPages || keys.size !== all.length) throw new Error(`page loss/duplicate: ${all.length}/${keys.size}`);
 
   // conformance: frozen candidate fixture の machine observation と一致（GT は読まない）
   const byKey = new Map(all.map(r => [`${r.localPdfPath}#${r.physicalPage}`, r]));
   const conformance: Record<string, { directChecked: number; directMismatch: number; stateChecked: number; stateMismatch: number }> = {};
-  for (const [v, f] of Object.entries(CANDIDATES)) {
+  for (const [v, f] of IS_FY2024 ? Object.entries(CANDIDATES) : []) {
     const rows = readJson<{ rows: { localPdfPath: string; physicalPage: number; strata: string[]; strataDetail?: Record<string, Record<string, unknown>>; samplingObservation?: { directResult?: unknown; activeStateFamily?: string | null } }[] }>(path.join(DIR, f)).rows;
     const c = { directChecked: 0, directMismatch: 0, stateChecked: 0, stateMismatch: 0 };
     for (const r of rows) {
@@ -83,7 +90,7 @@ function main() {
     schema: 'budget-request-page-classification-v0-implementation-manifest/v0',
     scope: 'frozen v0 specification の literal implementation の full-corpus 出力 manifest。rule 変更・GT 由来の調整なし。open-set safety は NOT EVALUATED',
     specVersion: CLASSIFIER_SPEC_VERSION,
-    frozenInput: { rawTextCorpusDigestSha256: FROZEN_DIGEST, phaseAFixtureSha256: sha256Hex(fs.readFileSync(PHASE_A)) },
+    frozenInput: { rawTextCorpusDigestSha256: FROZEN_DIGEST, phaseAFixtureSha256: IS_FY2024 ? sha256Hex(fs.readFileSync(PHASE_A)) : null },
     implementation: { files: Object.fromEntries(IMPL_FILES.map(f => [f, sha256Hex(fs.readFileSync(f))])), node: process.version, platform: `${process.platform}-${process.arch}` },
     summary: {
       totalPages: all.length,
@@ -103,6 +110,7 @@ function main() {
   };
   if (mismatches !== 0) { console.log(JSON.stringify({ conformance, mismatches })); throw new Error(`conformance mismatch: ${mismatches}`); }
   if (FREEZE) {
+    fs.mkdirSync(DIR, { recursive: true });
     fs.writeFileSync(MANIFEST_OUT, `${JSON.stringify(manifest, null, 1)}\n`);
     // representative: 各 (status, pageType, source) の組から hash 順で先頭 2 page（内容の良し悪しでは選ばない）
     const groups = new Map<string, PageClassificationRecord[]>();
