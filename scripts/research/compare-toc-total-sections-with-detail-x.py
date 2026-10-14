@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 """TOC＋総表の項候補（resolve-detail-sections-via-toc-total.py の出力）と、明細表の source-only X（immediate X / anchor carry、#452 の規則）を DETAIL 行ごとに比べる（read-only、記述のみ）。
 
-  python3 -I scripts/research/compare-toc-total-sections-with-detail-x.py <section-candidates.csv>
+  python3 -I scripts/research/compare-toc-total-sections-with-detail-x.py <section-candidates.csv> [--year=2024]
 
-明細表は data/work/budget-request-csv/2024/detail-table（output-manifest の SHA-256 を照合）。MOF は使わない。標準出力は JSON。
+明細表は data/work/budget-request-csv/{year}/detail-table（output-manifest の SHA-256 を照合）。MOF は使わない。標準出力は JSON。
 """
 import collections, csv, glob, hashlib, json, os, re, sys
 
-DETAIL = 'data/work/budget-request-csv/2024/detail-table'
-DETAIL_MANIFEST_SHA = '7989885b0d2ee0907d2389f71bc2642bada070120a06283c89d2f6d6634f226e'
-CANDIDATES_SHA = '94306354bae037b5fd3f72ac7bb839d3fc5ed59699ee6ff6509b68e03ec6ce1a'
+FROZEN = {
+    2024: {'detail_manifest': '7989885b0d2ee0907d2389f71bc2642bada070120a06283c89d2f6d6634f226e',
+           'candidates': '94306354bae037b5fd3f72ac7bb839d3fc5ed59699ee6ff6509b68e03ec6ce1a'},
+    2025: {'detail_manifest': '0bdeeb372f3fd8450fba35274c4af7994434ddcf2447d6d048f1284ef428a0a7',
+           'candidates': 'cd5ea2aeae50c36a9bd3811b249e7037236df44e48afb724166d6540e4802d86'},
+}
 SEC = re.compile(r'^([0-9]{2,3}) (.+)$')
 
 
@@ -45,9 +48,12 @@ def detail_x(rows):
 
 
 def main():
-    cand_path = sys.argv[1]
-    if sha(os.path.join(DETAIL, 'output-manifest.json')) != DETAIL_MANIFEST_SHA: sys.exit('STOP: detail-table output-manifest mismatch')
-    if sha(cand_path) != CANDIDATES_SHA: sys.exit('STOP: section-candidates.csv mismatch')
+    args = [a for a in sys.argv[1:] if not a.startswith('--year=')]
+    year = int(next((a[7:] for a in sys.argv[1:] if a.startswith('--year=')), '2024'))
+    cand_path, frozen = args[0], FROZEN[year]
+    DETAIL = f'data/work/budget-request-csv/{year}/detail-table'
+    if sha(os.path.join(DETAIL, 'output-manifest.json')) != frozen['detail_manifest']: sys.exit('STOP: detail-table output-manifest mismatch')
+    if sha(cand_path) != frozen['candidates']: sys.exit('STOP: section-candidates.csv mismatch')
     X, scope = {}, {}
     for f in sorted(glob.glob(os.path.join(DETAIL, 'sources', '*.csv'))):
         s = os.path.basename(f)[:-4]
@@ -69,7 +75,7 @@ def main():
                           'toc_total': [c['section_code'], c['section_name']], 'detail_x': list(x), 'x_source': src})
     both = sum(v for k, v in res.items() if '| toc:yes |' in k and 'X:none' not in k)
     agree = sum(v for k, v in res.items() if k.endswith(':agree'))
-    print(json.dumps({'inputs': {'detailOutputManifest': DETAIL_MANIFEST_SHA, 'sectionCandidates': CANDIDATES_SHA, 'script_sha256': sha(__file__)},
+    print(json.dumps({'fiscalYear': year, 'inputs': {'detailOutputManifest': frozen['detail_manifest'], 'sectionCandidates': frozen['candidates'], 'script_sha256': sha(__file__)},
                       'detailRows': len(cands), 'bothHaveSection': both, 'agreeCodeAndName': agree,
                       'byScopeAndOutcome': dict(sorted(res.items())), 'disagreements': diffs}, ensure_ascii=False, indent=1))
 
