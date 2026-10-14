@@ -11,6 +11,7 @@ import {
   parseSource,
   renderRowsCsv,
   renderUnresolvedCsv,
+  requestYearLabel,
   type LogicalRow,
 } from './budget-request-total-table';
 
@@ -31,6 +32,26 @@ describe('total-table page / block detection', () => {
   it('requires the full header signature; a title-only (TOC) page is not a candidate', () => {
     expect(isTotalTablePage(HEADER)).toBe(true);
     expect(isTotalTablePage('        1. 令和６年度歳出概算要求額総表 ・・・・・・   1')).toBe(false);
+  });
+
+  it('matches the request-year heading for any fiscal year (令和7年度 → ７年度概算要求額), not only ６', () => {
+    expect(HEADER).toContain('６');
+    const fy2025 = HEADER.replace(/６(\s*年\s*度)/gu, '７$1');
+    expect(fy2025).not.toEqual(HEADER);
+    expect(isTotalTablePage(fy2025)).toBe(true);
+    expect(isTotalTablePage(HEADER.replace(/６(\s*年\s*度)/gu, '$1'))).toBe(false);
+    const parsed = parseSource(`${fy2025}\n${DETAIL_ROW}\n\f`, 'synthetic', 's');
+    expect(parsed.rows.map(r => r.row_type)).toEqual(['DETAIL']);
+  });
+
+  it('labels the request-year amount columns with the fiscal year digit', () => {
+    expect(requestYearLabel(2024)).toBe('６');
+    expect(requestYearLabel(2025)).toBe('７');
+    expect(requestYearLabel(2028)).toBe('１０');
+    const header = renderRowsCsv([], requestYearLabel(2025)).split('\n')[0];
+    expect(header).toContain('７年度概算要求額_一般行政経費');
+    expect(header).not.toContain('６年度');
+    expect(renderRowsCsv([]).split('\n')[0]).toBe(TOTAL_TABLE_CSV_COLUMNS.join(','));
   });
 
   it('groups consecutive candidate pages and splits at a non-candidate page', () => {

@@ -1,7 +1,7 @@
 /**
- * Build 歳出概算要求額総表 CSVs from the plain-text archive (read-only input). The parser is the FY2024 v0 parser unchanged
- * (its header vocabulary still says ６年度); --year only selects the archive entries, the frozen manifest used for the
- * integrity diagnostic, the default output directory and the scope label.
+ * Build 歳出概算要求額総表 CSVs from the plain-text archive (read-only input). --year selects the archive entries, the frozen
+ * manifest used for the integrity diagnostic, the default output directory, the scope label and the request-year digit in
+ * the amount column names (令和7年度 → `７年度概算要求額_…`). The parser matches the request-year heading year-agnostically.
  *
  *   npx tsx scripts/pipeline-v2/build-budget-request-total-table-csv.ts [zipPath] [outputDir] [--year=2024]
  *
@@ -19,6 +19,7 @@ import {
   parseSource,
   renderAuditCsv,
   renderRowsCsv,
+  requestYearLabel,
   renderUnresolvedCsv,
   type LogicalRow,
   type SourceResult,
@@ -84,7 +85,7 @@ const allRows = results.flatMap(r => r.rows);
 const allUnresolved = results.flatMap(r => r.unresolved);
 for (const r of results) {
   if (r.blocks.length === 0) continue;
-  write(`sources/${path.basename(r.source_file, '.txt')}.csv`, renderRowsCsv(r.rows));
+  write(`sources/${path.basename(r.source_file, '.txt')}.csv`, renderRowsCsv(r.rows, requestYearLabel(year)));
 }
 write('unresolved.csv', renderUnresolvedCsv(allUnresolved));
 write('line-audit.csv', renderAuditCsv(results.flatMap(r => r.audit)));
