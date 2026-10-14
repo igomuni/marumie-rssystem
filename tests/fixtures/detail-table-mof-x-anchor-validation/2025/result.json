@@ -1,0 +1,86 @@
+{
+ "fiscalYear": 2025,
+ "inputs": {
+  "detailOutputManifest": "0bdeeb372f3fd8450fba35274c4af7994434ddcf2447d6d048f1284ef428a0a7",
+  "mofJikou": "9c0a878b7ed5552cfb0786e7d9501e97937c9295e0210a544ab98a421ce79a38",
+  "mofRecords": 1287,
+  "script_sha256": "7b7558adbc8282d5da9fa41a513c889870a5a4ffd224277f3dd179bc535f4cdc",
+  "sourceCsvs": 123
+ },
+ "population": {
+  "J1_0_candidates": 75,
+  "J1_multi": 224,
+  "J1_single": 986,
+  "J1_single_immediate_X": 675,
+  "J1_single_no_immediate_X": 311,
+  "J1_single_no_immediate_X_anchor_not_found": 0,
+  "eligible_DETAIL_rows": 1285,
+  "excluded": {
+   "source_without_CONTEXT (DETAIL rows)": 101,
+   "special_account_CONTEXT (DETAIL rows)": 483
+  }
+ },
+ "primary": {
+  "agree": 306,
+  "decision": "GO",
+  "definition": "J1 単一・immediate X なし・anchor 取得可の行で sectionName == X_anchor（exact）",
+  "min_evaluable": 50,
+  "n": 311,
+  "rate": 0.9839,
+  "threshold": 0.95,
+  "wilson95": [
+   0.9629,
+   0.9931
+  ]
+ },
+ "primary_mismatches": [
+  {
+   "X_anchor": "地域イノベーション・エコシステム形成プログラム",
+   "code": "50‑13",
+   "ministry": "文部科学省",
+   "sectionName": "科学技術・学術政策推進費"
+  },
+  {
+   "X_anchor": "離島振興事業費",
+   "code": "47‑43",
+   "ministry": "国土交通省",
+   "sectionName": "港湾環境整備事業費"
+  },
+  {
+   "X_anchor": "北海道開発事業費",
+   "code": "40‑43",
+   "ministry": "国土交通省",
+   "sectionName": "港湾環境整備事業費"
+  },
+  {
+   "X_anchor": "北海道開発事業費",
+   "code": "52‑45",
+   "ministry": "国土交通省",
+   "sectionName": "都市公園防災事業費"
+  },
+  {
+   "X_anchor": "北海道開発事業費",
+   "code": "54‑45",
+   "ministry": "国土交通省",
+   "sectionName": "下水道事業費"
+  }
+ ],
+ "secondary": {
+  "J1_multi_candidates_after_X": {
+   "anchor | 1": 93,
+   "anchor | 2+": 34,
+   "immediate | 1": 54,
+   "immediate | 2+": 43
+  },
+  "J1_single_immediate_X": {
+   "agree": 670,
+   "n": 675,
+   "rate": 0.9926
+  },
+  "J1_single_source_only_X_combined": {
+   "agree": 976,
+   "n": 986,
+   "rate": 0.9899
+  }
+ }
+}
