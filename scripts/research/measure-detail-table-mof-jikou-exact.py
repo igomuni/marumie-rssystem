@@ -5,10 +5,32 @@
 
 J0=名称の exact 一致、J1=所管＋名称の exact 一致。正規化・部分一致・金額・親子復元は使わない。標準出力は JSON。
 """
-import collections, csv, glob, json, os, re, sys
+import collections, csv, glob, hashlib, json, os, re, sys
 
 D = 'data/work/budget-request-csv/2024/detail-table/sources/'
 M = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser('~/MyGitHub/marumie-rssystem/data/normalized/mof/fy2024')
+# 入力 provenance guard（分析条件ではない。実際に使った入力の bytes を固定する）
+FROZEN_JIKOU_SHA = 'a63f50504c821ad7aff9fe1c96c80635dda978ea0870976d15f9bc9735d3ef7e'
+FROZEN_MANIFEST_SHA = '7989885b0d2ee0907d2389f71bc2642bada070120a06283c89d2f6d6634f226e'
+MANIFEST = 'data/work/budget-request-csv/2024/detail-table/output-manifest.json'
+
+
+def sha(path):
+    with open(path, 'rb') as fh: return hashlib.sha256(fh.read()).hexdigest()
+
+
+def verify_inputs():
+    if sha(f'{M}/budget-jikou.jsonl') != FROZEN_JIKOU_SHA: sys.exit('STOP: budget-jikou.jsonl SHA-256 mismatch')
+    if sha(MANIFEST) != FROZEN_MANIFEST_SHA: sys.exit('STOP: output-manifest.json SHA-256 mismatch')
+    man = json.load(open(MANIFEST, encoding='utf-8'))
+    files = sorted(glob.glob(D + '*.csv'))
+    for f in files:
+        key = os.path.relpath(f, os.path.dirname(MANIFEST))
+        if key not in man: sys.exit(f'STOP: {key} not in manifest')
+        if sha(f) != man[key]: sys.exit(f'STOP: {key} SHA-256 differs from manifest')
+    return len(files)
+
+
 HY = '[‑-]'
 DET = re.compile(rf'^([0-9]{{2}}){HY}([0-9]{{2}}) (.*)$')
 MIN = re.compile(r'^[0-9]{2}\s+(.+?)所管')
@@ -18,6 +40,7 @@ def cls(n): return '0 (unmatched)' if n == 0 else ('1 (single)' if n == 1 else '
 
 
 def main():
+    print(f'input hashes verified: {verify_inputs()} source CSVs + manifest + budget-jikou', file=sys.stderr)
     J = [json.loads(l) for l in open(f'{M}/budget-jikou.jsonl', encoding='utf-8')]
     by_name = collections.defaultdict(list); by_min_name = collections.defaultdict(list)
     for i, j in enumerate(J):
