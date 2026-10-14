@@ -1,9 +1,11 @@
 /**
- * Build 令和6年度歳出概算要求額明細表 CSVs (excluding 備考) from the plain-text archive (read-only input).
+ * Build 歳出概算要求額明細表 CSVs (excluding 備考) from the plain-text archive (read-only input). The parser is the FY2024 v0
+ * parser unchanged (its header vocabulary still says ６年度); --year only selects the archive entries, the frozen
+ * manifest used for the integrity diagnostic, the default output directory and the scope label.
  *
- *   npx tsx scripts/pipeline-v2/build-budget-request-detail-table-csv.ts [zipPath] [outputDir]
+ *   npx tsx scripts/pipeline-v2/build-budget-request-detail-table-csv.ts [zipPath] [outputDir] [--year=2024]
  *
- * Defaults: data/work/budget-request-plain-text.zip → data/work/budget-request-csv/2024/detail-table/
+ * Defaults: data/work/budget-request-plain-text.zip → data/work/budget-request-csv/{year}/detail-table/
  * Spec: docs/budget-request-detail-table-csv.md
  */
 import * as fs from 'fs';
@@ -19,17 +21,23 @@ import {
   type SourceResult,
 } from './lib/budget-request-detail-table';
 
-const zipPath = process.argv[2] ?? 'data/work/budget-request-plain-text.zip';
-const outputRoot = process.argv[3] ?? 'data/work/budget-request-csv/2024/detail-table';
-const manifestPath = 'tests/fixtures/budget-request-raw-text/2024/raw-text-manifest.json';
-const ENTRY = /^budget-request-plain-text\/2024\/[^/]+\.txt$/u;
+const yearArg = process.argv.find(a => a.startsWith('--year='))?.slice('--year='.length) ?? '2024';
+if (!/^\d{4}$/u.test(yearArg)) throw new Error(`--year must be a 4-digit fiscal year: ${yearArg}`);
+const year = Number(yearArg);
+const positional = process.argv.slice(2).filter(a => !a.startsWith('--'));
+const zipPath = positional[0] ?? 'data/work/budget-request-plain-text.zip';
+const outputRoot = positional[1] ?? `data/work/budget-request-csv/${year}/detail-table`;
+const manifestPath = year === 2024
+  ? 'tests/fixtures/budget-request-raw-text/2024/raw-text-manifest.json'
+  : `tests/fixtures/budget-request-plain-text/${year}/plain-text-manifest.json`;
+const ENTRY = new RegExp(`^budget-request-plain-text/${year}/[^/]+\\.txt$`, 'u');
 const sha256 = (v: Buffer | string) => createHash('sha256').update(v).digest('hex');
 
 if (!fs.existsSync(zipPath)) throw new Error(`input archive not found: ${zipPath}`);
 const zipBytes = fs.readFileSync(zipPath);
 const entries = execFileSync('unzip', ['-Z1', zipPath], { encoding: 'utf8', maxBuffer: 1 << 26 })
   .split('\n').filter(e => ENTRY.test(e)).sort();
-if (entries.length === 0) throw new Error('no budget-request-plain-text/2024/*.txt entries in archive');
+if (entries.length === 0) throw new Error(`no budget-request-plain-text/${year}/*.txt entries in archive`);
 
 // Frozen raw-text manifest: integrity diagnostic only (the archive is the source of truth for this parser).
 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
@@ -95,7 +103,7 @@ const nonBlank = results.reduce((n, r) => n + r.nonBlankLinesInDetailPages, 0);
 if (accounted !== nonBlank) throw new Error(`line accounting mismatch: classified ${accounted} != non-blank ${nonBlank}`);
 
 const summary = {
-  scope: 'FY2024 令和6年度歳出概算要求額明細表 (excluding 備考) raw text → logical rows (v0 deterministic parser; descriptive counts, not an accuracy score)',
+  scope: `FY${year} 令和${year - 2018}年度歳出概算要求額明細表 (excluding 備考) raw text → logical rows (v0 deterministic parser; descriptive counts, not an accuracy score)`,
   input: { zipPath, zipSha256: sha256(zipBytes), txtEntries: entries.length },
   frozenManifestIntegrity: count(integrity, i => i.status),
   frozenManifestIntegrityDetail: integrity.filter(i => i.status !== 'MATCH'),

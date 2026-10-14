@@ -1,4 +1,11 @@
-/** Generate byte-preserving plain text for the FY2024 physical budget-request PDFs. */
+/**
+ * Generate byte-preserving plain text for the physical budget-request PDFs of one fiscal year.
+ *   npx tsx scripts/pipeline-v2/build-budget-request-plain-text.ts [--year=2024] [--out-root=<dir>]
+ * FY2024 validates against the frozen raw-text manifest (PDF hash, page count, per-page text hash).
+ * Other years validate PDF hash and page count against the frozen PDF corpus
+ * (tests/fixtures/budget-request-pdf-corpus/{year}/pdf-corpus-freeze.json) and write plain-text-manifest.json
+ * (per-page text hashes) next to the text files, to be frozen.
+ */
 import * as fs from 'fs';
 import * as path from 'path';
 import { execFileSync, spawnSync } from 'child_process';
@@ -6,14 +13,18 @@ import { getBudgetRequestManifest } from './lib/budget-request-manifest';
 import { localPathFor, DEFAULT_BASE_DIR } from './lib/budget-request-download';
 import { assertUniqueSlugs, sha256, splitAndValidatePdfText } from './lib/budget-request-plain-text';
 
-const OUT_ROOT = process.argv.find(a => a.startsWith('--out-root='))?.slice('--out-root='.length)
-  ?? path.join('data', 'work', 'budget-request-plain-text', '2024');
-const FROZEN = path.join('tests', 'fixtures', 'budget-request-raw-text', '2024', 'raw-text-manifest.json');
-type FrozenDocument = { localPdfPath: string; pdfSha256: string; pageCount: number; pageTextSha256: string[] };
+const arg = (name: string) => process.argv.find(a => a.startsWith(`--${name}=`))?.slice(name.length + 3);
+const YEAR = Number(arg('year') ?? '2024');
+if (!/^\d{4}$/.test(String(YEAR))) throw new Error(`--year must be a 4-digit fiscal year: ${arg('year')}`);
+const OUT_ROOT = arg('out-root') ?? path.join('data', 'work', 'budget-request-plain-text', String(YEAR));
+const FROZEN = YEAR === 2024
+  ? path.join('tests', 'fixtures', 'budget-request-raw-text', '2024', 'raw-text-manifest.json')
+  : path.join('tests', 'fixtures', 'budget-request-pdf-corpus', String(YEAR), 'pdf-corpus-freeze.json');
+type FrozenDocument = { localPdfPath: string; pdfSha256: string; pageCount: number; pageTextSha256?: string[] };
 const frozen = JSON.parse(fs.readFileSync(FROZEN, 'utf8')) as { documents: FrozenDocument[] };
 
 function main(): void {
-  const manifest = getBudgetRequestManifest(2024);
+  const manifest = getBudgetRequestManifest(YEAR);
   const files: { localPdfPath: string; url: string }[] = [];
   for (const src of manifest.sources) for (const doc of src.logicalDocuments) for (const file of doc.files) {
     files.push({ localPdfPath: localPathFor(file.url, src.publisherDomain, DEFAULT_BASE_DIR).split(path.sep).join('/'), url: file.url });
@@ -24,6 +35,7 @@ function main(): void {
   if (files.length !== frozen.documents.length) throw new Error(`manifest has ${files.length} PDFs; frozen manifest has ${frozen.documents.length}`);
   fs.mkdirSync(OUT_ROOT, { recursive: true });
   let pages = 0;
+  const produced: { localPdfPath: string; textFile: string; pdfSha256: string; pageCount: number; status: 'EXTRACTED' | 'EMPTY'; textSha256: string; pageTextSha256: string[] }[] = [];
   for (const file of files) {
     const record = frozenByPath.get(file.localPdfPath);
     if (!record) throw new Error(`PDF missing from frozen manifest: ${file.localPdfPath}`);
@@ -41,10 +53,27 @@ function main(): void {
     const pageChunks = splitAndValidatePdfText(result.stdout, pageCount, record.pageTextSha256);
     const after = sha256(fs.readFileSync(file.localPdfPath));
     if (after !== before || after !== record.pdfSha256) throw new Error(`source PDF changed during extraction: ${file.localPdfPath}`);
-    fs.writeFileSync(path.join(OUT_ROOT, `${slugs.get(file.localPdfPath)}.txt`), result.stdout);
+    const textFile = `${slugs.get(file.localPdfPath)}.txt`;
+    fs.writeFileSync(path.join(OUT_ROOT, textFile), result.stdout);
     pages += pageChunks.length;
+    produced.push({
+      localPdfPath: file.localPdfPath, textFile, pdfSha256: before, pageCount,
+      status: pageChunks.every(c => c.toString('utf8').trim() === '') ? 'EMPTY' : 'EXTRACTED',
+      textSha256: sha256(result.stdout), pageTextSha256: pageChunks.map(c => sha256(c)),
+    });
   }
-  console.log(JSON.stringify({ physicalPdfs: files.length, physicalPages: pages, outputRoot: OUT_ROOT }, null, 2));
+  if (YEAR !== 2024) {
+    fs.writeFileSync(path.join(OUT_ROOT, 'plain-text-manifest.json'), JSON.stringify({
+      schema: 'budget-request-plain-text-manifest/v0',
+      fiscalYear: YEAR,
+      frozenPdfCorpus: { path: FROZEN, sha256: sha256(fs.readFileSync(FROZEN)) },
+      extraction: { tool: spawnSync('pdftotext', ['-v'], { encoding: 'utf8' }).stderr.split('\n')[0], args: ['-layout', '-enc', 'UTF-8'] },
+      physicalPdfs: produced.length,
+      physicalPages: pages,
+      documents: produced,
+    }, null, 2) + '\n');
+  }
+  console.log(JSON.stringify({ fiscalYear: YEAR, physicalPdfs: files.length, physicalPages: pages, outputRoot: OUT_ROOT }, null, 2));
 }
 
 main();
