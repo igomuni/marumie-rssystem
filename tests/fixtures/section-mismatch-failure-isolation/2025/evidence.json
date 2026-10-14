@@ -1,0 +1,1001 @@
+{
+ "schema": "section-mismatch-failure-isolation-evidence/v0",
+ "inputs": {
+  "data/work/budget-request-csv/2025/detail-table/output-manifest.json": "0bdeeb372f3fd8450fba35274c4af7994434ddcf2447d6d048f1284ef428a0a7",
+  "data/work/budget-request-csv/2024/detail-table/output-manifest.json": "7989885b0d2ee0907d2389f71bc2642bada070120a06283c89d2f6d6634f226e",
+  "data/normalized/mof/fy2025/budget-jikou-v1-canonical.jsonl": "9c0a878b7ed5552cfb0786e7d9501e97937c9295e0210a544ab98a421ce79a38",
+  "../../../../MyGitHub/marumie-rssystem/data/normalized/mof/fy2024/budget-jikou.jsonl": "a63f50504c821ad7aff9fe1c96c80635dda978ea0870976d15f9bc9735d3ef7e",
+  "tests/fixtures/detail-table-mof-section-match/2025/triple-match.csv": "2be288bc3d6d50f63345d87b58b453a5556fda112114e05845f928d8b8322dc6",
+  "tests/fixtures/detail-table-toc-total-sections/2025/section-candidates.csv": "cd5ea2aeae50c36a9bd3811b249e7037236df44e48afb724166d6540e4802d86",
+  "fy2024-section-candidates": "94306354bae037b5fd3f72ac7bb839d3fc5ed59699ee6ff6509b68e03ec6ce1a"
+ },
+ "script_sha256": "99080dd64865a35169885e094369aecf67fdbbcbeaa2e5ccaafc5510a4b5e086",
+ "rows": [
+  {
+   "target": {
+    "source": "mlit.go.jp__page__content__001762903",
+    "row_index": "2177",
+    "code": "47‑43",
+    "request_no": "101",
+    "page": "338",
+    "ministry": "国土交通省",
+    "name": "港湾環境整備事業に必要な経費",
+    "confirmed_section": "376 離島振興事業費"
+   },
+   "E2_mof_fy2025_record": {
+    "sectionCode": "351",
+    "sectionName": "港湾環境整備事業費",
+    "jikouName": "港湾環境整備事業に必要な経費",
+    "col4Raw": "43",
+    "previousAmountYen": 1782325000,
+    "amountYen": 736776000,
+    "page": 877
+   },
+   "E1_request_fy2025_same_name_rows": [
+    {
+     "source": "mlit.go.jp__page__content__001762903",
+     "row_index": "1365",
+     "ministry": "国土交通省",
+     "name": "港湾環境整備事業に必要な経費",
+     "code": "01‑43",
+     "request_no": "59",
+     "prev_amount_yen": 1473925000,
+     "page": "234",
+     "confirmed_section": "238 港湾環境整備事業費",
+     "prev_status": "K2_SUPPORTED"
+    },
+    {
+     "source": "mlit.go.jp__page__content__001762903",
+     "row_index": "2177",
+     "ministry": "国土交通省",
+     "name": "港湾環境整備事業に必要な経費",
+     "code": "47‑43",
+     "request_no": "101",
+     "prev_amount_yen": null,
+     "page": "338",
+     "confirmed_section": "376 離島振興事業費",
+     "prev_status": "UNRESOLVED_SECTION_MISMATCH"
+    },
+    {
+     "source": "mlit.go.jp__page__content__001762903",
+     "row_index": "2798",
+     "ministry": "国土交通省",
+     "name": "港湾環境整備事業に必要な経費",
+     "code": "40‑43",
+     "request_no": "158",
+     "prev_amount_yen": null,
+     "page": "406",
+     "confirmed_section": "763 北海道開発事業費",
+     "prev_status": "UNRESOLVED_SECTION_MISMATCH"
+    }
+   ],
+   "E2_confirmed_section_in_mof_fy2025": {
+    "sections": [
+     [
+      "083",
+      "離島振興事業費"
+     ]
+    ],
+    "items": [
+     {
+      "jikouName": "海岸事業に必要な経費",
+      "previousAmountYen": 840850000
+     },
+     {
+      "jikouName": "奄美群島海岸事業に必要な経費",
+      "previousAmountYen": 190800000
+     },
+     {
+      "jikouName": "治山事業に必要な経費",
+      "previousAmountYen": 994000000
+     },
+     {
+      "jikouName": "奄美群島治山事業に必要な経費",
+      "previousAmountYen": 133000000
+     },
+     {
+      "jikouName": "河川整備事業に必要な経費",
+      "previousAmountYen": 599000000
+     },
+     {
+      "jikouName": "奄美群島河川整備事業に必要な経費",
+      "previousAmountYen": 12000000
+     },
+     {
+      "jikouName": "砂防事業に必要な経費",
+      "previousAmountYen": 483000000
+     },
+     {
+      "jikouName": "奄美群島砂防事業に必要な経費",
+      "previousAmountYen": 194000000
+     },
+     {
+      "jikouName": "道路更新防災等対策事業に必要な経費",
+      "previousAmountYen": 2139560000
+     },
+     {
+      "jikouName": "奄美群島道路更新防災等対策事業に必要な経費",
+      "previousAmountYen": 805000000
+     },
+     {
+      "jikouName": "港湾事業に必要な経費",
+      "previousAmountYen": 5021000000
+     },
+     {
+      "jikouName": "奄美群島港湾事業に必要な経費",
+      "previousAmountYen": 1569000000
+     },
+     {
+      "jikouName": "道路交通安全対策事業に必要な経費",
+      "previousAmountYen": 1937000000
+     },
+     {
+      "jikouName": "奄美群島道路交通安全対策事業に必要な経費",
+      "previousAmountYen": 180000000
+     },
+     {
+      "jikouName": "道路環境改善事業に必要な経費",
+      "previousAmountYen": 130000000
+     },
+     {
+      "jikouName": "奄美群島道路環境改善事業に必要な経費",
+      "previousAmountYen": 98000000
+     },
+     {
+      "jikouName": "水道施設整備に必要な経費",
+      "previousAmountYen": 1032000000
+     },
+     {
+      "jikouName": "奄美群島水道施設整備に必要な経費",
+      "previousAmountYen": 368000000
+     },
+     {
+      "jikouName": "廃棄物処理施設整備に必要な経費",
+      "previousAmountYen": 851000000
+     },
+     {
+      "jikouName": "奄美群島廃棄物処理施設整備に必要な経費",
+      "previousAmountYen": 886000000
+     },
+     {
+      "jikouName": "農業農村整備事業に必要な経費",
+      "previousAmountYen": 2875000000
+     },
+     {
+      "jikouName": "奄美群島農業農村整備事業に必要な経費",
+      "previousAmountYen": 6289000000
+     },
+     {
+      "jikouName": "農山漁村地域整備事業に必要な経費",
+      "previousAmountYen": 3585000000
+     },
+     {
+      "jikouName": "奄美群島農山漁村地域整備事業に必要な経費",
+      "previousAmountYen": 1370000000
+     },
+     {
+      "jikouName": "森林整備事業に必要な経費",
+      "previousAmountYen": 638000000
+     },
+     {
+      "jikouName": "奄美群島森林整備事業に必要な経費",
+      "previousAmountYen": 160000000
+     },
+     {
+      "jikouName": "水産基盤整備に必要な経費",
+      "previousAmountYen": 11927000000
+     },
+     {
+      "jikouName": "奄美群島水産基盤整備に必要な経費",
+      "previousAmountYen": 494000000
+     },
+     {
+      "jikouName": "社会資本総合整備事業に必要な経費",
+      "previousAmountYen": 17626580000
+     },
+     {
+      "jikouName": "奄美群島社会資本総合整備事業に必要な経費",
+      "previousAmountYen": 9347450000
+     },
+     {
+      "jikouName": "上下水道一体効率化・基盤強化推進事業に必要な経費",
+      "previousAmountYen": 20000000
+     }
+    ]
+   },
+   "E3_mof_fy2024_same_name_records": [
+    {
+     "sectionCode": "351",
+     "sectionName": "港湾環境整備事業費",
+     "jikouName": "港湾環境整備事業に必要な経費",
+     "col4Raw": "43",
+     "previousAmountYen": 2754514000,
+     "amountYen": 1473925000,
+     "page": 877
+    }
+   ],
+   "E3_confirmed_section_in_mof_fy2024": [
+    [
+     "083",
+     "離島振興事業費"
+    ]
+   ],
+   "E4_request_fy2024_same_name_rows": [
+    {
+     "source": "mlit.go.jp__page__content__001630995",
+     "row_index": "1435",
+     "ministry": "国土交通省",
+     "name": "港湾環境整備事業に必要な経費",
+     "code": "01‑43",
+     "request_no": "60",
+     "prev_amount_yen": 2121514000,
+     "page": "286",
+     "confirmed_section": "238 港湾環境整備事業費"
+    },
+    {
+     "source": "mlit.go.jp__page__content__001630995",
+     "row_index": "2255",
+     "ministry": "国土交通省",
+     "name": "港湾環境整備事業に必要な経費",
+     "code": "47‑43",
+     "request_no": "104",
+     "prev_amount_yen": null,
+     "page": "414",
+     "confirmed_section": "376 離島振興事業費"
+    },
+    {
+     "source": "mlit.go.jp__page__content__001630995",
+     "row_index": "2917",
+     "ministry": "国土交通省",
+     "name": "港湾環境整備事業に必要な経費",
+     "code": "40‑43",
+     "request_no": "161",
+     "prev_amount_yen": null,
+     "page": "499",
+     "confirmed_section": "763 北海道開発事業費"
+    }
+   ],
+   "E5_flags": {
+    "a1_amount_supports_identity": false,
+    "a1_detail": {
+     "target_prev_yen": null,
+     "sum_of_same_name_request_rows_prev_yen": null,
+     "mof_previousAmountYen": 1782325000
+    },
+    "a2_confirmed_section_exists_in_mof_fy2025_or_fy2024": true,
+    "b1_amount_does_not_support_identity": true,
+    "b2_other_named_mof_record_with_equal_previous_amount": []
+   }
+  },
+  {
+   "target": {
+    "source": "mlit.go.jp__page__content__001762903",
+    "row_index": "2798",
+    "code": "40‑43",
+    "request_no": "158",
+    "page": "406",
+    "ministry": "国土交通省",
+    "name": "港湾環境整備事業に必要な経費",
+    "confirmed_section": "763 北海道開発事業費"
+   },
+   "E2_mof_fy2025_record": {
+    "sectionCode": "351",
+    "sectionName": "港湾環境整備事業費",
+    "jikouName": "港湾環境整備事業に必要な経費",
+    "col4Raw": "43",
+    "previousAmountYen": 1782325000,
+    "amountYen": 736776000,
+    "page": 877
+   },
+   "E1_request_fy2025_same_name_rows": [
+    {
+     "source": "mlit.go.jp__page__content__001762903",
+     "row_index": "1365",
+     "ministry": "国土交通省",
+     "name": "港湾環境整備事業に必要な経費",
+     "code": "01‑43",
+     "request_no": "59",
+     "prev_amount_yen": 1473925000,
+     "page": "234",
+     "confirmed_section": "238 港湾環境整備事業費",
+     "prev_status": "K2_SUPPORTED"
+    },
+    {
+     "source": "mlit.go.jp__page__content__001762903",
+     "row_index": "2177",
+     "ministry": "国土交通省",
+     "name": "港湾環境整備事業に必要な経費",
+     "code": "47‑43",
+     "request_no": "101",
+     "prev_amount_yen": null,
+     "page": "338",
+     "confirmed_section": "376 離島振興事業費",
+     "prev_status": "UNRESOLVED_SECTION_MISMATCH"
+    },
+    {
+     "source": "mlit.go.jp__page__content__001762903",
+     "row_index": "2798",
+     "ministry": "国土交通省",
+     "name": "港湾環境整備事業に必要な経費",
+     "code": "40‑43",
+     "request_no": "158",
+     "prev_amount_yen": null,
+     "page": "406",
+     "confirmed_section": "763 北海道開発事業費",
+     "prev_status": "UNRESOLVED_SECTION_MISMATCH"
+    }
+   ],
+   "E2_confirmed_section_in_mof_fy2025": {
+    "sections": [
+     [
+      "086",
+      "北海道開発事業費"
+     ]
+    ],
+    "items": [
+     {
+      "jikouName": "海岸事業に必要な経費",
+      "previousAmountYen": 2108100000
+     },
+     {
+      "jikouName": "治山事業に必要な経費",
+      "previousAmountYen": 10272000000
+     },
+     {
+      "jikouName": "河川整備事業に必要な経費",
+      "previousAmountYen": 97015107000
+     },
+     {
+      "jikouName": "多目的ダム建設事業に必要な経費",
+      "previousAmountYen": 5433490000
+     },
+     {
+      "jikouName": "総合流域防災事業に必要な経費",
+      "previousAmountYen": 1208310000
+     },
+     {
+      "jikouName": "砂防事業に必要な経費",
+      "previousAmountYen": 11441698000
+     },
+     {
+      "jikouName": "地域連携道路事業に必要な経費",
+      "previousAmountYen": 89886100000
+     },
+     {
+      "jikouName": "道路更新防災対策事業及び維持管理に必要な経費",
+      "previousAmountYen": 148971160000
+     },
+     {
+      "jikouName": "道路交通円滑化事業に必要な経費",
+      "previousAmountYen": 507000000
+     },
+     {
+      "jikouName": "港湾事業に必要な経費",
+      "previousAmountYen": 19522000000
+     },
+     {
+      "jikouName": "都市水環境整備事業に必要な経費",
+      "previousAmountYen": 922360000
+     },
+     {
+      "jikouName": "道路環境改善事業に必要な経費",
+      "previousAmountYen": 5148000000
+     },
+     {
+      "jikouName": "道路交通安全対策事業に必要な経費",
+      "previousAmountYen": 23108400000
+     },
+     {
+      "jikouName": "住宅防災事業に必要な経費",
+      "previousAmountYen": 300000000
+     },
+     {
+      "jikouName": "良好で緑豊かな都市空間の形成等のための国営公園等事業に必要な経費",
+      "previousAmountYen": 1903979000
+     },
+     {
+      "jikouName": "上下水道一体効率化・基盤強化推進事業に必要な経費",
+      "previousAmountYen": 200000000
+     },
+     {
+      "jikouName": "水道施設整備に必要な経費",
+      "previousAmountYen": 2820000000
+     },
+     {
+      "jikouName": "下水道防災事業に必要な経費",
+      "previousAmountYen": 2212000000
+     },
+     {
+      "jikouName": "廃棄物処理施設整備に必要な経費",
+      "previousAmountYen": 9455000000
+     },
+     {
+      "jikouName": "農業農村整備事業に必要な経費",
+      "previousAmountYen": 124356068000
+     },
+     {
+      "jikouName": "農山漁村地域整備事業に必要な経費",
+      "previousAmountYen": 8904000000
+     },
+     {
+      "jikouName": "森林整備事業に必要な経費",
+      "previousAmountYen": 11524000000
+     },
+     {
+      "jikouName": "水産基盤整備に必要な経費",
+      "previousAmountYen": 37931000000
+     },
+     {
+      "jikouName": "社会資本総合整備事業に必要な経費",
+      "previousAmountYen": 70070731000
+     },
+     {
+      "jikouName": "社会資本整備円滑化地籍整備事業に必要な経費",
+      "previousAmountYen": 78000000
+     }
+    ]
+   },
+   "E3_mof_fy2024_same_name_records": [
+    {
+     "sectionCode": "351",
+     "sectionName": "港湾環境整備事業費",
+     "jikouName": "港湾環境整備事業に必要な経費",
+     "col4Raw": "43",
+     "previousAmountYen": 2754514000,
+     "amountYen": 1473925000,
+     "page": 877
+    }
+   ],
+   "E3_confirmed_section_in_mof_fy2024": [
+    [
+     "086",
+     "北海道開発事業費"
+    ]
+   ],
+   "E4_request_fy2024_same_name_rows": [
+    {
+     "source": "mlit.go.jp__page__content__001630995",
+     "row_index": "1435",
+     "ministry": "国土交通省",
+     "name": "港湾環境整備事業に必要な経費",
+     "code": "01‑43",
+     "request_no": "60",
+     "prev_amount_yen": 2121514000,
+     "page": "286",
+     "confirmed_section": "238 港湾環境整備事業費"
+    },
+    {
+     "source": "mlit.go.jp__page__content__001630995",
+     "row_index": "2255",
+     "ministry": "国土交通省",
+     "name": "港湾環境整備事業に必要な経費",
+     "code": "47‑43",
+     "request_no": "104",
+     "prev_amount_yen": null,
+     "page": "414",
+     "confirmed_section": "376 離島振興事業費"
+    },
+    {
+     "source": "mlit.go.jp__page__content__001630995",
+     "row_index": "2917",
+     "ministry": "国土交通省",
+     "name": "港湾環境整備事業に必要な経費",
+     "code": "40‑43",
+     "request_no": "161",
+     "prev_amount_yen": null,
+     "page": "499",
+     "confirmed_section": "763 北海道開発事業費"
+    }
+   ],
+   "E5_flags": {
+    "a1_amount_supports_identity": false,
+    "a1_detail": {
+     "target_prev_yen": null,
+     "sum_of_same_name_request_rows_prev_yen": null,
+     "mof_previousAmountYen": 1782325000
+    },
+    "a2_confirmed_section_exists_in_mof_fy2025_or_fy2024": true,
+    "b1_amount_does_not_support_identity": true,
+    "b2_other_named_mof_record_with_equal_previous_amount": []
+   }
+  },
+  {
+   "target": {
+    "source": "mlit.go.jp__page__content__001762903",
+    "row_index": "2820",
+    "code": "52‑45",
+    "request_no": "163",
+    "page": "407",
+    "ministry": "国土交通省",
+    "name": "都市公園防災事業に必要な経費",
+    "confirmed_section": "763 北海道開発事業費"
+   },
+   "E2_mof_fy2025_record": {
+    "sectionCode": "023",
+    "sectionName": "都市公園防災事業費",
+    "jikouName": "都市公園防災事業に必要な経費",
+    "col4Raw": "45",
+    "previousAmountYen": 1146000000,
+    "amountYen": 645000000,
+    "page": 879
+   },
+   "E1_request_fy2025_same_name_rows": [
+    {
+     "source": "mlit.go.jp__page__content__001762903",
+     "row_index": "902",
+     "ministry": "国土交通省",
+     "name": "都市公園防災事業に必要な経費",
+     "code": "05‑45",
+     "request_no": "35",
+     "prev_amount_yen": null,
+     "page": "174",
+     "confirmed_section": "116 都市公園防災事業費",
+     "prev_status": "K2_SUPPORTED"
+    },
+    {
+     "source": "mlit.go.jp__page__content__001762903",
+     "row_index": "2820",
+     "ministry": "国土交通省",
+     "name": "都市公園防災事業に必要な経費",
+     "code": "52‑45",
+     "request_no": "163",
+     "prev_amount_yen": null,
+     "page": "407",
+     "confirmed_section": "763 北海道開発事業費",
+     "prev_status": "UNRESOLVED_SECTION_MISMATCH"
+    }
+   ],
+   "E2_confirmed_section_in_mof_fy2025": {
+    "sections": [
+     [
+      "086",
+      "北海道開発事業費"
+     ]
+    ],
+    "items": [
+     {
+      "jikouName": "海岸事業に必要な経費",
+      "previousAmountYen": 2108100000
+     },
+     {
+      "jikouName": "治山事業に必要な経費",
+      "previousAmountYen": 10272000000
+     },
+     {
+      "jikouName": "河川整備事業に必要な経費",
+      "previousAmountYen": 97015107000
+     },
+     {
+      "jikouName": "多目的ダム建設事業に必要な経費",
+      "previousAmountYen": 5433490000
+     },
+     {
+      "jikouName": "総合流域防災事業に必要な経費",
+      "previousAmountYen": 1208310000
+     },
+     {
+      "jikouName": "砂防事業に必要な経費",
+      "previousAmountYen": 11441698000
+     },
+     {
+      "jikouName": "地域連携道路事業に必要な経費",
+      "previousAmountYen": 89886100000
+     },
+     {
+      "jikouName": "道路更新防災対策事業及び維持管理に必要な経費",
+      "previousAmountYen": 148971160000
+     },
+     {
+      "jikouName": "道路交通円滑化事業に必要な経費",
+      "previousAmountYen": 507000000
+     },
+     {
+      "jikouName": "港湾事業に必要な経費",
+      "previousAmountYen": 19522000000
+     },
+     {
+      "jikouName": "都市水環境整備事業に必要な経費",
+      "previousAmountYen": 922360000
+     },
+     {
+      "jikouName": "道路環境改善事業に必要な経費",
+      "previousAmountYen": 5148000000
+     },
+     {
+      "jikouName": "道路交通安全対策事業に必要な経費",
+      "previousAmountYen": 23108400000
+     },
+     {
+      "jikouName": "住宅防災事業に必要な経費",
+      "previousAmountYen": 300000000
+     },
+     {
+      "jikouName": "良好で緑豊かな都市空間の形成等のための国営公園等事業に必要な経費",
+      "previousAmountYen": 1903979000
+     },
+     {
+      "jikouName": "上下水道一体効率化・基盤強化推進事業に必要な経費",
+      "previousAmountYen": 200000000
+     },
+     {
+      "jikouName": "水道施設整備に必要な経費",
+      "previousAmountYen": 2820000000
+     },
+     {
+      "jikouName": "下水道防災事業に必要な経費",
+      "previousAmountYen": 2212000000
+     },
+     {
+      "jikouName": "廃棄物処理施設整備に必要な経費",
+      "previousAmountYen": 9455000000
+     },
+     {
+      "jikouName": "農業農村整備事業に必要な経費",
+      "previousAmountYen": 124356068000
+     },
+     {
+      "jikouName": "農山漁村地域整備事業に必要な経費",
+      "previousAmountYen": 8904000000
+     },
+     {
+      "jikouName": "森林整備事業に必要な経費",
+      "previousAmountYen": 11524000000
+     },
+     {
+      "jikouName": "水産基盤整備に必要な経費",
+      "previousAmountYen": 37931000000
+     },
+     {
+      "jikouName": "社会資本総合整備事業に必要な経費",
+      "previousAmountYen": 70070731000
+     },
+     {
+      "jikouName": "社会資本整備円滑化地籍整備事業に必要な経費",
+      "previousAmountYen": 78000000
+     }
+    ]
+   },
+   "E3_mof_fy2024_same_name_records": [
+    {
+     "sectionCode": "023",
+     "sectionName": "都市公園防災事業費",
+     "jikouName": "都市公園防災事業に必要な経費",
+     "col4Raw": "45",
+     "previousAmountYen": 1791000000,
+     "amountYen": 1146000000,
+     "page": 879
+    }
+   ],
+   "E3_confirmed_section_in_mof_fy2024": [
+    [
+     "086",
+     "北海道開発事業費"
+    ]
+   ],
+   "E4_request_fy2024_same_name_rows": [
+    {
+     "source": "mlit.go.jp__page__content__001630995",
+     "row_index": "988",
+     "ministry": "国土交通省",
+     "name": "都市公園防災事業に必要な経費",
+     "code": "05‑45",
+     "request_no": "36",
+     "prev_amount_yen": null,
+     "page": "216",
+     "confirmed_section": "116 都市公園防災事業費"
+    },
+    {
+     "source": "mlit.go.jp__page__content__001630995",
+     "row_index": "2939",
+     "ministry": "国土交通省",
+     "name": "都市公園防災事業に必要な経費",
+     "code": "52‑45",
+     "request_no": "166",
+     "prev_amount_yen": null,
+     "page": "500",
+     "confirmed_section": "763 北海道開発事業費"
+    }
+   ],
+   "E5_flags": {
+    "a1_amount_supports_identity": false,
+    "a1_detail": {
+     "target_prev_yen": null,
+     "sum_of_same_name_request_rows_prev_yen": null,
+     "mof_previousAmountYen": 1146000000
+    },
+    "a2_confirmed_section_exists_in_mof_fy2025_or_fy2024": true,
+    "b1_amount_does_not_support_identity": true,
+    "b2_other_named_mof_record_with_equal_previous_amount": []
+   }
+  },
+  {
+   "target": {
+    "source": "mlit.go.jp__page__content__001762903",
+    "row_index": "2822",
+    "code": "54‑45",
+    "request_no": "164",
+    "page": "407",
+    "ministry": "国土交通省",
+    "name": "適正な汚水処理の確保等のための下水道事業に必要な経費",
+    "confirmed_section": "763 北海道開発事業費"
+   },
+   "E2_mof_fy2025_record": {
+    "sectionCode": "017",
+    "sectionName": "下水道事業費",
+    "jikouName": "適正な汚水処理の確保等のための下水道事業に必要な経費",
+    "col4Raw": "45",
+    "previousAmountYen": 15834279000,
+    "amountYen": 9447000000,
+    "page": 879
+   },
+   "E1_request_fy2025_same_name_rows": [
+    {
+     "source": "mlit.go.jp__page__content__001762903",
+     "row_index": "754",
+     "ministry": "国土交通省",
+     "name": "適正な汚水処理の確保等のための下水道事業に必要な経費",
+     "code": "05‑45",
+     "request_no": "26",
+     "prev_amount_yen": null,
+     "page": "160",
+     "confirmed_section": "076 下水道事業費",
+     "prev_status": "K2_SUPPORTED"
+    },
+    {
+     "source": "mlit.go.jp__page__content__001762903",
+     "row_index": "2822",
+     "ministry": "国土交通省",
+     "name": "適正な汚水処理の確保等のための下水道事業に必要な経費",
+     "code": "54‑45",
+     "request_no": "164",
+     "prev_amount_yen": null,
+     "page": "407",
+     "confirmed_section": "763 北海道開発事業費",
+     "prev_status": "UNRESOLVED_SECTION_MISMATCH"
+    }
+   ],
+   "E2_confirmed_section_in_mof_fy2025": {
+    "sections": [
+     [
+      "086",
+      "北海道開発事業費"
+     ]
+    ],
+    "items": [
+     {
+      "jikouName": "海岸事業に必要な経費",
+      "previousAmountYen": 2108100000
+     },
+     {
+      "jikouName": "治山事業に必要な経費",
+      "previousAmountYen": 10272000000
+     },
+     {
+      "jikouName": "河川整備事業に必要な経費",
+      "previousAmountYen": 97015107000
+     },
+     {
+      "jikouName": "多目的ダム建設事業に必要な経費",
+      "previousAmountYen": 5433490000
+     },
+     {
+      "jikouName": "総合流域防災事業に必要な経費",
+      "previousAmountYen": 1208310000
+     },
+     {
+      "jikouName": "砂防事業に必要な経費",
+      "previousAmountYen": 11441698000
+     },
+     {
+      "jikouName": "地域連携道路事業に必要な経費",
+      "previousAmountYen": 89886100000
+     },
+     {
+      "jikouName": "道路更新防災対策事業及び維持管理に必要な経費",
+      "previousAmountYen": 148971160000
+     },
+     {
+      "jikouName": "道路交通円滑化事業に必要な経費",
+      "previousAmountYen": 507000000
+     },
+     {
+      "jikouName": "港湾事業に必要な経費",
+      "previousAmountYen": 19522000000
+     },
+     {
+      "jikouName": "都市水環境整備事業に必要な経費",
+      "previousAmountYen": 922360000
+     },
+     {
+      "jikouName": "道路環境改善事業に必要な経費",
+      "previousAmountYen": 5148000000
+     },
+     {
+      "jikouName": "道路交通安全対策事業に必要な経費",
+      "previousAmountYen": 23108400000
+     },
+     {
+      "jikouName": "住宅防災事業に必要な経費",
+      "previousAmountYen": 300000000
+     },
+     {
+      "jikouName": "良好で緑豊かな都市空間の形成等のための国営公園等事業に必要な経費",
+      "previousAmountYen": 1903979000
+     },
+     {
+      "jikouName": "上下水道一体効率化・基盤強化推進事業に必要な経費",
+      "previousAmountYen": 200000000
+     },
+     {
+      "jikouName": "水道施設整備に必要な経費",
+      "previousAmountYen": 2820000000
+     },
+     {
+      "jikouName": "下水道防災事業に必要な経費",
+      "previousAmountYen": 2212000000
+     },
+     {
+      "jikouName": "廃棄物処理施設整備に必要な経費",
+      "previousAmountYen": 9455000000
+     },
+     {
+      "jikouName": "農業農村整備事業に必要な経費",
+      "previousAmountYen": 124356068000
+     },
+     {
+      "jikouName": "農山漁村地域整備事業に必要な経費",
+      "previousAmountYen": 8904000000
+     },
+     {
+      "jikouName": "森林整備事業に必要な経費",
+      "previousAmountYen": 11524000000
+     },
+     {
+      "jikouName": "水産基盤整備に必要な経費",
+      "previousAmountYen": 37931000000
+     },
+     {
+      "jikouName": "社会資本総合整備事業に必要な経費",
+      "previousAmountYen": 70070731000
+     },
+     {
+      "jikouName": "社会資本整備円滑化地籍整備事業に必要な経費",
+      "previousAmountYen": 78000000
+     }
+    ]
+   },
+   "E3_mof_fy2024_same_name_records": [
+    {
+     "sectionCode": "017",
+     "sectionName": "下水道事業費",
+     "jikouName": "適正な汚水処理の確保等のための下水道事業に必要な経費",
+     "col4Raw": "45",
+     "previousAmountYen": 16124367000,
+     "amountYen": 12091779000,
+     "page": 879
+    }
+   ],
+   "E3_confirmed_section_in_mof_fy2024": [
+    [
+     "086",
+     "北海道開発事業費"
+    ]
+   ],
+   "E4_request_fy2024_same_name_rows": [
+    {
+     "source": "mlit.go.jp__page__content__001630995",
+     "row_index": "834",
+     "ministry": "国土交通省",
+     "name": "適正な汚水処理の確保等のための下水道事業に必要な経費",
+     "code": "05‑45",
+     "request_no": "26",
+     "prev_amount_yen": null,
+     "page": "200",
+     "confirmed_section": "076 下水道事業費"
+    },
+    {
+     "source": "mlit.go.jp__page__content__001630995",
+     "row_index": "2941",
+     "ministry": "国土交通省",
+     "name": "適正な汚水処理の確保等のための下水道事業に必要な経費",
+     "code": "54‑45",
+     "request_no": "167",
+     "prev_amount_yen": null,
+     "page": "500",
+     "confirmed_section": "763 北海道開発事業費"
+    }
+   ],
+   "E5_flags": {
+    "a1_amount_supports_identity": false,
+    "a1_detail": {
+     "target_prev_yen": null,
+     "sum_of_same_name_request_rows_prev_yen": null,
+     "mof_previousAmountYen": 15834279000
+    },
+    "a2_confirmed_section_exists_in_mof_fy2025_or_fy2024": true,
+    "b1_amount_does_not_support_identity": true,
+    "b2_other_named_mof_record_with_equal_previous_amount": []
+   }
+  },
+  {
+   "target": {
+    "source": "npa.go.jp__policies__budget__r7__gaisanyokyu__ippankaikei",
+    "row_index": "472",
+    "code": "01‑95",
+    "request_no": "15",
+    "page": "55",
+    "ministry": "内閣府",
+    "name": "犯罪被害者等の支援の充実に必要な経費",
+    "confirmed_section": "100 犯罪被害給付費"
+   },
+   "E2_mof_fy2025_record": {
+    "sectionCode": "140",
+    "sectionName": "犯罪被害者等支援推進費",
+    "jikouName": "犯罪被害者等の支援の充実に必要な経費",
+    "col4Raw": "95",
+    "previousAmountYen": 1407409000,
+    "amountYen": 2316588000,
+    "page": 370
+   },
+   "E1_request_fy2025_same_name_rows": [
+    {
+     "source": "npa.go.jp__policies__budget__r7__gaisanyokyu__ippankaikei",
+     "row_index": "472",
+     "ministry": "内閣府",
+     "name": "犯罪被害者等の支援の充実に必要な経費",
+     "code": "01‑95",
+     "request_no": "15",
+     "prev_amount_yen": 1407409000,
+     "page": "55",
+     "confirmed_section": "100 犯罪被害給付費",
+     "prev_status": "UNRESOLVED_SECTION_MISMATCH"
+    }
+   ],
+   "E2_confirmed_section_in_mof_fy2025": {
+    "sections": [],
+    "items": []
+   },
+   "E3_mof_fy2024_same_name_records": [
+    {
+     "sectionCode": "140",
+     "sectionName": "犯罪被害給付費",
+     "jikouName": "犯罪被害者等の支援の充実に必要な経費",
+     "col4Raw": "95",
+     "previousAmountYen": 1585306000,
+     "amountYen": 1407409000,
+     "page": 368
+    }
+   ],
+   "E3_confirmed_section_in_mof_fy2024": [
+    [
+     "140",
+     "犯罪被害給付費"
+    ]
+   ],
+   "E4_request_fy2024_same_name_rows": [
+    {
+     "source": "npa.go.jp__policies__budget__r6__gaisanyokyu__ippankaikei",
+     "row_index": "480",
+     "ministry": "内閣府",
+     "name": "犯罪被害者等の支援の充実に必要な経費",
+     "code": "01‑95",
+     "request_no": "15",
+     "prev_amount_yen": 1223963000,
+     "page": "54",
+     "confirmed_section": "100 犯罪被害給付費"
+    }
+   ],
+   "E5_flags": {
+    "a1_amount_supports_identity": true,
+    "a1_detail": {
+     "target_prev_yen": 1407409000,
+     "sum_of_same_name_request_rows_prev_yen": 1407409000,
+     "mof_previousAmountYen": 1407409000
+    },
+    "a2_confirmed_section_exists_in_mof_fy2025_or_fy2024": true,
+    "b1_amount_does_not_support_identity": false,
+    "b2_other_named_mof_record_with_equal_previous_amount": []
+   }
+  }
+ ]
+}

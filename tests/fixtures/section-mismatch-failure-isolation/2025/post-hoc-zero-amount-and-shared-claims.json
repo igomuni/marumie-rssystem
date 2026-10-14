@@ -1,0 +1,172 @@
+{
+ "scope": "post-hoc descriptive diagnostic; not used for classification or promotion",
+ "inputs": {
+  "tests/fixtures/detail-table-mof-section-match/2025/triple-match.csv": "2be288bc3d6d50f63345d87b58b453a5556fda112114e05845f928d8b8322dc6",
+  "data/work/budget-request-csv/2025/detail-table/output-manifest.json": "0bdeeb372f3fd8450fba35274c4af7994434ddcf2447d6d048f1284ef428a0a7",
+  "script_sha256": "7babfdcc17b2b9794ae15c6b9079979456567b153439eb68c9f02c0aab853e84"
+ },
+ "population": 957,
+ "byStatus": {
+  "AMBIGUOUS_J1_MULTI | triple:1": {
+   "rows": 142,
+   "request_item_is_zero_amount": 1,
+   "request_rows_sharing_the_same_triple(>=2)": 2
+  },
+  "AMBIGUOUS_J1_MULTI | triple:2+": {
+   "rows": 72,
+   "request_item_is_zero_amount": 0,
+   "request_rows_sharing_the_same_triple(>=2)": 72
+  },
+  "K2_SUPPORTED | triple:1": {
+   "rows": 680,
+   "request_item_is_zero_amount": 10,
+   "request_rows_sharing_the_same_triple(>=2)": 8
+  },
+  "UNRESOLVED_J1_NO_CANDIDATE | triple:0": {
+   "rows": 58,
+   "request_item_is_zero_amount": 26,
+   "request_rows_sharing_the_same_triple(>=2)": 4
+  },
+  "UNRESOLVED_SECTION_MISMATCH | triple:0": {
+   "rows": 5,
+   "request_item_is_zero_amount": 4,
+   "request_rows_sharing_the_same_triple(>=2)": 0
+  }
+ },
+ "zeroAmountExamples": {
+  "K2_SUPPORTED | triple:1": [
+   {
+    "source": "meti.go.jp__main__yosangaisan_",
+    "code": "01‑95",
+    "name": "国立研究開発法人日本原子力研究開発機構出資に必要",
+    "section": "国立研究開発法人日本原子力研究開発機構出資"
+   },
+   {
+    "source": "meti.go.jp__main__yosangaisan_",
+    "code": "01‑13",
+    "name": "国立研究開発法人産業技術総合研究所施設整備に必要",
+    "section": "国立研究開発法人産業技術総合研究所施設整備費"
+   },
+   {
+    "source": "meti.go.jp__main__yosangaisan_",
+    "code": "01‑95",
+    "name": "独立行政法人製品評価技術基盤機構施設整備に必要な",
+    "section": "独立行政法人製品評価技術基盤機構施設整備費"
+   },
+   {
+    "source": "meti.go.jp__main__yosangaisan_",
+    "code": "05‑60",
+    "name": "独立行政法人中小企業基盤整備機構出資に必要な経費",
+    "section": "独立行政法人中小企業基盤整備機構出資"
+   },
+   {
+    "source": "mhlw.go.jp__wp__yosan__yosan__",
+    "code": "07‑07",
+    "name": "厚生労働調査研究等の推進に必要な経費",
+    "section": "厚生労働調査研究等推進費"
+   },
+   {
+    "source": "mhlw.go.jp__wp__yosan__yosan__",
+    "code": "05‑06",
+    "name": "独立行政法人国立重度知的障害者総合施設のぞみの園",
+    "section": "独立行政法人国立重度知的障害者総合施設のぞみの園施設整備費"
+   },
+   {
+    "source": "mhlw.go.jp__wp__yosan__yosan__",
+    "code": "05‑07",
+    "name": "国立研究開発法人国立国際医療研究センター施設整備",
+    "section": "国立研究開発法人国立国際医療研究センター施設整備費"
+   },
+   {
+    "source": "mlit.go.jp__page__content__001",
+    "code": "06‑95",
+    "name": "独立行政法人航空大学校施設整備に必要な経費",
+    "section": "独立行政法人航空大学校施設整備費"
+   }
+  ],
+  "UNRESOLVED_J1_NO_CANDIDATE | triple:0": [
+   {
+    "source": "mhlw.go.jp__wp__yosan__yosan__",
+    "code": "01‑07",
+    "name": "原爆死没者追悼平和祈念館施設整備に必要な経費",
+    "section": "原爆死没者追悼平和祈念館施設費"
+   },
+   {
+    "source": "mhlw.go.jp__wp__yosan__yosan__",
+    "code": "10‑05",
+    "name": "育児休業給付金の財源の労働保険特別会計雇用勘定へ",
+    "section": "失業等給付費等労働保険特別会計へ繰入"
+   },
+   {
+    "source": "mhlw.go.jp__wp__yosan__yosan__",
+    "code": "15‑06",
+    "name": "補正用",
+    "section": "社会福祉施設整備費"
+   },
+   {
+    "source": "mhlw.go.jp__wp__yosan__yosan__",
+    "code": "10‑06",
+    "name": "東日本大震災復旧・復興に係る社会福祉施設等施設整",
+    "section": "東日本大震災復旧・復興社会福祉施設整備費"
+   },
+   {
+    "source": "mhlw.go.jp__wp__yosan__yosan__",
+    "code": "10‑06",
+    "name": "独立行政法人福祉医療機構出資に必要な経費",
+    "section": "独立行政法人福祉医療機構出資"
+   },
+   {
+    "source": "mhlw.go.jp__wp__yosan__yosan__",
+    "code": "05‑06",
+    "name": "公的年金制度の適正な事業運営に必要な経費",
+    "section": "公的年金制度等運営諸費"
+   },
+   {
+    "source": "mhlw.go.jp__wp__yosan__yosan__",
+    "code": "01‑13",
+    "name": "科学技術イノベーション創造に必要な経費",
+    "section": "科学技術イノベーション創造推進費"
+   },
+   {
+    "source": "mhlw.go.jp__wp__yosan__yosan__",
+    "code": "10‑06",
+    "name": "国立光明寮に必要な経費",
+    "section": "国立障害者リハビリテーションセンター共通費"
+   }
+  ],
+  "UNRESOLVED_SECTION_MISMATCH | triple:0": [
+   {
+    "source": "mlit.go.jp__page__content__001",
+    "code": "47‑43",
+    "name": "港湾環境整備事業に必要な経費",
+    "section": "離島振興事業費"
+   },
+   {
+    "source": "mlit.go.jp__page__content__001",
+    "code": "40‑43",
+    "name": "港湾環境整備事業に必要な経費",
+    "section": "北海道開発事業費"
+   },
+   {
+    "source": "mlit.go.jp__page__content__001",
+    "code": "52‑45",
+    "name": "都市公園防災事業に必要な経費",
+    "section": "北海道開発事業費"
+   },
+   {
+    "source": "mlit.go.jp__page__content__001",
+    "code": "54‑45",
+    "name": "適正な汚水処理の確保等のための下水道事業に必要な",
+    "section": "北海道開発事業費"
+   }
+  ],
+  "AMBIGUOUS_J1_MULTI | triple:1": [
+   {
+    "source": "mlit.go.jp__page__content__001",
+    "code": "01‑95",
+    "name": "情報化の推進に必要な経費",
+    "section": "情報化推進費"
+   }
+  ]
+ }
+}
