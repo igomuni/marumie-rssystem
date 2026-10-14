@@ -59,6 +59,7 @@ next-env.d.ts
 
 # raw CSV data (939MB) and build artifacts (houjin.db etc.)
 /data/
+/data
 
 # IDE
 .vscode/
