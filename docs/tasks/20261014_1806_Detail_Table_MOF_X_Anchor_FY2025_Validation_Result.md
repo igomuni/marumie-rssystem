@@ -2,7 +2,7 @@
 
 状態: 実行済み（事前登録 `e748b66` の契約どおり、1回だけ実行）。結論: **GO。** primary（J1 単一・immediate X なし・anchor あり）は FY2025 で `sectionName == X_anchor` が **306/311（98.39%、Wilson 95% 区間 96.29〜99.31%）** となり、事前に決めた 95% 以上（評価可能な行数 50 以上）を満たした。事前の契約により、K2（anchor carry による項の持ち越し）を採用してよい。
 
-事前登録: `docs/tasks/20261014_1810_Detail_Table_MOF_X_Anchor_FY2025_Validation_Preregistration.md`。下限の 50 はユーザーが実行前に承認した。
+事前登録: `docs/tasks/20261014_1806_Detail_Table_MOF_X_Anchor_FY2025_Validation_Preregistration.md`。下限の 50 はユーザーが実行前に承認した。
 
 ## 実行
 - `python3 -I scripts/research/validate-detail-table-mof-x-anchor.py 2025 tests/fixtures/detail-table-mof-x-anchor-validation/2025/result.json` を1回だけ実行した（exit 0。入力 hash の照合は通過）。
