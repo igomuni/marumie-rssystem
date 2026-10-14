@@ -1,0 +1,198 @@
+{
+ "fiscalYear": 2025,
+ "inputs": {
+  "detailOutputManifest": "0bdeeb372f3fd8450fba35274c4af7994434ddcf2447d6d048f1284ef428a0a7",
+  "sectionCandidates": "cd5ea2aeae50c36a9bd3811b249e7037236df44e48afb724166d6540e4802d86",
+  "script_sha256": "aa265a75d76c939a8686aca4770af28fa986e46b683e7b331d9dae0be8fa5470"
+ },
+ "detailRows": 1869,
+ "bothHaveSection": 1489,
+ "agreeCodeAndName": 1477,
+ "byScopeAndOutcome": {
+  "general | toc:none | X:yes": 317,
+  "general | toc:yes | anchor:agree": 365,
+  "general | toc:yes | anchor:differ": 8,
+  "general | toc:yes | immediate:agree": 592,
+  "general | toc:yes | immediate:code_only": 1,
+  "general | toc:yes | immediate:differ": 2,
+  "no_context | toc:none | X:none": 3,
+  "no_context | toc:none | X:yes": 5,
+  "no_context | toc:yes | X:none": 14,
+  "no_context | toc:yes | anchor:agree": 32,
+  "no_context | toc:yes | immediate:agree": 47,
+  "special | toc:none | X:yes": 41,
+  "special | toc:yes | anchor:agree": 145,
+  "special | toc:yes | immediate:agree": 296,
+  "special | toc:yes | immediate:differ": 1
+ },
+ "disagreements": [
+  {
+   "source": "env.go.jp__content__000248527",
+   "detail_row_index": "257",
+   "item": "11‑13 気候変動の影響への適応策に関する調査研究に必要な経費",
+   "toc_total": [
+    "017",
+    "地球温暖化対策推進費"
+   ],
+   "detail_x": [
+    "002",
+    "「デコ活」（脱炭素につながる新しい豊かな暮らしを創る国民運動）推進事業"
+   ],
+   "x_source": "immediate"
+  },
+  {
+   "source": "maff.go.jp__j__budget__attach__pdf__240902-6",
+   "detail_row_index": "434",
+   "item": "01‑46 東日本大震災復興に係る東日本大震災復興特別会計へ繰入れに必要な経費",
+   "toc_total": [
+    "095",
+    "東日本大震災復興土地改良事業費負担金等収入一般会計へ繰入"
+   ],
+   "detail_x": [
+    "097",
+    "東日本大震災復興土地改良事業費負担金等収入東日本大震災復興特別会計へ繰入"
+   ],
+   "x_source": "immediate"
+  },
+  {
+   "source": "mhlw.go.jp__wp__yosan__yosan__25syokan__dl__05-1b-01",
+   "detail_row_index": "943",
+   "item": "30‑95 失業中の退職政府職員等に対する退職手当に必要な経費",
+   "toc_total": [
+    "001",
+    "厚生労働本省共通費"
+   ],
+   "detail_x": [
+    "006",
+    "地方調査費"
+   ],
+   "x_source": "immediate"
+  },
+  {
+   "source": "mhlw.go.jp__wp__yosan__yosan__25syokan__dl__05-1b-01",
+   "detail_row_index": "946",
+   "item": "35‑95 補充費（義務）",
+   "toc_total": [
+    "001",
+    "厚生労働本省共通費"
+   ],
+   "detail_x": [
+    "006",
+    "地方調査費"
+   ],
+   "x_source": "anchor"
+  },
+  {
+   "source": "mhlw.go.jp__wp__yosan__yosan__25syokan__dl__05-1b-01",
+   "detail_row_index": "948",
+   "item": "37‑95 補充費（裁量）",
+   "toc_total": [
+    "001",
+    "厚生労働本省共通費"
+   ],
+   "detail_x": [
+    "006",
+    "地方調査費"
+   ],
+   "x_source": "anchor"
+  },
+  {
+   "source": "mhlw.go.jp__wp__yosan__yosan__25syokan__dl__05-1b-01",
+   "detail_row_index": "950",
+   "item": "39‑06 消費税率の引上げに伴う補充費",
+   "toc_total": [
+    "001",
+    "厚生労働本省共通費"
+   ],
+   "detail_x": [
+    "006",
+    "地方調査費"
+   ],
+   "x_source": "anchor"
+  },
+  {
+   "source": "mhlw.go.jp__wp__yosan__yosan__25syokan__dl__05-1b-01",
+   "detail_row_index": "952",
+   "item": "40‑06 コロナ対策に伴う補充費",
+   "toc_total": [
+    "001",
+    "厚生労働本省共通費"
+   ],
+   "detail_x": [
+    "006",
+    "地方調査費"
+   ],
+   "x_source": "anchor"
+  },
+  {
+   "source": "mhlw.go.jp__wp__yosan__yosan__25syokan__dl__05-1b-01",
+   "detail_row_index": "956",
+   "item": "42‑06 物価高騰対策等を含めた重要な政策に伴う補充費",
+   "toc_total": [
+    "001",
+    "厚生労働本省共通費"
+   ],
+   "detail_x": [
+    "006",
+    "地方調査費"
+   ],
+   "x_source": "anchor"
+  },
+  {
+   "source": "mhlw.go.jp__wp__yosan__yosan__25syokan__dl__05-1b-01",
+   "detail_row_index": "958",
+   "item": "43‑06 物価高騰対策、賃上げ促進環境整備対応等を含めた重要な政策に伴う補充費",
+   "toc_total": [
+    "001",
+    "厚生労働本省共通費"
+   ],
+   "detail_x": [
+    "006",
+    "地方調査費"
+   ],
+   "x_source": "anchor"
+  },
+  {
+   "source": "mhlw.go.jp__wp__yosan__yosan__25syokan__dl__05-1b-01",
+   "detail_row_index": "960",
+   "item": "50‑06 防災・減災、国土強靱化のための５か年加速化対策に伴う補充費",
+   "toc_total": [
+    "001",
+    "厚生労働本省共通費"
+   ],
+   "detail_x": [
+    "006",
+    "地方調査費"
+   ],
+   "x_source": "anchor"
+  },
+  {
+   "source": "mhlw.go.jp__wp__yosan__yosan__25syokan__dl__05-1b-01",
+   "detail_row_index": "962",
+   "item": "60‑06 こども・子育て支援加速化プランに伴う補充費",
+   "toc_total": [
+    "001",
+    "厚生労働本省共通費"
+   ],
+   "detail_x": [
+    "006",
+    "地方調査費"
+   ],
+   "x_source": "anchor"
+  },
+  {
+   "source": "mlit.go.jp__page__content__001762903",
+   "detail_row_index": "8709",
+   "item": "11‑13 気象情報の高度化のための技術開発に必要な経費",
+   "toc_total": [
+    "040",
+    "観測予報等業務費"
+   ],
+   "detail_x": [
+    "040",
+    "次期静止気象衛星の整備"
+   ],
+   "x_source": "immediate"
+  }
+ ]
+}
