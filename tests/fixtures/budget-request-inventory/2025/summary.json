@@ -1,0 +1,145 @@
+{
+  "detailTable": {
+    "detailRowsByScope": {
+      "general": 1285,
+      "no_context": 101,
+      "special": 483
+    },
+    "rows": 53303,
+    "rowsByType": {
+      "CODE1": 29,
+      "CODE2": 1943,
+      "CODE3": 12147,
+      "CODE_5_4_2_4": 27748,
+      "CODE_NN_NNNN": 9456,
+      "CONTEXT": 111,
+      "DETAIL": 1869
+    },
+    "sources": 123
+  },
+  "fiscalYear": 2025,
+  "funnel": {
+    "detail_rows_section_agrees_with_X": 1477,
+    "detail_rows_section_disagrees_with_X": 12,
+    "detail_rows_with_toc_total_section": 1503,
+    "detail_table_DETAIL_rows": 1869,
+    "sectionStatus": {
+      "CANDIDATE_CSV_CONSISTENT": 1503,
+      "NO_SAME_SOURCE_TOC": 1,
+      "NO_SAME_SOURCE_TOTAL": 304,
+      "NO_TOC_ITEM": 55,
+      "SECTION_NOT_UNIQUE": 4,
+      "TOC_TOTAL_PAGE_CONFLICT": 2
+    },
+    "toc_item_rows": 1643,
+    "total_table_DETAIL_rows": 1833
+  },
+  "inputs": {
+    "data/normalized/mof/fy2025/budget-jikou-v1-canonical.jsonl": "9c0a878b7ed5552cfb0786e7d9501e97937c9295e0210a544ab98a421ce79a38",
+    "data/work/budget-request-csv/2025/detail-table-mof-match/output-manifest.json": "5b17a565e3a3f2666edf6399a547ad5f61043385d9e90b35f833921c2b0956a1",
+    "data/work/budget-request-csv/2025/detail-table/output-manifest.json": "0bdeeb372f3fd8450fba35274c4af7994434ddcf2447d6d048f1284ef428a0a7",
+    "data/work/budget-request-csv/2025/toc/output-hashes.json": "481e44e4e9947106f3dc6dec89d254cdafdbebbbebff06cfe033022977175f51",
+    "data/work/budget-request-csv/2025/total-table/output-manifest.json": "9fb163aee8748157d6d43fd98cf00c480771ae55eb3beb3a907f959d86be01ba",
+    "public/data/mof-jikou-2025.json.gz": "634a4166e84590dd1320691519f6a2bc4b5212d613c5fdbce1cb6a382ba686a5",
+    "script_sha256": "c1371114d78ad3e4d1ed48cbeb20154d97e594f2af0d0e14b2e3bb6a6fe23cb8",
+    "tests/fixtures/detail-table-mof-section-match/2025/triple-match.csv": "2be288bc3d6d50f63345d87b58b453a5556fda112114e05845f928d8b8322dc6",
+    "tests/fixtures/detail-table-toc-total-sections/2025/section-candidates.csv": "cd5ea2aeae50c36a9bd3811b249e7037236df44e48afb724166d6540e4802d86"
+  },
+  "mof": {
+    "general_initial_budget_canonical": {
+      "ministries": 18,
+      "organizations(ministry,organization)": 94,
+      "records(jikou)": 1287,
+      "sections(ministry,name)": 776,
+      "sections(ministry,organization,code,name)": 806
+    },
+    "moku": "not included (no FY2025 dataset in this worktree)",
+    "v1_items_by_budgetType_and_accountType": {
+      "当初予算 | agency": 48,
+      "当初予算 | general": 1287,
+      "当初予算 | special": 365,
+      "補正予算（第1号） | general": 1051,
+      "補正予算（第1号） | special": 139
+    }
+  },
+  "sameNameItems": {
+    "mof_distinct_ministry_name_by_records": {
+      "1": 1055,
+      "2": 94,
+      "3+": 14
+    },
+    "request_general_distinct_ministry_name_by_rows": {
+      "1": 961,
+      "2": 101,
+      "3+": 22
+    },
+    "request_general_rows_by_same_name_rows": {
+      "1": 961,
+      "2": 202,
+      "3+": 122
+    }
+  },
+  "toc": {
+    "kou": {
+      "rows": 1062,
+      "unique_code_name": 930,
+      "unique_source_ctx_code_name": 1062
+    },
+    "pdfsWithoutToc": 76,
+    "rows": 3018,
+    "rowsByRole": {
+      "other": 150,
+      "事項": 1643,
+      "会計": 30,
+      "勘定": 31,
+      "所管": 13,
+      "組織": 89,
+      "項": 1062
+    },
+    "sources": 55
+  },
+  "totalTable": {
+    "rows": 3752,
+    "rowsByType": {
+      "CODE3": 1693,
+      "DETAIL": 1833,
+      "HIER": 80,
+      "TOTAL": 146
+    },
+    "sources": 61
+  },
+  "zeroAmountItems": {
+    "byScope": {
+      "general": {
+        "items": 1285,
+        "zero": 58
+      },
+      "no_context": {
+        "items": 101,
+        "zero": 2
+      },
+      "special": {
+        "items": 483,
+        "zero": 24
+      }
+    },
+    "generalByK2Status": {
+      "AMBIGUOUS_J1_MULTI": {
+        "items": 224,
+        "zero": 1
+      },
+      "K2_SUPPORTED": {
+        "items": 976,
+        "zero": 17
+      },
+      "UNRESOLVED_J1_NO_CANDIDATE": {
+        "items": 75,
+        "zero": 36
+      },
+      "UNRESOLVED_SECTION_MISMATCH": {
+        "items": 10,
+        "zero": 4
+      }
+    }
+  }
+}
