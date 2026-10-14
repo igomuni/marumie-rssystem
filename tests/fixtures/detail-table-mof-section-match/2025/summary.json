@@ -1,0 +1,48 @@
+{
+  "fiscalYear": 2025,
+  "inputs": {
+    "data/work/budget-request-csv/2025/detail-table/output-manifest.json": "0bdeeb372f3fd8450fba35274c4af7994434ddcf2447d6d048f1284ef428a0a7",
+    "data/work/budget-request-csv/2025/detail-table-mof-match/output-manifest.json": "5b17a565e3a3f2666edf6399a547ad5f61043385d9e90b35f833921c2b0956a1",
+    "tests/fixtures/detail-table-toc-total-sections/2025/section-candidates.csv": "cd5ea2aeae50c36a9bd3811b249e7037236df44e48afb724166d6540e4802d86",
+    "data/normalized/mof/fy2025/budget-jikou-v1-canonical.jsonl": "9c0a878b7ed5552cfb0786e7d9501e97937c9295e0210a544ab98a421ce79a38",
+    "script_sha256": "5f4d845ebcb2898206b39c43cc3958a7e400d65cd8b5228f69ec005037e61eb0"
+  },
+  "population": 957,
+  "excluded": {
+    "OUT_OF_SCOPE_NO_CONTEXT": 101,
+    "OUT_OF_SCOPE_SPECIAL_ACCOUNT": 483,
+    "X_disagrees_with_toc_total": 11,
+    "no_section_from_toc_total": 317
+  },
+  "byPrevStatusAndTripleCandidates": {
+    "AMBIGUOUS_J1_MULTI | 1": 142,
+    "AMBIGUOUS_J1_MULTI | 2+": 72,
+    "K2_SUPPORTED | 1": 680,
+    "UNRESOLVED_J1_NO_CANDIDATE | 0": 58,
+    "UNRESOLVED_SECTION_MISMATCH | 0": 5
+  },
+  "byPrevStatusXSourceAndTripleCandidates": {
+    "AMBIGUOUS_J1_MULTI | anchor | 1": 91,
+    "AMBIGUOUS_J1_MULTI | anchor | 2+": 33,
+    "AMBIGUOUS_J1_MULTI | immediate | 1": 51,
+    "AMBIGUOUS_J1_MULTI | immediate | 2+": 39,
+    "K2_SUPPORTED | anchor | 1": 216,
+    "K2_SUPPORTED | immediate | 1": 464,
+    "UNRESOLVED_J1_NO_CANDIDATE | anchor | 0": 21,
+    "UNRESOLVED_J1_NO_CANDIDATE | immediate | 0": 37,
+    "UNRESOLVED_SECTION_MISMATCH | anchor | 0": 4,
+    "UNRESOLVED_SECTION_MISMATCH | immediate | 0": 1
+  },
+  "j1MultiRowsWithOneK2Candidate": {
+    "total": 147,
+    "inPopulation(section independently confirmed)": 142,
+    "notInPopulation": 5
+  },
+  "acceptance": {
+    "k2SupportedRowsInPopulation": 680,
+    "k2SupportedViolations": [],
+    "candidateCountEqualsPrevK2Candidates": true,
+    "identityViolations": []
+  },
+  "promotion": "none (J1-multi rows stay AMBIGUOUS even when the triple key returns one candidate)"
+}
