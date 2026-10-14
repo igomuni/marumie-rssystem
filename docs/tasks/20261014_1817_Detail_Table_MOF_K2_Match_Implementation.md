@@ -24,3 +24,11 @@
 
 ## 実装
 - `scripts/pipeline-v2/lib/budget-request-detail-table-mof-match.ts`（純関数）とテスト、runner `scripts/pipeline-v2/build-budget-request-detail-table-mof-match.ts`、仕様書 `docs/budget-request-detail-table-mof-match.md`。
+
+## 結果（実装後に追記）
+- 合格条件どおり、件数は validation と完全に一致した（契約は実装前に commit `f892eb9` で固定）。
+  - FY2025: K2_SUPPORTED 976（immediate 670 / anchor 306）、SECTION_MISMATCH 10、NO_X 0、AMBIGUOUS 224（immediate 1→54・2+→43、anchor 1→93・2+→34）、NO_CANDIDATE 75、対象外 101・483。
+  - FY2024: K2_SUPPORTED 687（471 / 216）、SECTION_MISMATCH 7、NO_X 0、AMBIGUOUS 215（57・37・88・33）、NO_CANDIDATE 73、対象外 213・446。
+- 決定性: FY2025 を2回実行し、出力ディレクトリは同一。output-manifest の SHA-256 は FY2025 が `5b17a565e3a3f266…`、FY2024 が `ea9c700694995bbf…`（出力は git 管理外）。
+- テスト: 新しい単体テスト9件が通過（immediate / anchor carry / 不一致で fallback しない / X なし / J1 複数は1候補でも AMBIGUOUS / 正規化しない / 対象外の4理由 / CSV）。型チェックも通過。
+- 仕様は `docs/budget-request-detail-table-mof-match.md` に書いた。
