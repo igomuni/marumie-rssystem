@@ -11,7 +11,8 @@
  * FY2024にあって、FY2025の掲載ページで確認できていないもの（欠落として残す。後から都合よく足さない）:
  *   - 衆議院（概要のみで歳出概算要求書なし）、参議院（掲載ページ404）、内閣官房（掲載ページ404）
  *   - こども家庭庁の年金特別会計、法務省の復興特別会計
- * 公害等調整委員会（MOF一覧）に対し、jcrc.go.jp はFY2024 manifestでカジノ管理委員会に対応していた。要人手確認。
+ * jcrc.go.jp はMOF一覧の「カジノ管理委員会」のリンク（publisherAuthority修正済み。調査依頼文の「公害等調整委員会」は依頼側の誤記）。
+ * 総務省の特別会計リンクは、PDF本文（22頁）の表題「9502 交付税及び譲与税配付金特別会計」で会計を確認済み。
  */
 import type {
   BudgetRequestFile,
@@ -789,7 +790,7 @@ export const FY2025_BUDGET_REQUEST_MANIFEST: BudgetRequestManifest = {
         "ページ本文の「概算要求書」リンクを確認。概要、重点施策、要望一覧、政策評価調書は対象外。 / 曖昧: PDFリンクのページ上表記は年度を含まない「概算要求書」。令和7年度予算関連資料の並びにあるためFY2025として採用。",
     },
     {
-      publisherAuthority: "(jcrc.go.jp)",
+      publisherAuthority: "カジノ管理委員会",
       publisherDomain: "jcrc.go.jp",
       landingPageUrl: "https://www.jcrc.go.jp/about/budget.html",
       logicalDocuments: [
@@ -810,7 +811,7 @@ export const FY2025_BUDGET_REQUEST_MANIFEST: BudgetRequestManifest = {
         },
       ],
       notes:
-        "FY2025欄の「歳出概算要求書」リンクを確認。概要、要望一覧、政策評価調書は対象外。 / 曖昧: 担当表ではpublisherを公害等調整委員会と記載しているが、jcrc.go.jpとFY2024 manifestの対応先はカジノ管理委員会。ドメイン上の表記・所管名の同一性は人間確認を残す。",
+        "FY2025欄の「歳出概算要求書」リンクを確認。概要、要望一覧、政策評価調書は対象外。 / 補足: 調査依頼でpublisherを公害等調整委員会と誤記していた。MOF一覧のリンク名・FY2024 manifestとも「カジノ管理委員会」。",
     },
     {
       publisherAuthority: "金融庁",
@@ -979,7 +980,7 @@ export const FY2025_BUDGET_REQUEST_MANIFEST: BudgetRequestManifest = {
           account: "交付税及び譲与税配付金特別会計",
           documentType: "budget-request-expenditure",
           notes:
-            "総務省の掲載リンク名は単に「特別会計」。会計の対応は暫定（anchor textで会計を分類しない）",
+            "総務省の掲載リンク名は単に「特別会計」。会計はPDF本文の表題「9502 交付税及び譲与税配付金特別会計」で確認済み（anchor textで会計を分類しない）",
           files: [
             file(
               "https://www.soumu.go.jp/main_content/000967302.pdf",
@@ -1005,7 +1006,7 @@ export const FY2025_BUDGET_REQUEST_MANIFEST: BudgetRequestManifest = {
         },
       ],
       notes:
-        "MOFリンク20（総務省、https://www.soumu.go.jp/menu_yosan/yosan.html#r7）から到達した令和7年度概算要求書ページ。掲載HTMLをShift_JISとして確認。特別会計のリンク見出しは会計名を特定せず『特別会計』のため、FY2024 manifestの交付税及び譲与税配付金特別会計との対応付けは暫定。 / 曖昧: 『特別会計』の掲載リンクがどの会計を指すかはページ上の表記だけでは特定できず、FY2024 manifestで同省が持つ交付税及び譲与税配付金特別会計を対応先として暫定記載。",
+        "MOFリンク20（総務省、https://www.soumu.go.jp/menu_yosan/yosan.html#r7）から到達した令和7年度概算要求書ページ。掲載HTMLをShift_JISとして確認。特別会計のリンク見出しは会計名を特定せず『特別会計』のため、PDF本文の表題で交付税及び譲与税配付金特別会計と確認。 / 確認: 特別会計リンクのPDF本文（22頁）の表題が「9502 交付税及び譲与税配付金特別会計」であることを確認した。",
     },
     {
       publisherAuthority: "法務省",
