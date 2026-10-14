@@ -100,6 +100,8 @@ normalized/derivedの全レコードは`provenance`（`domain`・`dataset`・`ye
 
 **manifest**: `scripts/pipeline-v2/lib/fy2024-budget-request-manifest.ts`（型・validationは `budget-request-manifest.ts`）。人間確認済みURLを固定したもので、URLの推測・自動探索はしない。構造は publisher → logical document（1つの概算要求書）→ physical files（N本のPDF）。皇室費/宮内庁、国会所管等はpublisherと別に `logicalAuthority`/`budgetJurisdiction` で保持する。FY2024は 32 source / 62 logical document / 82 PDF + reference 1 = **83 target**。`verificationStatus` は調査時の確認度で、実取得の成否とは別。manifest未定義の年度はエラー。
 
+**FY2025**: `fy2025-budget-request-manifest.ts`（候補の初版。財務省の29リンクの掲載ページに実際に現れたPDFだけを拾い、先頭bytesが%PDFであることまで確認。27 source / 114 PDF、うちbot遮断でmanual-requiredが8）。FY2024にあって掲載ページで確認できなかったもの（衆議院・参議院・内閣官房、こども家庭庁の年金特別会計、法務省の復興特会）は欠落として残している（manifestのheader参照）。別年度のvalidation（FY2024で作った規則を無変更で適用）の入力であり、取得結果で後から対象集合を変えない。
+
 ```bash
 npm run pipeline:v2:download:budget-requests -- 2024             # 取得
 npm run pipeline:v2:download:budget-requests -- 2024 --dry-run   # network・書き込みなしでtargetと保存先を表示
