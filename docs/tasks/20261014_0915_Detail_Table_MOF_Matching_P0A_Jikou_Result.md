@@ -1,6 +1,6 @@
 # 明細表 ↔ MOF 突合 P0-A の結果（`budget-jikou`、exact キー、記述的）
 
-状態: 実行済み（事前登録 commit `4f0bf15` の契約どおり）。**閾値なし、記述のみ。** 結論: eligible の DETAIL 982行のうち、**J1（所管＋名称）で候補が1件のものが694行（70.7%）、複数候補215行（21.9%）、候補なし73行（7.4%）。** 候補1件の694行すべてで、DETAIL の末尾2桁が `col4Raw` と exact 一致した（K3 の診断）。一致は「同一事項」の確定ではなく、exact な文字列の重なりの測定。
+状態: 実行済み（事前登録 commit `8cb7cfc`（#447 マージ後の rebase 前は `4f0bf15`） の契約どおり）。**閾値なし、記述のみ。** 結論: eligible の DETAIL 982行のうち、**J1（所管＋名称）で候補が1件のものが694行（70.7%）、複数候補215行（21.9%）、候補なし73行（7.4%）。** 候補1件の694行すべてで、DETAIL の末尾2桁が `col4Raw` と exact 一致した（K3 の診断）。一致は「同一事項」の確定ではなく、exact な文字列の重なりの測定。
 再現: `python3 -I scripts/research/measure-detail-table-mof-jikou-exact.py`（2回実行で一致、出力 SHA-256 `557d7d45…94c7`）。
 入力の固定（結果を見た後の provenance hardening。J0/J1/K3 のロジックは不変で、再実行した出力は同一）: `budget-jikou.jsonl` SHA-256 `a63f5050…ef7e`、`output-manifest.json` SHA-256 `7989885b…226e`、実際に読む `sources/*.csv` 73本がmanifest記載のhashと一致すること。違えばSTOP。
 
