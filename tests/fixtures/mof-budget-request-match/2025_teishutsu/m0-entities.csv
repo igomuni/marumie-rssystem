@@ -70,7 +70,7 @@ cas.go.jp__jp__yosan__pdf__r7_07,context,05 内閣所管(副長官補（副長�
 cas.go.jp__jp__yosan__pdf__r7_08,context,05 内閣所管(副長官補（危機管理）),内閣,内閣,MATCHED,general
 cas.go.jp__jp__yosan__pdf__r7_09,context,05 内閣所管(内閣官房（内閣広報室）),内閣,内閣,MATCHED,general
 cas.go.jp__jp__yosan__pdf__r7_10,context,05 内閣所管(内閣情報調査室（内閣情報調査室）),内閣,内閣,MATCHED,general
-cas.go.jp__jp__yosan__pdf__r7_11,context,,,,OUT_OF_SCOPE,no_context
+cas.go.jp__jp__yosan__pdf__r7_11,context,05 内閣所管(内閣情報調査室（衛星情報センター）),内閣,内閣,MATCHED,general
 cas.go.jp__jp__yosan__pdf__r7_12,context,05 内閣所管（内閣サイバーセキュリティセンター）,内閣,内閣,MATCHED,general
 cas.go.jp__jp__yosan__pdf__r7_13,context,05 内閣所管（内閣人事局）,内閣,内閣,MATCHED,general
 cas.go.jp__jp__yosan__pdf__r7_14,context,05 内閣所管（国家安全保障局）,内閣,内閣,MATCHED,general
@@ -107,14 +107,14 @@ fsa.go.jp__common__budget__yosan__7youkyuu-2__01,context,19 内閣府所管(金�
 fsa.go.jp__common__budget__yosan__7youkyuu-2__01,toc:組織,100 金融庁,金融庁,金融庁,MATCHED,
 jbaudit.go.jp__jbaudit__bud_clo__bud__pdf__r07__20240904_02,context,04 会計検査院所管,会計検査院,会計検査院,MATCHED,general
 jbaudit.go.jp__jbaudit__bud_clo__bud__pdf__r07__20240904_02,toc:組織,010 会計検査院,会計検査院,会計検査院,MATCHED,
-jcrc.go.jp__content__000002243,context,,,,OUT_OF_SCOPE,no_context
-jcrc.go.jp__content__000002243,toc:組織,067 カジノ管理委員会,カジノ管理委員会,,OUT_OF_SCOPE,no_context
+jcrc.go.jp__content__000002243,context,19 内閣府所管（カジノ管理委員会）,内閣府,内閣府,MATCHED,general
+jcrc.go.jp__content__000002243,toc:組織,067 カジノ管理委員会,カジノ管理委員会,カジノ管理委員会,MATCHED,
 jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r7__r7sandanhyou,context,19 内閣府所管(公正取引委員会（公正取引委員会）),内閣府,内閣府,MATCHED,general
 jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r7__r7sandanhyou,toc:組織,065 公正取引委員会,公正取引委員会,公正取引委員会,MATCHED,
 jinji.go.jp__content__000012445,context,05 内閣所管(人事院（人事院）),内閣,内閣,MATCHED,general
 jinji.go.jp__content__000012445,toc:組織,030 人事院,人事院,人事院,MATCHED,
-kunaicho.go.jp__kunaicho__kunaicho__pdf__r07-02,context,,,,OUT_OF_SCOPE,no_context
-kunaicho.go.jp__kunaicho__kunaicho__pdf__r07-02,toc:組織,010 皇室費,皇室費,,OUT_OF_SCOPE,no_context
+kunaicho.go.jp__kunaicho__kunaicho__pdf__r07-02,context,01 皇室費所管(皇室費（皇室費）),皇室費,皇室費,MATCHED,general
+kunaicho.go.jp__kunaicho__kunaicho__pdf__r07-02,toc:組織,010 皇室費,皇室費,皇室費,MATCHED,
 kunaicho.go.jp__kunaicho__kunaicho__pdf__r07-03,context,19 内閣府所管（宮内庁）,内閣府,内閣府,MATCHED,general
 maff.go.jp__j__budget__attach__pdf__240902-2,context,26 農林水産省所管,農林水産省,農林水産省,MATCHED,general
 maff.go.jp__j__budget__attach__pdf__240902-2,toc:組織,010 農林水産本省,農林水産本省,農林水産本省,MATCHED,
@@ -219,32 +219,32 @@ mod.go.jp__j__budget__gaisan__r7__gaisanyoukyu,context,30 防衛省所管（防�
 mod.go.jp__j__budget__gaisan__r7__gaisanyoukyu,toc:組織,010 防衛本省,防衛本省,防衛本省,MATCHED,
 mod.go.jp__j__budget__gaisan__r7__gaisanyoukyu,toc:組織,015 地方防衛局,地方防衛局,地方防衛局,MATCHED,
 mod.go.jp__j__budget__gaisan__r7__gaisanyoukyu,toc:組織,035 防衛装備庁,防衛装備庁,防衛装備庁,MATCHED,
-mof.go.jp__about_mof__mof_budget__budget__fy2025__2025fukkou_2,context,,,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2025__2025fukkou_2,toc:会計,01 東日本大震災復興,東日本大震災復興,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2025__2025fukkou_2,toc:所管,23 財務省,財務省,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2025__2025fukkou_2,toc:組織,010 財務本省,財務本省,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2025__2025fukkou_2,toc:所管,31 復興庁,復興庁,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2025__2025fukkou_2,toc:組織,010 復興庁,復興庁,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2025__2025gaitame_2,context,,,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2025__2025gaitame_2,toc:会計,05 外国為替資金,外国為替資金,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2025__2025ippan_2,context,,,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2025__2025ippan_2,toc:組織,010 財務本省,財務本省,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2025__2025ippan_2,toc:組織,020 財務局,財務局,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2025__2025ippan_2,toc:組織,030 税関,税関,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2025__2025ippan_2,toc:組織,040 国税庁,国税庁,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2025__2025jisinn_2,context,,,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2025__2025jisinn_2,toc:会計,07 地震再保険,地震再保険,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2025__2025kokusaiseirikikinn_2,context,,,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2025__2025kokusaiseirikikinn_2,toc:会計,04 国債整理基金,国債整理基金,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2025__2025tokuzai_2,context,,,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2025__2025tokuzai_2,toc:会計,08 財政投融資,財政投融資,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2025__2025tokuzai_2,toc:勘定,3 特定国有財産整備勘定,特定国有財産整備勘定,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2025__2025tousi_2,context,,,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2025__2025tousi_2,toc:会計,08 財政投融資,財政投融資,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2025__2025tousi_2,toc:勘定,2 投資勘定,投資勘定,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2025__2025zaiyuu_2,context,,,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2025__2025zaiyuu_2,toc:会計,08 財政投融資,財政投融資,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2025__2025zaiyuu_2,toc:勘定,1 財政融資資金勘定,財政融資資金勘定,,OUT_OF_SCOPE,no_context
+mof.go.jp__about_mof__mof_budget__budget__fy2025__2025fukkou_2,context,9101 東日本大震災復興特別会計（財務省）,東日本大震災復興,東日本大震災復興,MATCHED,special
+mof.go.jp__about_mof__mof_budget__budget__fy2025__2025fukkou_2,toc:会計,01 東日本大震災復興,東日本大震災復興,東日本大震災復興,MATCHED,
+mof.go.jp__about_mof__mof_budget__budget__fy2025__2025fukkou_2,toc:所管,23 財務省,財務省,,OUT_OF_SCOPE,special_source_has_ministry_label
+mof.go.jp__about_mof__mof_budget__budget__fy2025__2025fukkou_2,toc:組織,010 財務本省,財務本省,,OUT_OF_SCOPE,special_source_has_org_label
+mof.go.jp__about_mof__mof_budget__budget__fy2025__2025fukkou_2,toc:所管,31 復興庁,復興庁,,OUT_OF_SCOPE,special_source_has_ministry_label
+mof.go.jp__about_mof__mof_budget__budget__fy2025__2025fukkou_2,toc:組織,010 復興庁,復興庁,,OUT_OF_SCOPE,special_source_has_org_label
+mof.go.jp__about_mof__mof_budget__budget__fy2025__2025gaitame_2,context,2305 外国為替資金特別会計,外国為替資金,外国為替資金,MATCHED,special
+mof.go.jp__about_mof__mof_budget__budget__fy2025__2025gaitame_2,toc:会計,05 外国為替資金,外国為替資金,外国為替資金,MATCHED,
+mof.go.jp__about_mof__mof_budget__budget__fy2025__2025ippan_2,context,23 財務省所管,財務省,財務省,MATCHED,general
+mof.go.jp__about_mof__mof_budget__budget__fy2025__2025ippan_2,toc:組織,010 財務本省,財務本省,財務本省,MATCHED,
+mof.go.jp__about_mof__mof_budget__budget__fy2025__2025ippan_2,toc:組織,020 財務局,財務局,財務局,MATCHED,
+mof.go.jp__about_mof__mof_budget__budget__fy2025__2025ippan_2,toc:組織,030 税関,税関,税関,MATCHED,
+mof.go.jp__about_mof__mof_budget__budget__fy2025__2025ippan_2,toc:組織,040 国税庁,国税庁,国税庁,MATCHED,
+mof.go.jp__about_mof__mof_budget__budget__fy2025__2025jisinn_2,context,2307 地震再保険特別会計,地震再保険,地震再保険,MATCHED,special
+mof.go.jp__about_mof__mof_budget__budget__fy2025__2025jisinn_2,toc:会計,07 地震再保険,地震再保険,地震再保険,MATCHED,
+mof.go.jp__about_mof__mof_budget__budget__fy2025__2025kokusaiseirikikinn_2,context,2304 国債整理基金特別会計,国債整理基金,国債整理基金,MATCHED,special
+mof.go.jp__about_mof__mof_budget__budget__fy2025__2025kokusaiseirikikinn_2,toc:会計,04 国債整理基金,国債整理基金,国債整理基金,MATCHED,
+mof.go.jp__about_mof__mof_budget__budget__fy2025__2025tokuzai_2,context,9808 財政投融資特別会計（特定国有財産整備勘定）,財政投融資,財政投融資,MATCHED,special
+mof.go.jp__about_mof__mof_budget__budget__fy2025__2025tokuzai_2,toc:会計,08 財政投融資,財政投融資,財政投融資,MATCHED,
+mof.go.jp__about_mof__mof_budget__budget__fy2025__2025tokuzai_2,toc:勘定,3 特定国有財産整備勘定,特定国有財産整備勘定,特定国有財産整備勘定,MATCHED,
+mof.go.jp__about_mof__mof_budget__budget__fy2025__2025tousi_2,context,9808 財政投融資特別会計（投資勘定）,財政投融資,財政投融資,MATCHED,special
+mof.go.jp__about_mof__mof_budget__budget__fy2025__2025tousi_2,toc:会計,08 財政投融資,財政投融資,財政投融資,MATCHED,
+mof.go.jp__about_mof__mof_budget__budget__fy2025__2025tousi_2,toc:勘定,2 投資勘定,投資勘定,投資勘定,MATCHED,
+mof.go.jp__about_mof__mof_budget__budget__fy2025__2025zaiyuu_2,context,9808 財政投融資特別会計（財政融資資金勘定）,財政投融資,財政投融資,MATCHED,special
+mof.go.jp__about_mof__mof_budget__budget__fy2025__2025zaiyuu_2,toc:会計,08 財政投融資,財政投融資,財政投融資,MATCHED,
+mof.go.jp__about_mof__mof_budget__budget__fy2025__2025zaiyuu_2,toc:勘定,1 財政融資資金勘定,財政融資資金勘定,財政融資資金勘定,MATCHED,
 mofa.go.jp__mofaj__files__100718578,context,22 外務省所管,外務省,外務省,MATCHED,general
 mofa.go.jp__mofaj__files__100718578,toc:組織,010 外務本省,外務本省,外務本省,MATCHED,
 mofa.go.jp__mofaj__files__100718578,toc:組織,020 在外公館,在外公館,在外公館,MATCHED,
@@ -258,8 +258,8 @@ moj.go.jp__content__001424470,toc:組織,065 法務局,法務局,法務局,MATCH
 moj.go.jp__content__001424470,toc:組織,075 出入国在留管理庁,出入国在留管理庁,出入国在留管理庁,MATCHED,
 moj.go.jp__content__001424470,toc:組織,080 公安審査委員会,公安審査委員会,公安審査委員会,MATCHED,
 moj.go.jp__content__001424470,toc:組織,090 公安調査庁,公安調査庁,公安調査庁,MATCHED,
-ndl.go.jp__file__aboutus__outline__finances__r07_budgetrequest,context,,,,OUT_OF_SCOPE,no_context
-ndl.go.jp__file__aboutus__outline__finances__r07_budgetrequest,toc:組織,030 国立国会図書館,国立国会図書館,,OUT_OF_SCOPE,no_context
+ndl.go.jp__file__aboutus__outline__finances__r07_budgetrequest,context,02 国会所管（国立国会図書館）,国会,国会,MATCHED,general
+ndl.go.jp__file__aboutus__outline__finances__r07_budgetrequest,toc:組織,030 国立国会図書館,国立国会図書館,国立国会図書館,MATCHED,
 npa.go.jp__policies__budget__r7__gaisanyokyu__hukkoutokubetukikei,context,9101 東日本大震災復興特別会計（警察庁）,東日本大震災復興,東日本大震災復興,MATCHED,special
 npa.go.jp__policies__budget__r7__gaisanyokyu__hukkoutokubetukikei,toc:会計,01 東日本大震災復興,東日本大震災復興,東日本大震災復興,MATCHED,
 npa.go.jp__policies__budget__r7__gaisanyokyu__hukkoutokubetukikei,toc:所管,31 復興庁,復興庁,,OUT_OF_SCOPE,special_source_has_ministry_label

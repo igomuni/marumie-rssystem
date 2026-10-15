@@ -1,8 +1,8 @@
 request_source,level,request_code_name,request_name,mof_key,status,reason
-caa.go.jp__policies__budget__assets__cms_caa205_230914_02,context,,,,OUT_OF_SCOPE,no_context
-caa.go.jp__policies__budget__assets__cms_caa205_230914_02,toc:会計,01 東日本大震災復興,東日本大震災復興,,OUT_OF_SCOPE,no_context
-caa.go.jp__policies__budget__assets__cms_caa205_230914_02,toc:所管,31 復興庁,復興庁,,OUT_OF_SCOPE,no_context
-caa.go.jp__policies__budget__assets__cms_caa205_230914_02,toc:組織,010 復興庁,復興庁,,OUT_OF_SCOPE,no_context
+caa.go.jp__policies__budget__assets__cms_caa205_230914_02,context,9101 東日本大震災復興特別会計（内閣本府等）,東日本大震災復興,東日本大震災復興,MATCHED,special
+caa.go.jp__policies__budget__assets__cms_caa205_230914_02,toc:会計,01 東日本大震災復興,東日本大震災復興,東日本大震災復興,MATCHED,
+caa.go.jp__policies__budget__assets__cms_caa205_230914_02,toc:所管,31 復興庁,復興庁,,OUT_OF_SCOPE,special_source_has_ministry_label
+caa.go.jp__policies__budget__assets__cms_caa205_230914_02,toc:組織,010 復興庁,復興庁,,OUT_OF_SCOPE,special_source_has_org_label
 caa.go.jp__policies__budget__assets__cms_caa205_230914_03,context,19 内閣府所管（消費者庁）,内閣府,内閣府,MATCHED,general
 caa.go.jp__policies__budget__assets__cms_caa205_230914_03,toc:組織,055 消費者庁,消費者庁,消費者庁,MATCHED,
 cao.go.jp__yosan__soshiki__r06__pdf__0,context,,,,OUT_OF_SCOPE,no_context
@@ -56,8 +56,8 @@ env.go.jp__content__000157016,toc:所管,31 復興庁,復興庁,,OUT_OF_SCOPE,sp
 env.go.jp__content__000157016,toc:組織,010 復興庁,復興庁,,OUT_OF_SCOPE,special_source_has_org_label
 jbaudit.go.jp__jbaudit__bud_clo__bud__pdf__r06__20230906_02,context,04 会計検査院所管,会計検査院,会計検査院,MATCHED,general
 jbaudit.go.jp__jbaudit__bud_clo__bud__pdf__r06__20230906_02,toc:組織,010 会計検査院,会計検査院,会計検査院,MATCHED,
-jcrc.go.jp__content__000001746,context,,,,OUT_OF_SCOPE,no_context
-jcrc.go.jp__content__000001746,toc:組織,067 カジノ管理委員会,カジノ管理委員会,,OUT_OF_SCOPE,no_context
+jcrc.go.jp__content__000001746,context,19 内閣府所管（カジノ管理委員会）,内閣府,内閣府,MATCHED,general
+jcrc.go.jp__content__000001746,toc:組織,067 カジノ管理委員会,カジノ管理委員会,カジノ管理委員会,MATCHED,
 jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r6__r6sandanhyou,context,19 内閣府所管(公正取引委員会（公正取引委員会）),内閣府,内閣府,MATCHED,general
 jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r6__r6sandanhyou,toc:組織,065 公正取引委員会,公正取引委員会,公正取引委員会,MATCHED,
 jinji.go.jp__content__900024096,context,05 内閣所管(人事院（人事院）),内閣,内閣,MATCHED,general
@@ -110,11 +110,11 @@ meti.go.jp__main__yosangaisan__fy2024__pdf__ippan_o,toc:組織,040 資源エネ�
 meti.go.jp__main__yosangaisan__fy2024__pdf__ippan_o,toc:組織,060 中小企業庁,中小企業庁,中小企業庁,MATCHED,
 meti.go.jp__main__yosangaisan__fy2024__pdf__tokkyo_o,context,2703 特許特別会計(特許（特許）),特許,特許,MATCHED,special
 meti.go.jp__main__yosangaisan__fy2024__pdf__tokkyo_o,toc:会計,03 特許,特許,特許,MATCHED,
-mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,context,,,,OUT_OF_SCOPE,no_context
-mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,toc:組織,010 文部科学本省,文部科学本省,,OUT_OF_SCOPE,no_context
-mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,toc:組織,020 文部科学本省所轄機関,文部科学本省所轄機関,,OUT_OF_SCOPE,no_context
-mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,toc:組織,030 文化庁,文化庁,,OUT_OF_SCOPE,no_context
-mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,toc:組織,040 スポーツ庁,スポーツ庁,,OUT_OF_SCOPE,no_context
+mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,context,24 文部科学省所管,文部科学省,文部科学省,MATCHED,general
+mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,toc:組織,010 文部科学本省,文部科学本省,文部科学本省,MATCHED,
+mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,toc:組織,020 文部科学本省所轄機関,文部科学本省所轄機関,文部科学本省所轄機関,MATCHED,
+mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,toc:組織,030 文化庁,文化庁,文化庁,MATCHED,
+mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,toc:組織,040 スポーツ庁,スポーツ庁,スポーツ庁,MATCHED,
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-1b-01,context,25 厚生労働省所管,厚生労働省,厚生労働省,MATCHED,general
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-1b-01,toc:組織,010 厚生労働本省,厚生労働本省,厚生労働本省,MATCHED,
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-1b-01,toc:組織,030 検疫所,検疫所,検疫所,MATCHED,
@@ -163,26 +163,26 @@ mod.go.jp__j__budget__gaisan__r6__gaisanyoukyu,context,30 防衛省所管（防�
 mod.go.jp__j__budget__gaisan__r6__gaisanyoukyu,toc:組織,010 防衛本省,防衛本省,防衛本省,MATCHED,
 mod.go.jp__j__budget__gaisan__r6__gaisanyoukyu,toc:組織,015 地方防衛局,地方防衛局,地方防衛局,MATCHED,
 mod.go.jp__j__budget__gaisan__r6__gaisanyoukyu,toc:組織,035 防衛装備庁,防衛装備庁,防衛装備庁,MATCHED,
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024gaitame_2,context,,,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024gaitame_2,toc:会計,05 外国為替資金,外国為替資金,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2,context,,,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2,toc:組織,010 財務本省,財務本省,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2,toc:組織,020 財務局,財務局,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2,toc:組織,030 税関,税関,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2,toc:組織,040 国税庁,国税庁,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024jisinn_2,context,,,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024jisinn_2,toc:会計,07 地震再保険,地震再保険,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024kokusaiseirikikinn_2,context,,,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024kokusaiseirikikinn_2,toc:会計,04 国債整理基金,国債整理基金,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024tokuzai_2,context,,,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024tokuzai_2,toc:会計,08 財政投融資,財政投融資,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024tokuzai_2,toc:勘定,3 特定国有財産整備勘定,特定国有財産整備勘定,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024tousi_2,context,,,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024tousi_2,toc:会計,08 財政投融資,財政投融資,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024tousi_2,toc:勘定,2 投資勘定,投資勘定,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024zaiyuu_2,context,,,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024zaiyuu_2,toc:会計,08 財政投融資,財政投融資,,OUT_OF_SCOPE,no_context
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024zaiyuu_2,toc:勘定,1 財政融資資金勘定,財政融資資金勘定,,OUT_OF_SCOPE,no_context
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024gaitame_2,context,2305 外国為替資金特別会計,外国為替資金,外国為替資金,MATCHED,special
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024gaitame_2,toc:会計,05 外国為替資金,外国為替資金,外国為替資金,MATCHED,
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2,context,23 財務省所管,財務省,財務省,MATCHED,general
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2,toc:組織,010 財務本省,財務本省,財務本省,MATCHED,
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2,toc:組織,020 財務局,財務局,財務局,MATCHED,
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2,toc:組織,030 税関,税関,税関,MATCHED,
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2,toc:組織,040 国税庁,国税庁,国税庁,MATCHED,
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024jisinn_2,context,2307 地震再保険特別会計,地震再保険,地震再保険,MATCHED,special
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024jisinn_2,toc:会計,07 地震再保険,地震再保険,地震再保険,MATCHED,
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024kokusaiseirikikinn_2,context,2304 国債整理基金特別会計,国債整理基金,国債整理基金,MATCHED,special
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024kokusaiseirikikinn_2,toc:会計,04 国債整理基金,国債整理基金,国債整理基金,MATCHED,
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024tokuzai_2,context,9808 財政投融資特別会計（特定国有財産整備勘定）,財政投融資,財政投融資,MATCHED,special
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024tokuzai_2,toc:会計,08 財政投融資,財政投融資,財政投融資,MATCHED,
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024tokuzai_2,toc:勘定,3 特定国有財産整備勘定,特定国有財産整備勘定,特定国有財産整備勘定,MATCHED,
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024tousi_2,context,9808 財政投融資特別会計（投資勘定）,財政投融資,財政投融資,MATCHED,special
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024tousi_2,toc:会計,08 財政投融資,財政投融資,財政投融資,MATCHED,
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024tousi_2,toc:勘定,2 投資勘定,投資勘定,投資勘定,MATCHED,
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024zaiyuu_2,context,9808 財政投融資特別会計（財政融資資金勘定）,財政投融資,財政投融資,MATCHED,special
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024zaiyuu_2,toc:会計,08 財政投融資,財政投融資,財政投融資,MATCHED,
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024zaiyuu_2,toc:勘定,1 財政融資資金勘定,財政融資資金勘定,財政融資資金勘定,MATCHED,
 mofa.go.jp__mofaj__files__100546568,context,22 外務省所管,外務省,外務省,MATCHED,general
 mofa.go.jp__mofaj__files__100546568,toc:組織,010 外務本省,外務本省,外務本省,MATCHED,
 mofa.go.jp__mofaj__files__100546568,toc:組織,020 在外公館,在外公館,在外公館,MATCHED,
@@ -190,8 +190,8 @@ moj.go.jp__content__001402819,context,9101 東日本大震災復興特別会計�
 moj.go.jp__content__001402819,toc:会計,01 東日本大震災復興,東日本大震災復興,東日本大震災復興,MATCHED,
 moj.go.jp__content__001402819,toc:所管,31 復興庁,復興庁,,OUT_OF_SCOPE,special_source_has_ministry_label
 moj.go.jp__content__001402819,toc:組織,010 復興庁,復興庁,,OUT_OF_SCOPE,special_source_has_org_label
-ndl.go.jp__jp__aboutus__outline__r06_budgetrequest,context,,,,OUT_OF_SCOPE,no_context
-ndl.go.jp__jp__aboutus__outline__r06_budgetrequest,toc:組織,030 国立国会図書館,国立国会図書館,,OUT_OF_SCOPE,no_context
+ndl.go.jp__jp__aboutus__outline__r06_budgetrequest,context,02 国会所管（国立国会図書館）,国会,国会,MATCHED,general
+ndl.go.jp__jp__aboutus__outline__r06_budgetrequest,toc:組織,030 国立国会図書館,国立国会図書館,国立国会図書館,MATCHED,
 npa.go.jp__policies__budget__r6__gaisanyokyu__hukkoutokubetukaikei,context,9101 東日本大震災復興特別会計（警察庁）,東日本大震災復興,東日本大震災復興,MATCHED,special
 npa.go.jp__policies__budget__r6__gaisanyokyu__hukkoutokubetukaikei,toc:会計,01 東日本大震災復興,東日本大震災復興,東日本大震災復興,MATCHED,
 npa.go.jp__policies__budget__r6__gaisanyokyu__hukkoutokubetukaikei,toc:所管,31 復興庁,復興庁,,OUT_OF_SCOPE,special_source_has_ministry_label
