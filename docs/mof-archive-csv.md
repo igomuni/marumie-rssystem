@@ -32,9 +32,10 @@
 入力はすべて `data/download/mof.go.jp/archive/`（取得は `scripts/pipeline-v2/download-mof-archive.ts`）。出力は再生成して正の CSV とバイト単位で一致する。
 
 ```bash
-# 項・目（公式 CSV から）。<out-root>/{2024,2025,2025_teishutsu}/ に出力
-python3 -I scripts/research/build-mof-archive-kou-moku-csv.py <out-root>
-# 事項（一般会計／特別会計）。<version> は 2024 | 2025 | 2025_teishutsu
+# <version> は 2024 | 2025 | 2025_teishutsu
+# 項・目（公式 CSV から）
+npx tsx scripts/pipeline-v2/build-mof-archive-kou-moku-csv.ts <version> <out-dir>
+# 事項（一般会計／特別会計）
 npx tsx scripts/pipeline-v2/build-mof-jikou-csv.ts <version> <out-dir>
 npx tsx scripts/pipeline-v2/build-mof-jikou-special-csv.ts <version> <out-dir>
 ```
