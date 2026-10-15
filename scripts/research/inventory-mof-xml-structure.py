@@ -48,7 +48,7 @@ def main(out):
         total = 0
         for f in sorted(listed):
             b = open(f'{root}/xml/{f}', 'rb').read(); total += len(b)
-            t = b.decode('shift_jis', errors='strict')
+            t = b.decode('cp932', errors='strict')  # WHATWG の Shift_JIS（parser の TextDecoder）は cp932 と同じ
             enc = (re.search(r'<\?xml[^>]*encoding="([^"]*)"', t) or [None, ''])[1]
             dt = (re.search(r'<!DOCTYPE([^>]*)>', t) or [None, ''])[1].strip()
             rt = (re.search(r'<(\w+)[\s>]', re.sub(r'<\?.*?\?>|<!DOCTYPE[^>]*>|<!--.*?-->', '', t, flags=re.S)) or [None, ''])[1]
