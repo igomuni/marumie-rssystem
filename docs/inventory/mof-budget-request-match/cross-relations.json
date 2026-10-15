@@ -1,0 +1,191 @@
+{
+ "request2024__mof2024": {
+  "context": {
+   "general:mapped": 39,
+   "special:mapped": 23
+  },
+  "context_unmapped": [],
+  "kou": {
+   "detail:CODE3:no_scope": 1185,
+   "detail:CODE3:name_no_match": 8808,
+   "detail:CODE3:name_match_1": 771,
+   "detail:CODE3:code=cand+0": 85,
+   "detail:CODE3:code[:2]=cand(not +0)": 6,
+   "detail:CODE3:code_neither": 815,
+   "detail:CODE3:name_match_2plus": 135,
+   "total:CODE3:no_scope": 231,
+   "total:CODE3:name_no_match": 521,
+   "total:CODE3:name_match_1": 720,
+   "total:CODE3:code=cand+0": 82,
+   "total:CODE3:code[:2]=cand(not +0)": 4,
+   "total:CODE3:code_neither": 760,
+   "total:CODE3:name_match_2plus": 126
+  },
+  "jikou": {
+   "detail:DETAIL:no_scope": 213,
+   "detail:DETAIL:name_match_1": 982,
+   "detail:DETAIL:first=kou_code": 48,
+   "detail:DETAIL:second=class_code": 1328,
+   "detail:DETAIL:both_same_cand": 46,
+   "detail:DETAIL:name_no_match": 100,
+   "detail:DETAIL:name_match_2plus": 346,
+   "total:DETAIL:no_scope": 338,
+   "total:DETAIL:name_match_1": 950,
+   "total:DETAIL:first=kou_code": 46,
+   "total:DETAIL:second=class_code": 1287,
+   "total:DETAIL:both_same_cand": 44,
+   "total:DETAIL:name_no_match": 98,
+   "total:DETAIL:name_match_2plus": 337
+  },
+  "moku": {
+   "detail:CODE_5_4_2_4:no_scope": 3091,
+   "detail:CODE_5_4_2_4:name_match_2plus": 16833,
+   "detail:CODE_5_4_2_4:S": 523,
+   "detail:CODE_5_4_2_4:G": 0,
+   "detail:CODE_5_4_2_4:S_and_G": 0,
+   "detail:CODE_5_4_2_4:neither": 20710,
+   "detail:CODE_5_4_2_4:name_match_1": 4400,
+   "detail:CODE_5_4_2_4:name_no_match": 394
+  },
+  "mof_moku_structure": {
+   "general": {
+    "moku_keys_without_keizai": 3596,
+    "keys_with_2plus_rows": 1240,
+    "moku_rows": 6718
+   },
+   "special": {
+    "moku_keys_without_keizai": 638,
+    "keys_with_2plus_rows": 221,
+    "moku_rows": 1225
+   }
+  }
+ },
+ "request2025__mof2025_teishutsu": {
+  "context": {
+   "general:mapped": 85,
+   "special:mapped": 26
+  },
+  "context_unmapped": [],
+  "kou": {
+   "detail:CODE3:name_no_match": 10534,
+   "detail:CODE3:name_match_1": 993,
+   "detail:CODE3:code=cand+0": 84,
+   "detail:CODE3:code[:2]=cand(not +0)": 12,
+   "detail:CODE3:code_neither": 1043,
+   "detail:CODE3:name_match_2plus": 146,
+   "detail:CODE3:no_scope": 474,
+   "total:CODE3:name_no_match": 551,
+   "total:CODE3:name_match_1": 763,
+   "total:CODE3:code=cand+0": 81,
+   "total:CODE3:code[:2]=cand(not +0)": 9,
+   "total:CODE3:code_neither": 803,
+   "total:CODE3:no_scope": 249,
+   "total:CODE3:name_match_2plus": 130
+  },
+  "jikou": {
+   "detail:DETAIL:name_match_1": 1288,
+   "detail:DETAIL:first=kou_code": 47,
+   "detail:DETAIL:second=class_code": 1648,
+   "detail:DETAIL:both_same_cand": 45,
+   "detail:DETAIL:name_no_match": 115,
+   "detail:DETAIL:name_match_2plus": 364,
+   "detail:DETAIL:no_scope": 101,
+   "detail:DETAIL:unparsed": 1,
+   "total:DETAIL:name_match_1": 1012,
+   "total:DETAIL:first=kou_code": 45,
+   "total:DETAIL:second=class_code": 1355,
+   "total:DETAIL:both_same_cand": 43,
+   "total:DETAIL:no_scope": 365,
+   "total:DETAIL:name_no_match": 109,
+   "total:DETAIL:name_match_2plus": 346,
+   "total:DETAIL:unparsed": 1
+  },
+  "moku": {
+   "detail:CODE_5_4_2_4:name_match_2plus": 20588,
+   "detail:CODE_5_4_2_4:S": 527,
+   "detail:CODE_5_4_2_4:G": 0,
+   "detail:CODE_5_4_2_4:S_and_G": 0,
+   "detail:CODE_5_4_2_4:neither": 25682,
+   "detail:CODE_5_4_2_4:name_match_1": 5621,
+   "detail:CODE_5_4_2_4:name_no_match": 475,
+   "detail:CODE_5_4_2_4:no_scope": 1013,
+   "detail:CODE_5_4_2_4:unparsed": 51
+  },
+  "mof_moku_structure": {
+   "general": {
+    "moku_keys_without_keizai": 3640,
+    "keys_with_2plus_rows": 1267,
+    "moku_rows": 6780
+   },
+   "special": {
+    "moku_keys_without_keizai": 654,
+    "keys_with_2plus_rows": 221,
+    "moku_rows": 1250
+   }
+  }
+ },
+ "request2025__mof2025": {
+  "context": {
+   "general:mapped": 85,
+   "special:mapped": 26
+  },
+  "context_unmapped": [],
+  "kou": {
+   "detail:CODE3:name_no_match": 10534,
+   "detail:CODE3:name_match_1": 993,
+   "detail:CODE3:code=cand+0": 84,
+   "detail:CODE3:code[:2]=cand(not +0)": 12,
+   "detail:CODE3:code_neither": 1043,
+   "detail:CODE3:name_match_2plus": 146,
+   "detail:CODE3:no_scope": 474,
+   "total:CODE3:name_no_match": 551,
+   "total:CODE3:name_match_1": 763,
+   "total:CODE3:code=cand+0": 81,
+   "total:CODE3:code[:2]=cand(not +0)": 9,
+   "total:CODE3:code_neither": 803,
+   "total:CODE3:no_scope": 249,
+   "total:CODE3:name_match_2plus": 130
+  },
+  "jikou": {
+   "detail:DETAIL:name_match_1": 1288,
+   "detail:DETAIL:first=kou_code": 47,
+   "detail:DETAIL:second=class_code": 1648,
+   "detail:DETAIL:both_same_cand": 45,
+   "detail:DETAIL:name_no_match": 115,
+   "detail:DETAIL:name_match_2plus": 364,
+   "detail:DETAIL:no_scope": 101,
+   "detail:DETAIL:unparsed": 1,
+   "total:DETAIL:name_match_1": 1012,
+   "total:DETAIL:first=kou_code": 45,
+   "total:DETAIL:second=class_code": 1355,
+   "total:DETAIL:both_same_cand": 43,
+   "total:DETAIL:no_scope": 365,
+   "total:DETAIL:name_no_match": 109,
+   "total:DETAIL:name_match_2plus": 346,
+   "total:DETAIL:unparsed": 1
+  },
+  "moku": {
+   "detail:CODE_5_4_2_4:name_match_2plus": 20588,
+   "detail:CODE_5_4_2_4:S": 527,
+   "detail:CODE_5_4_2_4:G": 0,
+   "detail:CODE_5_4_2_4:S_and_G": 0,
+   "detail:CODE_5_4_2_4:neither": 25682,
+   "detail:CODE_5_4_2_4:name_match_1": 5621,
+   "detail:CODE_5_4_2_4:name_no_match": 475,
+   "detail:CODE_5_4_2_4:no_scope": 1013,
+   "detail:CODE_5_4_2_4:unparsed": 51
+  },
+  "mof_moku_structure": {
+   "general": {
+    "moku_keys_without_keizai": 3640,
+    "keys_with_2plus_rows": 1267,
+    "moku_rows": 6780
+   },
+   "special": {
+    "moku_keys_without_keizai": 654,
+    "keys_with_2plus_rows": 221,
+    "moku_rows": 1250
+   }
+  }
+ }
+}
