@@ -1,0 +1,11 @@
+{
+ "git_head": "43c069098e0fa65039191fecc6e7c000e8ad1bb7",
+ "fixture_dirs": 75,
+ "fixture_bytes": 46561836,
+ "fixture_dirs_without_code_test_docs_refs": 5,
+ "fixture_bytes_without_refs": 1510671,
+ "script_files": 368,
+ "script_bytes": 3842447,
+ "scripts_without_code_test_docs_refs": 145,
+ "scripts_without_refs_and_not_in_package_json": 145
+}
