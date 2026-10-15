@@ -76,11 +76,14 @@ export function selectXmlDocumentLinks(links: ArchiveLink[], reportIds: string[]
   return out;
 }
 
-/** 目次 `{id}menu.html`（EUC-JP をデコード済みの文字列）の `LineOut(...,"file.xml#anchor",...)` から、本文 XML のファイル名を重複なく順に取り出す */
+/**
+ * 目次 `{id}menu.html`（EUC-JP をデコード済みの文字列）の `LineOut(階層,子有無,"題名","file.xml#anchor","頁")` から、本文 XML のファイル名を重複なく順に取り出す。
+ * 題名に `)` を含む行（特別会計の目次に41行ある）を読み飛ばさないよう、引数を位置で読む（lib/mof-budget-xml-items.ts の readMenuAncestorChains と同じ形）。
+ */
 export function parseMenuXmlFileNames(menuHtml: string): string[] {
   const out: string[] = [];
   const seen = new Set<string>();
-  const re = /LineOut\([^)]*?"([0-9A-Za-z_]+\.xml)(?:#[^"]*)?"/g;
+  const re = /LineOut\(\d+,\d+,"[^"]*","([0-9A-Za-z_]+\.xml)(?:#[^"]*)?","[^"]*"\)/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(menuHtml)) !== null) {
     if (seen.has(m[1])) continue;
