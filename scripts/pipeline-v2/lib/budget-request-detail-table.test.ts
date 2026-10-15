@@ -34,8 +34,18 @@ describe('page detection and the left/備考 boundary', () => {
     expect(hb.boundary).toBe(lines.find(l => l.includes('事') && l.includes('備'))!.indexOf('前'));
   });
 
+  it('reads a page whose heading is three lines (要求/前年度 · 番号/事項/備考 · 予算額/概算要求額/比較): context and rows are kept', () => {
+    const r = parseFixture('no-boundary'); // 取り込んだ実ページは 3 行の表頭（以前は境界なしとして全行が落ちていた）
+    expect(r.pagesWithoutBoundary).toEqual([]);
+    expect(r.rows[0].row_type).toBe('CONTEXT');
+    expect(r.rows.length).toBeGreaterThan(1);
+    expect(r.unresolved.every(u => u.reason !== 'PAGE_WITHOUT_HEADER_BOUNDARY')).toBe(true);
+  });
+
   it('refuses to guess on a page without a header boundary: every non-blank line is unresolved', () => {
-    const r = parseFixture('no-boundary');
+    // 2 行目の `番号` を消して、境界が取れないページにする（ページ自体は明細表のページとして検出される）
+    const broken = fixture('no-boundary').replace('番号', '');
+    const r = parseDetailSource(broken, 'no-boundary-broken');
     expect(r.pagesWithoutBoundary).toEqual([1]);
     expect(r.rows).toEqual([]);
     expect(r.unresolved.length).toBe(r.nonBlankLinesInDetailPages);
