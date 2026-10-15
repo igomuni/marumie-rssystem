@@ -1,4 +1,10 @@
 {
+ "2023/jikou-general.csv": "fb4d69e0ff3ebab8ad626eceba72e99099ec51ac2ad9c0e26ad7cb346fb12503",
+ "2023/jikou-special.csv": "36ccb69e87133e4ed07568ca3461d66b34623d4edd4a560f1415f975d14ede48",
+ "2023/kou-general.csv": "9ebdee9e9a64f6bca416a21eced9193dcfdff8f93c2fbbb4b4a40a21a471a41b",
+ "2023/kou-special.csv": "37a4bb4ab357ef7f6a459d398c1a0724d4c788774a0f6c3286f72e302535f423",
+ "2023/moku-general.csv": "b211954858c2166ecce4cd3d3fe80692263b745312be218d9a1ee055a9fec710",
+ "2023/moku-special.csv": "7798d71c8e4288f86837249397c26a2b3814ed729811d885f14fbda9415dd1fd",
  "2024/jikou-general.csv": "2b92b50e71be0f909e1fa7bc96d81c74c821ae5f9659d27e28a016b646657e70",
  "2024/jikou-special.csv": "ab0dbf044610368ba87610df74291a214b3a71d22ad31899238a227095c15068",
  "2024/kou-general.csv": "cf52fdeaf294d847c4ede39580a8b13add79c09f270cd773f59ece4ba2838b98",
@@ -16,5 +22,11 @@
  "2025_teishutsu/kou-general.csv": "e816ceb5a26a869176761ab2e4fca925c0a6b85430cdf4d2ce2e03549b723169",
  "2025_teishutsu/kou-special.csv": "0e10146d656313d13f9b0d67dfa20a60fc729aab5e309643a794b24bd05c4434",
  "2025_teishutsu/moku-general.csv": "99684dc848d11daab78f00dc4d713d2b37335ba9258196118b30263a867f5a8a",
- "2025_teishutsu/moku-special.csv": "d5ca667c6c38d6dd90a4e54785b2cb61dca27d05cf571fe646a6e51eade36356"
+ "2025_teishutsu/moku-special.csv": "d5ca667c6c38d6dd90a4e54785b2cb61dca27d05cf571fe646a6e51eade36356",
+ "2026/jikou-general.csv": "aafccd622c55cbb170062e0966d40677988fb33ea1f198bff9b5c975b3f012ca",
+ "2026/jikou-special.csv": "b77f44f16be9b209116b459c9e1c654c67895dc88a6c48a711fd473b9e8ed76f",
+ "2026/kou-general.csv": "9ea231243d7d1f8da91385efb9f7e32eab0ad79b1cec4c73b68b55a84a015274",
+ "2026/kou-special.csv": "fae6858002286ef4d011282c06488ed9affb170abf8711a62cb590f692b4667c",
+ "2026/moku-general.csv": "56037fd8ca142ca838097311f8f32f8bc40f91cd58e0891af6b55ca18d655f69",
+ "2026/moku-special.csv": "e905673fde39843e580c4e83f6e249fde554c66f2ae05cef7f9e8b29ff87faee"
 }
