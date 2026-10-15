@@ -30,8 +30,6 @@ const FROZEN: Record<string, string> = {
 };
 type Kind = 'hosei' | 'kessan';
 const DOC: Record<Kind, Record<'general' | 'special', string>> = { hosei: { general: '21001', special: '22001' }, kessan: { general: '77001', special: '78001' } };
-/** 末尾の金額の列の数（補正 5、決算 9）。それより前は識別列 */
-const AMOUNT_COLS: Record<Kind, number> = { hosei: 5, kessan: 9 };
 
 const sha256 = (b: Buffer) => crypto.createHash('sha256').update(b).digest('hex');
 const cell = (v: string): string => (/[",\n\r]/u.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
@@ -53,20 +51,28 @@ function main(): void {
     const raw = execFileSync('unzip', ['-p', zp, `DL${doc}b.csv`], { maxBuffer: 1 << 30 });
     const text = new TextDecoder('utf-8', { fatal: true }).decode(raw).replace(/^﻿/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
     const all = parseCsv(text); const header = all[0]; const rows = all.slice(1).filter(r => r.length > 0);
-    const n = AMOUNT_COLS[kind]; const firstAmount = header.length - n;
+    // 金額の列＝見出しが `(円)` か `(千円)` で終わる列（特別会計の決算には `予算総則の規定による経費増額` の列が 1 つ多い）
+    const amountIx = header.map((h, i) => (/\((千円|円)\)$/.test(h) ? i : -1)).filter(i => i >= 0);
+    const firstAmount = amountIx[0];
+    if (amountIx.length === 0 || amountIx.some((i, k) => i !== firstAmount + k) || amountIx[amountIx.length - 1] !== header.length - 1) fail(`${rel} 金額の列が末尾に連続していない`);
     const num = (s: string): number | null => (/^-?\d+$/.test(s) ? Number(s) : null);
     for (const r of rows) {
       if (r.length !== header.length) fail(`${rel} row length ${r.length} != ${header.length}`);
-      for (let i = firstAmount; i < header.length; i++) if (r[i] !== '' && num(r[i]) === null) fail(`${rel} 整数でない金額 ${JSON.stringify(r[i])}`);
+      for (const i of amountIx) if (r[i] !== '' && num(r[i]) === null) fail(`${rel} 整数でない金額 ${JSON.stringify(r[i])}`);
     }
-    // 原本の列の恒等式（成否の件数だけ報告。直さない）
-    const v = (r: string[], i: number) => num(r[firstAmount + i]) ?? 0;
+    // 原本の列の恒等式（成否の件数だけ報告。直さない）。列は見出しの名前で探す
+    const col = (re: RegExp): number => { const i = amountIx.find(k => re.test(header[k])); if (i === undefined) fail(`${rel} 見出し ${re} がない`); return i as number; };
+    const v = (r: string[], i: number) => num(r[i]) ?? 0;
     let holds = 0, fails = 0;
-    for (const r of rows) {
-      const ok = kind === 'hosei'
-        ? v(r, 4) === v(r, 0) + v(r, 3) && v(r, 3) === v(r, 1) + v(r, 2) // 改予算額＝成立予算額＋差引額、差引額＝追加額＋修正減少額
-        : v(r, 5) === v(r, 0) + v(r, 1) + v(r, 2) + v(r, 3) + v(r, 4) && v(r, 8) === v(r, 5) - v(r, 6) - v(r, 7); // 現額＝予算額＋繰越＋予備費＋流用＋移替、不用額＝現額−支出済−翌年度繰越
-      if (ok) holds++; else fails++;
+    if (kind === 'hosei') {
+      const base = col(/成立予算額/), add = col(/追加額/), sub = col(/修正減少額/), diff = col(/差引額/), after = col(/^改/);
+      for (const r of rows) (v(r, after) === v(r, base) + v(r, diff) && v(r, diff) === v(r, add) + v(r, sub) ? holds++ : fails++);
+    } else {
+      const base = col(/^歳出予算額/), current = col(/歳出予算現額/), paid = col(/支出済歳出額/), carry = col(/翌年度繰越額/), unused = col(/不用額/);
+      for (const r of rows) {
+        let between = 0; for (let i = base + 1; i < current; i++) between += v(r, i);
+        (v(r, current) === v(r, base) + between && v(r, unused) === v(r, current) - v(r, paid) - v(r, carry) ? holds++ : fails++);
+      }
     }
     const file = `moku-${account}-${kind}.csv`;
     fs.writeFileSync(path.join(outDir, file), [[...header, 'source_row'], ...rows.map((r, i) => [...r, String(i + 1)])].map(r => r.map(cell).join(',')).join('\n') + '\n');
