@@ -48,7 +48,11 @@ function main(): void {
     if (!fs.existsSync(zp)) { (summary as Record<string, unknown>)[account] = { status: 'no_csv_in_archive' }; continue; }
     if (!(rel in FROZEN)) fail(`${rel} has no frozen SHA-256`);
     if (sha256(fs.readFileSync(zp)) !== FROZEN[rel]) fail(`${rel} SHA-256 mismatch`);
-    const raw = execFileSync('unzip', ['-p', zp, `DL${doc}b.csv`], { maxBuffer: 1 << 30 });
+    // 歳出の表は zip の中の b.csv が普通だが、FY2025 の特別会計の補正予算では a.csv と b.csv が入れ替わっている（b.csv が歳入）。
+    // 見出しに `主要経費別分類コード` を持つ（歳出の）ファイルを選ぶ。ちょうど 1 つでなければ停止する
+    const spending = ['a', 'b'].filter(x => /主要経費別分類コード/.test(execFileSync('unzip', ['-p', zp, `DL${doc}${x}.csv`], { maxBuffer: 1 << 30 }).toString('utf8').split('\n', 1)[0]));
+    if (spending.length !== 1) fail(`${rel} 歳出の表（見出しに主要経費別分類コードを持つ csv）がちょうど 1 つでない: ${spending.join(',')}`);
+    const raw = execFileSync('unzip', ['-p', zp, `DL${doc}${spending[0]}.csv`], { maxBuffer: 1 << 30 });
     const text = new TextDecoder('utf-8', { fatal: true }).decode(raw).replace(/^﻿/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
     const all = parseCsv(text); const header = all[0]; const rows = all.slice(1).filter(r => r.length > 0);
     // 金額の列＝見出しが `(円)` か `(千円)` で終わる列（特別会計の決算には `予算総則の規定による経費増額` の列が 1 つ多い）
@@ -88,7 +92,7 @@ function main(): void {
       if (total !== [...kou.values()].reduce((t, e) => t + e.sums[j], 0)) fail(`${rel} 項の合計が総計と一致しない ${header[amountIx[j]]}`);
     }
     fs.writeFileSync(path.join(outDir, `kou-${account}-${kind}.csv`), [[...KOU_KEY, '目の行数', ...amountIx.map(i => `${header[i]}の合計`)], ...[...kou.values()].map(e => [...e.key, String(e.rows), ...e.sums.map(String)])].map(r => r.map(cell).join(',')).join('\n') + '\n');
-    (summary as Record<string, unknown>)[account] = { kou: kou.size, zip: rel, zip_sha256: FROZEN[rel], rows: rows.length, amount_columns: header.slice(firstAmount), identity_holds: holds, identity_fails: fails };
+    (summary as Record<string, unknown>)[account] = { source_file: `DL${doc}${spending[0]}.csv`, kou: kou.size, zip: rel, zip_sha256: FROZEN[rel], rows: rows.length, amount_columns: header.slice(firstAmount), identity_holds: holds, identity_fails: fails };
   }
   fs.writeFileSync(path.join(outDir, `summary-${kind}.json`), JSON.stringify(summary, null, 2) + '\n');
   console.log(JSON.stringify(summary));
