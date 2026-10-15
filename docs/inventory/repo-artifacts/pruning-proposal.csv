@@ -1,0 +1,86 @@
+kind,path,proposal,reason
+script,scripts/analyze-houjin-quality.py,decide,製品側の分析・export（2026-07〜09）。研究系列でないため、ユーザーの判断が要る
+script,scripts/analyze-mof-section-identity-stability.ts,decide,製品側の分析・export（2026-07〜09）。研究系列でないため、ユーザーの判断が要る
+script,scripts/analyze-mof-section-name-reuse.ts,decide,製品側の分析・export（2026-07〜09）。研究系列でないため、ユーザーの判断が要る
+script,scripts/analyze-policy-distribution.ts,decide,製品側の分析・export（2026-07〜09）。研究系列でないため、ユーザーの判断が要る
+script,scripts/analyze-prose-bias.ts,decide,製品側の分析・export（2026-07〜09）。研究系列でないため、ユーザーの判断が要る
+script,scripts/analyze-score-discrimination.ts,decide,製品側の分析・export（2026-07〜09）。研究系列でないため、ユーザーの判断が要る
+script,scripts/analyze-transparency-weights.ts,decide,製品側の分析・export（2026-07〜09）。研究系列でないため、ユーザーの判断が要る
+script,scripts/dev/ai-chat-eval.mjs,decide,製品側の分析・export（2026-07〜09）。研究系列でないため、ユーザーの判断が要る
+script,scripts/export-luna-scores.ts,decide,製品側の分析・export（2026-07〜09）。研究系列でないため、ユーザーの判断が要る
+script,scripts/export-policy-decision-template.ts,decide,製品側の分析・export（2026-07〜09）。研究系列でないため、ユーザーの判断が要る
+script,scripts/extract-digital-agency-budget-text.ts,decide,製品側の分析・export（2026-07〜09）。研究系列でないため、ユーザーの判断が要る
+script,scripts/extract-mof-iryo-hoken-csv.ts,decide,製品側の分析・export（2026-07〜09）。研究系列でないため、ユーザーの判断が要る
+script,scripts/extract-rs-iryo-hoken-csv.ts,decide,製品側の分析・export（2026-07〜09）。研究系列でないため、ユーザーの判断が要る
+script,scripts/mof-classification-tables.ts,decide,製品側の分析・export（2026-07〜09）。研究系列でないため、ユーザーの判断が要る
+script,scripts/pipeline-v2/analyze-budget-request-toc-b-scope-continuity.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/analyze-budget-request-toc-column-boundary-evidence.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/analyze-budget-request-toc-column-structure.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/analyze-budget-request-toc-header-tokenless-positive-discovery-sample.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/analyze-budget-request-toc-header-tokenless-visual-sample.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/analyze-budget-request-toc-physical-row-boundary-band.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/analyze-budget-request-toc-physical-row-failures.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/build-budget-request-h1-human-validation-worklist.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/build-budget-request-toc-row-assembly-heldout-candidates.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/build-budget-request-toc-row-assembly-visual-gt.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/build-mof-jikou-special-csv.ts,keep,最終 CSV を作る builder（直近に作成。参照は docs/mof-archive-csv.md が #477 で入る）
+script,scripts/pipeline-v2/evaluate-budget-request-corpus-baseline-extraction.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/evaluate-budget-request-document-hierarchy-a2-holdout.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/evaluate-budget-request-document-hierarchy-a2.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/evaluate-budget-request-hierarchy-failure-isolation.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/evaluate-budget-request-item-candidate-development.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/evaluate-budget-request-item-candidate-mof-name-diagnostic.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/evaluate-budget-request-range-local-item.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/evaluate-budget-request-rule-line-anchor.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/evaluate-mof-budget-xml-items-v0.ts,delete,MOF XML parser v0 の評価・凍結用 generator（2026-10-04）。評価 artifact は残り、テストは artifact を読むだけ
+script,scripts/pipeline-v2/evaluate-mof-jikou-integration.ts,delete,MOF XML parser v0 の評価・凍結用 generator（2026-10-04）。評価 artifact は残り、テストは artifact を読むだけ
+script,scripts/pipeline-v2/freeze-budget-request-cover-structure-visual-gt.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/freeze-budget-request-page-classification-v1-eval-visual-gt.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/freeze-budget-request-page-classification-v2-visual-gt.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/freeze-budget-request-toc-h1-implementation.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/freeze-budget-request-toc-row-assembly-implementation.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/freeze-mof-budget-xml-hand-fixture.ts,delete,MOF XML parser v0 の評価・凍結用 generator（2026-10-04）。評価 artifact は残り、テストは artifact を読むだけ
+script,scripts/pipeline-v2/inspect-mof-budget-xml.ts,delete,MOF XML parser v0 の評価・凍結用 generator（2026-10-04）。評価 artifact は残り、テストは artifact を読むだけ
+script,scripts/pipeline-v2/inventory-budget-request-rule-line-thin-anchor.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/inventory-budget-request-rule-lines.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/project-mof-budget-xml-reference.ts,delete,MOF XML parser v0 の評価・凍結用 generator（2026-10-04）。評価 artifact は残り、テストは artifact を読むだけ
+script,scripts/pipeline-v2/run-budget-request-corpus-baseline.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/run-budget-request-cover-structure-descriptive-regression.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/run-budget-request-hierarchy-paired-diagnostic.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/run-budget-request-item-layout-anchor-baseline.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/run-budget-request-item-layout-anchor-evaluation.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/run-budget-request-mext-continuation-baseline.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/run-budget-request-mext-continuation-evaluation.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/run-budget-request-mext-continuation-isolation.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/run-budget-request-page-classification-descriptive-regression.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/run-budget-request-route-c-primitive-observation.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/run-budget-request-route-c-visual-gt-freeze.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/run-budget-request-rule-8p6-phase-bc.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/run-budget-request-rule-8p6-rotate-phase-b.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/run-budget-request-rule-line-item-phase-b.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/run-budget-request-toc-h1-formal-evaluation.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/run-budget-request-toc-row-assembly-heldout-evaluation.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/run-budget-request-unmatched59-baseline.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/run-budget-request-unmatched59-inventory.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/run-budget-request-unmatched59-scan.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/pipeline-v2/run-budget-request-unmatched59-summary.ts,delete,概算要求 PDF の個別実験（2026-10-03〜10-10）の runner / evaluator / freezer。結果は凍結済みで、再実行する計画が見えない
+script,scripts/research/assemble-detail-table-window-gt-final.py,hold,J1 複数×K2 の visual GT / 昇格に関わる進行中の系列（#462 保留、142 行昇格）
+script,scripts/research/build-toc-line-token-p4-population.py,delete,TOC 目次の P3〜P6 研究（2026-10-11〜12）の script。結論済みで、対応する fixtures と対にして削除
+script,scripts/research/build-toc-pdf-source-token-first-p6-population.py,delete,TOC 目次の P3〜P6 研究（2026-10-11〜12）の script。結論済みで、対応する fixtures と対にして削除
+script,scripts/research/capture-toc-source-correspondence-p5-a1-a2.py,delete,TOC 目次の P3〜P6 研究（2026-10-11〜12）の script。結論済みで、対応する fixtures と対にして削除
+script,scripts/research/collect-section-mismatch-evidence.py,hold,J1 複数×K2 の visual GT / 昇格に関わる進行中の系列（#462 保留、142 行昇格）
+script,scripts/research/diagnose-zero-amount-and-shared-claims.py,hold,J1 複数×K2 の visual GT / 昇格に関わる進行中の系列（#462 保留、142 行昇格）
+script,scripts/research/extract-toc-pdf-source-token-first-p6.ts,delete,TOC 目次の P3〜P6 研究（2026-10-11〜12）の script。結論済みで、対応する fixtures と対にして削除
+script,scripts/research/observe-toc-line-token-p4.py,delete,TOC 目次の P3〜P6 研究（2026-10-11〜12）の script。結論済みで、対応する fixtures と対にして削除
+script,scripts/research/prepare-toc-source-token-mapping-p3.py,delete,TOC 目次の P3〜P6 研究（2026-10-11〜12）の script。結論済みで、対応する fixtures と対にして削除
+script,scripts/research/render-detail-table-window-gt-pages.py,hold,J1 複数×K2 の visual GT / 昇格に関わる進行中の系列（#462 保留、142 行昇格）
+script,scripts/research/run-toc-source-token-mapping-p3.ts,delete,TOC 目次の P3〜P6 研究（2026-10-11〜12）の script。結論済みで、対応する fixtures と対にして削除
+script,scripts/research/toc-h1-control-package.py,delete,TOC 目次の P3〜P6 研究（2026-10-11〜12）の script。結論済みで、対応する fixtures と対にして削除
+script,scripts/research/toc-pdf-row-region-freeze.py,delete,TOC 目次の P3〜P6 研究（2026-10-11〜12）の script。結論済みで、対応する fixtures と対にして削除
+script,scripts/research/toc-source-token-mapping-p3-core.ts,delete,TOC 目次の P3〜P6 研究（2026-10-11〜12）の script。結論済みで、対応する fixtures と対にして削除
+script,scripts/summarize-quality-benchmark-run.ts,decide,製品側の分析・export（2026-07〜09）。研究系列でないため、ユーザーの判断が要る
+fixture,tests/fixtures/budget-request-inventory,keep,FY2025 概算要求の inventory（#468）。142 行昇格の入力
+fixture,tests/fixtures/budget-request-toc-line-token-order-failure-isolation,delete,TOC P4 研究の fixture。scripts の TOC 研究 10 本と対
+fixture,tests/fixtures/budget-request-toc-line-token-order-p4-audit,delete,同上
+fixture,tests/fixtures/budget-request-toc-source-correspondence-anchor,delete,TOC P5 研究の fixture。同上
+fixture,tests/fixtures/detail-table-mof-x-anchor-validation,hold,#460 の X anchor held-out validation（98.39%）の証跡。J1 の系列で使う可能性
