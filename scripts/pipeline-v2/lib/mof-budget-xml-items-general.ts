@@ -29,7 +29,7 @@ const ROW_CLASSES: Record<string, string> = {
   'description-only': '11.1',
 };
 const AMOUNT_GRAMMAR = /^(0|(△ )?[1-9]\d{0,2}(,\d{3})*)$/;
-const CELL_ID = /^p(\d+)-(\d+)\.(\d+)-(\d+)\.(\d+)$/;
+export const CELL_ID = /^p(\d+)-(\d+)\.(\d+)-(\d+)\.(\d+)$/;
 
 export type MofXmlFailureCode =
   | 'decode' | 'malformed' | 'input_contract' | 'table_structure' | 'unknown_row' | 'orphan' | 'item_code' | 'col4' | 'amount' | 'organization' | 'cell_content' | 'order';
@@ -42,16 +42,16 @@ export class MofXmlParseError extends Error {
 }
 
 // ---------------------------------------------------------------- 最小の XML 読み取り（この帳票が使う範囲）
-interface El { name: string; attrs: Record<string, string>; kids: (El | Tx)[] }
-interface Tx { text: string; cdata: boolean }
-const isEl = (n: El | Tx): n is El => (n as El).name !== undefined;
+export interface El { name: string; attrs: Record<string, string>; kids: (El | Tx)[] }
+export interface Tx { text: string; cdata: boolean }
+export const isEl = (n: El | Tx): n is El => (n as El).name !== undefined;
 
 const TOKEN = /<!\[CDATA\[([\s\S]*?)\]\]>|<!--[\s\S]*?-->|<\?([\s\S]*?)\?>|<!DOCTYPE([^>]*)>|<\/([^\s>]+)\s*>|<([^\s/>]+)((?:\s+[^\s=>/]+\s*=\s*(?:"[^"]*"|'[^']*'))*)\s*(\/?)>|([^<]+)/gy;
 const ENT: Record<string, string> = { lt: '<', gt: '>', amp: '&', quot: '"', apos: "'" };
 const unescapeXml = (s: string) => s.replace(/&(#x[0-9A-Fa-f]+|#[0-9]+|[A-Za-z]+);/g, (m, e: string) => (e[0] === '#' ? String.fromCodePoint(e[1] === 'x' ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10)) : ENT[e] ?? m));
 
-interface Doc { encoding: string | null; doctype: string | null; root: El }
-function readXml(src: string, file: string): Doc {
+export interface Doc { encoding: string | null; doctype: string | null; root: El }
+export function readXml(src: string, file: string): Doc {
   TOKEN.lastIndex = 0;
   let encoding: string | null = null;
   let doctype: string | null = null;
@@ -82,13 +82,13 @@ function readXml(src: string, file: string): Doc {
   return { encoding, doctype, root };
 }
 
-const children = (e: El, name: string) => e.kids.filter(isEl).filter(k => k.name === name);
+export const children = (e: El, name: string) => e.kids.filter(isEl).filter(k => k.name === name);
 
 // ---------------------------------------------------------------- 名称（セル）の復元
 export interface GaijiRef { code: string; text: string }
 export interface CellValue { lines: string[]; text: string; qtCount: number; gaiji: GaijiRef[] }
 
-function readCell(clm: El, file: string): CellValue {
+export function readCell(clm: El, file: string): CellValue {
   const ps = clm.kids.filter(k => isEl(k) || (k as Tx).text.trim() !== '');
   if (ps.length !== 1 || !isEl(ps[0]) || ps[0].name !== 'p') throw new MofXmlParseError('cell_content', file, `clm の子が単一の <p> でない (${clm.attrs.id})`);
   let qtCount = 0;
@@ -116,7 +116,7 @@ function readCell(clm: El, file: string): CellValue {
   return { lines, text: lines.join(''), qtCount, gaiji };
 }
 
-const deepText = (e: El): string => e.kids.map(k => (isEl(k) ? deepText(k) : k.text)).join('');
+export const deepText = (e: El): string => e.kids.map(k => (isEl(k) ? deepText(k) : k.text)).join('');
 
 // ---------------------------------------------------------------- 出力の型
 export interface MofXmlItemRecord {

@@ -1,0 +1,50 @@
+{
+  "parser": {
+    "path": "scripts/pipeline-v2/lib/mof-budget-xml-special-items.ts",
+    "sha256": "366dcebce90720b5fd4459565cd202860364db899b93074ccb3b4a04b79ed591"
+  },
+  "inputs": {
+    "sourceSet": {
+      "path": "tests/fixtures/mof-xml-parser-special/2025/source-set.json",
+      "sha256": "d9bdf969eab9f2c3c1d683911cce947ab98b72a7474c42012f4b1b1ca15b10ab"
+    },
+    "menu": {
+      "sha256": "effeea982f8e38bda21e131f7e3f6925da4faa77ad6768af26a1e6cdb43afdee"
+    }
+  },
+  "xmlFiles": 299,
+  "targetFiles": 34,
+  "notTargetFiles": 265,
+  "records": 365,
+  "rowClassCounts": {
+    "item-start": 249,
+    "continuation": 111,
+    "description-only": 9,
+    "ministry": 3,
+    "organization": 1,
+    "organization-total": 2,
+    "item-start-noprev": 5,
+    "nestedTableCells": 4
+  },
+  "layouts": {
+    "plain": 32,
+    "noprev": 1,
+    "org": 1
+  },
+  "columns": [
+    "所管",
+    "特別会計",
+    "勘定",
+    "組織",
+    "項コード",
+    "項名",
+    "事項名",
+    "分類コード",
+    "令和7年度予定額(千円)",
+    "前年度予算額(千円)",
+    "比較増△減額(千円)",
+    "source_file",
+    "source_row",
+    "source_page"
+  ]
+}
