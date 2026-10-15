@@ -1,0 +1,20 @@
+{
+ "year": 2024,
+ "coverPages": 69,
+ "sources": 59,
+ "rows": 413,
+ "rowKinds": {
+  "HEADER": 69,
+  "TITLE": 69,
+  "SECTION": 163,
+  "SCOPE": 112
+ },
+ "pageStatus": {
+  "RESOLVED": 69
+ },
+ "unclassifiedLines": 0,
+ "inventoryPageTextHash": {
+  "match": 69,
+  "mismatch": 0
+ }
+}
