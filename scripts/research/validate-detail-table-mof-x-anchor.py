@@ -10,10 +10,10 @@ MOF の値は anchor の探索に使わない。正規化・部分一致・金�
 import collections, csv, glob, hashlib, json, math, os, re, sys
 
 CFG = {
-    2024: {'detail': 'data/work/budget-request-csv/2024/detail-table',
+    2024: {'detail': 'tests/fixtures/budget-request-csv/2024/detail-table',
            'manifest_sha': '7989885b0d2ee0907d2389f71bc2642bada070120a06283c89d2f6d6634f226e',
            'mof_file': 'budget-jikou.jsonl', 'mof_sha': 'a63f50504c821ad7aff9fe1c96c80635dda978ea0870976d15f9bc9735d3ef7e'},
-    2025: {'detail': 'data/work/budget-request-csv/2025/detail-table',
+    2025: {'detail': 'tests/fixtures/budget-request-csv/2025/detail-table',
            'manifest_sha': '0bdeeb372f3fd8450fba35274c4af7994434ddcf2447d6d048f1284ef428a0a7',
            'mof_path': 'data/normalized/mof/fy2025/budget-jikou-v1-canonical.jsonl',
            'mof_sha': '9c0a878b7ed5552cfb0786e7d9501e97937c9295e0210a544ab98a421ce79a38'},

@@ -1,0 +1,19 @@
+要求番号,区分,前年度予算額_一般行政経費,前年度予算額_その他の経費,前年度予算額_計,６年度概算要求額_一般行政経費,６年度概算要求額_その他の経費,６年度概算要求額_計,増△減,明細書頁数,source_page,source_line_start,source_line_end,table_block_id,row_index,row_type,parse_status
+,010 裁判所,"265,129,512","57,087,268","322,216,780","278,587,973","53,852,583","332,440,556","10,223,776",3,5,52,52,courts.go.jp__vc-files__courts__2023__R06saisyutsu_gaisanyoukyusyo_720kb#b1,1,CODE3,PARSED
+,010 最高裁判所,"68,535,874","7,881,857","76,417,731","80,989,261","7,456,360","88,445,621","12,027,890",3,5,53,53,courts.go.jp__vc-files__courts__2023__R06saisyutsu_gaisanyoukyusyo_720kb#b1,2,CODE3,PARSED
+1,01‑95 最高裁判所の事務処理に必要な経費,"68,535,874",0,"68,535,874","80,989,261",0,"80,989,261","12,453,387",3,5,54,54,courts.go.jp__vc-files__courts__2023__R06saisyutsu_gaisanyoukyusyo_720kb#b1,3,DETAIL,PARSED
+2,06‑95 裁判運営の充実に必要な経費,0,"3,050,628","3,050,628",0,"1,219,713","1,219,713","△1,830,915",24,5,55,55,courts.go.jp__vc-files__courts__2023__R06saisyutsu_gaisanyoukyusyo_720kb#b1,4,DETAIL,PARSED
+3,11‑95 裁判所職員の研修に必要な経費,0,"4,831,229","4,831,229",0,"6,236,647","6,236,647","1,405,418",40,5,56,56,courts.go.jp__vc-files__courts__2023__R06saisyutsu_gaisanyoukyusyo_720kb#b1,5,DETAIL,PARSED
+,020 下級裁判所,"196,593,638","9,441,051","206,034,689","197,598,712","7,520,035","205,118,747","△915,942",60,5,57,57,courts.go.jp__vc-files__courts__2023__R06saisyutsu_gaisanyoukyusyo_720kb#b1,6,CODE3,PARSED
+4,01‑95 下級裁判所の事務処理に必要な経費,"196,593,638",0,"196,593,638","197,598,712",0,"197,598,712","1,005,074",60,5,58,58,courts.go.jp__vc-files__courts__2023__R06saisyutsu_gaisanyoukyusyo_720kb#b1,7,DETAIL,PARSED
+5,06‑95 裁判運営の充実に必要な経費,0,"9,441,051","9,441,051",0,"7,520,035","7,520,035","△1,921,016",71,5,59,59,courts.go.jp__vc-files__courts__2023__R06saisyutsu_gaisanyoukyusyo_720kb#b1,8,DETAIL,PARSED
+,030 検察審査費,0,"281,032","281,032",0,"281,653","281,653",621,88,5,60,60,courts.go.jp__vc-files__courts__2023__R06saisyutsu_gaisanyoukyusyo_720kb#b1,9,CODE3,PARSED
+6,06‑95 検察審査業務に必要な経費,0,"281,032","281,032",0,"281,653","281,653",621,88,5,61,61,courts.go.jp__vc-files__courts__2023__R06saisyutsu_gaisanyoukyusyo_720kb#b1,10,DETAIL,PARSED
+,040 裁判費,0,"24,844,232","24,844,232",0,"25,676,988","25,676,988","832,756",90,5,62,62,courts.go.jp__vc-files__courts__2023__R06saisyutsu_gaisanyoukyusyo_720kb#b1,11,CODE3,PARSED
+7,01‑95 裁判に必要な経費,0,"24,844,232","24,844,232",0,"25,676,988","25,676,988","832,756",90,5,63,63,courts.go.jp__vc-files__courts__2023__R06saisyutsu_gaisanyoukyusyo_720kb#b1,12,DETAIL,PARSED
+,050 裁判所施設費,0,"14,631,096","14,631,096",0,"12,909,547","12,909,547","△1,721,549",106,5,64,64,courts.go.jp__vc-files__courts__2023__R06saisyutsu_gaisanyoukyusyo_720kb#b1,13,CODE3,PARSED
+8,01‑95 裁判所施設整備に必要な経費,0,"14,631,096","14,631,096",0,"12,909,547","12,909,547","△1,721,549",106,5,65,65,courts.go.jp__vc-files__courts__2023__R06saisyutsu_gaisanyoukyusyo_720kb#b1,14,DETAIL,PARSED
+,080 裁判所予備経費,0,"8,000","8,000",0,"8,000","8,000",0,107,5,66,66,courts.go.jp__vc-files__courts__2023__R06saisyutsu_gaisanyoukyusyo_720kb#b1,15,CODE3,PARSED
+9,01‑95 裁判所の予備金に必要な経費,0,"8,000","8,000",0,"8,000","8,000",0,107,5,67,67,courts.go.jp__vc-files__courts__2023__R06saisyutsu_gaisanyoukyusyo_720kb#b1,16,DETAIL,PARSED
+,組織計,"265,129,512","57,087,268","322,216,780","278,587,973","53,852,583","332,440,556","10,223,776",,5,68,68,courts.go.jp__vc-files__courts__2023__R06saisyutsu_gaisanyoukyusyo_720kb#b1,17,TOTAL,PARSED
+,所管計,"265,129,512","57,087,268","322,216,780","278,587,973","53,852,583","332,440,556","10,223,776",,5,69,69,courts.go.jp__vc-files__courts__2023__R06saisyutsu_gaisanyoukyusyo_720kb#b1,18,TOTAL,PARSED

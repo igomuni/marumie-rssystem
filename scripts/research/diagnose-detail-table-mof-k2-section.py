@@ -7,11 +7,11 @@ J1 は P0-A/P1 から変更しない。K2 は診断で join には使わない�
 """
 import collections, csv, glob, hashlib, json, os, re, sys, unicodedata
 
-D = 'data/work/budget-request-csv/2024/detail-table/sources/'
+D = 'tests/fixtures/budget-request-csv/2024/detail-table/sources/'
 M = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser('~/MyGitHub/marumie-rssystem/data/normalized/mof/fy2024')
 FROZEN_JIKOU_SHA = 'a63f50504c821ad7aff9fe1c96c80635dda978ea0870976d15f9bc9735d3ef7e'
 FROZEN_MANIFEST_SHA = '7989885b0d2ee0907d2389f71bc2642bada070120a06283c89d2f6d6634f226e'
-MANIFEST = 'data/work/budget-request-csv/2024/detail-table/output-manifest.json'
+MANIFEST = 'tests/fixtures/budget-request-csv/2024/detail-table/output-manifest.json'
 HY = '[‑-]'
 DET = re.compile(rf'^([0-9]{{2}}){HY}([0-9]{{2}}) (.*)$')
 MIN = re.compile(r'^[0-9]{2}\s+(.+?)所管')

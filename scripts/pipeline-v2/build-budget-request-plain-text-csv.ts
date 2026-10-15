@@ -14,7 +14,7 @@ import {
 import { deterministicPdfSlug } from './lib/budget-request-plain-text';
 
 const rawRoot = 'data/work/budget-request-plain-text/2024';
-const outputRoot = 'data/work/budget-request-csv/2024';
+const outputRoot = 'tests/fixtures/budget-request-csv/2024';
 const manifestPath = 'tests/fixtures/budget-request-raw-text/2024/raw-text-manifest.json';
 const inventoryPath = 'tests/fixtures/budget-request-cover-toc-structure/2024/structure-inventory.json';
 const developmentPath = 'tests/fixtures/budget-request-toc-physical-row/2024/development-sample.json';

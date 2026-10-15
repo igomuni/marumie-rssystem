@@ -8,7 +8,7 @@
 """
 import collections, csv, glob, gzip, hashlib, json, os, re, sys
 
-D = 'data/work/budget-request-csv/2025'
+D = 'tests/fixtures/budget-request-csv/2025'
 MOF = 'data/normalized/mof/fy2025/budget-jikou-v1-canonical.jsonl'
 MOF_V1 = 'public/data/mof-jikou-2025.json.gz'
 SECTIONS = 'tests/fixtures/detail-table-toc-total-sections/2025/section-candidates.csv'

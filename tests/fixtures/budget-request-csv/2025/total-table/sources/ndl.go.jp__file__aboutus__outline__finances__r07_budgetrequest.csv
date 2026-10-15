@@ -1,0 +1,10 @@
+要求番号,区分,前年度予算額_一般行政経費,前年度予算額_その他の経費,前年度予算額_計,７年度概算要求額_一般行政経費,７年度概算要求額_その他の経費,７年度概算要求額_計,増△減,明細書頁数,source_page,source_line_start,source_line_end,table_block_id,row_index,row_type,parse_status
+,030 国立国会図書館,"10,241,382","9,959,207","20,200,589","10,267,205","10,489,295","20,756,500","555,911",3,3,52,52,ndl.go.jp__file__aboutus__outline__finances__r07_budgetrequest#b1,1,CODE3,PARSED
+,010 国立国会図書館,"10,241,382","8,905,804","19,147,186","10,267,205","8,896,221","19,163,426","16,240",3,3,53,53,ndl.go.jp__file__aboutus__outline__finances__r07_budgetrequest#b1,2,CODE3,PARSED
+1,01‑95 国立国会図書館の運営に必要な経費,"10,241,382",0,"10,241,382","10,267,205",0,"10,267,205","25,823",3,3,54,54,ndl.go.jp__file__aboutus__outline__finances__r07_budgetrequest#b1,3,DETAIL,PARSED
+2,06‑95 国立国会図書館業務に必要な経費,0,"7,815,512","7,815,512",0,"7,800,864","7,800,864","△14,648",5,3,55,55,ndl.go.jp__file__aboutus__outline__finances__r07_budgetrequest#b1,4,DETAIL,PARSED
+3,11‑13 科学技術関係資料の収集整備に必要な経費,0,"1,090,292","1,090,292",0,"1,095,357","1,095,357","5,065",12,3,56,56,ndl.go.jp__file__aboutus__outline__finances__r07_budgetrequest#b1,5,DETAIL,PARSED
+,020 国立国会図書館施設費,0,"1,053,403","1,053,403",0,"1,593,074","1,593,074","539,671",13,3,57,57,ndl.go.jp__file__aboutus__outline__finances__r07_budgetrequest#b1,6,CODE3,PARSED
+4,01‑95 国立国会図書館施設整備に必要な経費,0,"1,053,403","1,053,403",0,"1,593,074","1,593,074","539,671",13,3,58,58,ndl.go.jp__file__aboutus__outline__finances__r07_budgetrequest#b1,7,DETAIL,PARSED
+,組織計,"10,241,382","9,959,207","20,200,589","10,267,205","10,489,295","20,756,500","555,911",,3,59,59,ndl.go.jp__file__aboutus__outline__finances__r07_budgetrequest#b1,8,TOTAL,PARSED
+,所管計,"10,241,382","9,959,207","20,200,589","10,267,205","10,489,295","20,756,500","555,911",,3,60,60,ndl.go.jp__file__aboutus__outline__finances__r07_budgetrequest#b1,9,TOTAL,PARSED

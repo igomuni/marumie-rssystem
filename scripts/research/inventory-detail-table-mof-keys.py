@@ -4,12 +4,12 @@
   python3 -I scripts/research/inventory-detail-table-mof-keys.py [MOF normalized fy2024 dir]
 
 両側の値の分布を別々に数えるだけで、両側の共通部分（積集合）は取らない。標準出力は JSON。
-入力: data/work/budget-request-csv/2024/detail-table/sources/*.csv、
+入力: tests/fixtures/budget-request-csv/2024/detail-table/sources/*.csv、
       <MOF dir>/budget-jikou.jsonl・budget-items.jsonl（既定 ~/MyGitHub/marumie-rssystem/data/normalized/mof/fy2024）
 """
 import collections, csv, glob, json, os, re, sys
 
-D = 'data/work/budget-request-csv/2024/detail-table/sources/'
+D = 'tests/fixtures/budget-request-csv/2024/detail-table/sources/'
 M = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser('~/MyGitHub/marumie-rssystem/data/normalized/mof/fy2024')
 HY = '[‑-]'
 C4 = re.compile(rf'^([0-9 ]{{1,5}}){HY}([0-9 ]{{1,4}}){HY}([0-9]{{2}}){HY}([0-9]{{4}})(?:\s|$)')

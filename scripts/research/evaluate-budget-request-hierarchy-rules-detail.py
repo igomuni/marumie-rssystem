@@ -12,7 +12,7 @@ TOC = re.compile(r'^（([^）]*)）\s*(\S+)\s+(.+)$'); CODE = re.compile(r'^(\d+
 res, errs = {}, []
 for year, ver in (('2024', '2024'), ('2025', '2025_teishutsu')):
     accounts = {ns(r['特別会計']) for r in ld(f'tests/fixtures/mof-archive-csv/{ver}/kou-special.csv')}
-    B = f'data/work/budget-request-csv/{year}'
+    B = f'tests/fixtures/budget-request-csv/{year}'
     tp, fn, fp = (collections.Counter() for _ in range(3)); sources = 0; skipped = collections.Counter()
     for f in sorted(glob.glob(f'{B}/toc/sources/*.csv')):
         slug = os.path.basename(f)[:-4]; df = f'{B}/detail-table/sources/{slug}.csv'

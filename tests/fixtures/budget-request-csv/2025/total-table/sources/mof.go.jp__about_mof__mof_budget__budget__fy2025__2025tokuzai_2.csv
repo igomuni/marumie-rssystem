@@ -1,0 +1,10 @@
+要求番号,区分,前年度予算額_一般行政経費,前年度予算額_その他の経費,前年度予算額_計,７年度概算要求額_一般行政経費,７年度概算要求額_その他の経費,７年度概算要求額_計,増△減,明細書頁数,source_page,source_line_start,source_line_end,table_block_id,row_index,row_type,parse_status
+,08 財政投融資,0,"8,267,084","8,267,084",0,"4,173,449","4,173,449","△4,093,635",2,3,41,41,mof.go.jp__about_mof__mof_budget__budget__fy2025__2025tokuzai_2#b1,1,HIER,PARSED
+,3 特定国有財産整備勘定,0,"8,267,084","8,267,084",0,"4,173,449","4,173,449","△4,093,635",2,3,42,42,mof.go.jp__about_mof__mof_budget__budget__fy2025__2025tokuzai_2#b1,2,HIER,PARSED
+,010 特定国有財産整備費,0,"7,693,965","7,693,965",0,"3,703,066","3,703,066","△3,990,899",2,3,43,43,mof.go.jp__about_mof__mof_budget__budget__fy2025__2025tokuzai_2#b1,3,CODE3,PARSED
+1,01‑95 特定施設整備に必要な経費,0,"543,264","543,264",0,"119,903","119,903","△423,361",2,3,44,44,mof.go.jp__about_mof__mof_budget__budget__fy2025__2025tokuzai_2#b1,4,DETAIL,PARSED
+2,06‑95 民間資金等を活用した特定施設整備に必要な経費,0,"7,150,701","7,150,701",0,"3,583,163","3,583,163","△3,567,538",2,3,45,46,mof.go.jp__about_mof__mof_budget__budget__fy2025__2025tokuzai_2#b1,5,DETAIL,PARSED
+,020 事務取扱費,0,"573,119","573,119",0,"470,383","470,383","△102,736",2,3,47,47,mof.go.jp__about_mof__mof_budget__budget__fy2025__2025tokuzai_2#b1,6,CODE3,PARSED
+3,01‑95 事務取扱いに必要な経費,0,"299,352","299,352",0,"93,963","93,963","△205,389",2,3,48,48,mof.go.jp__about_mof__mof_budget__budget__fy2025__2025tokuzai_2#b1,7,DETAIL,PARSED
+4,06‑95 特定国有財産の取得及び処分に必要な経費,0,"273,767","273,767",0,"376,420","376,420","102,653",3,3,49,49,mof.go.jp__about_mof__mof_budget__budget__fy2025__2025tokuzai_2#b1,8,DETAIL,PARSED
+,会計計,0,"8,267,084","8,267,084",0,"4,173,449","4,173,449","△4,093,635",,3,50,50,mof.go.jp__about_mof__mof_budget__budget__fy2025__2025tokuzai_2#b1,9,TOTAL,PARSED

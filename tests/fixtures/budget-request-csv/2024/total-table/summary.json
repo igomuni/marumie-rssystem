@@ -1,0 +1,2358 @@
+{
+  "scope": "FY2024 令和6年度歳出概算要求額総表 raw text → logical rows (v0 deterministic parser; descriptive counts, not an accuracy score)",
+  "input": {
+    "zipPath": "data/work/budget-request-plain-text.zip",
+    "zipSha256": "268f1020957b58362e1b224197b16944855c139efa1524c343a77abdf754e533",
+    "txtEntries": 82
+  },
+  "frozenManifestIntegrity": {
+    "MATCH": 80,
+    "NOT_IN_FROZEN_MANIFEST": 2
+  },
+  "frozenManifestIntegrityDetail": [
+    {
+      "source_file": "budget-request-plain-text/2024/fsa.go.jp__common__budget__yosan__6youkyuu-2__01.txt",
+      "status": "NOT_IN_FROZEN_MANIFEST"
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/moj.go.jp__content__001402818.txt",
+      "status": "NOT_IN_FROZEN_MANIFEST"
+    }
+  ],
+  "sourceFileCount": 82,
+  "candidateTotalTableSourceCount": 59,
+  "candidateTotalTablePageCount": 164,
+  "tableBlockCount": 69,
+  "titleOnlyPageCount": 124,
+  "logicalRowCount": 3531,
+  "rowTypeCounts": {
+    "CODE3": 1598,
+    "DETAIL": 1723,
+    "HIER": 69,
+    "TOTAL": 141
+  },
+  "parseStatusCounts": {
+    "PARSED": 3531
+  },
+  "rowsWithContinuation": {
+    "CODE3": 197,
+    "DETAIL": 506
+  },
+  "continuationLineCount": {
+    "CODE3": 204,
+    "DETAIL": 532
+  },
+  "unresolvedCount": 0,
+  "unresolvedByReason": {},
+  "numericTailFailureCount": 0,
+  "unknownRowHeadCount": 0,
+  "lineClassCounts": {
+    "CONTEXT": 69,
+    "CONTINUATION": 736,
+    "PAGE_LABEL": 155,
+    "ROW": 3531,
+    "TABLE_HEADER": 984,
+    "TABLE_TITLE": 69,
+    "UNIT": 69
+  },
+  "blankLinesInCandidatePages": 1150,
+  "signedCellsByColumn": {
+    "previous_general": 2,
+    "previous_other": 0,
+    "previous_total": 2,
+    "request_general": 10,
+    "request_other": 2,
+    "request_total": 12,
+    "difference": 1414
+  },
+  "detailPageShape": {
+    "<blank>": 141,
+    "N": 3249,
+    "エ N": 76,
+    "原 N": 9,
+    "電 N": 56
+  },
+  "arithmeticDiagnostics": {
+    "rowsWithMismatch": 0,
+    "byCheck": {}
+  },
+  "sources": [
+    {
+      "source_file": "budget-request-plain-text/2024/caa.go.jp__policies__budget__assets__cms_caa205_230914_02.txt",
+      "pageCount": 9,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "caa.go.jp__policies__budget__assets__cms_caa205_230914_02#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "9101 東 日 本 大 震 災 復 興 特 別 会 計 （内閣本府等）"
+          ],
+          "rows": 6
+        }
+      ],
+      "rows": 6,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/caa.go.jp__policies__budget__assets__cms_caa205_230914_03.txt",
+      "pageCount": 200,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "caa.go.jp__policies__budget__assets__cms_caa205_230914_03#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "19 内 閣 府 所 管 （消費者庁）"
+          ],
+          "rows": 10
+        }
+      ],
+      "rows": 10,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__0.txt",
+      "pageCount": 25,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        2,
+        3,
+        4,
+        5,
+        7,
+        9,
+        11,
+        13,
+        15,
+        17,
+        19,
+        21,
+        23,
+        25
+      ],
+      "titleOnlyPages": [
+        1,
+        6,
+        8,
+        10,
+        12,
+        14,
+        16,
+        18,
+        20,
+        22,
+        24
+      ],
+      "blocks": [
+        {
+          "table_block_id": "cao.go.jp__yosan__soshiki__r06__pdf__0#b1",
+          "pages": [
+            2,
+            3,
+            4,
+            5
+          ],
+          "titlePages": [
+            2
+          ],
+          "contextLines": [
+            "19 内 閣 府 所 管"
+          ],
+          "rows": 106
+        },
+        {
+          "table_block_id": "cao.go.jp__yosan__soshiki__r06__pdf__0#b2",
+          "pages": [
+            7
+          ],
+          "titlePages": [
+            7
+          ],
+          "contextLines": [
+            "19 内 閣 府 所 管"
+          ],
+          "rows": 13
+        },
+        {
+          "table_block_id": "cao.go.jp__yosan__soshiki__r06__pdf__0#b3",
+          "pages": [
+            9
+          ],
+          "titlePages": [
+            9
+          ],
+          "contextLines": [
+            "19 内 閣 府 所 管"
+          ],
+          "rows": 4
+        },
+        {
+          "table_block_id": "cao.go.jp__yosan__soshiki__r06__pdf__0#b4",
+          "pages": [
+            11
+          ],
+          "titlePages": [
+            11
+          ],
+          "contextLines": [
+            "19 内 閣 府 所 管"
+          ],
+          "rows": 8
+        },
+        {
+          "table_block_id": "cao.go.jp__yosan__soshiki__r06__pdf__0#b5",
+          "pages": [
+            13
+          ],
+          "titlePages": [
+            13
+          ],
+          "contextLines": [
+            "19 内 閣 府 所 管"
+          ],
+          "rows": 5
+        },
+        {
+          "table_block_id": "cao.go.jp__yosan__soshiki__r06__pdf__0#b6",
+          "pages": [
+            15
+          ],
+          "titlePages": [
+            15
+          ],
+          "contextLines": [
+            "19 内 閣 府 所 管"
+          ],
+          "rows": 8
+        },
+        {
+          "table_block_id": "cao.go.jp__yosan__soshiki__r06__pdf__0#b7",
+          "pages": [
+            17
+          ],
+          "titlePages": [
+            17
+          ],
+          "contextLines": [
+            "19 内 閣 府 所 管"
+          ],
+          "rows": 7
+        },
+        {
+          "table_block_id": "cao.go.jp__yosan__soshiki__r06__pdf__0#b8",
+          "pages": [
+            19
+          ],
+          "titlePages": [
+            19
+          ],
+          "contextLines": [
+            "19 内 閣 府 所 管"
+          ],
+          "rows": 6
+        },
+        {
+          "table_block_id": "cao.go.jp__yosan__soshiki__r06__pdf__0#b9",
+          "pages": [
+            21
+          ],
+          "titlePages": [
+            21
+          ],
+          "contextLines": [
+            "19 内 閣 府 所 管"
+          ],
+          "rows": 5
+        },
+        {
+          "table_block_id": "cao.go.jp__yosan__soshiki__r06__pdf__0#b10",
+          "pages": [
+            23
+          ],
+          "titlePages": [
+            23
+          ],
+          "contextLines": [
+            "19 内 閣 府 所 管"
+          ],
+          "rows": 4
+        },
+        {
+          "table_block_id": "cao.go.jp__yosan__soshiki__r06__pdf__0#b11",
+          "pages": [
+            25
+          ],
+          "titlePages": [
+            25
+          ],
+          "contextLines": [
+            "19 内 閣 府 所 管"
+          ],
+          "rows": 20
+        }
+      ],
+      "rows": 186,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__1.txt",
+      "pageCount": 3,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__e2.txt",
+      "pageCount": 19,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__f1.txt",
+      "pageCount": 2,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        2
+      ],
+      "titleOnlyPages": [
+        1
+      ],
+      "blocks": [
+        {
+          "table_block_id": "cao.go.jp__yosan__soshiki__r06__pdf__f1#b1",
+          "pages": [
+            2
+          ],
+          "titlePages": [
+            2
+          ],
+          "contextLines": [
+            "9101 東 日 本 大 震 災 復 興 特 別 会 計 （内閣本府等）"
+          ],
+          "rows": 11
+        }
+      ],
+      "rows": 11,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__f2.txt",
+      "pageCount": 5,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cas.go.jp__jp__yosan__pdf__r6_01.txt",
+      "pageCount": 2,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        2
+      ],
+      "titleOnlyPages": [
+        1
+      ],
+      "blocks": [
+        {
+          "table_block_id": "cas.go.jp__jp__yosan__pdf__r6_01#b1",
+          "pages": [
+            2
+          ],
+          "titlePages": [
+            2
+          ],
+          "contextLines": [
+            "05 内 閣 所 管 （内閣官房）"
+          ],
+          "rows": 13
+        }
+      ],
+      "rows": 13,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cas.go.jp__jp__yosan__pdf__r6_02.txt",
+      "pageCount": 2,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cas.go.jp__jp__yosan__pdf__r6_03.txt",
+      "pageCount": 4,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cas.go.jp__jp__yosan__pdf__r6_04.txt",
+      "pageCount": 4,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cas.go.jp__jp__yosan__pdf__r6_05.txt",
+      "pageCount": 1,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cas.go.jp__jp__yosan__pdf__r6_06.txt",
+      "pageCount": 6,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cas.go.jp__jp__yosan__pdf__r6_07.txt",
+      "pageCount": 29,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cas.go.jp__jp__yosan__pdf__r6_08.txt",
+      "pageCount": 4,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cas.go.jp__jp__yosan__pdf__r6_09.txt",
+      "pageCount": 3,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cas.go.jp__jp__yosan__pdf__r6_10.txt",
+      "pageCount": 4,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cas.go.jp__jp__yosan__pdf__r6_11.txt",
+      "pageCount": 19,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cas.go.jp__jp__yosan__pdf__r6_12.txt",
+      "pageCount": 4,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cas.go.jp__jp__yosan__pdf__r6_13.txt",
+      "pageCount": 3,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cas.go.jp__jp__yosan__pdf__r6_14.txt",
+      "pageCount": 3,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cas.go.jp__jp__yosan__pdf__r6_15.txt",
+      "pageCount": 3,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cas.go.jp__jp__yosan__pdf__r6_16.txt",
+      "pageCount": 2,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        2
+      ],
+      "titleOnlyPages": [
+        1
+      ],
+      "blocks": [
+        {
+          "table_block_id": "cas.go.jp__jp__yosan__pdf__r6_16#b1",
+          "pages": [
+            2
+          ],
+          "titlePages": [
+            2
+          ],
+          "contextLines": [
+            "9101 東 日 本 大 震 災 復 興 特 別 会 計 （内閣）"
+          ],
+          "rows": 6
+        }
+      ],
+      "rows": 6,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cas.go.jp__jp__yosan__pdf__r6_17.txt",
+      "pageCount": 1,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__585bb95a__20230907_policies_budget_04.txt",
+      "pageCount": 147,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5,
+        6
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__585bb95a__20230907_policies_budget_04#b1",
+          "pages": [
+            5,
+            6
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "19 内 閣 府 所 管 （こども家庭庁）"
+          ],
+          "rows": 40
+        }
+      ],
+      "rows": 40,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__aac2d779__20230907_policies_budget_05.txt",
+      "pageCount": 29,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__aac2d779__20230907_policies_budget_05#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "9207 年 金 特 別 会 計 (子ども家庭局（子ども・子育て支援勘定）)"
+          ],
+          "rows": 17
+        }
+      ],
+      "rows": 17,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/clb.go.jp__files__topics__4473_ext_05_1.txt",
+      "pageCount": 29,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "clb.go.jp__files__topics__4473_ext_05_1#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "05 内 閣 所 管 (内閣法制局（内閣法制局）)"
+          ],
+          "rows": 6
+        }
+      ],
+      "rows": 6,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/courts.go.jp__vc-files__courts__2023__R06saisyutsu_gaisanyoukyusyo_720kb.txt",
+      "pageCount": 127,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "courts.go.jp__vc-files__courts__2023__R06saisyutsu_gaisanyoukyusyo_720kb#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "03 裁 判 所 所 管"
+          ],
+          "rows": 18
+        }
+      ],
+      "rows": 18,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/dangai.go.jp__info__pdf__r06_saisyutu-gaisan.txt",
+      "pageCount": 9,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "dangai.go.jp__info__pdf__r06_saisyutu-gaisan#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "02 国 会 所 管 （裁判官弾劾裁判所）"
+          ],
+          "rows": 6
+        }
+      ],
+      "rows": 6,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/digital.go.jp__assets__contents__node__basic_page__field_ref_resources__e9b99425-437c-4750-b4e2-6cca3cd877a6__0fab2c74__20230914_policies_budget_r6request_table_01.txt",
+      "pageCount": 32,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "digital.go.jp__assets__contents__node__basic_page__field_ref_resources__e9b99425-437c-4750-b4e2-6cca3cd877a6__0fab2c74__20230914_policies_budget_r6request_table_01#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "32 デジタル庁所管 （デジタル庁）"
+          ],
+          "rows": 10
+        }
+      ],
+      "rows": 10,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/env.go.jp__content__000157010.txt",
+      "pageCount": 193,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "env.go.jp__content__000157010#b1",
+          "pages": [
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "29 環 境 省 所 管"
+          ],
+          "rows": 466
+        }
+      ],
+      "rows": 466,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/env.go.jp__content__000157012.txt",
+      "pageCount": 16,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5,
+        6
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "env.go.jp__content__000157012#b1",
+          "pages": [
+            5,
+            6
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "9905 エ ネ ル ギ ー 対 策 特 別 会 計 (（エネルギー需給勘定）)"
+          ],
+          "rows": 40
+        }
+      ],
+      "rows": 40,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/env.go.jp__content__000157013.txt",
+      "pageCount": 25,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5,
+        6
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "env.go.jp__content__000157013#b1",
+          "pages": [
+            5,
+            6
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "9905 エ ネ ル ギ ー 対 策 特 別 会 計 （電源開発促進勘定）"
+          ],
+          "rows": 30
+        }
+      ],
+      "rows": 30,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/env.go.jp__content__000157016.txt",
+      "pageCount": 30,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5,
+        6
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "env.go.jp__content__000157016#b1",
+          "pages": [
+            5,
+            6
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "9101 東 日 本 大 震 災 復 興 特 別 会 計 （環境省）"
+          ],
+          "rows": 42
+        }
+      ],
+      "rows": 42,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/fsa.go.jp__common__budget__yosan__6youkyuu-2__01.txt",
+      "pageCount": 77,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/jbaudit.go.jp__jbaudit__bud_clo__bud__pdf__r06__20230906_02.txt",
+      "pageCount": 48,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "jbaudit.go.jp__jbaudit__bud_clo__bud__pdf__r06__20230906_02#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "04 会計検査院所管"
+          ],
+          "rows": 8
+        }
+      ],
+      "rows": 8,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/jcrc.go.jp__content__000001746.txt",
+      "pageCount": 17,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "jcrc.go.jp__content__000001746#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "19 内 閣 府 所 管 （カジノ管理委員会）"
+          ],
+          "rows": 7
+        }
+      ],
+      "rows": 7,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r6__r6sandanhyou.txt",
+      "pageCount": 140,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r6__r6sandanhyou#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "19 内 閣 府 所 管 (公正取引委員会（公正取引委員会）)"
+          ],
+          "rows": 10
+        }
+      ],
+      "rows": 10,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/jinji.go.jp__content__900024096.txt",
+      "pageCount": 98,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "jinji.go.jp__content__900024096#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "05 内 閣 所 管 (人事院（人事院）)"
+          ],
+          "rows": 23
+        }
+      ],
+      "rows": 23,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/kunaicho.go.jp__kunaicho__kunaicho__pdf__r06-02.txt",
+      "pageCount": 33,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "kunaicho.go.jp__kunaicho__kunaicho__pdf__r06-02#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "01 皇 室 費 所 管 （皇室費）"
+          ],
+          "rows": 10
+        }
+      ],
+      "rows": 10,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/kunaicho.go.jp__kunaicho__kunaicho__pdf__r06-03.txt",
+      "pageCount": 20,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "kunaicho.go.jp__kunaicho__kunaicho__pdf__r06-03#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "19 内 閣 府 所 管 （宮内庁）"
+          ],
+          "rows": 5
+        }
+      ],
+      "rows": 5,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/maff.go.jp__j__budget__attach__pdf__230901-2.txt",
+      "pageCount": 378,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "maff.go.jp__j__budget__attach__pdf__230901-2#b1",
+          "pages": [
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14
+          ],
+          "titlePages": [
+            7
+          ],
+          "contextLines": [
+            "26 農林水産省所管"
+          ],
+          "rows": 215
+        }
+      ],
+      "rows": 215,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/maff.go.jp__j__budget__attach__pdf__230901-4.txt",
+      "pageCount": 21,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5,
+        6
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "maff.go.jp__j__budget__attach__pdf__230901-4#b1",
+          "pages": [
+            5,
+            6
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "9101 東 日 本 大 震 災 復 興 特 別 会 計 （農林水産省）"
+          ],
+          "rows": 39
+        }
+      ],
+      "rows": 39,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/maff.go.jp__j__budget__attach__pdf__230901-6.txt",
+      "pageCount": 35,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5,
+        6,
+        7
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "maff.go.jp__j__budget__attach__pdf__230901-6#b1",
+          "pages": [
+            5,
+            6,
+            7
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "2610 食料安定供給特別会計"
+          ],
+          "rows": 80
+        }
+      ],
+      "rows": 80,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/maff.go.jp__j__budget__attach__pdf__230901-8.txt",
+      "pageCount": 7,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "maff.go.jp__j__budget__attach__pdf__230901-8#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "2611 国 有 林 野 事 業 債 務 管 理 特 別 会 計 (国有林野事業債務管理（国有林野債務管理）)"
+          ],
+          "rows": 4
+        }
+      ],
+      "rows": 4,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/meti.go.jp__main__yosangaisan__fy2024__pdf__eneden_o.txt",
+      "pageCount": 25,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5,
+        6
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "meti.go.jp__main__yosangaisan__fy2024__pdf__eneden_o#b1",
+          "pages": [
+            5,
+            6
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "9905 エ ネ ル ギ ー 対 策 特 別 会 計 （電源開発促進勘定）"
+          ],
+          "rows": 30
+        }
+      ],
+      "rows": 30,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/meti.go.jp__main__yosangaisan__fy2024__pdf__enegen_o.txt",
+      "pageCount": 7,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "meti.go.jp__main__yosangaisan__fy2024__pdf__enegen_o#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "9905 エ ネ ル ギ ー 対 策 特 別 会 計 （原子力損害賠償支援勘定）"
+          ],
+          "rows": 11
+        }
+      ],
+      "rows": 11,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/meti.go.jp__main__yosangaisan__fy2024__pdf__eneju_o.txt",
+      "pageCount": 16,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5,
+        6
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "meti.go.jp__main__yosangaisan__fy2024__pdf__eneju_o#b1",
+          "pages": [
+            5,
+            6
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "9905 エ ネ ル ギ ー 対 策 特 別 会 計 (（エネルギー需給勘定）)"
+          ],
+          "rows": 40
+        }
+      ],
+      "rows": 40,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/meti.go.jp__main__yosangaisan__fy2024__pdf__fukko_o.txt",
+      "pageCount": 10,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "meti.go.jp__main__yosangaisan__fy2024__pdf__fukko_o#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "9101 東 日 本 大 震 災 復 興 特 別 会 計 （経済産業省）"
+          ],
+          "rows": 13
+        }
+      ],
+      "rows": 13,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/meti.go.jp__main__yosangaisan__fy2024__pdf__ippan_o.txt",
+      "pageCount": 106,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5,
+        6,
+        7,
+        8
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "meti.go.jp__main__yosangaisan__fy2024__pdf__ippan_o#b1",
+          "pages": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "27 経済産業省所管"
+          ],
+          "rows": 93
+        }
+      ],
+      "rows": 93,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/meti.go.jp__main__yosangaisan__fy2024__pdf__tokkyo_o.txt",
+      "pageCount": 17,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "meti.go.jp__main__yosangaisan__fy2024__pdf__tokkyo_o#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "2703 特 許 特 別 会 計 (特 許（特 許）)"
+          ],
+          "rows": 12
+        }
+      ],
+      "rows": 12,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01.txt",
+      "pageCount": 6,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/mext.go.jp__content__20230914-mxt_kaikesou01-000031817_02.txt",
+      "pageCount": 8,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "titleOnlyPages": [],
+      "blocks": [
+        {
+          "table_block_id": "mext.go.jp__content__20230914-mxt_kaikesou01-000031817_02#b1",
+          "pages": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "titlePages": [
+            1
+          ],
+          "contextLines": [
+            "24 文部科学省所管"
+          ],
+          "rows": 191
+        }
+      ],
+      "rows": 191,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/mext.go.jp__content__20230914-mxt_kaikesou01-000031817_03.txt",
+      "pageCount": 1339,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/mext.go.jp__content__20230914-mxt_kaikesou01-000031817_04.txt",
+      "pageCount": 6,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-1b-01.txt",
+      "pageCount": 1723,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-1b-01#b1",
+          "pages": [
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "titlePages": [
+            9
+          ],
+          "contextLines": [
+            "25 厚生労働省所管"
+          ],
+          "rows": 342
+        }
+      ],
+      "rows": 342,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-2b-01.txt",
+      "pageCount": 782,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5,
+        6,
+        7,
+        8
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-2b-01#b1",
+          "pages": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "2505 労 働 保 険 特 別 会 計"
+          ],
+          "rows": 101
+        }
+      ],
+      "rows": 101,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01.txt",
+      "pageCount": 48,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5,
+        6,
+        7
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01#b1",
+          "pages": [
+            5,
+            6,
+            7
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "9207 年 金 特 別 会 計"
+          ],
+          "rows": 80
+        }
+      ],
+      "rows": 80,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/mlit.go.jp__page__content__001630393.txt",
+      "pageCount": 51,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5,
+        6,
+        7
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "mlit.go.jp__page__content__001630393#b1",
+          "pages": [
+            5,
+            6,
+            7
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "2809 自 動 車 安 全 特 別 会 計"
+          ],
+          "rows": 70
+        }
+      ],
+      "rows": 70,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/mlit.go.jp__page__content__001630395.txt",
+      "pageCount": 10,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "mlit.go.jp__page__content__001630395#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "9101 東 日 本 大 震 災 復 興 特 別 会 計 （国土交通省）"
+          ],
+          "rows": 24
+        }
+      ],
+      "rows": 24,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/mlit.go.jp__page__content__001630995.txt",
+      "pageCount": 1097,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "mlit.go.jp__page__content__001630995#b1",
+          "pages": [
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27
+          ],
+          "titlePages": [
+            11
+          ],
+          "contextLines": [
+            "28 国土交通省所管"
+          ],
+          "rows": 477
+        }
+      ],
+      "rows": 477,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/mod.go.jp__j__budget__gaisan__r6__gaisanyoukyu.txt",
+      "pageCount": 540,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5,
+        6,
+        7,
+        8
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "mod.go.jp__j__budget__gaisan__r6__gaisanyoukyu#b1",
+          "pages": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "30 防 衛 省 所 管 （防衛省）"
+          ],
+          "rows": 103
+        }
+      ],
+      "rows": 103,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/mof.go.jp__about_mof__mof_budget__budget__fy2024__2024gaitame_2.txt",
+      "pageCount": 20,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        3
+      ],
+      "titleOnlyPages": [
+        1,
+        2
+      ],
+      "blocks": [
+        {
+          "table_block_id": "mof.go.jp__about_mof__mof_budget__budget__fy2024__2024gaitame_2#b1",
+          "pages": [
+            3
+          ],
+          "titlePages": [
+            3
+          ],
+          "contextLines": [
+            "2305 外国為替資金特別会計"
+          ],
+          "rows": 15
+        }
+      ],
+      "rows": 15,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2.txt",
+      "pageCount": 297,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "titleOnlyPages": [
+        1,
+        2
+      ],
+      "blocks": [
+        {
+          "table_block_id": "mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2#b1",
+          "pages": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "titlePages": [
+            4
+          ],
+          "contextLines": [
+            "23 財 務 省 所 管"
+          ],
+          "rows": 106
+        }
+      ],
+      "rows": 106,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/mof.go.jp__about_mof__mof_budget__budget__fy2024__2024jisinn_2.txt",
+      "pageCount": 9,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        3
+      ],
+      "titleOnlyPages": [
+        1,
+        2
+      ],
+      "blocks": [
+        {
+          "table_block_id": "mof.go.jp__about_mof__mof_budget__budget__fy2024__2024jisinn_2#b1",
+          "pages": [
+            3
+          ],
+          "titlePages": [
+            3
+          ],
+          "contextLines": [
+            "2307 地 震 再 保 険 特 別 会 計"
+          ],
+          "rows": 9
+        }
+      ],
+      "rows": 9,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/mof.go.jp__about_mof__mof_budget__budget__fy2024__2024kokusaiseirikikinn_2.txt",
+      "pageCount": 9,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        3
+      ],
+      "titleOnlyPages": [
+        1,
+        2
+      ],
+      "blocks": [
+        {
+          "table_block_id": "mof.go.jp__about_mof__mof_budget__budget__fy2024__2024kokusaiseirikikinn_2#b1",
+          "pages": [
+            3
+          ],
+          "titlePages": [
+            3
+          ],
+          "contextLines": [
+            "2304 国債整理基金特別会計"
+          ],
+          "rows": 14
+        }
+      ],
+      "rows": 14,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/mof.go.jp__about_mof__mof_budget__budget__fy2024__2024tokuzai_2.txt",
+      "pageCount": 6,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        3
+      ],
+      "titleOnlyPages": [
+        1,
+        2
+      ],
+      "blocks": [
+        {
+          "table_block_id": "mof.go.jp__about_mof__mof_budget__budget__fy2024__2024tokuzai_2#b1",
+          "pages": [
+            3
+          ],
+          "titlePages": [
+            3
+          ],
+          "contextLines": [
+            "9808 財 政 投 融 資 特 別 会 計 （特定国有財産整備勘定）"
+          ],
+          "rows": 11
+        }
+      ],
+      "rows": 11,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/mof.go.jp__about_mof__mof_budget__budget__fy2024__2024tousi_2.txt",
+      "pageCount": 11,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        3
+      ],
+      "titleOnlyPages": [
+        1,
+        2
+      ],
+      "blocks": [
+        {
+          "table_block_id": "mof.go.jp__about_mof__mof_budget__budget__fy2024__2024tousi_2#b1",
+          "pages": [
+            3
+          ],
+          "titlePages": [
+            3
+          ],
+          "contextLines": [
+            "9808 財 政 投 融 資 特 別 会 計 （投資勘定）"
+          ],
+          "rows": 18
+        }
+      ],
+      "rows": 18,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/mof.go.jp__about_mof__mof_budget__budget__fy2024__2024zaiyuu_2.txt",
+      "pageCount": 16,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        3
+      ],
+      "titleOnlyPages": [
+        1,
+        2
+      ],
+      "blocks": [
+        {
+          "table_block_id": "mof.go.jp__about_mof__mof_budget__budget__fy2024__2024zaiyuu_2#b1",
+          "pages": [
+            3
+          ],
+          "titlePages": [
+            3
+          ],
+          "contextLines": [
+            "9808 財 政 投 融 資 特 別 会 計 （財政融資資金勘定）"
+          ],
+          "rows": 18
+        }
+      ],
+      "rows": 18,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/mofa.go.jp__mofaj__files__100546568.txt",
+      "pageCount": 314,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5,
+        6,
+        7
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "mofa.go.jp__mofaj__files__100546568#b1",
+          "pages": [
+            5,
+            6,
+            7
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "22 外 務 省 所 管"
+          ],
+          "rows": 76
+        }
+      ],
+      "rows": 76,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/moj.go.jp__content__001402818.txt",
+      "pageCount": 737,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/moj.go.jp__content__001402819.txt",
+      "pageCount": 11,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "moj.go.jp__content__001402819#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "9101 東 日 本 大 震 災 復 興 特 別 会 計 （法務省）"
+          ],
+          "rows": 8
+        }
+      ],
+      "rows": 8,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/ndl.go.jp__jp__aboutus__outline__r06_budgetrequest.txt",
+      "pageCount": 17,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        3
+      ],
+      "titleOnlyPages": [
+        1,
+        2
+      ],
+      "blocks": [
+        {
+          "table_block_id": "ndl.go.jp__jp__aboutus__outline__r06_budgetrequest#b1",
+          "pages": [
+            3
+          ],
+          "titlePages": [
+            3
+          ],
+          "contextLines": [
+            "02 国 会 所 管 （国立国会図書館）"
+          ],
+          "rows": 9
+        }
+      ],
+      "rows": 9,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/npa.go.jp__policies__budget__r6__gaisanyokyu__hukkoutokubetukaikei.txt",
+      "pageCount": 7,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        3
+      ],
+      "titleOnlyPages": [
+        1,
+        2
+      ],
+      "blocks": [
+        {
+          "table_block_id": "npa.go.jp__policies__budget__r6__gaisanyokyu__hukkoutokubetukaikei#b1",
+          "pages": [
+            3
+          ],
+          "titlePages": [
+            3
+          ],
+          "contextLines": [
+            "9101 東 日 本 大 震 災 復 興 特 別 会 計 （警察庁）"
+          ],
+          "rows": 8
+        }
+      ],
+      "rows": 8,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/npa.go.jp__policies__budget__r6__gaisanyokyu__ippankaikei.txt",
+      "pageCount": 112,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        3,
+        4
+      ],
+      "titleOnlyPages": [
+        1,
+        2
+      ],
+      "blocks": [
+        {
+          "table_block_id": "npa.go.jp__policies__budget__r6__gaisanyokyu__ippankaikei#b1",
+          "pages": [
+            3,
+            4
+          ],
+          "titlePages": [
+            3
+          ],
+          "contextLines": [
+            "19 内 閣 府 所 管"
+          ],
+          "rows": 36
+        }
+      ],
+      "rows": 36,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/ppc.go.jp__files__pdf__230831youkyu.txt",
+      "pageCount": 30,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "ppc.go.jp__files__pdf__230831youkyu#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "19 内 閣 府 所 管 （個人情報保護委員会）"
+          ],
+          "rows": 6
+        }
+      ],
+      "rows": 6,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/reconstruction.go.jp__files__user__topics__2023_fukkochougaisansaisyutsu.txt",
+      "pageCount": 103,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "reconstruction.go.jp__files__user__topics__2023_fukkochougaisansaisyutsu#b1",
+          "pages": [
+            7,
+            8,
+            9,
+            10,
+            11,
+            12
+          ],
+          "titlePages": [
+            7
+          ],
+          "contextLines": [
+            "9101 東 日 本 大 震 災 復 興 特 別 会 計"
+          ],
+          "rows": 153
+        }
+      ],
+      "rows": 153,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/sangiin.go.jp__jpn__annai__oshirase__pdf__r6gaisan-yokyusyo-250905.txt",
+      "pageCount": 21,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "sangiin.go.jp__jpn__annai__oshirase__pdf__r6gaisan-yokyusyo-250905#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "02 国 会 所 管 （参 議 院）"
+          ],
+          "rows": 10
+        }
+      ],
+      "rows": 10,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/shugiin.go.jp__internet__itdb_annai.nsf__html__statics__osirase__kaikei-saishutsugaisan6.pdf__%24File__kaikei-saishutsugaisan6.txt",
+      "pageCount": 36,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "shugiin.go.jp__internet__itdb_annai.nsf__html__statics__osirase__kaikei-saishutsugaisan6.pdf__%24File__kaikei-saishutsugaisan6#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "02 国 会 所 管 （衆 議 院）"
+          ],
+          "rows": 11
+        }
+      ],
+      "rows": 11,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/sotsui.go.jp__budget__images__r6budget_yokyu.txt",
+      "pageCount": 8,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "sotsui.go.jp__budget__images__r6budget_yokyu#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "02 国 会 所 管 （裁判官訴追委員会）"
+          ],
+          "rows": 5
+        }
+      ],
+      "rows": 5,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/soumu.go.jp__main_content__000901372.txt",
+      "pageCount": 454,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5,
+        6,
+        7,
+        8
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "soumu.go.jp__main_content__000901372#b1",
+          "pages": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "20 総 務 省 所 管"
+          ],
+          "rows": 97
+        }
+      ],
+      "rows": 97,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/soumu.go.jp__main_content__000901375.txt",
+      "pageCount": 22,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "soumu.go.jp__main_content__000901375#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "9502 交付税及び譲与税配付金特別会計"
+          ],
+          "rows": 26
+        }
+      ],
+      "rows": 26,
+      "unresolved": 0
+    }
+  ]
+}

@@ -15,7 +15,7 @@ os.makedirs(OUT, exist_ok=True)
 src_rows, fam_rows, loc_rows = [], [], []
 summary = {}
 for year in ('2024', '2025'):
-    B = f'data/work/budget-request-csv/{year}'
+    B = f'tests/fixtures/budget-request-csv/{year}'
     corpus = {}
     cf = f'tests/fixtures/budget-request-pdf-corpus/{year}/pdf-corpus-freeze.json'
     if os.path.exists(cf):

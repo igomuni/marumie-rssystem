@@ -1,0 +1,11 @@
+要求番号,区分,前年度予算額_一般行政経費,前年度予算額_その他の経費,前年度予算額_計,６年度概算要求額_一般行政経費,６年度概算要求額_その他の経費,６年度概算要求額_計,増△減,明細書頁数,source_page,source_line_start,source_line_end,table_block_id,row_index,row_type,parse_status
+,065 公正取引委員会,"10,051,099","1,080,885","11,131,984","10,391,139","1,001,007","11,392,146","260,162",3,5,43,43,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r6__r6sandanhyou#b1,1,CODE3,PARSED
+,010 公正取引委員会,"10,051,099","1,073,565","11,124,664","10,391,139","940,238","11,331,377","206,713",3,5,44,44,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r6__r6sandanhyou#b1,2,CODE3,PARSED
+1,01‑95 公正取引委員会に必要な経費,"10,051,099",0,"10,051,099","10,391,139",0,"10,391,139","340,040",4,5,45,45,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r6__r6sandanhyou#b1,3,DETAIL,PARSED
+2,06‑95 独占禁止法違反行為に対する措置等に必要な経費,0,"314,062","314,062",0,"284,194","284,194","△29,868",48,5,46,47,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r6__r6sandanhyou#b1,4,DETAIL,PARSED
+3,11‑95 公正な取引慣行の推進に必要な経費,0,"511,337","511,337",0,"393,354","393,354","△117,983",73,5,49,49,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r6__r6sandanhyou#b1,5,DETAIL,PARSED
+4,16‑95 競争政策の普及啓発等に必要な経費,0,"248,166","248,166",0,"262,690","262,690","14,524",98,5,50,50,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r6__r6sandanhyou#b1,6,DETAIL,PARSED
+,020 公正取引委員会施設費,0,"7,320","7,320",0,"60,769","60,769","53,449",130,5,51,51,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r6__r6sandanhyou#b1,7,CODE3,PARSED
+5,30‑95 公正取引委員会の施設整備に必要な経費,0,"7,320","7,320",0,"60,769","60,769","53,449",131,5,52,52,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r6__r6sandanhyou#b1,8,DETAIL,PARSED
+,組織計,"10,051,099","1,080,885","11,131,984","10,391,139","1,001,007","11,392,146","260,162",,5,53,53,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r6__r6sandanhyou#b1,9,TOTAL,PARSED
+,所管計,"10,051,099","1,080,885","11,131,984","10,391,139","1,001,007","11,392,146","260,162",,5,54,54,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r6__r6sandanhyou#b1,10,TOTAL,PARSED

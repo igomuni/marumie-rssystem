@@ -6,14 +6,14 @@
 出力（既定 tests/fixtures/budget-request-detail-table-window-gt/2024/）:
   candidates.csv   source_file, source_page, source_line_start, raw_text（窓の判定結果・列は含めない）
   candidates-manifest.json   件数、candidates.csv の SHA-256、元PDFの存在・SHA-256・ページ数の一致
-入力: data/work/budget-request-plain-text.zip, data/work/budget-request-csv/2024/detail-table/unresolved.csv,
+入力: data/work/budget-request-plain-text.zip, tests/fixtures/budget-request-csv/2024/detail-table/unresolved.csv,
       data/download/<host>/<path>.pdf（スラッグ host__path__file → host/path/file.pdf）
 窓の規則は scripts/research/isolate-detail-table-failures.py と同じ。annotator には窓の判定も候補列も渡さない。
 """
 import csv, hashlib, json, os, re, subprocess, sys, zipfile
 
 ZIP = 'data/work/budget-request-plain-text.zip'
-UNRES = 'data/work/budget-request-csv/2024/detail-table/unresolved.csv'
+UNRES = 'tests/fixtures/budget-request-csv/2024/detail-table/unresolved.csv'
 OUT = sys.argv[1] if len(sys.argv) > 1 else 'tests/fixtures/budget-request-detail-table-window-gt/2024'
 comp = lambda s: re.sub(r'\s+', '', s)
 HY = '[‑-]'

@@ -5,7 +5,7 @@
  *
  *   npx tsx scripts/pipeline-v2/build-budget-request-total-table-csv.ts [inputDir] [outputDir] [--year=2024]
  *
- * Defaults: data/work/budget-request-plain-text/{year}/ → data/work/budget-request-csv/{year}/total-table/
+ * Defaults: data/work/budget-request-plain-text/{year}/ → tests/fixtures/budget-request-csv/{year}/total-table/
  * Spec: docs/budget-request-total-table-csv.md
  */
 import * as fs from 'fs';
@@ -29,7 +29,7 @@ if (!/^\d{4}$/u.test(yearArg)) throw new Error(`--year must be a 4-digit fiscal 
 const year = Number(yearArg);
 const positional = process.argv.slice(2).filter(a => !a.startsWith('--'));
 const inputDir = positional[0] ?? `data/work/budget-request-plain-text/${year}`;
-const outputRoot = positional[1] ?? `data/work/budget-request-csv/${year}/total-table`;
+const outputRoot = positional[1] ?? `tests/fixtures/budget-request-csv/${year}/total-table`;
 const manifestPath = year === 2024
   ? 'tests/fixtures/budget-request-raw-text/2024/raw-text-manifest.json'
   : `tests/fixtures/budget-request-plain-text/${year}/plain-text-manifest.json`;
