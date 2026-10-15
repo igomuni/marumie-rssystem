@@ -1,0 +1,34 @@
+{
+ "2024": {
+  "sources": 79,
+  "sources_with_toc": 55,
+  "families": 48,
+  "families_with_multiple_sources": 10,
+  "toc_kou_location": {
+   "own_only": 937,
+   "other_only": 68
+  },
+  "sources_without_toc": {
+   "sources_without_toc": 24,
+   "family_has_toc_source": 2,
+   "code3_keys": 987,
+   "code3_keys_matching_a_family_toc_kou": 132
+  }
+ },
+ "2025": {
+  "sources": 130,
+  "sources_with_toc": 55,
+  "families": 47,
+  "families_with_multiple_sources": 11,
+  "toc_kou_location": {
+   "own_only": 992,
+   "other_only": 70
+  },
+  "sources_without_toc": {
+   "sources_without_toc": 75,
+   "family_has_toc_source": 3,
+   "code3_keys": 1650,
+   "code3_keys_matching_a_family_toc_kou": 136
+  }
+ }
+}

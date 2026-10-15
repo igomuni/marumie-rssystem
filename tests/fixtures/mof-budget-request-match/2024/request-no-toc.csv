@@ -1,0 +1,1124 @@
+request_source,doc,row_type,row_index,text,status,reason
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,1,010 内閣本府,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,2,010 内閣本府共通費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,3,01‑95 内閣本府一般行政に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,4,06‑95 重要政策に関する会議等に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,5,11‑95 消費税転嫁等対策に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,6,21‑95 拉致被害者等の支援に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,7,25‑95 皇位継承儀式の実施に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,8,41‑95 沖縄開発事業指導監督に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,9,016 政府広報費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,10,01‑95 政府広報の実施等に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,11,020 内閣本府施設費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,12,01‑95 内閣本府施設整備に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,13,030 独立行政法人国立公文書館運営費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,14,01‑95 独立行政法人国立公文書館運営費交付金に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,15,040 遺棄化学兵器廃棄処理事業費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,16,01‑95 遺棄化学兵器廃棄処理事業に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,17,045 経済財政政策費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,18,01‑95 経済財政政策の企画立案等に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,19,048 公文書等管理政策費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,20,01‑95 公文書等管理政策に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,21,050 アイヌ政策推進費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,22,03‑95 アイヌ政策の推進に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,23,063 地方創生支援費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,24,11‑95 地方創生の支援に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,25,068 防災政策費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,26,01‑95 防災基本政策の企画立案等に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,27,085 沖縄政策費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,28,01‑95 沖縄政策の推進に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,29,03‑13 沖縄科学技術大学院大学学園に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,30,05‑13 沖縄産業技術開発の推進に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,31,090 沖縄国立大学法人施設整備費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,32,20‑13 沖縄国立大学法人健康医療拠点施設整備に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,33,100 沖縄振興推進調査費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,34,01‑95 沖縄振興推進調査に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,35,126 沖縄北部連携促進特別振興事業費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,36,01‑95 沖縄北部連携促進特別振興事業に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,37,127 共生社会政策費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,38,01‑95 共生社会政策の企画立案等に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,39,129 栄典行政費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,40,01‑95 栄典事務の適切な遂行に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,41,131 男女共同参画社会形成促進費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,42,01‑95 男女共同参画社会の形成の促進に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,43,150 沖縄教育振興事業費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,44,01‑14 公立文教施設整備に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,45,170 沖縄保健衛生諸費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,46,01‑95 医師歯科医師等の派遣に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,47,172 公益法人制度適正運営推進費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,48,01‑95 公益法人制度の適正な運営の推進に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,49,173 迎賓施設運営費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,50,01‑95 迎賓施設の運営に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,51,175 沖縄振興交付金事業推進費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,52,06‑95 沖縄振興交付金事業の推進に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,53,180 沖縄振興特定事業推進費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,54,01‑95 沖縄振興特定事業の推進に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,55,191 電源開発促進税財源原子力安全規制対策費エネルギー対策特別会計へ繰入,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,56,05‑63 電源開発促進税財源の原子力安全規制対策に係るエネルギー対策特別会計電源開発促進勘定へ繰入れに必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,57,200 プレミアム付商品券事業助成費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,58,95‑95 プレミアム付商品券事業の助成に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,59,201 研究開発推進費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,60,13‑13 医療技術の推進に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,61,205 食品安全政策費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,62,01‑13 食品健康影響評価技術の研究に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,63,06‑95 食品安全の確保に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,64,215 沖縄治水事業費社会資本整備事業特別会計へ繰入,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,65,01‑41 治水事業等の財源の社会資本整備事業特別会計治水勘定へ繰入れに必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,66,220 沖縄道路整備事業費社会資本整備事業特別会計へ繰入,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,67,03‑42 道路整備事業の財源の社会資本整備事業特別会計道路整備勘定へ繰入れに必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,68,05‑44 道路環境整備事業の財源の社会資本整備事業特別会計道路整備勘定へ繰入れに必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,69,245 航空機燃料税財源沖縄空港整備事業費自動車安全特別会計へ繰入,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,70,05‑43 航空機燃料税財源の空港整備事業に係る自動車安全特別会計空港整備勘定へ繰入れに必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,71,282 重要土地等調査費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,72,01‑95 重要土地等調査に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,73,283 経済安全保障確保推進費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,74,01‑95 経済安全保障の確保の推進に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,75,284 工業所有権事務費特許特別会計へ繰入,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,76,01‑95 工業所有権事務の財源の特許特別会計へ繰入れに必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,77,290 子育て世帯等臨時特別支援事業費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,78,01‑06 子育て世帯等臨時特別支援事業に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,79,307 沖縄北部連携促進特別振興対策特定開発事業推進費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,80,01‑48 沖縄北部連携促進特別振興対策に係る特定開発事業の推進に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,81,330 経済社会総合研究所,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,82,01‑13 経済社会総合研究所に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,83,05‑13 経済社会活動の研究等に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,84,540 沖縄開発事業費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,85,10‑41 海岸事業に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,86,25‑44 道路環境改善事業に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,87,30‑42 道路更新防災対策事業及び維持管理に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,88,35‑44 道路交通安全対策事業に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,89,40‑42 地域連携道路事業に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,90,45‑42 道路交通円滑化事業に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,91,50‑41 河川整備事業に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,92,51‑45 水道施設整備に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,93,53‑45 廃棄物処理施設整備に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,94,55‑41 砂防事業に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,95,56‑45 良好で緑豊かな都市空間の形成等のための国営公園事業に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,96,70‑43 港湾事業に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,97,74‑46 森林整備事業に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,98,76‑41 治山事業に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,99,80‑46 水産基盤整備に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,100,93‑46 農業農村整備事業に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,101,95‑47 社会資本総合整備事業に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,102,666 宇宙開発利用政策費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,103,01‑95 宇宙開発利用政策の企画立案等に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,104,700 国立研究開発法人日本医療研究開発機構出資,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,105,01‑13 国立研究開発法人日本医療研究開発機構出資に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,TOTAL,106,組織計,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,107,015 地方創生推進事務局,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,108,063 地方創生推進事務局,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,109,01‑95 地方創生推進事務局の運営に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,110,11‑95 地方創生の推進に係る計画認定等に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,111,071 総合特区推進調整費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,112,01‑95 総合特区の推進調整に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,113,200 地方創生推進費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,114,01‑95 地方創生の推進に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,115,210 地方創生基盤整備事業推進費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,116,01‑48 地方創生の推進のための基盤整備事業に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,117,235 特定地域づくり事業推進費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,118,01‑95 特定地域づくり事業の推進に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,TOTAL,119,組織計,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,120,020 知的財産戦略推進事務局,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,121,001 知的財産戦略推進事務局,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,122,01‑95 知的財産戦略推進事務局の運営に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,TOTAL,123,組織計,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,124,022 科学技術・イノベーション推進事務局,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,125,281 科学技術・イノベーション推進事務局,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,126,01‑95 科学技術・イノベーション推進事務局の運営に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,127,06‑13 科学技術・イノベーション政策の推進に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,128,11‑95 科学技術・イノベーション政策の企画立案等に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,129,282 科学技術イノベーション創造推進費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,130,01‑13 科学技術イノベーション創造の推進に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,TOTAL,131,組織計,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,132,023 健康・医療戦略推進事務局,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,133,010 健康・医療戦略推進事務局,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,134,01‑95 健康・医療戦略推進事務局の運営に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,135,05‑95 健康・医療戦略の推進等に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,TOTAL,136,組織計,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,137,025 宇宙開発戦略推進事務局,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,138,666 宇宙開発戦略推進事務局,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,139,01‑95 宇宙開発戦略推進事務局の運営に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,140,06‑95 宇宙開発利用政策の企画立案等に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,141,11‑13 宇宙開発利用政策の推進に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,142,667 宇宙開発利用推進費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,143,01‑13 宇宙開発利用の推進に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,TOTAL,144,組織計,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,145,030 北方対策本部,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,146,010 北方対策本部,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,147,01‑95 北方対策本部の運営に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,148,06‑95 北方領土問題対策に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,149,020 独立行政法人北方領土問題対策協会運営費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,150,51‑95 独立行政法人北方領土問題対策協会運営費交付金に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,TOTAL,151,組織計,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,152,037 総合海洋政策推進事務局,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,153,001 総合海洋政策推進事務局,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,154,01‑95 総合海洋政策推進事務局の運営に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,155,005 有人国境離島政策推進費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,156,10‑95 有人国境離島政策の推進に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,TOTAL,157,組織計,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,158,040 国際平和協力本部,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,159,010 国際平和協力本部,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,160,01‑95 国際平和協力本部の運営に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,161,06‑95 国際平和協力業務の実施等に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,TOTAL,162,組織計,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,163,047 官民人材交流センター,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,164,010 官民人材交流センター,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,165,01‑95 官民人材交流センターの運営に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,TOTAL,166,組織計,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,167,050 沖縄総合事務局,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,168,010 沖縄総合事務局,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,169,01‑95 沖縄総合事務局一般行政に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,170,020 沖縄治水事業工事諸費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,171,01‑41 沖縄治水事業工事諸費に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,172,035 沖縄道路整備事業工事諸費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,173,01‑42 沖縄道路整備事業工事諸費に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,174,040 沖縄港湾空港整備事業工事諸費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,175,01‑43 沖縄港湾空港整備事業工事諸費に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,176,047 沖縄道路環境整備事業工事諸費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,177,01‑44 沖縄道路環境整備事業工事諸費に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,178,050 沖縄国営公園事業工事諸費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,179,01‑45 沖縄国営公園事業工事諸費に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,180,060 沖縄農業農村整備事業工事諸費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,181,01‑46 沖縄農業農村整備事業工事諸費に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,182,070 沖縄海岸事業調査諸費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,183,05‑41 沖縄海岸事業調査諸費に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,CODE3,184,080 沖縄水産基盤整備事業調査諸費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,DETAIL,185,01‑46 沖縄水産基盤整備事業調査諸費に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__0,total,TOTAL,186,組織計,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__1,detail,CONTEXT,1,19 内閣府所管(官房総務課（総務課）),OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__1,detail,CODE3,2,010 内閣本府,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__1,detail,CODE3,3,010 内閣本府共通費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__1,detail,DETAIL,4,01‑95 内閣本府一般行政に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__1,detail,CODE3,5,011 経常事務費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__1,detail,CODE3,6,006 総務課一般事務処理費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__1,detail,CODE_5_4_2_4,7,95016‑2111‑05‑0710 非常勤職員手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__1,detail,CODE_5_4_2_4,8,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__1,detail,CODE_5_4_2_4,9,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__1,detail,CODE_5_4_2_4,10,95016‑2129‑17‑1010 交際費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__1,detail,CODE3,11,016 一般事務処理費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__1,detail,CODE3,12,001 総務課行政特別推進費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__1,detail,CODE_5_4_2_4,13,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__1,detail,CODE_5_4_2_4,14,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__1,detail,CODE_5_4_2_4,15,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__1,detail,CODE_5_4_2_4,16,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__1,detail,CODE3,17,046 国民運動等の実施に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__1,detail,CODE3,18,001 国民安全運動推進等経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__1,detail,CODE_5_4_2_4,19,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CONTEXT,1,9905 エネルギー対策特別会計（電源開発促進勘定）,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE2,2,05 エネルギー対策,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE1,3,2 電源開発促進勘定,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,4,010 電源立地対策費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,DETAIL,5,01‑63 電源立地対策に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,6,010 文部科学関係,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,7,63191‑ 125‑14‑8205 電源立地等推進対策委託費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,8,63191‑ 855‑16‑5141 電源立地等推進対策補助金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,9,63191‑ 815‑16‑8211 電源立地地域対策交付金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,10,63191‑ 815‑16‑8215 電源立地等推進対策交付金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,11,63191‑ 725‑16‑9740 国際原子力機関等拠出金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,12,015 経済産業関係,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,13,63191‑ 125‑14‑8205 電源立地等推進対策委託費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,14,63191‑ 855‑16‑5141 電源立地等推進対策補助金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,15,63191‑ 815‑16‑8211 電源立地地域対策交付金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,16,63191‑ 815‑16‑8215 電源立地等推進対策交付金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,17,63191‑ 405‑16‑8225 原子力損害賠償・廃炉等支援機構交付金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,18,63191‑ 725‑16‑9740 国際原子力機関等拠出金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,19,020 電源利用対策費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,DETAIL,20,10‑63 電源利用対策に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,21,010 文部科学関係,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,22,63191‑ 125‑14‑8530 軽水炉等改良技術確証試験等委託費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,23,63191‑ 725‑16‑9740 国際原子力機関等拠出金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,24,015 経済産業関係,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,25,63191‑ 125‑14‑6523 放射性廃棄物処分基準調査等委託費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,26,63191‑ 125‑14‑8530 軽水炉等改良技術確証試験等委託費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,27,63191‑ 405‑16‑4170 ウラン探鉱支援事業費等補助金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,28,63191‑ 405‑16‑4175 原子力発電関連技術開発費等補助金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,29,63191‑ 725‑16‑9740 国際原子力機関等拠出金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,30,020 環境関係,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,31,63191‑ 125‑14‑8530 軽水炉等改良技術確証試験等委託費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,32,63191‑ 725‑16‑9740 国際原子力機関等拠出金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,33,025 脱炭素成長型経済構造移行推進対策費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,DETAIL,34,01‑63 脱炭素成長型経済構造の移行推進に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,35,015 経済産業関係,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,36,63191‑ 129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,37,63191‑ 122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,38,63191‑ 122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,39,63191‑ 123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,40,63191‑ 125‑14‑7600 脱炭素成長型経済構造移行推進対策委託費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,41,030 原子力安全規制対策費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,DETAIL,42,10‑63 原子力の安全規制対策に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,43,005 内閣関係,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,44,63191‑ 125‑14‑8206 原子力施設等防災対策等委託費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,45,63191‑ 815‑16‑8216 原子力施設等防災対策等交付金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,46,020 環境関係,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,47,63191‑ 125‑14‑6527 原子力災害影響調査等委託費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,48,63191‑ 125‑14‑8206 原子力施設等防災対策等委託費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,49,63191‑ 125‑14‑8485 原子力発電施設等安全技術対策委託費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,50,63191‑ 815‑16‑5209 原子力災害対策事業費補助金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,51,63191‑ 125‑16‑7448 原子力規制研究技術基盤構築事業費補助金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,52,63191‑ 815‑16‑8213 原子力災害影響調査等交付金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,53,63191‑ 815‑16‑8216 原子力施設等防災対策等交付金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,54,63191‑ 725‑16‑9740 国際原子力機関等拠出金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,55,040 国立研究開発法人日本原子力研究開発機構運営費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,DETAIL,56,01‑63 国立研究開発法人日本原子力研究開発機構運営費交付金に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,57,001 通常要求,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,58,63191‑ 305‑16‑8212 国立研究開発法人日本原子力研究開発機構電源利用勘定運営費交付金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,59,045 国立研究開発法人日本原子力研究開発機構施設整備費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,DETAIL,60,01‑63 国立研究開発法人日本原子力研究開発機構施設整備に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,61,63191‑ 305‑16‑4267 国立研究開発法人日本原子力研究開発機構施設整備費補助金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,62,050 事務取扱費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,DETAIL,63,01‑63 事務取扱いに必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,64,001 人件費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,65,001 既定定員に伴う経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,66,63191‑ 111‑02‑0000 職員基本給,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,67,02‑0100 職員俸給,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,68,02‑0200 扶養手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,69,02‑0300 地域手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,70,63191‑ 111‑03‑0000 職員諸手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,71,03‑0100 管理職手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,72,03‑0200 初任給調整手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,73,03‑0300 通勤手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,74,03‑0400 特殊勤務手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,75,03‑0500 特地勤務手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,76,03‑0600 宿日直手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,77,03‑0700 期末手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,78,03‑0800 勤勉手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,79,03‑1000 寒冷地手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,80,03‑1100 住居手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,81,03‑1200 単身赴任手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,82,03‑1300 管理職員特別勤務手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,83,03‑1700 広域異動手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,84,03‑1900 本府省業務調整手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,85,03‑8000 差額特別手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,86,63191‑ 111‑04‑0100 超過勤務手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,87,63191‑ 111‑05‑1200 休職者給与,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,88,63191‑ 111‑05‑1360 短時間勤務職員給与,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,89,05‑0100 暫定再任用短時間勤務職員給与,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,90,63191‑ 151‑05‑1400 公務災害補償費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,91,63191‑ 111‑05‑1500 退職手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,92,63191‑ 115‑16‑7500 国家公務員共済組合負担金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,93,003 定員合理化に伴う経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,94,63191‑ 111‑02‑0000 職員基本給,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,95,02‑0100 職員俸給,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,96,02‑0200 扶養手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,97,02‑0300 地域手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,98,63191‑ 111‑03‑0000 職員諸手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,99,03‑0100 管理職手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,100,03‑0300 通勤手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,101,03‑0700 期末手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,102,03‑0800 勤勉手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,103,03‑1100 住居手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,104,03‑1900 本府省業務調整手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,105,63191‑ 111‑04‑0100 超過勤務手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,106,63191‑ 115‑16‑7500 国家公務員共済組合負担金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,107,005 振替定員に伴う経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE2,108,01 振替定員に伴う経費（自律的再配置に伴う増）,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,109,63191‑ 111‑02‑0000 職員基本給,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,110,02‑0100 職員俸給,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,111,02‑0200 扶養手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,112,02‑0300 地域手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,113,63191‑ 111‑03‑0000 職員諸手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,114,03‑0300 通勤手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,115,03‑0700 期末手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,116,03‑0800 勤勉手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,117,03‑1100 住居手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,118,03‑1900 本府省業務調整手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,119,63191‑ 111‑04‑0100 超過勤務手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,120,63191‑ 115‑16‑7500 国家公務員共済組合負担金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE2,121,06 振替定員に伴う経費（業務改革に伴う減）,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,122,63191‑ 111‑02‑0000 職員基本給,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,123,02‑0100 職員俸給,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,124,02‑0200 扶養手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,125,02‑0300 地域手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,126,63191‑ 111‑03‑0000 職員諸手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,127,03‑0300 通勤手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,128,03‑0700 期末手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,129,03‑0800 勤勉手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,130,03‑1100 住居手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,131,03‑1900 本府省業務調整手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,132,63191‑ 111‑04‑0100 超過勤務手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,133,63191‑ 115‑16‑7500 国家公務員共済組合負担金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE2,134,11 振替定員に伴う経費（その他）,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,135,63191‑ 111‑02‑0000 職員基本給,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,136,02‑0100 職員俸給,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,137,02‑0200 扶養手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,138,02‑0300 地域手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,139,63191‑ 111‑03‑0000 職員諸手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,140,03‑0100 管理職手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,141,03‑0300 通勤手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,142,03‑0700 期末手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,143,03‑0800 勤勉手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,144,03‑1100 住居手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,145,03‑1300 管理職員特別勤務手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,146,03‑1900 本府省業務調整手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,147,63191‑ 111‑04‑0100 超過勤務手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,148,63191‑ 111‑05‑1360 短時間勤務職員給与,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,149,05‑0050 定年前再任用短時間勤務職員給与,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,150,05‑0100 暫定再任用短時間勤務職員給与,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,151,63191‑ 115‑16‑7500 国家公務員共済組合負担金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,152,006 増員要求に伴う経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,153,63191‑ 111‑02‑0000 職員基本給,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,154,02‑0100 職員俸給,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,155,02‑0200 扶養手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,156,02‑0300 地域手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,157,63191‑ 111‑03‑0000 職員諸手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,158,03‑0100 管理職手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,159,03‑0300 通勤手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,160,03‑0700 期末手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,161,03‑0800 勤勉手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,162,03‑1100 住居手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,163,03‑1300 管理職員特別勤務手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_NN_NNNN,164,03‑1900 本府省業務調整手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,165,63191‑ 111‑04‑0100 超過勤務手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,166,63191‑ 115‑16‑7500 国家公務員共済組合負担金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,167,006 人当経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,168,005 内閣関係,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,169,63191‑ 111‑05‑0710 非常勤職員手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,170,63089‑ 111‑05‑2100 児童手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,171,63191‑ 122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,172,63191‑ 122‑08‑3010 赴任旅費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,173,63191‑ 123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,174,63191‑ 123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,175,63191‑ 959‑18‑4010 貨幣交換差減補金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,176,010 文部科学関係,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,177,63191‑ 111‑05‑0710 非常勤職員手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,178,63191‑ 129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,179,63191‑ 122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,180,63191‑ 122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,181,63191‑ 123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,182,63191‑ 123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,183,63199‑ 133‑09‑9038 消費税,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,184,63191‑ 959‑18‑4010 貨幣交換差減補金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,185,015 経済産業関係,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,186,63191‑ 111‑05‑0710 非常勤職員手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,187,63191‑ 129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,188,63191‑ 122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,189,63191‑ 122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,190,63191‑ 123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,191,63191‑ 123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,192,63191‑ 123‑09‑4520 国有特許外国出願費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,193,63199‑ 133‑09‑9038 消費税,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,194,63191‑ 959‑18‑4010 貨幣交換差減補金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,195,020 環境関係,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,196,63191‑ 111‑05‑0710 非常勤職員手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,197,63089‑ 111‑05‑2100 児童手当,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,198,63191‑ 122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,199,63191‑ 122‑08‑3010 赴任旅費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,200,63191‑ 122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,201,63191‑ 123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,202,63191‑ 123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,203,63191‑ 123‑09‑5010 土地建物借料,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,204,63191‑ 123‑09‑5510 各所修繕,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,205,63199‑ 133‑09‑9038 消費税,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,206,63029‑ 135‑16‑7700 国有資産所在市町村交付金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,207,63191‑ 959‑18‑4010 貨幣交換差減補金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,208,63191‑ 306‑22‑0010 一般会計へ繰入,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,DETAIL,209,05‑63 電源立地対策に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,210,001 人当経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,211,015 経済産業関係,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,212,63191‑ 129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,213,63191‑ 122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,214,63191‑ 122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,215,63191‑ 123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,DETAIL,216,15‑63 電源利用対策に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,217,001 人当経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,218,015 経済産業関係,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,219,63191‑ 129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,220,63191‑ 122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,221,63191‑ 122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,222,63191‑ 123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,223,63191‑ 123‑09‑4890 研究開発設備撤去費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,224,020 環境関係,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,225,63191‑ 129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,226,63191‑ 122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,227,63191‑ 122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,228,63191‑ 123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,229,63191‑ 123‑09‑5010 土地建物借料,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,DETAIL,230,25‑63 原子力の安全規制対策に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,231,001 人当経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,232,005 内閣関係,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,233,63191‑ 129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,234,63191‑ 122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,235,63191‑ 122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,236,63191‑ 123‑09‑1086 原子力安全業務庁費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,237,63199‑ 133‑09‑9030 自動車重量税,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,238,020 環境関係,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,239,63191‑ 129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,240,63191‑ 122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,241,63191‑ 122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,242,63191‑ 123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,243,63191‑ 123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,244,63191‑ 123‑09‑1086 原子力安全業務庁費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,245,63191‑ 123‑09‑5010 土地建物借料,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,246,63199‑ 133‑09‑9030 自動車重量税,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,247,63191‑ 944‑15‑8010 不動産購入費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,248,060 諸支出金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,DETAIL,249,01‑63 返納金等の払戻しに必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,250,63191‑ 959‑18‑1010 賠償償還及払戻金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,251,070 脱炭素成長型経済構造移行推進諸支出金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,DETAIL,252,01‑63 脱炭素成長型経済構造移行推進に係る返納金等の払戻しに必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,253,63191‑ 959‑18‑1010 賠償償還及払戻金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,254,080 脱炭素成長型経済構造移行推進対策予備費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,DETAIL,255,01‑98 脱炭素成長型経済構造移行推進対策予備費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,256,98110‑ 959‑99‑4150 （脱炭素成長型経済構造移行推進対策予備費）,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,257,090 予備費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,DETAIL,258,01‑98 予備費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,259,98110‑ 959‑99‑4090 （予備費）,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE3,260,100 脱炭素成長型経済構造移行推進予備費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,DETAIL,261,01‑98 脱炭素成長型経済構造移行推進に係る予備費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__e2,detail,CODE_5_4_2_4,262,98110‑ 959‑99‑4090 （予備費）,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f1,total,HIER,1,01 東日本大震災復興,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f1,total,HIER,2,31 復興庁,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f1,total,CODE3,3,010 復興庁,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f1,total,CODE3,4,108 地域活性化等復興政策費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f1,total,DETAIL,5,01‑95 内閣府一般行政に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f1,total,DETAIL,6,14‑95 原子力災害対策に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f1,total,DETAIL,7,15‑95 経済財政政策に関する調査等に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f1,total,DETAIL,8,17‑95 防災基本政策の企画立案等に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f1,total,CODE3,9,155 消費生活復興政策費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f1,total,DETAIL,10,01‑95 消費者政策に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f1,total,TOTAL,11,会計計,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f2,detail,CONTEXT,1,9101 東日本大震災復興特別会計（内閣本府等）,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f2,detail,CODE2,2,01 東日本大震災復興,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f2,detail,CODE2,3,31 復興庁,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f2,detail,CODE3,4,010 復興庁,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f2,detail,CODE3,5,108 地域活性化等復興政策費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f2,detail,DETAIL,6,01‑95 内閣府一般行政に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f2,detail,CODE3,7,010 内閣本府一般行政に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f2,detail,CODE3,8,001 既定定員に伴う経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f2,detail,CODE2,9,01 人件費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f2,detail,CODE_5_4_2_4,10,95016‑ 115‑16‑7500 国家公務員共済組合負担金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f2,detail,DETAIL,11,14‑95 原子力災害対策に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f2,detail,CODE3,12,005 放射線影響の緊急防止対策に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f2,detail,CODE_5_4_2_4,13,95016‑ 125‑14‑9903 避難指示区域入域管理等委託費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f2,detail,CODE_5_4_2_4,14,95016‑ 125‑14‑9906 特定復興再生拠点区域外帰還・居住調査等委託費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f2,detail,DETAIL,15,15‑95 経済財政政策に関する調査等に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f2,detail,CODE3,16,011 ＮＰＯ等の「絆力（きずなりょく）」を活かした復興・被災者支援事業,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f2,detail,CODE_5_4_2_4,17,95016‑ 865‑16‑7889 特定非営利活動法人等被災者支援交付金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f2,detail,DETAIL,18,17‑95 防災基本政策の企画立案等に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f2,detail,CODE3,19,001 災害救助等に必要な経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f2,detail,CODE_5_4_2_4,20,95088‑ 865‑16‑7590 災害救助費等負担金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f2,detail,CODE_5_4_2_4,21,95088‑ 845‑16‑7592 災害弔慰金等負担金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f2,detail,CODE_5_4_2_4,22,95088‑ 959‑23‑1130 災害援護貸付金,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f2,detail,CODE3,23,003 被災者生活再建支援法施行に要する経費,OUT_OF_SCOPE,no_toc
+cao.go.jp__yosan__soshiki__r06__pdf__f2,detail,CODE_5_4_2_4,24,95053‑ 715‑16‑0827 被災者生活再建支援金補助金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_01,total,CODE3,1,010 内閣官房,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_01,total,CODE3,2,010 内閣官房共通費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_01,total,DETAIL,3,01‑95 内閣官房一般行政に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_01,total,DETAIL,4,03‑95 内閣感染症危機管理統括庁に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_01,total,DETAIL,5,06‑95 情報の収集及び分析その他の調査に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_01,total,CODE3,6,012 内閣官房施設費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_01,total,DETAIL,7,01‑95 内閣官房施設整備に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_01,total,CODE3,8,015 情報収集衛星業務費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_01,total,DETAIL,9,01‑95 情報収集衛星システム開発等に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_01,total,CODE3,10,018 情報収集衛星施設費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_01,total,DETAIL,11,01‑95 情報収集衛星施設整備に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_01,total,TOTAL,12,組織計,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_01,total,TOTAL,13,所管計,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_02,detail,CONTEXT,1,05 内閣所管(総務官室（総務課）),OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_02,detail,CODE3,2,010 内閣官房,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_02,detail,CODE3,3,010 内閣官房共通費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_02,detail,DETAIL,4,01‑95 内閣官房一般行政に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_02,detail,CODE3,5,011 経常事務費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_02,detail,CODE3,6,006 内閣総務官室一般事務費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_02,detail,CODE_5_4_2_4,7,95016‑2111‑05‑0710 非常勤職員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_02,detail,CODE_5_4_2_4,8,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_02,detail,CODE_5_4_2_4,9,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_02,detail,CODE_5_4_2_4,10,95016‑2122‑08‑3010 赴任旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_02,detail,CODE_5_4_2_4,11,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_02,detail,DETAIL,12,06‑95 情報の収集及び分析その他の調査に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_02,detail,CODE3,13,011 内閣総務官室システム関係経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_02,detail,CODE_5_4_2_4,14,95016‑2111‑05‑0710 非常勤職員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_02,detail,CODE_5_4_2_4,15,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CONTEXT,1,05 内閣所管(総務官室（会計課）),OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CODE3,2,010 内閣官房,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CODE3,3,010 内閣官房共通費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,DETAIL,4,01‑95 内閣官房一般行政に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CODE3,5,010 一般行政共通経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CODE3,6,001 一般行政共通経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CODE_5_4_2_4,7,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CODE_5_4_2_4,8,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CODE_5_4_2_4,9,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CODE_5_4_2_4,10,95199‑2133‑09‑9030 自動車重量税,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CODE_5_4_2_4,11,95016‑2129‑17‑1010 交際費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CODE_5_4_2_4,12,95016‑2959‑18‑1010 賠償償還及払戻金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CODE3,13,016 一般行政特別推進費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CODE3,14,007 内閣総理大臣の特別機使用経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CODE_5_4_2_4,15,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CODE3,16,009 臨時対応事務推進経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CODE_5_4_2_4,17,95016‑2111‑05‑0200 委員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CODE_5_4_2_4,18,95016‑2111‑05‑0710 非常勤職員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CODE_5_4_2_4,19,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CODE_5_4_2_4,20,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CODE_5_4_2_4,21,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CODE_5_4_2_4,22,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CODE_5_4_2_4,23,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CODE3,24,016 官庁会計事務データ通信システム経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CODE_5_4_2_4,25,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CODE3,26,031 内閣総理大臣外国訪問等経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CODE3,27,001 内閣総理大臣国際会議出席等外国訪問経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CODE_5_4_2_4,28,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_03,detail,CODE_5_4_2_4,29,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_04,detail,CONTEXT,1,05 内閣所管(総務官室（官邸事務所）),OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_04,detail,CODE3,2,010 内閣官房,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_04,detail,CODE3,3,010 内閣官房共通費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_04,detail,DETAIL,4,01‑95 内閣官房一般行政に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_04,detail,CODE3,5,011 経常事務費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_04,detail,CODE3,6,011 官邸事務所一般事務費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_04,detail,CODE_5_4_2_4,7,95016‑2111‑05‑0710 非常勤職員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_04,detail,CODE_5_4_2_4,8,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_04,detail,CODE_5_4_2_4,9,95016‑2959‑07‑1010 報償費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_04,detail,CODE_5_4_2_4,10,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_04,detail,CODE_5_4_2_4,11,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_04,detail,CODE_5_4_2_4,12,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_04,detail,CODE3,13,013 総理大臣官邸運営経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_04,detail,CODE_5_4_2_4,14,95016‑2123‑09‑1185 総理大臣官邸業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_04,detail,CODE_5_4_2_4,15,95016‑2123‑09‑5510 各所修繕,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_04,detail,CODE3,16,012 内閣官房施設費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_04,detail,DETAIL,17,01‑95 内閣官房施設整備に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_04,detail,CODE3,18,001 総理大臣官邸等施設の整備に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_04,detail,CODE_5_4_2_4,19,95016‑1202‑08‑2360 施設施工旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_04,detail,CODE_5_4_2_4,20,95016‑1203‑09‑2031 施設施工庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_04,detail,CODE_5_4_2_4,21,95016‑1204‑15‑0010 施設整備費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_05,detail,CONTEXT,1,05 内閣所管(総務官室（厚生管理官室）),OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_05,detail,CODE3,2,010 内閣官房,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_05,detail,CODE3,3,010 内閣官房共通費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_05,detail,DETAIL,4,01‑95 内閣官房一般行政に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_05,detail,CODE3,5,011 経常事務費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_05,detail,CODE3,6,016 厚生管理事務費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_05,detail,CODE_5_4_2_4,7,95089‑2111‑05‑2100 児童手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_05,detail,CODE_5_4_2_4,8,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CONTEXT,1,05 内閣所管(（内閣官房・人に伴う経費）),OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE3,2,010 内閣官房,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE3,3,010 内閣官房共通費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,DETAIL,4,01‑95 内閣官房一般行政に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE3,5,001 既定定員に伴う経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE3,6,001 人件費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,7,95016‑2111‑02‑0000 職員基本給,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,8,02‑0100 職員俸給,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,9,02‑0200 扶養手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,10,02‑0300 地域手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,11,95016‑2111‑03‑0000 職員諸手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,12,03‑0100 管理職手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,13,03‑0200 初任給調整手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,14,03‑0300 通勤手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,15,03‑0400 特殊勤務手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,16,03‑0600 宿日直手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,17,03‑0700 期末手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,18,03‑0800 勤勉手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,19,03‑1000 寒冷地手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,20,03‑1100 住居手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,21,03‑1200 単身赴任手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,22,03‑1300 管理職員特別勤務手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,23,03‑1700 広域異動手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,24,03‑1800 専門スタッフ職調整手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,25,03‑1900 本府省業務調整手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,26,03‑5300 予備,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,27,95016‑2111‑04‑0100 超過勤務手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,28,95016‑2111‑05‑1200 休職者給与,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,29,95016‑2111‑05‑1360 短時間勤務職員給与,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,30,05‑0050 定年前再任用短時間勤務職員給与,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,31,05‑0100 暫定再任用短時間勤務職員給与,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,32,05‑0200 任期付短時間勤務職員給与,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,33,95016‑2111‑05‑1500 退職手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,34,95016‑2115‑16‑7500 国家公務員共済組合負担金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,35,95016‑2115‑16‑7505 基礎年金等国家公務員共済組合負担金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,36,95016‑2115‑16‑7506 育児休業手当金国家公務員共済組合負担金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE3,37,003 定員合理化に伴う経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE3,38,001 人件費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,39,95016‑2111‑02‑0000 職員基本給,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,40,02‑0100 職員俸給,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,41,02‑0200 扶養手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,42,02‑0300 地域手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,43,95016‑2111‑03‑0000 職員諸手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,44,03‑0100 管理職手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,45,03‑0200 初任給調整手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,46,03‑0300 通勤手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,47,03‑0700 期末手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,48,03‑0800 勤勉手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,49,03‑1000 寒冷地手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,50,03‑1100 住居手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,51,03‑1200 単身赴任手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,52,03‑1300 管理職員特別勤務手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,53,03‑1900 本府省業務調整手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,54,03‑5300 予備,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,55,95016‑2111‑04‑0100 超過勤務手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,56,95016‑2111‑05‑1500 退職手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,57,95016‑2115‑16‑7500 国家公務員共済組合負担金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE3,58,006 増員要求に伴う経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE3,59,001 人件費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,60,95016‑2111‑02‑0000 職員基本給,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,61,02‑0100 職員俸給,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,62,02‑0200 扶養手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,63,02‑0300 地域手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,64,95016‑2111‑03‑0000 職員諸手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,65,03‑0100 管理職手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,66,03‑0200 初任給調整手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,67,03‑0300 通勤手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,68,03‑0700 期末手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,69,03‑0800 勤勉手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,70,03‑1100 住居手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,71,03‑1200 単身赴任手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,72,03‑1300 管理職員特別勤務手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,73,03‑1900 本府省業務調整手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,74,03‑5300 予備,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,75,95016‑2111‑04‑0100 超過勤務手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,76,95016‑2111‑05‑1360 短時間勤務職員給与,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,77,05‑0050 定年前再任用短時間勤務職員給与,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,78,05‑0100 暫定再任用短時間勤務職員給与,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,79,05‑0200 任期付短時間勤務職員給与,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,80,95016‑2111‑05‑1500 退職手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,81,95016‑2115‑16‑7500 国家公務員共済組合負担金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE3,82,009 振替定員に伴う経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE3,83,001 人件費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE2,84,01 自律的再配置に伴う増,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,85,95016‑2111‑02‑0000 職員基本給,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,86,02‑0100 職員俸給,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,87,02‑0200 扶養手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,88,02‑0300 地域手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,89,95016‑2111‑03‑0000 職員諸手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,90,03‑0100 管理職手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,91,03‑0300 通勤手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,92,03‑0700 期末手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,93,03‑0800 勤勉手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,94,03‑1100 住居手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,95,03‑1200 単身赴任手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,96,03‑1300 管理職員特別勤務手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,97,03‑1800 専門スタッフ職調整手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,98,03‑1900 本府省業務調整手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,99,03‑5300 予備,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,100,95016‑2111‑04‑0100 超過勤務手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,101,95016‑2111‑05‑1360 短時間勤務職員給与,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,102,05‑0050 定年前再任用短時間勤務職員給与,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,103,05‑0100 暫定再任用短時間勤務職員給与,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,104,05‑0200 任期付短時間勤務職員給与,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,105,95016‑2115‑16‑7500 国家公務員共済組合負担金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE2,106,06 業務改革に伴う減,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,107,95016‑2111‑02‑0000 職員基本給,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,108,02‑0100 職員俸給,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,109,02‑0200 扶養手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,110,02‑0300 地域手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,111,95016‑2111‑03‑0000 職員諸手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,112,03‑0100 管理職手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,113,03‑0300 通勤手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,114,03‑0700 期末手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,115,03‑0800 勤勉手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,116,03‑1100 住居手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,117,03‑1200 単身赴任手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,118,03‑1300 管理職員特別勤務手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,119,03‑1800 専門スタッフ職調整手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,120,03‑1900 本府省業務調整手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,121,03‑5300 予備,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,122,95016‑2111‑04‑0100 超過勤務手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,123,95016‑2111‑05‑1360 短時間勤務職員給与,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,124,05‑0050 定年前再任用短時間勤務職員給与,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,125,05‑0100 暫定再任用短時間勤務職員給与,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,126,05‑0200 任期付短時間勤務職員給与,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,127,95016‑2115‑16‑7500 国家公務員共済組合負担金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE2,128,11 その他,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,129,95016‑2111‑02‑0000 職員基本給,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,130,02‑0100 職員俸給,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,131,02‑0200 扶養手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,132,02‑0300 地域手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,133,95016‑2111‑03‑0000 職員諸手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,134,03‑0100 管理職手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,135,03‑0300 通勤手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,136,03‑0700 期末手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,137,03‑0800 勤勉手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,138,03‑1100 住居手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,139,03‑1200 単身赴任手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,140,03‑1300 管理職員特別勤務手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,141,03‑1800 専門スタッフ職調整手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,142,03‑1900 本府省業務調整手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,143,03‑5300 予備,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,144,95016‑2111‑04‑0100 超過勤務手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,145,95016‑2111‑05‑1360 短時間勤務職員給与,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,146,05‑0050 定年前再任用短時間勤務職員給与,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,147,05‑0100 暫定再任用短時間勤務職員給与,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_NN_NNNN,148,05‑0200 任期付短時間勤務職員給与,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,149,95016‑2111‑05‑1500 退職手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_06,detail,CODE_5_4_2_4,150,95016‑2115‑16‑7500 国家公務員共済組合負担金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CONTEXT,1,05 内閣所管(副長官補（副長官補）),OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE3,2,010 内閣官房,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE3,3,010 内閣官房共通費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,DETAIL,4,01‑95 内閣官房一般行政に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE3,5,036 内閣官房副長官補経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE3,6,001 一般事務処理費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,7,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,8,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE3,9,006 行政の指針検討等経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE2,10,01 行政の指針検討等経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,11,95016‑2111‑05‑0710 非常勤職員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,12,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,13,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,14,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,15,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,16,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,17,95016‑2123‑09‑5510 各所修繕,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE2,18,07 行政改革推進経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,19,95016‑2111‑05‑0710 非常勤職員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,20,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,21,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,22,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,23,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,24,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,25,95016‑2123‑09‑5010 土地建物借料,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE2,26,10 産業遺産の世界遺産登録推進経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,27,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,28,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,29,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,30,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE2,31,13 拉致問題対策本部経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,32,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,33,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,34,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,35,95016‑2122‑08‑6310 外国人招へい旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,36,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,37,95016‑2123‑09‑1300 拉致問題対策庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE2,38,16 郵政民営化推進経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,39,95016‑2111‑05‑0200 委員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,40,95016‑2111‑05‑0710 非常勤職員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,41,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,42,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,43,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,44,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,45,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE2,46,19 アイヌ総合政策経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,47,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,48,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,49,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,50,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,51,95016‑2123‑09‑5510 各所修繕,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE2,52,22 国際感染症対策経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,53,95016‑2111‑05‑0200 委員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,54,95016‑2111‑05‑0710 非常勤職員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,55,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,56,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,57,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,58,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,59,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE2,60,31 健康・医療戦略等経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,61,95016‑2111‑05‑0710 非常勤職員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,62,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,63,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,64,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,65,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE2,66,37 新しい資本主義実現本部事務局経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,67,95016‑2111‑05‑0710 非常勤職員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,68,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,69,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,70,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,71,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE2,72,40 教育未来創造会議経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,73,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,74,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,75,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,76,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE2,77,43 国土強靱化推進経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,78,95016‑2111‑05‑0200 委員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,79,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,80,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,81,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,82,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE2,83,46 国土強靱化政策推進経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,84,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,85,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE2,86,49 領土・主権対策企画調整室経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,87,95016‑2111‑05‑0710 非常勤職員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,88,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,89,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,90,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,91,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE2,92,52 領土・主権内外発信推進経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,93,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,94,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,95,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,96,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,97,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,98,95016‑2123‑09‑5010 土地建物借料,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE2,99,55 水循環政策本部事務局経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,100,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,101,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,102,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,103,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE2,104,58 デジタル田園都市国家構想実現会議事務局経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,105,95016‑2111‑05‑0710 非常勤職員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,106,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,107,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,108,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,109,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,110,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE2,111,64 特定複合観光施設区域整備推進室経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,112,95016‑2111‑05‑0200 委員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,113,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE2,114,67 地理空間情報活用推進経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,115,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,116,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,117,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,118,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE2,119,70 ギャンブル等依存症対策推進本部事務局経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,120,95016‑2111‑05‑0200 委員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,121,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,122,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,123,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,124,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE2,125,76 国際博覧会推進本部経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,126,95016‑2111‑05‑0710 非常勤職員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,127,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,128,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,129,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,130,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,131,95016‑2123‑09‑5010 土地建物借料,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE2,132,79 就職氷河期世代支援の推進に向けた全国プラットフォーム等に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,133,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,134,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,135,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,136,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE2,137,85 孤独・孤立対策経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,138,95016‑2111‑05‑0710 非常勤職員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,139,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,140,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,141,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,142,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,143,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,144,95016‑2125‑14‑8890 重要政策基礎調査委託費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE2,145,93 全世代型社会保障構築検討経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,146,95016‑2111‑05‑0200 委員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,147,95016‑2111‑05‑0710 非常勤職員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,148,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,149,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,150,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,151,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,152,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE2,153,96 船舶活用医療推進経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,154,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,155,95016‑2125‑14‑8890 重要政策基礎調査委託費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE2,156,98 サイバー安全保障体制整備経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,DETAIL,157,06‑95 情報の収集及び分析その他の調査に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE3,158,026 拉致問題対策情報収集・分析経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,159,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,160,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,161,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,162,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,163,95016‑2123‑09‑1300 拉致問題対策庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_07,detail,CODE_5_4_2_4,164,95016‑2123‑09‑6227 拉致問題対策情報収集等活動費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_08,detail,CONTEXT,1,05 内閣所管(副長官補（危機管理）),OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_08,detail,CODE3,2,010 内閣官房,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_08,detail,CODE3,3,010 内閣官房共通費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_08,detail,DETAIL,4,01‑95 内閣官房一般行政に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_08,detail,CODE3,5,041 内閣危機管理監及びその補佐体制に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_08,detail,CODE3,6,001 緊急事態に備えた調査・研究等経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_08,detail,CODE_5_4_2_4,7,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_08,detail,CODE_5_4_2_4,8,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_08,detail,CODE_5_4_2_4,9,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_08,detail,CODE_5_4_2_4,10,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_08,detail,CODE_5_4_2_4,11,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_08,detail,CODE3,12,006 緊急事態対処に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_08,detail,CODE_5_4_2_4,13,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_08,detail,CODE_5_4_2_4,14,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_08,detail,CODE_5_4_2_4,15,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_08,detail,CODE_5_4_2_4,16,95016‑2123‑09‑5010 土地建物借料,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_08,detail,CODE_5_4_2_4,17,95199‑2133‑09‑9030 自動車重量税,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_08,detail,DETAIL,18,06‑95 情報の収集及び分析その他の調査に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_08,detail,CODE3,19,016 危機管理体制システム経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_08,detail,CODE3,20,001 危機管理体制システム経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_08,detail,CODE_5_4_2_4,21,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_08,detail,CODE3,22,012 内閣官房施設費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_08,detail,DETAIL,23,01‑95 内閣官房施設整備に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_08,detail,CODE3,24,006 危機管理情報通信施設整備に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_08,detail,CODE_5_4_2_4,25,95016‑1203‑09‑2031 施設施工庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_09,detail,CONTEXT,1,05 内閣所管（内閣広報室）,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_09,detail,CODE3,2,010 内閣官房,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_09,detail,CODE3,3,010 内閣官房共通費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_09,detail,DETAIL,4,01‑95 内閣官房一般行政に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_09,detail,CODE3,5,011 経常事務費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_09,detail,CODE3,6,031 内閣広報室一般事務費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_09,detail,CODE_5_4_2_4,7,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_09,detail,CODE_5_4_2_4,8,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_09,detail,CODE3,9,046 内閣広報室経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_09,detail,CODE3,10,001 内閣広報充実強化研究調査等経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_09,detail,CODE_5_4_2_4,11,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_09,detail,CODE_5_4_2_4,12,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_09,detail,CODE_5_4_2_4,13,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_09,detail,CODE_5_4_2_4,14,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_09,detail,CODE3,15,011 総理等による社会的弱者・国際社会に向けた情報発信経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_09,detail,CODE_5_4_2_4,16,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_09,detail,CODE_5_4_2_4,17,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_09,detail,DETAIL,18,06‑95 情報の収集及び分析その他の調査に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_09,detail,CODE3,19,021 官邸からの情報発信及び収集分析経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_09,detail,CODE_5_4_2_4,20,95016‑2111‑05‑0710 非常勤職員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_09,detail,CODE_5_4_2_4,21,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_09,detail,CODE_5_4_2_4,22,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_09,detail,CODE_5_4_2_4,23,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,CONTEXT,1,05 内閣所管(内閣情報調査室（内閣情報調査室）),OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,CODE3,2,010 内閣官房,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,CODE3,3,010 内閣官房共通費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,DETAIL,4,06‑95 情報の収集及び分析その他の調査に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,CODE3,5,001 情報の収集及び分析その他の調査経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,CODE_5_4_2_4,6,95016‑2111‑05‑0710 非常勤職員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,CODE_5_4_2_4,7,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,CODE_5_4_2_4,8,95016‑2959‑07‑1010 報償費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,CODE_5_4_2_4,9,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,CODE_5_4_2_4,10,95016‑2122‑08‑2755 外国留学旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,CODE_5_4_2_4,11,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,CODE_5_4_2_4,12,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,CODE_5_4_2_4,13,95016‑2123‑09‑4210 電子計算機等借料,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,CODE_5_4_2_4,14,95016‑2123‑09‑5010 土地建物借料,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,CODE_5_4_2_4,15,95016‑2123‑09‑7175 国際テロ情報収集等活動費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,CODE3,16,006 情報の収集調査委託経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,CODE_5_4_2_4,17,95016‑2125‑14‑0120 情報調査委託費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,CODE3,18,031 情報機能強化検討経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,CODE_5_4_2_4,19,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,CODE_5_4_2_4,20,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,CODE_5_4_2_4,21,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,CODE_5_4_2_4,22,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,CODE_5_4_2_4,23,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,CODE_5_4_2_4,24,95016‑2123‑09‑4210 電子計算機等借料,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,CODE3,25,036 カウンターインテリジェンス推進経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,CODE_5_4_2_4,26,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,CODE_5_4_2_4,27,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_10,detail,CODE_5_4_2_4,28,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CONTEXT,1,05 内閣所管(内閣情報調査室（衛星情報センター）),OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE3,2,010 内閣官房,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE3,3,015 情報収集衛星業務費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,DETAIL,4,01‑95 情報収集衛星システム開発等に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE3,5,001 内閣衛星情報センター運営経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE_5_4_2_4,6,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE_5_4_2_4,7,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE_5_4_2_4,8,95016‑2122‑08‑2755 外国留学旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE_5_4_2_4,9,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE_5_4_2_4,10,95016‑2123‑09‑1035 情報収集衛星業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE_5_4_2_4,11,95016‑2123‑09‑4120 通信専用料,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE_5_4_2_4,12,95016‑2123‑09‑5010 土地建物借料,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE_5_4_2_4,13,95016‑2123‑09‑5510 各所修繕,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE_5_4_2_4,14,95199‑2133‑09‑9030 自動車重量税,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE3,15,006 情報収集衛星研究・開発経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE3,16,001 情報収集衛星研究・開発経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE_5_4_2_4,17,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE_5_4_2_4,18,95016‑2123‑09‑1035 情報収集衛星業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE_5_4_2_4,19,95016‑2125‑14‑0131 情報収集衛星システム開発等委託費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE3,20,011 情報収集衛星運用経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE_5_4_2_4,21,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE_5_4_2_4,22,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE_5_4_2_4,23,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE_5_4_2_4,24,95016‑2123‑09‑1035 情報収集衛星業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE_5_4_2_4,25,95016‑2123‑09‑4120 通信専用料,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE_5_4_2_4,26,95016‑2125‑14‑0131 情報収集衛星システム開発等委託費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE3,27,018 情報収集衛星施設費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,DETAIL,28,01‑95 情報収集衛星施設整備に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE_5_4_2_4,29,95016‑1202‑08‑2360 施設施工旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE_5_4_2_4,30,95016‑1203‑09‑2031 施設施工庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_11,detail,CODE_5_4_2_4,31,95016‑1204‑15‑0010 施設整備費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_12,detail,CONTEXT,1,05 内閣所管（内閣サイバーセキュリティセンター）,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_12,detail,CODE3,2,010 内閣官房,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_12,detail,CODE3,3,010 内閣官房共通費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_12,detail,DETAIL,4,01‑95 内閣官房一般行政に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_12,detail,CODE3,5,071 サイバーセキュリティ戦略本部等経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_12,detail,CODE_5_4_2_4,6,95016‑2111‑05‑0200 委員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_12,detail,CODE_5_4_2_4,7,95016‑2111‑05‑0710 非常勤職員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_12,detail,CODE_5_4_2_4,8,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_12,detail,CODE_5_4_2_4,9,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_12,detail,CODE_5_4_2_4,10,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_12,detail,CODE_5_4_2_4,11,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_12,detail,CODE_5_4_2_4,12,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_12,detail,CODE_5_4_2_4,13,95016‑2123‑09‑5010 土地建物借料,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_12,detail,DETAIL,14,06‑95 情報の収集及び分析その他の調査に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_12,detail,CODE3,15,076 内閣サイバーセキュリティセンター情報システム等経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_12,detail,CODE_5_4_2_4,16,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_12,detail,CODE_5_4_2_4,17,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_12,detail,CODE_5_4_2_4,18,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_12,detail,CODE_5_4_2_4,19,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_12,detail,CODE_5_4_2_4,20,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_12,detail,CODE_5_4_2_4,21,95016‑2123‑09‑5010 土地建物借料,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_12,detail,CODE_5_4_2_4,22,95016‑2125‑14‑0125 サイバーセキュリティ施策評価事務委託費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_12,detail,CODE_5_4_2_4,23,95016‑2125‑14‑6410 サイバーセキュリティ協議会連絡調整事務委託費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_13,detail,CONTEXT,1,05 内閣所管（内閣人事局）,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_13,detail,CODE3,2,010 内閣官房,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_13,detail,CODE3,3,010 内閣官房共通費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_13,detail,DETAIL,4,01‑95 内閣官房一般行政に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_13,detail,CODE3,5,011 経常事務費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_13,detail,CODE3,6,041 内閣人事局一般事務費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_13,detail,CODE_5_4_2_4,7,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_13,detail,CODE_5_4_2_4,8,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_13,detail,CODE3,9,051 内閣人事局経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_13,detail,CODE_5_4_2_4,10,95016‑2111‑05‑0710 非常勤職員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_13,detail,CODE_5_4_2_4,11,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_13,detail,CODE_5_4_2_4,12,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_13,detail,CODE_5_4_2_4,13,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_13,detail,CODE_5_4_2_4,14,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_13,detail,CODE_5_4_2_4,15,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_13,detail,DETAIL,16,06‑95 情報の収集及び分析その他の調査に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_13,detail,CODE3,17,041 内閣人事局情報通信システム等経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_13,detail,CODE_5_4_2_4,18,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_14,detail,CONTEXT,1,05 内閣所管（国家安全保障局）,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_14,detail,CODE3,2,010 内閣官房,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_14,detail,CODE3,3,010 内閣官房共通費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_14,detail,DETAIL,4,01‑95 内閣官房一般行政に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_14,detail,CODE3,5,066 国家安全保障会議等経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_14,detail,CODE_5_4_2_4,6,95016‑2111‑05‑0710 非常勤職員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_14,detail,CODE_5_4_2_4,7,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_14,detail,CODE_5_4_2_4,8,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_14,detail,CODE_5_4_2_4,9,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_14,detail,CODE_5_4_2_4,10,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_14,detail,CODE_5_4_2_4,11,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_14,detail,CODE_5_4_2_4,12,95016‑2123‑09‑7171 国家安全保障政策活動費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_14,detail,DETAIL,13,06‑95 情報の収集及び分析その他の調査に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_14,detail,CODE3,14,066 国家安全保障情報通信システム等経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_14,detail,CODE_5_4_2_4,15,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CONTEXT,1,05 内閣所管（内閣感染症危機管理統括庁）,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE3,2,010 内閣官房,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE3,3,010 内閣官房共通費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,DETAIL,4,03‑95 内閣感染症危機管理統括庁に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE3,5,006 内閣感染症危機管理統括庁設置準備経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE_5_4_2_4,6,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE_5_4_2_4,7,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE_5_4_2_4,8,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE_5_4_2_4,9,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE_5_4_2_4,10,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE3,11,011 内閣感染症危機管理統括庁共通経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE_5_4_2_4,12,95016‑2111‑05‑0200 委員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE_5_4_2_4,13,95016‑2111‑05‑0710 非常勤職員手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE_5_4_2_4,14,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE_5_4_2_4,15,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE_5_4_2_4,16,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE_5_4_2_4,17,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE_5_4_2_4,18,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE3,19,016 内閣感染症危機管理統括庁訓練研修経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE_5_4_2_4,20,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE_5_4_2_4,21,95016‑2122‑08‑2010 職員旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE_5_4_2_4,22,95016‑2122‑08‑6010 委員等旅費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE_5_4_2_4,23,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE3,24,021 内閣感染症危機管理統括庁普及啓発経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE_5_4_2_4,25,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE_5_4_2_4,26,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE_5_4_2_4,27,95016‑2123‑09‑1040 情報処理業務庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE3,28,026 内閣感染症危機管理統括庁調査研究経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE_5_4_2_4,29,95016‑2129‑06‑0110 諸謝金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_15,detail,CODE_5_4_2_4,30,95016‑2123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_16,total,HIER,1,01 東日本大震災復興,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_16,total,HIER,2,31 復興庁,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_16,total,CODE3,3,010 復興庁,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_16,total,CODE3,4,005 内閣共通費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_16,total,DETAIL,5,01‑95 内閣一般行政に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_16,total,TOTAL,6,会計計,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_17,detail,CONTEXT,1,9101 東日本大震災復興特別会計（内閣）,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_17,detail,CODE2,2,01 東日本大震災復興,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_17,detail,CODE2,3,31 復興庁,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_17,detail,CODE3,4,010 復興庁,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_17,detail,CODE3,5,005 内閣共通費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_17,detail,DETAIL,6,01‑95 内閣一般行政に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_17,detail,CODE3,7,016 内閣官房一般行政に必要な経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_17,detail,CODE3,8,001 既定定員に伴う経費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_17,detail,CODE2,9,01 人件費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_17,detail,CODE_5_4_2_4,10,95016‑ 111‑02‑0000 職員基本給,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_17,detail,CODE_NN_NNNN,11,02‑0100 職員俸給,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_17,detail,CODE_NN_NNNN,12,02‑0300 地域手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_17,detail,CODE_5_4_2_4,13,95016‑ 111‑03‑0000 職員諸手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_17,detail,CODE_NN_NNNN,14,03‑0300 通勤手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_17,detail,CODE_NN_NNNN,15,03‑0700 期末手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_17,detail,CODE_NN_NNNN,16,03‑0800 勤勉手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_17,detail,CODE_NN_NNNN,17,03‑1100 住居手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_17,detail,CODE_5_4_2_4,18,95016‑ 111‑05‑1500 退職手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_17,detail,CODE_5_4_2_4,19,95016‑ 115‑16‑7500 国家公務員共済組合負担金,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_17,detail,CODE3,20,011 事務取扱費,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_17,detail,CODE_5_4_2_4,21,95089‑ 111‑05‑2100 児童手当,OUT_OF_SCOPE,no_toc
+cas.go.jp__jp__yosan__pdf__r6_17,detail,CODE_5_4_2_4,22,95016‑ 123‑09‑1010 庁費,OUT_OF_SCOPE,no_toc
