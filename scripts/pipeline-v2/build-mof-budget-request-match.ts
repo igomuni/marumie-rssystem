@@ -242,12 +242,12 @@ const unmatchedFast = (table: 'kou' | 'jikou' | 'moku', refs: Set<string>) => {
     let reason = 'no_request_row';
     if (table !== 'kou') { const kk = kouKeyIdx[a].get(kjKey(r, a)); reason = kk !== undefined && refKou.has(id(`kou-${a}`, kk)) ? 'kou_matched_no_request_row' : 'kou_not_matched'; }
     counts[reason] = (counts[reason] ?? 0) + 1;
-    rows.push([rid, a, r['項コード'], r['項名'], table === 'jikou' ? r['事項名'] : table === 'moku' ? r['目名'] : '', reason]);
+    rows.push([rid, a, r['項コード'], r['項名'], table === 'jikou' ? r['事項名'] : table === 'moku' ? r['目名'] : '', reason, r['所管'] ?? '', r['組織'] ?? r['共管組織名'] ?? '', r['特別会計'] ?? '', r['勘定'] ?? '']);
   });
   return { rows, counts };
 };
 const uk = unmatchedFast('kou', refKou), uj = unmatchedFast('jikou', refJikou), um = unmatchedFast('moku', refMoku);
-const uh = ['mof_row', 'account', 'kou_code', 'kou_name', 'item_name', 'reason'];
+const uh = ['mof_row', 'account', 'kou_code', 'kou_name', 'item_name', 'reason', 'ministry', 'organization', 'special_account', 'sub_account'];
 writeCsv('unmatched-mof-kou.csv', uh, uk.rows); writeCsv('unmatched-mof-jikou.csv', uh, uj.rows); writeCsv('unmatched-mof-moku.csv', uh, um.rows);
 
 const noToc: unknown[][] = [];
