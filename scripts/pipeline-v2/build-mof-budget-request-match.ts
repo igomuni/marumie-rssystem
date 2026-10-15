@@ -8,7 +8,7 @@
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
-import { amount, buildTocTree, hy, mofAmountJikou, mofAmountKou, mofAmountMoku, ns, readCsv, type Rec, type TocTree } from './lib/mof-budget-request-match';
+import { amount, buildPositionTree, buildTocTree, hy, mofAmountJikou, mofAmountKou, mofAmountMoku, ns, readCsv, type Rec, type TocTree } from './lib/mof-budget-request-match';
 
 const [yearArg, ver, outDir] = process.argv.slice(2);
 if (!/^20(24|25)$/.test(yearArg ?? '') || !['2024', '2025', '2025_teishutsu'].includes(ver ?? '') || !outDir) throw new Error('usage: build-mof-budget-request-match.ts <2024|2025> <2024|2025|2025_teishutsu> <out-dir>');
@@ -41,6 +41,7 @@ const jikouIdx = { general: mofIdx('jikou', 'general'), special: mofIdx('jikou',
 const mokuIdx = { general: mofIdx('moku', 'general'), special: mofIdx('moku', 'special') };
 const kouByName = (a: Acct) => { const m = new Map<string, number[]>(); mofRaw[`kou-${a}`].forEach((r, i) => { const k = a === 'general' ? [ns(r['所管']), ns(r['組織']), ns(r['項名'])].join('|') : [ns(r['特別会計']), ns(r['勘定']), ns(r['項名'])].join('|'); (m.get(k) ?? m.set(k, []).get(k)!).push(i); }); return m; };
 const kouIdx = { general: kouByName('general'), special: kouByName('special') };
+const kouByMinName = new Map<string, number[]>(); mofRaw['kou-general'].forEach((r, i) => { const k = `${ns(r['所管'])}|${ns(r['項名'])}`; (kouByMinName.get(k) ?? kouByMinName.set(k, []).get(k)!).push(i); });
 const ministries = new Set(mofRaw['kou-general'].map(r => ns(r['所管'])));
 const orgsOf = new Map<string, Set<string>>(); for (const r of mofRaw['kou-general']) (orgsOf.get(ns(r['所管'])) ?? orgsOf.set(ns(r['所管']), new Set()).get(ns(r['所管']))!).add(ns(r['組織']));
 const accounts = new Set(mofRaw['kou-special'].map(r => ns(r['特別会計'])));
@@ -51,17 +52,24 @@ const trees = new Map<string, TocTree>(); for (const [s, rows] of toc) trees.set
 // 追補 A (a): 文書セット。TOC を持たない source S を、同じファミリーの TOC の source T に付ける（S の CODE3 が T の項と一致し、T がちょうど 1 つのとき）
 const famOf = (s: string) => s.replace(/[_-]?\d+$/, '');
 const code3Keys = (rows: Rec[], col: string): string[] => rows.filter(r => r['row_type'] === 'CODE3').map(r => { const m = /^(\d{3})\s*(.+)$/.exec(r[col]); return m ? `${m[1]}|${ns(m[2])}` : ''; }).filter(Boolean);
-const tocKeys = new Map<string, Set<string>>(); for (const t of trees.values()) tocKeys.set(t.slug, new Set(t.kous.map(k => `${k.code}|${k.name}`)));
 const attach = new Map<string, string>(); const setRows: unknown[][] = [];
-for (const s of [...new Set([...detail.keys(), ...total.keys()])].sort()) {
-  if (toc.has(s)) continue;
-  const keys = new Set([...code3Keys(detail.get(s) ?? [], '事項'), ...code3Keys(total.get(s) ?? [], '区分')]);
-  const cands = [...tocKeys].filter(([t, ks]) => famOf(t) === famOf(s) && [...keys].some(k => ks.has(k)));
-  if (cands.length === 1) { attach.set(s, cands[0][0]); setRows.push([cands[0][0], s, [...keys].filter(k => cands[0][1].has(k)).length]); }
-}
+const attachRound = (candidates: Set<string>) => {
+  const tocKeys = new Map<string, Set<string>>(); for (const t of trees.values()) if (candidates.has(t.slug)) tocKeys.set(t.slug, new Set(t.kous.map(k => `${k.code}|${k.name}`)));
+  for (const s of [...new Set([...detail.keys(), ...total.keys()])].sort()) {
+    if (trees.has(s) || attach.has(s)) continue;
+    const keys = new Set([...code3Keys(detail.get(s) ?? [], '事項'), ...code3Keys(total.get(s) ?? [], '区分')]);
+    const cands = [...tocKeys].filter(([t, ks]) => famOf(t) === famOf(s) && [...keys].some(k => ks.has(k)));
+    if (cands.length === 1) { attach.set(s, cands[0][0]); setRows.push([cands[0][0], s, [...keys].filter(k => cands[0][1].has(k)).length]); }
+  }
+};
+attachRound(new Set(trees.keys())); // 追補 A (a): TOC の source に付ける
+// 追補 D: TOC にも付かなかった source のうち総表を持つものは、総表の行の並びから木を作り、明細表だけの source をその木に付ける
+const tocTreeSlugs = new Set(trees.keys());
+for (const [s, rows] of total) if (!trees.has(s) && !attach.has(s)) { const t = buildPositionTree(s, rows, n => accounts.has(n)); if (t.kous.length > 0) trees.set(s, t); }
+attachRound(new Set([...trees.keys()].filter(x => !tocTreeSlugs.has(x))));
 const suffixNo = (s: string) => Number(/(\d+)$/.exec(s)?.[1] ?? 0);
 const extrasOf = (t: string) => [...attach].filter(([, to]) => to === t).map(([x]) => x).sort((a, b) => suffixNo(a) - suffixNo(b) || (a < b ? -1 : 1));
-const concatV = (m: Map<string, Rec[]>) => { const v = new Map<string, Rec[]>(); for (const t of toc.keys()) { const rows = [...(m.get(t) ?? []), ...extrasOf(t).flatMap(x => m.get(x) ?? [])]; if (rows.length) v.set(t, rows); } for (const [s, rows] of m) if (!toc.has(s) && !attach.has(s)) v.set(s, rows); return v; };
+const concatV = (m: Map<string, Rec[]>) => { const v = new Map<string, Rec[]>(); for (const t of trees.keys()) { const rows = [...(m.get(t) ?? []), ...extrasOf(t).flatMap(x => m.get(x) ?? [])]; if (rows.length) v.set(t, rows); } for (const [s, rows] of m) if (!trees.has(s) && !attach.has(s)) v.set(s, rows); return v; };
 const detailV = concatV(detail), totalV = concatV(total);
 const ctxOf = new Map<string, { acct: Acct; key: string; raw: string }>();
 for (const [s, rows] of detailV) {
@@ -70,7 +78,12 @@ for (const [s, rows] of detailV) {
   const name = ns(m[2]); const acct: Acct = m[1].length === 2 ? 'general' : 'special';
   ctxOf.set(s, { acct, key: acct === 'general' ? name.split('所管')[0] : name.replace(/特別会計.*$/, ''), raw: r['事項'] });
 }
-const sources = [...new Set([...toc.keys(), ...detailV.keys(), ...totalV.keys()])].sort();
+for (const t of trees.values()) if (t.hierarchy === 'position' && !ctxOf.has(t.slug)) {
+  const others = new Set<string>();
+  for (const [x, rows] of detail) if (x !== t.slug && famOf(x) === famOf(t.slug)) { const r = rows.find(y => y['row_type'] === 'CONTEXT'); const m = r ? /^(\d+)\s*(.+)$/.exec(r['事項']) : null; if (m) { const nm = ns(m[2]); const acct: Acct = m[1].length === 2 ? 'general' : 'special'; others.add(JSON.stringify([acct, acct === 'general' ? nm.split('所管')[0] : nm.replace(/特別会計.*$/, '')])); } }
+  if (others.size === 1) { const [acct, key] = JSON.parse([...others][0]) as [Acct, string]; ctxOf.set(t.slug, { acct, key, raw: '(family)' }); }
+}
+const sources = [...new Set([...trees.keys(), ...detailV.keys(), ...totalV.keys()])].sort();
 
 // ---------------------------------------------------------------- M0
 const m0: unknown[][] = [];
@@ -100,7 +113,8 @@ for (const s of sources) {
     if (!c) { scopeOfKou.set(`${s}#${k.idx}`, { ok: false, reason: 'no_context' }); continue; }
     if (c.acct === 'general') {
       const min = k.ministry ?? c.key; const org2 = k.org;
-      if (!ministries.has(min)) scopeOfKou.set(`${s}#${k.idx}`, { ok: false, reason: 'ministry_unmatched' });
+      if (t.hierarchy === 'position') { if (!ministries.has(min)) scopeOfKou.set(`${s}#${k.idx}`, { ok: false, reason: 'ministry_unmatched' }); else scopeOfKou.set(`${s}#${k.idx}`, { ok: true, reason: '', acct: 'general', ministry: min }); }
+      else if (!ministries.has(min)) scopeOfKou.set(`${s}#${k.idx}`, { ok: false, reason: 'ministry_unmatched' });
       else if (org2 === null || !orgsOf.get(min)?.has(org2)) scopeOfKou.set(`${s}#${k.idx}`, { ok: false, reason: org2 === null ? 'no_org_label' : 'org_unmatched' });
       else scopeOfKou.set(`${s}#${k.idx}`, { ok: true, reason: '', acct: 'general', ministry: min, org: org2 });
     } else {
@@ -139,8 +153,7 @@ for (const s of sources) {
     const head = [s, k.idx, k.code, k.name, k.page];
     if (!sc.ok) { m1.push([...head, '', '', 0, sc.reason === 'no_context' ? 'OUT_OF_SCOPE' : 'PARENT_UNMATCHED', sc.reason, reqAmt, '', '', '']); return; }
     const a = sc.acct!; kouAcct.set(`${s}#${k.idx}`, a);
-    const key = a === 'general' ? [sc.ministry, sc.org, k.name].join('|') : [sc.account, sc.sub, k.name].join('|');
-    const c: Cand = kouIdx[a].get(key) ?? [];
+    const c: Cand = a === 'general' && sc.org === undefined ? (kouByMinName.get(`${sc.ministry}|${k.name}`) ?? []) : (kouIdx[a].get(a === 'general' ? [sc.ministry, sc.org, k.name].join('|') : [sc.account, sc.sub, k.name].join('|')) ?? []);
     const st = c.length === 0 ? 'NO_CANDIDATE' : c.length === 1 ? 'MATCHED' : 'AMBIGUOUS';
     if (c.length === 1) m1Match.set(`${s}#${k.idx}`, c[0]);
     if (c.length === 0) m1.push([...head, '', '', 0, st, 'name_no_match', reqAmt, '', '', scopeText(`${s}#${k.idx}`)]);
@@ -151,7 +164,7 @@ for (const s of sources) {
     }
   });
 }
-writeCsv('m1-kou.csv', ['request_source', 'toc_kou_idx', 'request_code3', 'request_name', 'request_page', 'mof_row', 'mof_name', 'candidate_count', 'status', 'reason', 'request_amount', 'mof_amount', 'amount_diff', 'request_scope'], m1);
+writeCsv('m1-kou.csv', ['request_source', 'toc_kou_idx', 'request_code3', 'request_name', 'request_page', 'mof_row', 'mof_name', 'candidate_count', 'status', 'reason', 'request_amount', 'mof_amount', 'amount_diff', 'request_scope', 'hierarchy'], m1.map(r => [...r, trees.get(String(r[0]))?.hierarchy ?? '']));
 
 // ---------------------------------------------------------------- M2
 const m2: unknown[][] = []; const refJikou = new Set<string>();
@@ -180,7 +193,7 @@ for (const s of sources) {
     }
   });
 }
-writeCsv('m2-jikou.csv', ['request_source', 'request_no', 'request_code', 'request_name', 'request_page', 'toc_kou_idx', 'mof_kou_row', 'mof_jikou_row', 'candidate_count', 'status', 'reason', 'class_code_agrees', 'request_amount', 'mof_amount', 'amount_diff', 'request_scope'], m2);
+writeCsv('m2-jikou.csv', ['request_source', 'request_no', 'request_code', 'request_name', 'request_page', 'toc_kou_idx', 'mof_kou_row', 'mof_jikou_row', 'candidate_count', 'status', 'reason', 'class_code_agrees', 'request_amount', 'mof_amount', 'amount_diff', 'request_scope', 'hierarchy'], m2.map(r => [...r, trees.get(String(r[0]))?.hierarchy ?? '']));
 
 // ---------------------------------------------------------------- M3
 const m3: unknown[][] = []; const refMoku = new Set<string>();
@@ -228,7 +241,7 @@ for (const s of sources) {
     }
   }
 }
-writeCsv('m3-moku.csv', ['request_source', 'toc_kou_idx', 'code_main_purpose', 'code_x', 'code_item', 'request_name', 'request_rows', 'request_sum', 'mof_kou_row', 'mof_moku_row', 'candidate_count', 'status', 'reason', 'mof_amount', 'amount_diff'], m3);
+writeCsv('m3-moku.csv', ['request_source', 'toc_kou_idx', 'code_main_purpose', 'code_x', 'code_item', 'request_name', 'request_rows', 'request_sum', 'mof_kou_row', 'mof_moku_row', 'candidate_count', 'status', 'reason', 'mof_amount', 'amount_diff', 'hierarchy'], m3.map(r => [...r, trees.get(String(r[0]))?.hierarchy ?? '']));
 
 // ---------------------------------------------------------------- 出力の残り
 writeCsv('m0-entities.csv', ['request_source', 'level', 'request_code_name', 'request_name', 'mof_key', 'status', 'reason'], m0);
