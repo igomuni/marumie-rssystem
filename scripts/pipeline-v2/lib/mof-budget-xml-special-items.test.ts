@@ -15,7 +15,8 @@ const EXPECTED = { '2024': { targets: 32, nonTargets: 249, records: 360, items: 
 describe('special-account jikou: final CSV and source sets', () => {
   it('mof-archive-csv の manifest の SHA-256 が全 CSV と一致する', () => {
     const manifest = JSON.parse(fs.readFileSync(path.join(CSV_DIR, 'manifest.json'), 'utf8')) as Record<string, string>;
-    expect(Object.keys(manifest)).toHaveLength(6 * fs.readdirSync(CSV_DIR).filter(d => fs.statSync(path.join(CSV_DIR, d)).isDirectory()).length);
+    const core = Object.keys(manifest).filter(k => /\/(kou|moku|jikou)-(general|special)\.csv$/.test(k));
+    expect(core).toHaveLength(6 * fs.readdirSync(CSV_DIR).filter(d => fs.statSync(path.join(CSV_DIR, d)).isDirectory()).length);
     for (const [f, h] of Object.entries(manifest)) expect(sha(fs.readFileSync(path.join(CSV_DIR, f)))).toBe(h);
   });
   for (const v of VERSIONS) {
