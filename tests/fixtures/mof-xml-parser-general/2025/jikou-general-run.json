@@ -1,0 +1,40 @@
+{
+  "parser": {
+    "path": "scripts/pipeline-v2/lib/mof-budget-xml-items-general.ts",
+    "sha256": "234fe951883eaaf6ba6630518d786c17ae6dd91ac47f616c9124f192f7c523ea"
+  },
+  "inputs": {
+    "sourceSet": {
+      "path": "tests/fixtures/mof-xml-parser-general/2025/source-set.json",
+      "sha256": "de7731e5fc426d662f0c04c4ca7c6728dfe6ca70b835d0bb73979236c10b6d74"
+    },
+    "menu": {
+      "path": "data/download/mof.go.jp/archive/2025/2025/html/202511001menu.html",
+      "sha256": "8f42d7a6b98b89259d44b40908ae9d5c51325236de6d552bed2b77ecdd3cd898"
+    }
+  },
+  "xmlFiles": 328,
+  "targetFiles": 94,
+  "notTargetFiles": 234,
+  "records": 1287,
+  "parserCounts": {
+    "itemStartRows": 806,
+    "requestRows": 1287,
+    "subtotalRows": 89,
+    "descriptionOnlyRows": 28
+  },
+  "columns": [
+    "所管",
+    "組織",
+    "項コード",
+    "項名",
+    "事項名",
+    "主要経費別分類コード",
+    "令和7年度要求額(千円)",
+    "前年度予算額(千円)",
+    "比較増△減額(千円)",
+    "source_file",
+    "source_row",
+    "source_page"
+  ]
+}

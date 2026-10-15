@@ -1,0 +1,34 @@
+{
+ "2025": {
+  "kou_jikou": 806,
+  "kou_csv": 806,
+  "only_in_jikou": 0,
+  "only_in_kou_csv": 0,
+  "examples": [
+   [],
+   []
+  ],
+  "kou_sum_equal": 806,
+  "kou_sum_unequal": 0,
+  "jikou_total": 115197845248,
+  "kou_total": 115197845248
+ },
+ "2025_teishutsu": {
+  "kou_jikou": 806,
+  "kou_csv": 806,
+  "only_in_jikou": 0,
+  "only_in_kou_csv": 0,
+  "examples": [
+   [],
+   []
+  ],
+  "kou_sum_equal": 806,
+  "kou_sum_unequal": 0,
+  "jikou_total": 115541501128,
+  "kou_total": 115541501128
+ },
+ "seiritsugo_vs_teishutsu": {
+  "same_keys": true,
+  "rows_with_diff": 5
+ }
+}
