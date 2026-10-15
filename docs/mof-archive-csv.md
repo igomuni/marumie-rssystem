@@ -17,7 +17,7 @@
 | `jikou-general.csv` | 一般会計の事項 | 予算書 XML（事項別内訳） | 1,256 / 1,287 / 1,287 |
 | `jikou-special.csv` | 特別会計の事項 | 予算書 XML（歳出事項別内訳） | 360 / 365 / 365 |
 
-項・目は公式 CSV（`DL{帳票ID}.zip` の `b.csv`）から、事項は XML から作る。項と事項は、項の（コード・名称）の集合が一致し、項ごとの合計も一致することを確認済み（FY2024・FY2025 の両会計）。
+項・目は公式 CSV（`DL{帳票ID}.zip` の `b.csv`）から、事項は XML から作る。項と事項は、項の（コード・名称）の集合が一致し、項ごとの合計も一致することを作成時に確認した（FY2024・FY2025 の両会計）。
 
 ## 列の読み方
 
@@ -29,27 +29,33 @@
 
 ## 作り方
 
+入力はすべて `data/download/mof.go.jp/archive/`（取得は `scripts/pipeline-v2/download-mof-archive.ts`）。出力は再生成して正の CSV とバイト単位で一致する。
+
 ```bash
-# 項・目（公式 CSV から）
+# 項・目（公式 CSV から）。<out-root>/{2024,2025,2025_teishutsu}/ に出力
 python3 -I scripts/research/build-mof-archive-kou-moku-csv.py <out-root>
-# 事項（一般会計）。第1引数は 2024 | 2025 | 2025_teishutsu
+# 事項（一般会計／特別会計）。<version> は 2024 | 2025 | 2025_teishutsu
 npx tsx scripts/pipeline-v2/build-mof-jikou-csv.ts <version> <out-dir>
-# 事項（特別会計）
 npx tsx scripts/pipeline-v2/build-mof-jikou-special-csv.ts <version> <out-dir>
-# 整合の確認
-python3 -I scripts/research/check-mof-archive-csv-consistency.py
 ```
 
-parser は `scripts/pipeline-v2/lib/` にある。一般会計は `mof-budget-xml-items.ts`（FY2024 専用で、評価 artifact の hash で凍結。変更しない）と、その複製に帳票ごとの値（帳票 ID・DOCTYPE・年度の文字）を渡せるようにした `mof-budget-xml-items-general.ts`。特別会計は `mof-budget-xml-special-items.ts`。入力は凍結した source set（XML の SHA-256 の一覧）で、想定外の構造は例外にする（silent skip なし）。
+事項の parser は `scripts/pipeline-v2/lib/` にある。
+- 一般会計: `mof-budget-xml-items.ts`（FY2024 専用。評価 artifact の source hash で固定されているため変更しない）と、その複製に帳票ごとの値（帳票 ID・DOCTYPE・年度の文字）を渡せるようにした `mof-budget-xml-items-general.ts`。
+- 特別会計: `mof-budget-xml-special-items.ts`。
+- 入力境界は凍結した source set（XML の SHA-256 の一覧）。FY2024 の一般会計は `tests/fixtures/mof-budget-xml-parser-v0/2024/`、それ以外は `tests/fixtures/mof-xml-parser-general/`・`mof-xml-parser-special/`。想定外の構造は例外にし、silent skip しない。
 
-## 他の fixtures ディレクトリ（作成の根拠・中間成果物。正ではない）
+### 特別会計 parser の行の文法
 
-| ディレクトリ | 中身 |
+`歳出事項別内訳` のデータ行を、列の集合の完全一致で受理する（`1.4` / `3.2` は `1.1` / `3.1` の列位置の変種）。
+
+| 行の種類 | 列の集合 |
 |---|---|
-| `mof-xml-structure-inventory/` | 全 XML の構造の記述（ファイルごとの SHA-256・見出し・行の列構成・目次の chain） |
-| `mof-xml-parser-general/` | 一般会計 FY2025 の source set と実行記録（`jikou-general.csv` は `mof-archive-csv/` の複製） |
-| `mof-xml-parser-special/` | 特別会計の source set と実行記録・確認結果（`jikou-special.csv` は `mof-archive-csv/` の複製） |
-| `mof-special-row-classes/`、`mof-special-item-starts/` | 特別会計の行の種類の実例と、項の開始行の確認 |
-| `mof-budget-xml-parser-v0/` | 一般会計 FY2024 の parser v0 の凍結 fixture（source set・reference projection・評価） |
+| 項の開始行 | `{1.1\|1.4, 2.1, 3.1\|3.2, 4.1, 5.1, 7.1, 9.1, 11.1}`（項コード・項名・分類コード・事項名・予定額・前年度・比較増△減額・説明） |
+| 事項の続き行 | `{3.1\|3.2, 4.1, 5.1, 7.1, 9.1, 11.1}` |
+| 説明の続き行 | `{11.1}`（数えるだけ） |
+| 所管・組織の行 | `{1.1}`、`{1.3}`、`{1.3, 5.1, 7.1, 9.1}`（復興庁のファイルだけ。header が `所管・組織・項`） |
+| 前年度なしの項の開始行 | `{1.1, 2.1, 3.1, 4.1, 5.1, 7.1}`（新勘定のファイルだけ。`7.1` は説明） |
 
-複製の CSV を直接読む処理は、正の置き場（`mof-archive-csv/`）に切り替えてよい。
+- 説明欄（`11.1`）は読まない。入れ子の表（食糧管理勘定）は無視し、後ろの行まで読む。
+- 前年度の列がない行は、前年度・比較増△減額を空欄にする（0 にしない）。
+- 上記以外の列の集合・header は例外で止める。所管・特別会計・勘定は、目次の祖先 chain（`…所管 > {特別会計} > 甲号歳入歳出予定計算書 > ({勘定}) > 歳出 事項別内訳`）から取る。
