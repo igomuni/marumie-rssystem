@@ -2,25 +2,25 @@
  "request_year": "2025",
  "mof_version": "2025",
  "input_sha256": "4c7eb93a114325f910198ea9b1095555f61d95ef0d9d74d6a9514d123bd04380",
- "sources": 130,
+ "sources": 128,
  "m0_status": {
-  "MATCHED": 227,
-  "OUT_OF_SCOPE": 66
+  "MATCHED": 231,
+  "OUT_OF_SCOPE": 60
  },
  "m1_status": {
-  "MATCHED": 864,
+  "MATCHED": 934,
   "NO_CANDIDATE": 64,
-  "OUT_OF_SCOPE": 134
+  "OUT_OF_SCOPE": 64
  },
  "m2_status": {
-  "MATCHED": 1300,
-  "NO_CANDIDATE": 51,
+  "MATCHED": 1412,
+  "NO_CANDIDATE": 52,
   "PARENT_UNMATCHED": 65,
-  "OUT_OF_SCOPE": 227
+  "OUT_OF_SCOPE": 114
  },
  "m3_status": {
-  "MATCHED": 6364,
-  "NO_CANDIDATE": 442,
+  "MATCHED": 6826,
+  "NO_CANDIDATE": 446,
   "PARENT_UNMATCHED": 100,
   "OUT_OF_SCOPE": 256
  },
@@ -30,30 +30,33 @@
   "moku": 8030
  },
  "mof_rows_referenced": {
-  "kou": 789,
-  "jikou": 1189,
-  "moku": 5992
+  "kou": 859,
+  "jikou": 1301,
+  "moku": 6454
  },
  "unmatched_mof_reasons": {
   "kou": {
-   "no_request_row": 271
+   "no_request_row": 201
   },
   "jikou": {
-   "kou_not_matched": 412,
-   "kou_matched_no_request_row": 51
+   "kou_not_matched": 298,
+   "kou_matched_no_request_row": 53
   },
   "moku": {
-   "kou_not_matched": 1810,
-   "kou_matched_no_request_row": 228
+   "kou_not_matched": 1316,
+   "kou_matched_no_request_row": 260
   }
  },
  "request_links": {
-  "kou_total_table_linked": 992,
+  "kou_total_table_linked": 1062,
   "kou_total": 1062,
-  "jikou_total_table_linked": 1530,
-  "jikou_detail_linked": 1509,
+  "jikou_total_table_linked": 1643,
+  "jikou_detail_linked": 1622,
   "jikou_total": 1643
  },
+ "attached_sources": 2,
+ "no_toc_rows": 4568,
+ "no_toc_sources": 73,
  "request_unclassified_toc_rows": 150,
  "request_moku_rows_without_kou": 444
 }

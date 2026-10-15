@@ -160,13 +160,11 @@ meti.go.jp__main__yosangaisan__fy2025__pdf__ippan_o,toc:組織,040 資源エネ�
 meti.go.jp__main__yosangaisan__fy2025__pdf__ippan_o,toc:組織,060 中小企業庁,中小企業庁,中小企業庁,MATCHED,
 meti.go.jp__main__yosangaisan__fy2025__pdf__tokkyo_o,context,2703 特許特別会計(特許（特許）),特許,特許,MATCHED,special
 meti.go.jp__main__yosangaisan__fy2025__pdf__tokkyo_o,toc:会計,03 特許,特許,特許,MATCHED,
-mext.go.jp__content__20240911-mxt_kaikesou01-000038011_1,context,,,,OUT_OF_SCOPE,no_context
-mext.go.jp__content__20240911-mxt_kaikesou01-000038011_1,toc:組織,010 文部科学本省,文部科学本省,,OUT_OF_SCOPE,no_context
-mext.go.jp__content__20240911-mxt_kaikesou01-000038011_1,toc:組織,020 文部科学本省所轄機関,文部科学本省所轄機関,,OUT_OF_SCOPE,no_context
-mext.go.jp__content__20240911-mxt_kaikesou01-000038011_1,toc:組織,030 文化庁,文化庁,,OUT_OF_SCOPE,no_context
-mext.go.jp__content__20240911-mxt_kaikesou01-000038011_1,toc:組織,040 スポーツ庁,スポーツ庁,,OUT_OF_SCOPE,no_context
-mext.go.jp__content__20240911-mxt_kaikesou01-000038011_2,context,,,,OUT_OF_SCOPE,no_context
-mext.go.jp__content__20240911-mxt_kaikesou01-000038011_3,context,24 文部科学省所管,文部科学省,文部科学省,MATCHED,general
+mext.go.jp__content__20240911-mxt_kaikesou01-000038011_1,context,24 文部科学省所管,文部科学省,文部科学省,MATCHED,general
+mext.go.jp__content__20240911-mxt_kaikesou01-000038011_1,toc:組織,010 文部科学本省,文部科学本省,文部科学本省,MATCHED,
+mext.go.jp__content__20240911-mxt_kaikesou01-000038011_1,toc:組織,020 文部科学本省所轄機関,文部科学本省所轄機関,文部科学本省所轄機関,MATCHED,
+mext.go.jp__content__20240911-mxt_kaikesou01-000038011_1,toc:組織,030 文化庁,文化庁,文化庁,MATCHED,
+mext.go.jp__content__20240911-mxt_kaikesou01-000038011_1,toc:組織,040 スポーツ庁,スポーツ庁,スポーツ庁,MATCHED,
 mext.go.jp__content__20240911-mxt_kaikesou01-000038011_9,context,9905 エネルギー対策特別会計（電源開発促進勘定）,エネルギー対策,エネルギー対策,MATCHED,special
 mext.go.jp__content__20240911-mxt_kaikesou01-000038011_9,toc:会計,05 エネルギー対策,エネルギー対策,エネルギー対策,MATCHED,
 mext.go.jp__content__20240911-mxt_kaikesou01-000038011_9,toc:勘定,2 電源開発促進勘定,電源開発促進勘定,電源開発促進勘定,MATCHED,

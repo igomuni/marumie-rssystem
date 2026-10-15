@@ -115,8 +115,6 @@ mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,toc:組織,010 文部�
 mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,toc:組織,020 文部科学本省所轄機関,文部科学本省所轄機関,,OUT_OF_SCOPE,no_context
 mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,toc:組織,030 文化庁,文化庁,,OUT_OF_SCOPE,no_context
 mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,toc:組織,040 スポーツ庁,スポーツ庁,,OUT_OF_SCOPE,no_context
-mext.go.jp__content__20230914-mxt_kaikesou01-000031817_02,context,,,,OUT_OF_SCOPE,no_context
-mext.go.jp__content__20230914-mxt_kaikesou01-000031817_03,context,,,,OUT_OF_SCOPE,no_context
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-1b-01,context,25 厚生労働省所管,厚生労働省,厚生労働省,MATCHED,general
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-1b-01,toc:組織,010 厚生労働本省,厚生労働本省,厚生労働本省,MATCHED,
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-1b-01,toc:組織,030 検疫所,検疫所,検疫所,MATCHED,
