@@ -14,6 +14,7 @@ const [yearArg, ver, outDir] = process.argv.slice(2);
 if (!/^20(24|25)$/.test(yearArg ?? '') || !['2024', '2025', '2025_teishutsu'].includes(ver ?? '') || !outDir) throw new Error('usage: build-mof-budget-request-match.ts <2024|2025> <2024|2025|2025_teishutsu> <out-dir>');
 const REQ = path.join('data', 'work', 'budget-request-csv', yearArg);
 const MOF = path.join('tests', 'fixtures', 'mof-archive-csv', ver);
+fs.mkdirSync(outDir, { recursive: true });
 const sha = (b: Buffer | string) => crypto.createHash('sha256').update(b).digest('hex');
 const cell = (v: unknown): string => { const s = v === null || v === undefined ? '' : String(v); return /[",\n\r]/u.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
 const writeCsv = (name: string, header: string[], rows: unknown[][]) => fs.writeFileSync(path.join(outDir, name), [header, ...rows].map(r => r.map(cell).join(',')).join('\n') + '\n');
@@ -213,7 +214,6 @@ for (const s of sources) {
 writeCsv('m3-moku.csv', ['request_source', 'toc_kou_idx', 'code_main_purpose', 'code_x', 'code_item', 'request_name', 'request_rows', 'request_sum', 'mof_kou_row', 'mof_moku_row', 'candidate_count', 'status', 'reason', 'mof_amount', 'amount_diff'], m3);
 
 // ---------------------------------------------------------------- 出力の残り
-fs.mkdirSync(outDir, { recursive: true });
 writeCsv('m0-entities.csv', ['request_source', 'level', 'request_code_name', 'request_name', 'mof_key', 'status', 'reason'], m0);
 // kou_not_matched 判定は kou 行の索引で行う（findIndex は重いので索引化）
 const kouKeyIdx = { general: new Map<string, number>(), special: new Map<string, number>() };
