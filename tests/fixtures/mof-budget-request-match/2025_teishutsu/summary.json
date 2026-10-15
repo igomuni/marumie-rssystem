@@ -8,18 +8,18 @@
   "OUT_OF_SCOPE": 31
  },
  "m1_status": {
-  "MATCHED": 997,
-  "NO_CANDIDATE": 65
+  "MATCHED": 1009,
+  "NO_CANDIDATE": 53
  },
  "m2_status": {
-  "MATCHED": 1523,
+  "MATCHED": 1535,
   "NO_CANDIDATE": 54,
-  "PARENT_UNMATCHED": 66
+  "PARENT_UNMATCHED": 54
  },
  "m3_status": {
-  "MATCHED": 7256,
-  "NO_CANDIDATE": 476,
-  "PARENT_UNMATCHED": 101
+  "MATCHED": 7307,
+  "NO_CANDIDATE": 437,
+  "PARENT_UNMATCHED": 89
  },
  "mof_rows": {
   "kou": 1060,
@@ -27,21 +27,21 @@
   "moku": 8030
  },
  "mof_rows_referenced": {
-  "kou": 919,
-  "jikou": 1407,
-  "moku": 6876
+  "kou": 931,
+  "jikou": 1419,
+  "moku": 6922
  },
  "unmatched_mof_reasons": {
   "kou": {
-   "no_request_row": 141
+   "no_request_row": 129
   },
   "jikou": {
-   "kou_not_matched": 188,
+   "kou_not_matched": 176,
    "kou_matched_no_request_row": 57
   },
   "moku": {
-   "kou_matched_no_request_row": 284,
-   "kou_not_matched": 870
+   "kou_not_matched": 858,
+   "kou_matched_no_request_row": 250
   }
  },
  "request_links": {
