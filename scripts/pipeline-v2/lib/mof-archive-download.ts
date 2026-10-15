@@ -106,3 +106,14 @@ export function xmlDocumentPaths(mainHref: string): { menuHref: string; xmlDirHr
   if (!m) throw new Error(`XML版の Main.html として解釈できません: ${mainHref}`);
   return { menuHref: `${m[1]}/html/${m[2]}menu.html`, xmlDirHref: `${m[1]}/xml/` };
 }
+
+/**
+ * 目次（menu）の EUC-JP を読む。まず厳密に decode し、不正な byte 列があれば（FY2026 の特別会計の目次に、括弧の閉じが壊れた題名が 1 つある）
+ * 置換文字で decode する。目次からは XML のファイル名と祖先の見出しだけを使うため、壊れた題名の文字が置換されても XML の集合は変わらない。
+ * 置換文字の数を返す（0 なら厳密に decode できた）。
+ */
+export function decodeEucJpMenu(bytes: Uint8Array): { text: string; replacementChars: number } {
+  try { return { text: new TextDecoder('euc-jp', { fatal: true }).decode(bytes), replacementChars: 0 }; } catch { /* fallthrough */ }
+  const text = new TextDecoder('euc-jp').decode(bytes);
+  return { text, replacementChars: (text.match(/\uFFFD/g) ?? []).length };
+}

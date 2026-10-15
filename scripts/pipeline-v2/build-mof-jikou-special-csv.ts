@@ -8,7 +8,7 @@
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
-import { parseMenuXmlFileNames } from './lib/mof-archive-download';
+import { decodeEucJpMenu, parseMenuXmlFileNames } from './lib/mof-archive-download';
 import { readMenuAncestorChains } from './lib/mof-budget-xml-items-general';
 import { checkSourceSetCompleteness } from './lib/mof-budget-xml-items-evaluation-rules';
 import { MofXmlParseError } from './lib/mof-budget-xml-items-general';
@@ -35,7 +35,7 @@ function main(): void {
   const { spec } = t;
   const root = path.join('data', 'download', 'mof.go.jp', 'archive', t.archive);
   const menuBytes = fs.readFileSync(path.join(root, 'html', `${spec.documentId}menu.html`));
-  const menuText = new TextDecoder('euc-jp', { fatal: true }).decode(menuBytes);
+  const menuText = decodeEucJpMenu(menuBytes).text;
   const chains = readMenuAncestorChains(menuText);
   const setBytes = fs.readFileSync(t.sourceSet);
   if (sha256(setBytes) !== t.sourceSetSha256) throw new Error(`source set ${t.sourceSet} differs from the frozen value`);

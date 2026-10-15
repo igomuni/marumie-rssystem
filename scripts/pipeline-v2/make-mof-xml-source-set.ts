@@ -8,14 +8,15 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
-import { parseMenuXmlFileNames } from './lib/mof-archive-download';
+import { decodeEucJpMenu, parseMenuXmlFileNames } from './lib/mof-archive-download';
 import { children, isEl, readXml, type Tx } from './lib/mof-budget-xml-items-general';
 
 const [kind, sub, doc, out] = process.argv.slice(2);
 const TITLE: Record<string, string> = { general: '〔組織別事項別内訳〕', special: '歳出事項別内訳' };
 if (!TITLE[kind ?? ''] || !sub || !doc || !out) throw new Error('usage: make-mof-xml-source-set.ts <general|special> <archive-subdir> <doc-id> <out.json>');
 const root = path.join('data', 'download', 'mof.go.jp', 'archive', sub);
-const files = parseMenuXmlFileNames(new TextDecoder('euc-jp', { fatal: true }).decode(fs.readFileSync(path.join(root, 'html', `${doc}menu.html`))));
+const menu = decodeEucJpMenu(fs.readFileSync(path.join(root, 'html', `${doc}menu.html`)));
+const files = parseMenuXmlFileNames(menu.text);
 const ws = (s: string) => s.replace(/[\s　]+/g, '');
 const targets: { file: string; sha256: string }[] = [], nonTargets: { file: string; sha256: string }[] = [];
 for (const f of [...files].sort()) {
@@ -26,5 +27,5 @@ for (const f of [...files].sort()) {
   (title === TITLE[kind] ? targets : nonTargets).push({ file: f, sha256: crypto.createHash('sha256').update(bytes).digest('hex') });
 }
 fs.mkdirSync(path.dirname(out), { recursive: true });
-fs.writeFileSync(out, JSON.stringify({ schema: 'mof-xml-source-set/v1', document: doc, source: `${sub}/xml`, xmlFiles: files.length, targetTableFiles: targets.length, nonTargetFiles: nonTargets.length, targets, nonTargets }, null, 1) + '\n');
+fs.writeFileSync(out, JSON.stringify({ schema: 'mof-xml-source-set/v1', document: doc, source: `${sub}/xml`, menuReplacementChars: menu.replacementChars, xmlFiles: files.length, targetTableFiles: targets.length, nonTargetFiles: nonTargets.length, targets, nonTargets }, null, 1) + '\n');
 console.log(JSON.stringify({ doc, xmlFiles: files.length, targets: targets.length, nonTargets: nonTargets.length }));

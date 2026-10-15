@@ -12,7 +12,7 @@
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
-import { parseMenuXmlFileNames } from './lib/mof-archive-download';
+import { decodeEucJpMenu, parseMenuXmlFileNames } from './lib/mof-archive-download';
 import { MOF_ITEM_PARSER_SPEC_FY2024, type MofItemParserSpec, MofXmlParseError, parseMofBudgetXmlItemFile, readMenuAncestorChains } from './lib/mof-budget-xml-items-general';
 import { assertExpectedPopulation, assertFrozenSourceSetArtifact, assertMenuMatchesSourceSet } from './lib/mof-jikou-source-boundary';
 import { checkSourceSetCompleteness } from './lib/mof-budget-xml-items-evaluation-rules';
@@ -44,7 +44,7 @@ function main(): void {
   const COLUMNS = columnsFor(spec.yearLabel);
   const menuBytes = fs.readFileSync(MENU);
   if (target.menuSha256Prefix && !sha256(menuBytes).startsWith(target.menuSha256Prefix)) throw new Error('menu SHA-256 differs from the frozen value');
-  const menuText = new TextDecoder('euc-jp', { fatal: true }).decode(menuBytes);
+  const menuText = decodeEucJpMenu(menuBytes).text;
   const chains = readMenuAncestorChains(menuText);
   const sourceSetBytes = fs.readFileSync(SOURCE_SET);
   if (target.fy2024) assertFrozenSourceSetArtifact(sourceSetBytes);
