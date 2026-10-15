@@ -60,3 +60,6 @@ npx tsx scripts/pipeline-v2/build-mof-jikou-special-csv.ts <version> <out-dir>
 - 説明欄（`11.1`）は読まない。入れ子の表（食糧管理勘定）は無視し、後ろの行まで読む。
 - 前年度の列がない行は、前年度・比較増△減額を空欄にする（0 にしない）。
 - 上記以外の列の集合・header は例外で止める。所管・特別会計・勘定は、目次の祖先 chain（`…所管 > {特別会計} > 甲号歳入歳出予定計算書 > ({勘定}) > 歳出 事項別内訳`）から取る。
+
+## 概算要求との突合
+項・事項・目を概算要求の TOC・総表・明細表に対応づけた結果は [mof-budget-request-match.md](mof-budget-request-match.md)。
