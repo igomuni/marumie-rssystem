@@ -1,0 +1,15 @@
+source_page,entry_index,kind,ordinal,marker,code,name,page_ref,status
+1,0,HEADER,,,21,法務省所管,,RESOLVED
+1,0,TITLE,,,,令和７年度歳出概算要求書,,RESOLVED
+1,1,SECTION,1.,,,令和７年度歳出概算要求額総表,1,RESOLVED
+1,2,SECTION,2.,,,令和７年度歳出概算要求額明細表,5,RESOLVED
+1,3,SCOPE,,（組織）,010,法務本省,5,RESOLVED
+1,4,SCOPE,,（組織）,020,法務総合研究所,154,RESOLVED
+1,5,SCOPE,,（組織）,040,検察庁,176,RESOLVED
+1,6,SCOPE,,（組織）,050,矯正官署,226,RESOLVED
+1,7,SCOPE,,（組織）,060,更生保護官署,466,RESOLVED
+1,8,SCOPE,,（組織）,065,法務局,540,RESOLVED
+1,9,SCOPE,,（組織）,075,出入国在留管理庁,629,RESOLVED
+1,10,SCOPE,,（組織）,080,公安審査委員会,715,RESOLVED
+1,11,SCOPE,,（組織）,090,公安調査庁,718,RESOLVED
+1,12,SECTION,3.,,,令和７年度概算要求定員表,739,RESOLVED
