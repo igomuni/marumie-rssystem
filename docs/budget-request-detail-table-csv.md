@@ -7,11 +7,11 @@
 - 総表は別の仕様: [budget-request-total-table-csv.md](budget-request-total-table-csv.md)
 
 ```bash
-npx tsx scripts/pipeline-v2/build-budget-request-detail-table-csv.ts [zipPath] [outputDir] [--year=2024]
-# 既定: data/work/budget-request-plain-text.zip → data/work/budget-request-csv/{year}/detail-table/
+npx tsx scripts/pipeline-v2/build-budget-request-detail-table-csv.ts [inputDir] [outputDir] [--year=2024]
+# 既定: data/work/budget-request-plain-text/{year}/（build-budget-request-plain-text.ts --year={year} の出力）→ data/work/budget-request-csv/{year}/detail-table/
 ```
 
-`--year` が選ぶのは、zip の entry（`budget-request-plain-text/{year}/*.txt`）、整合性の診断に使う manifest（FY2024 は `tests/fixtures/budget-request-raw-text/2024/raw-text-manifest.json`、ほかの年度は `tests/fixtures/budget-request-plain-text/{year}/plain-text-manifest.json`）、既定の出力先、`summary.json` の scope だけ。parser は年度によらず同じで、表頭の語彙は「６年度」のまま（他の年度では、年度を含む表頭の行は `UNKNOWN_HEADER_ZONE_LINE` として unresolved に入る）。plain text は `build-budget-request-plain-text.ts --year={year}` で作る。
+`--year` が選ぶのは、入力ディレクトリの選択（既定 `data/work/budget-request-plain-text/{year}/`。出力の `source_file` は `budget-request-plain-text/{year}/{file}.txt` の形）、整合性の診断に使う manifest（FY2024 は `tests/fixtures/budget-request-raw-text/2024/raw-text-manifest.json`、ほかの年度は `tests/fixtures/budget-request-plain-text/{year}/plain-text-manifest.json`）、既定の出力先、`summary.json` の scope だけ。parser は年度によらず同じで、表頭の語彙は「６年度」のまま（他の年度では、年度を含む表頭の行は `UNKNOWN_HEADER_ZONE_LINE` として unresolved に入る）。plain text は `build-budget-request-plain-text.ts --year={year}` で作る。
 
 ## 原則
 
