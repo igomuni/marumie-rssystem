@@ -18,12 +18,13 @@ import { assertExpectedPopulation, assertFrozenSourceSetArtifact, assertMenuMatc
 import { checkSourceSetCompleteness } from './lib/mof-budget-xml-items-evaluation-rules';
 import { ministryFromMenuChain } from './lib/mof-jikou';
 
-interface Target { key: string; archive: string; spec: MofItemParserSpec; sourceSet: string; sourceSetSha256: string | null; menuSha256Prefix: string | null; fy2024: boolean }
+interface Target { targets?: number; nonTargets?: number; key: string; archive: string; spec: MofItemParserSpec; sourceSet: string; sourceSetSha256: string | null; menuSha256Prefix: string | null; fy2024: boolean }
 const ARCHIVE = path.join('data', 'download', 'mof.go.jp', 'archive');
 const GENERAL_SOURCE_SET = (v: string) => path.join('tests', 'fixtures', 'mof-xml-parser-general', v, 'source-set.json');
 const FY2025_SPEC: MofItemParserSpec = { documentId: '202511001', doctype: 'DOCTYPE budget SYSTEM "../dtd/202501.dtd"', yearLabel: '令和7年度' };
 /** FY2024 は従来どおり（frozen source set の SHA・menu の SHA・1,256 件を境界にする）。FY2025 は commit 済みの source set の SHA を境界にし、事項の件数は期待値を置かない */
 const TARGETS: Record<string, Target> = {
+  '2023': { key: '2023', archive: path.join('2023', '2023'), spec: { documentId: '202311001', doctype: 'DOCTYPE budget SYSTEM "../dtd/202301.dtd"', yearLabel: '令和5年度' }, sourceSet: GENERAL_SOURCE_SET('2023'), sourceSetSha256: '1e1a01892793161d55e5bcd2551a172101fc04642a10b72bf1d6f12fb01cdb24', menuSha256Prefix: null, fy2024: false, targets: 95, nonTargets: 235 },
   '2024': { key: '2024', archive: path.join('2024', '2024'), spec: MOF_ITEM_PARSER_SPEC_FY2024, sourceSet: path.join('tests', 'fixtures', 'mof-budget-xml-parser-v0', '2024', '202411001-source-set.json'), sourceSetSha256: null, menuSha256Prefix: '19ccfb611a1b7208', fy2024: true },
   '2025': { key: '2025', archive: path.join('2025', '2025'), spec: FY2025_SPEC, sourceSet: GENERAL_SOURCE_SET('2025'), sourceSetSha256: 'de7731e5fc426d662f0c04c4ca7c6728dfe6ca70b835d0bb73979236c10b6d74', menuSha256Prefix: null, fy2024: false },
   '2025_teishutsu': { key: '2025_teishutsu', archive: path.join('2025', '2025_teishutsu'), spec: FY2025_SPEC, sourceSet: GENERAL_SOURCE_SET('2025_teishutsu'), sourceSetSha256: '57b2433f8b616deb3d05f510741f619fc7aecf53841a4851cefd4d70b850a2e3', menuSha256Prefix: null, fy2024: false },
@@ -53,7 +54,7 @@ function main(): void {
   const files = parseMenuXmlFileNames(menuText);
   if (target.fy2024) assertMenuMatchesSourceSet(files, set);
   else {
-    if (set.targets.length !== 94 || set.nonTargets.length !== 234) throw new Error(`source set の件数が想定外（target ${set.targets.length} / non-target ${set.nonTargets.length}）`);
+    if (set.targets.length !== (target.targets ?? 94) || set.nonTargets.length !== (target.nonTargets ?? 234)) throw new Error(`source set の件数が想定外（target ${set.targets.length} / non-target ${set.nonTargets.length}）`);
     const c = checkSourceSetCompleteness(files, set.targets.map(t => t.file), set.nonTargets.map(t => t.file));
     if (files.length === 0 || !c.complete) throw new Error(`menu の XML 集合が source set と一致しない（欠落 ${c.missingLocally.length}、余剰 ${c.unexpectedLocally.length}、重複 ${c.duplicateExpected.length}）`);
   }
@@ -80,7 +81,7 @@ function main(): void {
     }
   }
   if (target.fy2024) assertExpectedPopulation({ targetFiles, notTargetFiles, records: rows.length });
-  else if (targetFiles !== 94 || notTargetFiles !== 234) throw new Error(`生成結果の population が期待と異なる（target ${targetFiles} / not_target ${notTargetFiles}。期待 94 / 234）`);
+  else if (targetFiles !== (target.targets ?? 94) || notTargetFiles !== (target.nonTargets ?? 234)) throw new Error(`生成結果の population が期待と異なる（target ${targetFiles} / not_target ${notTargetFiles}。期待 ${target.targets ?? 94} / ${target.nonTargets ?? 234}）`);
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(path.join(outDir, 'jikou-general.csv'), [COLUMNS.join(','), ...rows.map(r => r.map(cell).join(','))].join('\n') + '\n');
   fs.writeFileSync(path.join(outDir, 'jikou-general-run.json'), JSON.stringify({
