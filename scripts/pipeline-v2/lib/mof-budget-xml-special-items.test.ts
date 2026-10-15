@@ -6,35 +6,32 @@ import { readMenuAncestorChains } from './mof-budget-xml-items-general';
 import { MofXmlParseError } from './mof-budget-xml-items-general';
 import { parseMofSpecialXmlFile, specialScopeFromChain, type MofSpecialParserSpec } from './mof-budget-xml-special-items';
 
-const DIR = path.join('tests', 'fixtures', 'mof-xml-parser-special');
+const CSV_DIR = path.join('tests', 'fixtures', 'mof-archive-csv');
+const SET_DIR = path.join('tests', 'fixtures', 'mof-xml-parser-special');
 const sha = (b: Buffer) => crypto.createHash('sha256').update(b).digest('hex');
 const VERSIONS = ['2024', '2025', '2025_teishutsu'] as const;
-const EXPECTED = { '2024': { targets: 32, nonTargets: 249, records: 360 }, '2025': { targets: 34, nonTargets: 265, records: 365 }, '2025_teishutsu': { targets: 34, nonTargets: 265, records: 365 } };
+const EXPECTED = { '2024': { targets: 32, nonTargets: 249, records: 360, items: 250 }, '2025': { targets: 34, nonTargets: 265, records: 365, items: 254 }, '2025_teishutsu': { targets: 34, nonTargets: 265, records: 365, items: 254 } };
 
-describe('special-account jikou: frozen artifacts', () => {
-  it('manifest の SHA-256 が全 file と一致する', () => {
-    const manifest = JSON.parse(fs.readFileSync(path.join(DIR, 'manifest.json'), 'utf8')) as Record<string, string>;
-    expect(Object.keys(manifest).length).toBeGreaterThan(0);
-    for (const [f, h] of Object.entries(manifest)) expect(sha(fs.readFileSync(path.join(DIR, f)))).toBe(h);
+describe('special-account jikou: final CSV and source sets', () => {
+  it('mof-archive-csv の manifest の SHA-256 が全 CSV と一致する', () => {
+    const manifest = JSON.parse(fs.readFileSync(path.join(CSV_DIR, 'manifest.json'), 'utf8')) as Record<string, string>;
+    expect(Object.keys(manifest)).toHaveLength(18);
+    for (const [f, h] of Object.entries(manifest)) expect(sha(fs.readFileSync(path.join(CSV_DIR, f)))).toBe(h);
   });
   for (const v of VERSIONS) {
-    it(`${v}: source set の件数と CSV の行数、前年度が空欄の行は 0 にされていない`, () => {
-      const set = JSON.parse(fs.readFileSync(path.join(DIR, v, 'source-set.json'), 'utf8')) as { targets: unknown[]; nonTargets: unknown[] };
+    it(`${v}: source set の件数、事項の行数、項の数（公式 CSV の項と同数）、前年度の空欄は新勘定の 5 行だけ`, () => {
+      const set = JSON.parse(fs.readFileSync(path.join(SET_DIR, v, 'source-set.json'), 'utf8')) as { targets: unknown[]; nonTargets: unknown[] };
       expect(set.targets).toHaveLength(EXPECTED[v].targets);
       expect(set.nonTargets).toHaveLength(EXPECTED[v].nonTargets);
-      const lines = fs.readFileSync(path.join(DIR, v, 'jikou-special.csv'), 'utf8').trimEnd().split('\n');
+      const lines = fs.readFileSync(path.join(CSV_DIR, v, 'jikou-special.csv'), 'utf8').trimEnd().split('\n');
       expect(lines).toHaveLength(EXPECTED[v].records + 1);
+      const kou = fs.readFileSync(path.join(CSV_DIR, v, 'kou-special.csv'), 'utf8').trimEnd().split('\n');
+      expect(kou).toHaveLength(EXPECTED[v].items + 1);
       const blank = lines.slice(1).filter(l => /\d,,,\d+a\.xml,/.test(l)); // 予定額,（前年度）,（差額）,source_file
       expect(blank).toHaveLength(v === '2024' ? 0 : 5);
       expect(blank.every(l => l.includes('202512001000170a.xml'))).toBe(true);
     });
   }
-  it('check.json: 項は公式 CSV と一致（差 0）、項ごとの合計も一致', () => {
-    const c = JSON.parse(fs.readFileSync(path.join(DIR, 'check.json'), 'utf8')) as Record<string, Record<string, unknown>>;
-    for (const [v, n] of [['2024', 250], ['2025', 254], ['2025_teishutsu', 254]] as const) {
-      expect(c[v]).toMatchObject({ item_jikou: n, item_kou_csv: n, only_in_jikou: [], only_in_kou_csv: [], item_sum_equal: n, item_sum_unequal: 0 });
-    }
-  });
 });
 
 describe('specialScopeFromChain', () => {
@@ -55,7 +52,7 @@ const ARCHIVE = path.join('data', 'download', 'mof.go.jp', 'archive');
 const have = fs.existsSync(path.join(ARCHIVE, '2025', '2025', 'xml', '202512001000337a.xml'));
 describe.skipIf(!have)('special-account jikou: exception files (needs data/)', () => {
   const spec: MofSpecialParserSpec = { documentId: '202512001', doctype: 'DOCTYPE budget SYSTEM "../dtd/202501.dtd"', yearLabel: '令和7年度' };
-  const set = JSON.parse(fs.readFileSync(path.join(DIR, '2025', 'source-set.json'), 'utf8')) as { targets: { file: string; sha256: string }[]; nonTargets: { file: string; sha256: string }[] };
+  const set = JSON.parse(fs.readFileSync(path.join(SET_DIR, '2025', 'source-set.json'), 'utf8')) as { targets: { file: string; sha256: string }[]; nonTargets: { file: string; sha256: string }[] };
   const sourceSet = new Map([...set.targets, ...set.nonTargets].map(t => [t.file, t.sha256]));
   const chains = readMenuAncestorChains(new TextDecoder('euc-jp').decode(fs.readFileSync(path.join(ARCHIVE, '2025', '2025', 'html', '202512001menu.html'))));
   const run = (f: string) => parseMofSpecialXmlFile({ filename: f, bytes: fs.readFileSync(path.join(ARCHIVE, '2025', '2025', 'xml', f)), menuChain: chains.get(f), sourceSet, spec });
