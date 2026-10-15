@@ -3,7 +3,10 @@
  * 名称は空白を除いた完全一致だけ。階層は TOC の見出しだけで決める。金額は選択に使わない（診断の列のみ）。
  */
 
-export const ns = (s: string | undefined): string => (s ?? '').replace(/[\s　]+/g, '');
+/** 幅の統一（追補 B）: 全角の ASCII 相当（U+FF01〜FF5E）を ASCII に、半角のカナ・約物（U+FF61〜FF9F）を NFKC で全角に。それ以外の互換文字は変えない */
+export const fold = (s: string): string => s.replace(/[\uFF01-\uFF5E]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)).replace(/[\uFF61-\uFF9F]+/g, m => m.normalize('NFKC'));
+/** 名称の比較キー: 幅の統一のあと、空白（半角・全角）を除く */
+export const ns = (s: string | undefined): string => fold(s ?? '').replace(/[\s\u3000]+/g, '');
 /** コード中のハイフン類（U+2010〜2015, U+2212, U+FF0D, '-'）を '-' に揃える（コードの区切りの字形の違いだけを吸収する。名称には使わない） */
 export const hy = (s: string): string => s.replace(/[‐-―−－]/g, '-');
 
