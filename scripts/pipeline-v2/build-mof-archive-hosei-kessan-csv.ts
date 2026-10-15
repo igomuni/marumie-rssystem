@@ -6,7 +6,7 @@
  * 入力の zip の SHA-256 が凍結値と違えば、何も出さずに止まる。原本の列の恒等式（補正: 改予算額＝成立予算額＋差引額 ほか。決算: 歳出予算現額・不用額）の成否を件数で報告する。
  *
  * 使い方: npx tsx scripts/pipeline-v2/build-mof-archive-hosei-kessan-csv.ts <hosei|kessan> <2023|2024|2025|2026> <out-dir>
- * 出力: <out-dir>/moku-{general,special}-{hosei|kessan}.csv、summary.json
+ * 出力: <out-dir>/moku-{general,special}-{hosei|kessan}.csv（目）と kou-{general,special}-{hosei|kessan}.csv（項。目を項のキーで集計＝目の行数と各金額列の合計）、summary-{kind}.json
  */
 import * as crypto from 'crypto';
 import { execFileSync } from 'child_process';
@@ -76,7 +76,19 @@ function main(): void {
     }
     const file = `moku-${account}-${kind}.csv`;
     fs.writeFileSync(path.join(outDir, file), [[...header, 'source_row'], ...rows.map((r, i) => [...r, String(i + 1)])].map(r => r.map(cell).join(',')).join('\n') + '\n');
-    (summary as Record<string, unknown>)[account] = { zip: rel, zip_sha256: FROZEN[rel], rows: rows.length, amount_columns: header.slice(firstAmount), identity_holds: holds, identity_fails: fails };
+    // 項: 項より上の識別列（項コード・項名まで。特別会計は共管の列、2025 の特別会計の補正は款の列を含む）で目を集計する
+    const KOU_KEY = ['所管', '組織', '特別会計', '勘定', '款コード', '項コード', '款名', '項名', '共管所管名', '共管組織名'].filter(c => header.includes(c));
+    const kou = new Map<string, { key: string[]; rows: number; sums: number[] }>();
+    for (const r of rows) {
+      const key = KOU_KEY.map(c => r[header.indexOf(c)]); const k = JSON.stringify(key);
+      const e = kou.get(k) ?? { key, rows: 0, sums: amountIx.map(() => 0) }; e.rows++; amountIx.forEach((i, j) => { e.sums[j] += v(r, i); }); kou.set(k, e);
+    }
+    for (let j = 0; j < amountIx.length; j++) {
+      const total = rows.reduce((t, r) => t + v(r, amountIx[j]), 0);
+      if (total !== [...kou.values()].reduce((t, e) => t + e.sums[j], 0)) fail(`${rel} 項の合計が総計と一致しない ${header[amountIx[j]]}`);
+    }
+    fs.writeFileSync(path.join(outDir, `kou-${account}-${kind}.csv`), [[...KOU_KEY, '目の行数', ...amountIx.map(i => `${header[i]}の合計`)], ...[...kou.values()].map(e => [...e.key, String(e.rows), ...e.sums.map(String)])].map(r => r.map(cell).join(',')).join('\n') + '\n');
+    (summary as Record<string, unknown>)[account] = { kou: kou.size, zip: rel, zip_sha256: FROZEN[rel], rows: rows.length, amount_columns: header.slice(firstAmount), identity_holds: holds, identity_fails: fails };
   }
   fs.writeFileSync(path.join(outDir, `summary-${kind}.json`), JSON.stringify(summary, null, 2) + '\n');
   console.log(JSON.stringify(summary));
