@@ -1,5 +1,7 @@
 # 概算要求 明細表 × MOF 事項の突合（J1 単一 + K2）
 
+> 新しい突合（TOC・総表・明細表 × MOF の項・事項・目、FY2024・FY2025、一般・特別）は [mof-budget-request-match.md](mof-budget-request-match.md)。この文書の突合（J1＋K2）は別系統で、置き換えていない。
+
 明細表 CSV（[budget-request-detail-table-csv.md](budget-request-detail-table-csv.md)）の DETAIL 行（`NN‑NN 事項名`）を、MOF 予算書の事項（一般会計・当初予算）に対応付ける。採用するのは、名前の exact な一致が1候補で、かつ source から取った項がその候補の項と exact に一致したものだけ。正規化・金額・コード・部分一致・source 固有の例外は使わない。
 
 - 実装: `scripts/pipeline-v2/lib/budget-request-detail-table-mof-match.ts`（pure）、`scripts/pipeline-v2/build-budget-request-detail-table-mof-match.ts`（runner）
