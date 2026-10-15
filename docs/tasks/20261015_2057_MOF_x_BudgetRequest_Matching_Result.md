@@ -73,3 +73,21 @@
 
 - MOF の行のうち対応のあった数（FY2024 ／ FY2025 提出時）: 項 898／1,034 ・ 931／1,060、事項 1,371／1,616 ・ 1,419／1,652、目 6,722／7,943 ・ 6,922／8,030。
 - M1 の NO_CANDIDATE は 47 ／ 53 に減った。残りは、MOF の同じ範囲に名称がないもの（NoCandidate Diagnosis Result の `absent`、`exact_elsewhere`、`prefix_in_scope`）。
+
+## 追補 D の結果: TOC のない source を行の位置の木で突合した（ユーザー確定: 組織を使わず所管の範囲で項名を探す）
+契約の追補 D どおり実装して実行した（`manifest.json` `f93beee2…`）。**TOC を持つ source の m1〜m3 の行は、前後でバイト単位で変わっていない**（`hierarchy` 列を除く）。
+
+- **対象に入った source:** FY2025 は TOC のない 73 source のすべて（内閣府 51・内閣官房 17・内閣府の特別会計 4・宮内庁 1）。総表を持つ source の木から項を作り、明細表だけの source 69 件をその木に付けた（`sets.csv`）。`request-no-toc.csv` は 0 行。FY2024 は 22 source のうち 21 が入り、残る 1 source（262 行）は木も付け先もない。
+- **位置の木の行（`hierarchy = position`）:**
+
+| 層 | FY2024 × MOF 2024 | FY2025 × MOF 提出時 |
+|---|---|---|
+| M1 項 | 72（MATCHED 65、NO_CANDIDATE 7） | 88（MATCHED 76、NO_CANDIDATE 10、AMBIGUOUS 2） |
+| M2 事項 | 111（MATCHED 100、PARENT_UNMATCHED 8、NO_CANDIDATE 3） | 133（MATCHED 119、PARENT_UNMATCHED 11、NO_CANDIDATE 3） |
+| M3 目 | 42（MATCHED 41） | 335（MATCHED 311） |
+
+- **全体（TOC の木＋位置の木）:** 項の MATCHED は FY2024 1,023／1,077、FY2025 1,085／1,150（AMBIGUOUS 2）。事項の MATCHED は 1,567 ／ 1,654。目の MATCHED は 7,081 ／ 7,618。
+- MOF の行のうち対応のあった数（FY2024 ／ FY2025 提出時）: 項 961／1,034 ・ 997／1,060、事項 1,469／1,616 ・ 1,522／1,652、目 6,757／7,943 ・ 7,169／8,030。
+- **AMBIGUOUS 2 件（FY2025）:** `地方創生基盤整備事業推進費`（内閣府）が、MOF の内閣府の 2 つの組織にある。組織を使わない規則どおり、2 候補のまま記録した（絞っていない）。
+- **FY2024 の目が少ない（位置の木で 42 行）:** 内閣府・内閣官房の明細表 source が、FY2024 では木に付いた数が少ない（付いた source 19 件）。付かなかった source の目は MOF の `kou_matched_no_request_row` として現れている（FY2024 の目の `kou_matched_no_request_row` は 732）。原因（総表の `CODE3` と明細表の `CODE3` が一致しない等）は、まだ見ていない。
+- 目の金額診断（位置の木、集約後の合計と MOF の目の金額が一致）: 14／41（FY2024）、119／311（FY2025）。選択には使っていない。

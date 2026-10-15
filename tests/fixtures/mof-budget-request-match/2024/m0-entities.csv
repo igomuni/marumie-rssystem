@@ -5,28 +5,11 @@ caa.go.jp__policies__budget__assets__cms_caa205_230914_02,toc:所管,31 復興�
 caa.go.jp__policies__budget__assets__cms_caa205_230914_02,toc:組織,010 復興庁,復興庁,,OUT_OF_SCOPE,special_source_has_org_label
 caa.go.jp__policies__budget__assets__cms_caa205_230914_03,context,19 内閣府所管（消費者庁）,内閣府,内閣府,MATCHED,general
 caa.go.jp__policies__budget__assets__cms_caa205_230914_03,toc:組織,055 消費者庁,消費者庁,消費者庁,MATCHED,
-cao.go.jp__yosan__soshiki__r06__pdf__0,context,,,,OUT_OF_SCOPE,no_context
-cao.go.jp__yosan__soshiki__r06__pdf__1,context,19 内閣府所管(官房総務課（総務課）),内閣府,内閣府,MATCHED,general
+cao.go.jp__yosan__soshiki__r06__pdf__0,context,19 内閣府所管(官房総務課（総務課）),内閣府,内閣府,MATCHED,general
 cao.go.jp__yosan__soshiki__r06__pdf__e2,context,9905 エネルギー対策特別会計（電源開発促進勘定）,エネルギー対策,エネルギー対策,MATCHED,special
-cao.go.jp__yosan__soshiki__r06__pdf__f1,context,,,,OUT_OF_SCOPE,no_context
-cao.go.jp__yosan__soshiki__r06__pdf__f2,context,9101 東日本大震災復興特別会計（内閣本府等）,東日本大震災復興,東日本大震災復興,MATCHED,special
-cas.go.jp__jp__yosan__pdf__r6_01,context,,,,OUT_OF_SCOPE,no_context
-cas.go.jp__jp__yosan__pdf__r6_02,context,05 内閣所管(総務官室（総務課）),内閣,内閣,MATCHED,general
-cas.go.jp__jp__yosan__pdf__r6_03,context,05 内閣所管(総務官室（会計課）),内閣,内閣,MATCHED,general
-cas.go.jp__jp__yosan__pdf__r6_04,context,05 内閣所管(総務官室（官邸事務所）),内閣,内閣,MATCHED,general
-cas.go.jp__jp__yosan__pdf__r6_05,context,05 内閣所管(総務官室（厚生管理官室）),内閣,内閣,MATCHED,general
-cas.go.jp__jp__yosan__pdf__r6_06,context,05 内閣所管(（内閣官房・人に伴う経費）),内閣,内閣,MATCHED,general
-cas.go.jp__jp__yosan__pdf__r6_07,context,05 内閣所管(副長官補（副長官補）),内閣,内閣,MATCHED,general
-cas.go.jp__jp__yosan__pdf__r6_08,context,05 内閣所管(副長官補（危機管理）),内閣,内閣,MATCHED,general
-cas.go.jp__jp__yosan__pdf__r6_09,context,05 内閣所管（内閣広報室）,内閣,内閣,MATCHED,general
-cas.go.jp__jp__yosan__pdf__r6_10,context,05 内閣所管(内閣情報調査室（内閣情報調査室）),内閣,内閣,MATCHED,general
-cas.go.jp__jp__yosan__pdf__r6_11,context,05 内閣所管(内閣情報調査室（衛星情報センター）),内閣,内閣,MATCHED,general
-cas.go.jp__jp__yosan__pdf__r6_12,context,05 内閣所管（内閣サイバーセキュリティセンター）,内閣,内閣,MATCHED,general
-cas.go.jp__jp__yosan__pdf__r6_13,context,05 内閣所管（内閣人事局）,内閣,内閣,MATCHED,general
-cas.go.jp__jp__yosan__pdf__r6_14,context,05 内閣所管（国家安全保障局）,内閣,内閣,MATCHED,general
-cas.go.jp__jp__yosan__pdf__r6_15,context,05 内閣所管（内閣感染症危機管理統括庁）,内閣,内閣,MATCHED,general
-cas.go.jp__jp__yosan__pdf__r6_16,context,,,,OUT_OF_SCOPE,no_context
-cas.go.jp__jp__yosan__pdf__r6_17,context,9101 東日本大震災復興特別会計（内閣）,東日本大震災復興,東日本大震災復興,MATCHED,special
+cao.go.jp__yosan__soshiki__r06__pdf__f1,context,9101 東日本大震災復興特別会計（内閣本府等）,東日本大震災復興,東日本大震災復興,MATCHED,special
+cas.go.jp__jp__yosan__pdf__r6_01,context,05 内閣所管(総務官室（総務課）),内閣,内閣,MATCHED,general
+cas.go.jp__jp__yosan__pdf__r6_16,context,9101 東日本大震災復興特別会計（内閣）,東日本大震災復興,東日本大震災復興,MATCHED,special
 cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__585bb95a__20230907_policies_budget_04,context,19 内閣府所管（こども家庭庁）,内閣府,内閣府,MATCHED,general
 cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__585bb95a__20230907_policies_budget_04,toc:組織,110 こども家庭庁,こども家庭庁,こども家庭庁,MATCHED,
 cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__aac2d779__20230907_policies_budget_05,context,9207 年金特別会計(子ども家庭局（子ども・子育て支援勘定）),年金,年金,MATCHED,special
