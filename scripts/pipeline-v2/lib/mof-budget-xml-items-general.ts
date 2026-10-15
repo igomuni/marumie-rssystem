@@ -207,17 +207,20 @@ export function parseMofBudgetXmlItemFile(input: ParseInput): ParseOutcome {
 
   // header: 行番号の第2成分 1 = 見出し、2 = 下位見出し。列開始番号と文字列が事前登録と完全一致
   const headers = children(table, 'header');
-  if (headers.length !== 1) throw new MofXmlParseError('table_structure', file, 'header が 1 つでない');
-  const main: Record<string, string> = {};
-  const sub: Record<string, string> = {};
-  for (const c of children(headers[0], 'clm')) {
-    const m = CELL_ID.exec(c.attrs.id ?? '');
-    if (!m) throw new MofXmlParseError('table_structure', file, `header の id 形式外: ${c.attrs.id}`);
-    const t = readCell(c, file).text.replace(/\s+/g, '');
-    if (m[3] === '1') main[m[4]] = t; else if (m[3] === '2') sub[m[4]] = t; else throw new MofXmlParseError('table_structure', file, `header の行番号が想定外: ${c.attrs.id}`);
-  }
-  if (JSON.stringify(sortKeys(main)) !== JSON.stringify(sortKeys(headerMain(spec.yearLabel))) || JSON.stringify(sortKeys(sub)) !== JSON.stringify(sortKeys(HEADER_SUB))) {
-    throw new MofXmlParseError('table_structure', file, `header が事前登録と一致しない: main=${JSON.stringify(main)} sub=${JSON.stringify(sub)}`);
+  // 表が途中で分かれて見出しが繰り返される文書（FY2023 のこども家庭庁など）があるため、見出しは 1 つ以上で、**すべて**が事前登録と完全一致すること
+  if (headers.length < 1) throw new MofXmlParseError('table_structure', file, 'header がない');
+  for (const h of headers) {
+    const main: Record<string, string> = {};
+    const sub: Record<string, string> = {};
+    for (const c of children(h, 'clm')) {
+      const m = CELL_ID.exec(c.attrs.id ?? '');
+      if (!m) throw new MofXmlParseError('table_structure', file, `header の id 形式外: ${c.attrs.id}`);
+      const t = readCell(c, file).text.replace(/\s+/g, '');
+      if (m[3] === '1') main[m[4]] = t; else if (m[3] === '2') sub[m[4]] = t; else throw new MofXmlParseError('table_structure', file, `header の行番号が想定外: ${c.attrs.id}`);
+    }
+    if (JSON.stringify(sortKeys(main)) !== JSON.stringify(sortKeys(headerMain(spec.yearLabel))) || JSON.stringify(sortKeys(sub)) !== JSON.stringify(sortKeys(HEADER_SUB))) {
+      throw new MofXmlParseError('table_structure', file, `header が事前登録と一致しない: main=${JSON.stringify(main)} sub=${JSON.stringify(sub)}`);
+    }
   }
 
   // data: 行キーでまとめる（文書順）
