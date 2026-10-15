@@ -114,4 +114,4 @@ export interface MofSide { general: MofRows; special: MofRows }
 const col = (r: Rec, pred: (k: string) => boolean): string => { const k = Object.keys(r).find(pred); return k ? r[k] : ''; };
 export const mofAmountKou = (r: Rec): number | null => amount(col(r, k => /^令和.*年度(要求額|予定額).*の合計$/.test(k)));
 export const mofAmountJikou = (r: Rec): number | null => amount(col(r, k => /^令和.*年度(要求額|予定額)/.test(k)));
-export const mofAmountMoku = (r: Rec): number | null => amount(col(r, k => /^令和.*年度(要求額|予定額)$/.test(k)));
+export const mofAmountMoku = (r: Rec): number | null => amount(col(r, k => /^令和.*年度(要求額|予定額)(\(千円\))?$/.test(k)));
