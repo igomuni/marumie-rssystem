@@ -1,11 +1,12 @@
 # 概算要求 PDF の年度・所管別の取得状況（TOC・総表・明細表）
 
-状態: 記述として凍結した（FY2024・FY2025。manifest に載る PDF だけが対象）。成果物: `docs/inventory/budget-request-coverage/{pdfs.csv, by-authority.csv, summary.json}`。`pdfs.csv` は PDF ごと（年度・所管・会計・文字の有無・TOC／総表／明細表の有無と行数）、`by-authority.csv` は年度 × 所管 × 会計の種類の集計。
+状態: 記述として凍結した（FY2024・FY2025。manifest に載る PDF だけが対象）。成果物: `docs/inventory/budget-request-coverage/{pdfs.csv, by-authority.csv, summary.json}`。`pdfs.csv` は PDF ごと（年度・所管・会計・文字の有無・表紙／TOC／総表／明細表の有無と行数）、`by-authority.csv` は年度 × 所管 × 会計の種類の集計。
 
 | | FY2024 | FY2025 |
 |---|---:|---:|
 | manifest の PDF | 82 | 131 |
 | 文字層あり／なし | 80／2 | 131／0 |
+| 表紙（Cover）の CSV が取れた PDF | 59 | 61 |
 | TOC の CSV が取れた PDF | 55 | 55 |
 | 総表の CSV が取れた PDF | 59 | 61 |
 | 明細表の CSV が取れた PDF | 73 | 123 |
@@ -19,3 +20,5 @@
 - **CSV が取れていない PDF（文字はある）:** 文部科学省の `_4`（FY2024 は `_04`）。**概算要求定員表（第3表）**で、歳出の金額表（総表・明細表）ではなく人員の表。表頭が総表・明細表・TOC と違うため、どの builder の対象にもならない（取りこぼしではなく範囲外）。FY2024 の分は文字化けしている。
 
 詳細は `by-authority.csv`。会計の種類は一般（general）と特別（special）に分けてある。
+
+- 表紙の CSV が取れた PDF は、総表が取れた PDF と同数（FY2024 59、FY2025 61）。表紙のある PDF のうち、項・事項を含む TOC があるのは 55。CSV の置き場は `tests/fixtures/budget-request-csv/{year}/{cover,toc,total-table,detail-table}/`。
