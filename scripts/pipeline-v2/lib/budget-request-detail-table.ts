@@ -52,7 +52,7 @@ const HEADER_WORD_WINDOWS: readonly [RegExp, Window][] = [
  * `remarksStart` = column where the 備考 heading starts. `windows` = the columns where the three amounts may end.
  * A page whose second heading line lacks one of the three heading words has no boundary.
  */
-export function headerBoundary(lines: string[]): { boundary: number; remarksStart: number; windows: Window[]; headerEnd: number } | null {
+function headerBoundaryTwoLine(lines: string[]): { boundary: number; remarksStart: number; windows: Window[]; headerEnd: number } | null {
   const first = lines.findIndex(l => {
     const c = compact(l);
     if (!(c.includes('事項') && c.includes('前年度') && c.includes('備考'))) return false;
@@ -70,6 +70,37 @@ export function headerBoundary(lines: string[]): { boundary: number; remarksStar
     windows.push([wordEnd + lo, wordEnd + hi]);
   }
   return { boundary: lines[first].indexOf('前'), remarksStart: lines[first].indexOf('備'), windows, headerEnd: end };
+}
+
+
+type HeaderGeometry = { boundary: number; remarksStart: number; windows: Window[]; headerEnd: number };
+
+/**
+ * 3-line heading (first page of an organisation's table in some documents): line f `要求 … 前年度 … 対前年度`,
+ * line f+1 `番号 … 事項 … 備考`, line f+2 `予算額 概算要求額 比較増△減`. Used only when the 2-line search finds no boundary.
+ */
+function headerBoundaryThreeLine(lines: string[]): HeaderGeometry | null {
+  for (let f = 0; f + 2 < lines.length; f++) {
+    const c0 = compact(lines[f]), c1 = compact(lines[f + 1]), c2 = compact(lines[f + 2]);
+    if (!(c0.includes('前年度') && !c0.includes('事項'))) continue;
+    if (!(c1.includes('番号') && c1.includes('事項') && c1.includes('備考'))) continue;
+    if (!(c2.includes('予算額') && c2.includes('概算要求額') && c2.includes('比較'))) continue;
+    const q = lines[f].indexOf('前'), remarks = lines[f + 1].indexOf('備');
+    if (!(q > 0 && q < remarks)) continue;
+    const windows: Window[] = [];
+    for (const [re, [lo, hi]] of HEADER_WORD_WINDOWS) {
+      const m = re.exec(lines[f + 2]);
+      if (!m) return null;
+      const wordEnd = m.index + m[0].length;
+      windows.push([wordEnd + lo, wordEnd + hi]);
+    }
+    return { boundary: q, remarksStart: remarks, windows, headerEnd: f + 2 };
+  }
+  return null;
+}
+
+export function headerBoundary(lines: string[]): HeaderGeometry | null {
+  return headerBoundaryTwoLine(lines) ?? headerBoundaryThreeLine(lines);
 }
 
 // ---------- amounts ----------
