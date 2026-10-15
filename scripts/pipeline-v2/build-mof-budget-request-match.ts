@@ -135,7 +135,7 @@ function seqLink<T, U>(items: T[], rows: U[], same: (a: T, b: U) => boolean): (U
 const totAmt = (r: Rec) => amount(r[Object.keys(r).find(k => /概算要求額_計$/.test(k)) ?? '']);
 const detAmt = (r: Rec) => amount(r[Object.keys(r).find(k => /概算要求額$/.test(k)) ?? '']);
 
-const scopeText = (key: string): string => { const c = scopeOfKou.get(key); return c && c.ok ? (c.acct === 'general' ? `${c.ministry}|${c.org}` : `${c.account}|${c.sub}`) : ''; };
+const scopeText = (key: string): string => { const c = scopeOfKou.get(key); return c && c.ok ? (c.acct === 'general' ? `${c.ministry}|${c.org ?? ""}` : `${c.account}|${c.sub}`) : ''; };
 
 // ---------------------------------------------------------------- M1
 type Cand = number[];
