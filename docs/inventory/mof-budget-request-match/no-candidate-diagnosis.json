@@ -1,0 +1,21 @@
+{
+ "2024/M1": {
+  "absent": 40,
+  "exact_elsewhere": 5,
+  "prefix_in_scope": 2,
+  "variant_in_scope": 10
+ },
+ "2024/M2": {
+  "absent": 48,
+  "prefix_in_scope": 3
+ },
+ "2025_teishutsu/M1": {
+  "absent": 47,
+  "exact_elsewhere": 5,
+  "prefix_in_scope": 1,
+  "variant_in_scope": 12
+ },
+ "2025_teishutsu/M2": {
+  "absent": 54
+ }
+}

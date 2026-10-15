@@ -121,6 +121,8 @@ function seqLink<T, U>(items: T[], rows: U[], same: (a: T, b: U) => boolean): (U
 const totAmt = (r: Rec) => amount(r[Object.keys(r).find(k => /概算要求額_計$/.test(k)) ?? '']);
 const detAmt = (r: Rec) => amount(r[Object.keys(r).find(k => /概算要求額$/.test(k)) ?? '']);
 
+const scopeText = (key: string): string => { const c = scopeOfKou.get(key); return c && c.ok ? (c.acct === 'general' ? `${c.ministry}|${c.org}` : `${c.account}|${c.sub}`) : ''; };
+
 // ---------------------------------------------------------------- M1
 type Cand = number[];
 const m1: unknown[][] = []; const m1Match = new Map<string, number>(); // `${slug}#${kouIdx}` → MOF kou 行（MATCHED のみ）
@@ -135,21 +137,21 @@ for (const s of sources) {
     const sc = scopeOfKou.get(`${s}#${k.idx}`)!; linkStats.kou_total++; if (links[i]) linkStats.kou_total_table_linked++;
     const reqAmt = links[i]?.amt ?? '';
     const head = [s, k.idx, k.code, k.name, k.page];
-    if (!sc.ok) { m1.push([...head, '', '', 0, sc.reason === 'no_context' ? 'OUT_OF_SCOPE' : 'PARENT_UNMATCHED', sc.reason, reqAmt, '', '']); return; }
+    if (!sc.ok) { m1.push([...head, '', '', 0, sc.reason === 'no_context' ? 'OUT_OF_SCOPE' : 'PARENT_UNMATCHED', sc.reason, reqAmt, '', '', '']); return; }
     const a = sc.acct!; kouAcct.set(`${s}#${k.idx}`, a);
     const key = a === 'general' ? [sc.ministry, sc.org, k.name].join('|') : [sc.account, sc.sub, k.name].join('|');
     const c: Cand = kouIdx[a].get(key) ?? [];
     const st = c.length === 0 ? 'NO_CANDIDATE' : c.length === 1 ? 'MATCHED' : 'AMBIGUOUS';
     if (c.length === 1) m1Match.set(`${s}#${k.idx}`, c[0]);
-    if (c.length === 0) m1.push([...head, '', '', 0, st, 'name_no_match', reqAmt, '', '']);
+    if (c.length === 0) m1.push([...head, '', '', 0, st, 'name_no_match', reqAmt, '', '', scopeText(`${s}#${k.idx}`)]);
     for (const ci of c) {
       const r = mofRaw[`kou-${a}`][ci]; refKou.add(id(`kou-${a}`, ci));
       const ma = mofAmountKou(r);
-      m1.push([...head, id(`kou-${a}`, ci), r['項名'], c.length, st, '', reqAmt, ma ?? '', typeof reqAmt === 'number' && ma !== null ? reqAmt - ma : '']);
+      m1.push([...head, id(`kou-${a}`, ci), r['項名'], c.length, st, '', reqAmt, ma ?? '', typeof reqAmt === 'number' && ma !== null ? reqAmt - ma : '', scopeText(`${s}#${k.idx}`)]);
     }
   });
 }
-writeCsv('m1-kou.csv', ['request_source', 'toc_kou_idx', 'request_code3', 'request_name', 'request_page', 'mof_row', 'mof_name', 'candidate_count', 'status', 'reason', 'request_amount', 'mof_amount', 'amount_diff'], m1);
+writeCsv('m1-kou.csv', ['request_source', 'toc_kou_idx', 'request_code3', 'request_name', 'request_page', 'mof_row', 'mof_name', 'candidate_count', 'status', 'reason', 'request_amount', 'mof_amount', 'amount_diff', 'request_scope'], m1);
 
 // ---------------------------------------------------------------- M2
 const m2: unknown[][] = []; const refJikou = new Set<string>();
@@ -164,21 +166,21 @@ for (const s of sources) {
     const reqAmt = lt[i]?.amt ?? '';
     const head = [s, j.reqNo, `${j.first}-${j.class2}`, j.name, j.page, j.kouIdx ?? ''];
     const sc = j.kouIdx === null ? null : scopeOfKou.get(`${s}#${j.kouIdx}`);
-    if (j.kouIdx === null || !sc) { m2.push([...head, '', '', 0, 'OUT_OF_SCOPE', 'no_kou_heading', '', reqAmt, '', '']); return; }
+    if (j.kouIdx === null || !sc) { m2.push([...head, '', '', 0, 'OUT_OF_SCOPE', 'no_kou_heading', '', reqAmt, '', '', '']); return; }
     const mk = m1Match.get(`${s}#${j.kouIdx}`);
-    if (mk === undefined) { m2.push([...head, '', '', 0, sc.reason === 'no_context' ? 'OUT_OF_SCOPE' : 'PARENT_UNMATCHED', sc.ok ? 'kou_not_matched_uniquely' : sc.reason, '', reqAmt, '', '']); return; }
+    if (mk === undefined) { m2.push([...head, '', '', 0, sc.reason === 'no_context' ? 'OUT_OF_SCOPE' : 'PARENT_UNMATCHED', sc.ok ? 'kou_not_matched_uniquely' : sc.reason, '', reqAmt, '', '', scopeText(`${s}#${j.kouIdx}`)]); return; }
     const a = kouAcct.get(`${s}#${j.kouIdx}`)!; const kouRow = mofRaw[`kou-${a}`][mk];
     const cands = (jikouIdx[a].get(kjKey(kouRow, a)) ?? []).filter(ci => ns(mofRaw[`jikou-${a}`][ci][a === 'general' ? '事項名' : '事項名']) === j.name);
     const st = cands.length === 0 ? 'NO_CANDIDATE' : cands.length === 1 ? 'MATCHED' : 'AMBIGUOUS';
-    if (!cands.length) m2.push([...head, id(`kou-${a}`, mk), '', 0, st, 'name_no_match', '', reqAmt, '', '']);
+    if (!cands.length) m2.push([...head, id(`kou-${a}`, mk), '', 0, st, 'name_no_match', '', reqAmt, '', '', scopeText(`${s}#${j.kouIdx}`)]);
     for (const ci of cands) {
       const r = mofRaw[`jikou-${a}`][ci]; refJikou.add(id(`jikou-${a}`, ci));
       const cc = r[a === 'general' ? '主要経費別分類コード' : '分類コード']; const ma = mofAmountJikou(r);
-      m2.push([...head, id(`kou-${a}`, mk), id(`jikou-${a}`, ci), cands.length, st, '', cc === j.class2, reqAmt, ma ?? '', typeof reqAmt === 'number' && ma !== null ? reqAmt - ma : '']);
+      m2.push([...head, id(`kou-${a}`, mk), id(`jikou-${a}`, ci), cands.length, st, '', cc === j.class2, reqAmt, ma ?? '', typeof reqAmt === 'number' && ma !== null ? reqAmt - ma : '', scopeText(`${s}#${j.kouIdx}`)]);
     }
   });
 }
-writeCsv('m2-jikou.csv', ['request_source', 'request_no', 'request_code', 'request_name', 'request_page', 'toc_kou_idx', 'mof_kou_row', 'mof_jikou_row', 'candidate_count', 'status', 'reason', 'class_code_agrees', 'request_amount', 'mof_amount', 'amount_diff'], m2);
+writeCsv('m2-jikou.csv', ['request_source', 'request_no', 'request_code', 'request_name', 'request_page', 'toc_kou_idx', 'mof_kou_row', 'mof_jikou_row', 'candidate_count', 'status', 'reason', 'class_code_agrees', 'request_amount', 'mof_amount', 'amount_diff', 'request_scope'], m2);
 
 // ---------------------------------------------------------------- M3
 const m3: unknown[][] = []; const refMoku = new Set<string>();
