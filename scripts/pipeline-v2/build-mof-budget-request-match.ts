@@ -48,14 +48,29 @@ const subsOf = new Map<string, Set<string>>(); for (const r of mofRaw['kou-speci
 
 // ---------------------------------------------------------------- 概算要求の木と文脈
 const trees = new Map<string, TocTree>(); for (const [s, rows] of toc) trees.set(s, buildTocTree(s, rows));
+// 追補 A (a): 文書セット。TOC を持たない source S を、同じファミリーの TOC の source T に付ける（S の CODE3 が T の項と一致し、T がちょうど 1 つのとき）
+const famOf = (s: string) => s.replace(/[_-]?\d+$/, '');
+const code3Keys = (rows: Rec[], col: string): string[] => rows.filter(r => r['row_type'] === 'CODE3').map(r => { const m = /^(\d{3})\s*(.+)$/.exec(r[col]); return m ? `${m[1]}|${ns(m[2])}` : ''; }).filter(Boolean);
+const tocKeys = new Map<string, Set<string>>(); for (const t of trees.values()) tocKeys.set(t.slug, new Set(t.kous.map(k => `${k.code}|${k.name}`)));
+const attach = new Map<string, string>(); const setRows: unknown[][] = [];
+for (const s of [...new Set([...detail.keys(), ...total.keys()])].sort()) {
+  if (toc.has(s)) continue;
+  const keys = new Set([...code3Keys(detail.get(s) ?? [], '事項'), ...code3Keys(total.get(s) ?? [], '区分')]);
+  const cands = [...tocKeys].filter(([t, ks]) => famOf(t) === famOf(s) && [...keys].some(k => ks.has(k)));
+  if (cands.length === 1) { attach.set(s, cands[0][0]); setRows.push([cands[0][0], s, [...keys].filter(k => cands[0][1].has(k)).length]); }
+}
+const suffixNo = (s: string) => Number(/(\d+)$/.exec(s)?.[1] ?? 0);
+const extrasOf = (t: string) => [...attach].filter(([, to]) => to === t).map(([x]) => x).sort((a, b) => suffixNo(a) - suffixNo(b) || (a < b ? -1 : 1));
+const concatV = (m: Map<string, Rec[]>) => { const v = new Map<string, Rec[]>(); for (const t of toc.keys()) { const rows = [...(m.get(t) ?? []), ...extrasOf(t).flatMap(x => m.get(x) ?? [])]; if (rows.length) v.set(t, rows); } for (const [s, rows] of m) if (!toc.has(s) && !attach.has(s)) v.set(s, rows); return v; };
+const detailV = concatV(detail), totalV = concatV(total);
 const ctxOf = new Map<string, { acct: Acct; key: string; raw: string }>();
-for (const [s, rows] of detail) {
+for (const [s, rows] of detailV) {
   const r = rows.find(x => x['row_type'] === 'CONTEXT'); if (!r) continue;
   const m = /^(\d+)\s*(.+)$/.exec(r['事項']); if (!m) continue;
   const name = ns(m[2]); const acct: Acct = m[1].length === 2 ? 'general' : 'special';
   ctxOf.set(s, { acct, key: acct === 'general' ? name.split('所管')[0] : name.replace(/特別会計.*$/, ''), raw: r['事項'] });
 }
-const sources = [...new Set([...toc.keys(), ...detail.keys(), ...total.keys()])].sort();
+const sources = [...new Set([...toc.keys(), ...detailV.keys(), ...totalV.keys()])].sort();
 
 // ---------------------------------------------------------------- M0
 const m0: unknown[][] = [];
@@ -114,7 +129,7 @@ const linkStats = { kou_total_table_linked: 0, kou_total: 0, jikou_total_table_l
 const kouAcct = new Map<string, Acct>();
 for (const s of sources) {
   const t = trees.get(s); if (!t) continue;
-  const tcode3 = (total.get(s) ?? []).filter(r => r['row_type'] === 'CODE3').map(r => { const m = /^(\d{3})\s*(.+)$/.exec(r['区分']); return { code: m?.[1] ?? '', name: ns(m?.[2]), amt: totAmt(r) }; });
+  const tcode3 = (totalV.get(s) ?? []).filter(r => r['row_type'] === 'CODE3').map(r => { const m = /^(\d{3})\s*(.+)$/.exec(r['区分']); return { code: m?.[1] ?? '', name: ns(m?.[2]), amt: totAmt(r) }; });
   const links = seqLink(t.kous, tcode3, (k, r) => k.code === r.code && k.name === r.name);
   t.kous.forEach((k, i) => {
     const sc = scopeOfKou.get(`${s}#${k.idx}`)!; linkStats.kou_total++; if (links[i]) linkStats.kou_total_table_linked++;
@@ -140,8 +155,8 @@ writeCsv('m1-kou.csv', ['request_source', 'toc_kou_idx', 'request_code3', 'reque
 const m2: unknown[][] = []; const refJikou = new Set<string>();
 for (const s of sources) {
   const t = trees.get(s); if (!t) continue;
-  const tdet = (total.get(s) ?? []).filter(r => r['row_type'] === 'DETAIL').map(r => { const m = /^(\d{2})[‐-―−－-](\d{2})\s*(.+)$/.exec(r['区分']); return { req: r['要求番号'], f: m?.[1], c: m?.[2], name: ns(m?.[3]), amt: totAmt(r) }; });
-  const ddet = (detail.get(s) ?? []).filter(r => r['row_type'] === 'DETAIL').map(r => { const m = /^(\d{2})[‐-―−－-](\d{2})\s*(.+)$/.exec(r['事項']); return { req: r['要求番号'], f: m?.[1], c: m?.[2], name: ns(m?.[3]) }; });
+  const tdet = (totalV.get(s) ?? []).filter(r => r['row_type'] === 'DETAIL').map(r => { const m = /^(\d{2})[‐-―−－-](\d{2})\s*(.+)$/.exec(r['区分']); return { req: r['要求番号'], f: m?.[1], c: m?.[2], name: ns(m?.[3]), amt: totAmt(r) }; });
+  const ddet = (detailV.get(s) ?? []).filter(r => r['row_type'] === 'DETAIL').map(r => { const m = /^(\d{2})[‐-―−－-](\d{2})\s*(.+)$/.exec(r['事項']); return { req: r['要求番号'], f: m?.[1], c: m?.[2], name: ns(m?.[3]) }; });
   const same = (j: { reqNo: string; first: string; class2: string; name: string }, r: { req: string; f?: string; c?: string; name: string }) => j.reqNo === r.req && j.first === r.f && j.class2 === r.c && j.name === r.name;
   const lt = seqLink(t.jikous, tdet, same), ld = seqLink(t.jikous, ddet, same);
   t.jikous.forEach((j, i) => {
@@ -170,7 +185,7 @@ const m3: unknown[][] = []; const refMoku = new Set<string>();
 let orphanMoku = 0;
 for (const s of sources) {
   const t = trees.get(s); if (!t) continue;
-  const rows = detail.get(s) ?? [];
+  const rows = detailV.get(s) ?? [];
   const bound = t.kous.map(k => `${k.code}|${k.name}`);
   let p = 0, cur: number | null = null;
   const groups = new Map<string, { kou: number; c1: string; x: string; yy: string; name: string; n: number; sum: number; nulls: number }>();
@@ -233,6 +248,12 @@ const uk = unmatchedFast('kou', refKou), uj = unmatchedFast('jikou', refJikou), 
 const uh = ['mof_row', 'account', 'kou_code', 'kou_name', 'item_name', 'reason'];
 writeCsv('unmatched-mof-kou.csv', uh, uk.rows); writeCsv('unmatched-mof-jikou.csv', uh, uj.rows); writeCsv('unmatched-mof-moku.csv', uh, um.rows);
 
+const noToc: unknown[][] = [];
+for (const s of sources) if (!trees.has(s)) {
+  for (const [doc, m, col] of [['total', totalV, '区分'], ['detail', detailV, '事項']] as const) (m.get(s) ?? []).forEach((r, i) => noToc.push([s, doc, r['row_type'], i + 1, r[col], 'OUT_OF_SCOPE', 'no_toc']));
+}
+writeCsv('request-no-toc.csv', ['request_source', 'doc', 'row_type', 'row_index', 'text', 'status', 'reason'], noToc);
+writeCsv('sets.csv', ['toc_source', 'attached_source', 'matched_kou_keys'], setRows);
 const tally = (rows: unknown[][], statusIdx: number) => { const c: Record<string, number> = {}; for (const r of rows) c[String(r[statusIdx])] = (c[String(r[statusIdx])] ?? 0) + 1; return c; };
 const mofTotals = { kou: mofRaw['kou-general'].length + mofRaw['kou-special'].length, jikou: mofRaw['jikou-general'].length + mofRaw['jikou-special'].length, moku: mofRaw['moku-general'].length + mofRaw['moku-special'].length };
 const summary = {
@@ -240,7 +261,7 @@ const summary = {
   m0_status: tally(m0, 5), m1_status: tally(m1, 8), m2_status: tally(m2, 9), m3_status: tally(m3, 11),
   mof_rows: mofTotals, mof_rows_referenced: { kou: refKou.size, jikou: refJikou.size, moku: refMoku.size },
   unmatched_mof_reasons: { kou: uk.counts, jikou: uj.counts, moku: um.counts },
-  request_links: linkStats, request_unclassified_toc_rows: [...trees.values()].reduce((n, t) => n + t.unclassified, 0), request_moku_rows_without_kou: orphanMoku,
+  request_links: linkStats, attached_sources: setRows.length, no_toc_rows: noToc.length, no_toc_sources: new Set(noToc.map(r => r[0])).size, request_unclassified_toc_rows: [...trees.values()].reduce((n, t) => n + t.unclassified, 0), request_moku_rows_without_kou: orphanMoku,
 };
 fs.writeFileSync(path.join(outDir, 'summary.json'), JSON.stringify(summary, null, 1) + '\n');
 console.log(JSON.stringify(summary));
