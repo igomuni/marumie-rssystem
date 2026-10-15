@@ -6,8 +6,8 @@
 - テスト: `scripts/pipeline-v2/lib/budget-request-total-table.test.ts`、fixture は `tests/fixtures/budget-request-total-table/2024/`（原文の物理行を抜粋。出典は `excerpts.json`）
 
 ```bash
-npx tsx scripts/pipeline-v2/build-budget-request-total-table-csv.ts [zipPath] [outputDir] [--year=2024]
-# 既定: data/work/budget-request-plain-text.zip → data/work/budget-request-csv/{year}/total-table/
+npx tsx scripts/pipeline-v2/build-budget-request-total-table-csv.ts [inputDir] [outputDir] [--year=2024]
+# 既定: data/work/budget-request-plain-text/{year}/（build-budget-request-plain-text.ts --year={year} の出力）→ data/work/budget-request-csv/{year}/total-table/
 ```
 
 ## 原則
