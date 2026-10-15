@@ -1,0 +1,13 @@
+source_page,entry_index,kind,ordinal,marker,code,name,page_ref,status
+1,0,HEADER,,,25,厚生労働省所管,,RESOLVED
+1,0,TITLE,,,,令和７年度歳出概算要求書,,RESOLVED
+1,1,SECTION,1.,,,令和７年度歳出概算要求額総表,1,RESOLVED
+1,2,SECTION,2.,,,令和７年度歳出概算要求額明細表,15,RESOLVED
+1,3,SCOPE,,（組織）,010,厚生労働本省,15,RESOLVED
+1,4,SCOPE,,（組織）,030,検疫所,1216,RESOLVED
+1,5,SCOPE,,（組織）,040,国立ハンセン病療養所,1244,RESOLVED
+1,6,SCOPE,,（組織）,045,厚生労働本省試験研究機関,1268,RESOLVED
+1,7,SCOPE,,（組織）,050,国立障害者リハビリテーションセンター,1465,RESOLVED
+1,8,SCOPE,,（組織）,070,地方厚生局,1549,RESOLVED
+1,9,SCOPE,,（組織）,080,都道府県労働局,1598,RESOLVED
+1,10,SCOPE,,（組織）,090,中央労働委員会,1689,RESOLVED

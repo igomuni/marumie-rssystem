@@ -159,7 +159,7 @@ def run(root, output):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--input', type=Path, default=Path('data/work/budget-request-csv/2024'))
+    parser.add_argument('--input', type=Path, default=Path('tests/fixtures/budget-request-csv/2024'))
     parser.add_argument('--output', type=Path, default=Path('/private/tmp/toc-total-section-prototype-2024'))
     args = parser.parse_args()
     run(args.input, args.output)

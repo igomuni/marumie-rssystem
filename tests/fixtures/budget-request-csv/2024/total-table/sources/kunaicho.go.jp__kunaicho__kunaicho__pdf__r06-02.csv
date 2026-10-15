@@ -1,0 +1,11 @@
+要求番号,区分,前年度予算額_一般行政経費,前年度予算額_その他の経費,前年度予算額_計,６年度概算要求額_一般行政経費,６年度概算要求額_その他の経費,６年度概算要求額_計,増△減,明細書頁数,source_page,source_line_start,source_line_end,table_block_id,row_index,row_type,parse_status
+,010 皇室費,0,"6,708,028","6,708,028",0,"5,883,394","5,883,394","△824,634",2,5,42,42,kunaicho.go.jp__kunaicho__kunaicho__pdf__r06-02#b1,1,CODE3,PARSED
+,010 内廷費,0,"324,000","324,000",0,"324,000","324,000",0,2,5,43,43,kunaicho.go.jp__kunaicho__kunaicho__pdf__r06-02#b1,2,CODE3,PARSED
+1,01‑95 内廷に必要な経費,0,"324,000","324,000",0,"324,000","324,000",0,2,5,44,44,kunaicho.go.jp__kunaicho__kunaicho__pdf__r06-02#b1,3,DETAIL,PARSED
+,020 宮廷費,0,"6,123,863","6,123,863",0,"5,295,670","5,295,670","△828,193",2,5,45,45,kunaicho.go.jp__kunaicho__kunaicho__pdf__r06-02#b1,4,CODE3,PARSED
+2,01‑95 宮廷に必要な経費,0,"5,854,454","5,854,454",0,"5,295,670","5,295,670","△558,784",2,5,46,46,kunaicho.go.jp__kunaicho__kunaicho__pdf__r06-02#b1,5,DETAIL,PARSED
+3,03‑95 国際観光旅客税財源宮廷に必要な経費,0,"269,409","269,409",0,0,0,"△269,409",28,5,47,47,kunaicho.go.jp__kunaicho__kunaicho__pdf__r06-02#b1,6,DETAIL,PARSED
+,030 皇族費,0,"260,165","260,165",0,"263,724","263,724","3,559",28,5,48,48,kunaicho.go.jp__kunaicho__kunaicho__pdf__r06-02#b1,7,CODE3,PARSED
+4,01‑95 皇族に必要な経費,0,"260,165","260,165",0,"263,724","263,724","3,559",28,5,49,49,kunaicho.go.jp__kunaicho__kunaicho__pdf__r06-02#b1,8,DETAIL,PARSED
+,組織計,0,"6,708,028","6,708,028",0,"5,883,394","5,883,394","△824,634",,5,50,50,kunaicho.go.jp__kunaicho__kunaicho__pdf__r06-02#b1,9,TOTAL,PARSED
+,所管計,0,"6,708,028","6,708,028",0,"5,883,394","5,883,394","△824,634",,5,51,51,kunaicho.go.jp__kunaicho__kunaicho__pdf__r06-02#b1,10,TOTAL,PARSED

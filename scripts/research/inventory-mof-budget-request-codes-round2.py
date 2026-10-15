@@ -6,7 +6,7 @@
 import collections, csv, glob, json, os, re, sys
 
 OUT = sys.argv[1]
-REQ, MOF = 'data/work/budget-request-csv', 'tests/fixtures/mof-archive-csv'
+REQ, MOF = 'tests/fixtures/budget-request-csv', 'tests/fixtures/mof-archive-csv'
 PAIRS = [('2024', '2024'), ('2025', '2025_teishutsu'), ('2025', '2025')]
 ns = lambda s: re.sub(r'[\s　]+', '', s or '')
 ld = lambda p: list(csv.DictReader(open(p, encoding='utf-8')))

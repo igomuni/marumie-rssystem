@@ -7,7 +7,7 @@
 
 ```bash
 npx tsx scripts/pipeline-v2/build-budget-request-total-table-csv.ts [inputDir] [outputDir] [--year=2024]
-# 既定: data/work/budget-request-plain-text/{year}/（build-budget-request-plain-text.ts --year={year} の出力）→ data/work/budget-request-csv/{year}/total-table/
+# 既定: data/work/budget-request-plain-text/{year}/（build-budget-request-plain-text.ts --year={year} の出力）→ tests/fixtures/budget-request-csv/{year}/total-table/
 ```
 
 ## 原則
@@ -71,7 +71,7 @@ TAIL          = SIGNED_AMOUNT (\s+ SIGNED_AMOUNT){6} (\s+ DETAIL_PAGE)? \s*$
 
 `name_raw` は親行の名称と継続行（それぞれ前後の空白を除いたもの）を `\n` で連結した文字列、`name_compact` はそこから空白（半角・全角）をすべて除いて連結した文字列。`source_line_start` / `source_line_end` は、その論理行を構成するファイル内の物理行（1始まり）を指す。
 
-## 出力（`data/work/budget-request-csv/2024/total-table/`）
+## 出力（`tests/fixtures/budget-request-csv/2024/total-table/`）
 
 | ファイル | 内容 |
 |---|---|

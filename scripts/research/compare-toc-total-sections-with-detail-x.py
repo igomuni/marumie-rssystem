@@ -3,7 +3,7 @@
 
   python3 -I scripts/research/compare-toc-total-sections-with-detail-x.py <section-candidates.csv> [--year=2024]
 
-明細表は data/work/budget-request-csv/{year}/detail-table（output-manifest の SHA-256 を照合）。MOF は使わない。標準出力は JSON。
+明細表は tests/fixtures/budget-request-csv/{year}/detail-table（output-manifest の SHA-256 を照合）。MOF は使わない。標準出力は JSON。
 """
 import collections, csv, glob, hashlib, json, os, re, sys
 
@@ -51,7 +51,7 @@ def main():
     args = [a for a in sys.argv[1:] if not a.startswith('--year=')]
     year = int(next((a[7:] for a in sys.argv[1:] if a.startswith('--year=')), '2024'))
     cand_path, frozen = args[0], FROZEN[year]
-    DETAIL = f'data/work/budget-request-csv/{year}/detail-table'
+    DETAIL = f'tests/fixtures/budget-request-csv/{year}/detail-table'
     if sha(os.path.join(DETAIL, 'output-manifest.json')) != frozen['detail_manifest']: sys.exit('STOP: detail-table output-manifest mismatch')
     if sha(cand_path) != frozen['candidates']: sys.exit('STOP: section-candidates.csv mismatch')
     X, scope = {}, {}

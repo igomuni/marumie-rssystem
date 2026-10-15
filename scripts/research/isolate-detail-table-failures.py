@@ -5,8 +5,8 @@
 
 入力（ローカルの生成物。生成コマンドは docs/budget-request-detail-table-csv.md と docs/budget-request-total-table-csv.md）:
   data/work/budget-request-plain-text.zip
-  data/work/budget-request-csv/2024/detail-table/{sources/*.csv, unresolved.csv}
-  data/work/budget-request-csv/2024/total-table/sources/*.csv
+  tests/fixtures/budget-request-csv/2024/detail-table/{sources/*.csv, unresolved.csv}
+  tests/fixtures/budget-request-csv/2024/total-table/sources/*.csv
 
 分けて数える（原因の族が別なので、集計・分類を混ぜない）:
   A. unresolved.csv の「左側の行」1,573行（LEFT_*）の原因
@@ -25,8 +25,8 @@ import re
 import zipfile
 
 ZIP = 'data/work/budget-request-plain-text.zip'
-DETAIL = 'data/work/budget-request-csv/2024/detail-table/'
-TOTAL = 'data/work/budget-request-csv/2024/total-table/'
+DETAIL = 'tests/fixtures/budget-request-csv/2024/detail-table/'
+TOTAL = 'tests/fixtures/budget-request-csv/2024/total-table/'
 ENTRY = re.compile(r'^budget-request-plain-text/2024/([^/]+)\.txt$')
 comp = lambda s: re.sub(r'\s+', '', s)
 num = lambda s: re.sub(r'[^0-9]', '', s)

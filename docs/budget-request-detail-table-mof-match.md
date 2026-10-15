@@ -9,7 +9,7 @@
 
 ```bash
 npx tsx scripts/pipeline-v2/build-budget-request-detail-table-mof-match.ts --year=2025 --mof=<jikou.jsonl> [--detail=<dir>] [--out=<dir>]
-# 既定: data/work/budget-request-csv/{year}/detail-table → data/work/budget-request-csv/{year}/detail-table-mof-match/
+# 既定: tests/fixtures/budget-request-csv/{year}/detail-table → tests/fixtures/budget-request-csv/{year}/detail-table-mof-match/
 ```
 
 `--mof` は、1行1事項の JSONL で `ministry`・`organization`・`sectionCode`・`sectionName`・`jikouName`・`col4Raw` を持つもの。FY2024 は V2 の `data/normalized/mof/fy2024/budget-jikou.jsonl`。FY2025 は V1 `public/data/mof-jikou-2025.json.gz` を `scripts/research/mof-v1-jikou-adapter.py emit 2025` で写した `data/normalized/mof/fy2025/budget-jikou-v1-canonical.jsonl`（この adapter は FY2024 で V2 と全件一致することを確認済み）。明細表の source CSV は、`output-manifest.json` と集合・SHA-256 が一致しなければ止まる。

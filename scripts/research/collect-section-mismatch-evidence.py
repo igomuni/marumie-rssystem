@@ -9,7 +9,7 @@
 """
 import csv, glob, hashlib, json, os, re, sys
 
-D25, D24 = 'data/work/budget-request-csv/2025', 'data/work/budget-request-csv/2024'
+D25, D24 = 'tests/fixtures/budget-request-csv/2025', 'tests/fixtures/budget-request-csv/2024'
 MOF25 = 'data/normalized/mof/fy2025/budget-jikou-v1-canonical.jsonl'
 MOF24 = os.path.expanduser('~/MyGitHub/marumie-rssystem/data/normalized/mof/fy2024/budget-jikou.jsonl')
 MATCH = 'tests/fixtures/detail-table-mof-section-match/2025/triple-match.csv'

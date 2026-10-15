@@ -1,7 +1,7 @@
 /**
  * 明細表 CSV × MOF 事項の突合（J1 単一 + K2）。仕様: docs/budget-request-detail-table-mof-match.md
  *   npx tsx scripts/pipeline-v2/build-budget-request-detail-table-mof-match.ts --year=2025 --mof=<jikou.jsonl> [--detail=<dir>] [--out=<dir>]
- * 既定: --detail=data/work/budget-request-csv/{year}/detail-table → --out=data/work/budget-request-csv/{year}/detail-table-mof-match
+ * 既定: --detail=tests/fixtures/budget-request-csv/{year}/detail-table → --out=tests/fixtures/budget-request-csv/{year}/detail-table-mof-match
  * 明細表の source CSV は、同じディレクトリの output-manifest.json と集合・SHA-256 が一致しなければ止まる。
  */
 import * as fs from 'fs';
@@ -22,8 +22,8 @@ const yearArg = arg('year');
 if (!yearArg || !/^\d{4}$/u.test(yearArg)) throw new Error('--year=<4-digit fiscal year> is required');
 const mofPath = arg('mof');
 if (!mofPath) throw new Error('--mof=<MOF jikou JSONL> is required');
-const detailRoot = arg('detail') ?? `data/work/budget-request-csv/${yearArg}/detail-table`;
-const outputRoot = arg('out') ?? `data/work/budget-request-csv/${yearArg}/detail-table-mof-match`;
+const detailRoot = arg('detail') ?? `tests/fixtures/budget-request-csv/${yearArg}/detail-table`;
+const outputRoot = arg('out') ?? `tests/fixtures/budget-request-csv/${yearArg}/detail-table-mof-match`;
 const sha256 = (v: Buffer | string) => createHash('sha256').update(v).digest('hex');
 
 const manifestBytes = fs.readFileSync(path.join(detailRoot, 'output-manifest.json'));

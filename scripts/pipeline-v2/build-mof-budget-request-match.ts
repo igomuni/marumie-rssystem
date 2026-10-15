@@ -12,7 +12,7 @@ import { amount, buildPositionTree, buildPositionTreeFromDetail, buildTocTree, h
 
 const [yearArg, ver, outDir] = process.argv.slice(2);
 if (!/^20(24|25)$/.test(yearArg ?? '') || !['2024', '2025', '2025_teishutsu'].includes(ver ?? '') || !outDir) throw new Error('usage: build-mof-budget-request-match.ts <2024|2025> <2024|2025|2025_teishutsu> <out-dir>');
-const REQ = path.join('data', 'work', 'budget-request-csv', yearArg);
+const REQ = path.join('tests', 'fixtures', 'budget-request-csv', yearArg);
 const MOF = path.join('tests', 'fixtures', 'mof-archive-csv', ver);
 fs.mkdirSync(outDir, { recursive: true });
 const sha = (b: Buffer | string) => crypto.createHash('sha256').update(b).digest('hex');

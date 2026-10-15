@@ -30,7 +30,7 @@ import {
 } from './lib/budget-request-toc-pdf-native-csv';
 
 const DEFAULT_INVENTORY = 'tests/fixtures/budget-request-cover-toc-structure/2024/structure-inventory.json';
-const DEFAULT_OUT_DIR = 'data/work/budget-request-csv/2024/toc';
+const DEFAULT_OUT_DIR = 'tests/fixtures/budget-request-csv/2024/toc';
 const USAGE = `usage: build-budget-request-toc-pdf-native-csv.ts --source-root=<dir> [--out-dir=<dir>] [--inventory=<json>]
   --source-root=  inventory の localPdfPath の先頭 "data/download/" に相当するディレクトリ（読み取り専用）
   --out-dir=      出力先（既定: ${DEFAULT_OUT_DIR}、source-root の外）。既存ファイルのうちこのツールの成果物名のものだけ上書きする

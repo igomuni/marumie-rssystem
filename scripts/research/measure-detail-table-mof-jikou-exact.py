@@ -7,12 +7,12 @@ J0=名称の exact 一致、J1=所管＋名称の exact 一致。正規化・部
 """
 import collections, csv, glob, hashlib, json, os, re, sys
 
-D = 'data/work/budget-request-csv/2024/detail-table/sources/'
+D = 'tests/fixtures/budget-request-csv/2024/detail-table/sources/'
 M = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser('~/MyGitHub/marumie-rssystem/data/normalized/mof/fy2024')
 # 入力 provenance guard（分析条件ではない。実際に使った入力の bytes を固定する）
 FROZEN_JIKOU_SHA = 'a63f50504c821ad7aff9fe1c96c80635dda978ea0870976d15f9bc9735d3ef7e'
 FROZEN_MANIFEST_SHA = '7989885b0d2ee0907d2389f71bc2642bada070120a06283c89d2f6d6634f226e'
-MANIFEST = 'data/work/budget-request-csv/2024/detail-table/output-manifest.json'
+MANIFEST = 'tests/fixtures/budget-request-csv/2024/detail-table/output-manifest.json'
 
 
 def sha(path):

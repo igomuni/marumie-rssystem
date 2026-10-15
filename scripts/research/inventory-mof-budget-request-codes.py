@@ -9,7 +9,7 @@
 import collections, csv, glob, hashlib, json, os, re, sys
 
 OUT = sys.argv[1]
-REQ = 'data/work/budget-request-csv'
+REQ = 'tests/fixtures/budget-request-csv'
 MOF = 'tests/fixtures/mof-archive-csv'
 PAIRS = [('2024', '2024'), ('2025', '2025_teishutsu'), ('2025', '2025')]  # (概算要求の年度, MOF の版)
 ns = lambda s: re.sub(r'[\s　]+', '', s or '')
