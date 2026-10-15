@@ -54,10 +54,12 @@ export interface TocTree {
   kous: TocKou[];
   jikous: TocJikou[];
   unclassified: number;
+  /** 階層の根拠: TOC の見出し、または総表の行の並び（追補 D） */
+  hierarchy: 'toc' | 'position';
 }
 /** TOC の行（要求番号, 区分, ページ）を文書順に読み、見出しの直後の事項をその見出しの子にする。想定外の見出しの種類は例外 */
 export function buildTocTree(slug: string, rows: Rec[]): TocTree {
-  const t: TocTree = { slug, labels: [], kous: [], jikous: [], unclassified: 0 };
+  const t: TocTree = { slug, labels: [], kous: [], jikous: [], unclassified: 0, hierarchy: 'toc' };
   let ministry: string | null = null, account: string | null = null, sub: string | null = null, org: string | null = null, kouIdx: number | null = null;
   for (const r of rows) {
     const kind = r['区分'] ?? '';
@@ -81,10 +83,35 @@ export function buildTocTree(slug: string, rows: Rec[]): TocTree {
   return t;
 }
 
+/**
+ * TOC のない source の木を、総表の行の並びから作る（追補 D）。項＝\`CODE3\` の次が \`DETAIL\`、事項＝その項に続く \`DETAIL\`、
+ * 勘定＝\`HIER\` の先頭が 1 桁、会計＝\`HIER\` の先頭が 2 桁で名称が MOF の特別会計名に一致するもの。組織は使わない。
+ */
+export function buildPositionTree(slug: string, rows: Rec[], isAccountName: (name: string) => boolean): TocTree {
+  const t: TocTree = { slug, labels: [], kous: [], jikous: [], unclassified: 0, hierarchy: 'position' };
+  let account: string | null = null, sub: string | null = null, kouIdx: number | null = null;
+  rows.forEach((r, i) => {
+    const type = r['row_type'], next = rows[i + 1]?.['row_type'];
+    const text = r['区分'] ?? '';
+    if (type === 'HIER') {
+      const m = /^(\d+)\s*(.+)$/.exec(text); if (!m) return;
+      if (m[1].length === 1) sub = ns(m[2]);
+      else if (m[1].length === 2 && isAccountName(ns(m[2]))) { account = ns(m[2]); sub = null; }
+    } else if (type === 'CODE3' && next === 'DETAIL') {
+      const m = /^(\d{3})\s*(.+)$/.exec(text); if (!m) return;
+      kouIdx = t.kous.length; t.kous.push({ idx: kouIdx, slug, code: m[1], name: ns(m[2]), page: r['source_page'] ?? '', ministry: null, org: null, account, sub });
+    } else if (type === 'DETAIL') {
+      const m = /^(\d{2})[\u2010-\u2015\u2212\uFF0D-](\d{2})\s*(.+)$/.exec(text); if (!m) { t.unclassified++; return; }
+      t.jikous.push({ slug, reqNo: r['要求番号'] ?? '', first: m[1], class2: m[2], name: ns(m[3]), page: r['source_page'] ?? '', kouIdx });
+    }
+  });
+  return t;
+}
+
 // ---------------------------------------------------------------- MOF 側
 export interface MofRows { kou: Rec[]; jikou: Rec[]; moku: Rec[] }
 export interface MofSide { general: MofRows; special: MofRows }
 const col = (r: Rec, pred: (k: string) => boolean): string => { const k = Object.keys(r).find(pred); return k ? r[k] : ''; };
 export const mofAmountKou = (r: Rec): number | null => amount(col(r, k => /^令和.*年度(要求額|予定額).*の合計$/.test(k)));
 export const mofAmountJikou = (r: Rec): number | null => amount(col(r, k => /^令和.*年度(要求額|予定額)/.test(k)));
-export const mofAmountMoku = (r: Rec): number | null => amount(col(r, k => /^令和.*年度(要求額|予定額)$/.test(k)));
+export const mofAmountMoku = (r: Rec): number | null => amount(col(r, k => /^令和.*年度(要求額|予定額)(\(千円\))?$/.test(k)));
