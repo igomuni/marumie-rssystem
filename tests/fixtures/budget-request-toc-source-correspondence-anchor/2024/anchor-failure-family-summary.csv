@@ -1,4 +1,0 @@
-failureFamily,role,segmentCount,populationDenominator,interpretation
-AF-3,PRIMARY,17,17,No direct reproducible Raw Text UTF-16 offset to stable PDF token/glyph identity trace found.
-AF-2,SECONDARY_OVERLAPPING,17,17,P3 and P5 physical positions are item-level; no character-level bbox/source-position mapping is available.
-AF-4,NOT_ASSIGNED,0,17,"Three segments have normalized text represented by visibly separate item positions, but direct source correspondence is absent, so extraction-order causation is not assigned."
