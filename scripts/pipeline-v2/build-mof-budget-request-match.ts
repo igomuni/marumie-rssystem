@@ -162,7 +162,7 @@ for (const s of sources) {
     }
   });
 }
-writeCsv('m2-jikou.csv', ['request_source', 'request_no', 'request_code', 'request_name', 'request_page', 'toc_kou_idx', 'mof_kou_row', 'mof_jikou_row', 'candidate_count', 'status', 'reason', 'class_code_agrees', 'request_amount', 'mof_amount', 'amount_diff']], m2);
+writeCsv('m2-jikou.csv', ['request_source', 'request_no', 'request_code', 'request_name', 'request_page', 'toc_kou_idx', 'mof_kou_row', 'mof_jikou_row', 'candidate_count', 'status', 'reason', 'class_code_agrees', 'request_amount', 'mof_amount', 'amount_diff'], m2);
 
 // ---------------------------------------------------------------- M3
 const m3: unknown[][] = []; const refMoku = new Set<string>();
