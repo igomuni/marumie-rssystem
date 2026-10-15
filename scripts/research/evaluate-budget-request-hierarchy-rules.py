@@ -12,7 +12,7 @@ TOC = re.compile(r'^（([^）]*)）\s*(\S+)\s+(.+)$')
 CODE = re.compile(r'^(\d+)\s*(.+)$')
 res, errs = {}, []
 for year in ('2024', '2025'):
-    B = f'data/work/budget-request-csv/{year}'
+    B = f'tests/fixtures/budget-request-csv/{year}'
     tp, fn, fp = (collections.Counter() for _ in range(3)); skipped = collections.Counter(); sources = 0
     for f in sorted(glob.glob(f'{B}/toc/sources/*.csv')):
         slug = os.path.basename(f)[:-4]; tf = f'{B}/total-table/sources/{slug}.csv'

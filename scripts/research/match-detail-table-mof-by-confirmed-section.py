@@ -9,7 +9,7 @@ docs/tasks/20261015_0640_FY2025_Confirmed_Section_MOF_Match_Preregistration.mdã€
 """
 import collections, csv, glob, hashlib, json, os, re, sys
 
-D = 'data/work/budget-request-csv/2025'
+D = 'tests/fixtures/budget-request-csv/2025'
 SECTIONS = 'tests/fixtures/detail-table-toc-total-sections/2025/section-candidates.csv'
 MOF = 'data/normalized/mof/fy2025/budget-jikou-v1-canonical.jsonl'
 FROZEN = {

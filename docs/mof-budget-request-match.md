@@ -7,7 +7,7 @@ MOF の予算書の項・事項・目（[mof-archive-csv.md](mof-archive-csv.md)
 - 旧い突合（J1＋K2、[budget-request-detail-table-mof-match.md](budget-request-detail-table-mof-match.md)）とは別系統。置き換えてはいない。
 
 ```bash
-# 入力: data/work/budget-request-csv/{year}/{toc,total-table,detail-table}/sources/*.csv と tests/fixtures/mof-archive-csv/{version}/
+# 入力: tests/fixtures/budget-request-csv/{year}/{toc,total-table,detail-table}/sources/*.csv と tests/fixtures/mof-archive-csv/{version}/
 npx tsx scripts/pipeline-v2/build-mof-budget-request-match.ts <2024|2025> <2024|2025|2025_teishutsu> <out-dir>
 ```
 

@@ -10,7 +10,7 @@ SECTION_MISMATCH 5行の failure isolation で、MLIT の4行が「金額ゼロ�
 """
 import collections, csv, hashlib, json, os, re, sys
 
-D = 'data/work/budget-request-csv/2025/detail-table'
+D = 'tests/fixtures/budget-request-csv/2025/detail-table'
 MATCH = 'tests/fixtures/detail-table-mof-section-match/2025/triple-match.csv'
 FROZEN = {MATCH: '2be288bc3d6d50f63345d87b58b453a5556fda112114e05845f928d8b8322dc6',
           f'{D}/output-manifest.json': '0bdeeb372f3fd8450fba35274c4af7994434ddcf2447d6d048f1284ef428a0a7'}

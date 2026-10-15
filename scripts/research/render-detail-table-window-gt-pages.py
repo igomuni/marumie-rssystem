@@ -3,14 +3,14 @@
 
   python3 -I scripts/research/render-detail-table-window-gt-pages.py [PNG出力ディレクトリ]
 
-PNG は既定で data/work/budget-request-csv/2024/window-gt-render/（Git管理しない）。
+PNG は既定で data/work/gt-render/window-gt/（Git管理しない）。
 render-manifest.json（コミットする）に、コマンド・DPI・pdftoppm/Poppler のバージョン・PDF/PNG の SHA-256 を固定する。
 crop・強調・注釈なし。PDF の SHA-256 が candidates-manifest.json と違う、ページが無い、のいずれかなら STOP。
 """
 import csv, hashlib, json, os, re, subprocess, sys
 
 FIX = 'tests/fixtures/budget-request-detail-table-window-gt/2024'
-OUT = sys.argv[1] if len(sys.argv) > 1 else 'data/work/budget-request-csv/2024/window-gt-render'
+OUT = sys.argv[1] if len(sys.argv) > 1 else 'data/work/gt-render/window-gt'
 DPI = 150
 
 
