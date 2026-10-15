@@ -8,7 +8,7 @@
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
-import { amount, buildPositionTree, buildTocTree, hy, mofAmountJikou, mofAmountKou, mofAmountMoku, ns, readCsv, type Rec, type TocTree } from './lib/mof-budget-request-match';
+import { amount, buildPositionTree, buildPositionTreeFromDetail, buildTocTree, hy, mofAmountJikou, mofAmountKou, mofAmountMoku, ns, readCsv, type Rec, type TocTree } from './lib/mof-budget-request-match';
 
 const [yearArg, ver, outDir] = process.argv.slice(2);
 if (!/^20(24|25)$/.test(yearArg ?? '') || !['2024', '2025', '2025_teishutsu'].includes(ver ?? '') || !outDir) throw new Error('usage: build-mof-budget-request-match.ts <2024|2025> <2024|2025|2025_teishutsu> <out-dir>');
@@ -67,6 +67,8 @@ attachRound(new Set(trees.keys())); // 追補 A (a): TOC の source に付ける
 const tocTreeSlugs = new Set(trees.keys());
 for (const [s, rows] of total) if (!trees.has(s) && !attach.has(s)) { const t = buildPositionTree(s, rows, n => accounts.has(n)); if (t.kous.length > 0) trees.set(s, t); }
 attachRound(new Set([...trees.keys()].filter(x => !tocTreeSlugs.has(x))));
+// 追補 E: それでも木に付かなかった明細表だけの source は、自分の明細表の行の並びから木を作る
+for (const [s, rows] of detail) if (!trees.has(s) && !attach.has(s)) { const t = buildPositionTreeFromDetail(s, rows, n => accounts.has(n)); if (t.kous.length > 0) trees.set(s, t); }
 const suffixNo = (s: string) => Number(/(\d+)$/.exec(s)?.[1] ?? 0);
 const extrasOf = (t: string) => [...attach].filter(([, to]) => to === t).map(([x]) => x).sort((a, b) => suffixNo(a) - suffixNo(b) || (a < b ? -1 : 1));
 const concatV = (m: Map<string, Rec[]>) => { const v = new Map<string, Rec[]>(); for (const t of trees.keys()) { const rows = [...(m.get(t) ?? []), ...extrasOf(t).flatMap(x => m.get(x) ?? [])]; if (rows.length) v.set(t, rows); } for (const [s, rows] of m) if (!trees.has(s) && !attach.has(s)) v.set(s, rows); return v; };
@@ -113,7 +115,7 @@ for (const s of sources) {
     if (!c) { scopeOfKou.set(`${s}#${k.idx}`, { ok: false, reason: 'no_context' }); continue; }
     if (c.acct === 'general') {
       const min = k.ministry ?? c.key; const org2 = k.org;
-      if (t.hierarchy === 'position') { if (!ministries.has(min)) scopeOfKou.set(`${s}#${k.idx}`, { ok: false, reason: 'ministry_unmatched' }); else scopeOfKou.set(`${s}#${k.idx}`, { ok: true, reason: '', acct: 'general', ministry: min }); }
+      if (t.hierarchy !== 'toc') { if (!ministries.has(min)) scopeOfKou.set(`${s}#${k.idx}`, { ok: false, reason: 'ministry_unmatched' }); else scopeOfKou.set(`${s}#${k.idx}`, { ok: true, reason: '', acct: 'general', ministry: min }); }
       else if (!ministries.has(min)) scopeOfKou.set(`${s}#${k.idx}`, { ok: false, reason: 'ministry_unmatched' });
       else if (org2 === null || !orgsOf.get(min)?.has(org2)) scopeOfKou.set(`${s}#${k.idx}`, { ok: false, reason: org2 === null ? 'no_org_label' : 'org_unmatched' });
       else scopeOfKou.set(`${s}#${k.idx}`, { ok: true, reason: '', acct: 'general', ministry: min, org: org2 });

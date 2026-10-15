@@ -1,0 +1,48 @@
+{
+ "2024": {
+  "sources_evaluated": 54,
+  "skipped": {
+   "no_detail_table": 1
+  },
+  "rules": {
+   "項": {
+    "tp": 917,
+    "fn": 2,
+    "fp": 9
+   },
+   "勘定": {
+    "tp": 28,
+    "fn": 0,
+    "fp": 0
+   },
+   "会計": {
+    "tp": 27,
+    "fn": 0,
+    "fp": 0
+   }
+  }
+ },
+ "2025": {
+  "sources_evaluated": 54,
+  "skipped": {
+   "no_detail_table": 1
+  },
+  "rules": {
+   "項": {
+    "tp": 974,
+    "fn": 1,
+    "fp": 12
+   },
+   "勘定": {
+    "tp": 31,
+    "fn": 0,
+    "fp": 0
+   },
+   "会計": {
+    "tp": 30,
+    "fn": 0,
+    "fp": 0
+   }
+  }
+ }
+}
