@@ -3,14 +3,13 @@
  * parser unchanged (its header vocabulary still says ６年度); --year only selects the archive entries, the frozen
  * manifest used for the integrity diagnostic, the default output directory and the scope label.
  *
- *   npx tsx scripts/pipeline-v2/build-budget-request-detail-table-csv.ts [zipPath] [outputDir] [--year=2024]
+ *   npx tsx scripts/pipeline-v2/build-budget-request-detail-table-csv.ts [inputDir] [outputDir] [--year=2024]
  *
- * Defaults: data/work/budget-request-plain-text.zip → data/work/budget-request-csv/{year}/detail-table/
+ * Defaults: data/work/budget-request-plain-text/{year}/ → data/work/budget-request-csv/{year}/detail-table/
  * Spec: docs/budget-request-detail-table-csv.md
  */
 import * as fs from 'fs';
 import * as path from 'path';
-import { execFileSync } from 'child_process';
 import { createHash } from 'crypto';
 import {
   csvCell,
@@ -25,21 +24,22 @@ const yearArg = process.argv.find(a => a.startsWith('--year='))?.slice('--year='
 if (!/^\d{4}$/u.test(yearArg)) throw new Error(`--year must be a 4-digit fiscal year: ${yearArg}`);
 const year = Number(yearArg);
 const positional = process.argv.slice(2).filter(a => !a.startsWith('--'));
-const zipPath = positional[0] ?? 'data/work/budget-request-plain-text.zip';
+const inputDir = positional[0] ?? `data/work/budget-request-plain-text/${year}`;
 const outputRoot = positional[1] ?? `data/work/budget-request-csv/${year}/detail-table`;
 const manifestPath = year === 2024
   ? 'tests/fixtures/budget-request-raw-text/2024/raw-text-manifest.json'
   : `tests/fixtures/budget-request-plain-text/${year}/plain-text-manifest.json`;
-const ENTRY = new RegExp(`^budget-request-plain-text/${year}/[^/]+\\.txt$`, 'u');
 const sha256 = (v: Buffer | string) => createHash('sha256').update(v).digest('hex');
 
-if (!fs.existsSync(zipPath)) throw new Error(`input archive not found: ${zipPath}`);
-const zipBytes = fs.readFileSync(zipPath);
-const entries = execFileSync('unzip', ['-Z1', zipPath], { encoding: 'utf8', maxBuffer: 1 << 26 })
-  .split('\n').filter(e => ENTRY.test(e)).sort();
-if (entries.length === 0) throw new Error(`no budget-request-plain-text/${year}/*.txt entries in archive`);
+if (!fs.existsSync(inputDir) || !fs.statSync(inputDir).isDirectory()) throw new Error(`input directory not found: ${inputDir} (build it with build-budget-request-plain-text.ts --year=${year})`);
+const files = fs.readdirSync(inputDir).filter(f => f.endsWith('.txt')).sort();
+if (files.length === 0) throw new Error(`no *.txt files in ${inputDir}`);
+// 出力に残る source_file は従来どおり `budget-request-plain-text/{year}/{file}` の形（入力が zip だった頃と同じ）
+const entries = files.map(f => `budget-request-plain-text/${year}/${f}`);
+const inputBytes = new Map(files.map(f => [f, fs.readFileSync(path.join(inputDir, f))]));
+const inputSha256 = sha256([...inputBytes].map(([f, b]) => `${f}\t${sha256(b)}\n`).join(''));
 
-// Frozen raw-text manifest: integrity diagnostic only (the archive is the source of truth for this parser).
+// Frozen raw-text manifest: integrity diagnostic only (the plain-text files are the source of truth for this parser).
 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
 const manifestBySlug = new Map<string, { pageCount: number; pageTextSha256: string[] }>(
   manifest.documents
@@ -54,8 +54,7 @@ const results: SourceResult[] = [];
 const integrity: { source_file: string; status: string }[] = [];
 const noTextLayer: { source_file: string; pageCount: number }[] = [];
 for (const entry of entries) {
-  const pattern = entry.replace(/[[\]*?\\]/gu, '\\$&');
-  const bytes = execFileSync('unzip', ['-p', zipPath, pattern], { maxBuffer: 1 << 28 });
+  const bytes = inputBytes.get(path.basename(entry))!;
   const text = decoder.decode(bytes);
   const slug = path.basename(entry, '.txt');
   const result = parseDetailSource(text, entry);
@@ -104,7 +103,7 @@ if (accounted !== nonBlank) throw new Error(`line accounting mismatch: classifie
 
 const summary = {
   scope: `FY${year} 令和${year - 2018}年度歳出概算要求額明細表 (excluding 備考) raw text → logical rows (v0 deterministic parser; descriptive counts, not an accuracy score)`,
-  input: { zipPath, zipSha256: sha256(zipBytes), txtEntries: entries.length },
+  input: { inputDir, inputSha256, txtEntries: entries.length },
   frozenManifestIntegrity: count(integrity, i => i.status),
   frozenManifestIntegrityDetail: integrity.filter(i => i.status !== 'MATCH'),
   sourceFileCount: results.length,
