@@ -1,0 +1,78 @@
+{
+  "amount_consistency(当年度, 千円)": {
+    "equal": 784,
+    "kou_with_jikou": 784,
+    "not_equal": 0,
+    "not_equal_by_jikou_count": {},
+    "not_equal_examples": [],
+    "total_jikou": 112571688422,
+    "total_moku": 112571688422
+  },
+  "description_column(列11)": {
+    "continuation_examples": [
+      {
+        "file": "202411001000265b.xml",
+        "row": "p265-3.1",
+        "text": "説明"
+      },
+      {
+        "file": "202411001000269b.xml",
+        "row": "p269-2.1",
+        "text": "説明"
+      },
+      {
+        "file": "202411001000272a.xml",
+        "row": "p272-2.1",
+        "text": "説明"
+      }
+    ],
+    "jikou_rows": 1256,
+    "jikou_rows_with_nonempty_description_in_the_same_row": 1256,
+    "jikou_rows_without": 0,
+    "other_rows_with_description_text(continuation or other)": 126,
+    "rows_with_more_than_one_description_cell": 0
+  },
+  "fy2025_enacted_vs_teishutsu": {
+    "general": {
+      "keys_only_in_enacted": 0,
+      "keys_only_in_teishutsu": 0,
+      "rows": [
+        6780,
+        6780
+      ],
+      "rows_with_different_current_amount": 14,
+      "same_key_sequence": true,
+      "sum_current(千円)": [
+        115197845248,
+        115541501128
+      ]
+    },
+    "special": {
+      "keys_only_in_enacted": 0,
+      "keys_only_in_teishutsu": 0,
+      "rows": [
+        1250,
+        1250
+      ],
+      "rows_with_different_current_amount": 3,
+      "same_key_sequence": true,
+      "sum_current(千円)": [
+        429481228883,
+        429494228883
+      ]
+    }
+  },
+  "inputs": {
+    "script_sha256": "9ab53037cdaedb15e557d80466f9ef61c4b93179c631b5ecd2738d3f28360220",
+    "tests/fixtures/mof-archive-csv/2024/jikou-general.csv": "2b92b50e71be0f909e1fa7bc96d81c74c821ae5f9659d27e28a016b646657e70",
+    "tests/fixtures/mof-archive-csv/2024/kou-general.csv": "cf52fdeaf294d847c4ede39580a8b13add79c09f270cd773f59ece4ba2838b98",
+    "tests/fixtures/mof-archive-csv/2024/moku-general.csv": "9a9c3d6b592ddc914efe7277c4afacf4085ac353ed0aa340c4292501b24a0431"
+  },
+  "kou_match": {
+    "both": 784,
+    "jikou_csv": 784,
+    "kou_csv": 784,
+    "only_jikou_csv": [],
+    "only_kou_csv": []
+  }
+}
