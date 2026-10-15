@@ -55,6 +55,12 @@ describe('目次からの XML 列挙', () => {
   it('ファイル名を fragment 抜きで重複なく順に返し、リンクの無い行は無視する', () => {
     expect(parseMenuXmlFileNames(MENU)).toEqual(['202411001910001a.xml', '202411001000001a.xml', '202411001000029a.xml', '202411001000265b.xml']);
   });
+  it('題名に ")" を含む行も読み飛ばさない（特別会計の目次。以前の読み取りは41行を落としていた）', () => {
+    const menu = `${MENU}
+  LineOut(04,0,"（うち）項(注) 見出し","202412001000086a.xml#p86","p. 86");
+  LineOut(04,0,"別の見出し","202412001000094a.xml#p94","p. 94");`;
+    expect(parseMenuXmlFileNames(menu)).toEqual(['202411001910001a.xml', '202411001000001a.xml', '202411001000029a.xml', '202411001000265b.xml', '202412001000086a.xml', '202412001000094a.xml']);
+  });
   it('Main.html から目次と XML ディレクトリの path を導く。形が違えば throw', () => {
     expect(xmlDocumentPaths('/server/2024/html/202411001Main.html')).toEqual({ menuHref: '/server/2024/html/202411001menu.html', xmlDirHref: '/server/2024/xml/' });
     expect(() => xmlDocumentPaths('/server/2024/csv/DL202411001.zip')).toThrow();
