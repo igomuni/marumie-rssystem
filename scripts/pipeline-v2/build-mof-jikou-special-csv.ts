@@ -19,6 +19,7 @@ const SET = (v: string) => path.join('tests', 'fixtures', 'mof-xml-parser-specia
 const SPEC24: MofSpecialParserSpec = { documentId: '202412001', doctype: 'DOCTYPE budget SYSTEM "../dtd/202401.dtd"', yearLabel: '令和6年度' };
 const SPEC25: MofSpecialParserSpec = { documentId: '202512001', doctype: 'DOCTYPE budget SYSTEM "../dtd/202501.dtd"', yearLabel: '令和7年度' };
 const TARGETS: Record<string, Target> = {
+  '2026': { archive: path.join('2026', '2026'), spec: { documentId: '202612001', doctype: 'DOCTYPE budget SYSTEM "../dtd/202601.dtd"', yearLabel: '令和8年度' }, sourceSet: SET('2026'), sourceSetSha256: 'f59575dbd638abd9f534b870ba3bf9da75deae7d33429fc4b483723bce4a1168', targets: 34, nonTargets: 264 },
   '2023': { archive: path.join('2023', '2023'), spec: { documentId: '202312001', doctype: 'DOCTYPE budget SYSTEM "../dtd/202301.dtd"', yearLabel: '令和5年度' }, sourceSet: SET('2023'), sourceSetSha256: '6aa906b8365314a7e054b98a364c15af932bab1a56c5a823e01bfe0d84dd7e99', targets: 32, nonTargets: 249 },
   '2024': { archive: path.join('2024', '2024'), spec: SPEC24, sourceSet: SET('2024'), sourceSetSha256: '96fb5e5cc69996cdf83e23323bf2711d904f2caf74dea59024a92154ba3fb833', targets: 32, nonTargets: 249 },
   '2025': { archive: path.join('2025', '2025'), spec: SPEC25, sourceSet: SET('2025'), sourceSetSha256: 'd9bdf969eab9f2c3c1d683911cce947ab98b72a7474c42012f4b1b1ca15b10ab', targets: 34, nonTargets: 265 },
