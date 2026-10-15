@@ -13,6 +13,10 @@ import * as path from 'path';
 
 const ARCHIVE = path.join('data', 'download', 'mof.go.jp', 'archive');
 const FROZEN: Record<string, string> = {
+  '2023/2023/csv/DL202311001.zip': '5b37cafbed02f78b04a283ea9bd264e201b0fd7d47a684c09006121999056298',
+  '2023/2023/csv/DL202312001.zip': '0c4571da22aeede17b30a3e9f7cfe1885923b9c5266c31a0f5233237affd43d4',
+  '2026/2026/csv/DL202611001.zip': '7d4ed867c12c82d4a9581aed6c951ec93527d9d353ec4292fa21f49aa01ab808',
+  '2026/2026/csv/DL202612001.zip': 'bead1d1305ced67d198e3ccae4a3091ef2ce5e2a5e284c6adc5deda3dca32fc6',
   '2024/2024/csv/DL202411001.zip': '234bd440ac8647a07e458e3609457d00a133ffbbef2fc766b1421e1c5510e06f',
   '2024/2024/csv/DL202412001.zip': '48392740ce2a8b83c6e3af0141f37e3ebeebd268466890a506658fa75487603c',
   '2025/2025/csv/DL202511001.zip': 'ad3e482a8c2102f29e8ccd1fc2484b4144650993781cd9c53e2b7a66166cdc2d',
@@ -22,6 +26,8 @@ const FROZEN: Record<string, string> = {
 };
 /** version → (csv の置き場, 帳票 ID の年部分) */
 const VERSIONS: Record<string, { dir: string; year: string }> = {
+  '2023': { dir: '2023/2023/csv', year: '2023' },
+  '2026': { dir: '2026/2026/csv', year: '2026' },
   '2024': { dir: '2024/2024/csv', year: '2024' },
   '2025': { dir: '2025/2025/csv', year: '2025' },
   '2025_teishutsu': { dir: '2025/2025_teishutsu/csv', year: '2025' },
