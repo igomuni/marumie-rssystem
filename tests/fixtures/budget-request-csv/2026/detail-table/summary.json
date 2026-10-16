@@ -2,54 +2,54 @@
   "scope": "FY2026 令和8年度歳出概算要求額明細表 (excluding 備考) raw text → logical rows (v0 deterministic parser; descriptive counts, not an accuracy score)",
   "input": {
     "inputDir": "data/work/budget-request-plain-text/2026",
-    "inputSha256": "3ff157661edc8075a5d7cde1cbf1d3a8d598243414c2c924b1f35a9612e1e638",
-    "txtEntries": 135
+    "inputSha256": "90674cbe56badd1dd30c3d98e385b6df9b0c98ad43eb65af234558f65cac30d1",
+    "txtEntries": 138
   },
   "frozenManifestIntegrity": {
-    "MATCH": 135
+    "MATCH": 138
   },
   "frozenManifestIntegrityDetail": [],
-  "sourceFileCount": 135,
-  "detailTableSourceCount": 128,
-  "detailTablePageCount": 8350,
+  "sourceFileCount": 138,
+  "detailTableSourceCount": 131,
+  "detailTablePageCount": 8407,
   "sourcesWithoutDetailTable": 7,
   "sourcesWithNoTextLayer": [],
   "pagesWithoutHeaderBoundary": 1,
-  "nonBlankLinesInDetailPages": 331244,
+  "nonBlankLinesInDetailPages": 333322,
   "lineClassCounts": {
-    "PAGE_LABEL": 8349,
-    "TABLE_TITLE": 128,
-    "ROW": 54029,
-    "UNIT": 128,
-    "UNRESOLVED": 9598,
-    "TABLE_HEADER": 8434,
-    "CONTINUATION": 24885,
-    "RIGHT_REGION": 221895,
+    "PAGE_LABEL": 8406,
+    "TABLE_TITLE": 131,
+    "ROW": 54409,
+    "UNIT": 131,
+    "UNRESOLVED": 9655,
+    "TABLE_HEADER": 8491,
+    "CONTINUATION": 24992,
+    "RIGHT_REGION": 223309,
     "FOOTER_TIMESTAMP": 3798
   },
-  "logicalRowCount": 54029,
+  "logicalRowCount": 54409,
   "rowTypeCounts": {
     "CODE1": 33,
-    "CODE2": 1898,
-    "CODE3": 12410,
-    "CODE_5_4_2_4": 28140,
-    "CODE_NN_NNNN": 9503,
-    "CONTEXT": 128,
-    "DETAIL": 1917
+    "CODE2": 1904,
+    "CODE3": 12481,
+    "CODE_5_4_2_4": 28300,
+    "CODE_NN_NNNN": 9634,
+    "CONTEXT": 131,
+    "DETAIL": 1926
   },
   "parseStatusCounts": {
     "AMOUNTS_PLACED_BY_HEADER_WINDOWS": 105,
     "AMOUNTS_PLACED_BY_PAGE_EDGES": 685,
-    "PARSED": 53239
+    "PARSED": 53619
   },
   "rowsByBlankCells": {
-    "blank:none": 44239,
+    "blank:none": 44573,
     "blank:previous": 352,
-    "blank:previous+request+difference": 9000,
+    "blank:previous+request+difference": 9046,
     "blank:request": 438
   },
-  "rowsWithContinuation": 19726,
-  "unresolvedCount": 9598,
+  "rowsWithContinuation": 19823,
+  "unresolvedCount": 9655,
   "unresolvedByReason": {
     "BLANK_CELL_COLUMN_UNDETERMINED": 146,
     "LEFT_FRAGMENT_NOT_ADJACENT": 420,
@@ -58,7 +58,7 @@
     "LEFT_TEXT_CROSSES_BOUNDARY": 304,
     "PAGE_WITHOUT_HEADER_BOUNDARY": 40,
     "UNEXPECTED_AMOUNT_COUNT": 7,
-    "UNKNOWN_HEADER_ZONE_LINE": 8349
+    "UNKNOWN_HEADER_ZONE_LINE": 8406
   },
   "arithmeticDiagnostics": {
     "rowsWithMismatch": 0
@@ -1397,6 +1397,24 @@
       }
     },
     {
+      "source_file": "budget-request-plain-text/2026/clb.go.jp__files__topics__5125_ext_05_0.txt",
+      "pageCount": 26,
+      "detailPages": 18,
+      "pagesWithoutBoundary": [],
+      "rows": 104,
+      "unresolved": 18,
+      "lineClassCounts": {
+        "PAGE_LABEL": 18,
+        "TABLE_TITLE": 1,
+        "ROW": 104,
+        "UNIT": 1,
+        "UNRESOLVED": 18,
+        "TABLE_HEADER": 18,
+        "RIGHT_REGION": 321,
+        "CONTINUATION": 16
+      }
+    },
+    {
       "source_file": "budget-request-plain-text/2026/courts.go.jp__assets__R08saisyutsu_gaisanyoukyusyo_510kb.txt",
       "pageCount": 118,
       "detailPages": 104,
@@ -2279,6 +2297,24 @@
       }
     },
     {
+      "source_file": "budget-request-plain-text/2026/ppc.go.jp__files__pdf__250829youkyu.txt",
+      "pageCount": 31,
+      "detailPages": 24,
+      "pagesWithoutBoundary": [],
+      "rows": 150,
+      "unresolved": 24,
+      "lineClassCounts": {
+        "PAGE_LABEL": 24,
+        "TABLE_TITLE": 1,
+        "ROW": 150,
+        "UNIT": 1,
+        "UNRESOLVED": 24,
+        "TABLE_HEADER": 24,
+        "CONTINUATION": 50,
+        "RIGHT_REGION": 701
+      }
+    },
+    {
       "source_file": "budget-request-plain-text/2026/reconstruction.go.jp__files__user__2025__09__2025_fukkochougaisansaisyutsu.txt",
       "pageCount": 102,
       "detailPages": 90,
@@ -2294,6 +2330,24 @@
         "TABLE_HEADER": 90,
         "RIGHT_REGION": 1682,
         "CONTINUATION": 589
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/sangiin.go.jp__jpn__annai__oshirase__pdf__r8gaisan-yokyusyo.txt",
+      "pageCount": 21,
+      "detailPages": 15,
+      "pagesWithoutBoundary": [],
+      "rows": 126,
+      "unresolved": 15,
+      "lineClassCounts": {
+        "PAGE_LABEL": 15,
+        "TABLE_TITLE": 1,
+        "ROW": 126,
+        "UNIT": 1,
+        "UNRESOLVED": 15,
+        "TABLE_HEADER": 15,
+        "CONTINUATION": 41,
+        "RIGHT_REGION": 392
       }
     },
     {

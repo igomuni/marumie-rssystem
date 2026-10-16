@@ -2,27 +2,27 @@
   "scope": "FY2026 令和8年度歳出概算要求額総表 raw text → logical rows (v0 deterministic parser; descriptive counts, not an accuracy score)",
   "input": {
     "inputDir": "data/work/budget-request-plain-text/2026",
-    "inputSha256": "3ff157661edc8075a5d7cde1cbf1d3a8d598243414c2c924b1f35a9612e1e638",
-    "txtEntries": 135
+    "inputSha256": "90674cbe56badd1dd30c3d98e385b6df9b0c98ad43eb65af234558f65cac30d1",
+    "txtEntries": 138
   },
   "frozenManifestIntegrity": {
-    "MATCH": 135
+    "MATCH": 138
   },
   "frozenManifestIntegrityDetail": [],
-  "sourceFileCount": 135,
-  "candidateTotalTableSourceCount": 63,
-  "candidateTotalTablePageCount": 167,
-  "tableBlockCount": 74,
-  "titleOnlyPageCount": 128,
-  "logicalRowCount": 3501,
+  "sourceFileCount": 138,
+  "candidateTotalTableSourceCount": 66,
+  "candidateTotalTablePageCount": 170,
+  "tableBlockCount": 77,
+  "titleOnlyPageCount": 134,
+  "logicalRowCount": 3525,
   "rowTypeCounts": {
-    "CODE3": 1415,
-    "DETAIL": 1855,
+    "CODE3": 1424,
+    "DETAIL": 1864,
     "HIER": 82,
-    "TOTAL": 149
+    "TOTAL": 155
   },
   "parseStatusCounts": {
-    "PARSED": 3501
+    "PARSED": 3525
   },
   "rowsWithContinuation": {
     "CODE3": 167,
@@ -37,15 +37,15 @@
   "numericTailFailureCount": 0,
   "unknownRowHeadCount": 0,
   "lineClassCounts": {
-    "CONTEXT": 74,
+    "CONTEXT": 77,
     "CONTINUATION": 765,
-    "PAGE_LABEL": 167,
-    "ROW": 3501,
-    "TABLE_HEADER": 1002,
-    "TABLE_TITLE": 74,
-    "UNIT": 74
+    "PAGE_LABEL": 170,
+    "ROW": 3525,
+    "TABLE_HEADER": 1020,
+    "TABLE_TITLE": 77,
+    "UNIT": 77
   },
-  "blankLinesInCandidatePages": 1092,
+  "blankLinesInCandidatePages": 1104,
   "signedCellsByColumn": {
     "previous_general": 2,
     "previous_other": 0,
@@ -53,11 +53,11 @@
     "request_general": 4,
     "request_other": 2,
     "request_total": 6,
-    "difference": 1161
+    "difference": 1175
   },
   "detailPageShape": {
-    "<blank>": 149,
-    "N": 3352
+    "<blank>": 155,
+    "N": 3370
   },
   "arithmeticDiagnostics": {
     "rowsWithMismatch": 0,
@@ -1201,6 +1201,35 @@
         }
       ],
       "rows": 43,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/clb.go.jp__files__topics__5125_ext_05_0.txt",
+      "pageCount": 26,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "clb.go.jp__files__topics__5125_ext_05_0#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "05 内 閣 所 管 (内閣法制局（内閣法制局）)"
+          ],
+          "rows": 6
+        }
+      ],
+      "rows": 6,
       "unresolved": 0
     },
     {
@@ -2764,6 +2793,35 @@
       "unresolved": 0
     },
     {
+      "source_file": "budget-request-plain-text/2026/ppc.go.jp__files__pdf__250829youkyu.txt",
+      "pageCount": 31,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "ppc.go.jp__files__pdf__250829youkyu#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "19 内 閣 府 所 管 （個人情報保護委員会）"
+          ],
+          "rows": 8
+        }
+      ],
+      "rows": 8,
+      "unresolved": 0
+    },
+    {
       "source_file": "budget-request-plain-text/2026/reconstruction.go.jp__files__user__2025__09__2025_fukkochougaisansaisyutsu.txt",
       "pageCount": 102,
       "endsWithFormFeed": true,
@@ -2798,6 +2856,35 @@
         }
       ],
       "rows": 143,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/sangiin.go.jp__jpn__annai__oshirase__pdf__r8gaisan-yokyusyo.txt",
+      "pageCount": 21,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "sangiin.go.jp__jpn__annai__oshirase__pdf__r8gaisan-yokyusyo#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "02 国 会 所 管 （参 議 院）"
+          ],
+          "rows": 10
+        }
+      ],
+      "rows": 10,
       "unresolved": 0
     },
     {

@@ -1,0 +1,11 @@
+要求番号,区分,前年度予算額_一般行政経費,前年度予算額_その他の経費,前年度予算額_計,８年度概算要求額_一般行政経費,８年度概算要求額_その他の経費,８年度概算要求額_計,増△減,明細書頁数,source_page,source_line_start,source_line_end,table_block_id,row_index,row_type,parse_status
+,020 参議院,"15,620,908","27,117,040","42,737,948","16,172,854","27,195,198","43,368,052","630,104",3,5,42,42,sangiin.go.jp__jpn__annai__oshirase__pdf__r8gaisan-yokyusyo#b1,1,CODE3,PARSED
+,010 参議院,"15,620,908","26,046,840","41,667,748","16,172,854","25,909,016","42,081,870","414,122",3,5,43,43,sangiin.go.jp__jpn__annai__oshirase__pdf__r8gaisan-yokyusyo#b1,2,CODE3,PARSED
+1,01‑95 国会の権能行使に必要な経費,0,"26,046,840","26,046,840",0,"25,909,016","25,909,016","△137,824",3,5,44,44,sangiin.go.jp__jpn__annai__oshirase__pdf__r8gaisan-yokyusyo#b1,3,DETAIL,PARSED
+2,06‑95 参議院の運営に必要な経費,"15,620,908",0,"15,620,908","16,172,854",0,"16,172,854","551,946",12,5,45,45,sangiin.go.jp__jpn__annai__oshirase__pdf__r8gaisan-yokyusyo#b1,4,DETAIL,PARSED
+,020 参議院施設費,0,"1,065,200","1,065,200",0,"1,281,182","1,281,182","215,982",16,5,46,46,sangiin.go.jp__jpn__annai__oshirase__pdf__r8gaisan-yokyusyo#b1,5,CODE3,PARSED
+3,01‑95 参議院施設整備に必要な経費,0,"1,065,200","1,065,200",0,"1,281,182","1,281,182","215,982",16,5,47,47,sangiin.go.jp__jpn__annai__oshirase__pdf__r8gaisan-yokyusyo#b1,6,DETAIL,PARSED
+,030 参議院予備経費,0,"5,000","5,000",0,"5,000","5,000",0,17,5,48,48,sangiin.go.jp__jpn__annai__oshirase__pdf__r8gaisan-yokyusyo#b1,7,CODE3,PARSED
+4,01‑95 国会予備金に必要な経費,0,"5,000","5,000",0,"5,000","5,000",0,17,5,49,49,sangiin.go.jp__jpn__annai__oshirase__pdf__r8gaisan-yokyusyo#b1,8,DETAIL,PARSED
+,組織計,"15,620,908","27,117,040","42,737,948","16,172,854","27,195,198","43,368,052","630,104",,5,50,50,sangiin.go.jp__jpn__annai__oshirase__pdf__r8gaisan-yokyusyo#b1,9,TOTAL,PARSED
+,所管計,"15,620,908","27,117,040","42,737,948","16,172,854","27,195,198","43,368,052","630,104",,5,51,51,sangiin.go.jp__jpn__annai__oshirase__pdf__r8gaisan-yokyusyo#b1,10,TOTAL,PARSED
