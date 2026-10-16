@@ -1,0 +1,21 @@
+{
+ "year": 2023,
+ "coverPages": 75,
+ "sources": 63,
+ "rows": 447,
+ "rowKinds": {
+  "HEADER": 75,
+  "TITLE": 75,
+  "SECTION": 179,
+  "SCOPE": 118
+ },
+ "pageStatus": {
+  "RESOLVED": 74,
+  "PARTIAL": 1
+ },
+ "unclassifiedLines": 1,
+ "inventoryPageTextHash": {
+  "match": 75,
+  "mismatch": 0
+ }
+}

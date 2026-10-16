@@ -1,0 +1,10 @@
+要求番号,区分,前年度予算額_一般行政経費,前年度予算額_その他の経費,前年度予算額_計,５年度概算要求額_一般行政経費,５年度概算要求額_その他の経費,５年度概算要求額_計,増△減,明細書頁数,source_page,source_line_start,source_line_end,table_block_id,row_index,row_type,parse_status
+,055 消費者庁,"4,176,655","6,640,764","10,817,419","4,400,525","4,824,766","9,225,291","△1,592,128",3,5,41,41,caa.go.jp__policies__budget__assets__policies_budget_220914_0001#b1,1,CODE3,PARSED
+,010 消費者庁共通費,"4,176,655",0,"4,176,655","4,400,525",0,"4,400,525","223,870",3,5,42,42,caa.go.jp__policies__budget__assets__policies_budget_220914_0001#b1,2,CODE3,PARSED
+1,01‑95 消費者庁一般行政に必要な経費,"4,176,655",0,"4,176,655","4,400,525",0,"4,400,525","223,870",3,5,43,43,caa.go.jp__policies__budget__assets__policies_budget_220914_0001#b1,3,DETAIL,PARSED
+,020 消費者政策費,0,"3,614,934","3,614,934",0,"1,798,936","1,798,936","△1,815,998",44,5,44,44,caa.go.jp__policies__budget__assets__policies_budget_220914_0001#b1,4,CODE3,PARSED
+2,01‑95 消費者政策に必要な経費,0,"3,614,934","3,614,934",0,"1,798,936","1,798,936","△1,815,998",44,5,45,45,caa.go.jp__policies__budget__assets__policies_budget_220914_0001#b1,5,DETAIL,PARSED
+,030 独立行政法人国民生活センター運営費,0,"3,025,830","3,025,830",0,"3,025,830","3,025,830",0,163,5,46,46,caa.go.jp__policies__budget__assets__policies_budget_220914_0001#b1,6,CODE3,PARSED
+3,01‑95 独立行政法人国民生活センター運営費交付金に必要な経費,0,"3,025,830","3,025,830",0,"3,025,830","3,025,830",0,163,5,47,48,caa.go.jp__policies__budget__assets__policies_budget_220914_0001#b1,7,DETAIL,PARSED
+,組織計,"4,176,655","6,640,764","10,817,419","4,400,525","4,824,766","9,225,291","△1,592,128",,5,50,50,caa.go.jp__policies__budget__assets__policies_budget_220914_0001#b1,8,TOTAL,PARSED
+,所管計,"4,176,655","6,640,764","10,817,419","4,400,525","4,824,766","9,225,291","△1,592,128",,5,51,51,caa.go.jp__policies__budget__assets__policies_budget_220914_0001#b1,9,TOTAL,PARSED

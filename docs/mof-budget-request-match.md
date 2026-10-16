@@ -1,9 +1,9 @@
 # MOF 予算書（項・事項・目）× 概算要求（TOC・総表・明細表）の突合
 
-MOF の予算書の項・事項・目（[mof-archive-csv.md](mof-archive-csv.md)）と、概算要求の目次（TOC）・総表・明細表（[budget-request-toc-pdf-native-csv.md](budget-request-toc-pdf-native-csv.md)、[budget-request-total-table-csv.md](budget-request-total-table-csv.md)、[budget-request-detail-table-csv.md](budget-request-detail-table-csv.md)）を、名称とコードで対応づける。対象は FY2024（令和6年度）、FY2025（令和7年度）、FY2026（令和8年度）の一般会計・特別会計。
+MOF の予算書の項・事項・目（[mof-archive-csv.md](mof-archive-csv.md)）と、概算要求の目次（TOC）・総表・明細表（[budget-request-toc-pdf-native-csv.md](budget-request-toc-pdf-native-csv.md)、[budget-request-total-table-csv.md](budget-request-total-table-csv.md)、[budget-request-detail-table-csv.md](budget-request-detail-table-csv.md)）を、名称とコードで対応づける。対象は FY2023（令和5年度）、FY2024（令和6年度）、FY2025（令和7年度）、FY2026（令和8年度）の一般会計・特別会計。
 
 - 実装: `scripts/pipeline-v2/build-mof-budget-request-match.ts`（runner）、`scripts/pipeline-v2/lib/mof-budget-request-match.ts`（木・名称キー・金額の読み取り）
-- 出力（git 管理）: `tests/fixtures/mof-budget-request-match/{2024,2025,2025_teishutsu,2026}/`（`manifest.json` に SHA-256）。ディレクトリ名は MOF の版: `2024`＝令和6年度（提出時）、`2025_teishutsu`＝令和7年度の提出時、`2025`＝令和7年度の成立後、`2026`＝令和8年度（提出時）。概算要求は FY2024 が `2024`、FY2025 が後の 2 つ、FY2026 が `2026` と対になる。
+- 出力（git 管理）: `tests/fixtures/mof-budget-request-match/{2023,2024,2025,2025_teishutsu,2026}/`（`manifest.json` に SHA-256）。ディレクトリ名は MOF の版: `2023`＝令和5年度（提出時）、`2024`＝令和6年度（提出時）、`2025_teishutsu`＝令和7年度の提出時、`2025`＝令和7年度の成立後、`2026`＝令和8年度（提出時）。概算要求は FY2023 が `2023`、FY2024 が `2024`、FY2025 が後の 2 つ、FY2026 が `2026` と対になる。
 - 旧い突合（J1＋K2、[budget-request-detail-table-mof-match.md](budget-request-detail-table-mof-match.md)）とは別系統。置き換えてはいない。
 
 ```bash
@@ -68,5 +68,7 @@ FY2024 の数値は、凍結済みの PDF corpus（82 PDF）に、後から取�
 - FY2024 の法務省・金融庁の PDF は文字層がなく（描画パス型）、概算要求側が取れていないため、突合に載っていない。
 - 同じ MOF の行が複数の概算要求の source から対応づくことがある（電源開発促進勘定を複数の省庁の PDF が載せる等）。
 - 概算要求の目を MOF の目に対応づけたあと、集約した合計と MOF の金額が一致する割合は約 4 割。概算要求と予算書の時点の違いによる。
+
+FY2023（令和5年度）× MOF 2023（提出時）: 項 1,016 件対応づき（曖昧 12、対象外 3、親未対応 5、候補なし 68）、事項 1,558（候補なし 70、親未対応 94）、目（集約後）7,243（候補なし 437、親未対応 280）。MOF の行のうち対応づいた割合は、項 89.9%（938／1,043）、事項 86.7%（1,430／1,650）、目 84.1%（6,768／8,046）。FY2024 以降より低いのは、法務省の PDF（文字層なし）を入力に含まない（MOF 側の未対応の項 105 のうち 35 が法務省）ことと、こども家庭庁の発足年度で複数候補（曖昧 12）があることによる。
 
 FY2025 も同じ仕組みで、後から取得した 4 PDF（参議院・衆議院・裁判官訴追委員会・裁判官弾劾裁判所、75 頁）を補遺（`tests/fixtures/budget-request-pdf-corpus/2025/pdf-corpus-freeze-supplement-*.json`）として加えている。凍結記録（131 PDF、ダイジェスト `520dd9c6…`）は変更していない。補遺を加えた FY2025 の結果は上の表の FY2025 の列（加える前: 項 1,085／1,150、事項 1,654／1,776、目 7,618／8,168）。MOF の行の網羅は、項 94.8%（1,005／1,060）、事項 92.9%（1,534／1,652）、目 90.6%（7,272／8,030）。

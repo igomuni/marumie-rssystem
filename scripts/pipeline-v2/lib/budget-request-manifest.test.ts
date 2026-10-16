@@ -104,7 +104,7 @@ describe('FY2024 manifest', () => {
 
 describe('getBudgetRequestManifest', () => {
   it('未定義年度はエラー', () => {
-    expect(() => getBudgetRequestManifest(2023)).toThrow(/未定義/);
+    expect(() => getBudgetRequestManifest(2022)).toThrow(/未定義/);
   });
 });
 

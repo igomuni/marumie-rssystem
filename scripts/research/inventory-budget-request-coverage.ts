@@ -15,20 +15,23 @@ if (!OUT) throw new Error('usage: inventory-budget-request-coverage.ts <out-dir>
 const cell = (v: unknown): string => { const s = String(v ?? ''); return /[",\n\r]/u.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
 const rd = (p: string) => (fs.existsSync(p) ? readCsv(fs.readFileSync(p, 'utf8')) : null);
 const header = ['year', 'authority', 'account_type', 'account', 'role', 'slug', 'url', 'verification', 'plain_text', 'plain_text_nonblank_lines', 'cover', 'cover_scope', 'toc', 'toc_kou', 'toc_jikou', 'total', 'total_rows', 'detail', 'detail_rows', 'detail_has_context'];
-// FY2026 は人手の目録が無く、manifest は凍結した PDF 記録から組み立てたもの（所管の欄は PDF 本文の見出し）。
-// 年度間で比べられるよう、FY2026 の所管は、財務省のリンク先一覧での掲載（PDF が載る掲載ページの、一般会計の府省名。なければ特別会計・勘定名）にする
-const authority2026 = new Map<string, string>();
-{
+// FY2023・FY2026 は人手の目録が無く、manifest は凍結した PDF 記録から組み立てたもの（所管の欄は PDF 本文の見出し）。
+// 年度間で比べられるよう、所管は掲載ページの府省名にする（FY2026: 財務省のリンク先一覧での掲載。PDF が載る掲載ページの、一般会計の府省名。なければ特別会計・勘定名。
+// FY2023: 財務省の一覧が無いため、同じ入口ドメインの FY2026 での掲載名）
+const authorityByYear = new Map<number, Map<string, string>>();
+for (const y of [2023, 2026]) {
   const D = path.join('docs', 'inventory', 'budget-request-sources');
-  const pages = new Map(readCsv(fs.readFileSync(path.join(D, 'fy2026-landing-pages.csv'), 'utf8')).map(r => [r['landing_url'], r['listed_for']]));
-  for (const r of readCsv(fs.readFileSync(path.join(D, 'fy2026-expenditure-request-pdfs.csv'), 'utf8'))) {
+  const pages = new Map(readCsv(fs.readFileSync(path.join(D, `fy${y}-landing-pages.csv`), 'utf8')).map(r => [r['landing_url'], r['listed_for']]));
+  const m = new Map<string, string>();
+  for (const r of readCsv(fs.readFileSync(path.join(D, `fy${y}-expenditure-request-pdfs.csv`), 'utf8'))) {
     const who = (pages.get(r['landing_url']) ?? '').split(' ; ');
     const g = who.find(w => w.startsWith('general:'));
-    authority2026.set(r['pdf_url'], (g ?? who[0] ?? '').replace(/^(general|special):/, ''));
+    m.set(r['pdf_url'], (g ?? who[0] ?? '').replace(/^(general|special):/, ''));
   }
+  authorityByYear.set(y, m);
 }
 const rows: (string | number)[][] = [];
-for (const year of [2024, 2025, 2026]) {
+for (const year of [2023, 2024, 2025, 2026]) {
   const m = getBudgetRequestManifest(year);
   const base = path.join('tests', 'fixtures', 'budget-request-csv', String(year));
   for (const src of m.sources) for (const doc of src.logicalDocuments) for (const f of doc.files) {
@@ -38,7 +41,7 @@ for (const year of [2024, 2025, 2026]) {
     const nonblank = fs.existsSync(txtPath) ? fs.readFileSync(txtPath, 'utf8').split('\n').filter(l => l.trim() !== '').length : null;
     const cover = rd(path.join(base, 'cover', 'sources', `${slug}.csv`));
     const toc = rd(path.join(base, 'toc', 'sources', `${slug}.csv`)), tot = rd(path.join(base, 'total-table', 'sources', `${slug}.csv`)), det = rd(path.join(base, 'detail-table', 'sources', `${slug}.csv`));
-    rows.push([year, year === 2026 ? (authority2026.get(f.url) ?? src.publisherAuthority) : (doc.logicalAuthority ?? doc.budgetJurisdiction ?? src.publisherAuthority), doc.accountType, doc.account, f.role ?? '', slug, f.url, f.verificationStatus,
+    rows.push([year, authorityByYear.has(year) ? (authorityByYear.get(year)!.get(f.url) ?? src.publisherAuthority) : (doc.logicalAuthority ?? doc.budgetJurisdiction ?? src.publisherAuthority), doc.accountType, doc.account, f.role ?? '', slug, f.url, f.verificationStatus,
       nonblank === null ? 'not_extracted' : nonblank === 0 ? 'no_text_layer' : 'text', nonblank ?? '',
       cover ? 'yes' : 'no', cover ? cover.filter(r => r['kind'] === 'SCOPE').length : '',
       toc ? 'yes' : 'no', toc ? toc.filter(r => /^（項）/.test(r['区分'])).length : '', toc ? toc.filter(r => (r['要求番号'] ?? '') !== '' && /^\d{2}[‐-―−－-]\d{2}/.test(r['区分'])).length : '',
@@ -59,6 +62,6 @@ for (const r of rows) {
 const h2 = ['year', 'authority', 'account_type', 'pdfs', 'with_text', 'with_cover', 'cover_scope', 'with_toc', 'toc_kou', 'with_total', 'total_rows', 'with_detail', 'detail_rows'];
 fs.writeFileSync(path.join(OUT, 'by-authority.csv'), [h2, ...[...agg.values()].sort((a, b) => a.year - b.year || (a.authority < b.authority ? -1 : 1) || (a.account_type < b.account_type ? -1 : 1)).map(a => [a.year, a.authority, a.account_type, a.pdfs, a.text, a.cover, a.cover_scope, a.toc, a.toc_kou, a.total, a.total_rows, a.detail, a.detail_rows])].map(r => r.map(cell).join(',')).join('\n') + '\n');
 const summary: Record<string, unknown> = {};
-for (const y of [2024, 2025, 2026]) { const rs = rows.filter(r => r[0] === y); summary[y] = { pdfs: rs.length, text: rs.filter(r => r[8] === 'text').length, no_text_layer: rs.filter(r => r[8] === 'no_text_layer').length, not_extracted: rs.filter(r => r[8] === 'not_extracted').length, with_cover: rs.filter(r => r[10] === 'yes').length, with_toc: rs.filter(r => r[12] === 'yes').length, with_total: rs.filter(r => r[15] === 'yes').length, with_detail: rs.filter(r => r[17] === 'yes').length }; }
+for (const y of [2023, 2024, 2025, 2026]) { const rs = rows.filter(r => r[0] === y); summary[y] = { pdfs: rs.length, text: rs.filter(r => r[8] === 'text').length, no_text_layer: rs.filter(r => r[8] === 'no_text_layer').length, not_extracted: rs.filter(r => r[8] === 'not_extracted').length, with_cover: rs.filter(r => r[10] === 'yes').length, with_toc: rs.filter(r => r[12] === 'yes').length, with_total: rs.filter(r => r[15] === 'yes').length, with_detail: rs.filter(r => r[17] === 'yes').length }; }
 fs.writeFileSync(path.join(OUT, 'summary.json'), JSON.stringify(summary, null, 1) + '\n');
 console.log(JSON.stringify(summary));
