@@ -12,7 +12,7 @@
   "unknownAccountType": 0,
   "pdfinfoVersion": "pdfinfo version 26.09.0",
   "corpusDigestRule": "sha256(各 target について \"{localPdfPath} {pdfSha256}\" を改行連結。localPdfPath の昇順)",
-  "corpusDigestSha256": "c815b405dcb4cba2bf1bc03e9ee9c17eb7c82fee026540d58d123069afa1ed51"
+  "corpusDigestSha256": "44678262ab8a4f0ca4a0e602bf79724ec68171cb88ab2862a6e98d97e67c4114"
  },
  "documents": [
   {
@@ -2133,10 +2133,10 @@
    "logicalAuthority": "国会",
    "accountType": "general",
    "account": "一般会計",
-   "sourceUrl": "https://www.sangiin.go.jp/jpn/annai/oshirase/pdf/r8gaisan-yokyusyo.pdf",
-   "localPdfPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r8gaisan-yokyusyo.pdf",
-   "bytes": 135022,
-   "pdfSha256": "8e0daee8fd841dd3ee17129fbb511f6a337276a5f9e510700b6dd5eaba4746c6",
+   "sourceUrl": "https://www.sangiin.go.jp/jpn/annai/oshirase/pdf/r8gaisan-yokyusyo-2.pdf",
+   "localPdfPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r8gaisan-yokyusyo-2.pdf",
+   "bytes": 49298,
+   "pdfSha256": "4fb4d22630a34098c90a96867c929e2bbab48fec5712bf8005d0169c073baa8f",
    "pageCount": 21,
    "acquisition": "manual",
    "targetIndex": 132,

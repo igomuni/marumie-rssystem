@@ -3,7 +3,7 @@
  "scope": "frozen v0 specification の literal implementation の full-corpus 出力 manifest。rule 変更・GT 由来の調整なし。open-set safety は NOT EVALUATED",
  "specVersion": "page-classification-v0-frozen",
  "frozenInput": {
-  "rawTextCorpusDigestSha256": "4d790aff1d5da1a9ab908741e05104b5d7e3f78e675b467300259a446c5cebb4",
+  "rawTextCorpusDigestSha256": "8d83ff700685cc3e1c8765da24d9285f7184bcacb3d878856934a5cc19740963",
   "phaseAFixtureSha256": null
  },
  "implementation": {
@@ -54,7 +54,7 @@
   },
   "bridgedBlankPages": 0,
   "pageLossOrDuplicate": 0,
-  "corpusClassificationDigestSha256": "87c1571a6284ca2c69688fa54e2485ab126531ba1fa9a4097f6d7b12f14e2ab0"
+  "corpusClassificationDigestSha256": "448bc6e877d718b1e3d78b4ae03a2e6e6d2488a388df32cca5174e72b04d3904"
  },
  "conformance": {
   "totalMismatch": 0
@@ -721,9 +721,9 @@
    "classificationDigestSha256": "cb50caad5f864c53db91291adc863c5f02f371eb51e05d3e4acdcc14d00fd37e"
   },
   {
-   "localPdfPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r8gaisan-yokyusyo.pdf",
+   "localPdfPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r8gaisan-yokyusyo-2.pdf",
    "pageCount": 21,
-   "classificationDigestSha256": "f00b14b1782d3e14fb9417845e60699f6652681115e5db53127b4976e7d6c82d"
+   "classificationDigestSha256": "b797cecad5feb762e208b857423de23bbd09a328f5298a5b923d77dc14004f3a"
   },
   {
    "localPdfPath": "data/download/shugiin.go.jp/internet/itdb_annai.nsf/html/statics/osirase/kaikei-saishutsugaisan8.pdf/%24File/kaikei-saishutsugaisan8.pdf",

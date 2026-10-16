@@ -49,7 +49,7 @@
   "inputs": {
     "inventory": {
       "path": "tests/fixtures/budget-request-cover-toc-structure/2026/structure-inventory.json",
-      "sha256": "3505d7b04fee34a4d2357d362261a32b4ac3a9daa81a5600943c568b4b1e0e97"
+      "sha256": "7bc8f3c611c5beaffd9b9c61250d48a6484f7b8a56b4310b3424b854a2022893"
     },
     "pdfs": [
       {
@@ -452,8 +452,8 @@
         ]
       },
       {
-        "source_pdf": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r8gaisan-yokyusyo.pdf",
-        "pdf_sha256": "8e0daee8fd841dd3ee17129fbb511f6a337276a5f9e510700b6dd5eaba4746c6",
+        "source_pdf": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r8gaisan-yokyusyo-2.pdf",
+        "pdf_sha256": "4fb4d22630a34098c90a96867c929e2bbab48fec5712bf8005d0169c073baa8f",
         "toc_pages": [
           3
         ]

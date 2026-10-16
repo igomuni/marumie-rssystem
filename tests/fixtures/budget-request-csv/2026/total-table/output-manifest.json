@@ -1,6 +1,6 @@
 {
   "arithmetic-diagnostics.csv": "72b5a35d1de830e4882938a106c13f0779ca09cf98f87cd30a048564ec51521a",
-  "line-audit.csv": "efc6747ca3cece41bc2653d1004e8f406d56cd721b269efb3f75d17f5080e966",
+  "line-audit.csv": "c84d763911f26fec735a99558cdb2b4ed095aaf01ba1bbfe0b92edb61496b197",
   "sources/caa.go.jp__policies__budget__assets__caa_cms_205_250912_0001.csv": "39f3d7762b98abd75849d08e79b7a93c5a1903442ed3cfea7c949231014ac6ae",
   "sources/caa.go.jp__policies__budget__assets__caa_cms_205_250912_0002.csv": "fdc4cfa9d3b3ffe0a3d803030d49119909be1c9c12f7dee60305fed325e9880d",
   "sources/cao.go.jp__yosan__soshiki__r08__pdf__00.csv": "b3149d1db9b040a1b77396be8e33cf6ed2e7359ea09d224b97f2735c184673f9",
@@ -61,12 +61,12 @@
   "sources/npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei.csv": "3eb44c334817e1e9c4c16050e803e47c9fd1ab2464cdd689dbe6c097a65c6a56",
   "sources/ppc.go.jp__files__pdf__250829youkyu.csv": "8df997fc2fa2cc1cc4a983465b638f83fa92ef063031fdb26c96f297fe14ec40",
   "sources/reconstruction.go.jp__files__user__2025__09__2025_fukkochougaisansaisyutsu.csv": "48cd7345b9204c77593868ee8b39d1279b360109b4a5071bc18036976f3309c7",
-  "sources/sangiin.go.jp__jpn__annai__oshirase__pdf__r8gaisan-yokyusyo.csv": "57186ac5ca39e700da7cecdcf1e78fa7f2b42875a760e9266f11964cb9e74066",
+  "sources/sangiin.go.jp__jpn__annai__oshirase__pdf__r8gaisan-yokyusyo-2.csv": "c834252a2c467dc7fa0db18aad6440b6b9928885fe09e9e50b63eb2f5a199d30",
   "sources/shugiin.go.jp__internet__itdb_annai.nsf__html__statics__osirase__kaikei-saishutsugaisan8.pdf__%24File__kaikei-saishutsugaisan8.csv": "c6cae48f879121eb59522d91dfdc25667416d7aae137eed32fa8c7439d730bb2",
   "sources/sotsui.go.jp__budget__images__r8budget_yokyu.csv": "7dde72dbd6922956167b0e4e8e442bf9217fd6ff0cf4f500a5fbd625f1c5d898",
   "sources/soumu.go.jp__main_content__001030551.csv": "e8f69954735db3ece98a537d0316caabb6be6fcb482638f93bee9dd7476925cb",
   "sources/soumu.go.jp__main_content__001030553.csv": "35e14f7123ade2b8bbe2c78387a9d67bb8ed8f732adbacd353a3d80c8af850f2",
   "sources/soumu.go.jp__main_content__001030554.csv": "9b961e45049dd82391d46ff33a85b7945247d2ccb4de1b9b24651a916d4dc988",
-  "summary.json": "f4c30a3300192453204c623d9b044495ffc9ea261225ee09148b641001ab5921",
+  "summary.json": "b8225e7e556e64adbca8fca38ab7751ade1cf637311a74b266e3fc5ce7f8d369",
   "unresolved.csv": "917cf56115ce24571bcd65fee21e8f8b817abed0178c1ebc468466801963030c"
 }

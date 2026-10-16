@@ -125,12 +125,12 @@
   "sources/npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei.csv": "96c18c2e68da94b8f9af0f2186f87e4d0842d2003522894c6fc85bcea210987d",
   "sources/ppc.go.jp__files__pdf__250829youkyu.csv": "e7a6f2eb6910d6fc9102dd1ccdcec1912b5351c6b5bdf52b1f5789ad743534b6",
   "sources/reconstruction.go.jp__files__user__2025__09__2025_fukkochougaisansaisyutsu.csv": "a0dcc30731607dc2c7c791a16cb03bc8952df1244d19dd342a1902273cbb164c",
-  "sources/sangiin.go.jp__jpn__annai__oshirase__pdf__r8gaisan-yokyusyo.csv": "09441ea9eddef2e0b9402ef8034d910b085ff3ae8eeb47c467b3788fe406ded2",
+  "sources/sangiin.go.jp__jpn__annai__oshirase__pdf__r8gaisan-yokyusyo-2.csv": "a806b9cd046517cf07cb651e712797122654ae9cf767ce2de828e3676918f093",
   "sources/shugiin.go.jp__internet__itdb_annai.nsf__html__statics__osirase__kaikei-saishutsugaisan8.pdf__%24File__kaikei-saishutsugaisan8.csv": "0dbbced5ea3dcfcad61a6fe7dbfe01a8ddc3b4cab35e518c7b5283820199da8b",
   "sources/sotsui.go.jp__budget__images__r8budget_yokyu.csv": "33938900725b15e39f87ab71b3302c04dc6cc97fc9ac2f39c66f601bd90bd4cc",
   "sources/soumu.go.jp__main_content__001030551.csv": "5bb2b4a78516a10a8622e14c0795f7b0181a0939a7489fc3b7073ea33bc2cbde",
   "sources/soumu.go.jp__main_content__001030553.csv": "6dd062527dd75e73e9f6e57232c0c8679f1ee1fa6e933cb0d67eb3ee611fd2ea",
   "sources/soumu.go.jp__main_content__001030554.csv": "5cac5c2ed9e813736d87f338a24bd2395016602bbffb95806f82cb06d55f3438",
-  "summary.json": "30c88b553c051addaabf1974645aa66943eaf73e78412c2bb67402cacd84dc07",
-  "unresolved.csv": "960fe323a917ec852a72bd8ed7b4ac3c3f76217a0dfba14637754cd01896715f"
+  "summary.json": "760ff65e102b73f260239599b8eb3e614a85c9dd085836c68411c53e74eeb18a",
+  "unresolved.csv": "4d87ff230b1d31c624a3097ea019a302d0d43e610c6cdc5a80aeacdd101ab183"
 }

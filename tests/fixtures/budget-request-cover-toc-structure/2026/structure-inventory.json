@@ -3,8 +3,8 @@
  "scope": "Page Classification v0 が COVER / TOC と routing した page の machine inventory。parser output ではない。logical row・semantic field は確定していない",
  "generator": "scripts/pipeline-v2/analyze-budget-request-cover-toc-structure.ts",
  "frozenInput": {
-  "rawTextCorpusDigestSha256": "4d790aff1d5da1a9ab908741e05104b5d7e3f78e675b467300259a446c5cebb4",
-  "pageClassificationCorpusDigestSha256": "87c1571a6284ca2c69688fa54e2485ab126531ba1fa9a4097f6d7b12f14e2ab0"
+  "rawTextCorpusDigestSha256": "8d83ff700685cc3e1c8765da24d9285f7184bcacb3d878856934a5cc19740963",
+  "pageClassificationCorpusDigestSha256": "448bc6e877d718b1e3d78b4ae03a2e6e6d2488a388df32cca5174e72b04d3904"
  },
  "summary": {
   "coverRouted": 75,
@@ -1395,7 +1395,7 @@
    "tocRunsWithNoTextInside": 0
   },
   {
-   "localPdfPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r8gaisan-yokyusyo.pdf",
+   "localPdfPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r8gaisan-yokyusyo-2.pdf",
    "publisherDomain": "sangiin.go.jp",
    "logicalDocumentIndex": 132,
    "accountType": "general",
@@ -8279,8 +8279,8 @@
    "headerLeadingCodeDigits": 1
   },
   {
-   "localPdfPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r8gaisan-yokyusyo.pdf",
-   "pdfSha256": "8e0daee8fd841dd3ee17129fbb511f6a337276a5f9e510700b6dd5eaba4746c6",
+   "localPdfPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r8gaisan-yokyusyo-2.pdf",
+   "pdfSha256": "4fb4d22630a34098c90a96867c929e2bbab48fec5712bf8005d0169c073baa8f",
    "physicalPage": 1,
    "textSha256": "e35727945e143f106b17b822f80c8726d047b197ab46ca0f61d8ab9bce53910b",
    "classifierPageType": "COVER",
@@ -8324,8 +8324,8 @@
    "headerLeadingCodeDigits": 2
   },
   {
-   "localPdfPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r8gaisan-yokyusyo.pdf",
-   "pdfSha256": "8e0daee8fd841dd3ee17129fbb511f6a337276a5f9e510700b6dd5eaba4746c6",
+   "localPdfPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r8gaisan-yokyusyo-2.pdf",
+   "pdfSha256": "4fb4d22630a34098c90a96867c929e2bbab48fec5712bf8005d0169c073baa8f",
    "physicalPage": 3,
    "textSha256": "5e182a5c80395cfcc0333c83c39fb0fc3e650bf580894633eec74f9a0fa322df",
    "classifierPageType": "TOC",

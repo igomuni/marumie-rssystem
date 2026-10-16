@@ -2,7 +2,7 @@
   "scope": "FY2026 令和8年度歳出概算要求額総表 raw text → logical rows (v0 deterministic parser; descriptive counts, not an accuracy score)",
   "input": {
     "inputDir": "data/work/budget-request-plain-text/2026",
-    "inputSha256": "90674cbe56badd1dd30c3d98e385b6df9b0c98ad43eb65af234558f65cac30d1",
+    "inputSha256": "97ac2417b02e371e70d333783a5b47fe17ab67ff5856b5366e7ef39733e0bd6b",
     "txtEntries": 138
   },
   "frozenManifestIntegrity": {
@@ -2859,7 +2859,7 @@
       "unresolved": 0
     },
     {
-      "source_file": "budget-request-plain-text/2026/sangiin.go.jp__jpn__annai__oshirase__pdf__r8gaisan-yokyusyo.txt",
+      "source_file": "budget-request-plain-text/2026/sangiin.go.jp__jpn__annai__oshirase__pdf__r8gaisan-yokyusyo-2.txt",
       "pageCount": 21,
       "endsWithFormFeed": true,
       "candidatePages": [
@@ -2871,7 +2871,7 @@
       ],
       "blocks": [
         {
-          "table_block_id": "sangiin.go.jp__jpn__annai__oshirase__pdf__r8gaisan-yokyusyo#b1",
+          "table_block_id": "sangiin.go.jp__jpn__annai__oshirase__pdf__r8gaisan-yokyusyo-2#b1",
           "pages": [
             5
           ],
