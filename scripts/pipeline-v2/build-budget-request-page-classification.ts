@@ -13,11 +13,15 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { sha256Hex } from './lib/budget-request-raw-text';
+import { loadPlainTextCorpus, plainTextPages } from './lib/budget-request-plain-text-pages';
 import { CLASSIFIER_SPEC_VERSION, classifyDocument, documentDigest, recordLine, verifyHashes, type ClassifierPageInput, type EmptyKind, type PageClassificationRecord } from './lib/budget-request-page-classification';
 
 const FREEZE = process.argv.includes('--freeze-fixture');
 const YEAR_ARG = process.argv.find(a => a.startsWith('--year='))?.slice('--year='.length) ?? '2024';
-if (!/^\d{4}$/.test(YEAR_ARG)) throw new Error(`--year must be a 4-digit fiscal year: ${YEAR_ARG}`);
+// --input=plain-text: Raw Text を別に作らず、plain text（tests/fixtures/budget-request-plain-text/{year}/plain-text-manifest.json と data/work/budget-request-plain-text/{year}/）から同じ page 単位の入力を得る。
+// 年度に "-supplement" を付けると、凍結済みの年度に後から足した PDF の補遺（例: 2024-supplement）を指す
+const PLAIN = process.argv.includes('--input=plain-text');
+if (!/^\d{4}(-supplement)?$/.test(YEAR_ARG)) throw new Error(`--year must be a 4-digit fiscal year (optionally with -supplement): ${YEAR_ARG}`);
 const IS_FY2024 = YEAR_ARG === '2024';
 const DIR = path.join('tests', 'fixtures', 'budget-request-page-classification', YEAR_ARG);
 const RAW_MANIFEST = path.join('tests', 'fixtures', 'budget-request-raw-text', YEAR_ARG, 'raw-text-manifest.json');
@@ -35,7 +39,10 @@ const readJson = <T>(f: string) => JSON.parse(fs.readFileSync(f, 'utf8')) as T;
 const count = (rs: PageClassificationRecord[], f: (r: PageClassificationRecord) => string) => { const o: Record<string, number> = {}; for (const r of rs) o[f(r)] = (o[f(r)] ?? 0) + 1; return Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1))); };
 
 function main() {
-  const raw = readJson<{ frozenInput: { corpusDigestSha256: string; physicalPages: number }; documents: Doc[] }>(RAW_MANIFEST);
+  const plainCorpus = PLAIN ? loadPlainTextCorpus(YEAR_ARG) : null;
+  const raw = plainCorpus
+    ? { frozenInput: { corpusDigestSha256: plainCorpus.corpusDigestSha256, physicalPages: plainCorpus.physicalPages }, documents: plainCorpus.documents.map(d => ({ ...d, status: d.status, artifactPath: d.textFile })) as Doc[] }
+    : readJson<{ frozenInput: { corpusDigestSha256: string; physicalPages: number }; documents: Doc[] }>(RAW_MANIFEST);
   const FROZEN_DIGEST = IS_FY2024 ? FROZEN_FY2024_DIGEST : raw.frozenInput.corpusDigestSha256;
   if (raw.frozenInput.corpusDigestSha256 !== FROZEN_DIGEST) throw new Error('raw text corpus digest mismatch');
   const phaseA = IS_FY2024 ? readJson<{ pages: { localPdfPath: string; physicalPage: number; isolationCategory: string }[] }>(PHASE_A) : { pages: [] };
@@ -49,8 +56,9 @@ function main() {
     if (d.status === 'EMPTY') {
       pages = d.pageTextSha256.map((h, i) => ({ physicalPage: i + 1, rawStatus: 'EMPTY' as const, textSha256: h, nonEmptyLines: [], emptyKind: 'UNRESOLVED_EMPTY' as const }));
     } else {
-      const lines = fs.readFileSync(path.join(PAGES_DIR, d.artifactPath), 'utf8').split('\n').filter(l => l);
-      const recs = lines.map(l => JSON.parse(l) as { page: number; text: string; textSha256: string; status: 'EXTRACTED' | 'EMPTY'; nonEmptyLines: { text: string }[] });
+      const recs: { page: number; text: string; textSha256: string; status: 'EXTRACTED' | 'EMPTY'; nonEmptyLines: { text: string }[] }[] = plainCorpus
+        ? plainTextPages(plainCorpus, d as unknown as Parameters<typeof plainTextPages>[1])
+        : fs.readFileSync(path.join(PAGES_DIR, d.artifactPath), 'utf8').split('\n').filter(l => l).map(l => JSON.parse(l));
       verifyHashes(d.localPdfPath, { expectedPdfSha256: d.pdfSha256, actualPdfSha256: d.pdfSha256, expectedPageTextSha256: d.pageTextSha256, actualPageTextSha256: recs.map(r => sha256Hex(r.text)) });
       pages = recs.map(r => ({ physicalPage: r.page, rawStatus: r.status, textSha256: r.textSha256, nonEmptyLines: r.nonEmptyLines, emptyKind: r.status === 'EMPTY' ? (emptyKind.get(`${d.localPdfPath}#${r.page}`) ?? 'UNRESOLVED_EMPTY') : 'NONE' }));
     }
@@ -90,7 +98,7 @@ function main() {
     schema: 'budget-request-page-classification-v0-implementation-manifest/v0',
     scope: 'frozen v0 specification の literal implementation の full-corpus 出力 manifest。rule 変更・GT 由来の調整なし。open-set safety は NOT EVALUATED',
     specVersion: CLASSIFIER_SPEC_VERSION,
-    frozenInput: { rawTextCorpusDigestSha256: FROZEN_DIGEST, phaseAFixtureSha256: IS_FY2024 ? sha256Hex(fs.readFileSync(PHASE_A)) : null },
+    frozenInput: { ...(PLAIN ? { plainTextCorpusDigestSha256: FROZEN_DIGEST } : { rawTextCorpusDigestSha256: FROZEN_DIGEST }), phaseAFixtureSha256: IS_FY2024 ? sha256Hex(fs.readFileSync(PHASE_A)) : null },
     implementation: { files: Object.fromEntries(IMPL_FILES.map(f => [f, sha256Hex(fs.readFileSync(f))])), node: process.version, platform: `${process.platform}-${process.arch}` },
     summary: {
       totalPages: all.length,
