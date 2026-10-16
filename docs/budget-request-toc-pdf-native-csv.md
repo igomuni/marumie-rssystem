@@ -4,7 +4,7 @@
 
 - 実装: `scripts/pipeline-v2/lib/budget-request-toc-pdf-native-csv.ts`（pure）、`scripts/pipeline-v2/build-budget-request-toc-pdf-native-csv.ts`（runner）
 - テスト: `scripts/pipeline-v2/lib/budget-request-toc-pdf-native-csv.test.ts`（合成 token のコード検証。意味の正しさを示すものではない）
-- 旧 TOC v0（`budget-request-plain-text-csv.ts`、Raw Text 由来）とは独立。置き換えもしていない。
+- 旧 TOC v0（Raw Text 由来の `budget-request-plain-text-csv.ts`）は、Raw Text の廃止とともに削除した。この PDF-native 版が現行の TOC の CSV。
 
 ```bash
 npx tsx scripts/pipeline-v2/build-budget-request-toc-pdf-native-csv.ts \

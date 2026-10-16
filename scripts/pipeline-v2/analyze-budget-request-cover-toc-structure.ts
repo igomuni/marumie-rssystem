@@ -22,18 +22,13 @@ import type { PageClassificationRecord } from './lib/budget-request-page-classif
 
 const FREEZE = process.argv.includes('--freeze-fixture');
 const YEAR = process.argv.find(a => a.startsWith('--year='))?.slice('--year='.length) ?? '2024';
-// --input=plain-text: 頁分類と同じく、Raw Text を別に作らず plain text から page 単位の入力を得る。年度に "-supplement" を付けると補遺（例: 2024-supplement）
-// 既定: FY2024・FY2025 は従来どおり Raw Text。それ以外の年度は plain text（--input=raw-text で Raw Text を明示できる）
-const PLAIN = process.argv.includes('--input=plain-text') || (!process.argv.includes('--input=raw-text') && !['2024', '2025'].includes(YEAR));
+// 入力は plain text（頁分類と同じ）。年度に "-supplement" を付けると補遺（例: 2024-supplement）
 if (!/^\d{4}(-supplement)?$/.test(YEAR)) throw new Error(`--year must be a 4-digit fiscal year (optionally with -supplement): ${YEAR}`);
 const IS_FY2024 = YEAR === '2024';
 const OUT_DIR = path.join('tests', 'fixtures', 'budget-request-cover-toc-structure', YEAR);
 const WORK_DIR = path.join('data', 'work', 'budget-request-cover-toc-structure', YEAR);
 const CLS = path.join('data', 'work', 'budget-request-page-classification', YEAR, 'page-classification.jsonl');
-const PAGES_DIR = path.join('data', 'work', 'budget-request-raw-text', YEAR, 'pages');
-const RAW_MANIFEST = path.join('tests', 'fixtures', 'budget-request-raw-text', YEAR, 'raw-text-manifest.json');
 const CLS_MANIFEST = path.join('tests', 'fixtures', 'budget-request-page-classification', YEAR, 'page-classification-v0-implementation-manifest.json');
-const FROZEN_FY2024_RAW_DIGEST = '7c6d2dcec1f4bec0ca37a1b3aa391adce7d99b93ac4642c74cab7a328dac4052';
 const FROZEN_FY2024_CLS_DIGEST = '39464fc76b1b83272d5852d3db1db776e22bb570ee0f6b7ca4d1da64de4a5ecc';
 export const SAMPLE_SEED = 'budget-request-cover-toc-structure-dev-exploration-20261007';
 const PER_STRATUM = 2;
@@ -50,12 +45,9 @@ const countMatches = (s: string, re: RegExp) => (s.match(re) ?? []).length;
 interface RawPage { page: number; text: string; textSha256: string; status: string; nonEmptyLines: { lineIndex: number; text: string }[] }
 
 function main() {
-  const plainCorpus = PLAIN ? loadPlainTextCorpus(YEAR) : null;
-  const rawManifest = (plainCorpus
-    ? { frozenInput: { corpusDigestSha256: plainCorpus.corpusDigestSha256 }, documents: plainCorpus.documents.map(d => ({ ...d, artifactPath: d.textFile, logicalDocumentIndex: 0 })) }
-    : readJson<{ frozenInput: { corpusDigestSha256: string }; documents: { localPdfPath: string; pdfSha256: string; pageCount: number; artifactPath: string; pageTextSha256: string[]; publisherDomain: string; logicalDocumentIndex: number }[] }>(RAW_MANIFEST)) as { frozenInput: { corpusDigestSha256: string }; documents: { localPdfPath: string; pdfSha256: string; pageCount: number; artifactPath: string; pageTextSha256: string[]; publisherDomain: string; logicalDocumentIndex: number }[] };
-  const FROZEN_RAW_DIGEST = IS_FY2024 ? FROZEN_FY2024_RAW_DIGEST : rawManifest.frozenInput.corpusDigestSha256;
-  if (rawManifest.frozenInput.corpusDigestSha256 !== FROZEN_RAW_DIGEST) throw new Error('raw text digest mismatch');
+  const plainCorpus = loadPlainTextCorpus(YEAR);
+  const rawManifest = { frozenInput: { corpusDigestSha256: plainCorpus.corpusDigestSha256 }, documents: plainCorpus.documents.map(d => ({ ...d, artifactPath: d.textFile, logicalDocumentIndex: 0 })) };
+  const FROZEN_RAW_DIGEST = rawManifest.frozenInput.corpusDigestSha256;
   const clsManifest = readJson<{ summary: { corpusClassificationDigestSha256: string } }>(CLS_MANIFEST);
   const FROZEN_CLS_DIGEST = IS_FY2024 ? FROZEN_FY2024_CLS_DIGEST : clsManifest.summary.corpusClassificationDigestSha256;
   const clsBody = fs.readFileSync(CLS, 'utf8');
@@ -72,7 +64,7 @@ function main() {
   }
 
   const rawCache = new Map<string, RawPage[]>();
-  const rawPages = (p: string) => { let r = rawCache.get(p); if (!r) { r = plainCorpus ? plainTextPages(plainCorpus, docs.get(p) as unknown as Parameters<typeof plainTextPages>[1]) as RawPage[] : fs.readFileSync(path.join(PAGES_DIR, slug(p) + '.jsonl'), 'utf8').split('\n').filter(l => l).map(l => JSON.parse(l) as RawPage); rawCache.set(p, r); } return r; };
+  const rawPages = (p: string) => { let r = rawCache.get(p); if (!r) { r = plainTextPages(plainCorpus, docs.get(p) as unknown as Parameters<typeof plainTextPages>[1]) as RawPage[]; rawCache.set(p, r); } return r; };
 
   const byPdf = new Map<string, PageClassificationRecord[]>();
   for (const r of cls) (byPdf.get(r.localPdfPath) ?? byPdf.set(r.localPdfPath, []).get(r.localPdfPath)!).push(r);
@@ -220,7 +212,7 @@ function main() {
     schema: 'budget-request-cover-toc-structure-inventory/v0',
     scope: 'Page Classification v0 が COVER / TOC と routing した page の machine inventory。parser output ではない。logical row・semantic field は確定していない',
     generator: 'scripts/pipeline-v2/analyze-budget-request-cover-toc-structure.ts',
-    frozenInput: { ...(PLAIN ? { plainTextCorpusDigestSha256: FROZEN_RAW_DIGEST } : { rawTextCorpusDigestSha256: FROZEN_RAW_DIGEST }), pageClassificationCorpusDigestSha256: FROZEN_CLS_DIGEST },
+    frozenInput: { plainTextCorpusDigestSha256: FROZEN_RAW_DIGEST, pageClassificationCorpusDigestSha256: FROZEN_CLS_DIGEST },
     summary, perPdf, pages: inventory,
   };
   const sel = {

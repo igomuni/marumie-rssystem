@@ -8,7 +8,9 @@ type Page = { localPdfPath: string; pdfSha256: string; physicalPage: number; tex
 const inv = read<{ frozenInput: { rawTextCorpusDigestSha256: string; pageClassificationCorpusDigestSha256: string }; summary: { coverRouted: number; tocRouted: number; tocExplicitTitleStarts: number; tocContinuationPages: number }; pages: Page[] }>('structure-inventory.json');
 const sel = read<{ seed: string; poolSizes: Record<string, number>; sample: { localPdfPath: string; physicalPage: number; selectionStratum: string[] }[] }>('development-sample-selection.json');
 const ledger = read<{ pages: (Page & { selectionStratum: string[]; inspectionRole: string; inspection: { rawTextViewed: boolean; renderViewed: boolean } })[] }>('development-explored-pages.json');
-const raw = JSON.parse(fs.readFileSync(path.join('tests', 'fixtures', 'budget-request-raw-text', '2024', 'raw-text-manifest.json'), 'utf8')) as { frozenInput: { corpusDigestSha256: string }; documents: { localPdfPath: string; pdfSha256: string; pageTextSha256: string[] }[] };
+// FY2024 の Raw Text corpus のダイジェスト（凍結時の値）。Raw Text の manifest は廃止し、page 単位のハッシュは同じ値を持つ plain text の manifest から読む
+const RAW_TEXT_CORPUS_DIGEST_AT_FREEZE = '7c6d2dcec1f4bec0ca37a1b3aa391adce7d99b93ac4642c74cab7a328dac4052';
+const raw = { frozenInput: { corpusDigestSha256: RAW_TEXT_CORPUS_DIGEST_AT_FREEZE }, ...(JSON.parse(fs.readFileSync(path.join('tests', 'fixtures', 'budget-request-plain-text', '2024', 'plain-text-manifest.json'), 'utf8')) as { documents: { localPdfPath: string; pdfSha256: string; pageTextSha256: string[] }[] }) };
 const cls = JSON.parse(fs.readFileSync(path.join('tests', 'fixtures', 'budget-request-page-classification', '2024', 'page-classification-v0-implementation-manifest.json'), 'utf8')) as { summary: { corpusClassificationDigestSha256: string; pageType: Record<string, number> } };
 const key = (r: { localPdfPath: string; physicalPage: number }) => `${r.localPdfPath}#${r.physicalPage}`;
 
@@ -20,7 +22,7 @@ describe('cover / toc structure inventory（PR-3A: observation only）', () => {
     expect(inv.summary.tocRouted).toBe(cls.summary.pageType.TOC);
     expect(inv.summary.tocExplicitTitleStarts + inv.summary.tocContinuationPages).toBe(inv.summary.tocRouted);
   });
-  it('target key が unique で、PDF / text hash が Raw Text manifest と一致する', () => {
+  it('target key が unique で、PDF / text hash が plain text manifest（Raw Text と同じ page hash）と一致する', () => {
     expect(new Set(inv.pages.map(key)).size).toBe(inv.pages.length);
     const docs = new Map(raw.documents.map(d => [d.localPdfPath, d]));
     for (const p of inv.pages) {

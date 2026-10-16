@@ -19,9 +19,7 @@ if (!/^\d{4}$/.test(String(YEAR))) throw new Error(`--year must be a 4-digit fis
 const OUT_ROOT = arg('out-root') ?? path.join('data', 'work', 'budget-request-plain-text', String(YEAR));
 // --corpus=<凍結記録の JSON> は、凍結済みの年度に後から足した PDF の補遺（pdf-corpus-freeze-supplement-*.json）だけを処理するときに使う（--out-root も指定する）
 const CORPUS = arg('corpus');
-const FROZEN = CORPUS ? CORPUS : YEAR === 2024
-  ? path.join('tests', 'fixtures', 'budget-request-raw-text', '2024', 'raw-text-manifest.json')
-  : path.join('tests', 'fixtures', 'budget-request-pdf-corpus', String(YEAR), 'pdf-corpus-freeze.json');
+const FROZEN = CORPUS ? CORPUS : path.join('tests', 'fixtures', 'budget-request-pdf-corpus', String(YEAR), 'pdf-corpus-freeze.json');
 type FrozenDocument = { localPdfPath: string; pdfSha256: string; pageCount: number; pageTextSha256?: string[] };
 const frozen = JSON.parse(fs.readFileSync(FROZEN, 'utf8')) as { documents: FrozenDocument[] };
 
@@ -70,7 +68,7 @@ function main(): void {
       textSha256: sha256(result.stdout), pageTextSha256: pageChunks.map(c => sha256(c)),
     });
   }
-  if (YEAR !== 2024 || CORPUS) {
+  {
     fs.writeFileSync(path.join(OUT_ROOT, 'plain-text-manifest.json'), JSON.stringify({
       schema: 'budget-request-plain-text-manifest/v0',
       fiscalYear: YEAR,

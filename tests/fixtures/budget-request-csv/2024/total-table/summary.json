@@ -1,8 +1,8 @@
 {
   "scope": "FY2024 令和6年度歳出概算要求額総表 raw text → logical rows (v0 deterministic parser; descriptive counts, not an accuracy score)",
   "input": {
-    "zipPath": "data/work/budget-request-plain-text.zip",
-    "zipSha256": "268f1020957b58362e1b224197b16944855c139efa1524c343a77abdf754e533",
+    "inputDir": "data/work/budget-request-plain-text/2024",
+    "inputSha256": "1d9ca4cef50556db1247dbb35a6c14f3dc8c4571bb1e76c7d3873792b379ff56",
     "txtEntries": 82
   },
   "frozenManifestIntegrity": {

@@ -21,7 +21,9 @@ const reg = read<{
   v3Fixture: { sha256: string };
 }>('page-classification-v0-descriptive-regression.json');
 const rep = read<{ records: { classification: { status: string; pageType: string | null; source: string | null } }[] }>('page-classification-v0-implementation-representative.json');
-const raw = JSON.parse(fs.readFileSync(path.join('tests', 'fixtures', 'budget-request-raw-text', '2024', 'raw-text-manifest.json'), 'utf8')) as { frozenInput: { corpusDigestSha256: string } };
+// FY2024 の Raw Text corpus のダイジェスト（凍結時の値）。Raw Text の manifest は廃止し、page 単位のハッシュは同じ値を持つ plain text の manifest から読む
+const RAW_TEXT_CORPUS_DIGEST_AT_FREEZE = '7c6d2dcec1f4bec0ca37a1b3aa391adce7d99b93ac4642c74cab7a328dac4052';
+const raw = { frozenInput: { corpusDigestSha256: RAW_TEXT_CORPUS_DIGEST_AT_FREEZE }, ...(JSON.parse(fs.readFileSync(path.join('tests', 'fixtures', 'budget-request-plain-text', '2024', 'plain-text-manifest.json'), 'utf8')) as { documents: { localPdfPath: string; pdfSha256: string; pageTextSha256: string[] }[] }) };
 
 describe('page classifier v0 implementation result', () => {
   it('full corpus 9,899 page を欠落・重複なく分類し、status 集計が整合する', () => {
