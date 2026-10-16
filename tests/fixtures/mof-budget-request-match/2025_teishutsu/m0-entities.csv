@@ -21,6 +21,7 @@ clb.go.jp__files__topics__4742_ext_05_0,toc:組織,020 内閣法制局,内閣法
 courts.go.jp__vc-files__courts__2024__R07saisyutsu_gaisanyoukyusyo_527kb,context,03 裁判所所管（裁判所）,裁判所,裁判所,MATCHED,general
 courts.go.jp__vc-files__courts__2024__R07saisyutsu_gaisanyoukyusyo_527kb,toc:組織,010 裁判所,裁判所,裁判所,MATCHED,
 dangai.go.jp__info__pdf__r07_saisyutu-gaisan,context,02 国会所管（裁判官弾劾裁判所）,国会,国会,MATCHED,general
+dangai.go.jp__info__pdf__r07_saisyutu-gaisan,toc:組織,050 裁判官弾劾裁判所,裁判官弾劾裁判所,裁判官弾劾裁判所,MATCHED,
 digital.go.jp__assets__contents__node__basic_page__field_ref_resources__7e109e66-b39c-40c5-a788-cab2cad79f95__d3e6a9cd__20240913_policies_budget_r7request_table_01,context,32 デジタル庁所管,デジタル庁,デジタル庁,MATCHED,general
 digital.go.jp__assets__contents__node__basic_page__field_ref_resources__7e109e66-b39c-40c5-a788-cab2cad79f95__d3e6a9cd__20240913_policies_budget_r7request_table_01,toc:組織,010 デジタル庁,デジタル庁,デジタル庁,MATCHED,
 env.go.jp__content__000248527,context,29 環境省所管,環境省,環境省,MATCHED,general
@@ -211,8 +212,11 @@ reconstruction.go.jp__files__user__topics__2024_fukkochougaisansaisyutsu,toc:組
 reconstruction.go.jp__files__user__topics__2024_fukkochougaisansaisyutsu,toc:所管,31 復興庁,復興庁,,OUT_OF_SCOPE,special_source_has_ministry_label
 reconstruction.go.jp__files__user__topics__2024_fukkochougaisansaisyutsu,toc:組織,010 復興庁,復興庁,,OUT_OF_SCOPE,special_source_has_org_label
 sangiin.go.jp__jpn__annai__oshirase__pdf__r7gaisan-yokyusyo-250905,context,02 国会所管（参議院）,国会,国会,MATCHED,general
+sangiin.go.jp__jpn__annai__oshirase__pdf__r7gaisan-yokyusyo-250905,toc:組織,020 参議院,参議院,参議院,MATCHED,
 shugiin.go.jp__internet__itdb_annai.nsf__html__statics__osirase__kaikei-saishutsugaisan7.pdf__%24File__kaikei-saishutsugaisan7,context,02 国会所管（衆議院）,国会,国会,MATCHED,general
+shugiin.go.jp__internet__itdb_annai.nsf__html__statics__osirase__kaikei-saishutsugaisan7.pdf__%24File__kaikei-saishutsugaisan7,toc:組織,010 衆議院,衆議院,衆議院,MATCHED,
 sotsui.go.jp__budget__images__r7budget_yokyu,context,02 国会所管（裁判官訴追委員会）,国会,国会,MATCHED,general
+sotsui.go.jp__budget__images__r7budget_yokyu,toc:組織,040 裁判官訴追委員会,裁判官訴追委員会,裁判官訴追委員会,MATCHED,
 soumu.go.jp__main_content__000967291,context,20 総務省所管,総務省,総務省,MATCHED,general
 soumu.go.jp__main_content__000967291,toc:組織,010 総務本省,総務本省,総務本省,MATCHED,
 soumu.go.jp__main_content__000967291,toc:組織,040 管区行政評価局,管区行政評価局,管区行政評価局,MATCHED,

@@ -1,0 +1,5 @@
+source_slug,pdf_sha256,physical_page,items,column_evidence,boundary_x,no_evidence_reason,geometric_rows_left,geometric_rows_right,entries,audit_records,blank_items,header_zone_items,entry_items,unresolved_items
+dangai.go.jp__info__pdf__r07_saisyutu-gaisan,0f691ed1ab3aa13614fa746668d775e5a43a8bae8c07612c135aa3b7aabb6206,3,98,YES,414.627,,6,0,6,0,47,31,20,0
+sangiin.go.jp__jpn__annai__oshirase__pdf__r7gaisan-yokyusyo-250905,ea1fd9c2d8c402ff9153377f8903ca16573da96b7c44481483da4e83cda305cd,3,134,YES,414.627,,10,0,10,0,65,33,36,0
+shugiin.go.jp__internet__itdb_annai.nsf__html__statics__osirase__kaikei-saishutsugaisan7.pdf__%24File__kaikei-saishutsugaisan7,c3d0071b7791b4bc2522a71dc2cd59ba9430cf6827b2cdb9baf64c3de4b69054,3,142,YES,414.627,,11,0,11,0,69,33,40,0
+sotsui.go.jp__budget__images__r7budget_yokyu,953ebaff7d0e9c746f85892d673eabdd26840949c09e101cfebb45e2d90be361,3,90,YES,414.627,,5,0,5,0,43,31,16,0

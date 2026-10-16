@@ -61,7 +61,7 @@ FY2026（令和8年度）× MOF 2026（提出時）: 項 1,112／1,175、事項 
 
 MOF の行のうち対応づいた割合: 項 約 93〜94%、事項 約 91〜92%、目 約 85〜89%。事項の主要経費コードの一致は 99.8% 以上。
 
-FY2024 の数値は、凍結済みの PDF corpus（82 PDF）に、後から取得した 60 PDF（内閣府の明細表 49 本とエネルギー対策特別会計の表紙・総表、文部科学省のエネルギー対策特別会計、金融庁の分割 9 本）の補遺を加えたもの。補遺は `tests/fixtures/budget-request-pdf-corpus/2024/pdf-corpus-freeze-supplement-*.json` に記録し、凍結記録（`raw-text-manifest.json` など）は変更していない。補遺の PDF は plain text（`--corpus=` 付き）から総表・明細表の CSV まで作り（`tests/fixtures/budget-request-csv/2024-supplement/`）、突合 runner が `{year}-supplement` を同じ入力として読む。表紙・目次の CSV は、補遺の PDF では作っていない（凍結済みの構造 inventory が必要なため）。MOF の行の網羅は、項 92.9%（961／1,034）、事項 90.9%（1,469／1,616）、目 87.8%（6,976／7,943）。補遺を加える前は、目 85.1%（6,757／7,943）。金融庁の分割 9 本も文字層がなく（描画パス型）、CSV は作れていない。
+FY2024 の数値は、凍結済みの PDF corpus（82 PDF）に、後から取得した 60 PDF（内閣府の明細表 49 本とエネルギー対策特別会計の表紙・総表、文部科学省のエネルギー対策特別会計、金融庁の分割 9 本）の補遺を加えたもの。補遺は `tests/fixtures/budget-request-pdf-corpus/2024/pdf-corpus-freeze-supplement-*.json` に記録し、凍結記録（`raw-text-manifest.json` など）は変更していない。補遺の PDF は plain text（`--corpus=` 付き）から総表・明細表の CSV まで作り（`tests/fixtures/budget-request-csv/2024-supplement/`）、突合 runner が `{year}-supplement` を同じ入力として読む。表紙・目次の CSV は、補遺の PDF についても plain text 入力の頁分類・構造分析（`--input=plain-text --year=2024-supplement`）から作っている（`tests/fixtures/budget-request-csv/2024-supplement/{cover,toc}/`）。MOF の行の網羅は、項 92.9%（961／1,034）、事項 90.9%（1,469／1,616）、目 87.8%（6,976／7,943）。補遺を加える前は、目 85.1%（6,757／7,943）。金融庁の分割 9 本も文字層がなく（描画パス型）、CSV は作れていない。
 
 ## 限界と注意
 - 一致しなかった行の大半は、MOF の同じ範囲に名称がないもの（概算要求の項目が予算案で統合・改称・新設された等）。全角／半角の違いは幅の統一で一致にしている。

@@ -1,0 +1,526 @@
+{
+ "schema": "budget-request-cover-toc-structure-inventory/v0",
+ "scope": "Page Classification v0 が COVER / TOC と routing した page の machine inventory。parser output ではない。logical row・semantic field は確定していない",
+ "generator": "scripts/pipeline-v2/analyze-budget-request-cover-toc-structure.ts",
+ "frozenInput": {
+  "plainTextCorpusDigestSha256": "cf0834d6e8345efd0d69bc2294154e053765a043b979c99d7cb98aed40d169bd",
+  "pageClassificationCorpusDigestSha256": "82b0b8419f5336ae998acdec046acd43125c6f24b79fbfda93498b16460bbfd5"
+ },
+ "summary": {
+  "coverRouted": 4,
+  "tocRouted": 4,
+  "coverBySource": {
+   "DIRECT": 4
+  },
+  "tocBySource": {
+   "DIRECT": 4
+  },
+  "tocExplicitTitleStarts": 4,
+  "tocContinuationPages": 0,
+  "physicalPdfsWithCover": 4,
+  "physicalPdfsWithToc": 4,
+  "logicalDocumentsWithCover": 1,
+  "logicalDocumentsWithToc": 1,
+  "coverByPublisher": {
+   "dangai.go.jp": 1,
+   "sangiin.go.jp": 1,
+   "shugiin.go.jp": 1,
+   "sotsui.go.jp": 1
+  },
+  "tocByPublisher": {
+   "dangai.go.jp": 1,
+   "sangiin.go.jp": 1,
+   "shugiin.go.jp": 1,
+   "sotsui.go.jp": 1
+  },
+  "coverByAccountType": {
+   "general": 4
+  },
+  "pdfsWithMultipleCovers": 0,
+  "maxCoversInOnePdf": 1,
+  "tocRunCountDistribution": {
+   "1": 4
+  },
+  "tocRunLengthDistribution": {
+   "1": 4
+  },
+  "tocRunStartSource": {
+   "DIRECT": 4
+  },
+  "tocContinuationDistance": {
+   "count": 0,
+   "max": 0,
+   "distribution": {}
+  },
+  "tocRunsWithNoTextInside": 0,
+  "coverTocPagesAdjacentToUnresolvedOrNoText": 8,
+  "privateUseCharacterPages": {
+   "COVER": 0,
+   "TOC": 0
+  },
+  "nonBreakingHyphenPages": {
+   "COVER": 0,
+   "TOC": 4
+  },
+  "tocPageHeaderTokenCountDistribution": {
+   "2": 4
+  },
+  "tocWithTwoTrailingNumberTokenLines": 4,
+  "coverStaffingReferenceTextPresent": 0,
+  "coverHeaderLeadingCodeDigits": {
+   "2": 4
+  }
+ },
+ "perPdf": [
+  {
+   "localPdfPath": "data/download/dangai.go.jp/info/pdf/r07_saisyutu-gaisan.pdf",
+   "publisherDomain": "dangai.go.jp",
+   "logicalDocumentIndex": -1,
+   "accountType": "general",
+   "filesInLogicalDocument": 1,
+   "pageCount": 9,
+   "coverPages": [
+    1
+   ],
+   "tocRuns": [
+    {
+     "start": 3,
+     "end": 3,
+     "length": 1,
+     "startSource": "DIRECT"
+    }
+   ],
+   "tocRunCount": 1,
+   "adjacentUnresolvedOrNoTextCount": 2,
+   "tocRunsWithNoTextInside": 0
+  },
+  {
+   "localPdfPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r7gaisan-yokyusyo-250905.pdf",
+   "publisherDomain": "sangiin.go.jp",
+   "logicalDocumentIndex": -1,
+   "accountType": "general",
+   "filesInLogicalDocument": 1,
+   "pageCount": 21,
+   "coverPages": [
+    1
+   ],
+   "tocRuns": [
+    {
+     "start": 3,
+     "end": 3,
+     "length": 1,
+     "startSource": "DIRECT"
+    }
+   ],
+   "tocRunCount": 1,
+   "adjacentUnresolvedOrNoTextCount": 2,
+   "tocRunsWithNoTextInside": 0
+  },
+  {
+   "localPdfPath": "data/download/shugiin.go.jp/internet/itdb_annai.nsf/html/statics/osirase/kaikei-saishutsugaisan7.pdf/%24File/kaikei-saishutsugaisan7.pdf",
+   "publisherDomain": "shugiin.go.jp",
+   "logicalDocumentIndex": -1,
+   "accountType": "general",
+   "filesInLogicalDocument": 1,
+   "pageCount": 37,
+   "coverPages": [
+    1
+   ],
+   "tocRuns": [
+    {
+     "start": 3,
+     "end": 3,
+     "length": 1,
+     "startSource": "DIRECT"
+    }
+   ],
+   "tocRunCount": 1,
+   "adjacentUnresolvedOrNoTextCount": 2,
+   "tocRunsWithNoTextInside": 0
+  },
+  {
+   "localPdfPath": "data/download/sotsui.go.jp/budget/images/r7budget_yokyu.pdf",
+   "publisherDomain": "sotsui.go.jp",
+   "logicalDocumentIndex": -1,
+   "accountType": "general",
+   "filesInLogicalDocument": 1,
+   "pageCount": 8,
+   "coverPages": [
+    1
+   ],
+   "tocRuns": [
+    {
+     "start": 3,
+     "end": 3,
+     "length": 1,
+     "startSource": "DIRECT"
+    }
+   ],
+   "tocRunCount": 1,
+   "adjacentUnresolvedOrNoTextCount": 2,
+   "tocRunsWithNoTextInside": 0
+  }
+ ],
+ "pages": [
+  {
+   "localPdfPath": "data/download/dangai.go.jp/info/pdf/r07_saisyutu-gaisan.pdf",
+   "pdfSha256": "0f691ed1ab3aa13614fa746668d775e5a43a8bae8c07612c135aa3b7aabb6206",
+   "physicalPage": 1,
+   "textSha256": "49b34c397a8fb9e069b8de2577c8e12ca05b2a57668af9b056985d8b7974562b",
+   "classifierPageType": "COVER",
+   "classifierSource": "DIRECT",
+   "rawStatus": "EXTRACTED",
+   "publisherDomain": "dangai.go.jp",
+   "logicalDocumentIndex": -1,
+   "accountType": "general",
+   "filesInLogicalDocument": 1,
+   "budgetJurisdiction": null,
+   "logicalAuthority": null,
+   "tocRunStart": null,
+   "tocRunLength": null,
+   "tocDistanceFromRunStart": null,
+   "explicitTitleObserved": true,
+   "firstNonEmptyLines": [
+    "02 国   会   所    管 （裁判官弾劾裁判所）",
+    "   令       和   ７       年      度      歳      出      概      算       要         求   書",
+    "           1. 令和７年度歳出概算要求額総表 ・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・   1",
+    "           2. 令和７年度歳出概算要求額明細表 ・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・     3",
+    "              （組織）050 裁 判 官 弾 劾 裁 判 所 ・・・・・・・・・・・・・・・・・・・・・・・・・・        3"
+   ],
+   "nonEmptyLineCount": 5,
+   "charCount": 339,
+   "privateUseCharacterPresent": false,
+   "nonBreakingHyphenPresent": false,
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "所管": 0,
+    "項": 0,
+    "勘定": 0
+   },
+   "trailingPageNumberLineCount": 3,
+   "leaderDotLineCount": 3,
+   "pageHeaderTokenCount": 0,
+   "linesWithoutTrailingNumberOrLeader": 2,
+   "largeWhitespaceGapLineCount": 2,
+   "twoTrailingNumberTokenLineCount": 0,
+   "staffingReferenceTextPresent": false,
+   "headerLeadingCodeDigits": 2
+  },
+  {
+   "localPdfPath": "data/download/dangai.go.jp/info/pdf/r07_saisyutu-gaisan.pdf",
+   "pdfSha256": "0f691ed1ab3aa13614fa746668d775e5a43a8bae8c07612c135aa3b7aabb6206",
+   "physicalPage": 3,
+   "textSha256": "31fe8249b40e6bbddfa5e553db8c22c764a70ba0e441f0bc0ecc521a814b3a58",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "rawStatus": "EXTRACTED",
+   "publisherDomain": "dangai.go.jp",
+   "logicalDocumentIndex": -1,
+   "accountType": "general",
+   "filesInLogicalDocument": 1,
+   "budgetJurisdiction": null,
+   "logicalAuthority": null,
+   "tocRunStart": 3,
+   "tocRunLength": 1,
+   "tocDistanceFromRunStart": 0,
+   "explicitTitleObserved": true,
+   "firstNonEmptyLines": [
+    "                                                                   1",
+    "                               令 和 ７ 年 度 歳 出 概 算 要 求 額 目 次",
+    "02     国    会    所 管 （裁判官弾劾裁判所）",
+    "要求                    区            分       ページ 要求    区       分   ページ",
+    "番号                                             番号"
+   ],
+   "nonEmptyLineCount": 11,
+   "charCount": 563,
+   "privateUseCharacterPresent": false,
+   "nonBreakingHyphenPresent": true,
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "所管": 0,
+    "項": 1,
+    "勘定": 0
+   },
+   "trailingPageNumberLineCount": 7,
+   "leaderDotLineCount": 0,
+   "pageHeaderTokenCount": 2,
+   "linesWithoutTrailingNumberOrLeader": 4,
+   "largeWhitespaceGapLineCount": 8,
+   "twoTrailingNumberTokenLineCount": 2,
+   "staffingReferenceTextPresent": false,
+   "headerLeadingCodeDigits": 1
+  },
+  {
+   "localPdfPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r7gaisan-yokyusyo-250905.pdf",
+   "pdfSha256": "ea1fd9c2d8c402ff9153377f8903ca16573da96b7c44481483da4e83cda305cd",
+   "physicalPage": 1,
+   "textSha256": "c8f7dfd49c9493a58016c891a95e0863117b9015957a81c54206643787865e81",
+   "classifierPageType": "COVER",
+   "classifierSource": "DIRECT",
+   "rawStatus": "EXTRACTED",
+   "publisherDomain": "sangiin.go.jp",
+   "logicalDocumentIndex": -1,
+   "accountType": "general",
+   "filesInLogicalDocument": 1,
+   "budgetJurisdiction": null,
+   "logicalAuthority": null,
+   "tocRunStart": null,
+   "tocRunLength": null,
+   "tocDistanceFromRunStart": null,
+   "explicitTitleObserved": true,
+   "firstNonEmptyLines": [
+    "02 国   会   所    管 （参       議      院）",
+    "   令       和   ７       年      度      歳      出      概      算       要         求   書",
+    "           1. 令和７年度歳出概算要求額総表 ・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・   1",
+    "           2. 令和７年度歳出概算要求額明細表 ・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・     3",
+    "              （組織）020 参   議         院 ・・・・・・・・・・・・・・・・・・・・・・・・・・        3"
+   ],
+   "nonEmptyLineCount": 5,
+   "charCount": 347,
+   "privateUseCharacterPresent": false,
+   "nonBreakingHyphenPresent": false,
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "所管": 0,
+    "項": 0,
+    "勘定": 0
+   },
+   "trailingPageNumberLineCount": 3,
+   "leaderDotLineCount": 3,
+   "pageHeaderTokenCount": 0,
+   "linesWithoutTrailingNumberOrLeader": 2,
+   "largeWhitespaceGapLineCount": 2,
+   "twoTrailingNumberTokenLineCount": 0,
+   "staffingReferenceTextPresent": false,
+   "headerLeadingCodeDigits": 2
+  },
+  {
+   "localPdfPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r7gaisan-yokyusyo-250905.pdf",
+   "pdfSha256": "ea1fd9c2d8c402ff9153377f8903ca16573da96b7c44481483da4e83cda305cd",
+   "physicalPage": 3,
+   "textSha256": "ce07d81c7c5eb80d968977d0e6de24039502269d710f29add3e48c72c7a81e0c",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "rawStatus": "EXTRACTED",
+   "publisherDomain": "sangiin.go.jp",
+   "logicalDocumentIndex": -1,
+   "accountType": "general",
+   "filesInLogicalDocument": 1,
+   "budgetJurisdiction": null,
+   "logicalAuthority": null,
+   "tocRunStart": 3,
+   "tocRunLength": 1,
+   "tocDistanceFromRunStart": 0,
+   "explicitTitleObserved": true,
+   "firstNonEmptyLines": [
+    "                                                               1",
+    "                           令 和 ７ 年 度 歳 出 概 算 要 求 額 目 次",
+    "02     国    会   所 管 （参     議   院）",
+    "要求                   区              分   ページ 要求   区       分   ページ",
+    "番号                                          番号"
+   ],
+   "nonEmptyLineCount": 15,
+   "charCount": 708,
+   "privateUseCharacterPresent": false,
+   "nonBreakingHyphenPresent": true,
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "所管": 0,
+    "項": 3,
+    "勘定": 0
+   },
+   "trailingPageNumberLineCount": 11,
+   "leaderDotLineCount": 0,
+   "pageHeaderTokenCount": 2,
+   "linesWithoutTrailingNumberOrLeader": 4,
+   "largeWhitespaceGapLineCount": 12,
+   "twoTrailingNumberTokenLineCount": 4,
+   "staffingReferenceTextPresent": false,
+   "headerLeadingCodeDigits": 1
+  },
+  {
+   "localPdfPath": "data/download/shugiin.go.jp/internet/itdb_annai.nsf/html/statics/osirase/kaikei-saishutsugaisan7.pdf/%24File/kaikei-saishutsugaisan7.pdf",
+   "pdfSha256": "c3d0071b7791b4bc2522a71dc2cd59ba9430cf6827b2cdb9baf64c3de4b69054",
+   "physicalPage": 1,
+   "textSha256": "3a940325e7568cf25ccf8ffc02bc87e6a2fc4d8395124867259d44f8e91704c5",
+   "classifierPageType": "COVER",
+   "classifierSource": "DIRECT",
+   "rawStatus": "EXTRACTED",
+   "publisherDomain": "shugiin.go.jp",
+   "logicalDocumentIndex": -1,
+   "accountType": "general",
+   "filesInLogicalDocument": 1,
+   "budgetJurisdiction": null,
+   "logicalAuthority": null,
+   "tocRunStart": null,
+   "tocRunLength": null,
+   "tocDistanceFromRunStart": null,
+   "explicitTitleObserved": true,
+   "firstNonEmptyLines": [
+    "02 国   会   所    管 （衆       議      院）",
+    "   令       和   ７       年      度      歳      出      概      算       要         求   書",
+    "           1. 令和７年度歳出概算要求額総表 ・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・   1",
+    "           2. 令和７年度歳出概算要求額明細表 ・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・     3",
+    "              （組織）010 衆   議         院 ・・・・・・・・・・・・・・・・・・・・・・・・・・        3"
+   ],
+   "nonEmptyLineCount": 5,
+   "charCount": 347,
+   "privateUseCharacterPresent": false,
+   "nonBreakingHyphenPresent": false,
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "所管": 0,
+    "項": 0,
+    "勘定": 0
+   },
+   "trailingPageNumberLineCount": 3,
+   "leaderDotLineCount": 3,
+   "pageHeaderTokenCount": 0,
+   "linesWithoutTrailingNumberOrLeader": 2,
+   "largeWhitespaceGapLineCount": 2,
+   "twoTrailingNumberTokenLineCount": 0,
+   "staffingReferenceTextPresent": false,
+   "headerLeadingCodeDigits": 2
+  },
+  {
+   "localPdfPath": "data/download/shugiin.go.jp/internet/itdb_annai.nsf/html/statics/osirase/kaikei-saishutsugaisan7.pdf/%24File/kaikei-saishutsugaisan7.pdf",
+   "pdfSha256": "c3d0071b7791b4bc2522a71dc2cd59ba9430cf6827b2cdb9baf64c3de4b69054",
+   "physicalPage": 3,
+   "textSha256": "2cf165d3e7c09b70f2b191bae3f3f1e92653f2fe4a5e62c81de35fa4a04881ed",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "rawStatus": "EXTRACTED",
+   "publisherDomain": "shugiin.go.jp",
+   "logicalDocumentIndex": -1,
+   "accountType": "general",
+   "filesInLogicalDocument": 1,
+   "budgetJurisdiction": null,
+   "logicalAuthority": null,
+   "tocRunStart": 3,
+   "tocRunLength": 1,
+   "tocDistanceFromRunStart": 0,
+   "explicitTitleObserved": true,
+   "firstNonEmptyLines": [
+    "                                                                   1",
+    "                               令 和 ７ 年 度 歳 出 概 算 要 求 額 目 次",
+    "02     国    会   所 管 （衆         議     院）",
+    "要求                   区                    分   ページ 要求   区     分   ページ",
+    "番号                                                番号"
+   ],
+   "nonEmptyLineCount": 16,
+   "charCount": 842,
+   "privateUseCharacterPresent": false,
+   "nonBreakingHyphenPresent": true,
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "所管": 0,
+    "項": 3,
+    "勘定": 0
+   },
+   "trailingPageNumberLineCount": 12,
+   "leaderDotLineCount": 0,
+   "pageHeaderTokenCount": 2,
+   "linesWithoutTrailingNumberOrLeader": 4,
+   "largeWhitespaceGapLineCount": 14,
+   "twoTrailingNumberTokenLineCount": 5,
+   "staffingReferenceTextPresent": false,
+   "headerLeadingCodeDigits": 1
+  },
+  {
+   "localPdfPath": "data/download/sotsui.go.jp/budget/images/r7budget_yokyu.pdf",
+   "pdfSha256": "953ebaff7d0e9c746f85892d673eabdd26840949c09e101cfebb45e2d90be361",
+   "physicalPage": 1,
+   "textSha256": "810b1583efdcc38821a9a8895fd1f3314317c49acff82a30f646f03c94758fb6",
+   "classifierPageType": "COVER",
+   "classifierSource": "DIRECT",
+   "rawStatus": "EXTRACTED",
+   "publisherDomain": "sotsui.go.jp",
+   "logicalDocumentIndex": -1,
+   "accountType": "general",
+   "filesInLogicalDocument": 1,
+   "budgetJurisdiction": null,
+   "logicalAuthority": null,
+   "tocRunStart": null,
+   "tocRunLength": null,
+   "tocDistanceFromRunStart": null,
+   "explicitTitleObserved": true,
+   "firstNonEmptyLines": [
+    "02 国   会   所    管 （裁判官訴追委員会）",
+    "   令       和   ７       年      度      歳      出      概      算       要         求   書",
+    "           1. 令和７年度歳出概算要求額総表 ・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・   1",
+    "           2. 令和７年度歳出概算要求額明細表 ・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・     3",
+    "              （組織）040 裁 判 官 訴 追 委 員 会 ・・・・・・・・・・・・・・・・・・・・・・・・・・        3"
+   ],
+   "nonEmptyLineCount": 5,
+   "charCount": 339,
+   "privateUseCharacterPresent": false,
+   "nonBreakingHyphenPresent": false,
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "所管": 0,
+    "項": 0,
+    "勘定": 0
+   },
+   "trailingPageNumberLineCount": 3,
+   "leaderDotLineCount": 3,
+   "pageHeaderTokenCount": 0,
+   "linesWithoutTrailingNumberOrLeader": 2,
+   "largeWhitespaceGapLineCount": 2,
+   "twoTrailingNumberTokenLineCount": 0,
+   "staffingReferenceTextPresent": false,
+   "headerLeadingCodeDigits": 2
+  },
+  {
+   "localPdfPath": "data/download/sotsui.go.jp/budget/images/r7budget_yokyu.pdf",
+   "pdfSha256": "953ebaff7d0e9c746f85892d673eabdd26840949c09e101cfebb45e2d90be361",
+   "physicalPage": 3,
+   "textSha256": "18e3e8d0e0244c95106b007ca32bc9313ee62a941766bc56114da03c5b47d307",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "rawStatus": "EXTRACTED",
+   "publisherDomain": "sotsui.go.jp",
+   "logicalDocumentIndex": -1,
+   "accountType": "general",
+   "filesInLogicalDocument": 1,
+   "budgetJurisdiction": null,
+   "logicalAuthority": null,
+   "tocRunStart": 3,
+   "tocRunLength": 1,
+   "tocDistanceFromRunStart": 0,
+   "explicitTitleObserved": true,
+   "firstNonEmptyLines": [
+    "                                                                1",
+    "                            令 和 ７ 年 度 歳 出 概 算 要 求 額 目 次",
+    "02     国   会    所 管 （裁判官訴追委員会）",
+    "要求                  区           分       ページ 要求    区       分   ページ",
+    "番号                                          番号"
+   ],
+   "nonEmptyLineCount": 10,
+   "charCount": 488,
+   "privateUseCharacterPresent": false,
+   "nonBreakingHyphenPresent": true,
+   "markerCounts": {
+    "組織": 1,
+    "会計": 0,
+    "所管": 0,
+    "項": 1,
+    "勘定": 0
+   },
+   "trailingPageNumberLineCount": 6,
+   "leaderDotLineCount": 0,
+   "pageHeaderTokenCount": 2,
+   "linesWithoutTrailingNumberOrLeader": 4,
+   "largeWhitespaceGapLineCount": 7,
+   "twoTrailingNumberTokenLineCount": 1,
+   "staffingReferenceTextPresent": false,
+   "headerLeadingCodeDigits": 1
+  }
+ ]
+}
