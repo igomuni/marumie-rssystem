@@ -1,4 +1,2 @@
 authority,status_and_note
-外務省,掲載ページ・PDF（mofaj/files/100387588.pdf）とも 403 for scripted HTTP。手動取得が必要（URL は指示者から提供）
-警察庁,Web 検索に載る r5/gaisanyokyu/ippankaikei.pdf は現在 404。移設先を要確認
-参考,経産省（6 PDF）・会計検査院・国立国会図書館は国立国会図書館 WARP の保存コピーから取得（pdf_url は原 URL、landing_url は WARP 上の掲載ページ）。法務省は fy2023-no-text-layer-pdfs.csv
+（未解決なし）,参考: 経産省（6 PDF）・会計検査院・国立国会図書館・警察庁は国立国会図書館 WARP の保存コピー、外務省はブラウザ取得（fy2023-browser-retrieved.csv）。法務省 2 PDF は文字層なしのため fy2023-no-text-layer-pdfs.csv

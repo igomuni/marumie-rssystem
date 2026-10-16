@@ -1,0 +1,4 @@
+year,authority,retrieval_url,local_path,bytes,pages,sha256,method,status
+2023,外務省,https://www.mofa.go.jp/mofaj/files/100387588.pdf,data/download/mofa.go.jp/mofaj/files/100387588.pdf,962519,412,b12d333f0169d1c872c137e8557d0f2c37a34291d8db801cf5c13162360ea18e,codex-computer-use-chrome,verified
+2023,警察庁（一般会計）,https://warp.ndl.go.jp/20240402/20240401001031/https://www.npa.go.jp/policies/budget/r5/gaisanyokyu/ippankaikei.pdf,data/download/npa.go.jp/policies/budget/r5/gaisanyokyu/ippankaikei.pdf,552561,119,8c3d1c550cb5564d9f89f4356534cabc829d2e47027d5cc09d796588ff52b88d,codex-computer-use-chrome,verified
+2023,警察庁（復興特別会計）,https://warp.ndl.go.jp/20240402/20240401010702/https://www.npa.go.jp/policies/budget/r5/gaisanyokyu/hukkoutokubetukaikei.pdf,data/download/npa.go.jp/policies/budget/r5/gaisanyokyu/hukkoutokubetukaikei.pdf,14229,9,e595bb3dc4de43f425848c1af05f9f7fb066d969dcfc84d67ad2711df7dd1452,codex-computer-use-chrome,verified
