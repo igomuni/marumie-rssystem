@@ -26,7 +26,8 @@ const year = Number(yearArg);
 const positional = process.argv.slice(2).filter(a => !a.startsWith('--'));
 const inputDir = positional[0] ?? `data/work/budget-request-plain-text/${year}`;
 const outputRoot = positional[1] ?? `tests/fixtures/budget-request-csv/${year}/detail-table`;
-const manifestPath = year === 2024
+const manifestOverride = process.argv.find(a => a.startsWith('--manifest='))?.slice('--manifest='.length); // 凍結済みの年度に後から足した PDF の補遺（plain-text-manifest.json）を使うとき
+const manifestPath = manifestOverride ? manifestOverride : year === 2024
   ? 'tests/fixtures/budget-request-raw-text/2024/raw-text-manifest.json'
   : `tests/fixtures/budget-request-plain-text/${year}/plain-text-manifest.json`;
 const sha256 = (v: Buffer | string) => createHash('sha256').update(v).digest('hex');

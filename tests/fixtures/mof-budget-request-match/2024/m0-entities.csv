@@ -6,7 +6,7 @@ caa.go.jp__policies__budget__assets__cms_caa205_230914_02,toc:組織,010 復興�
 caa.go.jp__policies__budget__assets__cms_caa205_230914_03,context,19 内閣府所管（消費者庁）,内閣府,内閣府,MATCHED,general
 caa.go.jp__policies__budget__assets__cms_caa205_230914_03,toc:組織,055 消費者庁,消費者庁,消費者庁,MATCHED,
 cao.go.jp__yosan__soshiki__r06__pdf__0,context,19 内閣府所管(官房総務課（総務課）),内閣府,内閣府,MATCHED,general
-cao.go.jp__yosan__soshiki__r06__pdf__e2,context,9905 エネルギー対策特別会計（電源開発促進勘定）,エネルギー対策,エネルギー対策,MATCHED,special
+cao.go.jp__yosan__soshiki__r06__pdf__e1,context,9905 エネルギー対策特別会計（電源開発促進勘定）,エネルギー対策,エネルギー対策,MATCHED,special
 cao.go.jp__yosan__soshiki__r06__pdf__f1,context,9101 東日本大震災復興特別会計（内閣本府等）,東日本大震災復興,東日本大震災復興,MATCHED,special
 cas.go.jp__jp__yosan__pdf__r6_01,context,05 内閣所管(総務官室（総務課）),内閣,内閣,MATCHED,general
 cas.go.jp__jp__yosan__pdf__r6_16,context,9101 東日本大震災復興特別会計（内閣）,東日本大震災復興,東日本大震災復興,MATCHED,special
@@ -98,6 +98,7 @@ mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,toc:組織,010 文部�
 mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,toc:組織,020 文部科学本省所轄機関,文部科学本省所轄機関,文部科学本省所轄機関,MATCHED,
 mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,toc:組織,030 文化庁,文化庁,文化庁,MATCHED,
 mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,toc:組織,040 スポーツ庁,スポーツ庁,スポーツ庁,MATCHED,
+mext.go.jp__content__20230914-mxt_kaikesou01-000031817_08,context,9905 エネルギー対策特別会計（電源開発促進勘定）,エネルギー対策,エネルギー対策,MATCHED,special
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-1b-01,context,25 厚生労働省所管,厚生労働省,厚生労働省,MATCHED,general
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-1b-01,toc:組織,010 厚生労働本省,厚生労働本省,厚生労働本省,MATCHED,
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-1b-01,toc:組織,030 検疫所,検疫所,検疫所,MATCHED,
