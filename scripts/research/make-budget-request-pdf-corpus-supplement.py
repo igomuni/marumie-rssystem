@@ -3,7 +3,7 @@
 
   python3 -I scripts/research/make-budget-request-pdf-corpus-supplement.py <year> <name> <results.csv>
 入力: 取得結果の CSV（missing-pdfs-retrieval-results.csv。列 fiscal_year, authority, account, category, pdf_url, local_path, status）。
-対象: fiscal_year == <year>、status == SAVED の行。SHA-256・bytes・頁数は実ファイルから取り直す（CSV の sha256 と違えば STOP）。URL は https の .go.jp のみ。
+対象: fiscal_year == <year>、status == SAVED の行と、category が A で始まる EXISTING の行（取得済みだが補遺にまだ無いもの）。SHA-256・bytes・頁数は実ファイルから取り直す（CSV の sha256 と違えば STOP）。URL は https の .go.jp のみ。
 """
 import csv, hashlib, json, os, re, subprocess, sys
 from urllib.parse import urlparse, unquote
@@ -11,7 +11,7 @@ from urllib.parse import urlparse, unquote
 year, name, results = sys.argv[1:4]
 docs = []
 for r in csv.DictReader(open(results, encoding='utf-8')):
-    if r['fiscal_year'] != year or r['status'] != 'SAVED': continue
+    if r['fiscal_year'] != year or not (r['status'] == 'SAVED' or (r['status'] == 'EXISTING' and r['category'].startswith('A'))): continue
     p = urlparse(r['pdf_url']); host = (p.hostname or '').lower().removeprefix('www.')
     segs = [unquote(s) for s in p.path.split('/') if s]
     if p.scheme != 'https' or not host.endswith('.go.jp') or any(s in ('.', '..') or re.search(r'[/\\\0]', s) for s in segs): sys.exit(f'STOP: unsafe url {r["pdf_url"]}')
