@@ -5,7 +5,7 @@
 各 PDF の SHA-256・bytes・頁数を実ファイルから取り直し、会計の種類と所管・会計の名前は先頭 2 ページの本文（`NN 〇〇所管`／`NNNN 〇〇特別会計`）から読む。
 CSV の sha256 と実ファイルの SHA-256 が違えば STOP。出力: tests/fixtures/budget-request-pdf-corpus/{year}/pdf-corpus-freeze.json
 """
-import csv, hashlib, json, os, re, subprocess, sys, unicodedata
+import collections, csv, hashlib, json, os, re, subprocess, sys, unicodedata
 from urllib.parse import urlparse, unquote
 
 year = sys.argv[1]
@@ -28,14 +28,15 @@ for r in rows:
     else: acct_type, account, header = 'unknown', '', ''
     who = pages[r['landing_url']]['listed_for'].split(' ; ')[0].split(':', 1)[-1]
     docs.append({'publisherAuthority': who, 'publisherDomain': host, 'logicalAuthority': header[2:] if acct_type == 'general' else (header[4:] if header else None), 'accountType': acct_type, 'account': account,
-                 'sourceUrl': r['pdf_url'], 'localPdfPath': local.replace(os.sep, '/'), 'bytes': len(b), 'pdfSha256': hashlib.sha256(b).hexdigest(), 'pageCount': n, 'acquisition': 'pipeline-fetch'})
+                 'sourceUrl': r['pdf_url'], 'localPdfPath': local.replace(os.sep, '/'), 'bytes': len(b), 'pdfSha256': hashlib.sha256(b).hexdigest(), 'pageCount': n, 'acquisition': 'pipeline-fetch' if pages[r['landing_url']]['http'] in ('200', 'direct_pdf') else 'manual'})
 docs.sort(key=lambda d: d['localPdfPath'])
 for i, d in enumerate(docs): d['targetIndex'] = i; d['kind'] = 'document'; d['role'] = None
 digest = hashlib.sha256('\n'.join(f"{d['localPdfPath']} {d['pdfSha256']}" for d in docs).encode()).hexdigest()
 out = f'tests/fixtures/budget-request-pdf-corpus/{year}/pdf-corpus-freeze.json'
 os.makedirs(os.path.dirname(out), exist_ok=True)
 json.dump({'schema': 'budget-request-pdf-corpus-freeze/v0', 'scope': f'FY{year} 概算要求 PDF の取得集合（財務省のリンク先一覧から辿り、先頭 2 ページで「令和{int(year)-2018}年度」「歳出概算要求」を確認した PDF。text 抽出・意味付け・照合は含まない）',
-           'frozenInput': {'targets': len(docs), 'physicalPages': sum(d['pageCount'] for d in docs), 'acquisition': {'pipeline-fetch': len(docs)}, 'unknownAccountType': sum(1 for d in docs if d['accountType'] == 'unknown'),
+           'frozenInput': {'targets': len(docs), 'physicalPages': sum(d['pageCount'] for d in docs), 'acquisition': dict(collections.Counter(d['acquisition'] for d in docs)),
+                           'manualAcquisitionNote': '掲載ページがスクリプトからの取得に 403 を返した所管の PDF は、ユーザー操作の別セッションで取得した。原本とのバイト同一性は照合できない。先頭 %PDF- と本文の印（令和N年度・歳出概算要求）のみ確認', 'unknownAccountType': sum(1 for d in docs if d['accountType'] == 'unknown'),
                            'pdfinfoVersion': subprocess.run(['pdfinfo', '-v'], capture_output=True, text=True).stderr.split('\n')[0], 'corpusDigestRule': 'sha256(各 target について "{localPdfPath} {pdfSha256}" を改行連結。localPdfPath の昇順)', 'corpusDigestSha256': digest},
            'documents': docs}, open(out, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 open(out, 'a').write('\n')
