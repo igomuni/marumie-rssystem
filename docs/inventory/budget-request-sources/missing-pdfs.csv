@@ -69,7 +69,7 @@ fiscal_year,authority,account,category,pdf_url,landing_url,local_path,note
 2023,法務省,東日本大震災復興特別会計,B_unreadable,https://www.moj.go.jp/content/001380395.pdf,https://www.moj.go.jp/kaikei/bunsho/kaikei02_00111.html,data/download/moj.go.jp/content/001380395.pdf,取得済み（11頁）。文字層なし
 2024,法務省,（一般会計・復興特会）,B_unreadable,,https://www.moj.go.jp/kaikei/bunsho/kaikei02_00121.html,,FY2024 の 2 PDF（文字層なし）。URL は目録 fy2024 を参照（corpus では no_text_layer）
 2024,金融庁,一般会計,B_unreadable,https://www.fsa.go.jp/common/budget/yosan/6youkyuu-2/01.pdf,https://www.fsa.go.jp/common/budget/yosan/6youkyuu-2.html,data/download/fsa.go.jp/common/budget/yosan/6youkyuu-2/01.pdf,全体版。文字層なし。上の分割版（A）で代替できる可能性
-2024,日本学術会議,一般会計（内閣府所管）,C_unknown,,https://www.cao.go.jp/yosan/soshiki/r06/yosangaisan_r6.html,,MOF 2024 の項（1件）が対応づかない。どの PDF の本文にも名前がない。内閣府の未取得 50 本の中にある可能性
-2025,日本学術会議,一般会計（内閣府所管）,C_unknown,,https://www.cao.go.jp/yosan/soshiki/r07/yosangaisan_r7.html,,MOF 2025 の項（1件）が対応づかない。内閣府 55 本は取得済みだが本文に名前がない
-2026,サイバー通信情報監理委員会,一般会計,C_unknown,,,,MOF 2026 の項（1件）が対応づかない。PDF の存在・所在とも未確認（新設組織）
+2024,日本学術会議,一般会計（内閣府所管）,D_no_request_document,,https://www.cao.go.jp/yosan/soshiki/r06/yosangaisan_r6.html,,内閣府の掲載ページ（r04/yosangaisan_r4.html）で「日本学術会議 事項要求」と記載され、PDF（金額つきの要求書）は存在しない。MOF の項（1件）が概算要求側に対応づかないのは想定どおり
+2025,日本学術会議,一般会計（内閣府所管）,D_no_request_document,,https://www.cao.go.jp/yosan/soshiki/r07/yosangaisan_r7.html,,内閣府の掲載ページ（r05/yosangaisan_r5.html）で「日本学術会議 事項要求」と記載され、PDF（金額つきの要求書）は存在しない。MOF の項（1件）が概算要求側に対応づかないのは想定どおり
+2026,サイバー通信情報監理委員会,一般会計,D_no_request_document,,,,同委員会の予算ページ（https://www.aoc.go.jp/public-info/budget）に載る概算要求書は令和9年度のみ。令和8年度（FY2026）の歳出概算要求書は公開されていない。MOF 2026 の項（1件）が対応づかないのは想定どおり
 2026,参議院,一般会計,C_unknown,https://www.sangiin.go.jp/jpn/annai/oshirase/pdf/r8gaisan-yokyusyo-2.pdf,https://www.sangiin.go.jp/jpn/annai/oshirase/yosan-gaisan.html,data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r8gaisan-yokyusyo-2.pdf,掲載ページに「概算要求書 49KB」。取得済みの r8gaisan-yokyusyo.pdf（135KB）との関係（別版か）は未確認
