@@ -1,14 +1,14 @@
 # MOF 予算書（項・事項・目）× 概算要求（TOC・総表・明細表）の突合
 
-MOF の予算書の項・事項・目（[mof-archive-csv.md](mof-archive-csv.md)）と、概算要求の目次（TOC）・総表・明細表（[budget-request-toc-pdf-native-csv.md](budget-request-toc-pdf-native-csv.md)、[budget-request-total-table-csv.md](budget-request-total-table-csv.md)、[budget-request-detail-table-csv.md](budget-request-detail-table-csv.md)）を、名称とコードで対応づける。対象は FY2024（令和6年度）と FY2025（令和7年度）の一般会計・特別会計。
+MOF の予算書の項・事項・目（[mof-archive-csv.md](mof-archive-csv.md)）と、概算要求の目次（TOC）・総表・明細表（[budget-request-toc-pdf-native-csv.md](budget-request-toc-pdf-native-csv.md)、[budget-request-total-table-csv.md](budget-request-total-table-csv.md)、[budget-request-detail-table-csv.md](budget-request-detail-table-csv.md)）を、名称とコードで対応づける。対象は FY2024（令和6年度）、FY2025（令和7年度）、FY2026（令和8年度）の一般会計・特別会計。
 
 - 実装: `scripts/pipeline-v2/build-mof-budget-request-match.ts`（runner）、`scripts/pipeline-v2/lib/mof-budget-request-match.ts`（木・名称キー・金額の読み取り）
-- 出力（git 管理）: `tests/fixtures/mof-budget-request-match/{2024,2025,2025_teishutsu}/`（`manifest.json` に SHA-256）。ディレクトリ名は MOF の版: `2024`＝令和6年度、`2025_teishutsu`＝令和7年度の提出時、`2025`＝令和7年度の成立後。概算要求は FY2024 が `2024`、FY2025 が後の 2 つと対になる。
+- 出力（git 管理）: `tests/fixtures/mof-budget-request-match/{2024,2025,2025_teishutsu,2026}/`（`manifest.json` に SHA-256）。ディレクトリ名は MOF の版: `2024`＝令和6年度（提出時）、`2025_teishutsu`＝令和7年度の提出時、`2025`＝令和7年度の成立後、`2026`＝令和8年度（提出時）。概算要求は FY2024 が `2024`、FY2025 が後の 2 つ、FY2026 が `2026` と対になる。
 - 旧い突合（J1＋K2、[budget-request-detail-table-mof-match.md](budget-request-detail-table-mof-match.md)）とは別系統。置き換えてはいない。
 
 ```bash
 # 入力: tests/fixtures/budget-request-csv/{year}/{toc,total-table,detail-table}/sources/*.csv と tests/fixtures/mof-archive-csv/{version}/
-npx tsx scripts/pipeline-v2/build-mof-budget-request-match.ts <2024|2025> <2024|2025|2025_teishutsu> <out-dir>
+npx tsx scripts/pipeline-v2/build-mof-budget-request-match.ts <2024|2025|2026> <2023|2024|2025|2025_teishutsu|2026> <out-dir>
 ```
 
 ## 原則
@@ -56,6 +56,8 @@ npx tsx scripts/pipeline-v2/build-mof-budget-request-match.ts <2024|2025> <2024|
 | 項 | 1,033／1,089 | 1,085／1,150 |
 | 事項 | 1,580／1,689 | 1,654／1,776 |
 | 目（集約後） | 7,134／7,562 | 7,618／8,168 |
+
+FY2026（令和8年度）× MOF 2026（提出時）: 項 1,112／1,175、事項 1,673／1,795、目（集約後）7,660／8,317。複数候補は 0。MOF の行のうち対応づいた割合は、項 93.9%、事項 93.0%、目 90.0%。
 
 MOF の行のうち対応づいた割合: 項 約 93〜94%、事項 約 91〜92%、目 約 85〜89%。事項の主要経費コードの一致は 99.8% 以上。
 

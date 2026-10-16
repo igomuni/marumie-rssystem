@@ -28,5 +28,15 @@
  "2025_teishutsu/summary.json": "6fbb16efd26cd4f177d93eb56b8a3bf48fe958976e926ae1a12ed7037e447d6e",
  "2025_teishutsu/unmatched-mof-jikou.csv": "7833c0d2c9b8cc9c2745fbdf920015de688d71238db1e05210a7ab9e61aed9b0",
  "2025_teishutsu/unmatched-mof-kou.csv": "1e0a561c5310027aa2fc60cd7bcce92de8effdd039f3da117698e7d06cefba10",
- "2025_teishutsu/unmatched-mof-moku.csv": "925fd650bb505d517da45afec4e3691b7cb1214053fe6e0a9c922ecf30241190"
+ "2025_teishutsu/unmatched-mof-moku.csv": "925fd650bb505d517da45afec4e3691b7cb1214053fe6e0a9c922ecf30241190",
+ "2026/m0-entities.csv": "61eb49460036e1fd17b1d826ceb4e5a35e8bd9c115f2bff7d065ee74ff35d00a",
+ "2026/m1-kou.csv": "71c07b69118834592e2b317cdb7067e200eee8c5d1fd2d598e96fd798e2e7c0b",
+ "2026/m2-jikou.csv": "51f636c9fbce201c41428de9da1bd762b48be21b400378b9cf87dec68bf6a610",
+ "2026/m3-moku.csv": "ddd311ab0033f2b0f3ac0d374fdd17efb4c33476db1edad180c483c4f7bbab03",
+ "2026/request-no-toc.csv": "70758bc40e9f4f4c831f23dfec98baa90c294aac5a3fdbeeddc3a8c402cf0cce",
+ "2026/sets.csv": "3b061f74dcd0beebb17f50b9dc2f71fbf62eebde9a33a964bca5464b47757880",
+ "2026/summary.json": "d1f2e2737335984c6f149a09a5d6918f5738c64f6122361fe1a5c150bcb44eee",
+ "2026/unmatched-mof-jikou.csv": "67875dfc5974701a78725405eede0f5e8a69c1aef2ae8cf3558ce96caf873691",
+ "2026/unmatched-mof-kou.csv": "3ab512ea883aee6803f04c8207a191facd85be6d3baf2ac4cac2bd08137cd455",
+ "2026/unmatched-mof-moku.csv": "663938869ea44e3a339bf7790f71f08f95959e593ff75b570e63c5328b18660f"
 }
