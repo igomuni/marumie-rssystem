@@ -11,7 +11,7 @@ import * as path from 'path';
 import { amount, buildPositionTree, buildPositionTreeFromDetail, buildTocTree, hy, mofAmountJikou, mofAmountKou, mofAmountMoku, ns, readCsv, type Rec, type TocTree } from './lib/mof-budget-request-match';
 
 const [yearArg, ver, outDir] = process.argv.slice(2);
-if (!/^20(24|25|26)$/.test(yearArg ?? '') || !['2023', '2024', '2025', '2025_teishutsu', '2026'].includes(ver ?? '') || !outDir) throw new Error('usage: build-mof-budget-request-match.ts <2024|2025|2026> <2023|2024|2025|2025_teishutsu|2026> <out-dir>');
+if (!/^20(23|24|25|26)$/.test(yearArg ?? '') || !['2023', '2024', '2025', '2025_teishutsu', '2026'].includes(ver ?? '') || !outDir) throw new Error('usage: build-mof-budget-request-match.ts <2023|2024|2025|2026> <2023|2024|2025|2025_teishutsu|2026> <out-dir>');
 const REQ = path.join('tests', 'fixtures', 'budget-request-csv', yearArg);
 const MOF = path.join('tests', 'fixtures', 'mof-archive-csv', ver);
 fs.mkdirSync(outDir, { recursive: true });
@@ -23,8 +23,13 @@ const rd = (p: string) => readCsv(fs.readFileSync(p, 'utf8'));
 // ---------------------------------------------------------------- 入力
 const inputHashes: string[] = [];
 const bySource = (kind: string): Map<string, Rec[]> => {
-  const dir = path.join(REQ, kind, 'sources'); const m = new Map<string, Rec[]>();
-  for (const f of fs.readdirSync(dir).filter(x => x.endsWith('.csv')).sort()) { const b = fs.readFileSync(path.join(dir, f)); inputHashes.push(`${kind}/${f}\t${sha(b)}`); m.set(f.slice(0, -4), readCsv(b.toString('utf8'))); }
+  const m = new Map<string, Rec[]>();
+  // 凍結済みの年度に後から足した PDF の補遺（{year}-supplement）があれば、同じ入力として読む
+  for (const base of [REQ, `${REQ}-supplement`]) {
+    const dir = path.join(base, kind, 'sources');
+    if (!fs.existsSync(dir)) continue;
+    for (const f of fs.readdirSync(dir).filter(x => x.endsWith('.csv')).sort()) { const b = fs.readFileSync(path.join(dir, f)); inputHashes.push(`${kind}/${f}\t${sha(b)}`); m.set(f.slice(0, -4), readCsv(b.toString('utf8'))); }
+  }
   return m;
 };
 const toc = bySource('toc'), detail = bySource('detail-table'), total = bySource('total-table');

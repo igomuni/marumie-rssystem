@@ -1,4 +1,14 @@
 {
+ "2023": {
+  "pdfs": 134,
+  "text": 134,
+  "no_text_layer": 0,
+  "not_extracted": 0,
+  "with_cover": 63,
+  "with_toc": 56,
+  "with_total": 63,
+  "with_detail": 124
+ },
  "2024": {
   "pdfs": 82,
   "text": 80,
@@ -20,13 +30,13 @@
   "with_detail": 123
  },
  "2026": {
-  "pdfs": 135,
-  "text": 135,
+  "pdfs": 138,
+  "text": 138,
   "no_text_layer": 0,
   "not_extracted": 0,
-  "with_cover": 61,
-  "with_toc": 56,
-  "with_total": 63,
-  "with_detail": 128
+  "with_cover": 64,
+  "with_toc": 59,
+  "with_total": 66,
+  "with_detail": 131
  }
 }

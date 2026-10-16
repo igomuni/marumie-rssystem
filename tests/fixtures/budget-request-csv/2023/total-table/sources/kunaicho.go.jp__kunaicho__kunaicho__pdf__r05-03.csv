@@ -1,0 +1,6 @@
+要求番号,区分,前年度予算額_一般行政経費,前年度予算額_その他の経費,前年度予算額_計,５年度概算要求額_一般行政経費,５年度概算要求額_その他の経費,５年度概算要求額_計,増△減,明細書頁数,source_page,source_line_start,source_line_end,table_block_id,row_index,row_type,parse_status
+,060 宮内庁,"12,060,772",0,"12,060,772","11,599,960",0,"11,599,960","△460,812",3,5,38,38,kunaicho.go.jp__kunaicho__kunaicho__pdf__r05-03#b1,1,CODE3,PARSED
+,010 宮内庁,"12,060,772",0,"12,060,772","11,599,960",0,"11,599,960","△460,812",3,5,39,39,kunaicho.go.jp__kunaicho__kunaicho__pdf__r05-03#b1,2,CODE3,PARSED
+1,01‑95 宮内庁に必要な経費,"12,060,772",0,"12,060,772","11,599,960",0,"11,599,960","△460,812",4,5,40,40,kunaicho.go.jp__kunaicho__kunaicho__pdf__r05-03#b1,3,DETAIL,PARSED
+,組織計,"12,060,772",0,"12,060,772","11,599,960",0,"11,599,960","△460,812",,5,41,41,kunaicho.go.jp__kunaicho__kunaicho__pdf__r05-03#b1,4,TOTAL,PARSED
+,所管計,"12,060,772",0,"12,060,772","11,599,960",0,"11,599,960","△460,812",,5,42,42,kunaicho.go.jp__kunaicho__kunaicho__pdf__r05-03#b1,5,TOTAL,PARSED

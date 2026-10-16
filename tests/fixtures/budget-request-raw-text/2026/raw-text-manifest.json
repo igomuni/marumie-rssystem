@@ -3,14 +3,14 @@
  "scope": "FY2026 概算要求 PDF の page 単位 Raw Text（source observation）。意味付け・分類・照合は含まない",
  "generator": "scripts/pipeline-v2/build-budget-request-raw-text.ts",
  "frozenInput": {
-  "baseCommit": "6062435afa0fbd055be4575e309dc6a999e53ec1",
+  "baseCommit": "00cb1140b9fb8e1c5353f24c1e93e66b8f3747f9",
   "manifestFiles": {
-   "tests/fixtures/budget-request-pdf-corpus/2026/pdf-corpus-freeze.json": "55ec93cb20a0825b282fe188f56d68c3d09368e0ad1585e148ab923c2cac7aa7",
+   "tests/fixtures/budget-request-pdf-corpus/2026/pdf-corpus-freeze.json": "c8cd4d2409a07fde8bd635f20cfde4b42d4513147c53680cae848368107c7aa2",
    "scripts/pipeline-v2/lib/budget-request-manifest.ts": "c5196bba2cffa28ccefa36f6f170e20812f2505c807287a9bf49e02aadebb218"
   },
-  "logicalDocuments": 135,
-  "physicalPdfs": 135,
-  "physicalPages": 8855,
+  "logicalDocuments": 138,
+  "physicalPdfs": 138,
+  "physicalPages": 8933,
   "pageIndexBase": 1,
   "extraction": {
    "tool": "pdftotext (poppler)",
@@ -25,13 +25,13 @@
    "platform": "darwin-arm64"
   },
   "status": {
-   "EXTRACTED": 135,
+   "EXTRACTED": 138,
    "EMPTY": 0,
    "FAILED": 0
   },
-  "charCount": 38633498,
-  "nonWhitespaceCharCount": 7479814,
-  "corpusDigestSha256": "7e656f2dde889767bc6408ec630e2ee8ba2f95dee2ae208f11a643ed5510dd4b",
+  "charCount": 38891950,
+  "nonWhitespaceCharCount": 7528508,
+  "corpusDigestSha256": "8d83ff700685cc3e1c8765da24d9285f7184bcacb3d878856934a5cc19740963",
   "corpusDigestRule": "sha256(manifest 列挙順の各文書について \"{localPdfPath} {pdfSha256} {artifactSha256}\" を改行連結)"
  },
  "documents": [
@@ -2403,6 +2403,55 @@
   },
   {
    "logicalDocumentIndex": 79,
+   "publisherDomain": "clb.go.jp",
+   "logicalDocumentIndexInSource": 0,
+   "fileIndex": 0,
+   "sourceUrl": "https://www.clb.go.jp/files/topics/5125_ext_05_0.pdf",
+   "role": null,
+   "localPdfPath": "data/download/clb.go.jp/files/topics/5125_ext_05_0.pdf",
+   "pdfSha256": "78607a1b206a5c963569d349033ab5bc0de737583aa5cb16c524bfad9e5d8ee4",
+   "pageCount": 26,
+   "status": "EXTRACTED",
+   "artifactPath": "pages/clb.go.jp__files__topics__5125_ext_05_0.jsonl",
+   "artifactSha256": "e92ee9d0c63c7c012c3ec43c19d058458bb49b59a1907b3bbae667759a73b950",
+   "charCount": 69007,
+   "nonWhitespaceCharCount": 11684,
+   "emptyPages": [
+    2,
+    4,
+    6
+   ],
+   "pageTextSha256": [
+    "1f0a5b3fa022e8df680105390b4eeed8bfb1dafa650e12ff06aaa93c92552058",
+    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "37fe053a322565c955643b115b5236457ad684996cc17ebab3dbdd80bec49089",
+    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "8d7668ffcafe4f27bf69784e1c6bdb4948742df61b1923276f450ac94885033d",
+    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "f33e04b2b05fe5a20ede73b6df3a1d393e6b425a756b4fd02b459914cfafd5bc",
+    "0ee622f2f20a052c2dad8b961b7ba2f92efa62a364d7e32ac152f248e307e1e5",
+    "57e4fa28b3ef399f4805f76b0f9b611119e1fba749b477d03cd7b3c6b1cbfc7a",
+    "a43222f8dd37041101be7c1c79af6922aec3b9a4818f08a46a9e43a50f502395",
+    "1a4cc74a0ddaa0eee96336e256dc51c20e3414a25ec15e18440d0eaaa9671fc3",
+    "1ec706aced3dd0092a59d85b78c4b0cd05dc213233ab0f7e98273a1cebc140a3",
+    "c144a386845810e03d81ee0135111d5dfee8fda06d7d1523fa1a05de3cffe6fb",
+    "56d8dd129c70e9dfafb7eb02cf2f7fe5b389c92ab3ae8672401d12e09c058a0a",
+    "5b964d6989d38e1247b64cf74132861b52cea34a0597b312c41c2e5a3095e0b0",
+    "cd4ed894a0fc92fb05da89665a10c14ff88a3c68c4f1c1d7309014756b23b271",
+    "8862d7dedffc7ff661be69a0e2707c6a622e35cd84ac6c97165203c4ff84bac0",
+    "1fd0034dc16e5eb25c754eb13f4f32c7baddb54299631bbd0817102bf221e5e1",
+    "8f98825ba6e0139b7f6cfbab8e462caff92b920a0211c2c1a9935635b46bd609",
+    "8bb166c0b2e83c523faf10d863446d2b4a582b0364d60869bc75d948989a3361",
+    "304feba8aedc820d67a85ad8286f8fc038d1ac11bc27df0b1d0b9b1a5007bbc7",
+    "6d63485e50dd02febf40932b957f9693ed3c26986dbe32087fc17fecf7eaed34",
+    "a67d46769335894c07a8fa0fa55ca8fe0dfe66144340caed9aa3bcc634312b36",
+    "3602268c5f2bb0b5f85a6e9f7231a57758e0e2d2bf369ef01ad552fbbf2eb578",
+    "f936d3403d6f4c0cb98e5b3eb17be8a36c405cab4568a081bdd538b585b7afb9",
+    "ed252e93d94726e3d514c525b77fa3886dc6cf8aca7cbf01259cadc90f3dcc7a"
+   ]
+  },
+  {
+   "logicalDocumentIndex": 80,
    "publisherDomain": "courts.go.jp",
    "logicalDocumentIndexInSource": 0,
    "fileIndex": 0,
@@ -2544,7 +2593,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 80,
+   "logicalDocumentIndex": 81,
    "publisherDomain": "dangai.go.jp",
    "logicalDocumentIndexInSource": 0,
    "fileIndex": 0,
@@ -2575,7 +2624,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 81,
+   "logicalDocumentIndex": 82,
    "publisherDomain": "digital.go.jp",
    "logicalDocumentIndexInSource": 0,
    "fileIndex": 0,
@@ -2630,7 +2679,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 82,
+   "logicalDocumentIndex": 83,
    "publisherDomain": "env.go.jp",
    "logicalDocumentIndexInSource": 0,
    "fileIndex": 0,
@@ -2794,7 +2843,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 83,
+   "logicalDocumentIndex": 84,
    "publisherDomain": "env.go.jp",
    "logicalDocumentIndexInSource": 1,
    "fileIndex": 0,
@@ -2824,7 +2873,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 84,
+   "logicalDocumentIndex": 85,
    "publisherDomain": "env.go.jp",
    "logicalDocumentIndexInSource": 2,
    "fileIndex": 0,
@@ -2871,7 +2920,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 85,
+   "logicalDocumentIndex": 86,
    "publisherDomain": "env.go.jp",
    "logicalDocumentIndexInSource": 3,
    "fileIndex": 0,
@@ -2907,7 +2956,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 86,
+   "logicalDocumentIndex": 87,
    "publisherDomain": "fsa.go.jp",
    "logicalDocumentIndexInSource": 0,
    "fileIndex": 0,
@@ -2995,7 +3044,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 87,
+   "logicalDocumentIndex": 88,
    "publisherDomain": "jbaudit.go.jp",
    "logicalDocumentIndexInSource": 0,
    "fileIndex": 0,
@@ -3053,7 +3102,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 88,
+   "logicalDocumentIndex": 89,
    "publisherDomain": "jcrc.go.jp",
    "logicalDocumentIndexInSource": 0,
    "fileIndex": 0,
@@ -3093,7 +3142,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 89,
+   "logicalDocumentIndex": 90,
    "publisherDomain": "jftc.go.jp",
    "logicalDocumentIndexInSource": 0,
    "fileIndex": 0,
@@ -3179,7 +3228,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 90,
+   "logicalDocumentIndex": 91,
    "publisherDomain": "jinji.go.jp",
    "logicalDocumentIndexInSource": 0,
    "fileIndex": 0,
@@ -3244,7 +3293,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 91,
+   "logicalDocumentIndex": 92,
    "publisherDomain": "kunaicho.go.jp",
    "logicalDocumentIndexInSource": 0,
    "fileIndex": 0,
@@ -3299,7 +3348,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 92,
+   "logicalDocumentIndex": 93,
    "publisherDomain": "kunaicho.go.jp",
    "logicalDocumentIndexInSource": 1,
    "fileIndex": 0,
@@ -3342,7 +3391,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 93,
+   "logicalDocumentIndex": 94,
    "publisherDomain": "maff.go.jp",
    "logicalDocumentIndexInSource": 0,
    "fileIndex": 0,
@@ -3786,7 +3835,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 94,
+   "logicalDocumentIndex": 95,
    "publisherDomain": "maff.go.jp",
    "logicalDocumentIndexInSource": 1,
    "fileIndex": 0,
@@ -3845,7 +3894,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 95,
+   "logicalDocumentIndex": 96,
    "publisherDomain": "maff.go.jp",
    "logicalDocumentIndexInSource": 2,
    "fileIndex": 0,
@@ -3875,7 +3924,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 96,
+   "logicalDocumentIndex": 97,
    "publisherDomain": "maff.go.jp",
    "logicalDocumentIndexInSource": 3,
    "fileIndex": 0,
@@ -3917,7 +3966,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 97,
+   "logicalDocumentIndex": 98,
    "publisherDomain": "meti.go.jp",
    "logicalDocumentIndexInSource": 0,
    "fileIndex": 0,
@@ -3964,7 +4013,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 98,
+   "logicalDocumentIndex": 99,
    "publisherDomain": "meti.go.jp",
    "logicalDocumentIndexInSource": 1,
    "fileIndex": 0,
@@ -3994,7 +4043,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 99,
+   "logicalDocumentIndex": 100,
    "publisherDomain": "meti.go.jp",
    "logicalDocumentIndexInSource": 2,
    "fileIndex": 0,
@@ -4031,7 +4080,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 100,
+   "logicalDocumentIndex": 101,
    "publisherDomain": "meti.go.jp",
    "logicalDocumentIndexInSource": 3,
    "fileIndex": 0,
@@ -4061,7 +4110,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 101,
+   "logicalDocumentIndex": 102,
    "publisherDomain": "meti.go.jp",
    "logicalDocumentIndexInSource": 4,
    "fileIndex": 0,
@@ -4094,7 +4143,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 102,
+   "logicalDocumentIndex": 103,
    "publisherDomain": "meti.go.jp",
    "logicalDocumentIndexInSource": 5,
    "fileIndex": 0,
@@ -4223,7 +4272,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 103,
+   "logicalDocumentIndex": 104,
    "publisherDomain": "meti.go.jp",
    "logicalDocumentIndexInSource": 6,
    "fileIndex": 0,
@@ -4262,7 +4311,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 104,
+   "logicalDocumentIndex": 105,
    "publisherDomain": "mext.go.jp",
    "logicalDocumentIndexInSource": 0,
    "fileIndex": 0,
@@ -4312,7 +4361,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 105,
+   "logicalDocumentIndex": 106,
    "publisherDomain": "mext.go.jp",
    "logicalDocumentIndexInSource": 1,
    "fileIndex": 0,
@@ -4335,7 +4384,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 106,
+   "logicalDocumentIndex": 107,
    "publisherDomain": "mext.go.jp",
    "logicalDocumentIndexInSource": 2,
    "fileIndex": 0,
@@ -4361,7 +4410,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 107,
+   "logicalDocumentIndex": 108,
    "publisherDomain": "mext.go.jp",
    "logicalDocumentIndexInSource": 3,
    "fileIndex": 0,
@@ -4942,7 +4991,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 108,
+   "logicalDocumentIndex": 109,
    "publisherDomain": "mhlw.go.jp",
    "logicalDocumentIndexInSource": 0,
    "fileIndex": 0,
@@ -6661,7 +6710,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 109,
+   "logicalDocumentIndex": 110,
    "publisherDomain": "mhlw.go.jp",
    "logicalDocumentIndexInSource": 1,
    "fileIndex": 0,
@@ -7444,7 +7493,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 110,
+   "logicalDocumentIndex": 111,
    "publisherDomain": "mhlw.go.jp",
    "logicalDocumentIndexInSource": 2,
    "fileIndex": 0,
@@ -7493,7 +7542,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 111,
+   "logicalDocumentIndex": 112,
    "publisherDomain": "mhlw.go.jp",
    "logicalDocumentIndexInSource": 3,
    "fileIndex": 0,
@@ -7565,7 +7614,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 112,
+   "logicalDocumentIndex": 113,
    "publisherDomain": "mlit.go.jp",
    "logicalDocumentIndexInSource": 0,
    "fileIndex": 0,
@@ -8522,7 +8571,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 113,
+   "logicalDocumentIndex": 114,
    "publisherDomain": "mlit.go.jp",
    "logicalDocumentIndexInSource": 1,
    "fileIndex": 0,
@@ -8596,7 +8645,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 114,
+   "logicalDocumentIndex": 115,
    "publisherDomain": "mlit.go.jp",
    "logicalDocumentIndexInSource": 2,
    "fileIndex": 0,
@@ -8628,7 +8677,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 115,
+   "logicalDocumentIndex": 116,
    "publisherDomain": "mod.go.jp",
    "logicalDocumentIndexInSource": 0,
    "fileIndex": 0,
@@ -9145,7 +9194,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 116,
+   "logicalDocumentIndex": 117,
    "publisherDomain": "mof.go.jp",
    "logicalDocumentIndexInSource": 0,
    "fileIndex": 0,
@@ -9169,7 +9218,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 117,
+   "logicalDocumentIndex": 118,
    "publisherDomain": "mof.go.jp",
    "logicalDocumentIndexInSource": 1,
    "fileIndex": 0,
@@ -9205,7 +9254,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 118,
+   "logicalDocumentIndex": 119,
    "publisherDomain": "mof.go.jp",
    "logicalDocumentIndexInSource": 2,
    "fileIndex": 0,
@@ -9500,7 +9549,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 119,
+   "logicalDocumentIndex": 120,
    "publisherDomain": "mof.go.jp",
    "logicalDocumentIndexInSource": 3,
    "fileIndex": 0,
@@ -9528,7 +9577,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 120,
+   "logicalDocumentIndex": 121,
    "publisherDomain": "mof.go.jp",
    "logicalDocumentIndexInSource": 4,
    "fileIndex": 0,
@@ -9556,7 +9605,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 121,
+   "logicalDocumentIndex": 122,
    "publisherDomain": "mof.go.jp",
    "logicalDocumentIndexInSource": 5,
    "fileIndex": 0,
@@ -9581,7 +9630,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 122,
+   "logicalDocumentIndex": 123,
    "publisherDomain": "mof.go.jp",
    "logicalDocumentIndexInSource": 6,
    "fileIndex": 0,
@@ -9611,7 +9660,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 123,
+   "logicalDocumentIndex": 124,
    "publisherDomain": "mof.go.jp",
    "logicalDocumentIndexInSource": 7,
    "fileIndex": 0,
@@ -9647,7 +9696,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 124,
+   "logicalDocumentIndex": 125,
    "publisherDomain": "mofa.go.jp",
    "logicalDocumentIndexInSource": 0,
    "fileIndex": 0,
@@ -9920,7 +9969,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 125,
+   "logicalDocumentIndex": 126,
    "publisherDomain": "moj.go.jp",
    "logicalDocumentIndexInSource": 0,
    "fileIndex": 0,
@@ -10733,7 +10782,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 126,
+   "logicalDocumentIndex": 127,
    "publisherDomain": "ndl.go.jp",
    "logicalDocumentIndexInSource": 0,
    "fileIndex": 0,
@@ -10769,7 +10818,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 127,
+   "logicalDocumentIndex": 128,
    "publisherDomain": "npa.go.jp",
    "logicalDocumentIndexInSource": 0,
    "fileIndex": 0,
@@ -10801,7 +10850,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 128,
+   "logicalDocumentIndex": 129,
    "publisherDomain": "npa.go.jp",
    "logicalDocumentIndexInSource": 1,
    "fileIndex": 0,
@@ -10927,7 +10976,61 @@
    ]
   },
   {
-   "logicalDocumentIndex": 129,
+   "logicalDocumentIndex": 130,
+   "publisherDomain": "ppc.go.jp",
+   "logicalDocumentIndexInSource": 0,
+   "fileIndex": 0,
+   "sourceUrl": "https://www.ppc.go.jp/files/pdf/250829youkyu.pdf",
+   "role": null,
+   "localPdfPath": "data/download/ppc.go.jp/files/pdf/250829youkyu.pdf",
+   "pdfSha256": "b11cc8d7d822f4a7dc1b0bd17a3ad3164b4ce047450b34f54a283341efd5d67b",
+   "pageCount": 31,
+   "status": "EXTRACTED",
+   "artifactPath": "pages/ppc.go.jp__files__pdf__250829youkyu.jsonl",
+   "artifactSha256": "05566df6ed47cf53f066890d7098d2aaedc17b632de46d61cde7b90a8d538a19",
+   "charCount": 123660,
+   "nonWhitespaceCharCount": 23452,
+   "emptyPages": [
+    2,
+    4,
+    6
+   ],
+   "pageTextSha256": [
+    "06f1dec379a2860eb163480c41e336af57e8cc7541a838e62af79357f2ef6348",
+    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "68405e3d383ebdb64af5dd641d7efbfc3902a0ada3eb1b98be193d012acc9906",
+    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "933c35135f20c83d7f41297e48438f2a1e9eba9b4043e55cc2d0a05b625eba46",
+    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "df65c027fea8ca9d7d435e532445e1544dc1608d9ae8285e1f2f6ab7e0d66672",
+    "122da0a16bdf1c8b5446572199fb2bbd0b28ccb950270b82f6859c769c08dc50",
+    "7991c5d83c1d2e3072e71bac650920582d4f1d68bd7b2d6ea21d96de3db768c1",
+    "5be779d55cbda789fd3b2261a1e07bb72de4982be1ec70e49c7037c164d6bf04",
+    "4dc929a4b93a35f15321bd66b697625053af7254a1081a6783509513d58b5b05",
+    "d40a4633e0d0a5333da6046ecec6dcdfc3c3cb7251dccc07c6615836b2d32656",
+    "d4961a724dab0fee5e48bff544b9e697c81fc0159d1c54999e68449b89d9de22",
+    "b4c2a4943a3fd439afea9b6a62cce34351407fd22177ecd696c122b39dcb143c",
+    "9151e58d314bd9604c28b642803787f59ddfe9271b7710e3608b3d27eca482d9",
+    "c2fa8b8aa9e37b12dcc02b1fcae16928bfa15bb85fe66e5264800eb1363e6e79",
+    "41ade3a8c9ec4e719bf10354fe05edc2b7f43fad876f5dfa70635a86081a96bf",
+    "d1d2160fc8e3d43af92e1be3dc6cbdfaa7cb1c5232c64ebb353b94014f5e5719",
+    "4ed9688802233e0f39349e90f07d701601c33325c17cf5621778979cb833480f",
+    "d92689cef70982d46169adb30646cb0a580c14f0003cadae41e8e4d6a63a604c",
+    "81f9cece98a607121bd59018766de09fd2a3d9481009b9767dbb3b14b6c59a90",
+    "94619422e2c205bbb1d8f92e6dff93b8f9f3b3cc8d7770018da519c19c8c941a",
+    "a1d9baef513c9bd57edd538b1ff7d27a6ac63f0f46c77f656ca0384859c07528",
+    "e265d5e6f8cc9e21060218469a97987846d7a31c64056a1784c29aa18c516fa5",
+    "b6b771807256e3afd12d13ee1d5f09edfd9047d2dc54cb92831e5720ad29e59d",
+    "02b8700f6f4bef145602361c7bc898d1c3300291cc63cc6990d144c6ee55f191",
+    "210e921768b779c924ccb9bfcee5560b539cd6461f262eb0b9872f80a163cd9d",
+    "fcdbfca4ca02622811d0f1567eade77cd3bb0383711d30ecfd25a45abeff4383",
+    "018913a25a6c971e744e23790d0f12000c8f21a6ae2ced2ef902042c264c0588",
+    "1874c650a2ad88c9a1caa2eeecaddd07fc1b5fabb02ca5fa47aeaaec16371bc3",
+    "507d0c61abca871c93f40ef7ef2def4027471f62637933b96a3a01dce3b7c0d5"
+   ]
+  },
+  {
+   "logicalDocumentIndex": 131,
    "publisherDomain": "reconstruction.go.jp",
    "logicalDocumentIndexInSource": 0,
    "fileIndex": 0,
@@ -11052,7 +11155,51 @@
    ]
   },
   {
-   "logicalDocumentIndex": 130,
+   "logicalDocumentIndex": 132,
+   "publisherDomain": "sangiin.go.jp",
+   "logicalDocumentIndexInSource": 0,
+   "fileIndex": 0,
+   "sourceUrl": "https://www.sangiin.go.jp/jpn/annai/oshirase/pdf/r8gaisan-yokyusyo-2.pdf",
+   "role": null,
+   "localPdfPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r8gaisan-yokyusyo-2.pdf",
+   "pdfSha256": "4fb4d22630a34098c90a96867c929e2bbab48fec5712bf8005d0169c073baa8f",
+   "pageCount": 21,
+   "status": "EXTRACTED",
+   "artifactPath": "pages/sangiin.go.jp__jpn__annai__oshirase__pdf__r8gaisan-yokyusyo-2.jsonl",
+   "artifactSha256": "1dd7b53362749650fea32d79da90f7582b198d038d939058b74a0707f5ed694d",
+   "charCount": 65785,
+   "nonWhitespaceCharCount": 13558,
+   "emptyPages": [
+    2,
+    4,
+    6
+   ],
+   "pageTextSha256": [
+    "e35727945e143f106b17b822f80c8726d047b197ab46ca0f61d8ab9bce53910b",
+    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "5e182a5c80395cfcc0333c83c39fb0fc3e650bf580894633eec74f9a0fa322df",
+    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "70204f8f8a584cc8c16befb02a73032323e9db14d3ac470d92da98ad814e1d25",
+    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "0cd22a8ba324faacdf3ddaf7c97fd516a2b2069080ed886db65fcf77149e8cc1",
+    "a7f606adbdb24921c897501e9abecb7a83fcfc4a894bea7588bcfd036678d296",
+    "5db1dd0ce27b065e4adfb94b7924dc93c31adee4277b11c3ae3984800bbd5ec5",
+    "016708288ef070554acd32fd5641b1f31c6df2da2f28289992282cbd308a23ce",
+    "282ecf5013df8e62aeba4ab70800bd1bed150171a7c9d0ef2c41ed0d77f1d7b6",
+    "b56996915a24ad030631dec953c1332e87e5fdc11836a03be5e2c68f573409e4",
+    "923bc87576e782286e248be86a577f239569c49844c02192f541d4772a683bf6",
+    "c2447a75d4ecbb6979c8ddf5378302127ebe1dbc67c83297d9bbb34e22389ea6",
+    "e94ac49830b3789417aef299925f62e6425b3c094f04a37374e56402f0da8680",
+    "4fef77884492cb941b042b8b76f87ef85dc8726b7eb2b5d5cdec6d5fbae34cc6",
+    "4e3045ca99752bc2317b38a26982acda599e260c7df8e685b18e17b338b39caa",
+    "bae3a4df1b0b51c663dfeac9e740471c66385dd525e3c9d048b42635af88a4b8",
+    "15b9cab13c917f0bc8cfbd5e58fd1574cf5554bd323d801e4793c9877d09b028",
+    "118f2cf3ebca9bc0aea66eb4c50e234d4237f1c280aae72850db3560a329ac95",
+    "6158b232d30f99dcf1a3115b19bbcdbec2ef763aeafbc7a65df28a4203538161"
+   ]
+  },
+  {
+   "logicalDocumentIndex": 133,
    "publisherDomain": "shugiin.go.jp",
    "logicalDocumentIndexInSource": 0,
    "fileIndex": 0,
@@ -11113,7 +11260,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 131,
+   "logicalDocumentIndex": 134,
    "publisherDomain": "sotsui.go.jp",
    "logicalDocumentIndexInSource": 0,
    "fileIndex": 0,
@@ -11144,7 +11291,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 132,
+   "logicalDocumentIndex": 135,
    "publisherDomain": "soumu.go.jp",
    "logicalDocumentIndexInSource": 0,
    "fileIndex": 0,
@@ -11546,7 +11693,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 133,
+   "logicalDocumentIndex": 136,
    "publisherDomain": "soumu.go.jp",
    "logicalDocumentIndexInSource": 1,
    "fileIndex": 0,
@@ -11591,7 +11738,7 @@
    ]
   },
   {
-   "logicalDocumentIndex": 134,
+   "logicalDocumentIndex": 137,
    "publisherDomain": "soumu.go.jp",
    "logicalDocumentIndexInSource": 2,
    "fileIndex": 0,

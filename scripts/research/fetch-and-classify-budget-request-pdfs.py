@@ -16,7 +16,8 @@ links = list(csv.DictReader(open(f'{D}/fy{year}-pdf-links.csv', encoding='utf-8'
 pages = {r['landing_url']: r for r in csv.DictReader(open(f'{D}/fy{year}-landing-pages.csv', encoding='utf-8'))}
 nf = lambda s: unicodedata.normalize('NFKC', s)
 K = re.compile(r'概算要求|歳出|要求書|総表|明細|gaisan|yokyu|youkyu', re.I)
-Y = re.compile(r'令和8|R8|r8|fy2026|2026|8年度|r08', re.I)
+N = int(year) - 2018  # 令和N年度（FY2026=8, FY2023=5）
+Y = re.compile(rf'令和{N}|R0?{N}(?!\d)|fy{year}|{year}|(?<!\d){N}年度|{N}(?:youkyu|yokyu)', re.I)
 by_page = {}
 for l in links: by_page.setdefault(l['landing_url'], []).append(l)
 cand = {}

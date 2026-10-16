@@ -1,0 +1,37 @@
+{
+  "schema": "budget-request-toc-pdf-native-csv/v0/output-hashes",
+  "files": {
+    "entry-provenance.csv": {
+      "sha256": "37671f76caf7eaaf5a91c02510c4a5f95b42eb33fddd37df9f0f42fe68cf51cf",
+      "bytes": 11382
+    },
+    "page-summary.csv": {
+      "sha256": "aebd4a5bf19d261cd8e330340452eac2c7b79f843338c633ec3254b1816c581c",
+      "bytes": 376
+    },
+    "source-errors.csv": {
+      "sha256": "69718ec77d81a565d8d2a6540d76089dcec03fe98d022b4389f90df0db1fabd8",
+      "bytes": 21
+    },
+    "sources.csv": {
+      "sha256": "f73c9499708375f81040ec3efc40435af428d5ca14910c96fb990996d60108b8",
+      "bytes": 287
+    },
+    "sources/mext.go.jp__content__20230914-mxt_kaikesou01-000031817_08.csv": {
+      "sha256": "7e5f1698c899f622457ce6d1676c468ad74f160e76e056139281420ff845f8b0",
+      "bytes": 1969
+    },
+    "summary.json": {
+      "sha256": "173b19f9ca469f61413a8b8ad3da0d6361007f5ed8701b7c0dfaa0c988ae03d8",
+      "bytes": 1884
+    },
+    "token-ledger.csv": {
+      "sha256": "bcf487b280a5bf76281ca4a1d2e38bb14373def0f37137c002d8ae1e3e839ab5",
+      "bytes": 52734
+    },
+    "unresolved.csv": {
+      "sha256": "c5e0ab10ddec6c3e184a3ac146ef24cda31eb3b6d104641219586f64b5324943",
+      "bytes": 157
+    }
+  }
+}
