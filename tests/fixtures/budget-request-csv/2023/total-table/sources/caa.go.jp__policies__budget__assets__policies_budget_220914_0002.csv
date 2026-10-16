@@ -1,0 +1,11 @@
+要求番号,区分,前年度予算額_一般行政経費,前年度予算額_その他の経費,前年度予算額_計,５年度概算要求額_一般行政経費,５年度概算要求額_その他の経費,５年度概算要求額_計,増△減,明細書頁数,source_page,source_line_start,source_line_end,table_block_id,row_index,row_type,parse_status
+,01 東日本大震災復興,0,"10,451,041","10,451,041",0,"8,410,855","8,410,855","△2,040,186",3,5,44,44,caa.go.jp__policies__budget__assets__policies_budget_220914_0002#b1,1,HIER,PARSED
+,31 復興庁,0,"10,451,041","10,451,041",0,"8,410,855","8,410,855","△2,040,186",3,5,45,45,caa.go.jp__policies__budget__assets__policies_budget_220914_0002#b1,2,HIER,PARSED
+,010 復興庁,0,"10,451,041","10,451,041",0,"8,410,855","8,410,855","△2,040,186",3,5,46,46,caa.go.jp__policies__budget__assets__policies_budget_220914_0002#b1,3,CODE3,PARSED
+,108 地域活性化等復興政策費,0,"10,172,041","10,172,041",0,"8,166,855","8,166,855","△2,005,186",3,5,47,47,caa.go.jp__policies__budget__assets__policies_budget_220914_0002#b1,4,CODE3,PARSED
+1,14‑95 原子力災害対策に必要な経費,0,"6,729,624","6,729,624",0,"5,295,615","5,295,615","△1,434,009",3,5,48,48,caa.go.jp__policies__budget__assets__policies_budget_220914_0002#b1,5,DETAIL,PARSED
+2,15‑95 経済財政政策に関する調査等に必要な経費,0,"116,648","116,648",0,"105,522","105,522","△11,126",6,5,49,49,caa.go.jp__policies__budget__assets__policies_budget_220914_0002#b1,6,DETAIL,PARSED
+3,17‑95 防災基本政策の企画立案等に必要な経費,0,"3,325,769","3,325,769",0,"2,765,718","2,765,718","△560,051",7,5,50,50,caa.go.jp__policies__budget__assets__policies_budget_220914_0002#b1,7,DETAIL,PARSED
+,155 消費生活復興政策費,0,"279,000","279,000",0,"244,000","244,000","△35,000",8,5,51,51,caa.go.jp__policies__budget__assets__policies_budget_220914_0002#b1,8,CODE3,PARSED
+4,01‑95 消費者政策に必要な経費,0,"279,000","279,000",0,"244,000","244,000","△35,000",8,5,52,52,caa.go.jp__policies__budget__assets__policies_budget_220914_0002#b1,9,DETAIL,PARSED
+,会計計,0,"10,451,041","10,451,041",0,"8,410,855","8,410,855","△2,040,186",,5,53,53,caa.go.jp__policies__budget__assets__policies_budget_220914_0002#b1,10,TOTAL,PARSED

@@ -1,0 +1,12 @@
+要求番号,区分,前年度予算額_一般行政経費,前年度予算額_その他の経費,前年度予算額_計,５年度概算要求額_一般行政経費,５年度概算要求額_その他の経費,５年度概算要求額_計,増△減,明細書頁数,source_page,source_line_start,source_line_end,table_block_id,row_index,row_type,parse_status
+,065 公正取引委員会,"9,179,386","1,307,420","10,486,806","9,667,792","767,928","10,435,720","△51,086",3,5,45,45,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r5__gaisaiyoukyuusho#b1,1,CODE3,PARSED
+,010 公正取引委員会,"9,179,386","1,173,435","10,352,821","9,667,792","760,608","10,428,400","75,579",3,5,46,46,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r5__gaisaiyoukyuusho#b1,2,CODE3,PARSED
+1,01‑95 公正取引委員会に必要な経費,"9,179,386",0,"9,179,386","9,667,792",0,"9,667,792","488,406",4,5,47,47,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r5__gaisaiyoukyuusho#b1,3,DETAIL,PARSED
+2,06‑95 独占禁止法違反行為に対する措置等に必要な経費,0,"260,980","260,980",0,"296,599","296,599","35,619",44,5,48,49,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r5__gaisaiyoukyuusho#b1,4,DETAIL,PARSED
+3,11‑95 下請法違反行為に対する措置等に必要な経費,0,"289,659","289,659",0,"248,425","248,425","△41,234",70,5,51,51,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r5__gaisaiyoukyuusho#b1,5,DETAIL,PARSED
+4,16‑95 競争政策の普及啓発等に必要な経費,0,"248,000","248,000",0,"215,584","215,584","△32,416",99,5,52,52,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r5__gaisaiyoukyuusho#b1,6,DETAIL,PARSED
+5,21‑95 消費税の円滑かつ適正な転嫁の確保に必要な経費,0,"374,796","374,796",0,0,0,"△374,796",135,5,53,54,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r5__gaisaiyoukyuusho#b1,7,DETAIL,PARSED
+,020 公正取引委員会施設費,0,"133,985","133,985",0,"7,320","7,320","△126,665",144,5,56,56,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r5__gaisaiyoukyuusho#b1,8,CODE3,PARSED
+6,01‑95 公正取引委員会施設整備に必要な経費,0,"133,985","133,985",0,"7,320","7,320","△126,665",144,5,57,57,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r5__gaisaiyoukyuusho#b1,9,DETAIL,PARSED
+,組織計,"9,179,386","1,307,420","10,486,806","9,667,792","767,928","10,435,720","△51,086",,5,58,58,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r5__gaisaiyoukyuusho#b1,10,TOTAL,PARSED
+,所管計,"9,179,386","1,307,420","10,486,806","9,667,792","767,928","10,435,720","△51,086",,5,59,59,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r5__gaisaiyoukyuusho#b1,11,TOTAL,PARSED

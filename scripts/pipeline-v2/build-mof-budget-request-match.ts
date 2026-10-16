@@ -11,7 +11,7 @@ import * as path from 'path';
 import { amount, buildPositionTree, buildPositionTreeFromDetail, buildTocTree, hy, mofAmountJikou, mofAmountKou, mofAmountMoku, ns, readCsv, type Rec, type TocTree } from './lib/mof-budget-request-match';
 
 const [yearArg, ver, outDir] = process.argv.slice(2);
-if (!/^20(24|25|26)$/.test(yearArg ?? '') || !['2023', '2024', '2025', '2025_teishutsu', '2026'].includes(ver ?? '') || !outDir) throw new Error('usage: build-mof-budget-request-match.ts <2024|2025|2026> <2023|2024|2025|2025_teishutsu|2026> <out-dir>');
+if (!/^20(23|24|25|26)$/.test(yearArg ?? '') || !['2023', '2024', '2025', '2025_teishutsu', '2026'].includes(ver ?? '') || !outDir) throw new Error('usage: build-mof-budget-request-match.ts <2023|2024|2025|2026> <2023|2024|2025|2025_teishutsu|2026> <out-dir>');
 const REQ = path.join('tests', 'fixtures', 'budget-request-csv', yearArg);
 const MOF = path.join('tests', 'fixtures', 'mof-archive-csv', ver);
 fs.mkdirSync(outDir, { recursive: true });

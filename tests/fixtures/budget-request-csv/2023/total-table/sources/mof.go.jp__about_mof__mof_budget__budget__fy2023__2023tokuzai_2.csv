@@ -1,0 +1,12 @@
+要求番号,区分,前年度予算額_一般行政経費,前年度予算額_その他の経費,前年度予算額_計,５年度概算要求額_一般行政経費,５年度概算要求額_その他の経費,５年度概算要求額_計,増△減,明細書頁数,source_page,source_line_start,source_line_end,table_block_id,row_index,row_type,parse_status
+,08 財政投融資,0,"22,533,016","22,533,016",0,"19,150,553","19,150,553","△3,382,463",2,3,43,43,mof.go.jp__about_mof__mof_budget__budget__fy2023__2023tokuzai_2#b1,1,HIER,PARSED
+,3 特定国有財産整備勘定,0,"22,533,016","22,533,016",0,"19,150,553","19,150,553","△3,382,463",2,3,44,44,mof.go.jp__about_mof__mof_budget__budget__fy2023__2023tokuzai_2#b1,2,HIER,PARSED
+,010 特定国有財産整備費,0,"22,065,853","22,065,853",0,"18,546,786","18,546,786","△3,519,067",2,3,45,45,mof.go.jp__about_mof__mof_budget__budget__fy2023__2023tokuzai_2#b1,3,CODE3,PARSED
+1,01‑95 特定施設整備に必要な経費,0,"8,902,389","8,902,389",0,"9,589,367","9,589,367","686,978",2,3,46,46,mof.go.jp__about_mof__mof_budget__budget__fy2023__2023tokuzai_2#b1,4,DETAIL,PARSED
+2,06‑95 民間資金等を活用した特定施設整備に必要な経費,0,"13,163,464","13,163,464",0,"8,957,419","8,957,419","△4,206,045",2,3,47,48,mof.go.jp__about_mof__mof_budget__budget__fy2023__2023tokuzai_2#b1,5,DETAIL,PARSED
+,020 事務取扱費,0,"457,163","457,163",0,"593,767","593,767","136,604",2,3,49,49,mof.go.jp__about_mof__mof_budget__budget__fy2023__2023tokuzai_2#b1,6,CODE3,PARSED
+3,01‑95 事務取扱いに必要な経費,0,"173,393","173,393",0,"302,181","302,181","128,788",2,3,50,50,mof.go.jp__about_mof__mof_budget__budget__fy2023__2023tokuzai_2#b1,7,DETAIL,PARSED
+4,06‑95 特定国有財産の取得及び処分に必要な経費,0,"283,770","283,770",0,"291,586","291,586","7,816",3,3,51,51,mof.go.jp__about_mof__mof_budget__budget__fy2023__2023tokuzai_2#b1,8,DETAIL,PARSED
+,090 予備費,0,"10,000","10,000",0,"10,000","10,000",0,4,3,52,52,mof.go.jp__about_mof__mof_budget__budget__fy2023__2023tokuzai_2#b1,9,CODE3,PARSED
+5,01‑98 予備費,0,"10,000","10,000",0,"10,000","10,000",0,4,3,53,53,mof.go.jp__about_mof__mof_budget__budget__fy2023__2023tokuzai_2#b1,10,DETAIL,PARSED
+,会計計,0,"22,533,016","22,533,016",0,"19,150,553","19,150,553","△3,382,463",,3,54,54,mof.go.jp__about_mof__mof_budget__budget__fy2023__2023tokuzai_2#b1,11,TOTAL,PARSED

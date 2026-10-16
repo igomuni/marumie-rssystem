@@ -1,0 +1,11 @@
+要求番号,区分,前年度予算額_一般行政経費,前年度予算額_その他の経費,前年度予算額_計,５年度概算要求額_一般行政経費,５年度概算要求額_その他の経費,５年度概算要求額_計,増△減,明細書頁数,source_page,source_line_start,source_line_end,table_block_id,row_index,row_type,parse_status
+,04 国債整理基金,0,"245,791,482,900","245,791,482,900",0,"239,151,730,926","239,151,730,926","△6,639,751,974",2,3,42,42,mof.go.jp__about_mof__mof_budget__budget__fy2023__2023kokusaiseirikikinn_2#b1,1,HIER,PARSED
+,010 国債整理支出,0,"241,735,989,200","241,735,989,200",0,"235,498,229,161","235,498,229,161","△6,237,760,039",2,3,43,43,mof.go.jp__about_mof__mof_budget__budget__fy2023__2023kokusaiseirikikinn_2#b1,2,CODE3,PARSED
+1,01‑20 公債等償還に必要な経費,0,"231,897,311,218","231,897,311,218",0,"224,882,634,730","224,882,634,730","△7,014,676,488",2,3,44,44,mof.go.jp__about_mof__mof_budget__budget__fy2023__2023kokusaiseirikikinn_2#b1,3,DETAIL,PARSED
+2,06‑20 公債利子等支払に必要な経費,0,"9,788,439,263","9,788,439,263",0,"10,562,444,840","10,562,444,840","774,005,577",3,3,45,45,mof.go.jp__about_mof__mof_budget__budget__fy2023__2023kokusaiseirikikinn_2#b1,4,DETAIL,PARSED
+3,36‑20 公債等の償還及び発行に関する諸費等に必要な経費,0,"50,238,719","50,238,719",0,"53,149,591","53,149,591","2,910,872",4,3,46,47,mof.go.jp__about_mof__mof_budget__budget__fy2023__2023kokusaiseirikikinn_2#b1,5,DETAIL,PARSED
+,012 復興債整理支出,0,"4,055,493,700","4,055,493,700",0,"3,653,501,765","3,653,501,765","△401,991,935",5,3,48,48,mof.go.jp__about_mof__mof_budget__budget__fy2023__2023kokusaiseirikikinn_2#b1,6,CODE3,PARSED
+4,01‑20 復興債償還に必要な経費,0,"4,030,808,140","4,030,808,140",0,"3,624,135,490","3,624,135,490","△406,672,650",5,3,49,49,mof.go.jp__about_mof__mof_budget__budget__fy2023__2023kokusaiseirikikinn_2#b1,7,DETAIL,PARSED
+5,06‑20 復興債利子等支払に必要な経費,0,"20,228,523","20,228,523",0,"25,166,233","25,166,233","4,937,710",5,3,50,50,mof.go.jp__about_mof__mof_budget__budget__fy2023__2023kokusaiseirikikinn_2#b1,8,DETAIL,PARSED
+6,11‑20 復興債の償還及び発行に関する諸費等に必要な経費,0,"4,457,037","4,457,037",0,"4,200,042","4,200,042","△256,995",6,3,51,52,mof.go.jp__about_mof__mof_budget__budget__fy2023__2023kokusaiseirikikinn_2#b1,9,DETAIL,PARSED
+,会計計,0,"245,791,482,900","245,791,482,900",0,"239,151,730,926","239,151,730,926","△6,639,751,974",,3,53,53,mof.go.jp__about_mof__mof_budget__budget__fy2023__2023kokusaiseirikikinn_2#b1,10,TOTAL,PARSED
