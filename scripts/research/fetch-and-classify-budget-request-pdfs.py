@@ -27,10 +27,33 @@ for u, ls in by_page.items():
         for l in ls: cand.setdefault(l['pdf_url'], (u, 'page_without_keyword_hit'))
     if pages.get(u, {}).get('http') == 'direct_pdf':
         for l in ls: cand.setdefault(l['pdf_url'], (u, 'direct'))
+BASE = os.path.realpath(os.path.join('data', 'download'))
+HOST = re.compile(r'^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$')
+
+
+def safe_local_path(p):
+    """URL から保存先を決める。掲載ページ由来の URL は信頼しない: https のみ、host は英小文字・数字・ . - だけで .go.jp で終わる、path の各 segment は decode したあと
+    `/` `\\` NUL を含まず `.` `..` でないこと、最終的な実パスが data/download の中にあること。満たさなければ None（取得しない）"""
+    if p.scheme != 'https' or not p.hostname: return None
+    host = p.hostname.lower().removeprefix('www.')
+    if not HOST.match(host) or not host.endswith('.go.jp'): return None  # 政府機関のドメイン（.go.jp）だけ。IP アドレスや他のドメインは取得しない
+    segs = []
+    for raw in p.path.split('/'):
+        if not raw: continue
+        d = unquote(raw)
+        if d in ('.', '..') or re.search(r'[/\\\0]', d): return None
+        segs.append(d.replace('%', '%25').replace('$', '%24'))
+    if not segs: return None
+    local = os.path.realpath(os.path.join(BASE, host, *segs))
+    return local if local.startswith(os.path.join(BASE, host) + os.sep) else None
+
+
 rows = []
 for i, (pu, (landing, why)) in enumerate(sorted(cand.items())):
-    p = urlparse(pu); host = p.netloc.removeprefix('www.')
-    local = os.path.join('data', 'download', host, *[unquote(s).replace('%', '%25').replace('$', '%24') for s in p.path.split('/') if s])
+    p = urlparse(pu)
+    local = safe_local_path(p)
+    if local is None:
+        rows.append([pu, landing, why, 'rejected_unsafe_url', 0, '', 0, '', '', '']); continue
     code = 'cached'
     if not os.path.exists(local):
         time.sleep(1); os.makedirs(os.path.dirname(local), exist_ok=True)
