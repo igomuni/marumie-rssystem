@@ -1,25 +1,25 @@
 {
  "request_year": "2025",
  "mof_version": "2025_teishutsu",
- "input_sha256": "0e9b8d59f875fa6270f4227d319488f01e97c4e301bbda7c854855a3e614ccff",
- "sources": 61,
+ "input_sha256": "6a4d6778d0c80c603c32e64c46929d5a2ae27201d6e2833abca261356c138664",
+ "sources": 65,
  "m0_status": {
-  "MATCHED": 198,
+  "MATCHED": 206,
   "OUT_OF_SCOPE": 26
  },
  "m1_status": {
-  "MATCHED": 1085,
+  "MATCHED": 1093,
   "NO_CANDIDATE": 63,
   "AMBIGUOUS": 2
  },
  "m2_status": {
-  "MATCHED": 1654,
+  "MATCHED": 1666,
   "NO_CANDIDATE": 57,
   "PARENT_UNMATCHED": 65
  },
  "m3_status": {
-  "MATCHED": 7618,
-  "NO_CANDIDATE": 458,
+  "MATCHED": 7721,
+  "NO_CANDIDATE": 462,
   "PARENT_UNMATCHED": 92
  },
  "mof_rows": {
@@ -28,33 +28,33 @@
   "moku": 8030
  },
  "mof_rows_referenced": {
-  "kou": 997,
-  "jikou": 1522,
-  "moku": 7169
+  "kou": 1005,
+  "jikou": 1534,
+  "moku": 7272
  },
  "unmatched_mof_reasons": {
   "kou": {
-   "no_request_row": 63
+   "no_request_row": 55
   },
   "jikou": {
-   "kou_not_matched": 69,
+   "kou_not_matched": 57,
    "kou_matched_no_request_row": 61
   },
   "moku": {
-   "kou_not_matched": 204,
-   "kou_matched_no_request_row": 657
+   "kou_matched_no_request_row": 661,
+   "kou_not_matched": 97
   }
  },
  "request_links": {
-  "kou_total_table_linked": 1149,
-  "kou_total": 1149,
-  "jikou_total_table_linked": 1776,
-  "jikou_detail_linked": 1688,
-  "jikou_total": 1776
+  "kou_total_table_linked": 1157,
+  "kou_total": 1157,
+  "jikou_total_table_linked": 1788,
+  "jikou_detail_linked": 1700,
+  "jikou_total": 1788
  },
  "attached_sources": 69,
  "no_toc_rows": 0,
  "no_toc_sources": 0,
- "request_unclassified_toc_rows": 150,
+ "request_unclassified_toc_rows": 158,
  "request_moku_rows_without_kou": 1514
 }

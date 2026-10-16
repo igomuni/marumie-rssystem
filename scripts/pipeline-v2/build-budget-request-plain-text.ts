@@ -17,7 +17,9 @@ const arg = (name: string) => process.argv.find(a => a.startsWith(`--${name}=`))
 const YEAR = Number(arg('year') ?? '2024');
 if (!/^\d{4}$/.test(String(YEAR))) throw new Error(`--year must be a 4-digit fiscal year: ${arg('year')}`);
 const OUT_ROOT = arg('out-root') ?? path.join('data', 'work', 'budget-request-plain-text', String(YEAR));
-const FROZEN = YEAR === 2024
+// --corpus=<凍結記録の JSON> は、凍結済みの年度に後から足した PDF の補遺（pdf-corpus-freeze-supplement-*.json）だけを処理するときに使う（--out-root も指定する）
+const CORPUS = arg('corpus');
+const FROZEN = CORPUS ? CORPUS : YEAR === 2024
   ? path.join('tests', 'fixtures', 'budget-request-raw-text', '2024', 'raw-text-manifest.json')
   : path.join('tests', 'fixtures', 'budget-request-pdf-corpus', String(YEAR), 'pdf-corpus-freeze.json');
 type FrozenDocument = { localPdfPath: string; pdfSha256: string; pageCount: number; pageTextSha256?: string[] };
@@ -25,7 +27,7 @@ const frozen = JSON.parse(fs.readFileSync(FROZEN, 'utf8')) as { documents: Froze
 
 function main(): void {
   const files: { localPdfPath: string; url: string }[] = [];
-  const hasManifest = YEAR === 2024 || YEAR === 2025;
+  const hasManifest = !CORPUS && (YEAR === 2024 || YEAR === 2025);
   if (hasManifest) {
     const manifest = getBudgetRequestManifest(YEAR);
     for (const src of manifest.sources) for (const doc of src.logicalDocuments) for (const file of doc.files) {
@@ -68,7 +70,7 @@ function main(): void {
       textSha256: sha256(result.stdout), pageTextSha256: pageChunks.map(c => sha256(c)),
     });
   }
-  if (YEAR !== 2024) {
+  if (YEAR !== 2024 || CORPUS) {
     fs.writeFileSync(path.join(OUT_ROOT, 'plain-text-manifest.json'), JSON.stringify({
       schema: 'budget-request-plain-text-manifest/v0',
       fiscalYear: YEAR,

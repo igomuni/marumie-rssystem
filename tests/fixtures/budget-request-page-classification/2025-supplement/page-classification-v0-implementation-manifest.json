@@ -1,0 +1,76 @@
+{
+ "schema": "budget-request-page-classification-v0-implementation-manifest/v0",
+ "scope": "frozen v0 specification の literal implementation の full-corpus 出力 manifest。rule 変更・GT 由来の調整なし。open-set safety は NOT EVALUATED",
+ "specVersion": "page-classification-v0-frozen",
+ "frozenInput": {
+  "plainTextCorpusDigestSha256": "cf0834d6e8345efd0d69bc2294154e053765a043b979c99d7cb98aed40d169bd",
+  "phaseAFixtureSha256": null
+ },
+ "implementation": {
+  "files": {
+   "scripts/pipeline-v2/lib/budget-request-page-classification.ts": "9476bac301f819b716433f2da0ae59c3eff1906a573d565484fcf54b17cb3c6a",
+   "scripts/pipeline-v2/lib/budget-request-page-classification-direct.ts": "2642ebfd7d6e589fd6681b0eb279b2a4119c1094b3c7904f81d7f6ec9bbb118f",
+   "scripts/pipeline-v2/build-budget-request-page-classification.ts": "96017c6684b64f757b79da7ffa3f61b16610a1b0f3a5b4c8c527f62b8e79c5f6"
+  },
+  "node": "v24.9.0",
+  "platform": "darwin-arm64"
+ },
+ "summary": {
+  "totalPages": 75,
+  "rawStatus": {
+   "EMPTY": 12,
+   "EXTRACTED": 63
+  },
+  "classificationStatus": {
+   "NO_TEXT": 12,
+   "RESOLVED": 63
+  },
+  "pageType": {
+   "COVER": 4,
+   "DETAIL": 51,
+   "SUMMARY": 4,
+   "TOC": 4,
+   "null": 12
+  },
+  "source": {
+   "DIRECT": 16,
+   "INHERITED": 47,
+   "null": 12
+  },
+  "unresolvedReason": {},
+  "noTextReason": {
+   "NO_TEXT_UNRESOLVED": 12
+  },
+  "resetCounts": {
+   "NO_TEXT_UNRESOLVED": 8
+  },
+  "bridgedBlankPages": 0,
+  "pageLossOrDuplicate": 0,
+  "corpusClassificationDigestSha256": "82b0b8419f5336ae998acdec046acd43125c6f24b79fbfda93498b16460bbfd5"
+ },
+ "conformance": {
+  "totalMismatch": 0
+ },
+ "perPdf": [
+  {
+   "localPdfPath": "data/download/dangai.go.jp/info/pdf/r07_saisyutu-gaisan.pdf",
+   "pageCount": 9,
+   "classificationDigestSha256": "206a6a935008854f6e3c57da1b5be458181d71c7827b20cb938347473ecd10d8"
+  },
+  {
+   "localPdfPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r7gaisan-yokyusyo-250905.pdf",
+   "pageCount": 21,
+   "classificationDigestSha256": "107fb063d6ae5f3ffe630220987506a3872e37672cfb7496e5cb5f09a59a364c"
+  },
+  {
+   "localPdfPath": "data/download/shugiin.go.jp/internet/itdb_annai.nsf/html/statics/osirase/kaikei-saishutsugaisan7.pdf/%24File/kaikei-saishutsugaisan7.pdf",
+   "pageCount": 37,
+   "classificationDigestSha256": "1a5d3cf110ecc5bfbb780acaff5715e9ebe555c3f7ce76b10a3e168bae19bdf3"
+  },
+  {
+   "localPdfPath": "data/download/sotsui.go.jp/budget/images/r7budget_yokyu.pdf",
+   "pageCount": 8,
+   "classificationDigestSha256": "7ba0e92d95e537f55813972adc490aaa3f2eacccb546dc9a5f6525c8e9dc2a88"
+  }
+ ]
+}
