@@ -24,6 +24,12 @@ for r in csv.DictReader(open(f'{D}/fy2026-landing-pages.csv', encoding='utf-8'))
     if u.lower().endswith('.pdf'): continue
     seeds.setdefault(urlparse(u).hostname, []).append(u)
 
+# FY2026 の入口から辿れなかった所管の入口（Web 検索や URL の年度置換で見つけたもの。fy2023-extra-seeds.csv）
+extra_pdfs = []
+for r in csv.DictReader(open(f'{D}/fy2023-extra-seeds.csv', encoding='utf-8')):
+    if r['url'].lower().endswith('.pdf'): extra_pdfs.append(r['url'])
+    else: seeds.setdefault(urlparse(r['url']).hostname, []).append(r['url'])
+
 
 def fetch(u):
     time.sleep(1)
@@ -73,6 +79,8 @@ for host, urls in sorted(seeds.items()):
                 s = nf(x) + ' ' + h
                 if MARK5.search(s) and TOPIC.search(s): queue.append((h, depth + 1, 'link'))
     print(host, n, 'pages', flush=True)
+for u in extra_pdfs:  # 直接 PDF の URL は一覧に直接載る PDF として扱う（取得・分類は fetch-and-classify が行う）
+    pages.append([u, 'direct_pdf', '', '', '', 1, f'extra:{urlparse(u).hostname}']); pdfs.append([u, u, '(extra seed の直接 PDF)'])
 with open(f'{D}/fy2023-landing-pages.csv', 'w', encoding='utf-8', newline='') as fh:
     w = csv.writer(fh, lineterminator='\n'); w.writerow(['landing_url', 'http', 'content_type', 'sha256', 'bytes', 'pdf_links', 'listed_for']); w.writerows(pages)
 with open(f'{D}/fy2023-pdf-links.csv', 'w', encoding='utf-8', newline='') as fh:

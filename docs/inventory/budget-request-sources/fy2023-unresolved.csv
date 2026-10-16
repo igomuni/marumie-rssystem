@@ -1,0 +1,7 @@
+authority,status_and_note
+外務省,403 for scripted HTTP（掲載ページ）。ブラウザ等での手動取得が必要
+経済産業省,403 for scripted HTTP（fy2023/index.html）。手動取得が必要
+法務省,掲載ページ（kaikei02_00108／00117）は取得できたが歳出概算要求書の PDF リンクを拾えていない。概算要求書の一覧ページ（kaikei02_00008）を要確認
+警察庁,Web 検索には r5/gaisanyokyu/ippankaikei.pdf が載るが、現在は 404（index.html も 404）。移設先を要確認
+国立国会図書館,現行ページは過年度を WARP へ移管（ChatGPT 調査。未確認）
+会計検査院,現行の予算ページは令和6年度以降（ChatGPT 調査・Web 検索とも令和5年度は未発見）。WARP 等で要追加探索
