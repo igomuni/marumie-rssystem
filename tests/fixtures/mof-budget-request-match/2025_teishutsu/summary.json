@@ -1,10 +1,10 @@
 {
  "request_year": "2025",
  "mof_version": "2025_teishutsu",
- "input_sha256": "c5a355eea6c00e7502c325396742e4fe2f82911bd235e50276a43b33ed85ccea",
+ "input_sha256": "6a4d6778d0c80c603c32e64c46929d5a2ae27201d6e2833abca261356c138664",
  "sources": 65,
  "m0_status": {
-  "MATCHED": 202,
+  "MATCHED": 206,
   "OUT_OF_SCOPE": 26
  },
  "m1_status": {
@@ -55,6 +55,6 @@
  "attached_sources": 69,
  "no_toc_rows": 0,
  "no_toc_sources": 0,
- "request_unclassified_toc_rows": 150,
+ "request_unclassified_toc_rows": 158,
  "request_moku_rows_without_kou": 1514
 }

@@ -99,6 +99,8 @@ mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,toc:組織,020 文部�
 mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,toc:組織,030 文化庁,文化庁,文化庁,MATCHED,
 mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,toc:組織,040 スポーツ庁,スポーツ庁,スポーツ庁,MATCHED,
 mext.go.jp__content__20230914-mxt_kaikesou01-000031817_08,context,9905 エネルギー対策特別会計（電源開発促進勘定）,エネルギー対策,エネルギー対策,MATCHED,special
+mext.go.jp__content__20230914-mxt_kaikesou01-000031817_08,toc:会計,05 エネルギー対策,エネルギー対策,エネルギー対策,MATCHED,
+mext.go.jp__content__20230914-mxt_kaikesou01-000031817_08,toc:勘定,2 電源開発促進勘定,電源開発促進勘定,電源開発促進勘定,MATCHED,
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-1b-01,context,25 厚生労働省所管,厚生労働省,厚生労働省,MATCHED,general
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-1b-01,toc:組織,010 厚生労働本省,厚生労働本省,厚生労働本省,MATCHED,
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-1b-01,toc:組織,030 検疫所,検疫所,検疫所,MATCHED,

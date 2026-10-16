@@ -1,0 +1,245 @@
+{
+ "schema": "budget-request-cover-toc-structure-inventory/v0",
+ "scope": "Page Classification v0 が COVER / TOC と routing した page の machine inventory。parser output ではない。logical row・semantic field は確定していない",
+ "generator": "scripts/pipeline-v2/analyze-budget-request-cover-toc-structure.ts",
+ "frozenInput": {
+  "plainTextCorpusDigestSha256": "66cdd595836700d6d143bf91c4133ffdf28d585f75cc5d7b75c32243917fbd68",
+  "pageClassificationCorpusDigestSha256": "6dab1b9cefab82c0ba70866485cf97d4c9a107aa797d142a3f093a05711f3467"
+ },
+ "summary": {
+  "coverRouted": 2,
+  "tocRouted": 1,
+  "coverBySource": {
+   "DIRECT": 2
+  },
+  "tocBySource": {
+   "DIRECT": 1
+  },
+  "tocExplicitTitleStarts": 1,
+  "tocContinuationPages": 0,
+  "physicalPdfsWithCover": 2,
+  "physicalPdfsWithToc": 1,
+  "logicalDocumentsWithCover": 1,
+  "logicalDocumentsWithToc": 1,
+  "coverByPublisher": {
+   "cao.go.jp": 1,
+   "mext.go.jp": 1
+  },
+  "tocByPublisher": {
+   "mext.go.jp": 1
+  },
+  "coverByAccountType": {
+   "general": 2
+  },
+  "pdfsWithMultipleCovers": 0,
+  "maxCoversInOnePdf": 1,
+  "tocRunCountDistribution": {
+   "1": 1
+  },
+  "tocRunLengthDistribution": {
+   "1": 1
+  },
+  "tocRunStartSource": {
+   "DIRECT": 1
+  },
+  "tocContinuationDistance": {
+   "count": 0,
+   "max": 0,
+   "distribution": {}
+  },
+  "tocRunsWithNoTextInside": 0,
+  "coverTocPagesAdjacentToUnresolvedOrNoText": 2,
+  "privateUseCharacterPages": {
+   "COVER": 0,
+   "TOC": 0
+  },
+  "nonBreakingHyphenPages": {
+   "COVER": 0,
+   "TOC": 1
+  },
+  "tocPageHeaderTokenCountDistribution": {
+   "2": 1
+  },
+  "tocWithTwoTrailingNumberTokenLines": 1,
+  "coverStaffingReferenceTextPresent": 2,
+  "coverHeaderLeadingCodeDigits": {
+   "4": 2
+  }
+ },
+ "perPdf": [
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/e1.pdf",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": -1,
+   "accountType": "general",
+   "filesInLogicalDocument": 1,
+   "pageCount": 3,
+   "coverPages": [
+    1
+   ],
+   "tocRuns": [],
+   "tocRunCount": 0,
+   "adjacentUnresolvedOrNoTextCount": 0,
+   "tocRunsWithNoTextInside": 0
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_08.pdf",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": -1,
+   "accountType": "general",
+   "filesInLogicalDocument": 1,
+   "pageCount": 25,
+   "coverPages": [
+    1
+   ],
+   "tocRuns": [
+    {
+     "start": 3,
+     "end": 3,
+     "length": 1,
+     "startSource": "DIRECT"
+    }
+   ],
+   "tocRunCount": 1,
+   "adjacentUnresolvedOrNoTextCount": 2,
+   "tocRunsWithNoTextInside": 0
+  }
+ ],
+ "pages": [
+  {
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/e1.pdf",
+   "pdfSha256": "d564a5295eaf76fe54aefbe8269a8c6092aa2803595bcb715fcd926b1557facd",
+   "physicalPage": 1,
+   "textSha256": "5cc103a01aea125d4eaf4e2ff7d34a743d123af01aacd03684b9a765b79359ed",
+   "classifierPageType": "COVER",
+   "classifierSource": "DIRECT",
+   "rawStatus": "EXTRACTED",
+   "publisherDomain": "cao.go.jp",
+   "logicalDocumentIndex": -1,
+   "accountType": "general",
+   "filesInLogicalDocument": 1,
+   "budgetJurisdiction": null,
+   "logicalAuthority": null,
+   "tocRunStart": null,
+   "tocRunLength": null,
+   "tocDistanceFromRunStart": null,
+   "explicitTitleObserved": true,
+   "firstNonEmptyLines": [
+    "9905 エ ネ ル ギ ー 対 策 特 別 会 計 （電源開発促進勘定）",
+    "   令   和    ６      年       度       歳      出       概       算      要      求   書",
+    "       1. 令和６年度歳出概算要求額総表 ・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・       1",
+    "       2. 令和６年度歳出概算要求額明細表 ・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・         1",
+    "          （会計）05 エ ネ ル ギ ー 対 策 ・・・・・・・・・・・・・・・・・・・・・・・・・・               1"
+   ],
+   "nonEmptyLineCount": 6,
+   "charCount": 418,
+   "privateUseCharacterPresent": false,
+   "nonBreakingHyphenPresent": false,
+   "markerCounts": {
+    "組織": 0,
+    "会計": 1,
+    "所管": 0,
+    "項": 0,
+    "勘定": 0
+   },
+   "trailingPageNumberLineCount": 4,
+   "leaderDotLineCount": 4,
+   "pageHeaderTokenCount": 0,
+   "linesWithoutTrailingNumberOrLeader": 2,
+   "largeWhitespaceGapLineCount": 2,
+   "twoTrailingNumberTokenLineCount": 0,
+   "staffingReferenceTextPresent": true,
+   "headerLeadingCodeDigits": 4
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_08.pdf",
+   "pdfSha256": "fa30da231f9e890b7edd5a664e87db047875ebc90331684308bc278fadeaf4c1",
+   "physicalPage": 1,
+   "textSha256": "5cc103a01aea125d4eaf4e2ff7d34a743d123af01aacd03684b9a765b79359ed",
+   "classifierPageType": "COVER",
+   "classifierSource": "DIRECT",
+   "rawStatus": "EXTRACTED",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": -1,
+   "accountType": "general",
+   "filesInLogicalDocument": 1,
+   "budgetJurisdiction": null,
+   "logicalAuthority": null,
+   "tocRunStart": null,
+   "tocRunLength": null,
+   "tocDistanceFromRunStart": null,
+   "explicitTitleObserved": true,
+   "firstNonEmptyLines": [
+    "9905 エ ネ ル ギ ー 対 策 特 別 会 計 （電源開発促進勘定）",
+    "   令   和    ６      年       度       歳      出       概       算      要      求   書",
+    "       1. 令和６年度歳出概算要求額総表 ・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・       1",
+    "       2. 令和６年度歳出概算要求額明細表 ・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・         1",
+    "          （会計）05 エ ネ ル ギ ー 対 策 ・・・・・・・・・・・・・・・・・・・・・・・・・・               1"
+   ],
+   "nonEmptyLineCount": 6,
+   "charCount": 418,
+   "privateUseCharacterPresent": false,
+   "nonBreakingHyphenPresent": false,
+   "markerCounts": {
+    "組織": 0,
+    "会計": 1,
+    "所管": 0,
+    "項": 0,
+    "勘定": 0
+   },
+   "trailingPageNumberLineCount": 4,
+   "leaderDotLineCount": 4,
+   "pageHeaderTokenCount": 0,
+   "linesWithoutTrailingNumberOrLeader": 2,
+   "largeWhitespaceGapLineCount": 2,
+   "twoTrailingNumberTokenLineCount": 0,
+   "staffingReferenceTextPresent": true,
+   "headerLeadingCodeDigits": 4
+  },
+  {
+   "localPdfPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_08.pdf",
+   "pdfSha256": "fa30da231f9e890b7edd5a664e87db047875ebc90331684308bc278fadeaf4c1",
+   "physicalPage": 3,
+   "textSha256": "c98e672955f0fc1c9ccba11f7e33bc1980350d3ff663981f51896f86c36e441b",
+   "classifierPageType": "TOC",
+   "classifierSource": "DIRECT",
+   "rawStatus": "EXTRACTED",
+   "publisherDomain": "mext.go.jp",
+   "logicalDocumentIndex": -1,
+   "accountType": "general",
+   "filesInLogicalDocument": 1,
+   "budgetJurisdiction": null,
+   "logicalAuthority": null,
+   "tocRunStart": 3,
+   "tocRunLength": 1,
+   "tocDistanceFromRunStart": 0,
+   "explicitTitleObserved": true,
+   "firstNonEmptyLines": [
+    "                                  令 和 ６ 年 度 歳 出 概 算 要 求 額 目 次",
+    "9905 エ ネ ル ギ ー 対 策 特 別 会 計 （電源開発促進勘定）",
+    "要求                    区                 分     ページ 要求    区       分   ページ",
+    "番号                                                番号",
+    "     令和６年度歳出概算要求額総表                              1"
+   ],
+   "nonEmptyLineCount": 36,
+   "charCount": 1843,
+   "privateUseCharacterPresent": false,
+   "nonBreakingHyphenPresent": true,
+   "markerCounts": {
+    "組織": 0,
+    "会計": 1,
+    "所管": 0,
+    "項": 12,
+    "勘定": 1
+   },
+   "trailingPageNumberLineCount": 32,
+   "leaderDotLineCount": 0,
+   "pageHeaderTokenCount": 2,
+   "linesWithoutTrailingNumberOrLeader": 4,
+   "largeWhitespaceGapLineCount": 30,
+   "twoTrailingNumberTokenLineCount": 17,
+   "staffingReferenceTextPresent": true,
+   "headerLeadingCodeDigits": null
+  }
+ ]
+}
