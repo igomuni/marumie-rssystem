@@ -1,0 +1,24 @@
+{
+ "schema": "budget-request-pdf-corpus-freeze-supplement/v0",
+ "scope": "FY2025 概算要求 PDF の凍結記録（pdf-corpus-freeze.json、131 PDF）に後から見つかった PDF。凍結記録そのものは変更していない（凍結記録の corpusDigestSha256 を参照する評価・文書があるため）。",
+ "addedAfterFreeze": true,
+ "discoveredOn": "2026-10-16",
+ "note": "参議院の FY2025 歳出概算要求書。先頭ページに「令和７年度歳出概算要求書」。PDF の作成日時は 2024-08-13（概算要求の提出前後）。ファイル名の 250905 は掲載日とみられる（FY2024 の r6gaisan-yokyusyo-250905.pdf と同じ）。パイプライン（plain text 以降）・突合は未実行。",
+ "baseFreezeCorpusDigestSha256": "520dd9c60683962ed8dce3ea45f2b2674b8c924aeabd0aa851bff6261f015127",
+ "documents": [
+  {
+   "publisherAuthority": "参議院",
+   "publisherDomain": "sangiin.go.jp",
+   "logicalAuthority": "参議院",
+   "accountType": "general",
+   "account": "一般会計",
+   "role": null,
+   "sourceUrl": "https://www.sangiin.go.jp/jpn/annai/oshirase/pdf/r7gaisan-yokyusyo-250905.pdf",
+   "localPdfPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r7gaisan-yokyusyo-250905.pdf",
+   "bytes": 33664,
+   "pdfSha256": "ea1fd9c2d8c402ff9153377f8903ca16573da96b7c44481483da4e83cda305cd",
+   "pageCount": 21,
+   "acquisition": "pipeline-fetch"
+  }
+ ]
+}
