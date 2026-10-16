@@ -41,4 +41,6 @@ npx tsx scripts/pipeline-v2/build-budget-request-cover-csv.ts <年度>
 # 補遺（凍結済みの年度に後から足した PDF）は、年度に -supplement を付ける（例 --year=2024-supplement。plain text は --corpus=<補遺の JSON> --out-root=... で作る）
 ```
 
+FY2024・FY2025 以外の年度（FY2023・FY2026・補遺）は、`--input` を省くと plain text 入力になる（Raw Text を使うには `--input=raw-text`）。FY2023・FY2026 の Raw Text fixture は、上の結果が一致することを確かめたうえで削除した。
+
 `--input=plain-text` の入力は、`tests/fixtures/budget-request-plain-text/{年度}/plain-text-manifest.json`（git 管理）と `data/work/budget-request-plain-text/{年度}/`。Raw Text の fixture（`tests/fixtures/budget-request-raw-text/`）は作らない。FY2024・FY2025 は評価の記録が Raw Text の manifest に紐づいているため、既存の Raw Text 経路をそのまま残している。

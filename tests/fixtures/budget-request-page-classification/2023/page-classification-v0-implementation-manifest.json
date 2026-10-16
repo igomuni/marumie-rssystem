@@ -3,14 +3,14 @@
  "scope": "frozen v0 specification の literal implementation の full-corpus 出力 manifest。rule 変更・GT 由来の調整なし。open-set safety は NOT EVALUATED",
  "specVersion": "page-classification-v0-frozen",
  "frozenInput": {
-  "rawTextCorpusDigestSha256": "1c3d3a613d7403e6215b98df6ea934c3ce568ef267949b69bf4260c348cf55f8",
+  "plainTextCorpusDigestSha256": "fa807c80173685ab0173ea149d8c84b38c71866b3921de45f1549648e014da54",
   "phaseAFixtureSha256": null
  },
  "implementation": {
   "files": {
    "scripts/pipeline-v2/lib/budget-request-page-classification.ts": "9476bac301f819b716433f2da0ae59c3eff1906a573d565484fcf54b17cb3c6a",
    "scripts/pipeline-v2/lib/budget-request-page-classification-direct.ts": "2642ebfd7d6e589fd6681b0eb279b2a4119c1094b3c7904f81d7f6ec9bbb118f",
-   "scripts/pipeline-v2/build-budget-request-page-classification.ts": "53f315b262aeb21e2076af0a8077a1e40b77c3a3217304c51a348b2067a22b5f"
+   "scripts/pipeline-v2/build-budget-request-page-classification.ts": "b4815bda969b44c0699577a5575d73af0380c25c95543571d69fcedba5033793"
   },
   "node": "v24.9.0",
   "platform": "darwin-arm64"
