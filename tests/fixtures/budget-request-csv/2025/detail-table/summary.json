@@ -1,8 +1,8 @@
 {
   "scope": "FY2025 令和7年度歳出概算要求額明細表 (excluding 備考) raw text → logical rows (v0 deterministic parser; descriptive counts, not an accuracy score)",
   "input": {
-    "zipPath": "data/work/budget-request-plain-text-2025.zip",
-    "zipSha256": "11909d768c38c025c70178755dea1f84280e85c124575f380af3e786a28889f2",
+    "inputDir": "data/work/budget-request-plain-text/2025",
+    "inputSha256": "c7513de89b873839166e7d48e3bc2464e8b2e3f83f45fea621887f98571dab42",
     "txtEntries": 131
   },
   "frozenManifestIntegrity": {

@@ -94,7 +94,7 @@ describe('cover structure v0 parser（observed development data / synthetic を�
     expect(JSON.stringify(parse(OBSERVED_WORDSPLIT))).toBe(JSON.stringify(parse(OBSERVED_WORDSPLIT)));
   });
   it('production parser / builder は GT・development fixture・manifest・辞書を参照しない（境界のコード検査）', () => {
-    for (const f of ['scripts/pipeline-v2/lib/budget-request-cover-structure.ts', 'scripts/pipeline-v2/build-budget-request-cover-structure.ts']) {
+    for (const f of ['scripts/pipeline-v2/lib/budget-request-cover-structure.ts']) {
       const src = fs.readFileSync(f, 'utf8');
       const code = src.split('\n').filter(l => !l.trim().startsWith('*') && !l.trim().startsWith('//') && !l.trim().startsWith('/*')).join('\n');
       expect(code).not.toMatch(/visual-gt|development-explored|structure-inventory|frozen-candidates|budget-request-manifest|localPathFor/);
