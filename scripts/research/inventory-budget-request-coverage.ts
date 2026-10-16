@@ -15,6 +15,18 @@ if (!OUT) throw new Error('usage: inventory-budget-request-coverage.ts <out-dir>
 const cell = (v: unknown): string => { const s = String(v ?? ''); return /[",\n\r]/u.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
 const rd = (p: string) => (fs.existsSync(p) ? readCsv(fs.readFileSync(p, 'utf8')) : null);
 const header = ['year', 'authority', 'account_type', 'account', 'role', 'slug', 'url', 'verification', 'plain_text', 'plain_text_nonblank_lines', 'cover', 'cover_scope', 'toc', 'toc_kou', 'toc_jikou', 'total', 'total_rows', 'detail', 'detail_rows', 'detail_has_context'];
+// FY2026 は人手の目録が無く、manifest は凍結した PDF 記録から組み立てたもの（所管の欄は PDF 本文の見出し）。
+// 年度間で比べられるよう、FY2026 の所管は、財務省のリンク先一覧での掲載（PDF が載る掲載ページの、一般会計の府省名。なければ特別会計・勘定名）にする
+const authority2026 = new Map<string, string>();
+{
+  const D = path.join('docs', 'inventory', 'budget-request-sources');
+  const pages = new Map(readCsv(fs.readFileSync(path.join(D, 'fy2026-landing-pages.csv'), 'utf8')).map(r => [r['landing_url'], r['listed_for']]));
+  for (const r of readCsv(fs.readFileSync(path.join(D, 'fy2026-expenditure-request-pdfs.csv'), 'utf8'))) {
+    const who = (pages.get(r['landing_url']) ?? '').split(' ; ');
+    const g = who.find(w => w.startsWith('general:'));
+    authority2026.set(r['pdf_url'], (g ?? who[0] ?? '').replace(/^(general|special):/, ''));
+  }
+}
 const rows: (string | number)[][] = [];
 for (const year of [2024, 2025, 2026]) {
   const m = getBudgetRequestManifest(year);
@@ -26,7 +38,7 @@ for (const year of [2024, 2025, 2026]) {
     const nonblank = fs.existsSync(txtPath) ? fs.readFileSync(txtPath, 'utf8').split('\n').filter(l => l.trim() !== '').length : null;
     const cover = rd(path.join(base, 'cover', 'sources', `${slug}.csv`));
     const toc = rd(path.join(base, 'toc', 'sources', `${slug}.csv`)), tot = rd(path.join(base, 'total-table', 'sources', `${slug}.csv`)), det = rd(path.join(base, 'detail-table', 'sources', `${slug}.csv`));
-    rows.push([year, doc.logicalAuthority ?? doc.budgetJurisdiction ?? src.publisherAuthority, doc.accountType, doc.account, f.role ?? '', slug, f.url, f.verificationStatus,
+    rows.push([year, year === 2026 ? (authority2026.get(f.url) ?? src.publisherAuthority) : (doc.logicalAuthority ?? doc.budgetJurisdiction ?? src.publisherAuthority), doc.accountType, doc.account, f.role ?? '', slug, f.url, f.verificationStatus,
       nonblank === null ? 'not_extracted' : nonblank === 0 ? 'no_text_layer' : 'text', nonblank ?? '',
       cover ? 'yes' : 'no', cover ? cover.filter(r => r['kind'] === 'SCOPE').length : '',
       toc ? 'yes' : 'no', toc ? toc.filter(r => /^（項）/.test(r['区分'])).length : '', toc ? toc.filter(r => (r['要求番号'] ?? '') !== '' && /^\d{2}[‐-―−－-]\d{2}/.test(r['区分'])).length : '',
