@@ -1,0 +1,15 @@
+要求番号,区分,前年度予算額_一般行政経費,前年度予算額_その他の経費,前年度予算額_計,８年度概算要求額_一般行政経費,８年度概算要求額_その他の経費,８年度概算要求額_計,増△減,明細書頁数,source_page,source_line_start,source_line_end,table_block_id,row_index,row_type,parse_status
+,04 国債整理基金,0,"222,118,500,012","222,118,500,012",0,"224,477,253,768","224,477,253,768","2,358,753,756",2,3,46,46,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026kokusaiseirikikinn_2#b1,1,HIER,PARSED
+,010 国債整理支出,0,"218,164,211,397","218,164,211,397",0,"221,213,402,803","221,213,402,803","3,049,191,406",2,3,47,47,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026kokusaiseirikikinn_2#b1,2,CODE3,PARSED
+1,01‑20 公債等償還に必要な経費,0,"205,142,476,791","205,142,476,791",0,"205,200,209,663","205,200,209,663","57,732,872",2,3,48,48,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026kokusaiseirikikinn_2#b1,3,DETAIL,PARSED
+2,06‑20 公債利子等支払に必要な経費,0,"12,794,995,668","12,794,995,668",0,"15,779,674,172","15,779,674,172","2,984,678,504",3,3,49,49,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026kokusaiseirikikinn_2#b1,4,DETAIL,PARSED
+3,36‑20 公債等の償還及び発行に関する諸費等に必要な経費,0,"226,738,938","226,738,938",0,"233,518,968","233,518,968","6,780,030",4,3,50,51,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026kokusaiseirikikinn_2#b1,5,DETAIL,PARSED
+,012 復興債整理支出,0,"3,192,270,374","3,192,270,374",0,"3,194,650,513","3,194,650,513","2,380,139",5,3,52,52,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026kokusaiseirikikinn_2#b1,6,CODE3,PARSED
+4,01‑20 復興債償還に必要な経費,0,"3,163,127,300","3,163,127,300",0,"3,146,251,150","3,146,251,150","△16,876,150",5,3,53,53,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026kokusaiseirikikinn_2#b1,7,DETAIL,PARSED
+5,06‑20 復興債利子等支払に必要な経費,0,"27,013,870","27,013,870",0,"46,263,297","46,263,297","19,249,427",5,3,54,54,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026kokusaiseirikikinn_2#b1,8,DETAIL,PARSED
+6,11‑20 復興債の償還及び発行に関する諸費等に必要な経費,0,"2,129,204","2,129,204",0,"2,136,066","2,136,066","6,862",6,3,55,56,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026kokusaiseirikikinn_2#b1,9,DETAIL,PARSED
+,013 脱炭素成長型経済構造移行債整理支出,0,"762,018,241","762,018,241",0,"69,200,452","69,200,452","△692,817,789",6,3,57,57,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026kokusaiseirikikinn_2#b1,10,CODE3,PARSED
+7,01‑20 脱炭素成長型経済構造移行債償還に必要な経費,0,"703,503,400","703,503,400",0,0,0,"△703,503,400",6,3,58,59,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026kokusaiseirikikinn_2#b1,11,DETAIL,PARSED
+8,06‑20 脱炭素成長型経済構造移行債利子等支払に必要な経費,0,"56,268,920","56,268,920",0,"69,115,457","69,115,457","12,846,537",6,3,60,61,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026kokusaiseirikikinn_2#b1,12,DETAIL,PARSED
+9,36‑20 脱炭素成長型経済構造移行債の償還及び発行に関する諸費等に必要な経費,0,"2,245,921","2,245,921",0,"84,995","84,995","△2,160,926",7,3,62,63,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026kokusaiseirikikinn_2#b1,13,DETAIL,PARSED
+,会計計,0,"222,118,500,012","222,118,500,012",0,"224,477,253,768","224,477,253,768","2,358,753,756",,3,64,64,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026kokusaiseirikikinn_2#b1,14,TOTAL,PARSED

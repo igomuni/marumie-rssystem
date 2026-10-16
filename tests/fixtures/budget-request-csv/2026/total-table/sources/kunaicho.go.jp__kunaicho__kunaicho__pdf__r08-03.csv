@@ -1,0 +1,6 @@
+要求番号,区分,前年度予算額_一般行政経費,前年度予算額_その他の経費,前年度予算額_計,８年度概算要求額_一般行政経費,８年度概算要求額_その他の経費,８年度概算要求額_計,増△減,明細書頁数,source_page,source_line_start,source_line_end,table_block_id,row_index,row_type,parse_status
+,060 宮内庁,"11,914,310",0,"11,914,310","12,201,485",0,"12,201,485","287,175",2,5,38,38,kunaicho.go.jp__kunaicho__kunaicho__pdf__r08-03#b1,1,CODE3,PARSED
+,010 宮内庁,"11,914,310",0,"11,914,310","12,201,485",0,"12,201,485","287,175",2,5,39,39,kunaicho.go.jp__kunaicho__kunaicho__pdf__r08-03#b1,2,CODE3,PARSED
+1,01‑95 宮内庁に必要な経費,"11,914,310",0,"11,914,310","12,201,485",0,"12,201,485","287,175",3,5,40,40,kunaicho.go.jp__kunaicho__kunaicho__pdf__r08-03#b1,3,DETAIL,PARSED
+,組織計,"11,914,310",0,"11,914,310","12,201,485",0,"12,201,485","287,175",,5,41,41,kunaicho.go.jp__kunaicho__kunaicho__pdf__r08-03#b1,4,TOTAL,PARSED
+,所管計,"11,914,310",0,"11,914,310","12,201,485",0,"12,201,485","287,175",,5,42,42,kunaicho.go.jp__kunaicho__kunaicho__pdf__r08-03#b1,5,TOTAL,PARSED

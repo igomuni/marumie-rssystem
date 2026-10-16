@@ -1,0 +1,2224 @@
+{
+  "scope": "FY2026 令和8年度歳出概算要求額明細表 (excluding 備考) raw text → logical rows (v0 deterministic parser; descriptive counts, not an accuracy score)",
+  "input": {
+    "inputDir": "data/work/budget-request-plain-text/2026",
+    "inputSha256": "3c05fa18b31c7fb431602926fb2c8ffdc5e4d926b9692c45da18def9f1a30c21",
+    "txtEntries": 126
+  },
+  "frozenManifestIntegrity": {
+    "MATCH": 126
+  },
+  "frozenManifestIntegrityDetail": [],
+  "sourceFileCount": 126,
+  "detailTableSourceCount": 119,
+  "detailTablePageCount": 7475,
+  "sourcesWithoutDetailTable": 7,
+  "sourcesWithNoTextLayer": [],
+  "pagesWithoutHeaderBoundary": 1,
+  "nonBlankLinesInDetailPages": 294104,
+  "lineClassCounts": {
+    "PAGE_LABEL": 7474,
+    "TABLE_TITLE": 119,
+    "ROW": 46108,
+    "UNIT": 119,
+    "UNRESOLVED": 8537,
+    "TABLE_HEADER": 7558,
+    "CONTINUATION": 20780,
+    "RIGHT_REGION": 199998,
+    "FOOTER_TIMESTAMP": 3411
+  },
+  "logicalRowCount": 46108,
+  "rowTypeCounts": {
+    "CODE1": 29,
+    "CODE2": 1506,
+    "CODE3": 10391,
+    "CODE_5_4_2_4": 24037,
+    "CODE_NN_NNNN": 8337,
+    "CONTEXT": 119,
+    "DETAIL": 1689
+  },
+  "parseStatusCounts": {
+    "AMOUNTS_PLACED_BY_HEADER_WINDOWS": 74,
+    "AMOUNTS_PLACED_BY_PAGE_EDGES": 275,
+    "PARSED": 45759
+  },
+  "rowsByBlankCells": {
+    "blank:none": 38144,
+    "blank:previous": 207,
+    "blank:previous+request+difference": 7615,
+    "blank:request": 142
+  },
+  "rowsWithContinuation": 16501,
+  "unresolvedCount": 8537,
+  "unresolvedByReason": {
+    "BLANK_CELL_COLUMN_UNDETERMINED": 95,
+    "LEFT_FRAGMENT_NOT_ADJACENT": 400,
+    "LEFT_FRAGMENT_NOT_ALIGNED": 12,
+    "LEFT_FRAGMENT_WITHOUT_PRECEDING_ROW_ON_PAGE": 251,
+    "LEFT_TEXT_CROSSES_BOUNDARY": 259,
+    "PAGE_WITHOUT_HEADER_BOUNDARY": 40,
+    "UNEXPECTED_AMOUNT_COUNT": 6,
+    "UNKNOWN_HEADER_ZONE_LINE": 7474
+  },
+  "arithmeticDiagnostics": {
+    "rowsWithMismatch": 0
+  },
+  "sources": [
+    {
+      "source_file": "budget-request-plain-text/2026/caa.go.jp__policies__budget__assets__caa_cms_205_250912_0001.txt",
+      "pageCount": 170,
+      "detailPages": 164,
+      "pagesWithoutBoundary": [],
+      "rows": 416,
+      "unresolved": 164,
+      "lineClassCounts": {
+        "PAGE_LABEL": 164,
+        "TABLE_TITLE": 1,
+        "ROW": 416,
+        "UNIT": 1,
+        "UNRESOLVED": 164,
+        "TABLE_HEADER": 164,
+        "CONTINUATION": 145,
+        "RIGHT_REGION": 4213,
+        "FOOTER_TIMESTAMP": 164
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/caa.go.jp__policies__budget__assets__caa_cms_205_250912_0002.txt",
+      "pageCount": 6,
+      "detailPages": 3,
+      "pagesWithoutBoundary": [],
+      "rows": 17,
+      "unresolved": 3,
+      "lineClassCounts": {
+        "PAGE_LABEL": 3,
+        "TABLE_TITLE": 1,
+        "ROW": 17,
+        "UNIT": 1,
+        "UNRESOLVED": 3,
+        "TABLE_HEADER": 4,
+        "FOOTER_TIMESTAMP": 3,
+        "RIGHT_REGION": 32,
+        "CONTINUATION": 6
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__01.txt",
+      "pageCount": 2,
+      "detailPages": 2,
+      "pagesWithoutBoundary": [],
+      "rows": 19,
+      "unresolved": 2,
+      "lineClassCounts": {
+        "PAGE_LABEL": 2,
+        "TABLE_TITLE": 1,
+        "ROW": 19,
+        "UNIT": 1,
+        "UNRESOLVED": 2,
+        "TABLE_HEADER": 3,
+        "CONTINUATION": 2,
+        "RIGHT_REGION": 15
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__02.txt",
+      "pageCount": 1,
+      "detailPages": 1,
+      "pagesWithoutBoundary": [],
+      "rows": 15,
+      "unresolved": 1,
+      "lineClassCounts": {
+        "PAGE_LABEL": 1,
+        "TABLE_TITLE": 1,
+        "ROW": 15,
+        "UNIT": 1,
+        "UNRESOLVED": 1,
+        "TABLE_HEADER": 2,
+        "CONTINUATION": 4,
+        "RIGHT_REGION": 23
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__03.txt",
+      "pageCount": 1,
+      "detailPages": 1,
+      "pagesWithoutBoundary": [],
+      "rows": 11,
+      "unresolved": 1,
+      "lineClassCounts": {
+        "PAGE_LABEL": 1,
+        "TABLE_TITLE": 1,
+        "ROW": 11,
+        "UNIT": 1,
+        "UNRESOLVED": 1,
+        "TABLE_HEADER": 2,
+        "CONTINUATION": 4,
+        "RIGHT_REGION": 6
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__04.txt",
+      "pageCount": 2,
+      "detailPages": 2,
+      "pagesWithoutBoundary": [],
+      "rows": 28,
+      "unresolved": 2,
+      "lineClassCounts": {
+        "PAGE_LABEL": 2,
+        "TABLE_TITLE": 1,
+        "ROW": 28,
+        "UNIT": 1,
+        "UNRESOLVED": 2,
+        "TABLE_HEADER": 3,
+        "CONTINUATION": 6,
+        "RIGHT_REGION": 15
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__05.txt",
+      "pageCount": 14,
+      "detailPages": 14,
+      "pagesWithoutBoundary": [],
+      "rows": 66,
+      "unresolved": 14,
+      "lineClassCounts": {
+        "PAGE_LABEL": 14,
+        "TABLE_TITLE": 1,
+        "ROW": 66,
+        "UNIT": 1,
+        "UNRESOLVED": 14,
+        "TABLE_HEADER": 15,
+        "CONTINUATION": 27,
+        "RIGHT_REGION": 440
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__06.txt",
+      "pageCount": 6,
+      "detailPages": 6,
+      "pagesWithoutBoundary": [],
+      "rows": 45,
+      "unresolved": 6,
+      "lineClassCounts": {
+        "PAGE_LABEL": 6,
+        "TABLE_TITLE": 1,
+        "ROW": 45,
+        "UNIT": 1,
+        "UNRESOLVED": 6,
+        "TABLE_HEADER": 7,
+        "CONTINUATION": 8,
+        "RIGHT_REGION": 39
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__07.txt",
+      "pageCount": 1,
+      "detailPages": 1,
+      "pagesWithoutBoundary": [],
+      "rows": 11,
+      "unresolved": 1,
+      "lineClassCounts": {
+        "PAGE_LABEL": 1,
+        "TABLE_TITLE": 1,
+        "ROW": 11,
+        "UNIT": 1,
+        "UNRESOLVED": 1,
+        "TABLE_HEADER": 2,
+        "CONTINUATION": 2,
+        "RIGHT_REGION": 5
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__08.txt",
+      "pageCount": 2,
+      "detailPages": 2,
+      "pagesWithoutBoundary": [],
+      "rows": 22,
+      "unresolved": 2,
+      "lineClassCounts": {
+        "PAGE_LABEL": 2,
+        "TABLE_TITLE": 1,
+        "ROW": 22,
+        "UNIT": 1,
+        "UNRESOLVED": 2,
+        "TABLE_HEADER": 3,
+        "CONTINUATION": 7,
+        "RIGHT_REGION": 19
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__09.txt",
+      "pageCount": 1,
+      "detailPages": 1,
+      "pagesWithoutBoundary": [],
+      "rows": 6,
+      "unresolved": 1,
+      "lineClassCounts": {
+        "PAGE_LABEL": 1,
+        "TABLE_TITLE": 1,
+        "ROW": 6,
+        "UNIT": 1,
+        "UNRESOLVED": 1,
+        "TABLE_HEADER": 2,
+        "CONTINUATION": 5
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__10.txt",
+      "pageCount": 1,
+      "detailPages": 1,
+      "pagesWithoutBoundary": [],
+      "rows": 5,
+      "unresolved": 1,
+      "lineClassCounts": {
+        "PAGE_LABEL": 1,
+        "TABLE_TITLE": 1,
+        "ROW": 5,
+        "UNIT": 1,
+        "UNRESOLVED": 1,
+        "TABLE_HEADER": 2,
+        "CONTINUATION": 2
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__11.txt",
+      "pageCount": 1,
+      "detailPages": 1,
+      "pagesWithoutBoundary": [],
+      "rows": 16,
+      "unresolved": 1,
+      "lineClassCounts": {
+        "PAGE_LABEL": 1,
+        "TABLE_TITLE": 1,
+        "ROW": 16,
+        "UNIT": 1,
+        "UNRESOLVED": 1,
+        "TABLE_HEADER": 2,
+        "CONTINUATION": 2,
+        "RIGHT_REGION": 7
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__12.txt",
+      "pageCount": 4,
+      "detailPages": 4,
+      "pagesWithoutBoundary": [],
+      "rows": 35,
+      "unresolved": 4,
+      "lineClassCounts": {
+        "PAGE_LABEL": 4,
+        "TABLE_TITLE": 1,
+        "ROW": 35,
+        "UNIT": 1,
+        "UNRESOLVED": 4,
+        "TABLE_HEADER": 5,
+        "CONTINUATION": 16,
+        "RIGHT_REGION": 73
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__13.txt",
+      "pageCount": 3,
+      "detailPages": 3,
+      "pagesWithoutBoundary": [],
+      "rows": 38,
+      "unresolved": 3,
+      "lineClassCounts": {
+        "PAGE_LABEL": 3,
+        "TABLE_TITLE": 1,
+        "ROW": 38,
+        "UNIT": 1,
+        "UNRESOLVED": 3,
+        "TABLE_HEADER": 4,
+        "CONTINUATION": 4,
+        "RIGHT_REGION": 38
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__14.txt",
+      "pageCount": 1,
+      "detailPages": 1,
+      "pagesWithoutBoundary": [],
+      "rows": 15,
+      "unresolved": 1,
+      "lineClassCounts": {
+        "PAGE_LABEL": 1,
+        "TABLE_TITLE": 1,
+        "ROW": 15,
+        "UNIT": 1,
+        "UNRESOLVED": 1,
+        "TABLE_HEADER": 2,
+        "CONTINUATION": 2,
+        "RIGHT_REGION": 21
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__15.txt",
+      "pageCount": 3,
+      "detailPages": 3,
+      "pagesWithoutBoundary": [],
+      "rows": 15,
+      "unresolved": 3,
+      "lineClassCounts": {
+        "PAGE_LABEL": 3,
+        "TABLE_TITLE": 1,
+        "ROW": 15,
+        "UNIT": 1,
+        "UNRESOLVED": 3,
+        "TABLE_HEADER": 4,
+        "CONTINUATION": 6,
+        "RIGHT_REGION": 5
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__16.txt",
+      "pageCount": 1,
+      "detailPages": 1,
+      "pagesWithoutBoundary": [],
+      "rows": 7,
+      "unresolved": 1,
+      "lineClassCounts": {
+        "PAGE_LABEL": 1,
+        "TABLE_TITLE": 1,
+        "ROW": 7,
+        "UNIT": 1,
+        "UNRESOLVED": 1,
+        "TABLE_HEADER": 2,
+        "CONTINUATION": 2,
+        "RIGHT_REGION": 2
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__17.txt",
+      "pageCount": 2,
+      "detailPages": 2,
+      "pagesWithoutBoundary": [],
+      "rows": 22,
+      "unresolved": 2,
+      "lineClassCounts": {
+        "PAGE_LABEL": 2,
+        "TABLE_TITLE": 1,
+        "ROW": 22,
+        "UNIT": 1,
+        "UNRESOLVED": 2,
+        "TABLE_HEADER": 3,
+        "CONTINUATION": 7,
+        "RIGHT_REGION": 12
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__18.txt",
+      "pageCount": 8,
+      "detailPages": 8,
+      "pagesWithoutBoundary": [],
+      "rows": 193,
+      "unresolved": 8,
+      "lineClassCounts": {
+        "PAGE_LABEL": 8,
+        "TABLE_TITLE": 1,
+        "ROW": 193,
+        "UNIT": 1,
+        "UNRESOLVED": 8,
+        "TABLE_HEADER": 9,
+        "RIGHT_REGION": 2,
+        "CONTINUATION": 77
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__19.txt",
+      "pageCount": 8,
+      "detailPages": 8,
+      "pagesWithoutBoundary": [],
+      "rows": 59,
+      "unresolved": 8,
+      "lineClassCounts": {
+        "PAGE_LABEL": 8,
+        "TABLE_TITLE": 1,
+        "ROW": 59,
+        "UNIT": 1,
+        "UNRESOLVED": 8,
+        "TABLE_HEADER": 9,
+        "CONTINUATION": 25,
+        "RIGHT_REGION": 54
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__20.txt",
+      "pageCount": 1,
+      "detailPages": 1,
+      "pagesWithoutBoundary": [],
+      "rows": 9,
+      "unresolved": 1,
+      "lineClassCounts": {
+        "PAGE_LABEL": 1,
+        "TABLE_TITLE": 1,
+        "ROW": 9,
+        "UNIT": 1,
+        "UNRESOLVED": 1,
+        "TABLE_HEADER": 2,
+        "CONTINUATION": 2,
+        "RIGHT_REGION": 9
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__21.txt",
+      "pageCount": 1,
+      "detailPages": 1,
+      "pagesWithoutBoundary": [],
+      "rows": 7,
+      "unresolved": 1,
+      "lineClassCounts": {
+        "PAGE_LABEL": 1,
+        "TABLE_TITLE": 1,
+        "ROW": 7,
+        "UNIT": 1,
+        "UNRESOLVED": 1,
+        "TABLE_HEADER": 2,
+        "CONTINUATION": 3,
+        "RIGHT_REGION": 1
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__22.txt",
+      "pageCount": 7,
+      "detailPages": 7,
+      "pagesWithoutBoundary": [],
+      "rows": 54,
+      "unresolved": 7,
+      "lineClassCounts": {
+        "PAGE_LABEL": 7,
+        "TABLE_TITLE": 1,
+        "ROW": 54,
+        "UNIT": 1,
+        "UNRESOLVED": 7,
+        "TABLE_HEADER": 8,
+        "CONTINUATION": 29,
+        "RIGHT_REGION": 58
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__23.txt",
+      "pageCount": 5,
+      "detailPages": 5,
+      "pagesWithoutBoundary": [],
+      "rows": 56,
+      "unresolved": 5,
+      "lineClassCounts": {
+        "PAGE_LABEL": 5,
+        "TABLE_TITLE": 1,
+        "ROW": 56,
+        "UNIT": 1,
+        "UNRESOLVED": 5,
+        "TABLE_HEADER": 6,
+        "CONTINUATION": 21,
+        "RIGHT_REGION": 54
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__24.txt",
+      "pageCount": 12,
+      "detailPages": 12,
+      "pagesWithoutBoundary": [],
+      "rows": 84,
+      "unresolved": 12,
+      "lineClassCounts": {
+        "PAGE_LABEL": 12,
+        "TABLE_TITLE": 1,
+        "ROW": 84,
+        "UNIT": 1,
+        "UNRESOLVED": 12,
+        "TABLE_HEADER": 13,
+        "CONTINUATION": 60,
+        "RIGHT_REGION": 49
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__25.txt",
+      "pageCount": 13,
+      "detailPages": 13,
+      "pagesWithoutBoundary": [],
+      "rows": 134,
+      "unresolved": 13,
+      "lineClassCounts": {
+        "PAGE_LABEL": 13,
+        "TABLE_TITLE": 1,
+        "ROW": 134,
+        "UNIT": 1,
+        "UNRESOLVED": 13,
+        "TABLE_HEADER": 14,
+        "CONTINUATION": 70,
+        "RIGHT_REGION": 123
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__26.txt",
+      "pageCount": 2,
+      "detailPages": 2,
+      "pagesWithoutBoundary": [],
+      "rows": 17,
+      "unresolved": 2,
+      "lineClassCounts": {
+        "PAGE_LABEL": 2,
+        "TABLE_TITLE": 1,
+        "ROW": 17,
+        "UNIT": 1,
+        "UNRESOLVED": 2,
+        "TABLE_HEADER": 3,
+        "CONTINUATION": 15,
+        "RIGHT_REGION": 26
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__27.txt",
+      "pageCount": 16,
+      "detailPages": 16,
+      "pagesWithoutBoundary": [],
+      "rows": 91,
+      "unresolved": 16,
+      "lineClassCounts": {
+        "PAGE_LABEL": 16,
+        "TABLE_TITLE": 1,
+        "ROW": 91,
+        "UNIT": 1,
+        "UNRESOLVED": 16,
+        "TABLE_HEADER": 17,
+        "CONTINUATION": 87,
+        "RIGHT_REGION": 39
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__28.txt",
+      "pageCount": 13,
+      "detailPages": 13,
+      "pagesWithoutBoundary": [],
+      "rows": 116,
+      "unresolved": 13,
+      "lineClassCounts": {
+        "PAGE_LABEL": 13,
+        "TABLE_TITLE": 1,
+        "ROW": 116,
+        "UNIT": 1,
+        "UNRESOLVED": 13,
+        "TABLE_HEADER": 14,
+        "CONTINUATION": 32,
+        "RIGHT_REGION": 249
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__29.txt",
+      "pageCount": 2,
+      "detailPages": 2,
+      "pagesWithoutBoundary": [],
+      "rows": 14,
+      "unresolved": 2,
+      "lineClassCounts": {
+        "PAGE_LABEL": 2,
+        "TABLE_TITLE": 1,
+        "ROW": 14,
+        "UNIT": 1,
+        "UNRESOLVED": 2,
+        "TABLE_HEADER": 3,
+        "CONTINUATION": 10,
+        "RIGHT_REGION": 67
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__30.txt",
+      "pageCount": 2,
+      "detailPages": 2,
+      "pagesWithoutBoundary": [],
+      "rows": 21,
+      "unresolved": 2,
+      "lineClassCounts": {
+        "PAGE_LABEL": 2,
+        "TABLE_TITLE": 1,
+        "ROW": 21,
+        "UNIT": 1,
+        "UNRESOLVED": 2,
+        "TABLE_HEADER": 3,
+        "CONTINUATION": 8,
+        "RIGHT_REGION": 32
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__31.txt",
+      "pageCount": 2,
+      "detailPages": 2,
+      "pagesWithoutBoundary": [],
+      "rows": 25,
+      "unresolved": 2,
+      "lineClassCounts": {
+        "PAGE_LABEL": 2,
+        "TABLE_TITLE": 1,
+        "ROW": 25,
+        "UNIT": 1,
+        "UNRESOLVED": 2,
+        "TABLE_HEADER": 3,
+        "CONTINUATION": 16,
+        "RIGHT_REGION": 30
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__32.txt",
+      "pageCount": 1,
+      "detailPages": 1,
+      "pagesWithoutBoundary": [],
+      "rows": 8,
+      "unresolved": 1,
+      "lineClassCounts": {
+        "PAGE_LABEL": 1,
+        "TABLE_TITLE": 1,
+        "ROW": 8,
+        "UNIT": 1,
+        "UNRESOLVED": 1,
+        "TABLE_HEADER": 2,
+        "CONTINUATION": 4,
+        "RIGHT_REGION": 8
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__33.txt",
+      "pageCount": 1,
+      "detailPages": 1,
+      "pagesWithoutBoundary": [],
+      "rows": 8,
+      "unresolved": 1,
+      "lineClassCounts": {
+        "PAGE_LABEL": 1,
+        "TABLE_TITLE": 1,
+        "ROW": 8,
+        "UNIT": 1,
+        "UNRESOLVED": 1,
+        "TABLE_HEADER": 2,
+        "CONTINUATION": 2,
+        "RIGHT_REGION": 9
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__34.txt",
+      "pageCount": 3,
+      "detailPages": 3,
+      "pagesWithoutBoundary": [],
+      "rows": 16,
+      "unresolved": 3,
+      "lineClassCounts": {
+        "PAGE_LABEL": 3,
+        "TABLE_TITLE": 1,
+        "ROW": 16,
+        "UNIT": 1,
+        "UNRESOLVED": 3,
+        "TABLE_HEADER": 4,
+        "CONTINUATION": 3,
+        "RIGHT_REGION": 71
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__35.txt",
+      "pageCount": 7,
+      "detailPages": 7,
+      "pagesWithoutBoundary": [],
+      "rows": 112,
+      "unresolved": 7,
+      "lineClassCounts": {
+        "PAGE_LABEL": 7,
+        "TABLE_TITLE": 1,
+        "ROW": 112,
+        "UNIT": 1,
+        "UNRESOLVED": 7,
+        "TABLE_HEADER": 8,
+        "CONTINUATION": 47,
+        "RIGHT_REGION": 104
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__36.txt",
+      "pageCount": 49,
+      "detailPages": 49,
+      "pagesWithoutBoundary": [],
+      "rows": 941,
+      "unresolved": 49,
+      "lineClassCounts": {
+        "PAGE_LABEL": 49,
+        "TABLE_TITLE": 1,
+        "ROW": 941,
+        "UNIT": 1,
+        "UNRESOLVED": 49,
+        "TABLE_HEADER": 50,
+        "CONTINUATION": 281,
+        "RIGHT_REGION": 483
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__37.txt",
+      "pageCount": 4,
+      "detailPages": 4,
+      "pagesWithoutBoundary": [],
+      "rows": 46,
+      "unresolved": 4,
+      "lineClassCounts": {
+        "PAGE_LABEL": 4,
+        "TABLE_TITLE": 1,
+        "ROW": 46,
+        "UNIT": 1,
+        "UNRESOLVED": 4,
+        "TABLE_HEADER": 5,
+        "CONTINUATION": 17,
+        "RIGHT_REGION": 44
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__38.txt",
+      "pageCount": 2,
+      "detailPages": 2,
+      "pagesWithoutBoundary": [],
+      "rows": 23,
+      "unresolved": 2,
+      "lineClassCounts": {
+        "PAGE_LABEL": 2,
+        "TABLE_TITLE": 1,
+        "ROW": 23,
+        "UNIT": 1,
+        "UNRESOLVED": 2,
+        "TABLE_HEADER": 3,
+        "CONTINUATION": 7,
+        "RIGHT_REGION": 24
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__39.txt",
+      "pageCount": 1,
+      "detailPages": 1,
+      "pagesWithoutBoundary": [],
+      "rows": 12,
+      "unresolved": 1,
+      "lineClassCounts": {
+        "PAGE_LABEL": 1,
+        "TABLE_TITLE": 1,
+        "ROW": 12,
+        "UNIT": 1,
+        "UNRESOLVED": 1,
+        "TABLE_HEADER": 2,
+        "CONTINUATION": 3,
+        "RIGHT_REGION": 11
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__40.txt",
+      "pageCount": 1,
+      "detailPages": 1,
+      "pagesWithoutBoundary": [],
+      "rows": 12,
+      "unresolved": 1,
+      "lineClassCounts": {
+        "PAGE_LABEL": 1,
+        "TABLE_TITLE": 1,
+        "ROW": 12,
+        "UNIT": 1,
+        "UNRESOLVED": 1,
+        "TABLE_HEADER": 2,
+        "CONTINUATION": 4,
+        "RIGHT_REGION": 11
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__41.txt",
+      "pageCount": 13,
+      "detailPages": 13,
+      "pagesWithoutBoundary": [],
+      "rows": 155,
+      "unresolved": 37,
+      "lineClassCounts": {
+        "PAGE_LABEL": 13,
+        "TABLE_TITLE": 1,
+        "ROW": 155,
+        "UNIT": 1,
+        "UNRESOLVED": 37,
+        "TABLE_HEADER": 14,
+        "CONTINUATION": 43,
+        "RIGHT_REGION": 102
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__42.txt",
+      "pageCount": 6,
+      "detailPages": 6,
+      "pagesWithoutBoundary": [],
+      "rows": 40,
+      "unresolved": 6,
+      "lineClassCounts": {
+        "PAGE_LABEL": 6,
+        "TABLE_TITLE": 1,
+        "ROW": 40,
+        "UNIT": 1,
+        "UNRESOLVED": 6,
+        "TABLE_HEADER": 7,
+        "CONTINUATION": 6,
+        "RIGHT_REGION": 173
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__43.txt",
+      "pageCount": 19,
+      "detailPages": 19,
+      "pagesWithoutBoundary": [],
+      "rows": 127,
+      "unresolved": 19,
+      "lineClassCounts": {
+        "PAGE_LABEL": 19,
+        "TABLE_TITLE": 1,
+        "ROW": 127,
+        "UNIT": 1,
+        "UNRESOLVED": 19,
+        "TABLE_HEADER": 20,
+        "CONTINUATION": 57,
+        "RIGHT_REGION": 77
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__44.txt",
+      "pageCount": 3,
+      "detailPages": 3,
+      "pagesWithoutBoundary": [],
+      "rows": 47,
+      "unresolved": 3,
+      "lineClassCounts": {
+        "PAGE_LABEL": 3,
+        "TABLE_TITLE": 1,
+        "ROW": 47,
+        "UNIT": 1,
+        "UNRESOLVED": 3,
+        "TABLE_HEADER": 4,
+        "CONTINUATION": 6,
+        "RIGHT_REGION": 33
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__45.txt",
+      "pageCount": 13,
+      "detailPages": 13,
+      "pagesWithoutBoundary": [],
+      "rows": 192,
+      "unresolved": 13,
+      "lineClassCounts": {
+        "PAGE_LABEL": 13,
+        "TABLE_TITLE": 1,
+        "ROW": 192,
+        "UNIT": 1,
+        "UNRESOLVED": 13,
+        "TABLE_HEADER": 14,
+        "CONTINUATION": 73,
+        "RIGHT_REGION": 136
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__46.txt",
+      "pageCount": 4,
+      "detailPages": 4,
+      "pagesWithoutBoundary": [],
+      "rows": 51,
+      "unresolved": 4,
+      "lineClassCounts": {
+        "PAGE_LABEL": 4,
+        "TABLE_TITLE": 1,
+        "ROW": 51,
+        "UNIT": 1,
+        "UNRESOLVED": 4,
+        "TABLE_HEADER": 5,
+        "CONTINUATION": 11,
+        "RIGHT_REGION": 39
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__47.txt",
+      "pageCount": 11,
+      "detailPages": 11,
+      "pagesWithoutBoundary": [],
+      "rows": 98,
+      "unresolved": 11,
+      "lineClassCounts": {
+        "PAGE_LABEL": 11,
+        "TABLE_TITLE": 1,
+        "ROW": 98,
+        "UNIT": 1,
+        "UNRESOLVED": 11,
+        "TABLE_HEADER": 12,
+        "CONTINUATION": 40,
+        "RIGHT_REGION": 233
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__48.txt",
+      "pageCount": 5,
+      "detailPages": 5,
+      "pagesWithoutBoundary": [],
+      "rows": 51,
+      "unresolved": 5,
+      "lineClassCounts": {
+        "PAGE_LABEL": 5,
+        "TABLE_TITLE": 1,
+        "ROW": 51,
+        "UNIT": 1,
+        "UNRESOLVED": 5,
+        "TABLE_HEADER": 6,
+        "RIGHT_REGION": 78,
+        "CONTINUATION": 21
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__49.txt",
+      "pageCount": 4,
+      "detailPages": 4,
+      "pagesWithoutBoundary": [],
+      "rows": 61,
+      "unresolved": 4,
+      "lineClassCounts": {
+        "PAGE_LABEL": 4,
+        "TABLE_TITLE": 1,
+        "ROW": 61,
+        "UNIT": 1,
+        "UNRESOLVED": 4,
+        "TABLE_HEADER": 5,
+        "CONTINUATION": 19,
+        "RIGHT_REGION": 64
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__50.txt",
+      "pageCount": 11,
+      "detailPages": 11,
+      "pagesWithoutBoundary": [],
+      "rows": 78,
+      "unresolved": 37,
+      "lineClassCounts": {
+        "PAGE_LABEL": 11,
+        "TABLE_TITLE": 1,
+        "ROW": 78,
+        "UNIT": 1,
+        "UNRESOLVED": 37,
+        "TABLE_HEADER": 12,
+        "CONTINUATION": 29,
+        "RIGHT_REGION": 80
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__51.txt",
+      "pageCount": 29,
+      "detailPages": 29,
+      "pagesWithoutBoundary": [],
+      "rows": 165,
+      "unresolved": 29,
+      "lineClassCounts": {
+        "PAGE_LABEL": 29,
+        "TABLE_TITLE": 1,
+        "ROW": 165,
+        "UNIT": 1,
+        "UNRESOLVED": 29,
+        "TABLE_HEADER": 30,
+        "CONTINUATION": 36,
+        "RIGHT_REGION": 157
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__52.txt",
+      "pageCount": 3,
+      "detailPages": 3,
+      "pagesWithoutBoundary": [],
+      "rows": 36,
+      "unresolved": 3,
+      "lineClassCounts": {
+        "PAGE_LABEL": 3,
+        "TABLE_TITLE": 1,
+        "ROW": 36,
+        "UNIT": 1,
+        "UNRESOLVED": 3,
+        "TABLE_HEADER": 4,
+        "CONTINUATION": 9,
+        "RIGHT_REGION": 50
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__53.txt",
+      "pageCount": 15,
+      "detailPages": 15,
+      "pagesWithoutBoundary": [],
+      "rows": 166,
+      "unresolved": 15,
+      "lineClassCounts": {
+        "PAGE_LABEL": 15,
+        "TABLE_TITLE": 1,
+        "ROW": 166,
+        "UNIT": 1,
+        "UNRESOLVED": 15,
+        "TABLE_HEADER": 16,
+        "CONTINUATION": 28,
+        "RIGHT_REGION": 420
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__e2.txt",
+      "pageCount": 19,
+      "detailPages": 19,
+      "pagesWithoutBoundary": [],
+      "rows": 269,
+      "unresolved": 19,
+      "lineClassCounts": {
+        "PAGE_LABEL": 19,
+        "TABLE_TITLE": 1,
+        "ROW": 269,
+        "UNIT": 1,
+        "UNRESOLVED": 19,
+        "TABLE_HEADER": 20,
+        "CONTINUATION": 122,
+        "RIGHT_REGION": 322
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cao.go.jp__yosan__soshiki__r08__pdf__f2.txt",
+      "pageCount": 5,
+      "detailPages": 5,
+      "pagesWithoutBoundary": [],
+      "rows": 19,
+      "unresolved": 5,
+      "lineClassCounts": {
+        "PAGE_LABEL": 5,
+        "TABLE_TITLE": 1,
+        "ROW": 19,
+        "UNIT": 1,
+        "UNRESOLVED": 5,
+        "TABLE_HEADER": 6,
+        "CONTINUATION": 16,
+        "RIGHT_REGION": 100
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cas.go.jp__jp__yosan__pdf__r8_02.txt",
+      "pageCount": 2,
+      "detailPages": 2,
+      "pagesWithoutBoundary": [],
+      "rows": 24,
+      "unresolved": 2,
+      "lineClassCounts": {
+        "PAGE_LABEL": 2,
+        "TABLE_TITLE": 1,
+        "ROW": 24,
+        "UNIT": 1,
+        "UNRESOLVED": 2,
+        "TABLE_HEADER": 3,
+        "CONTINUATION": 7,
+        "RIGHT_REGION": 41
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cas.go.jp__jp__yosan__pdf__r8_03.txt",
+      "pageCount": 2,
+      "detailPages": 2,
+      "pagesWithoutBoundary": [],
+      "rows": 15,
+      "unresolved": 2,
+      "lineClassCounts": {
+        "PAGE_LABEL": 2,
+        "TABLE_TITLE": 1,
+        "ROW": 15,
+        "UNIT": 1,
+        "UNRESOLVED": 2,
+        "TABLE_HEADER": 3,
+        "CONTINUATION": 6,
+        "RIGHT_REGION": 71
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cas.go.jp__jp__yosan__pdf__r8_04.txt",
+      "pageCount": 2,
+      "detailPages": 2,
+      "pagesWithoutBoundary": [],
+      "rows": 16,
+      "unresolved": 2,
+      "lineClassCounts": {
+        "PAGE_LABEL": 2,
+        "TABLE_TITLE": 1,
+        "ROW": 16,
+        "UNIT": 1,
+        "UNRESOLVED": 2,
+        "TABLE_HEADER": 3,
+        "CONTINUATION": 5,
+        "RIGHT_REGION": 19
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cas.go.jp__jp__yosan__pdf__r8_05.txt",
+      "pageCount": 5,
+      "detailPages": 5,
+      "pagesWithoutBoundary": [],
+      "rows": 29,
+      "unresolved": 5,
+      "lineClassCounts": {
+        "PAGE_LABEL": 5,
+        "TABLE_TITLE": 1,
+        "ROW": 29,
+        "UNIT": 1,
+        "UNRESOLVED": 5,
+        "TABLE_HEADER": 6,
+        "CONTINUATION": 9,
+        "RIGHT_REGION": 79
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cas.go.jp__jp__yosan__pdf__r8_06.txt",
+      "pageCount": 3,
+      "detailPages": 3,
+      "pagesWithoutBoundary": [],
+      "rows": 21,
+      "unresolved": 3,
+      "lineClassCounts": {
+        "PAGE_LABEL": 3,
+        "TABLE_TITLE": 1,
+        "ROW": 21,
+        "UNIT": 1,
+        "UNRESOLVED": 3,
+        "TABLE_HEADER": 4,
+        "CONTINUATION": 4,
+        "RIGHT_REGION": 65
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cas.go.jp__jp__yosan__pdf__r8_07.txt",
+      "pageCount": 1,
+      "detailPages": 1,
+      "pagesWithoutBoundary": [],
+      "rows": 8,
+      "unresolved": 1,
+      "lineClassCounts": {
+        "PAGE_LABEL": 1,
+        "TABLE_TITLE": 1,
+        "ROW": 8,
+        "UNIT": 1,
+        "UNRESOLVED": 1,
+        "TABLE_HEADER": 2,
+        "CONTINUATION": 1
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cas.go.jp__jp__yosan__pdf__r8_08.txt",
+      "pageCount": 5,
+      "detailPages": 5,
+      "pagesWithoutBoundary": [],
+      "rows": 131,
+      "unresolved": 5,
+      "lineClassCounts": {
+        "PAGE_LABEL": 5,
+        "TABLE_TITLE": 1,
+        "ROW": 131,
+        "UNIT": 1,
+        "UNRESOLVED": 5,
+        "TABLE_HEADER": 6,
+        "RIGHT_REGION": 2,
+        "CONTINUATION": 51
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cas.go.jp__jp__yosan__pdf__r8_09.txt",
+      "pageCount": 24,
+      "detailPages": 24,
+      "pagesWithoutBoundary": [],
+      "rows": 157,
+      "unresolved": 24,
+      "lineClassCounts": {
+        "PAGE_LABEL": 24,
+        "TABLE_TITLE": 1,
+        "ROW": 157,
+        "UNIT": 1,
+        "UNRESOLVED": 24,
+        "TABLE_HEADER": 25,
+        "CONTINUATION": 27,
+        "RIGHT_REGION": 352
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cas.go.jp__jp__yosan__pdf__r8_10.txt",
+      "pageCount": 3,
+      "detailPages": 3,
+      "pagesWithoutBoundary": [],
+      "rows": 26,
+      "unresolved": 3,
+      "lineClassCounts": {
+        "PAGE_LABEL": 3,
+        "TABLE_TITLE": 1,
+        "ROW": 26,
+        "UNIT": 1,
+        "UNRESOLVED": 3,
+        "TABLE_HEADER": 4,
+        "CONTINUATION": 12,
+        "RIGHT_REGION": 71
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cas.go.jp__jp__yosan__pdf__r8_11.txt",
+      "pageCount": 2,
+      "detailPages": 2,
+      "pagesWithoutBoundary": [],
+      "rows": 23,
+      "unresolved": 2,
+      "lineClassCounts": {
+        "PAGE_LABEL": 2,
+        "TABLE_TITLE": 1,
+        "ROW": 23,
+        "UNIT": 1,
+        "UNRESOLVED": 2,
+        "TABLE_HEADER": 3,
+        "CONTINUATION": 9,
+        "RIGHT_REGION": 18
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cas.go.jp__jp__yosan__pdf__r8_12.txt",
+      "pageCount": 4,
+      "detailPages": 4,
+      "pagesWithoutBoundary": [],
+      "rows": 28,
+      "unresolved": 4,
+      "lineClassCounts": {
+        "PAGE_LABEL": 4,
+        "TABLE_TITLE": 1,
+        "ROW": 28,
+        "UNIT": 1,
+        "UNRESOLVED": 4,
+        "TABLE_HEADER": 5,
+        "CONTINUATION": 9,
+        "RIGHT_REGION": 126
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cas.go.jp__jp__yosan__pdf__r8_13.txt",
+      "pageCount": 19,
+      "detailPages": 13,
+      "pagesWithoutBoundary": [],
+      "rows": 27,
+      "unresolved": 13,
+      "lineClassCounts": {
+        "PAGE_LABEL": 13,
+        "TABLE_TITLE": 1,
+        "ROW": 27,
+        "UNIT": 1,
+        "UNRESOLVED": 13,
+        "TABLE_HEADER": 14,
+        "CONTINUATION": 13,
+        "RIGHT_REGION": 610
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cas.go.jp__jp__yosan__pdf__r8_14.txt",
+      "pageCount": 4,
+      "detailPages": 4,
+      "pagesWithoutBoundary": [],
+      "rows": 31,
+      "unresolved": 4,
+      "lineClassCounts": {
+        "PAGE_LABEL": 4,
+        "TABLE_TITLE": 1,
+        "ROW": 31,
+        "UNIT": 1,
+        "UNRESOLVED": 4,
+        "TABLE_HEADER": 5,
+        "CONTINUATION": 19,
+        "RIGHT_REGION": 83
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cas.go.jp__jp__yosan__pdf__r8_15.txt",
+      "pageCount": 2,
+      "detailPages": 2,
+      "pagesWithoutBoundary": [],
+      "rows": 15,
+      "unresolved": 2,
+      "lineClassCounts": {
+        "PAGE_LABEL": 2,
+        "TABLE_TITLE": 1,
+        "ROW": 15,
+        "UNIT": 1,
+        "UNRESOLVED": 2,
+        "TABLE_HEADER": 3,
+        "CONTINUATION": 2,
+        "RIGHT_REGION": 28
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cas.go.jp__jp__yosan__pdf__r8_17.txt",
+      "pageCount": 1,
+      "detailPages": 1,
+      "pagesWithoutBoundary": [],
+      "rows": 22,
+      "unresolved": 1,
+      "lineClassCounts": {
+        "PAGE_LABEL": 1,
+        "TABLE_TITLE": 1,
+        "ROW": 22,
+        "UNIT": 1,
+        "UNRESOLVED": 1,
+        "TABLE_HEADER": 2,
+        "CONTINUATION": 3,
+        "RIGHT_REGION": 1
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__7058059f__20250829_policies_budget_72.txt",
+      "pageCount": 145,
+      "detailPages": 139,
+      "pagesWithoutBoundary": [],
+      "rows": 562,
+      "unresolved": 139,
+      "lineClassCounts": {
+        "PAGE_LABEL": 139,
+        "TABLE_TITLE": 1,
+        "ROW": 562,
+        "UNIT": 1,
+        "UNRESOLVED": 139,
+        "TABLE_HEADER": 139,
+        "RIGHT_REGION": 3883,
+        "CONTINUATION": 274,
+        "FOOTER_TIMESTAMP": 139
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__bdd2b4b4__20250918_policies_budget_84.txt",
+      "pageCount": 50,
+      "detailPages": 44,
+      "pagesWithoutBoundary": [],
+      "rows": 324,
+      "unresolved": 44,
+      "lineClassCounts": {
+        "PAGE_LABEL": 44,
+        "TABLE_TITLE": 1,
+        "ROW": 324,
+        "UNIT": 1,
+        "UNRESOLVED": 44,
+        "TABLE_HEADER": 45,
+        "RIGHT_REGION": 1079,
+        "CONTINUATION": 187
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/courts.go.jp__assets__R08saisyutsu_gaisanyoukyusyo_510kb.txt",
+      "pageCount": 118,
+      "detailPages": 104,
+      "pagesWithoutBoundary": [
+        74
+      ],
+      "rows": 510,
+      "unresolved": 143,
+      "lineClassCounts": {
+        "PAGE_LABEL": 103,
+        "TABLE_TITLE": 1,
+        "ROW": 510,
+        "UNIT": 1,
+        "UNRESOLVED": 143,
+        "TABLE_HEADER": 103,
+        "CONTINUATION": 162,
+        "RIGHT_REGION": 2988
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/dangai.go.jp__info__pdf__r08_saisyutu-gaisan.txt",
+      "pageCount": 8,
+      "detailPages": 2,
+      "pagesWithoutBoundary": [],
+      "rows": 32,
+      "unresolved": 2,
+      "lineClassCounts": {
+        "PAGE_LABEL": 2,
+        "TABLE_TITLE": 1,
+        "ROW": 32,
+        "UNIT": 1,
+        "UNRESOLVED": 2,
+        "TABLE_HEADER": 2,
+        "CONTINUATION": 3,
+        "RIGHT_REGION": 18
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/digital.go.jp__assets__contents__node__basic_page__field_ref_resources__e460a082-5c89-43a5-8f38-984711d26039__af04ac3e__20250912_policies_budget_r8request_table_01.txt",
+      "pageCount": 32,
+      "detailPages": 26,
+      "pagesWithoutBoundary": [],
+      "rows": 496,
+      "unresolved": 26,
+      "lineClassCounts": {
+        "PAGE_LABEL": 26,
+        "TABLE_TITLE": 1,
+        "ROW": 496,
+        "UNIT": 1,
+        "UNRESOLVED": 26,
+        "TABLE_HEADER": 26,
+        "CONTINUATION": 232,
+        "RIGHT_REGION": 346
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/env.go.jp__content__000337060.txt",
+      "pageCount": 143,
+      "detailPages": 135,
+      "pagesWithoutBoundary": [],
+      "rows": 1776,
+      "unresolved": 135,
+      "lineClassCounts": {
+        "PAGE_LABEL": 135,
+        "TABLE_TITLE": 1,
+        "ROW": 1776,
+        "UNIT": 1,
+        "UNRESOLVED": 135,
+        "TABLE_HEADER": 135,
+        "CONTINUATION": 847,
+        "FOOTER_TIMESTAMP": 135,
+        "RIGHT_REGION": 2835
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/env.go.jp__content__000337061.txt",
+      "pageCount": 11,
+      "detailPages": 9,
+      "pagesWithoutBoundary": [],
+      "rows": 187,
+      "unresolved": 9,
+      "lineClassCounts": {
+        "PAGE_LABEL": 9,
+        "TABLE_TITLE": 1,
+        "ROW": 187,
+        "UNIT": 1,
+        "UNRESOLVED": 9,
+        "TABLE_HEADER": 9,
+        "CONTINUATION": 172,
+        "FOOTER_TIMESTAMP": 9,
+        "RIGHT_REGION": 42
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/env.go.jp__content__000337062.txt",
+      "pageCount": 25,
+      "detailPages": 19,
+      "pagesWithoutBoundary": [],
+      "rows": 269,
+      "unresolved": 19,
+      "lineClassCounts": {
+        "PAGE_LABEL": 19,
+        "TABLE_TITLE": 1,
+        "ROW": 269,
+        "UNIT": 1,
+        "UNRESOLVED": 19,
+        "TABLE_HEADER": 19,
+        "CONTINUATION": 122,
+        "FOOTER_TIMESTAMP": 19,
+        "RIGHT_REGION": 322
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/env.go.jp__content__000337066.txt",
+      "pageCount": 17,
+      "detailPages": 15,
+      "pagesWithoutBoundary": [],
+      "rows": 161,
+      "unresolved": 15,
+      "lineClassCounts": {
+        "PAGE_LABEL": 15,
+        "TABLE_TITLE": 1,
+        "ROW": 161,
+        "UNIT": 1,
+        "UNRESOLVED": 15,
+        "TABLE_HEADER": 15,
+        "CONTINUATION": 117,
+        "RIGHT_REGION": 361,
+        "FOOTER_TIMESTAMP": 15
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/fsa.go.jp__common__budget__yosan__8youkyuu-2__01.txt",
+      "pageCount": 69,
+      "detailPages": 66,
+      "pagesWithoutBoundary": [],
+      "rows": 368,
+      "unresolved": 66,
+      "lineClassCounts": {
+        "PAGE_LABEL": 66,
+        "TABLE_TITLE": 1,
+        "ROW": 368,
+        "UNIT": 1,
+        "UNRESOLVED": 66,
+        "TABLE_HEADER": 66,
+        "CONTINUATION": 210,
+        "RIGHT_REGION": 1837
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/jbaudit.go.jp__jbaudit__bud_clo__bud__pdf__r08__20250903_02.txt",
+      "pageCount": 32,
+      "detailPages": 23,
+      "pagesWithoutBoundary": [],
+      "rows": 126,
+      "unresolved": 23,
+      "lineClassCounts": {
+        "PAGE_LABEL": 23,
+        "TABLE_TITLE": 1,
+        "ROW": 126,
+        "UNIT": 1,
+        "UNRESOLVED": 23,
+        "TABLE_HEADER": 23,
+        "CONTINUATION": 42,
+        "RIGHT_REGION": 537
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/jcrc.go.jp__content__000002668.txt",
+      "pageCount": 17,
+      "detailPages": 10,
+      "pagesWithoutBoundary": [],
+      "rows": 127,
+      "unresolved": 10,
+      "lineClassCounts": {
+        "PAGE_LABEL": 10,
+        "TABLE_TITLE": 1,
+        "ROW": 127,
+        "UNIT": 1,
+        "UNRESOLVED": 10,
+        "TABLE_HEADER": 11,
+        "RIGHT_REGION": 116,
+        "CONTINUATION": 45
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r8__r8sandanhyou.txt",
+      "pageCount": 63,
+      "detailPages": 54,
+      "pagesWithoutBoundary": [],
+      "rows": 245,
+      "unresolved": 54,
+      "lineClassCounts": {
+        "PAGE_LABEL": 54,
+        "TABLE_TITLE": 1,
+        "ROW": 245,
+        "UNIT": 1,
+        "UNRESOLVED": 54,
+        "TABLE_HEADER": 54,
+        "RIGHT_REGION": 872,
+        "CONTINUATION": 83
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/jinji.go.jp__content__000005401.txt",
+      "pageCount": 42,
+      "detailPages": 34,
+      "pagesWithoutBoundary": [],
+      "rows": 246,
+      "unresolved": 34,
+      "lineClassCounts": {
+        "PAGE_LABEL": 34,
+        "TABLE_TITLE": 1,
+        "ROW": 246,
+        "UNIT": 1,
+        "UNRESOLVED": 34,
+        "TABLE_HEADER": 34,
+        "RIGHT_REGION": 712,
+        "CONTINUATION": 70
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/kunaicho.go.jp__kunaicho__kunaicho__pdf__r08-02.txt",
+      "pageCount": 32,
+      "detailPages": 26,
+      "pagesWithoutBoundary": [],
+      "rows": 79,
+      "unresolved": 26,
+      "lineClassCounts": {
+        "PAGE_LABEL": 26,
+        "TABLE_TITLE": 1,
+        "ROW": 79,
+        "UNIT": 1,
+        "UNRESOLVED": 26,
+        "TABLE_HEADER": 26,
+        "RIGHT_REGION": 853,
+        "FOOTER_TIMESTAMP": 26,
+        "CONTINUATION": 2
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/kunaicho.go.jp__kunaicho__kunaicho__pdf__r08-03.txt",
+      "pageCount": 20,
+      "detailPages": 13,
+      "pagesWithoutBoundary": [],
+      "rows": 150,
+      "unresolved": 13,
+      "lineClassCounts": {
+        "PAGE_LABEL": 13,
+        "TABLE_TITLE": 1,
+        "ROW": 150,
+        "UNIT": 1,
+        "UNRESOLVED": 13,
+        "TABLE_HEADER": 14,
+        "RIGHT_REGION": 313,
+        "CONTINUATION": 35
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/maff.go.jp__j__budget__attach__pdf__r8yokyusho-2.txt",
+      "pageCount": 422,
+      "detailPages": 389,
+      "pagesWithoutBoundary": [],
+      "rows": 2617,
+      "unresolved": 389,
+      "lineClassCounts": {
+        "PAGE_LABEL": 389,
+        "TABLE_TITLE": 1,
+        "ROW": 2617,
+        "UNIT": 1,
+        "UNRESOLVED": 389,
+        "TABLE_HEADER": 389,
+        "RIGHT_REGION": 8782,
+        "CONTINUATION": 1223
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/maff.go.jp__j__budget__attach__pdf__r8yokyusho-6.txt",
+      "pageCount": 37,
+      "detailPages": 28,
+      "pagesWithoutBoundary": [],
+      "rows": 443,
+      "unresolved": 28,
+      "lineClassCounts": {
+        "PAGE_LABEL": 28,
+        "TABLE_TITLE": 1,
+        "ROW": 443,
+        "UNIT": 1,
+        "UNRESOLVED": 28,
+        "TABLE_HEADER": 28,
+        "CONTINUATION": 141,
+        "RIGHT_REGION": 310
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/maff.go.jp__j__budget__attach__pdf__r8yokyusho-8.txt",
+      "pageCount": 7,
+      "detailPages": 1,
+      "pagesWithoutBoundary": [],
+      "rows": 5,
+      "unresolved": 1,
+      "lineClassCounts": {
+        "PAGE_LABEL": 1,
+        "TABLE_TITLE": 1,
+        "ROW": 5,
+        "UNIT": 1,
+        "UNRESOLVED": 1,
+        "TABLE_HEADER": 1,
+        "CONTINUATION": 3,
+        "RIGHT_REGION": 1
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/maff.go.jp__j__budget__attach__pdf__r8yokyusho-9.txt",
+      "pageCount": 20,
+      "detailPages": 13,
+      "pagesWithoutBoundary": [],
+      "rows": 179,
+      "unresolved": 13,
+      "lineClassCounts": {
+        "PAGE_LABEL": 13,
+        "TABLE_TITLE": 1,
+        "ROW": 179,
+        "UNIT": 1,
+        "UNRESOLVED": 13,
+        "TABLE_HEADER": 13,
+        "CONTINUATION": 106,
+        "RIGHT_REGION": 150
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/mext.go.jp__content__20250908-mxt_kaikesou01-000044539_8.txt",
+      "pageCount": 28,
+      "detailPages": 19,
+      "pagesWithoutBoundary": [],
+      "rows": 269,
+      "unresolved": 19,
+      "lineClassCounts": {
+        "PAGE_LABEL": 19,
+        "TABLE_TITLE": 1,
+        "ROW": 269,
+        "UNIT": 1,
+        "UNRESOLVED": 19,
+        "TABLE_HEADER": 19,
+        "CONTINUATION": 122,
+        "FOOTER_TIMESTAMP": 19,
+        "RIGHT_REGION": 322
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/mext.go.jp__content__20250909-mxt_kaikesou01-000044539_3.txt",
+      "pageCount": 562,
+      "detailPages": 562,
+      "pagesWithoutBoundary": [],
+      "rows": 3402,
+      "unresolved": 1407,
+      "lineClassCounts": {
+        "PAGE_LABEL": 562,
+        "TABLE_TITLE": 1,
+        "ROW": 3402,
+        "UNIT": 1,
+        "UNRESOLVED": 1407,
+        "TABLE_HEADER": 562,
+        "RIGHT_REGION": 15761,
+        "CONTINUATION": 1768
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/mhlw.go.jp__wp__yosan__yosan__26syokan__dl__05-1b-01.txt",
+      "pageCount": 1696,
+      "detailPages": 1674,
+      "pagesWithoutBoundary": [],
+      "rows": 7105,
+      "unresolved": 1699,
+      "lineClassCounts": {
+        "PAGE_LABEL": 1674,
+        "TABLE_TITLE": 1,
+        "ROW": 7105,
+        "UNIT": 1,
+        "UNRESOLVED": 1699,
+        "TABLE_HEADER": 1674,
+        "CONTINUATION": 3959,
+        "RIGHT_REGION": 48981,
+        "FOOTER_TIMESTAMP": 1674
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/mhlw.go.jp__wp__yosan__yosan__26syokan__dl__05-2b-01.txt",
+      "pageCount": 762,
+      "detailPages": 754,
+      "pagesWithoutBoundary": [],
+      "rows": 2337,
+      "unresolved": 754,
+      "lineClassCounts": {
+        "PAGE_LABEL": 754,
+        "TABLE_TITLE": 1,
+        "ROW": 2337,
+        "UNIT": 1,
+        "UNRESOLVED": 754,
+        "TABLE_HEADER": 754,
+        "RIGHT_REGION": 26647,
+        "CONTINUATION": 1235,
+        "FOOTER_TIMESTAMP": 754
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/mhlw.go.jp__wp__yosan__yosan__26syokan__dl__05-3b-01.txt",
+      "pageCount": 27,
+      "detailPages": 19,
+      "pagesWithoutBoundary": [],
+      "rows": 359,
+      "unresolved": 19,
+      "lineClassCounts": {
+        "PAGE_LABEL": 19,
+        "TABLE_TITLE": 1,
+        "ROW": 359,
+        "UNIT": 1,
+        "UNRESOLVED": 19,
+        "TABLE_HEADER": 19,
+        "CONTINUATION": 213,
+        "FOOTER_TIMESTAMP": 19,
+        "RIGHT_REGION": 120
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/mhlw.go.jp__wp__yosan__yosan__26syokan__dl__05-4b-01.txt",
+      "pageCount": 50,
+      "detailPages": 44,
+      "pagesWithoutBoundary": [],
+      "rows": 324,
+      "unresolved": 44,
+      "lineClassCounts": {
+        "PAGE_LABEL": 44,
+        "TABLE_TITLE": 1,
+        "ROW": 324,
+        "UNIT": 1,
+        "UNRESOLVED": 44,
+        "TABLE_HEADER": 44,
+        "RIGHT_REGION": 1079,
+        "CONTINUATION": 187,
+        "FOOTER_TIMESTAMP": 44
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/mlit.go.jp__page__content__001908433.txt",
+      "pageCount": 934,
+      "detailPages": 906,
+      "pagesWithoutBoundary": [],
+      "rows": 9439,
+      "unresolved": 972,
+      "lineClassCounts": {
+        "PAGE_LABEL": 906,
+        "TABLE_TITLE": 1,
+        "ROW": 9439,
+        "UNIT": 1,
+        "UNRESOLVED": 972,
+        "TABLE_HEADER": 906,
+        "RIGHT_REGION": 20456,
+        "CONTINUATION": 3790
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/mlit.go.jp__page__content__001908435.txt",
+      "pageCount": 52,
+      "detailPages": 44,
+      "pagesWithoutBoundary": [],
+      "rows": 944,
+      "unresolved": 44,
+      "lineClassCounts": {
+        "PAGE_LABEL": 44,
+        "TABLE_TITLE": 1,
+        "ROW": 944,
+        "UNIT": 1,
+        "UNRESOLVED": 44,
+        "TABLE_HEADER": 44,
+        "CONTINUATION": 294,
+        "RIGHT_REGION": 419
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/mlit.go.jp__page__content__001908436.txt",
+      "pageCount": 9,
+      "detailPages": 3,
+      "pagesWithoutBoundary": [],
+      "rows": 56,
+      "unresolved": 3,
+      "lineClassCounts": {
+        "PAGE_LABEL": 3,
+        "TABLE_TITLE": 1,
+        "ROW": 56,
+        "UNIT": 1,
+        "UNRESOLVED": 3,
+        "TABLE_HEADER": 3,
+        "CONTINUATION": 30,
+        "RIGHT_REGION": 12
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/mof.go.jp__about_mof__mof_budget__budget__fy2026__2026fukkou_2.txt",
+      "pageCount": 5,
+      "detailPages": 2,
+      "pagesWithoutBoundary": [],
+      "rows": 26,
+      "unresolved": 2,
+      "lineClassCounts": {
+        "PAGE_LABEL": 2,
+        "TABLE_TITLE": 1,
+        "ROW": 26,
+        "UNIT": 1,
+        "UNRESOLVED": 2,
+        "TABLE_HEADER": 3,
+        "CONTINUATION": 23,
+        "RIGHT_REGION": 13
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/mof.go.jp__about_mof__mof_budget__budget__fy2026__2026gaitame_2.txt",
+      "pageCount": 17,
+      "detailPages": 13,
+      "pagesWithoutBoundary": [],
+      "rows": 81,
+      "unresolved": 13,
+      "lineClassCounts": {
+        "PAGE_LABEL": 13,
+        "TABLE_TITLE": 1,
+        "ROW": 81,
+        "UNIT": 1,
+        "UNRESOLVED": 13,
+        "TABLE_HEADER": 14,
+        "CONTINUATION": 26,
+        "RIGHT_REGION": 379
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/mof.go.jp__about_mof__mof_budget__budget__fy2026__2026ippan_2.txt",
+      "pageCount": 274,
+      "detailPages": 258,
+      "pagesWithoutBoundary": [],
+      "rows": 1220,
+      "unresolved": 258,
+      "lineClassCounts": {
+        "PAGE_LABEL": 258,
+        "TABLE_TITLE": 1,
+        "ROW": 1220,
+        "UNIT": 1,
+        "UNRESOLVED": 258,
+        "TABLE_HEADER": 259,
+        "CONTINUATION": 377,
+        "RIGHT_REGION": 6645
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/mof.go.jp__about_mof__mof_budget__budget__fy2026__2026jisinn_2.txt",
+      "pageCount": 9,
+      "detailPages": 5,
+      "pagesWithoutBoundary": [],
+      "rows": 43,
+      "unresolved": 5,
+      "lineClassCounts": {
+        "PAGE_LABEL": 5,
+        "TABLE_TITLE": 1,
+        "ROW": 43,
+        "UNIT": 1,
+        "UNRESOLVED": 5,
+        "TABLE_HEADER": 6,
+        "CONTINUATION": 7,
+        "RIGHT_REGION": 121
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/mof.go.jp__about_mof__mof_budget__budget__fy2026__2026kokusaiseirikikinn_2.txt",
+      "pageCount": 9,
+      "detailPages": 6,
+      "pagesWithoutBoundary": [],
+      "rows": 159,
+      "unresolved": 6,
+      "lineClassCounts": {
+        "PAGE_LABEL": 6,
+        "TABLE_TITLE": 1,
+        "ROW": 159,
+        "UNIT": 1,
+        "UNRESOLVED": 6,
+        "TABLE_HEADER": 7,
+        "CONTINUATION": 65
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/mof.go.jp__about_mof__mof_budget__budget__fy2026__2026tokuzai_2.txt",
+      "pageCount": 6,
+      "detailPages": 3,
+      "pagesWithoutBoundary": [],
+      "rows": 26,
+      "unresolved": 3,
+      "lineClassCounts": {
+        "PAGE_LABEL": 3,
+        "TABLE_TITLE": 1,
+        "ROW": 26,
+        "UNIT": 1,
+        "UNRESOLVED": 3,
+        "TABLE_HEADER": 4,
+        "CONTINUATION": 7,
+        "RIGHT_REGION": 44
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/mof.go.jp__about_mof__mof_budget__budget__fy2026__2026tousi_2.txt",
+      "pageCount": 11,
+      "detailPages": 7,
+      "pagesWithoutBoundary": [],
+      "rows": 70,
+      "unresolved": 7,
+      "lineClassCounts": {
+        "PAGE_LABEL": 7,
+        "TABLE_TITLE": 1,
+        "ROW": 70,
+        "UNIT": 1,
+        "UNRESOLVED": 7,
+        "TABLE_HEADER": 8,
+        "CONTINUATION": 32,
+        "RIGHT_REGION": 155
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/mof.go.jp__about_mof__mof_budget__budget__fy2026__2026zaiyuu_2.txt",
+      "pageCount": 17,
+      "detailPages": 13,
+      "pagesWithoutBoundary": [],
+      "rows": 95,
+      "unresolved": 13,
+      "lineClassCounts": {
+        "PAGE_LABEL": 13,
+        "TABLE_TITLE": 1,
+        "ROW": 95,
+        "UNIT": 1,
+        "UNRESOLVED": 13,
+        "TABLE_HEADER": 14,
+        "CONTINUATION": 24,
+        "RIGHT_REGION": 343
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/moj.go.jp__content__001446299.txt",
+      "pageCount": 784,
+      "detailPages": 760,
+      "pagesWithoutBoundary": [],
+      "rows": 1600,
+      "unresolved": 760,
+      "lineClassCounts": {
+        "PAGE_LABEL": 760,
+        "TABLE_TITLE": 1,
+        "ROW": 1600,
+        "UNIT": 1,
+        "UNRESOLVED": 760,
+        "TABLE_HEADER": 761,
+        "CONTINUATION": 461,
+        "RIGHT_REGION": 27235
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/ndl.go.jp__file__aboutus__outline__finances__r08_budgetrequest.txt",
+      "pageCount": 17,
+      "detailPages": 12,
+      "pagesWithoutBoundary": [],
+      "rows": 108,
+      "unresolved": 12,
+      "lineClassCounts": {
+        "PAGE_LABEL": 12,
+        "TABLE_TITLE": 1,
+        "ROW": 108,
+        "UNIT": 1,
+        "UNRESOLVED": 12,
+        "TABLE_HEADER": 13,
+        "CONTINUATION": 43,
+        "RIGHT_REGION": 257
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/npa.go.jp__policies__budget__r8__gaisanyokyu__hukkoutokubetukaikei.txt",
+      "pageCount": 9,
+      "detailPages": 3,
+      "pagesWithoutBoundary": [],
+      "rows": 19,
+      "unresolved": 3,
+      "lineClassCounts": {
+        "PAGE_LABEL": 3,
+        "TABLE_TITLE": 1,
+        "ROW": 19,
+        "UNIT": 1,
+        "UNRESOLVED": 3,
+        "TABLE_HEADER": 3,
+        "CONTINUATION": 5,
+        "RIGHT_REGION": 11
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei.txt",
+      "pageCount": 104,
+      "detailPages": 96,
+      "pagesWithoutBoundary": [],
+      "rows": 690,
+      "unresolved": 96,
+      "lineClassCounts": {
+        "PAGE_LABEL": 96,
+        "TABLE_TITLE": 1,
+        "ROW": 690,
+        "UNIT": 1,
+        "UNRESOLVED": 96,
+        "TABLE_HEADER": 96,
+        "RIGHT_REGION": 2476,
+        "CONTINUATION": 148
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/reconstruction.go.jp__files__user__2025__09__2025_fukkochougaisansaisyutsu.txt",
+      "pageCount": 102,
+      "detailPages": 90,
+      "pagesWithoutBoundary": [],
+      "rows": 856,
+      "unresolved": 90,
+      "lineClassCounts": {
+        "PAGE_LABEL": 90,
+        "TABLE_TITLE": 1,
+        "ROW": 856,
+        "UNIT": 1,
+        "UNRESOLVED": 90,
+        "TABLE_HEADER": 90,
+        "RIGHT_REGION": 1682,
+        "CONTINUATION": 589
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/shugiin.go.jp__internet__itdb_annai.nsf__html__statics__osirase__kaikei-saishutsugaisan8.pdf__%24File__kaikei-saishutsugaisan8.txt",
+      "pageCount": 38,
+      "detailPages": 32,
+      "pagesWithoutBoundary": [],
+      "rows": 136,
+      "unresolved": 32,
+      "lineClassCounts": {
+        "PAGE_LABEL": 32,
+        "TABLE_TITLE": 1,
+        "ROW": 136,
+        "UNIT": 1,
+        "UNRESOLVED": 32,
+        "TABLE_HEADER": 32,
+        "CONTINUATION": 42,
+        "RIGHT_REGION": 1059
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/sotsui.go.jp__budget__images__r8budget_yokyu.txt",
+      "pageCount": 8,
+      "detailPages": 2,
+      "pagesWithoutBoundary": [],
+      "rows": 26,
+      "unresolved": 2,
+      "lineClassCounts": {
+        "PAGE_LABEL": 2,
+        "TABLE_TITLE": 1,
+        "ROW": 26,
+        "UNIT": 1,
+        "UNRESOLVED": 2,
+        "TABLE_HEADER": 2,
+        "CONTINUATION": 2,
+        "RIGHT_REGION": 13
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/soumu.go.jp__main_content__001030551.txt",
+      "pageCount": 381,
+      "detailPages": 373,
+      "pagesWithoutBoundary": [],
+      "rows": 2748,
+      "unresolved": 410,
+      "lineClassCounts": {
+        "PAGE_LABEL": 373,
+        "TABLE_TITLE": 1,
+        "ROW": 2748,
+        "UNIT": 1,
+        "UNRESOLVED": 410,
+        "TABLE_HEADER": 373,
+        "CONTINUATION": 1425,
+        "RIGHT_REGION": 9231,
+        "FOOTER_TIMESTAMP": 373
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/soumu.go.jp__main_content__001030553.txt",
+      "pageCount": 22,
+      "detailPages": 16,
+      "pagesWithoutBoundary": [],
+      "rows": 49,
+      "unresolved": 16,
+      "lineClassCounts": {
+        "PAGE_LABEL": 16,
+        "TABLE_TITLE": 1,
+        "ROW": 49,
+        "UNIT": 1,
+        "UNRESOLVED": 16,
+        "TABLE_HEADER": 16,
+        "CONTINUATION": 37,
+        "RIGHT_REGION": 18,
+        "FOOTER_TIMESTAMP": 16
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2026/soumu.go.jp__main_content__001030554.txt",
+      "pageCount": 8,
+      "detailPages": 2,
+      "pagesWithoutBoundary": [],
+      "rows": 24,
+      "unresolved": 2,
+      "lineClassCounts": {
+        "PAGE_LABEL": 2,
+        "TABLE_TITLE": 1,
+        "ROW": 24,
+        "UNIT": 1,
+        "UNRESOLVED": 2,
+        "TABLE_HEADER": 2,
+        "RIGHT_REGION": 9,
+        "CONTINUATION": 20,
+        "FOOTER_TIMESTAMP": 2
+      }
+    }
+  ]
+}

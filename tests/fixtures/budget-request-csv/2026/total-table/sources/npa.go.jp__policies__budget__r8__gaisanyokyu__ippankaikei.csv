@@ -1,0 +1,37 @@
+要求番号,区分,前年度予算額_一般行政経費,前年度予算額_その他の経費,前年度予算額_計,８年度概算要求額_一般行政経費,８年度概算要求額_その他の経費,８年度概算要求額_計,増△減,明細書頁数,source_page,source_line_start,source_line_end,table_block_id,row_index,row_type,parse_status
+,070 警察庁,"104,748,655","182,707,872","287,456,527","108,364,309","192,715,261","301,079,570","13,623,043",3,5,74,74,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,1,CODE3,PARSED
+,010 警察庁共通費,"95,668,819","1,521,140","97,189,959","99,059,591","1,543,394","100,602,985","3,413,026",3,5,75,75,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,2,CODE3,PARSED
+1,01‑95 国家公安委員会に必要な経費,"116,168",0,"116,168","118,517",0,"118,517","2,349",3,5,76,76,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,3,DETAIL,PARSED
+2,06‑95 警察庁一般行政に必要な経費,"95,552,651",0,"95,552,651","98,941,074",0,"98,941,074","3,388,423",5,5,77,77,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,4,DETAIL,PARSED
+3,11‑95 国際会議等に必要な経費,0,"1,521,140","1,521,140",0,"1,543,394","1,543,394","22,254",20,5,78,78,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,5,DETAIL,PARSED
+,020 警察庁施設費,0,"8,486,902","8,486,902",0,"8,247,690","8,247,690","△239,212",23,5,79,79,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,6,CODE3,PARSED
+4,01‑95 警察庁施設整備に必要な経費,0,"8,486,902","8,486,902",0,"8,247,690","8,247,690","△239,212",23,5,80,80,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,7,DETAIL,PARSED
+,030 匿名・流動型犯罪グループ対策推進費,0,"279,728","279,728",0,"311,634","311,634","31,906",25,5,81,81,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,8,CODE3,PARSED
+5,01‑95 匿名・流動型犯罪グループに対する取組の推進に必要な経費,0,"279,728","279,728",0,"311,634","311,634","31,906",25,5,82,83,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,9,DETAIL,PARSED
+,040 犯罪被害者等支援推進費,0,"2,316,588","2,316,588",0,"2,128,606","2,128,606","△187,982",26,5,85,85,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,10,CODE3,PARSED
+6,01‑95 犯罪被害者等の支援の充実に必要な経費,0,"2,316,588","2,316,588",0,"2,128,606","2,128,606","△187,982",26,5,86,86,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,11,DETAIL,PARSED
+,050 警察情報通信基盤費,0,"19,804,988","19,804,988",0,"34,062,521","34,062,521","14,257,533",28,5,87,87,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,12,CODE3,PARSED
+7,01‑95 警察情報通信基盤の強化に必要な経費,0,"19,804,988","19,804,988",0,"34,062,521","34,062,521","14,257,533",28,5,88,88,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,13,DETAIL,PARSED
+,060 生活安全警察費,0,"57,665","57,665",0,"83,495","83,495","25,830",33,5,89,89,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,14,CODE3,PARSED
+8,01‑95 市民生活の安全と平穏の確保に必要な経費,0,"57,665","57,665",0,"83,495","83,495","25,830",33,5,90,90,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,15,DETAIL,PARSED
+,070 刑事警察費,0,"128,487","128,487",0,"144,341","144,341","15,854",35,5,91,91,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,16,CODE3,PARSED
+9,01‑95 犯罪捜査の的確な推進に必要な経費,0,"128,487","128,487",0,"144,341","144,341","15,854",35,5,92,92,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,17,DETAIL,PARSED
+,080 組織犯罪対策費,0,"64,654","64,654",0,"64,997","64,997",343,38,5,93,93,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,18,CODE3,PARSED
+10,01‑95 組織犯罪対策の推進に必要な経費,0,"64,654","64,654",0,"64,997","64,997",343,38,5,94,94,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,19,DETAIL,PARSED
+,090 交通警察費,0,"16,657,435","16,657,435",0,"17,017,268","17,017,268","359,833",40,5,95,95,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,20,CODE3,PARSED
+11,01‑95 安全かつ快適な交通の確保に必要な経費,0,"16,657,435","16,657,435",0,"17,017,268","17,017,268","359,833",40,5,96,96,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,21,DETAIL,PARSED
+,095 交通反則者納金財源交通安全対策特別交付金等交付税及び譲与税配付金特別会計へ繰入,0,"47,115,029","47,115,029",0,"43,925,007","43,925,007","△3,190,022",41,5,97,98,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,22,CODE3,PARSED
+12,01‑95 交通反則者納金財源の交通安全対策特別交付金等に係る交付税及び譲与税配付金特別会計へ繰入れに必要な経費,0,"47,115,029","47,115,029",0,"43,925,007","43,925,007","△3,190,022",41,5,100,102,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,23,DETAIL,PARSED
+,100 警備警察費,0,"10,236,735","10,236,735",0,"10,468,374","10,468,374","231,639",42,5,104,104,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,24,CODE3,PARSED
+13,01‑95 国の公安の維持に必要な経費,0,"10,236,735","10,236,735",0,"10,468,374","10,468,374","231,639",42,5,105,105,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,25,DETAIL,PARSED
+,110 皇宮警察本部,"7,856,352","899,128","8,755,480","7,939,231","921,521","8,860,752","105,272",48,5,106,106,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,26,CODE3,PARSED
+14,01‑95 皇宮警察本部に必要な経費,"7,856,352",0,"7,856,352","7,939,231",0,"7,939,231","82,879",48,5,107,107,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,27,DETAIL,PARSED
+15,06‑95 護衛・警備に必要な経費,0,"899,128","899,128",0,"921,521","921,521","22,393",50,5,108,108,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,28,DETAIL,PARSED
+,120 サイバー警察費,0,"2,969,849","2,969,849",0,"2,618,275","2,618,275","△351,574",55,5,109,109,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,29,CODE3,PARSED
+16,01‑95 デジタル社会の安全・安心の確保に必要な経費,0,"2,969,849","2,969,849",0,"2,618,275","2,618,275","△351,574",55,6,118,119,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,30,DETAIL,PARSED
+,130 科学警察研究所,"1,223,484","713,332","1,936,816","1,365,487","757,041","2,122,528","185,712",57,6,121,121,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,31,CODE3,PARSED
+17,01‑13 科学警察研究所に必要な経費,"1,223,484",0,"1,223,484","1,365,487",0,"1,365,487","142,003",57,6,122,122,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,32,DETAIL,PARSED
+18,06‑13 研究・鑑定等に必要な経費,0,"713,332","713,332",0,"757,041","757,041","43,709",59,6,123,123,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,33,DETAIL,PARSED
+,140 警察活動基盤整備費,0,"71,456,212","71,456,212",0,"70,421,097","70,421,097","△1,035,115",66,6,124,124,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,34,CODE3,PARSED
+19,01‑95 警察活動基盤の整備に必要な経費,0,"71,456,212","71,456,212",0,"70,421,097","70,421,097","△1,035,115",66,6,125,125,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,35,DETAIL,PARSED
+,組織計,"104,748,655","182,707,872","287,456,527","108,364,309","192,715,261","301,079,570","13,623,043",,6,126,126,npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei#b1,36,TOTAL,PARSED
