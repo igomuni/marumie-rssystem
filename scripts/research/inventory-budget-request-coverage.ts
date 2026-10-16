@@ -16,7 +16,7 @@ const cell = (v: unknown): string => { const s = String(v ?? ''); return /[",\n\
 const rd = (p: string) => (fs.existsSync(p) ? readCsv(fs.readFileSync(p, 'utf8')) : null);
 const header = ['year', 'authority', 'account_type', 'account', 'role', 'slug', 'url', 'verification', 'plain_text', 'plain_text_nonblank_lines', 'cover', 'cover_scope', 'toc', 'toc_kou', 'toc_jikou', 'total', 'total_rows', 'detail', 'detail_rows', 'detail_has_context'];
 const rows: (string | number)[][] = [];
-for (const year of [2024, 2025]) {
+for (const year of [2024, 2025, 2026]) {
   const m = getBudgetRequestManifest(year);
   const base = path.join('tests', 'fixtures', 'budget-request-csv', String(year));
   for (const src of m.sources) for (const doc of src.logicalDocuments) for (const f of doc.files) {
@@ -47,6 +47,6 @@ for (const r of rows) {
 const h2 = ['year', 'authority', 'account_type', 'pdfs', 'with_text', 'with_cover', 'cover_scope', 'with_toc', 'toc_kou', 'with_total', 'total_rows', 'with_detail', 'detail_rows'];
 fs.writeFileSync(path.join(OUT, 'by-authority.csv'), [h2, ...[...agg.values()].sort((a, b) => a.year - b.year || (a.authority < b.authority ? -1 : 1) || (a.account_type < b.account_type ? -1 : 1)).map(a => [a.year, a.authority, a.account_type, a.pdfs, a.text, a.cover, a.cover_scope, a.toc, a.toc_kou, a.total, a.total_rows, a.detail, a.detail_rows])].map(r => r.map(cell).join(',')).join('\n') + '\n');
 const summary: Record<string, unknown> = {};
-for (const y of [2024, 2025]) { const rs = rows.filter(r => r[0] === y); summary[y] = { pdfs: rs.length, text: rs.filter(r => r[8] === 'text').length, no_text_layer: rs.filter(r => r[8] === 'no_text_layer').length, not_extracted: rs.filter(r => r[8] === 'not_extracted').length, with_cover: rs.filter(r => r[10] === 'yes').length, with_toc: rs.filter(r => r[12] === 'yes').length, with_total: rs.filter(r => r[15] === 'yes').length, with_detail: rs.filter(r => r[17] === 'yes').length }; }
+for (const y of [2024, 2025, 2026]) { const rs = rows.filter(r => r[0] === y); summary[y] = { pdfs: rs.length, text: rs.filter(r => r[8] === 'text').length, no_text_layer: rs.filter(r => r[8] === 'no_text_layer').length, not_extracted: rs.filter(r => r[8] === 'not_extracted').length, with_cover: rs.filter(r => r[10] === 'yes').length, with_toc: rs.filter(r => r[12] === 'yes').length, with_total: rs.filter(r => r[15] === 'yes').length, with_detail: rs.filter(r => r[17] === 'yes').length }; }
 fs.writeFileSync(path.join(OUT, 'summary.json'), JSON.stringify(summary, null, 1) + '\n');
 console.log(JSON.stringify(summary));
