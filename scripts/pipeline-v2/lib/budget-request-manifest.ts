@@ -12,6 +12,8 @@
  * `verificationStatus` はmanifest作成時の確認度であり、実取得の成否（runtime）とは別。
  * 実取得成功時にmanifestを自動で書き換えて昇格させることはしない。
  */
+import * as fs from 'fs';
+import * as path from 'path';
 import { FY2024_BUDGET_REQUEST_MANIFEST } from './fy2024-budget-request-manifest';
 import { FY2025_BUDGET_REQUEST_MANIFEST } from './fy2025-budget-request-manifest';
 
@@ -118,9 +120,31 @@ const MANIFESTS: Record<number, BudgetRequestManifest> = {
   2025: FY2025_BUDGET_REQUEST_MANIFEST,
 };
 
-/** manifest未定義の年度はURLを推測せずエラーにする */
+/**
+ * 人手の目録（manifest）が無い年度（FY2026〜）は、凍結した PDF corpus の記録
+ * （tests/fixtures/budget-request-pdf-corpus/{year}/pdf-corpus-freeze.json）から manifest を組み立てる。
+ * 記録に無い URL は足さない。1 つの PDF を 1 つの論理文書として扱う（複数 file の論理文書の構成は記録に無い）。
+ */
+function manifestFromCorpusFreeze(fiscalYear: number): BudgetRequestManifest | null {
+  const freeze = path.join('tests', 'fixtures', 'budget-request-pdf-corpus', String(fiscalYear), 'pdf-corpus-freeze.json');
+  if (!fs.existsSync(freeze)) return null;
+  const docs = (JSON.parse(fs.readFileSync(freeze, 'utf8')) as { documents: { publisherAuthority: string; publisherDomain: string; logicalAuthority: string | null; accountType: 'general' | 'special'; account: string; sourceUrl: string; acquisition: string }[] }).documents;
+  const byKey = new Map<string, BudgetRequestSource>();
+  for (const d of docs) {
+    const key = `${d.publisherAuthority}|${d.publisherDomain}`;
+    const src = byKey.get(key) ?? { publisherAuthority: d.publisherAuthority, publisherDomain: d.publisherDomain, logicalDocuments: [] };
+    src.logicalDocuments.push({
+      ...(d.logicalAuthority ? { logicalAuthority: d.logicalAuthority } : {}), accountType: d.accountType, account: d.account, documentType: 'budget-request-expenditure',
+      files: [{ url: d.sourceUrl, verificationStatus: 'pdf-confirmed', ...(d.acquisition === 'manual' ? { acquisitionPolicy: 'manual-required' as const } : {}) }],
+    });
+    byKey.set(key, src);
+  }
+  return { fiscalYear, sources: [...byKey.values()] };
+}
+
+/** manifest未定義の年度はURLを推測せずエラーにする（凍結した PDF corpus の記録がある年度はそこから組み立てる） */
 export function getBudgetRequestManifest(fiscalYear: number): BudgetRequestManifest {
-  const manifest = MANIFESTS[fiscalYear];
+  const manifest = MANIFESTS[fiscalYear] ?? manifestFromCorpusFreeze(fiscalYear);
   if (!manifest) {
     throw new Error(
       `概算要求manifestが未定義の年度です: ${fiscalYear}（対応年度: ${Object.keys(MANIFESTS).join(', ')}）`,

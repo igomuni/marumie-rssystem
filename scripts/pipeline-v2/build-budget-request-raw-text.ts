@@ -25,8 +25,9 @@ const FIXTURE_DIR = path.join('tests', 'fixtures', 'budget-request-raw-text', St
 const WRITE_FIXTURE = process.argv.includes('--freeze-fixture');
 const MANIFEST_FILES = [
   path.join('scripts', 'pipeline-v2', 'lib', `fy${YEAR}-budget-request-manifest.ts`),
+  path.join('tests', 'fixtures', 'budget-request-pdf-corpus', String(YEAR), 'pdf-corpus-freeze.json'),
   path.join('scripts', 'pipeline-v2', 'lib', 'budget-request-manifest.ts'),
-];
+].filter(f => fs.existsSync(f)); // 人手の目録が無い年度は、凍結した PDF corpus の記録が取得集合
 const PDFTOTEXT_ARGS = ['-layout', '-enc', 'UTF-8'];
 
 const versionOf = (cmd: string) => { const r = spawnSync(cmd, ['-v'], { encoding: 'utf8' }); return (r.stderr + r.stdout).trim().split('\n')[0]; };
