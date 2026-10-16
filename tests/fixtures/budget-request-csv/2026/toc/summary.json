@@ -15,24 +15,24 @@
     "prefixGapFactor": 1.5
   },
   "population": {
-    "tocPages": 85,
-    "pdfs": 56,
-    "pagesWithColumnEvidence": 85,
+    "tocPages": 88,
+    "pdfs": 59,
+    "pagesWithColumnEvidence": 88,
     "pagesWithoutColumnEvidence": 0
   },
   "counts": {
-    "items": 27832,
+    "items": 28180,
     "itemDisposition": {
-      "blank": 13633,
-      "headerZone": 1876,
-      "entry": 11966,
+      "blank": 13801,
+      "headerZone": 1968,
+      "entry": 12054,
       "unresolved": 357
     },
-    "entries": 3075,
+    "entries": 3101,
     "entriesByShape": {
-      "TITLE_PAGE": 137,
-      "MARKER": 1221,
-      "NUMBERED": 1628,
+      "TITLE_PAGE": 145,
+      "MARKER": 1230,
+      "NUMBERED": 1637,
       "CODE": 89
     },
     "auditRecords": 140,
@@ -42,14 +42,14 @@
       "PAGE_REF_AMBIGUOUS": 2
     },
     "geometricRows": {
-      "left": 2114,
+      "left": 2140,
       "right": 1101
     }
   },
   "inputs": {
     "inventory": {
       "path": "tests/fixtures/budget-request-cover-toc-structure/2026/structure-inventory.json",
-      "sha256": "9c1df09b8f709162ea019426476aea702d624963d4e9b0e270773fe2f5f57f55"
+      "sha256": "7bc8f3c611c5beaffd9b9c61250d48a6484f7b8a56b4310b3424b854a2022893"
     },
     "pdfs": [
       {
@@ -79,6 +79,13 @@
         "toc_pages": [
           3,
           4
+        ]
+      },
+      {
+        "source_pdf": "data/download/clb.go.jp/files/topics/5125_ext_05_0.pdf",
+        "pdf_sha256": "78607a1b206a5c963569d349033ab5bc0de737583aa5cb16c524bfad9e5d8ee4",
+        "toc_pages": [
+          3
         ]
       },
       {
@@ -429,12 +436,26 @@
         ]
       },
       {
+        "source_pdf": "data/download/ppc.go.jp/files/pdf/250829youkyu.pdf",
+        "pdf_sha256": "b11cc8d7d822f4a7dc1b0bd17a3ad3164b4ce047450b34f54a283341efd5d67b",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
         "source_pdf": "data/download/reconstruction.go.jp/files/user/2025/09/2025_fukkochougaisansaisyutsu.pdf",
         "pdf_sha256": "b35cbe4e11b2636fbea24c855de1951af7c3b5c0ff343a9428425d09ee155c5e",
         "toc_pages": [
           3,
           4,
           5
+        ]
+      },
+      {
+        "source_pdf": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r8gaisan-yokyusyo-2.pdf",
+        "pdf_sha256": "4fb4d22630a34098c90a96867c929e2bbab48fec5712bf8005d0169c073baa8f",
+        "toc_pages": [
+          3
         ]
       },
       {

@@ -1,0 +1,747 @@
+{
+  "scope": "FY2024 令和6年度歳出概算要求額総表 raw text → logical rows (v0 deterministic parser; descriptive counts, not an accuracy score)",
+  "input": {
+    "inputDir": "data/work/budget-request-plain-text/2024-supplement",
+    "inputSha256": "967d82a6d79a605afa683c33805669f01d66bdfef27d4a86c88d7b1565acc0cd",
+    "txtEntries": 60
+  },
+  "frozenManifestIntegrity": {
+    "MATCH": 51,
+    "NOT_IN_FROZEN_MANIFEST": 9
+  },
+  "frozenManifestIntegrityDetail": [
+    {
+      "source_file": "budget-request-plain-text/2024/fsa.go.jp__common__budget__yosan__6youkyuu-2__02.txt",
+      "status": "NOT_IN_FROZEN_MANIFEST"
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/fsa.go.jp__common__budget__yosan__6youkyuu-2__03.txt",
+      "status": "NOT_IN_FROZEN_MANIFEST"
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/fsa.go.jp__common__budget__yosan__6youkyuu-2__04.txt",
+      "status": "NOT_IN_FROZEN_MANIFEST"
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/fsa.go.jp__common__budget__yosan__6youkyuu-2__05.txt",
+      "status": "NOT_IN_FROZEN_MANIFEST"
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/fsa.go.jp__common__budget__yosan__6youkyuu-2__06.txt",
+      "status": "NOT_IN_FROZEN_MANIFEST"
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/fsa.go.jp__common__budget__yosan__6youkyuu-2__07.txt",
+      "status": "NOT_IN_FROZEN_MANIFEST"
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/fsa.go.jp__common__budget__yosan__6youkyuu-2__08.txt",
+      "status": "NOT_IN_FROZEN_MANIFEST"
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/fsa.go.jp__common__budget__yosan__6youkyuu-2__09.txt",
+      "status": "NOT_IN_FROZEN_MANIFEST"
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/fsa.go.jp__common__budget__yosan__6youkyuu-2__10.txt",
+      "status": "NOT_IN_FROZEN_MANIFEST"
+    }
+  ],
+  "sourceFileCount": 60,
+  "candidateTotalTableSourceCount": 2,
+  "candidateTotalTablePageCount": 4,
+  "tableBlockCount": 2,
+  "titleOnlyPageCount": 3,
+  "logicalRowCount": 60,
+  "rowTypeCounts": {
+    "CODE3": 24,
+    "DETAIL": 30,
+    "HIER": 4,
+    "TOTAL": 2
+  },
+  "parseStatusCounts": {
+    "PARSED": 60
+  },
+  "rowsWithContinuation": {
+    "CODE3": 4,
+    "DETAIL": 8
+  },
+  "continuationLineCount": {
+    "CODE3": 4,
+    "DETAIL": 8
+  },
+  "unresolvedCount": 0,
+  "unresolvedByReason": {},
+  "numericTailFailureCount": 0,
+  "unknownRowHeadCount": 0,
+  "lineClassCounts": {
+    "CONTEXT": 2,
+    "CONTINUATION": 12,
+    "ROW": 60,
+    "TABLE_HEADER": 24,
+    "TABLE_TITLE": 2,
+    "UNIT": 2
+  },
+  "blankLinesInCandidatePages": 22,
+  "signedCellsByColumn": {
+    "previous_general": 0,
+    "previous_other": 0,
+    "previous_total": 0,
+    "request_general": 0,
+    "request_other": 0,
+    "request_total": 0,
+    "difference": 2
+  },
+  "detailPageShape": {
+    "<blank>": 2,
+    "N": 2,
+    "電 N": 56
+  },
+  "arithmeticDiagnostics": {
+    "rowsWithMismatch": 0,
+    "byCheck": {}
+  },
+  "sources": [
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__10.txt",
+      "pageCount": 4,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__11.txt",
+      "pageCount": 4,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__12.txt",
+      "pageCount": 2,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__13.txt",
+      "pageCount": 3,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__14.txt",
+      "pageCount": 1,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__15.txt",
+      "pageCount": 1,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__16.txt",
+      "pageCount": 7,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__17.txt",
+      "pageCount": 11,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__18.txt",
+      "pageCount": 1,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__19.txt",
+      "pageCount": 1,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__2.txt",
+      "pageCount": 2,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__20.txt",
+      "pageCount": 11,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__21.txt",
+      "pageCount": 6,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__22.txt",
+      "pageCount": 13,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__23.txt",
+      "pageCount": 35,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__24.txt",
+      "pageCount": 2,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__25.txt",
+      "pageCount": 15,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__26.txt",
+      "pageCount": 17,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__27.txt",
+      "pageCount": 2,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__28.txt",
+      "pageCount": 2,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__29.txt",
+      "pageCount": 2,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__3.txt",
+      "pageCount": 2,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__30.txt",
+      "pageCount": 2,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__31.txt",
+      "pageCount": 1,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__32.txt",
+      "pageCount": 3,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__33.txt",
+      "pageCount": 12,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__34.txt",
+      "pageCount": 55,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__35.txt",
+      "pageCount": 5,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__36.txt",
+      "pageCount": 2,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__37.txt",
+      "pageCount": 1,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__38.txt",
+      "pageCount": 1,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__39.txt",
+      "pageCount": 14,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__4.txt",
+      "pageCount": 12,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__40.txt",
+      "pageCount": 7,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__41.txt",
+      "pageCount": 19,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__42.txt",
+      "pageCount": 3,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__43.txt",
+      "pageCount": 22,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__44.txt",
+      "pageCount": 4,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__45.txt",
+      "pageCount": 7,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__46.txt",
+      "pageCount": 6,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__47.txt",
+      "pageCount": 3,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__48.txt",
+      "pageCount": 11,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__49.txt",
+      "pageCount": 4,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__5.txt",
+      "pageCount": 6,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__50.txt",
+      "pageCount": 16,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__6.txt",
+      "pageCount": 1,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__7.txt",
+      "pageCount": 2,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__8.txt",
+      "pageCount": 1,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__9.txt",
+      "pageCount": 2,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/cao.go.jp__yosan__soshiki__r06__pdf__e1.txt",
+      "pageCount": 3,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        2,
+        3
+      ],
+      "titleOnlyPages": [
+        1
+      ],
+      "blocks": [
+        {
+          "table_block_id": "cao.go.jp__yosan__soshiki__r06__pdf__e1#b1",
+          "pages": [
+            2,
+            3
+          ],
+          "titlePages": [
+            2
+          ],
+          "contextLines": [
+            "9905 エ ネ ル ギ ー 対 策 特 別 会 計 （電源開発促進勘定）"
+          ],
+          "rows": 30
+        }
+      ],
+      "rows": 30,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/fsa.go.jp__common__budget__yosan__6youkyuu-2__02.txt",
+      "pageCount": 3,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/fsa.go.jp__common__budget__yosan__6youkyuu-2__03.txt",
+      "pageCount": 43,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/fsa.go.jp__common__budget__yosan__6youkyuu-2__04.txt",
+      "pageCount": 3,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/fsa.go.jp__common__budget__yosan__6youkyuu-2__05.txt",
+      "pageCount": 3,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/fsa.go.jp__common__budget__yosan__6youkyuu-2__06.txt",
+      "pageCount": 3,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/fsa.go.jp__common__budget__yosan__6youkyuu-2__07.txt",
+      "pageCount": 4,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/fsa.go.jp__common__budget__yosan__6youkyuu-2__08.txt",
+      "pageCount": 9,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/fsa.go.jp__common__budget__yosan__6youkyuu-2__09.txt",
+      "pageCount": 6,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/fsa.go.jp__common__budget__yosan__6youkyuu-2__10.txt",
+      "pageCount": 1,
+      "endsWithFormFeed": true,
+      "candidatePages": [],
+      "titleOnlyPages": [],
+      "blocks": [],
+      "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2024/mext.go.jp__content__20230914-mxt_kaikesou01-000031817_08.txt",
+      "pageCount": 25,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5,
+        6
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "mext.go.jp__content__20230914-mxt_kaikesou01-000031817_08#b1",
+          "pages": [
+            5,
+            6
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "9905 エ ネ ル ギ ー 対 策 特 別 会 計 （電源開発促進勘定）"
+          ],
+          "rows": 30
+        }
+      ],
+      "rows": 30,
+      "unresolved": 0
+    }
+  ]
+}

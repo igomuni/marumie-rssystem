@@ -3,7 +3,7 @@
  "scope": "frozen v0 specification の literal implementation の full-corpus 出力 manifest。rule 変更・GT 由来の調整なし。open-set safety は NOT EVALUATED",
  "specVersion": "page-classification-v0-frozen",
  "frozenInput": {
-  "rawTextCorpusDigestSha256": "7e656f2dde889767bc6408ec630e2ee8ba2f95dee2ae208f11a643ed5510dd4b",
+  "rawTextCorpusDigestSha256": "8d83ff700685cc3e1c8765da24d9285f7184bcacb3d878856934a5cc19740963",
   "phaseAFixtureSha256": null
  },
  "implementation": {
@@ -16,45 +16,45 @@
   "platform": "darwin-arm64"
  },
  "summary": {
-  "totalPages": 8855,
+  "totalPages": 8933,
   "rawStatus": {
-   "EMPTY": 121,
-   "EXTRACTED": 8734
+   "EMPTY": 130,
+   "EXTRACTED": 8803
   },
   "classificationStatus": {
-   "NO_TEXT": 121,
-   "RESOLVED": 8724,
+   "NO_TEXT": 130,
+   "RESOLVED": 8793,
    "UNRESOLVED": 10
   },
   "pageType": {
-   "COVER": 72,
-   "DETAIL": 8340,
+   "COVER": 75,
+   "DETAIL": 8397,
    "PRIORITY_DETAIL": 4,
    "PRIORITY_SUMMARY": 1,
-   "STAFFING": 55,
-   "SUMMARY": 167,
-   "TOC": 85,
+   "STAFFING": 58,
+   "SUMMARY": 170,
+   "TOC": 88,
    "UNRESOLVED": 10,
-   "null": 121
+   "null": 130
   },
   "source": {
-   "DIRECT": 378,
-   "INHERITED": 8346,
-   "null": 131
+   "DIRECT": 393,
+   "INHERITED": 8400,
+   "null": 140
   },
   "unresolvedReason": {
    "NO_ACTIVE_STATE": 10
   },
   "noTextReason": {
-   "NO_TEXT_UNRESOLVED": 121
+   "NO_TEXT_UNRESOLVED": 130
   },
   "resetCounts": {
    "DIRECT_NON_INHERITABLE": 11,
-   "NO_TEXT_UNRESOLVED": 63
+   "NO_TEXT_UNRESOLVED": 69
   },
   "bridgedBlankPages": 0,
   "pageLossOrDuplicate": 0,
-  "corpusClassificationDigestSha256": "111ff67c3279a04af7e5c33bed5e39c670de3f9cdee956ddf6ee3713b075d66a"
+  "corpusClassificationDigestSha256": "448bc6e877d718b1e3d78b4ae03a2e6e6d2488a388df32cca5174e72b04d3904"
  },
  "conformance": {
   "totalMismatch": 0
@@ -456,6 +456,11 @@
    "classificationDigestSha256": "03055e4bb5623f8262ddf6d40b15c34ec0314f1d3b140e791b6c9707c0f87ef9"
   },
   {
+   "localPdfPath": "data/download/clb.go.jp/files/topics/5125_ext_05_0.pdf",
+   "pageCount": 26,
+   "classificationDigestSha256": "fb17d9adc36821ae00c3f9e7a0da01191f355c8b07982f131ae249ac4eac274e"
+  },
+  {
    "localPdfPath": "data/download/courts.go.jp/assets/R08saisyutsu_gaisanyoukyusyo_510kb.pdf",
    "pageCount": 118,
    "classificationDigestSha256": "0e0114cbc7b3a3742cec6e75f484655e450f84fb443c3446155da6db3cccbe73"
@@ -706,9 +711,19 @@
    "classificationDigestSha256": "d7c1072d9ac6e1d8b7b371453f4a6d1ebf5774a40e30112d979dc9ba89659641"
   },
   {
+   "localPdfPath": "data/download/ppc.go.jp/files/pdf/250829youkyu.pdf",
+   "pageCount": 31,
+   "classificationDigestSha256": "3389612cc364a7fecea4f643c82de4f1fca1cad1d0d7c4e2cf3b7e69894a1a63"
+  },
+  {
    "localPdfPath": "data/download/reconstruction.go.jp/files/user/2025/09/2025_fukkochougaisansaisyutsu.pdf",
    "pageCount": 102,
    "classificationDigestSha256": "cb50caad5f864c53db91291adc863c5f02f371eb51e05d3e4acdcc14d00fd37e"
+  },
+  {
+   "localPdfPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r8gaisan-yokyusyo-2.pdf",
+   "pageCount": 21,
+   "classificationDigestSha256": "b797cecad5feb762e208b857423de23bbd09a328f5298a5b923d77dc14004f3a"
   },
   {
    "localPdfPath": "data/download/shugiin.go.jp/internet/itdb_annai.nsf/html/statics/osirase/kaikei-saishutsugaisan8.pdf/%24File/kaikei-saishutsugaisan8.pdf",

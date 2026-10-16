@@ -1,0 +1,20 @@
+{
+ "year": null,
+ "coverPages": 4,
+ "sources": 4,
+ "rows": 20,
+ "rowKinds": {
+  "HEADER": 4,
+  "TITLE": 4,
+  "SECTION": 8,
+  "SCOPE": 4
+ },
+ "pageStatus": {
+  "RESOLVED": 4
+ },
+ "unclassifiedLines": 0,
+ "inventoryPageTextHash": {
+  "match": 4,
+  "mismatch": 0
+ }
+}

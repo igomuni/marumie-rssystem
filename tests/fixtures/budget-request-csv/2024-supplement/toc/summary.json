@@ -1,0 +1,69 @@
+{
+  "schema": "budget-request-toc-pdf-native-csv/v0",
+  "extraction": {
+    "library": "pdfjs-dist",
+    "version": "5.4.296",
+    "optionsId": "pdfjs-5.4.296-disableNormalization-true-cmaps-standardfonts-verbosity0-v1"
+  },
+  "parameters": {
+    "rowToleranceFactor": 0.25,
+    "headerBandFactor": 4,
+    "headerBottomToleranceFactor": 0.5,
+    "pageRefRightEdgeFactor": 1,
+    "pageRefZoneLeftFactor": 2,
+    "requestNumberCenterFactor": 0.75,
+    "prefixGapFactor": 1.5
+  },
+  "population": {
+    "tocPages": 1,
+    "pdfs": 1,
+    "pagesWithColumnEvidence": 1,
+    "pagesWithoutColumnEvidence": 0
+  },
+  "counts": {
+    "items": 319,
+    "itemDisposition": {
+      "blank": 143,
+      "headerZone": 26,
+      "entry": 150,
+      "unresolved": 0
+    },
+    "entries": 32,
+    "entriesByShape": {
+      "TITLE_PAGE": 3,
+      "MARKER": 14,
+      "NUMBERED": 15
+    },
+    "auditRecords": 0,
+    "auditRecordsByKind": {},
+    "geometricRows": {
+      "left": 32,
+      "right": 0
+    }
+  },
+  "inputs": {
+    "inventory": {
+      "path": "tests/fixtures/budget-request-cover-toc-structure/2024-supplement/structure-inventory.json",
+      "sha256": "9476a54dd82750adaca653b1f69dae8f7f3fcee53185c158cb57978eee470e91"
+    },
+    "pdfs": [
+      {
+        "source_pdf": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_08.pdf",
+        "pdf_sha256": "fa30da231f9e890b7edd5a664e87db047875ebc90331684308bc278fadeaf4c1",
+        "toc_pages": [
+          3
+        ]
+      }
+    ],
+    "code": [
+      {
+        "path": "scripts/pipeline-v2/lib/budget-request-toc-pdf-native-csv.ts",
+        "sha256": "8692116d08788f98f8aaeea4a1977a1a88cbae1e5c0bd8cd26c836de41f2f68a"
+      },
+      {
+        "path": "scripts/pipeline-v2/build-budget-request-toc-pdf-native-csv.ts",
+        "sha256": "a776552053049f53f627ac7bb85e8228494078af8de10254c6251c351d5778b0"
+      }
+    ]
+  }
+}

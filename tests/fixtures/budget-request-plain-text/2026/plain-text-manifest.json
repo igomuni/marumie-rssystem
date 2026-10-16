@@ -3,7 +3,7 @@
   "fiscalYear": 2026,
   "frozenPdfCorpus": {
     "path": "tests/fixtures/budget-request-pdf-corpus/2026/pdf-corpus-freeze.json",
-    "sha256": "55ec93cb20a0825b282fe188f56d68c3d09368e0ad1585e148ab923c2cac7aa7"
+    "sha256": "c8cd4d2409a07fde8bd635f20cfde4b42d4513147c53680cae848368107c7aa2"
   },
   "extraction": {
     "tool": "pdftotext version 26.09.0",
@@ -13,8 +13,8 @@
       "UTF-8"
     ]
   },
-  "physicalPdfs": 135,
-  "physicalPages": 8855,
+  "physicalPdfs": 138,
+  "physicalPages": 8933,
   "documents": [
     {
       "localPdfPath": "data/download/caa.go.jp/policies/budget/assets/caa_cms_205_250912_0001.pdf",
@@ -1657,6 +1657,42 @@
         "65e143c08e7a91ee1a44ac5a8238f8b3f54fbc2b3da5c8cf91127535e62fceec",
         "f91d5545725a5163649c9061df4cabdfff747089d54a1832650470a707c47010",
         "0d616728d25c7b9f220ea358f062a1c0d13b2f78dbd89f9bf6dfe11ee5fda26d"
+      ]
+    },
+    {
+      "localPdfPath": "data/download/clb.go.jp/files/topics/5125_ext_05_0.pdf",
+      "textFile": "clb.go.jp__files__topics__5125_ext_05_0.txt",
+      "pdfSha256": "78607a1b206a5c963569d349033ab5bc0de737583aa5cb16c524bfad9e5d8ee4",
+      "pageCount": 26,
+      "status": "EXTRACTED",
+      "textSha256": "55d8a4190b191b13397f2108c5af00d9a034755d785e35f42a7b0d5e873c4e0f",
+      "pageTextSha256": [
+        "1f0a5b3fa022e8df680105390b4eeed8bfb1dafa650e12ff06aaa93c92552058",
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "37fe053a322565c955643b115b5236457ad684996cc17ebab3dbdd80bec49089",
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "8d7668ffcafe4f27bf69784e1c6bdb4948742df61b1923276f450ac94885033d",
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "f33e04b2b05fe5a20ede73b6df3a1d393e6b425a756b4fd02b459914cfafd5bc",
+        "0ee622f2f20a052c2dad8b961b7ba2f92efa62a364d7e32ac152f248e307e1e5",
+        "57e4fa28b3ef399f4805f76b0f9b611119e1fba749b477d03cd7b3c6b1cbfc7a",
+        "a43222f8dd37041101be7c1c79af6922aec3b9a4818f08a46a9e43a50f502395",
+        "1a4cc74a0ddaa0eee96336e256dc51c20e3414a25ec15e18440d0eaaa9671fc3",
+        "1ec706aced3dd0092a59d85b78c4b0cd05dc213233ab0f7e98273a1cebc140a3",
+        "c144a386845810e03d81ee0135111d5dfee8fda06d7d1523fa1a05de3cffe6fb",
+        "56d8dd129c70e9dfafb7eb02cf2f7fe5b389c92ab3ae8672401d12e09c058a0a",
+        "5b964d6989d38e1247b64cf74132861b52cea34a0597b312c41c2e5a3095e0b0",
+        "cd4ed894a0fc92fb05da89665a10c14ff88a3c68c4f1c1d7309014756b23b271",
+        "8862d7dedffc7ff661be69a0e2707c6a622e35cd84ac6c97165203c4ff84bac0",
+        "1fd0034dc16e5eb25c754eb13f4f32c7baddb54299631bbd0817102bf221e5e1",
+        "8f98825ba6e0139b7f6cfbab8e462caff92b920a0211c2c1a9935635b46bd609",
+        "8bb166c0b2e83c523faf10d863446d2b4a582b0364d60869bc75d948989a3361",
+        "304feba8aedc820d67a85ad8286f8fc038d1ac11bc27df0b1d0b9b1a5007bbc7",
+        "6d63485e50dd02febf40932b957f9693ed3c26986dbe32087fc17fecf7eaed34",
+        "a67d46769335894c07a8fa0fa55ca8fe0dfe66144340caed9aa3bcc634312b36",
+        "3602268c5f2bb0b5f85a6e9f7231a57758e0e2d2bf369ef01ad552fbbf2eb578",
+        "f936d3403d6f4c0cb98e5b3eb17be8a36c405cab4568a081bdd538b585b7afb9",
+        "ed252e93d94726e3d514c525b77fa3886dc6cf8aca7cbf01259cadc90f3dcc7a"
       ]
     },
     {
@@ -9603,6 +9639,47 @@
       ]
     },
     {
+      "localPdfPath": "data/download/ppc.go.jp/files/pdf/250829youkyu.pdf",
+      "textFile": "ppc.go.jp__files__pdf__250829youkyu.txt",
+      "pdfSha256": "b11cc8d7d822f4a7dc1b0bd17a3ad3164b4ce047450b34f54a283341efd5d67b",
+      "pageCount": 31,
+      "status": "EXTRACTED",
+      "textSha256": "7816afc0a48f8ee1e30f5cd5d55d576bdb33fee8c15fd91aa8cf1c6493989107",
+      "pageTextSha256": [
+        "06f1dec379a2860eb163480c41e336af57e8cc7541a838e62af79357f2ef6348",
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "68405e3d383ebdb64af5dd641d7efbfc3902a0ada3eb1b98be193d012acc9906",
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "933c35135f20c83d7f41297e48438f2a1e9eba9b4043e55cc2d0a05b625eba46",
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "df65c027fea8ca9d7d435e532445e1544dc1608d9ae8285e1f2f6ab7e0d66672",
+        "122da0a16bdf1c8b5446572199fb2bbd0b28ccb950270b82f6859c769c08dc50",
+        "7991c5d83c1d2e3072e71bac650920582d4f1d68bd7b2d6ea21d96de3db768c1",
+        "5be779d55cbda789fd3b2261a1e07bb72de4982be1ec70e49c7037c164d6bf04",
+        "4dc929a4b93a35f15321bd66b697625053af7254a1081a6783509513d58b5b05",
+        "d40a4633e0d0a5333da6046ecec6dcdfc3c3cb7251dccc07c6615836b2d32656",
+        "d4961a724dab0fee5e48bff544b9e697c81fc0159d1c54999e68449b89d9de22",
+        "b4c2a4943a3fd439afea9b6a62cce34351407fd22177ecd696c122b39dcb143c",
+        "9151e58d314bd9604c28b642803787f59ddfe9271b7710e3608b3d27eca482d9",
+        "c2fa8b8aa9e37b12dcc02b1fcae16928bfa15bb85fe66e5264800eb1363e6e79",
+        "41ade3a8c9ec4e719bf10354fe05edc2b7f43fad876f5dfa70635a86081a96bf",
+        "d1d2160fc8e3d43af92e1be3dc6cbdfaa7cb1c5232c64ebb353b94014f5e5719",
+        "4ed9688802233e0f39349e90f07d701601c33325c17cf5621778979cb833480f",
+        "d92689cef70982d46169adb30646cb0a580c14f0003cadae41e8e4d6a63a604c",
+        "81f9cece98a607121bd59018766de09fd2a3d9481009b9767dbb3b14b6c59a90",
+        "94619422e2c205bbb1d8f92e6dff93b8f9f3b3cc8d7770018da519c19c8c941a",
+        "a1d9baef513c9bd57edd538b1ff7d27a6ac63f0f46c77f656ca0384859c07528",
+        "e265d5e6f8cc9e21060218469a97987846d7a31c64056a1784c29aa18c516fa5",
+        "b6b771807256e3afd12d13ee1d5f09edfd9047d2dc54cb92831e5720ad29e59d",
+        "02b8700f6f4bef145602361c7bc898d1c3300291cc63cc6990d144c6ee55f191",
+        "210e921768b779c924ccb9bfcee5560b539cd6461f262eb0b9872f80a163cd9d",
+        "fcdbfca4ca02622811d0f1567eade77cd3bb0383711d30ecfd25a45abeff4383",
+        "018913a25a6c971e744e23790d0f12000c8f21a6ae2ced2ef902042c264c0588",
+        "1874c650a2ad88c9a1caa2eeecaddd07fc1b5fabb02ca5fa47aeaaec16371bc3",
+        "507d0c61abca871c93f40ef7ef2def4027471f62637933b96a3a01dce3b7c0d5"
+      ]
+    },
+    {
       "localPdfPath": "data/download/reconstruction.go.jp/files/user/2025/09/2025_fukkochougaisansaisyutsu.pdf",
       "textFile": "reconstruction.go.jp__files__user__2025__09__2025_fukkochougaisansaisyutsu.txt",
       "pdfSha256": "b35cbe4e11b2636fbea24c855de1951af7c3b5c0ff343a9428425d09ee155c5e",
@@ -9712,6 +9789,37 @@
         "dd70d105c0575ffccfe2e999d8c7ee3cda3f3b32ddf8a341085afc9da2072cf0",
         "0d7a9854e62cf88808d51e2a1a71e557ac53e473f0dc03e9b91895d230d225c6",
         "476145ed59e4973eb4471f18783a7fc55c123b32b46ff359da670cb7de24f033"
+      ]
+    },
+    {
+      "localPdfPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r8gaisan-yokyusyo-2.pdf",
+      "textFile": "sangiin.go.jp__jpn__annai__oshirase__pdf__r8gaisan-yokyusyo-2.txt",
+      "pdfSha256": "4fb4d22630a34098c90a96867c929e2bbab48fec5712bf8005d0169c073baa8f",
+      "pageCount": 21,
+      "status": "EXTRACTED",
+      "textSha256": "c648d98419e7df9e75d14c75ae464a0f3c87ae90639576d0d55427b0b64f978a",
+      "pageTextSha256": [
+        "e35727945e143f106b17b822f80c8726d047b197ab46ca0f61d8ab9bce53910b",
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "5e182a5c80395cfcc0333c83c39fb0fc3e650bf580894633eec74f9a0fa322df",
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "70204f8f8a584cc8c16befb02a73032323e9db14d3ac470d92da98ad814e1d25",
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "0cd22a8ba324faacdf3ddaf7c97fd516a2b2069080ed886db65fcf77149e8cc1",
+        "a7f606adbdb24921c897501e9abecb7a83fcfc4a894bea7588bcfd036678d296",
+        "5db1dd0ce27b065e4adfb94b7924dc93c31adee4277b11c3ae3984800bbd5ec5",
+        "016708288ef070554acd32fd5641b1f31c6df2da2f28289992282cbd308a23ce",
+        "282ecf5013df8e62aeba4ab70800bd1bed150171a7c9d0ef2c41ed0d77f1d7b6",
+        "b56996915a24ad030631dec953c1332e87e5fdc11836a03be5e2c68f573409e4",
+        "923bc87576e782286e248be86a577f239569c49844c02192f541d4772a683bf6",
+        "c2447a75d4ecbb6979c8ddf5378302127ebe1dbc67c83297d9bbb34e22389ea6",
+        "e94ac49830b3789417aef299925f62e6425b3c094f04a37374e56402f0da8680",
+        "4fef77884492cb941b042b8b76f87ef85dc8726b7eb2b5d5cdec6d5fbae34cc6",
+        "4e3045ca99752bc2317b38a26982acda599e260c7df8e685b18e17b338b39caa",
+        "bae3a4df1b0b51c663dfeac9e740471c66385dd525e3c9d048b42635af88a4b8",
+        "15b9cab13c917f0bc8cfbd5e58fd1574cf5554bd323d801e4793c9877d09b028",
+        "118f2cf3ebca9bc0aea66eb4c50e234d4237f1c280aae72850db3560a329ac95",
+        "6158b232d30f99dcf1a3115b19bbcdbec2ef763aeafbc7a65df28a4203538161"
       ]
     },
     {

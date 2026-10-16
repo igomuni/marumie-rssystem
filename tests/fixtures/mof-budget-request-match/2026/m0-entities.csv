@@ -16,6 +16,8 @@ cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e45
 cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__bdd2b4b4__20250918_policies_budget_84,toc:会計,08 子ども・子育て支援,子ども・子育て支援,子ども・子育て支援,MATCHED,
 cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__bdd2b4b4__20250918_policies_budget_84,toc:勘定,1 子ども・子育て支援勘定,子ども・子育て支援勘定,子ども・子育て支援勘定,MATCHED,
 cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__bdd2b4b4__20250918_policies_budget_84,toc:勘定,2 育児休業等給付勘定,育児休業等給付勘定,育児休業等給付勘定,MATCHED,
+clb.go.jp__files__topics__5125_ext_05_0,context,05 内閣所管(内閣法制局（内閣法制局）),内閣,内閣,MATCHED,general
+clb.go.jp__files__topics__5125_ext_05_0,toc:組織,020 内閣法制局,内閣法制局,内閣法制局,MATCHED,
 courts.go.jp__assets__R08saisyutsu_gaisanyoukyusyo_510kb,context,03 裁判所所管（裁判所）,裁判所,裁判所,MATCHED,general
 courts.go.jp__assets__R08saisyutsu_gaisanyoukyusyo_510kb,toc:組織,010 裁判所,裁判所,裁判所,MATCHED,
 dangai.go.jp__info__pdf__r08_saisyutu-gaisan,context,02 国会所管（裁判官弾劾裁判所）,国会,国会,MATCHED,general
@@ -198,6 +200,8 @@ npa.go.jp__policies__budget__r8__gaisanyokyu__hukkoutokubetukaikei,toc:所管,31
 npa.go.jp__policies__budget__r8__gaisanyokyu__hukkoutokubetukaikei,toc:組織,010 復興庁,復興庁,,OUT_OF_SCOPE,special_source_has_org_label
 npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei,context,19 内閣府所管,内閣府,内閣府,MATCHED,general
 npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei,toc:組織,070 警察庁,警察庁,警察庁,MATCHED,
+ppc.go.jp__files__pdf__250829youkyu,context,19 内閣府所管（個人情報保護委員会）,内閣府,内閣府,MATCHED,general
+ppc.go.jp__files__pdf__250829youkyu,toc:組織,096 個人情報保護委員会,個人情報保護委員会,個人情報保護委員会,MATCHED,
 reconstruction.go.jp__files__user__2025__09__2025_fukkochougaisansaisyutsu,context,9101 東日本大震災復興特別会計,東日本大震災復興,東日本大震災復興,MATCHED,special
 reconstruction.go.jp__files__user__2025__09__2025_fukkochougaisansaisyutsu,toc:会計,01 東日本大震災復興,東日本大震災復興,東日本大震災復興,MATCHED,
 reconstruction.go.jp__files__user__2025__09__2025_fukkochougaisansaisyutsu,toc:所管,20 総務省,総務省,,OUT_OF_SCOPE,special_source_has_ministry_label
@@ -206,6 +210,8 @@ reconstruction.go.jp__files__user__2025__09__2025_fukkochougaisansaisyutsu,toc:�
 reconstruction.go.jp__files__user__2025__09__2025_fukkochougaisansaisyutsu,toc:組織,010 財務本省,財務本省,,OUT_OF_SCOPE,special_source_has_org_label
 reconstruction.go.jp__files__user__2025__09__2025_fukkochougaisansaisyutsu,toc:所管,31 復興庁,復興庁,,OUT_OF_SCOPE,special_source_has_ministry_label
 reconstruction.go.jp__files__user__2025__09__2025_fukkochougaisansaisyutsu,toc:組織,010 復興庁,復興庁,,OUT_OF_SCOPE,special_source_has_org_label
+sangiin.go.jp__jpn__annai__oshirase__pdf__r8gaisan-yokyusyo-2,context,02 国会所管（参議院）,国会,国会,MATCHED,general
+sangiin.go.jp__jpn__annai__oshirase__pdf__r8gaisan-yokyusyo-2,toc:組織,020 参議院,参議院,参議院,MATCHED,
 shugiin.go.jp__internet__itdb_annai.nsf__html__statics__osirase__kaikei-saishutsugaisan8.pdf__%24File__kaikei-saishutsugaisan8,context,02 国会所管（衆議院）,国会,国会,MATCHED,general
 shugiin.go.jp__internet__itdb_annai.nsf__html__statics__osirase__kaikei-saishutsugaisan8.pdf__%24File__kaikei-saishutsugaisan8,toc:組織,010 衆議院,衆議院,衆議院,MATCHED,
 sotsui.go.jp__budget__images__r8budget_yokyu,context,02 国会所管（裁判官訴追委員会）,国会,国会,MATCHED,general
