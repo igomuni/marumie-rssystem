@@ -1,0 +1,82 @@
+{
+  "selection": "FY2025 detail-table-mof-match: status == AMBIGUOUS_J1_MULTI and k2_candidates == 1（全件。追加・削除しない）",
+  "inputs": {
+    "matchOutputManifest": "5b17a565e3a3f2666edf6399a547ad5f61043385d9e90b35f833921c2b0956a1",
+    "detailOutputManifest": "0bdeeb372f3fd8450fba35274c4af7994434ddcf2447d6d048f1284ef428a0a7",
+    "plainTextZip": "11909d768c38c025c70178755dea1f84280e85c124575f380af3e786a28889f2",
+    "pdfCorpus": "731fa1458be0ec6c9c060f4bb7f67c3c4269e8d7029652bf095f18eed72d1f2d"
+  },
+  "candidates": 147,
+  "candidates_csv_sha256": "9a1266bbfd778661ffa8be98d7bda7ba85fe8f675d3267887bc364cd5bced4d1",
+  "window": {
+    "pagesBeforeTarget": 5,
+    "rule": "対象頁と、同じ PDF のその前の WINDOW 頁（1頁未満は切る）。対象ごとに変えない"
+  },
+  "pdfs": {
+    "cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__d8acbb82__20240830_policies_budget_28": {
+      "path": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/d8acbb82/20240830_policies_budget_28.pdf",
+      "sha256": "b2cc7cace7a9f51747b69b1f137310124fb85ff3e4f4aea686d020d35ec3b697",
+      "pageCount": 150
+    },
+    "courts.go.jp__vc-files__courts__2024__R07saisyutsu_gaisanyoukyusyo_527kb": {
+      "path": "data/download/courts.go.jp/vc-files/courts/2024/R07saisyutsu_gaisanyoukyusyo_527kb.pdf",
+      "sha256": "fa53c70939ee9a69ed69b84f9f11aae93964c7eb6fe03082090b4802808aefad",
+      "pageCount": 120
+    },
+    "env.go.jp__content__000248527": {
+      "path": "data/download/env.go.jp/content/000248527.pdf",
+      "sha256": "f7ee728602b3d48ac154b0ed2646ca31690dba61a47d868d0227a6277319b074",
+      "pageCount": 248
+    },
+    "fsa.go.jp__common__budget__yosan__7youkyuu-2__01": {
+      "path": "data/download/fsa.go.jp/common/budget/yosan/7youkyuu-2/01.pdf",
+      "sha256": "19da96c6e1d9c866593c3e36ef67baf90de05b77c51407a6d7cc015f38b932a2",
+      "pageCount": 74
+    },
+    "maff.go.jp__j__budget__attach__pdf__240902-2": {
+      "path": "data/download/maff.go.jp/j/budget/attach/pdf/240902-2.pdf",
+      "sha256": "8e782b8d436bae4a37372beb7d935f96c653b6c3f69e87df5be1bd9dad152caa",
+      "pageCount": 377
+    },
+    "meti.go.jp__main__yosangaisan__fy2025__pdf__ippan_o": {
+      "path": "data/download/meti.go.jp/main/yosangaisan/fy2025/pdf/ippan_o.pdf",
+      "sha256": "0bbee3d2244dbe5a4a7c8e650a996ee05fa46b67c321d45f17341dcd23372db9",
+      "pageCount": 114
+    },
+    "mext.go.jp__content__20240911-mxt_kaikesou01-000038011_3": {
+      "path": "data/download/mext.go.jp/content/20240911-mxt_kaikesou01-000038011_3.pdf",
+      "sha256": "444b394739952f72e2ecef3feb86441dcee77948c710772d79a0ddcce8be3c4f",
+      "pageCount": 1148
+    },
+    "mhlw.go.jp__wp__yosan__yosan__25syokan__dl__05-1b-01": {
+      "path": "data/download/mhlw.go.jp/wp/yosan/yosan/25syokan/dl/05-1b-01.pdf",
+      "sha256": "e04a73a7d0ca48550abccd48680d0d50db6be1d68e54fe9cb7a4fd9daf5f1282",
+      "pageCount": 1717
+    },
+    "mlit.go.jp__page__content__001762903": {
+      "path": "data/download/mlit.go.jp/page/content/001762903.pdf",
+      "sha256": "87996c8d77891387af82ba0c8c87b0b4e3172dfb5796dd70ce2628149ce200ce",
+      "pageCount": 935
+    },
+    "mod.go.jp__j__budget__gaisan__r7__gaisanyoukyu": {
+      "path": "data/download/mod.go.jp/j/budget/gaisan/r7/gaisanyoukyu.pdf",
+      "sha256": "df9ed512ac13f92bcfee872f510504cc1245b63b164369262a3458e70be68d8e",
+      "pageCount": 499
+    },
+    "mofa.go.jp__mofaj__files__100718578": {
+      "path": "data/download/mofa.go.jp/mofaj/files/100718578.pdf",
+      "sha256": "c7547e9e60d316088f6530eb3e3a4db981dd548f168894b9d35c3a0340109fc6",
+      "pageCount": 240
+    },
+    "npa.go.jp__policies__budget__r7__gaisanyokyu__ippankaikei": {
+      "path": "data/download/npa.go.jp/policies/budget/r7/gaisanyokyu/ippankaikei.pdf",
+      "sha256": "618603d5791b26531393231b7f55bbdbe6f9950c54a0e2b2b9a1f7ea0c77e98d",
+      "pageCount": 114
+    },
+    "soumu.go.jp__main_content__000967291": {
+      "path": "data/download/soumu.go.jp/main_content/000967291.pdf",
+      "sha256": "94908426d34dbf5cc83fc9f9855375008c74a86d3ecb9c74f9acc1d1a2812878",
+      "pageCount": 383
+    }
+  }
+}
