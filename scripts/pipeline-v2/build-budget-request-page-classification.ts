@@ -20,7 +20,8 @@ const FREEZE = process.argv.includes('--freeze-fixture');
 const YEAR_ARG = process.argv.find(a => a.startsWith('--year='))?.slice('--year='.length) ?? '2024';
 // --input=plain-text: Raw Text を別に作らず、plain text（tests/fixtures/budget-request-plain-text/{year}/plain-text-manifest.json と data/work/budget-request-plain-text/{year}/）から同じ page 単位の入力を得る。
 // 年度に "-supplement" を付けると、凍結済みの年度に後から足した PDF の補遺（例: 2024-supplement）を指す
-const PLAIN = process.argv.includes('--input=plain-text');
+// 既定: FY2024・FY2025 は従来どおり Raw Text（評価の記録が Raw Text の manifest に紐づく）。それ以外の年度は plain text（--input=raw-text で Raw Text を明示できる）
+const PLAIN = process.argv.includes('--input=plain-text') || (!process.argv.includes('--input=raw-text') && !['2024', '2025'].includes(YEAR_ARG));
 if (!/^\d{4}(-supplement)?$/.test(YEAR_ARG)) throw new Error(`--year must be a 4-digit fiscal year (optionally with -supplement): ${YEAR_ARG}`);
 const IS_FY2024 = YEAR_ARG === '2024';
 const DIR = path.join('tests', 'fixtures', 'budget-request-page-classification', YEAR_ARG);

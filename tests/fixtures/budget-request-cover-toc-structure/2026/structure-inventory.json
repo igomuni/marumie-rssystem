@@ -3,7 +3,7 @@
  "scope": "Page Classification v0 が COVER / TOC と routing した page の machine inventory。parser output ではない。logical row・semantic field は確定していない",
  "generator": "scripts/pipeline-v2/analyze-budget-request-cover-toc-structure.ts",
  "frozenInput": {
-  "rawTextCorpusDigestSha256": "8d83ff700685cc3e1c8765da24d9285f7184bcacb3d878856934a5cc19740963",
+  "plainTextCorpusDigestSha256": "c8cd4d2409a07fde8bd635f20cfde4b42d4513147c53680cae848368107c7aa2",
   "pageClassificationCorpusDigestSha256": "448bc6e877d718b1e3d78b4ae03a2e6e6d2488a388df32cca5174e72b04d3904"
  },
  "summary": {

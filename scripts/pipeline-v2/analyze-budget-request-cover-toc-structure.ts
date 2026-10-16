@@ -23,7 +23,8 @@ import type { PageClassificationRecord } from './lib/budget-request-page-classif
 const FREEZE = process.argv.includes('--freeze-fixture');
 const YEAR = process.argv.find(a => a.startsWith('--year='))?.slice('--year='.length) ?? '2024';
 // --input=plain-text: 頁分類と同じく、Raw Text を別に作らず plain text から page 単位の入力を得る。年度に "-supplement" を付けると補遺（例: 2024-supplement）
-const PLAIN = process.argv.includes('--input=plain-text');
+// 既定: FY2024・FY2025 は従来どおり Raw Text。それ以外の年度は plain text（--input=raw-text で Raw Text を明示できる）
+const PLAIN = process.argv.includes('--input=plain-text') || (!process.argv.includes('--input=raw-text') && !['2024', '2025'].includes(YEAR));
 if (!/^\d{4}(-supplement)?$/.test(YEAR)) throw new Error(`--year must be a 4-digit fiscal year (optionally with -supplement): ${YEAR}`);
 const IS_FY2024 = YEAR === '2024';
 const OUT_DIR = path.join('tests', 'fixtures', 'budget-request-cover-toc-structure', YEAR);

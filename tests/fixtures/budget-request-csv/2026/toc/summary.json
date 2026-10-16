@@ -49,7 +49,7 @@
   "inputs": {
     "inventory": {
       "path": "tests/fixtures/budget-request-cover-toc-structure/2026/structure-inventory.json",
-      "sha256": "7bc8f3c611c5beaffd9b9c61250d48a6484f7b8a56b4310b3424b854a2022893"
+      "sha256": "74ecaa9a5e8bd00d730d95c9fab9f7bb8cc792d13c68c8ae996b5a5adb9cfe65"
     },
     "pdfs": [
       {
