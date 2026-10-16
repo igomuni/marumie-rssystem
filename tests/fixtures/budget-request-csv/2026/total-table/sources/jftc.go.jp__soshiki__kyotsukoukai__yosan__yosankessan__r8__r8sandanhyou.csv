@@ -1,0 +1,11 @@
+要求番号,区分,前年度予算額_一般行政経費,前年度予算額_その他の経費,前年度予算額_計,８年度概算要求額_一般行政経費,８年度概算要求額_その他の経費,８年度概算要求額_計,増△減,明細書頁数,source_page,source_line_start,source_line_end,table_block_id,row_index,row_type,parse_status
+,065 公正取引委員会,"701,556","14,668,919","15,370,475","706,039","12,136,911","12,842,950","△2,527,525",3,5,43,43,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r8__r8sandanhyou#b1,1,CODE3,PARSED
+,121 公正取引委員会,"701,556","12,112,889","12,814,445","706,039","12,061,821","12,767,860","△46,585",3,5,44,44,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r8__r8sandanhyou#b1,2,CODE3,PARSED
+1,01‑95 公正取引委員会に必要な経費,"701,556","10,756,456","11,458,012","706,039","10,462,086","11,168,125","△289,887",4,5,45,45,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r8__r8sandanhyou#b1,3,DETAIL,PARSED
+2,06‑95 独占禁止法違反行為に対する措置等に必要な経費,0,"290,867","290,867",0,"290,492","290,492",△375,24,5,46,47,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r8__r8sandanhyou#b1,4,DETAIL,PARSED
+3,11‑95 公正な取引慣行の推進に必要な経費,0,"777,953","777,953",0,"1,027,762","1,027,762","249,809",32,5,49,49,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r8__r8sandanhyou#b1,5,DETAIL,PARSED
+4,16‑95 競争政策の普及啓発等に必要な経費,0,"287,613","287,613",0,"281,481","281,481","△6,132",41,5,50,50,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r8__r8sandanhyou#b1,6,DETAIL,PARSED
+,122 公正取引委員会施設費,0,"2,556,030","2,556,030",0,"75,090","75,090","△2,480,940",53,5,51,51,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r8__r8sandanhyou#b1,7,CODE3,PARSED
+5,01‑95 公正取引委員会施設整備に必要な経費,0,"2,556,030","2,556,030",0,"75,090","75,090","△2,480,940",54,5,52,52,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r8__r8sandanhyou#b1,8,DETAIL,PARSED
+,組織計,"701,556","14,668,919","15,370,475","706,039","12,136,911","12,842,950","△2,527,525",,5,53,53,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r8__r8sandanhyou#b1,9,TOTAL,PARSED
+,所管計,"701,556","14,668,919","15,370,475","706,039","12,136,911","12,842,950","△2,527,525",,5,54,54,jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r8__r8sandanhyou#b1,10,TOTAL,PARSED

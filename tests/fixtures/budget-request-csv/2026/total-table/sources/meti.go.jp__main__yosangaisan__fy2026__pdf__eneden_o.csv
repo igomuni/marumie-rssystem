@@ -1,0 +1,31 @@
+要求番号,区分,前年度予算額_一般行政経費,前年度予算額_その他の経費,前年度予算額_計,８年度概算要求額_一般行政経費,８年度概算要求額_その他の経費,８年度概算要求額_計,増△減,明細書頁数,source_page,source_line_start,source_line_end,table_block_id,row_index,row_type,parse_status
+,05 エネルギー対策,0,"420,929,444","420,929,444",0,"509,421,685","509,421,685","88,492,241",3,5,62,62,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,1,HIER,PARSED
+,2 電源開発促進勘定,0,"420,929,444","420,929,444",0,"509,421,685","509,421,685","88,492,241",3,5,63,63,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,2,HIER,PARSED
+,010 電源立地対策費,0,"173,356,824","173,356,824",0,"175,511,835","175,511,835","2,155,011",3,5,64,64,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,3,CODE3,PARSED
+1,01‑63 電源立地対策に必要な経費,0,"173,356,824","173,356,824",0,"175,511,835","175,511,835","2,155,011",3,5,65,65,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,4,DETAIL,PARSED
+,020 電源利用対策費,0,"13,117,018","13,117,018",0,"15,085,399","15,085,399","1,968,381",3,5,66,66,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,5,CODE3,PARSED
+2,10‑63 電源利用対策に必要な経費,0,"13,117,018","13,117,018",0,"15,085,399","15,085,399","1,968,381",3,5,67,67,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,6,DETAIL,PARSED
+,025 脱炭素成長型経済構造移行推進対策費,0,"88,905,500","88,905,500",0,"127,345,000","127,345,000","38,439,500",4,5,68,68,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,7,CODE3,PARSED
+3,01‑63 脱炭素成長型経済構造の移行推進に必要な経費,0,"88,905,500","88,905,500",0,"127,345,000","127,345,000","38,439,500",4,5,69,70,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,8,DETAIL,PARSED
+,030 原子力安全規制対策費,0,"25,193,926","25,193,926",0,"36,468,112","36,468,112","11,274,186",4,5,72,72,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,9,CODE3,PARSED
+4,10‑63 原子力の安全規制対策に必要な経費,0,"25,193,926","25,193,926",0,"36,468,112","36,468,112","11,274,186",4,5,73,73,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,10,DETAIL,PARSED
+,040 国立研究開発法人日本原子力研究開発機構運営費,0,"93,201,056","93,201,056",0,"112,340,723","112,340,723","19,139,667",5,5,74,75,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,11,CODE3,PARSED
+5,01‑63 国立研究開発法人日本原子力研究開発機構運営費交付金に必要な経費,0,"93,201,056","93,201,056",0,"112,340,723","112,340,723","19,139,667",5,5,77,78,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,12,DETAIL,PARSED
+,045 国立研究開発法人日本原子力研究開発機構施設整備費,0,0,0,0,"8,895,059","8,895,059","8,895,059",5,5,80,81,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,13,CODE3,PARSED
+6,01‑63 国立研究開発法人日本原子力研究開発機構施設整備に必要な経費,0,0,0,0,"8,895,059","8,895,059","8,895,059",5,5,83,84,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,14,DETAIL,PARSED
+,050 事務取扱費,0,"26,974,643","26,974,643",0,"33,595,080","33,595,080","6,620,437",5,5,86,86,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,15,CODE3,PARSED
+7,01‑63 事務取扱いに必要な経費,0,"14,650,843","14,650,843",0,"16,533,909","16,533,909","1,883,066",5,5,87,87,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,16,DETAIL,PARSED
+8,05‑63 電源立地対策に必要な経費,0,"189,646","189,646",0,"198,805","198,805","9,159",16,5,88,88,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,17,DETAIL,PARSED
+9,15‑63 電源利用対策に必要な経費,0,"97,547","97,547",0,"105,069","105,069","7,522",16,5,89,89,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,18,DETAIL,PARSED
+10,25‑63 原子力の安全規制対策に必要な経費,0,"12,036,607","12,036,607",0,"16,757,297","16,757,297","4,720,690",17,5,90,90,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,19,DETAIL,PARSED
+,060 諸支出金,0,417,417,0,417,417,0,20,5,91,91,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,20,CODE3,PARSED
+11,01‑63 返納金等の払戻しに必要な経費,0,417,417,0,417,417,0,20,5,92,92,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,21,DETAIL,PARSED
+,070 脱炭素成長型経済構造移行推進諸支出金,0,60,60,0,60,60,0,20,5,93,93,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,22,CODE3,PARSED
+12,01‑63 脱炭素成長型経済構造移行推進に係る返納金等の払戻しに必要な経費,0,60,60,0,60,60,0,20,5,94,95,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,23,DETAIL,PARSED
+,080 脱炭素成長型経済構造移行推進対策予備費,0,0,0,0,0,0,0,20,5,97,97,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,24,CODE3,PARSED
+13,01‑98 脱炭素成長型経済構造移行推進対策予備費,0,0,0,0,0,0,0,20,5,98,98,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,25,DETAIL,PARSED
+,090 予備費,0,"180,000","180,000",0,"180,000","180,000",0,20,5,99,99,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,26,CODE3,PARSED
+14,01‑98 予備費,0,"180,000","180,000",0,"180,000","180,000",0,20,5,100,100,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,27,DETAIL,PARSED
+,100 脱炭素成長型経済構造移行推進予備費,0,0,0,0,0,0,0,21,5,101,101,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,28,CODE3,PARSED
+15,01‑98 脱炭素成長型経済構造移行推進に係る予備費,0,0,0,0,0,0,0,21,6,109,109,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,29,DETAIL,PARSED
+,会計計,0,"420,929,444","420,929,444",0,"509,421,685","509,421,685","88,492,241",,6,110,110,meti.go.jp__main__yosangaisan__fy2026__pdf__eneden_o#b1,30,TOTAL,PARSED

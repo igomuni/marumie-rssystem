@@ -24,10 +24,16 @@ type FrozenDocument = { localPdfPath: string; pdfSha256: string; pageCount: numb
 const frozen = JSON.parse(fs.readFileSync(FROZEN, 'utf8')) as { documents: FrozenDocument[] };
 
 function main(): void {
-  const manifest = getBudgetRequestManifest(YEAR);
   const files: { localPdfPath: string; url: string }[] = [];
-  for (const src of manifest.sources) for (const doc of src.logicalDocuments) for (const file of doc.files) {
-    files.push({ localPdfPath: localPathFor(file.url, src.publisherDomain, DEFAULT_BASE_DIR).split(path.sep).join('/'), url: file.url });
+  const hasManifest = YEAR === 2024 || YEAR === 2025;
+  if (hasManifest) {
+    const manifest = getBudgetRequestManifest(YEAR);
+    for (const src of manifest.sources) for (const doc of src.logicalDocuments) for (const file of doc.files) {
+      files.push({ localPdfPath: localPathFor(file.url, src.publisherDomain, DEFAULT_BASE_DIR).split(path.sep).join('/'), url: file.url });
+    }
+  } else {
+    // manifest（人手で確認した目録）が無い年度（FY2026〜）は、凍結した PDF corpus の記録が取得集合そのもの
+    for (const d of frozen.documents as (FrozenDocument & { sourceUrl: string })[]) files.push({ localPdfPath: d.localPdfPath, url: d.sourceUrl });
   }
   const slugs = assertUniqueSlugs(files.map(f => f.localPdfPath));
   const frozenByPath = new Map(frozen.documents.map(d => [d.localPdfPath, d]));

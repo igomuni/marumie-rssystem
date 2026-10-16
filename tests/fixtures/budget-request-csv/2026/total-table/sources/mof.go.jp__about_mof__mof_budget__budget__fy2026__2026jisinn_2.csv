@@ -1,0 +1,10 @@
+要求番号,区分,前年度予算額_一般行政経費,前年度予算額_その他の経費,前年度予算額_計,８年度概算要求額_一般行政経費,８年度概算要求額_その他の経費,８年度概算要求額_計,増△減,明細書頁数,source_page,source_line_start,source_line_end,table_block_id,row_index,row_type,parse_status
+,07 地震再保険,0,"117,427,430","117,427,430",0,"124,882,194","124,882,194","7,454,764",2,3,43,43,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026jisinn_2#b1,1,HIER,PARSED
+,010 再保険費,0,"117,332,856","117,332,856",0,"124,783,089","124,783,089","7,450,233",2,3,44,44,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026jisinn_2#b1,2,CODE3,PARSED
+1,01‑95 地震再保険金支払に必要な経費,0,"117,332,856","117,332,856",0,"124,783,089","124,783,089","7,450,233",2,3,45,45,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026jisinn_2#b1,3,DETAIL,PARSED
+,020 事務取扱費,0,"94,074","94,074",0,"98,605","98,605","4,531",2,3,46,46,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026jisinn_2#b1,4,CODE3,PARSED
+2,01‑95 事務取扱いに必要な経費,0,"91,872","91,872",0,"96,392","96,392","4,520",2,3,47,47,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026jisinn_2#b1,5,DETAIL,PARSED
+3,04‑95 地震再保険事業に必要な経費,0,"2,202","2,202",0,"2,213","2,213",11,5,3,48,48,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026jisinn_2#b1,6,DETAIL,PARSED
+,090 予備費,0,500,500,0,500,500,0,6,3,49,49,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026jisinn_2#b1,7,CODE3,PARSED
+4,01‑98 予備費,0,500,500,0,500,500,0,6,3,50,50,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026jisinn_2#b1,8,DETAIL,PARSED
+,会計計,0,"117,427,430","117,427,430",0,"124,882,194","124,882,194","7,454,764",,3,51,51,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026jisinn_2#b1,9,TOTAL,PARSED

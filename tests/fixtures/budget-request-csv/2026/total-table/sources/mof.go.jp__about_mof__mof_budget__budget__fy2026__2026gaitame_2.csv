@@ -1,0 +1,14 @@
+要求番号,区分,前年度予算額_一般行政経費,前年度予算額_その他の経費,前年度予算額_計,８年度概算要求額_一般行政経費,８年度概算要求額_その他の経費,８年度概算要求額_計,増△減,明細書頁数,source_page,source_line_start,source_line_end,table_block_id,row_index,row_type,parse_status
+,05 外国為替資金,0,"1,545,794,724","1,545,794,724",0,"1,356,521,470","1,356,521,470","△189,273,254",2,3,47,47,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026gaitame_2#b1,1,HIER,PARSED
+,010 事務取扱費,0,"3,214,954","3,214,954",0,"5,690,068","5,690,068","2,475,114",2,3,48,48,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026gaitame_2#b1,2,CODE3,PARSED
+1,01‑95 事務取扱いに必要な経費,0,"615,015","615,015",0,"653,872","653,872","38,857",2,3,49,49,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026gaitame_2#b1,3,DETAIL,PARSED
+2,04‑95 外国為替市場及び国際金融システムの安定に必要な経費,0,"2,599,939","2,599,939",0,"5,036,196","5,036,196","2,436,257",6,3,50,51,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026gaitame_2#b1,4,DETAIL,PARSED
+,020 諸支出金,0,"454,022,607","454,022,607",0,"256,739,700","256,739,700","△197,282,907",13,3,52,52,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026gaitame_2#b1,5,CODE3,PARSED
+3,01‑95 手数料等に必要な経費,0,"454,022,607","454,022,607",0,"256,739,700","256,739,700","△197,282,907",14,3,53,53,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026gaitame_2#b1,6,DETAIL,PARSED
+,030 国債整理基金特別会計へ繰入,0,"788,556,315","788,556,315",0,"794,090,929","794,090,929","5,534,614",14,3,54,54,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026gaitame_2#b1,7,CODE3,PARSED
+4,01‑20 国債整理基金特別会計へ繰入れに必要な経費,0,"788,556,315","788,556,315",0,"794,090,929","794,090,929","5,534,614",14,3,55,55,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026gaitame_2#b1,8,DETAIL,PARSED
+,050 融通証券事務取扱費一般会計へ繰入,0,848,848,0,773,773,△75,14,3,56,56,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026gaitame_2#b1,9,CODE3,PARSED
+5,01‑20 融通証券事務取扱費の財源の一般会計へ繰入れに必要な経費,0,848,848,0,773,773,△75,14,3,57,58,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026gaitame_2#b1,10,DETAIL,PARSED
+,090 予備費,0,"300,000,000","300,000,000",0,"300,000,000","300,000,000",0,14,3,59,59,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026gaitame_2#b1,11,CODE3,PARSED
+6,01‑98 予備費,0,"300,000,000","300,000,000",0,"300,000,000","300,000,000",0,14,3,60,60,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026gaitame_2#b1,12,DETAIL,PARSED
+,会計計,0,"1,545,794,724","1,545,794,724",0,"1,356,521,470","1,356,521,470","△189,273,254",,3,61,61,mof.go.jp__about_mof__mof_budget__budget__fy2026__2026gaitame_2#b1,13,TOTAL,PARSED
