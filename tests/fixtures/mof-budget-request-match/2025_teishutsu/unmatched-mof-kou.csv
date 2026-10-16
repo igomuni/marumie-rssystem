@@ -1,13 +1,5 @@
 mof_row,account,kou_code,kou_name,item_name,reason,ministry,organization,special_account,sub_account
-kou-general:4,general,001,衆議院,,no_request_row,国会,衆議院,,
-kou-general:5,general,002,衆議院施設費,,no_request_row,国会,衆議院,,
-kou-general:6,general,009,衆議院予備経費,,no_request_row,国会,衆議院,,
-kou-general:7,general,011,参議院,,no_request_row,国会,参議院,,
-kou-general:8,general,012,参議院施設費,,no_request_row,国会,参議院,,
-kou-general:9,general,019,参議院予備経費,,no_request_row,国会,参議院,,
 kou-general:11,general,022,国立国会図書館施設費,,no_request_row,国会,国立国会図書館,,
-kou-general:12,general,031,裁判官訴追委員会,,no_request_row,国会,裁判官訴追委員会,,
-kou-general:13,general,041,裁判官弾劾裁判所,,no_request_row,国会,裁判官弾劾裁判所,,
 kou-general:29,general,002,内閣本府施設費,,no_request_row,内閣府,内閣本府,,
 kou-general:39,general,014,事前防災対策総合推進費,,no_request_row,内閣府,内閣本府,,
 kou-general:61,general,059,独立行政法人国立公文書館施設整備費,,no_request_row,内閣府,内閣本府,,

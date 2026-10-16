@@ -1,0 +1,7 @@
+要求番号,区分,前年度予算額_一般行政経費,前年度予算額_その他の経費,前年度予算額_計,７年度概算要求額_一般行政経費,７年度概算要求額_その他の経費,７年度概算要求額_計,増△減,明細書頁数,source_page,source_line_start,source_line_end,table_block_id,row_index,row_type,parse_status
+,050 裁判官弾劾裁判所,"115,850",721,"116,571","116,047",721,"116,768",197,3,5,38,38,dangai.go.jp__info__pdf__r07_saisyutu-gaisan#b1,1,CODE3,PARSED
+,010 裁判官弾劾裁判所,"115,850",721,"116,571","116,047",721,"116,768",197,3,5,39,39,dangai.go.jp__info__pdf__r07_saisyutu-gaisan#b1,2,CODE3,PARSED
+1,01‑95 裁判官弾劾裁判所の運営に必要な経費,"115,850",0,"115,850","116,047",0,"116,047",197,3,5,40,40,dangai.go.jp__info__pdf__r07_saisyutu-gaisan#b1,3,DETAIL,PARSED
+2,06‑95 裁判に必要な経費,0,721,721,0,721,721,0,5,5,41,41,dangai.go.jp__info__pdf__r07_saisyutu-gaisan#b1,4,DETAIL,PARSED
+,組織計,"115,850",721,"116,571","116,047",721,"116,768",197,,5,42,42,dangai.go.jp__info__pdf__r07_saisyutu-gaisan#b1,5,TOTAL,PARSED
+,所管計,"115,850",721,"116,571","116,047",721,"116,768",197,,5,43,43,dangai.go.jp__info__pdf__r07_saisyutu-gaisan#b1,6,TOTAL,PARSED
