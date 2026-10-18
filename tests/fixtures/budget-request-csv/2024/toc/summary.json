@@ -15,24 +15,24 @@
     "prefixGapFactor": 1.5
   },
   "population": {
-    "tocPages": 82,
-    "pdfs": 55,
-    "pagesWithColumnEvidence": 82,
+    "tocPages": 83,
+    "pdfs": 56,
+    "pagesWithColumnEvidence": 83,
     "pagesWithoutColumnEvidence": 0
   },
   "counts": {
-    "items": 26317,
+    "items": 26636,
     "itemDisposition": {
-      "blank": 12859,
-      "headerZone": 1835,
-      "entry": 11327,
+      "blank": 13002,
+      "headerZone": 1861,
+      "entry": 11477,
       "unresolved": 296
     },
-    "entries": 2864,
+    "entries": 2896,
     "entriesByShape": {
-      "TITLE_PAGE": 136,
-      "MARKER": 1151,
-      "NUMBERED": 1563,
+      "TITLE_PAGE": 139,
+      "MARKER": 1165,
+      "NUMBERED": 1578,
       "CODE": 14
     },
     "auditRecords": 116,
@@ -43,14 +43,14 @@
       "NO_PAGE_REF": 1
     },
     "geometricRows": {
-      "left": 1956,
+      "left": 1988,
       "right": 1024
     }
   },
   "inputs": {
     "inventory": {
       "path": "tests/fixtures/budget-request-cover-toc-structure/2024/structure-inventory.json",
-      "sha256": "d2b2311cb6cbcb0974816706be1126d07e2a062614ac5b7cefee62be2b5ebc2d"
+      "sha256": "a9dcb4a832e3c7b54f436e18dd94243dd8a6d35cad9249e3aaf0970abd291630"
     },
     "pdfs": [
       {
@@ -265,6 +265,13 @@
         ]
       },
       {
+        "source_pdf": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_08.pdf",
+        "pdf_sha256": "fa30da231f9e890b7edd5a664e87db047875ebc90331684308bc278fadeaf4c1",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
         "source_pdf": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
         "pdf_sha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
         "toc_pages": [
@@ -473,7 +480,7 @@
       },
       {
         "path": "scripts/pipeline-v2/build-budget-request-toc-pdf-native-csv.ts",
-        "sha256": "e4acdb630b754efeb15dbd10cb8fa8906608d05b4aa73afc8b37a1913741148f"
+        "sha256": "a776552053049f53f627ac7bb85e8228494078af8de10254c6251c351d5778b0"
       }
     ]
   }

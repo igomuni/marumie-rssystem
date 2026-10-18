@@ -30,8 +30,7 @@ const year = Number(yearArg);
 const positional = process.argv.slice(2).filter(a => !a.startsWith('--'));
 const inputDir = positional[0] ?? `data/work/budget-request-plain-text/${year}`;
 const outputRoot = positional[1] ?? `tests/fixtures/budget-request-csv/${year}/total-table`;
-const manifestOverride = process.argv.find(a => a.startsWith('--manifest='))?.slice('--manifest='.length); // 凍結済みの年度に後から足した PDF の補遺（plain-text-manifest.json）を使うとき
-const manifestPath = manifestOverride ? manifestOverride : `tests/fixtures/budget-request-plain-text/${year}/plain-text-manifest.json`;
+const manifestPath = `tests/fixtures/budget-request-plain-text/${year}/plain-text-manifest.json`;
 const sha256 = (v: Buffer | string) => createHash('sha256').update(v).digest('hex');
 
 if (!fs.existsSync(inputDir) || !fs.statSync(inputDir).isDirectory()) throw new Error(`input directory not found: ${inputDir} (build it with build-budget-request-plain-text.ts --year=${year})`);

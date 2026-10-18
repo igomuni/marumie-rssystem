@@ -38,7 +38,6 @@ npx tsx scripts/pipeline-v2/build-budget-request-plain-text.ts --year=<年度>  
 npx tsx scripts/pipeline-v2/build-budget-request-page-classification.ts --year=<年度> --freeze-fixture
 npx tsx scripts/pipeline-v2/analyze-budget-request-cover-toc-structure.ts --year=<年度> --freeze-fixture
 npx tsx scripts/pipeline-v2/build-budget-request-cover-csv.ts <年度>
-# 補遺（凍結済みの年度に後から足した PDF）は、年度に -supplement を付ける（例 --year=2024-supplement。plain text は --corpus=<補遺の JSON> --out-root=... で作る）
 ```
 
-入力は、`tests/fixtures/budget-request-plain-text/{年度}/plain-text-manifest.json`（git 管理）と `data/work/budget-request-plain-text/{年度}/`。PDF の SHA-256・頁数は `tests/fixtures/budget-request-pdf-corpus/{年度}/pdf-corpus-freeze.json` に照らす。FY2024 の頁分類の凍結ダイジェスト（`7c6d2dce…`）は、Raw Text corpus だったときの値のまま `frozenInput.rawTextCorpusDigestSha256` に残っている（凍結記録のため書き換えていない）。
+入力は、`tests/fixtures/budget-request-plain-text/{年度}/plain-text-manifest.json`（git 管理）と `data/work/budget-request-plain-text/{年度}/`。PDF の集合と SHA-256・頁数は `tests/fixtures/budget-request-pdf-corpus/{年度}/pdf-corpus-freeze.json` が決める。後から取得した PDF は、この記録の `documents` に `addedAfterFreeze` つきで追記して（`frozenInput` の件数・頁数・ダイジェストを更新して）、plain text 以降を作り直す。FY2024 の頁分類は、Raw Text の時代の凍結ダイジェスト（`39464fc7…`、82 PDF）から、142 PDF（凍結後の 60 PDF を統合）の新しいダイジェストになった。

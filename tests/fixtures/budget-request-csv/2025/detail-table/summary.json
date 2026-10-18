@@ -2,54 +2,54 @@
   "scope": "FY2025 令和7年度歳出概算要求額明細表 (excluding 備考) raw text → logical rows (v0 deterministic parser; descriptive counts, not an accuracy score)",
   "input": {
     "inputDir": "data/work/budget-request-plain-text/2025",
-    "inputSha256": "c7513de89b873839166e7d48e3bc2464e8b2e3f83f45fea621887f98571dab42",
-    "txtEntries": 131
+    "inputSha256": "61ca06fe82282ef943708387b696b336329623ae36c64b6fa581362b168b1411",
+    "txtEntries": 135
   },
   "frozenManifestIntegrity": {
-    "MATCH": 131
+    "MATCH": 135
   },
   "frozenManifestIntegrityDetail": [],
-  "sourceFileCount": 131,
-  "detailTableSourceCount": 123,
-  "detailTablePageCount": 9055,
+  "sourceFileCount": 135,
+  "detailTableSourceCount": 127,
+  "detailTablePageCount": 9106,
   "sourcesWithoutDetailTable": 8,
   "sourcesWithNoTextLayer": [],
   "pagesWithoutHeaderBoundary": 0,
-  "nonBlankLinesInDetailPages": 352634,
+  "nonBlankLinesInDetailPages": 354646,
   "lineClassCounts": {
-    "PAGE_LABEL": 9055,
-    "TABLE_TITLE": 123,
-    "ROW": 53569,
-    "UNIT": 123,
-    "UNRESOLVED": 10258,
-    "TABLE_HEADER": 9067,
-    "CONTINUATION": 24223,
-    "RIGHT_REGION": 242265,
+    "PAGE_LABEL": 9106,
+    "TABLE_TITLE": 127,
+    "ROW": 53868,
+    "UNIT": 127,
+    "UNRESOLVED": 10309,
+    "TABLE_HEADER": 9118,
+    "CONTINUATION": 24309,
+    "RIGHT_REGION": 243731,
     "FOOTER_TIMESTAMP": 3951
   },
-  "logicalRowCount": 53569,
+  "logicalRowCount": 53868,
   "rowTypeCounts": {
     "CODE1": 32,
     "CODE2": 1955,
-    "CODE3": 12201,
-    "CODE_5_4_2_4": 27828,
-    "CODE_NN_NNNN": 9540,
-    "CONTEXT": 123,
-    "DETAIL": 1890
+    "CODE3": 12254,
+    "CODE_5_4_2_4": 27978,
+    "CODE_NN_NNNN": 9620,
+    "CONTEXT": 127,
+    "DETAIL": 1902
   },
   "parseStatusCounts": {
     "AMOUNTS_PLACED_BY_HEADER_WINDOWS": 196,
     "AMOUNTS_PLACED_BY_PAGE_EDGES": 582,
-    "PARSED": 52791
+    "PARSED": 53090
   },
   "rowsByBlankCells": {
-    "blank:none": 43993,
+    "blank:none": 44261,
     "blank:previous": 394,
-    "blank:previous+request+difference": 8798,
+    "blank:previous+request+difference": 8829,
     "blank:request": 384
   },
-  "rowsWithContinuation": 19218,
-  "unresolvedCount": 10258,
+  "rowsWithContinuation": 19294,
+  "unresolvedCount": 10309,
   "unresolvedByReason": {
     "BLANK_CELL_COLUMN_UNDETERMINED": 109,
     "LEFT_FRAGMENT_NOT_ADJACENT": 412,
@@ -57,7 +57,7 @@
     "LEFT_FRAGMENT_WITHOUT_PRECEDING_ROW_ON_PAGE": 363,
     "LEFT_TEXT_CROSSES_BOUNDARY": 302,
     "UNEXPECTED_AMOUNT_COUNT": 3,
-    "UNKNOWN_HEADER_ZONE_LINE": 9055
+    "UNKNOWN_HEADER_ZONE_LINE": 9106
   },
   "arithmeticDiagnostics": {
     "rowsWithMismatch": 0
@@ -1381,6 +1381,24 @@
       }
     },
     {
+      "source_file": "budget-request-plain-text/2025/dangai.go.jp__info__pdf__r07_saisyutu-gaisan.txt",
+      "pageCount": 9,
+      "detailPages": 3,
+      "pagesWithoutBoundary": [],
+      "rows": 32,
+      "unresolved": 3,
+      "lineClassCounts": {
+        "PAGE_LABEL": 3,
+        "TABLE_TITLE": 1,
+        "ROW": 32,
+        "UNIT": 1,
+        "UNRESOLVED": 3,
+        "TABLE_HEADER": 3,
+        "CONTINUATION": 3,
+        "RIGHT_REGION": 18
+      }
+    },
+    {
       "source_file": "budget-request-plain-text/2025/digital.go.jp__assets__contents__node__basic_page__field_ref_resources__7e109e66-b39c-40c5-a788-cab2cad79f95__d3e6a9cd__20240913_policies_budget_r7request_table_01.txt",
       "pageCount": 32,
       "detailPages": 26,
@@ -2236,6 +2254,60 @@
         "TABLE_HEADER": 86,
         "RIGHT_REGION": 1628,
         "CONTINUATION": 579
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2025/sangiin.go.jp__jpn__annai__oshirase__pdf__r7gaisan-yokyusyo-250905.txt",
+      "pageCount": 21,
+      "detailPages": 15,
+      "pagesWithoutBoundary": [],
+      "rows": 111,
+      "unresolved": 15,
+      "lineClassCounts": {
+        "PAGE_LABEL": 15,
+        "TABLE_TITLE": 1,
+        "ROW": 111,
+        "UNIT": 1,
+        "UNRESOLVED": 15,
+        "TABLE_HEADER": 15,
+        "CONTINUATION": 37,
+        "RIGHT_REGION": 391
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2025/shugiin.go.jp__internet__itdb_annai.nsf__html__statics__osirase__kaikei-saishutsugaisan7.pdf__%24File__kaikei-saishutsugaisan7.txt",
+      "pageCount": 37,
+      "detailPages": 31,
+      "pagesWithoutBoundary": [],
+      "rows": 130,
+      "unresolved": 31,
+      "lineClassCounts": {
+        "PAGE_LABEL": 31,
+        "TABLE_TITLE": 1,
+        "ROW": 130,
+        "UNIT": 1,
+        "UNRESOLVED": 31,
+        "TABLE_HEADER": 31,
+        "CONTINUATION": 44,
+        "RIGHT_REGION": 1044
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2025/sotsui.go.jp__budget__images__r7budget_yokyu.txt",
+      "pageCount": 8,
+      "detailPages": 2,
+      "pagesWithoutBoundary": [],
+      "rows": 26,
+      "unresolved": 2,
+      "lineClassCounts": {
+        "PAGE_LABEL": 2,
+        "TABLE_TITLE": 1,
+        "ROW": 26,
+        "UNIT": 1,
+        "UNRESOLVED": 2,
+        "TABLE_HEADER": 2,
+        "CONTINUATION": 2,
+        "RIGHT_REGION": 13
       }
     },
     {

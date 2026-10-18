@@ -10,24 +10,24 @@
   "with_detail": 124
  },
  "2024": {
-  "pdfs": 82,
-  "text": 80,
-  "no_text_layer": 2,
-  "not_extracted": 0,
-  "with_cover": 59,
-  "with_toc": 55,
-  "with_total": 59,
-  "with_detail": 73
- },
- "2025": {
-  "pdfs": 131,
+  "pdfs": 142,
   "text": 131,
-  "no_text_layer": 0,
+  "no_text_layer": 11,
   "not_extracted": 0,
   "with_cover": 61,
-  "with_toc": 55,
+  "with_toc": 56,
   "with_total": 61,
   "with_detail": 123
+ },
+ "2025": {
+  "pdfs": 135,
+  "text": 135,
+  "no_text_layer": 0,
+  "not_extracted": 0,
+  "with_cover": 65,
+  "with_toc": 59,
+  "with_total": 65,
+  "with_detail": 127
  },
  "2026": {
   "pdfs": 138,

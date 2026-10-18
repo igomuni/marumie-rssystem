@@ -150,6 +150,27 @@
   },
   {
    "group": "RESOLVED|DETAIL|DIRECT|",
+   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/33.pdf",
+   "pdfSha256": "ca368b090f3690a0e4e8931f7c6233b28d8557f06c5e414d98249bac56fcab52",
+   "physicalPage": 1,
+   "rawText": {
+    "status": "EXTRACTED",
+    "textSha256": "8cbf175c2b3f9e0bc372dca3c1d31d38e5ea435e420c256650f67b6ca28aac63"
+   },
+   "classification": {
+    "status": "RESOLVED",
+    "pageType": "DETAIL",
+    "source": "DIRECT",
+    "reason": null
+   },
+   "stateObservation": {
+    "activeFamilyBefore": null,
+    "activeFamilyAfter": "DETAIL",
+    "resetReason": null
+   }
+  },
+  {
+   "group": "RESOLVED|DETAIL|DIRECT|",
    "localPdfPath": "data/download/ppc.go.jp/files/pdf/230831youkyu.pdf",
    "pdfSha256": "0a9a58273e0f9c137414e062872c1c642ad0fa5aec403ae5e606c56f198db9a3",
    "physicalPage": 7,
@@ -165,27 +186,6 @@
    },
    "stateObservation": {
     "activeFamilyBefore": "SUMMARY",
-    "activeFamilyAfter": "DETAIL",
-    "resetReason": null
-   }
-  },
-  {
-   "group": "RESOLVED|DETAIL|DIRECT|",
-   "localPdfPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/e2.pdf",
-   "pdfSha256": "6267ffbdc50e439899169659817271da4aa97596eb48e85fe3122f292f3ab7f2",
-   "physicalPage": 1,
-   "rawText": {
-    "status": "EXTRACTED",
-    "textSha256": "e273637cf8183c844ad3a0056043e0015a0869f83aaf854b1bf69853f11e6f57"
-   },
-   "classification": {
-    "status": "RESOLVED",
-    "pageType": "DETAIL",
-    "source": "DIRECT",
-    "reason": null
-   },
-   "stateObservation": {
-    "activeFamilyBefore": null,
     "activeFamilyAfter": "DETAIL",
     "resetReason": null
    }

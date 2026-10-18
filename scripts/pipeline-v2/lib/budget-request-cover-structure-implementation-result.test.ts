@@ -13,13 +13,17 @@ const reg = read<{
 const cls = JSON.parse(fs.readFileSync(path.join('tests', 'fixtures', 'budget-request-page-classification', '2024', 'page-classification-v0-implementation-manifest.json'), 'utf8')) as { summary: { corpusClassificationDigestSha256: string; pageType: Record<string, number> } };
 const cand = read<{ population: { allCover: number; developmentExploredCover: number; frozenCandidates: number } }>('frozen-candidates.json');
 
+// development の観測は、FY2024 の凍結時点（82 PDF・9,899 頁）の頁分類に紐づく。その後 FY2024 には 60 PDF を統合したため、現行の頁分類ではなく凍結時の値に固定する
+const COVER_PAGES_AT_FREEZE = 69;
+const CLASSIFICATION_DIGEST_AT_FREEZE = '39464fc76b1b83272d5852d3db1db776e22bb570ee0f6b7ca4d1da64de4a5ecc';
+
 describe('cover structure v0 implementation（development / descriptive）', () => {
   it('COVER 69 page を provenance 不一致・parser error なしで処理し、population が 14 + 55 = 69 に整合する', () => {
-    expect(man.summary.coverPages).toBe(cls.summary.pageType.COVER);
+    expect(man.summary.coverPages).toBe(COVER_PAGES_AT_FREEZE);
     expect(man.summary.coverPages).toBe(cand.population.developmentExploredCover + cand.population.frozenCandidates);
     expect([man.summary.provenanceMismatch, man.summary.parserErrors]).toEqual([0, 0]);
     expect(Object.values(man.summary.status).reduce((a, b) => a + b, 0)).toBe(69);
-    expect(man.frozenInput.pageClassificationCorpusDigestSha256).toBe(cls.summary.corpusClassificationDigestSha256);
+    expect(man.frozenInput.pageClassificationCorpusDigestSha256).toBe(CLASSIFICATION_DIGEST_AT_FREEZE);
   });
   it('descriptive regression は同じ output digest に紐づき、formal validation ではないと明記されている', () => {
     expect(reg.observationOutputDigestSha256).toBe(man.summary.outputDigestSha256);

@@ -1,6 +1,6 @@
 {
   "arithmetic-diagnostics.csv": "72b5a35d1de830e4882938a106c13f0779ca09cf98f87cd30a048564ec51521a",
-  "line-audit.csv": "aa7c8206ed06f320d61d1cc325fb3bb5facd412446fc812642ffc077130a331f",
+  "line-audit.csv": "7e668206e273be6abf478beac5ea787ce14200ec028d1dd007ad139dafac9627",
   "sources/caa.go.jp__policies__budget__assets__caa_cms205_240913_01.csv": "9231bc5a1bdc970d7e6b1aa6dbaf9a583a22a8b262c61d7ac16358869030fa36",
   "sources/caa.go.jp__policies__budget__assets__caa_cms205_240913_02.csv": "a5428a09330ca5fc82b6845f606af4b1f4448adbbc1d202011a2e7efe96123e1",
   "sources/cao.go.jp__yosan__soshiki__r07__pdf__0.csv": "4d23788e4ccc9cb2f1111c0679bdda8153d49d8a790f049ba382d571a419b9f3",
@@ -12,6 +12,7 @@
   "sources/cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__d8acbb82__20240830_policies_budget_28.csv": "c1ad99f828907840e4a1ef45b7dba94c2441bd4bb6cbf6f79ae64f5c30562cf8",
   "sources/clb.go.jp__files__topics__4742_ext_05_0.csv": "ce52a2e2e11547d4081a30abb403e0860ad4dbf36bf7245e29196fb647ee3c7d",
   "sources/courts.go.jp__vc-files__courts__2024__R07saisyutsu_gaisanyoukyusyo_527kb.csv": "5c8fad577e915f0c423ceb3147a7e2ada1cd6fe45802a32fec2a62afb03a2abb",
+  "sources/dangai.go.jp__info__pdf__r07_saisyutu-gaisan.csv": "9bbd3904f87e6eabb3e8db872489ea118a87d7a62b716cdf4c3dab3215a1ac99",
   "sources/digital.go.jp__assets__contents__node__basic_page__field_ref_resources__7e109e66-b39c-40c5-a788-cab2cad79f95__d3e6a9cd__20240913_policies_budget_r7request_table_01.csv": "eba4e5c63d37813240a784002cbb460257aa7ffceb32e7293271b64881d948c2",
   "sources/env.go.jp__content__000248527.csv": "a2c8bf5f230737a948eb361da4b26b77cdd4cfb69d0c9bc96b9c195a3f23e3bd",
   "sources/env.go.jp__content__000248529.csv": "7d27f09726db87bf5367aa4d1d614b3e038c3ce8d32014b6fc54fd1e34c50cd6",
@@ -59,9 +60,12 @@
   "sources/npa.go.jp__policies__budget__r7__gaisanyokyu__ippankaikei.csv": "3d03635ab88f278ade2284494d675e1e21eae9613541243a6da8ab27edd8cd3e",
   "sources/ppc.go.jp__files__pdf__240830youkyu.csv": "2b129bd559cb85fb7ec14e4992e1b818d632e5d0201f6a9486254b55ba7f917d",
   "sources/reconstruction.go.jp__files__user__topics__2024_fukkochougaisansaisyutsu.csv": "45b1d3d528d567b7349151f77dc0e7461fe451815040753faa5d58ec1e103a6f",
+  "sources/sangiin.go.jp__jpn__annai__oshirase__pdf__r7gaisan-yokyusyo-250905.csv": "10d5960e637310ee75af9afe2d4f630a99d4aaf9daadf654f2e28a352b26438c",
+  "sources/shugiin.go.jp__internet__itdb_annai.nsf__html__statics__osirase__kaikei-saishutsugaisan7.pdf__%24File__kaikei-saishutsugaisan7.csv": "fd08fbe7a52e7ef6ead6c760489c41bc1f4ba8f0648bf87c79f6ff553c87b6dc",
+  "sources/sotsui.go.jp__budget__images__r7budget_yokyu.csv": "1119de0dc76b921d04539faf10432fb53a004c28e76ab220bd4fc0c68c99d680",
   "sources/soumu.go.jp__main_content__000967291.csv": "d644da3293f13f4b222bf051a17ff634914da64d630896294f5a0bab68b1a6ea",
   "sources/soumu.go.jp__main_content__000967302.csv": "b7457f0eb1c55995340562eab42ccdc213c153e59bf8f54b05ce47dc9fc36208",
   "sources/soumu.go.jp__main_content__000967305.csv": "a85901020469a073dc871c2f3636bf20bac0d3ad94c26b91cd6eb1b7ecde184a",
-  "summary.json": "53bd500a3f6b3fbb352b3d0b7d25f9da50e4b08db9229890b2a0701e63d30996",
+  "summary.json": "69993b92730691170a1662ba8f9c6865868e234f3487034e48bfbe0880c2ddd4",
   "unresolved.csv": "1390b2417e207fcf79b0769c35a4c0edb794181d06195a6449277c70bf84f739"
 }

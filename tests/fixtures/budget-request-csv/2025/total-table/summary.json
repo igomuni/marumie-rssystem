@@ -2,35 +2,35 @@
   "scope": "FY2025 令和7年度歳出概算要求額総表 raw text → logical rows (v0 deterministic parser; descriptive counts, not an accuracy score)",
   "input": {
     "inputDir": "data/work/budget-request-plain-text/2025",
-    "inputSha256": "c7513de89b873839166e7d48e3bc2464e8b2e3f83f45fea621887f98571dab42",
-    "txtEntries": 131
+    "inputSha256": "61ca06fe82282ef943708387b696b336329623ae36c64b6fa581362b168b1411",
+    "txtEntries": 135
   },
   "frozenManifestIntegrity": {
-    "MATCH": 131
+    "MATCH": 135
   },
   "frozenManifestIntegrityDetail": [],
-  "sourceFileCount": 131,
-  "candidateTotalTableSourceCount": 61,
-  "candidateTotalTablePageCount": 173,
-  "tableBlockCount": 71,
-  "titleOnlyPageCount": 127,
-  "logicalRowCount": 3752,
+  "sourceFileCount": 135,
+  "candidateTotalTableSourceCount": 65,
+  "candidateTotalTablePageCount": 177,
+  "tableBlockCount": 75,
+  "titleOnlyPageCount": 135,
+  "logicalRowCount": 3784,
   "rowTypeCounts": {
-    "CODE3": 1693,
-    "DETAIL": 1833,
+    "CODE3": 1705,
+    "DETAIL": 1845,
     "HIER": 80,
-    "TOTAL": 146
+    "TOTAL": 154
   },
   "parseStatusCounts": {
-    "PARSED": 3752
+    "PARSED": 3784
   },
   "rowsWithContinuation": {
     "CODE3": 214,
-    "DETAIL": 541
+    "DETAIL": 542
   },
   "continuationLineCount": {
     "CODE3": 220,
-    "DETAIL": 574
+    "DETAIL": 575
   },
   "unresolvedCount": 1,
   "unresolvedByReason": {
@@ -39,16 +39,16 @@
   "numericTailFailureCount": 0,
   "unknownRowHeadCount": 0,
   "lineClassCounts": {
-    "CONTEXT": 71,
-    "CONTINUATION": 794,
-    "PAGE_LABEL": 173,
-    "ROW": 3752,
-    "TABLE_HEADER": 1037,
-    "TABLE_TITLE": 71,
-    "UNIT": 71,
+    "CONTEXT": 75,
+    "CONTINUATION": 795,
+    "PAGE_LABEL": 177,
+    "ROW": 3784,
+    "TABLE_HEADER": 1061,
+    "TABLE_TITLE": 75,
+    "UNIT": 75,
     "UNRESOLVED": 1
   },
-  "blankLinesInCandidatePages": 1258,
+  "blankLinesInCandidatePages": 1274,
   "signedCellsByColumn": {
     "previous_general": 2,
     "previous_other": 0,
@@ -56,11 +56,11 @@
     "request_general": 6,
     "request_other": 0,
     "request_total": 6,
-    "difference": 1523
+    "difference": 1525
   },
   "detailPageShape": {
-    "<blank>": 146,
-    "N": 3447,
+    "<blank>": 154,
+    "N": 3471,
     "エ N": 38,
     "原 N": 9,
     "電 N": 112
@@ -1214,6 +1214,35 @@
         }
       ],
       "rows": 18,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2025/dangai.go.jp__info__pdf__r07_saisyutu-gaisan.txt",
+      "pageCount": 9,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "dangai.go.jp__info__pdf__r07_saisyutu-gaisan#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "02 国 会 所 管 （裁判官弾劾裁判所）"
+          ],
+          "rows": 6
+        }
+      ],
+      "rows": 6,
       "unresolved": 0
     },
     {
@@ -2793,6 +2822,93 @@
         }
       ],
       "rows": 146,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2025/sangiin.go.jp__jpn__annai__oshirase__pdf__r7gaisan-yokyusyo-250905.txt",
+      "pageCount": 21,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "sangiin.go.jp__jpn__annai__oshirase__pdf__r7gaisan-yokyusyo-250905#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "02 国 会 所 管 （参 議 院）"
+          ],
+          "rows": 10
+        }
+      ],
+      "rows": 10,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2025/shugiin.go.jp__internet__itdb_annai.nsf__html__statics__osirase__kaikei-saishutsugaisan7.pdf__%24File__kaikei-saishutsugaisan7.txt",
+      "pageCount": 37,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "shugiin.go.jp__internet__itdb_annai.nsf__html__statics__osirase__kaikei-saishutsugaisan7.pdf__%24File__kaikei-saishutsugaisan7#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "02 国 会 所 管 （衆 議 院）"
+          ],
+          "rows": 11
+        }
+      ],
+      "rows": 11,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2025/sotsui.go.jp__budget__images__r7budget_yokyu.txt",
+      "pageCount": 8,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "sotsui.go.jp__budget__images__r7budget_yokyu#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "02 国 会 所 管 （裁判官訴追委員会）"
+          ],
+          "rows": 5
+        }
+      ],
+      "rows": 5,
       "unresolved": 0
     },
     {

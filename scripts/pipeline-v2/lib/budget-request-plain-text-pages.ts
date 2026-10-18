@@ -19,7 +19,7 @@ export interface PlainTextCorpus {
   documents: (PlainTextManifestDocument & { publisherDomain: string })[];
 }
 
-/** year は "2026" や "2024-supplement"。manifest は tests/fixtures/budget-request-plain-text/{year}/plain-text-manifest.json、本文は data/work/budget-request-plain-text/{year}/ */
+/** year は "2026" など。manifest は tests/fixtures/budget-request-plain-text/{year}/plain-text-manifest.json、本文は data/work/budget-request-plain-text/{year}/ */
 export function loadPlainTextCorpus(year: string): PlainTextCorpus {
   const manifestPath = path.join('tests', 'fixtures', 'budget-request-plain-text', year, 'plain-text-manifest.json');
   const m = JSON.parse(fs.readFileSync(manifestPath, 'utf8')) as { frozenPdfCorpus: { sha256: string }; physicalPages: number; documents: PlainTextManifestDocument[] };
