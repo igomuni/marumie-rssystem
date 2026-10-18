@@ -2,16 +2,20 @@
   "schema": "budget-request-toc-pdf-native-csv/v0/output-hashes",
   "files": {
     "entry-provenance.csv": {
-      "sha256": "6652458d61fb69c9dfa96a03496d593ea051bdb82b39cf34bbf3e719fda2c77a",
-      "bytes": 949111
+      "sha256": "2170cfbea14fedc5c4d7b841fdcc05f0566069e78dac0e66f644e4ff8f013352",
+      "bytes": 960305
     },
     "page-summary.csv": {
-      "sha256": "970b56453a54c805aaafd4a28bd30a1bc319341188597ddcc189d475fd5cde80",
-      "bytes": 13334
+      "sha256": "2cc1d189d0cbb2056f26edd6cea6e1e3f22ce3563737771eba587a09e3973212",
+      "bytes": 13499
+    },
+    "source-errors.csv": {
+      "sha256": "69718ec77d81a565d8d2a6540d76089dcec03fe98d022b4389f90df0db1fabd8",
+      "bytes": 21
     },
     "sources.csv": {
-      "sha256": "3b66ec2bbb5d17cdce81d9020894d9e984278832ef9ac2ac24aeddbe4c9b0f71",
-      "bytes": 11207
+      "sha256": "bbd41aff2405985a769f6b35db9e42ed21569fe58eb848d0967e1bccc7c53712",
+      "bytes": 11413
     },
     "sources/caa.go.jp__policies__budget__assets__cms_caa205_230914_02.csv": {
       "sha256": "82eb4fc5bdfbef9340cd9e85673d2854c62359a75d67f5d98b8e00a46355dfdb",
@@ -129,6 +133,10 @@
       "sha256": "036611dd02d2df4aa76f86c619e20590e466540405ec8f4058d920b11e6c1eda",
       "bytes": 13181
     },
+    "sources/mext.go.jp__content__20230914-mxt_kaikesou01-000031817_08.csv": {
+      "sha256": "7e5f1698c899f622457ce6d1676c468ad74f160e76e056139281420ff845f8b0",
+      "bytes": 1969
+    },
     "sources/mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-1b-01.csv": {
       "sha256": "767b6e59c7f6cf32f5a691dee38d1bdee23fa925f51813d768686a785afc344a",
       "bytes": 22331
@@ -234,12 +242,12 @@
       "bytes": 1522
     },
     "summary.json": {
-      "sha256": "7f816b1d0bffeb6b500139a28122feb6de693f45ea5fa3ab57a6995374d4bcd4",
-      "bytes": 15757
+      "sha256": "48dab0f0625bd91e5d9e5cc185e99db3fa7aa5977ac6a97338e11c1b5bc741d3",
+      "bytes": 16008
     },
     "token-ledger.csv": {
-      "sha256": "0fb3291fb62e800acf2f722449df9681abb8a3a424aef4aa35e1c884eb84a36c",
-      "bytes": 4174183
+      "sha256": "cc76d0ffa7edc175dc67c0de5075c3479cb56430af92b361405fc0d75ac8f6e3",
+      "bytes": 4226832
     },
     "unresolved.csv": {
       "sha256": "48ddad2f905eb8d2aaab6d7bdae7464e5eda82207ca8e79097976231225eb67c",

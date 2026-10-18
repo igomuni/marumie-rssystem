@@ -23,13 +23,8 @@ const rd = (p: string) => readCsv(fs.readFileSync(p, 'utf8'));
 // ---------------------------------------------------------------- 入力
 const inputHashes: string[] = [];
 const bySource = (kind: string): Map<string, Rec[]> => {
-  const m = new Map<string, Rec[]>();
-  // 凍結済みの年度に後から足した PDF の補遺（{year}-supplement）があれば、同じ入力として読む
-  for (const base of [REQ, `${REQ}-supplement`]) {
-    const dir = path.join(base, kind, 'sources');
-    if (!fs.existsSync(dir)) continue;
-    for (const f of fs.readdirSync(dir).filter(x => x.endsWith('.csv')).sort()) { const b = fs.readFileSync(path.join(dir, f)); inputHashes.push(`${kind}/${f}\t${sha(b)}`); m.set(f.slice(0, -4), readCsv(b.toString('utf8'))); }
-  }
+  const dir = path.join(REQ, kind, 'sources'); const m = new Map<string, Rec[]>();
+  for (const f of fs.readdirSync(dir).filter(x => x.endsWith('.csv')).sort()) { const b = fs.readFileSync(path.join(dir, f)); inputHashes.push(`${kind}/${f}\t${sha(b)}`); m.set(f.slice(0, -4), readCsv(b.toString('utf8'))); }
   return m;
 };
 const toc = bySource('toc'), detail = bySource('detail-table'), total = bySource('total-table');

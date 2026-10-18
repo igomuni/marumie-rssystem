@@ -31,10 +31,20 @@ for (const y of [2023, 2026]) {
   authorityByYear.set(y, m);
 }
 const rows: (string | number)[][] = [];
+type ManifestLike = ReturnType<typeof getBudgetRequestManifest>;
+// 人手の目録（FY2024・FY2025）にない PDF（凍結後に取得して PDF corpus の記録に統合したもの）も、記録から足す
+function* entriesOf(year: number, m: ManifestLike) {
+  const listed = new Set<string>();
+  for (const src of m.sources) for (const doc of src.logicalDocuments) for (const f of doc.files) { listed.add(f.url); yield { src, doc, f }; }
+  const freezePath = path.join('tests', 'fixtures', 'budget-request-pdf-corpus', String(year), 'pdf-corpus-freeze.json');
+  if (!fs.existsSync(freezePath)) return;
+  const docs = (JSON.parse(fs.readFileSync(freezePath, 'utf8')) as { documents: { publisherAuthority: string; publisherDomain: string; accountType: 'general' | 'special'; account: string; sourceUrl: string }[] }).documents;
+  for (const d of docs) if (!listed.has(d.sourceUrl)) yield { src: { publisherAuthority: d.publisherAuthority, publisherDomain: d.publisherDomain }, doc: { accountType: d.accountType, account: d.account, logicalAuthority: undefined, budgetJurisdiction: undefined }, f: { url: d.sourceUrl, role: undefined, verificationStatus: 'pdf-confirmed' } };
+}
 for (const year of [2023, 2024, 2025, 2026]) {
   const m = getBudgetRequestManifest(year);
   const base = path.join('tests', 'fixtures', 'budget-request-csv', String(year));
-  for (const src of m.sources) for (const doc of src.logicalDocuments) for (const f of doc.files) {
+  for (const { src, doc, f } of entriesOf(year, m)) {
     const local = localPathFor(f.url, src.publisherDomain, DEFAULT_BASE_DIR);
     const slug = local.replace(/^data\/download\//, '').replace(/\.pdf$/i, '').replace(/\//g, '__');
     const txtPath = path.join('data', 'work', 'budget-request-plain-text', String(year), `${slug}.txt`);

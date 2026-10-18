@@ -15,24 +15,24 @@
     "prefixGapFactor": 1.5
   },
   "population": {
-    "tocPages": 84,
-    "pdfs": 56,
-    "pagesWithColumnEvidence": 83,
+    "tocPages": 88,
+    "pdfs": 60,
+    "pagesWithColumnEvidence": 87,
     "pagesWithoutColumnEvidence": 1
   },
   "counts": {
-    "items": 27620,
+    "items": 28084,
     "itemDisposition": {
-      "blank": 13500,
-      "headerZone": 1829,
-      "entry": 11942,
+      "blank": 13724,
+      "headerZone": 1957,
+      "entry": 12054,
       "unresolved": 349
     },
-    "entries": 3018,
+    "entries": 3050,
     "entriesByShape": {
-      "TITLE_PAGE": 136,
-      "MARKER": 1225,
-      "NUMBERED": 1643,
+      "TITLE_PAGE": 144,
+      "MARKER": 1237,
+      "NUMBERED": 1655,
       "CODE": 14
     },
     "auditRecords": 133,
@@ -42,14 +42,14 @@
       "PAGE_REF_AMBIGUOUS": 3
     },
     "geometricRows": {
-      "left": 2078,
+      "left": 2110,
       "right": 1073
     }
   },
   "inputs": {
     "inventory": {
       "path": "tests/fixtures/budget-request-cover-toc-structure/2025/structure-inventory.json",
-      "sha256": "8bb8634d2967e0f1895e405c7c5e9ca75dcb2c9e6698f843af8c8fb875f4dc24"
+      "sha256": "55622f07836cbcc80e5a5b2af1eedcf982dd31bbea91d0bc63b04369b32a246a"
     },
     "pdfs": [
       {
@@ -90,6 +90,13 @@
       {
         "source_pdf": "data/download/courts.go.jp/vc-files/courts/2024/R07saisyutsu_gaisanyoukyusyo_527kb.pdf",
         "pdf_sha256": "fa53c70939ee9a69ed69b84f9f11aae93964c7eb6fe03082090b4802808aefad",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/dangai.go.jp/info/pdf/r07_saisyutu-gaisan.pdf",
+        "pdf_sha256": "0f691ed1ab3aa13614fa746668d775e5a43a8bae8c07612c135aa3b7aabb6206",
         "toc_pages": [
           3
         ]
@@ -451,6 +458,27 @@
         ]
       },
       {
+        "source_pdf": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r7gaisan-yokyusyo-250905.pdf",
+        "pdf_sha256": "ea1fd9c2d8c402ff9153377f8903ca16573da96b7c44481483da4e83cda305cd",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/shugiin.go.jp/internet/itdb_annai.nsf/html/statics/osirase/kaikei-saishutsugaisan7.pdf/%24File/kaikei-saishutsugaisan7.pdf",
+        "pdf_sha256": "c3d0071b7791b4bc2522a71dc2cd59ba9430cf6827b2cdb9baf64c3de4b69054",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/sotsui.go.jp/budget/images/r7budget_yokyu.pdf",
+        "pdf_sha256": "953ebaff7d0e9c746f85892d673eabdd26840949c09e101cfebb45e2d90be361",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
         "source_pdf": "data/download/soumu.go.jp/main_content/000967291.pdf",
         "pdf_sha256": "94908426d34dbf5cc83fc9f9855375008c74a86d3ecb9c74f9acc1d1a2812878",
         "toc_pages": [
@@ -480,7 +508,7 @@
       },
       {
         "path": "scripts/pipeline-v2/build-budget-request-toc-pdf-native-csv.ts",
-        "sha256": "2f73777986769b5dfeb57ad434164979e854555bc448bd4e433dba7047f36afe"
+        "sha256": "a776552053049f53f627ac7bb85e8228494078af8de10254c6251c351d5778b0"
       }
     ]
   }

@@ -5,7 +5,7 @@
  * 表紙のページは、Cover／TOC の構造 inventory（tests/fixtures/budget-request-cover-toc-structure/{year}/structure-inventory.json）の COVER 分類を使う。
  * 名称の空白（均等割付）は除いて出力する（他の概算要求 CSV と同じ）。
  *
- * 使い方: npx tsx scripts/pipeline-v2/build-budget-request-cover-csv.ts <2023|2024|2025|2026|2024-supplement|2025-supplement> [outDir] [inputDir]
+ * 使い方: npx tsx scripts/pipeline-v2/build-budget-request-cover-csv.ts <2023|2024|2025|2026> [outDir] [inputDir]
  * 既定: inputDir = data/work/budget-request-plain-text/{year}、outDir = tests/fixtures/budget-request-csv/{year}/cover
  * 出力: sources/{slug}.csv、unclassified.csv（どの項目にも分類できなかった行）、summary.json
  */
@@ -15,7 +15,7 @@ import * as path from 'path';
 import { parseCoverPage, type CoverObservation } from './lib/budget-request-cover-structure';
 
 const year = process.argv[2];
-if (!/^20(23|24|25|26)(-supplement)?$/.test(year ?? '')) throw new Error('usage: build-budget-request-cover-csv.ts <2023|2024|2025|2026|2024-supplement|2025-supplement> [outDir] [inputDir]');
+if (!/^20(23|24|25|26)$/.test(year ?? '')) throw new Error('usage: build-budget-request-cover-csv.ts <2023|2024|2025|2026> [outDir] [inputDir]');
 const outDir = process.argv[3] ?? path.join('tests', 'fixtures', 'budget-request-csv', year, 'cover');
 const inputDir = process.argv[4] ?? path.join('data', 'work', 'budget-request-plain-text', year);
 const INVENTORY = path.join('tests', 'fixtures', 'budget-request-cover-toc-structure', year, 'structure-inventory.json');

@@ -5,18 +5,16 @@ import { describe, expect, it } from 'vitest';
 const dir = path.join('tests', 'fixtures', 'budget-request-cover-toc-structure', '2024');
 const read = <T>(f: string) => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')) as T;
 type Page = { localPdfPath: string; pdfSha256: string; physicalPage: number; textSha256: string; classifierPageType: string; classifierSource: string; rawStatus: string; explicitTitleObserved: boolean };
-const inv = read<{ frozenInput: { rawTextCorpusDigestSha256: string; pageClassificationCorpusDigestSha256: string }; summary: { coverRouted: number; tocRouted: number; tocExplicitTitleStarts: number; tocContinuationPages: number }; pages: Page[] }>('structure-inventory.json');
+const inv = read<{ frozenInput: { plainTextCorpusDigestSha256: string; pageClassificationCorpusDigestSha256: string }; summary: { coverRouted: number; tocRouted: number; tocExplicitTitleStarts: number; tocContinuationPages: number }; pages: Page[] }>('structure-inventory.json');
 const sel = read<{ seed: string; poolSizes: Record<string, number>; sample: { localPdfPath: string; physicalPage: number; selectionStratum: string[] }[] }>('development-sample-selection.json');
 const ledger = read<{ pages: (Page & { selectionStratum: string[]; inspectionRole: string; inspection: { rawTextViewed: boolean; renderViewed: boolean } })[] }>('development-explored-pages.json');
-// FY2024 の Raw Text corpus のダイジェスト（凍結時の値）。Raw Text の manifest は廃止し、page 単位のハッシュは同じ値を持つ plain text の manifest から読む
-const RAW_TEXT_CORPUS_DIGEST_AT_FREEZE = '7c6d2dcec1f4bec0ca37a1b3aa391adce7d99b93ac4642c74cab7a328dac4052';
-const raw = { frozenInput: { corpusDigestSha256: RAW_TEXT_CORPUS_DIGEST_AT_FREEZE }, ...(JSON.parse(fs.readFileSync(path.join('tests', 'fixtures', 'budget-request-plain-text', '2024', 'plain-text-manifest.json'), 'utf8')) as { documents: { localPdfPath: string; pdfSha256: string; pageTextSha256: string[] }[] }) };
+const raw = JSON.parse(fs.readFileSync(path.join('tests', 'fixtures', 'budget-request-plain-text', '2024', 'plain-text-manifest.json'), 'utf8')) as { frozenPdfCorpus: { sha256: string }; documents: { localPdfPath: string; pdfSha256: string; pageTextSha256: string[] }[] };
 const cls = JSON.parse(fs.readFileSync(path.join('tests', 'fixtures', 'budget-request-page-classification', '2024', 'page-classification-v0-implementation-manifest.json'), 'utf8')) as { summary: { corpusClassificationDigestSha256: string; pageType: Record<string, number> } };
 const key = (r: { localPdfPath: string; physicalPage: number }) => `${r.localPdfPath}#${r.physicalPage}`;
 
 describe('cover / toc structure inventory（PR-3A: observation only）', () => {
   it('frozen Raw Text・Page Classification に紐づき、COVER / TOC の件数が classifier manifest と一致する', () => {
-    expect(inv.frozenInput.rawTextCorpusDigestSha256).toBe(raw.frozenInput.corpusDigestSha256);
+    expect(inv.frozenInput.plainTextCorpusDigestSha256).toBe(raw.frozenPdfCorpus.sha256);
     expect(inv.frozenInput.pageClassificationCorpusDigestSha256).toBe(cls.summary.corpusClassificationDigestSha256);
     expect(inv.summary.coverRouted).toBe(cls.summary.pageType.COVER);
     expect(inv.summary.tocRouted).toBe(cls.summary.pageType.TOC);

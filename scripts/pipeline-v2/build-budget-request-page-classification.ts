@@ -19,8 +19,7 @@ import { CLASSIFIER_SPEC_VERSION, classifyDocument, documentDigest, recordLine, 
 const FREEZE = process.argv.includes('--freeze-fixture');
 const YEAR_ARG = process.argv.find(a => a.startsWith('--year='))?.slice('--year='.length) ?? '2024';
 // 入力は plain text（tests/fixtures/budget-request-plain-text/{year}/plain-text-manifest.json と data/work/budget-request-plain-text/{year}/）。page 単位の入力は plain text の form feed 分割から作る。
-// 年度に "-supplement" を付けると、凍結済みの年度に後から足した PDF の補遺（例: 2024-supplement）を指す
-if (!/^\d{4}(-supplement)?$/.test(YEAR_ARG)) throw new Error(`--year must be a 4-digit fiscal year (optionally with -supplement): ${YEAR_ARG}`);
+if (!/^\d{4}$/.test(YEAR_ARG)) throw new Error(`--year must be a 4-digit fiscal year: ${YEAR_ARG}`);
 const IS_FY2024 = YEAR_ARG === '2024';
 const DIR = path.join('tests', 'fixtures', 'budget-request-page-classification', YEAR_ARG);
 const PHASE_A = path.join(DIR, 'empty-page-failure-isolation.json');

@@ -22,14 +22,13 @@ import type { PageClassificationRecord } from './lib/budget-request-page-classif
 
 const FREEZE = process.argv.includes('--freeze-fixture');
 const YEAR = process.argv.find(a => a.startsWith('--year='))?.slice('--year='.length) ?? '2024';
-// 入力は plain text（頁分類と同じ）。年度に "-supplement" を付けると補遺（例: 2024-supplement）
-if (!/^\d{4}(-supplement)?$/.test(YEAR)) throw new Error(`--year must be a 4-digit fiscal year (optionally with -supplement): ${YEAR}`);
+// 入力は plain text（頁分類と同じ）
+if (!/^\d{4}$/.test(YEAR)) throw new Error(`--year must be a 4-digit fiscal year: ${YEAR}`);
 const IS_FY2024 = YEAR === '2024';
 const OUT_DIR = path.join('tests', 'fixtures', 'budget-request-cover-toc-structure', YEAR);
 const WORK_DIR = path.join('data', 'work', 'budget-request-cover-toc-structure', YEAR);
 const CLS = path.join('data', 'work', 'budget-request-page-classification', YEAR, 'page-classification.jsonl');
 const CLS_MANIFEST = path.join('tests', 'fixtures', 'budget-request-page-classification', YEAR, 'page-classification-v0-implementation-manifest.json');
-const FROZEN_FY2024_CLS_DIGEST = '39464fc76b1b83272d5852d3db1db776e22bb570ee0f6b7ca4d1da64de4a5ecc';
 export const SAMPLE_SEED = 'budget-request-cover-toc-structure-dev-exploration-20261007';
 const PER_STRATUM = 2;
 /** 作業者が実際に render 画像まで確認した sample page（sample の昇順 1-based index）。それ以外は Raw Text（先頭の最大 12〜14 line）のみ確認 */
@@ -49,7 +48,7 @@ function main() {
   const rawManifest = { frozenInput: { corpusDigestSha256: plainCorpus.corpusDigestSha256 }, documents: plainCorpus.documents.map(d => ({ ...d, artifactPath: d.textFile, logicalDocumentIndex: 0 })) };
   const FROZEN_RAW_DIGEST = rawManifest.frozenInput.corpusDigestSha256;
   const clsManifest = readJson<{ summary: { corpusClassificationDigestSha256: string } }>(CLS_MANIFEST);
-  const FROZEN_CLS_DIGEST = IS_FY2024 ? FROZEN_FY2024_CLS_DIGEST : clsManifest.summary.corpusClassificationDigestSha256;
+  const FROZEN_CLS_DIGEST = clsManifest.summary.corpusClassificationDigestSha256;
   const clsBody = fs.readFileSync(CLS, 'utf8');
   if (clsManifest.summary.corpusClassificationDigestSha256 !== FROZEN_CLS_DIGEST || sha256Hex(clsBody) !== FROZEN_CLS_DIGEST) throw new Error('classification digest mismatch');
   const cls = clsBody.split('\n').filter(l => l).map(l => JSON.parse(l) as PageClassificationRecord);
@@ -58,11 +57,13 @@ function main() {
   // acquisition metadata（manifest）: physical file ごと
   const meta = new Map<string, { publisherAuthority: string; accountType: string; account: string; budgetJurisdiction: string | null; logicalAuthority: string | null; filesInLogicalDocument: number; logicalDocumentIndex: number }>();
   let li = 0;
-  for (const src of /^\d{4}$/.test(YEAR) ? getBudgetRequestManifest(Number(YEAR)).sources : []) for (const ld of src.logicalDocuments) {
+  for (const src of getBudgetRequestManifest(Number(YEAR)).sources) for (const ld of src.logicalDocuments) {
     const idx = li++;
     for (const f of ld.files) meta.set(localPathFor(f.url, src.publisherDomain, DEFAULT_BASE_DIR).split(path.sep).join('/'), { publisherAuthority: src.publisherAuthority, accountType: ld.accountType, account: ld.account, budgetJurisdiction: ld.budgetJurisdiction ?? null, logicalAuthority: ld.logicalAuthority ?? null, filesInLogicalDocument: ld.files.length, logicalDocumentIndex: idx });
   }
 
+  const corpusDocs = new Map((readJson<{ documents: { localPdfPath: string; publisherAuthority: string; accountType: string; account: string }[] }>(path.join('tests', 'fixtures', 'budget-request-pdf-corpus', YEAR, 'pdf-corpus-freeze.json'))).documents.map(d => [d.localPdfPath, d]));
+  const corpusMeta = (pdf: string) => { const d = corpusDocs.get(pdf)!; return { publisherAuthority: d.publisherAuthority, accountType: d.accountType, account: d.account, budgetJurisdiction: null, logicalAuthority: null, filesInLogicalDocument: 1, logicalDocumentIndex: -1 }; };
   const rawCache = new Map<string, RawPage[]>();
   const rawPages = (p: string) => { let r = rawCache.get(p); if (!r) { r = plainTextPages(plainCorpus, docs.get(p) as unknown as Parameters<typeof plainTextPages>[1]) as RawPage[]; rawCache.set(p, r); } return r; };
 
@@ -78,7 +79,7 @@ function main() {
   for (const [pdf, recs] of [...byPdf.entries()].sort(([a], [b]) => cmp(a, b))) {
     const d = docs.get(pdf)!;
     const pages = rawPages(pdf);
-    const m = meta.get(pdf) ?? { publisherAuthority: d.publisherDomain, accountType: 'general', account: '', budgetJurisdiction: null, logicalAuthority: null, filesInLogicalDocument: 1, logicalDocumentIndex: -1 }; // 補遺の PDF は人手の目録にない（accountType は不明のため既定値。構造 inventory の特徴量には使わない）
+    const m = meta.get(pdf) ?? corpusMeta(pdf); // 人手の目録にない PDF（凍結後に取得した PDF）は、PDF corpus の記録から
     // TOC run 構造（page classification 出力の page 列から機械的に）
     const runs: { start: number; end: number; startSource: string | null }[] = [];
     let cur: { start: number; end: number; startSource: string | null } | null = null;

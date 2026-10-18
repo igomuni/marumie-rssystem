@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 const dir = path.join('tests', 'fixtures', 'budget-request-page-classification', '2024');
 const read = <T>(f: string) => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')) as T;
 const man = read<{
-  frozenInput: { rawTextCorpusDigestSha256: string };
+  frozenInput: { plainTextCorpusDigestSha256: string };
   summary: { totalPages: number; rawStatus: Record<string, number>; classificationStatus: Record<string, number>; source: Record<string, number>; pageLossOrDuplicate: number; corpusClassificationDigestSha256: string };
   conformance: { totalMismatch: number; v0: { directMismatch: number; stateMismatch: number }; v1: { directMismatch: number; stateMismatch: number }; v2: { directMismatch: number; stateMismatch: number } };
   perPdf: { pageCount: number }[];
@@ -21,17 +21,18 @@ const reg = read<{
   v3Fixture: { sha256: string };
 }>('page-classification-v0-descriptive-regression.json');
 const rep = read<{ records: { classification: { status: string; pageType: string | null; source: string | null } }[] }>('page-classification-v0-implementation-representative.json');
-// FY2024 の Raw Text corpus のダイジェスト（凍結時の値）。Raw Text の manifest は廃止し、page 単位のハッシュは同じ値を持つ plain text の manifest から読む
-const RAW_TEXT_CORPUS_DIGEST_AT_FREEZE = '7c6d2dcec1f4bec0ca37a1b3aa391adce7d99b93ac4642c74cab7a328dac4052';
-const raw = { frozenInput: { corpusDigestSha256: RAW_TEXT_CORPUS_DIGEST_AT_FREEZE }, ...(JSON.parse(fs.readFileSync(path.join('tests', 'fixtures', 'budget-request-plain-text', '2024', 'plain-text-manifest.json'), 'utf8')) as { documents: { localPdfPath: string; pdfSha256: string; pageTextSha256: string[] }[] }) };
+// 入力の識別子: FY2024 の PDF corpus 記録（tests/fixtures/budget-request-pdf-corpus/2024/pdf-corpus-freeze.json。凍結後に取得した PDF を統合済み）のダイジェスト
+const corpus = JSON.parse(fs.readFileSync(path.join('tests', 'fixtures', 'budget-request-pdf-corpus', '2024', 'pdf-corpus-freeze.json'), 'utf8')) as { frozenInput: { corpusDigestSha256: string; physicalPages: number } };
+const plain = JSON.parse(fs.readFileSync(path.join('tests', 'fixtures', 'budget-request-plain-text', '2024', 'plain-text-manifest.json'), 'utf8')) as { frozenPdfCorpus: { sha256: string } };
+const PAGES = corpus.frozenInput.physicalPages;
 
 describe('page classifier v0 implementation result', () => {
-  it('full corpus 9,899 page を欠落・重複なく分類し、status 集計が整合する', () => {
-    expect(man.frozenInput.rawTextCorpusDigestSha256).toBe(raw.frozenInput.corpusDigestSha256);
-    expect(man.summary.totalPages).toBe(9899);
-    expect(man.perPdf.reduce((n, p) => n + p.pageCount, 0)).toBe(9899);
+  it('full corpus の全 page を欠落・重複なく分類し、status 集計が整合する', () => {
+    expect(man.frozenInput.plainTextCorpusDigestSha256).toBe(plain.frozenPdfCorpus.sha256);
+    expect(man.summary.totalPages).toBe(PAGES);
+    expect(man.perPdf.reduce((n, p) => n + p.pageCount, 0)).toBe(PAGES);
     expect(man.summary.pageLossOrDuplicate).toBe(0);
-    expect(Object.values(man.summary.classificationStatus).reduce((a, b) => a + b, 0)).toBe(9899);
+    expect(Object.values(man.summary.classificationStatus).reduce((a, b) => a + b, 0)).toBe(PAGES);
     expect(man.summary.classificationStatus.NO_TEXT).toBe(man.summary.rawStatus.EMPTY);
   });
   it('frozen candidate の machine observation と実装出力が一致する（conformance mismatch 0）', () => {

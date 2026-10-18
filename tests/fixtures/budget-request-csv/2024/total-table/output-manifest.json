@@ -1,9 +1,10 @@
 {
   "arithmetic-diagnostics.csv": "72b5a35d1de830e4882938a106c13f0779ca09cf98f87cd30a048564ec51521a",
-  "line-audit.csv": "a72140e101365eba29f664141be002a47c957f09cb0dfc43480321bd35b9b890",
+  "line-audit.csv": "6fe3e2fb190adcbf038c4ef00e8312bfd0942ec70df08dad77d7842d04cc2f34",
   "sources/caa.go.jp__policies__budget__assets__cms_caa205_230914_02.csv": "87d84b5d5cf6f0d918324e7f9c9d42c787011d79e9229dbfe528981a711c4101",
   "sources/caa.go.jp__policies__budget__assets__cms_caa205_230914_03.csv": "773c8139f6e60aa74ce47e0df851f2133d044411466c0249ffc8943115c35ffa",
   "sources/cao.go.jp__yosan__soshiki__r06__pdf__0.csv": "7f3521a2fadde6484ba72b8d2efb8e41041a8c29230b7c03364a7867001f71dd",
+  "sources/cao.go.jp__yosan__soshiki__r06__pdf__e1.csv": "c6a777913e29191f5f7a30039d798368fc0cc1925276413ff82cbcd659036f0b",
   "sources/cao.go.jp__yosan__soshiki__r06__pdf__f1.csv": "bd1c718666b1bcc1a865d112f41431972ff5c8ffca1aa78c9bf2e804bf8b6ca4",
   "sources/cas.go.jp__jp__yosan__pdf__r6_01.csv": "70b675b32898ea29e434337bb184138102ed8ec6ca3b1cf419ea513ee069f330",
   "sources/cas.go.jp__jp__yosan__pdf__r6_16.csv": "4139f12e0881f5f891a80d0ac8e79c458c4f60dfe86a8ff64d9409ef3e33cf0c",
@@ -34,6 +35,7 @@
   "sources/meti.go.jp__main__yosangaisan__fy2024__pdf__ippan_o.csv": "7aab9e024ffddafcff339483fa2f936ba47b105847c7475f92ee9762baaef16c",
   "sources/meti.go.jp__main__yosangaisan__fy2024__pdf__tokkyo_o.csv": "57ef22ba7fda06ffe8893d67a065ff5ccf19afc5938ac8d6516adb83b08d8c5a",
   "sources/mext.go.jp__content__20230914-mxt_kaikesou01-000031817_02.csv": "cb4d1c577566aaa8d15ba00003ab96fb22982de91459279cbf5185881daca4ec",
+  "sources/mext.go.jp__content__20230914-mxt_kaikesou01-000031817_08.csv": "2da5c2a71da0d9908ba0e3b83e68a16a6d660594eed3bc1e748868384b0418ce",
   "sources/mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-1b-01.csv": "16e8139f4136c1b0e92474a1a25722596b6ad71072134561b4893caa3313eba3",
   "sources/mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-2b-01.csv": "baa68067d7fe3883f324af848badd7fb62b5cb0095fa0e1969a94c6332fd3ad8",
   "sources/mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01.csv": "2a05c9ce0ac117ed106fde338ed487aca1000e8c1d7b12ee86266e006d7fa100",
@@ -60,6 +62,6 @@
   "sources/sotsui.go.jp__budget__images__r6budget_yokyu.csv": "b84e706d39aecb38e0185979249a2b6c3b3a04599140cabb16834a02bd3a692e",
   "sources/soumu.go.jp__main_content__000901372.csv": "63cdcfafed3651ea23ee129ecfbd8bb8e9f9253731182297a741ddf4835b609d",
   "sources/soumu.go.jp__main_content__000901375.csv": "9240cbe95946cc247a398a330f9488ffb327287632c6b3ec62df8789efa80ae7",
-  "summary.json": "e1fd310fa7dad748bd7fb10fa9effbb65c1edb5c89495e2fa15f53d6dcdaf170",
+  "summary.json": "43700030bfc4c9d16325c445b180e9b5756e10da9b568c8f395887f5cbf27db4",
   "unresolved.csv": "917cf56115ce24571bcd65fee21e8f8b817abed0178c1ebc468466801963030c"
 }

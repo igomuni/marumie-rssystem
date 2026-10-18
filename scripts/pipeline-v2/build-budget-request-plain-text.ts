@@ -1,40 +1,26 @@
 /**
  * Generate byte-preserving plain text for the physical budget-request PDFs of one fiscal year.
  *   npx tsx scripts/pipeline-v2/build-budget-request-plain-text.ts [--year=2024] [--out-root=<dir>]
- * FY2024 validates against the frozen raw-text manifest (PDF hash, page count, per-page text hash).
- * Other years validate PDF hash and page count against the frozen PDF corpus
- * (tests/fixtures/budget-request-pdf-corpus/{year}/pdf-corpus-freeze.json) and write plain-text-manifest.json
- * (per-page text hashes) next to the text files, to be frozen.
+ * The PDF set is the frozen PDF corpus record (tests/fixtures/budget-request-pdf-corpus/{year}/pdf-corpus-freeze.json). PDF hash and page count are validated
+ * against it, and plain-text-manifest.json (per-page text hashes) is written next to the text files, to be frozen
+ * (tests/fixtures/budget-request-plain-text/{year}/plain-text-manifest.json).
  */
 import * as fs from 'fs';
 import * as path from 'path';
 import { execFileSync, spawnSync } from 'child_process';
-import { getBudgetRequestManifest } from './lib/budget-request-manifest';
-import { localPathFor, DEFAULT_BASE_DIR } from './lib/budget-request-download';
 import { assertUniqueSlugs, sha256, splitAndValidatePdfText } from './lib/budget-request-plain-text';
 
 const arg = (name: string) => process.argv.find(a => a.startsWith(`--${name}=`))?.slice(name.length + 3);
 const YEAR = Number(arg('year') ?? '2024');
 if (!/^\d{4}$/.test(String(YEAR))) throw new Error(`--year must be a 4-digit fiscal year: ${arg('year')}`);
 const OUT_ROOT = arg('out-root') ?? path.join('data', 'work', 'budget-request-plain-text', String(YEAR));
-// --corpus=<凍結記録の JSON> は、凍結済みの年度に後から足した PDF の補遺（pdf-corpus-freeze-supplement-*.json）だけを処理するときに使う（--out-root も指定する）
-const CORPUS = arg('corpus');
-const FROZEN = CORPUS ? CORPUS : path.join('tests', 'fixtures', 'budget-request-pdf-corpus', String(YEAR), 'pdf-corpus-freeze.json');
+const FROZEN = path.join('tests', 'fixtures', 'budget-request-pdf-corpus', String(YEAR), 'pdf-corpus-freeze.json');
 type FrozenDocument = { localPdfPath: string; pdfSha256: string; pageCount: number; pageTextSha256?: string[] };
 const frozen = JSON.parse(fs.readFileSync(FROZEN, 'utf8')) as { documents: FrozenDocument[] };
 
 function main(): void {
   const files: { localPdfPath: string; url: string }[] = [];
-  const hasManifest = !CORPUS && (YEAR === 2024 || YEAR === 2025);
-  if (hasManifest) {
-    const manifest = getBudgetRequestManifest(YEAR);
-    for (const src of manifest.sources) for (const doc of src.logicalDocuments) for (const file of doc.files) {
-      files.push({ localPdfPath: localPathFor(file.url, src.publisherDomain, DEFAULT_BASE_DIR).split(path.sep).join('/'), url: file.url });
-    }
-  } else {
-    // manifest（人手で確認した目録）が無い年度（FY2026〜）は、凍結した PDF corpus の記録が取得集合そのもの
-    for (const d of frozen.documents as (FrozenDocument & { sourceUrl: string })[]) files.push({ localPdfPath: d.localPdfPath, url: d.sourceUrl });
-  }
+  for (const d of frozen.documents as (FrozenDocument & { sourceUrl: string })[]) files.push({ localPdfPath: d.localPdfPath, url: d.sourceUrl });
   const slugs = assertUniqueSlugs(files.map(f => f.localPdfPath));
   const frozenByPath = new Map(frozen.documents.map(d => [d.localPdfPath, d]));
   if (frozenByPath.size !== frozen.documents.length) throw new Error('duplicate localPdfPath in frozen manifest');
