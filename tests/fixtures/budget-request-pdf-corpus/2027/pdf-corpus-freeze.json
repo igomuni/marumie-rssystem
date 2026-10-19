@@ -2,17 +2,17 @@
  "schema": "budget-request-pdf-corpus-freeze/v0",
  "scope": "FY2027 概算要求 PDF の取得集合（財務省のリンク先一覧から辿り、先頭 2 ページで「令和9年度」「歳出概算要求」を確認した PDF。text 抽出・意味付け・照合は含まない）",
  "frozenInput": {
-  "targets": 122,
-  "physicalPages": 5122,
+  "targets": 132,
+  "physicalPages": 5353,
   "acquisition": {
-   "pipeline-fetch": 120,
-   "manual": 2
+   "pipeline-fetch": 123,
+   "manual": 9
   },
   "manualAcquisitionNote": "掲載ページがスクリプトからの取得に 403 を返した所管の PDF は、ユーザー操作の別セッションで取得した。原本とのバイト同一性は照合できない。先頭 %PDF- と本文の印（令和N年度・歳出概算要求）のみ確認",
   "unknownAccountType": 2,
   "pdfinfoVersion": "pdfinfo version 26.09.0",
   "corpusDigestRule": "sha256(各 target について \"{localPdfPath} {pdfSha256}\" を改行連結。localPdfPath の昇順)",
-  "corpusDigestSha256": "909bc468192d7490e554407d841c8b90ce19d0aab7b8d5fba6bea835609b7919"
+  "corpusDigestSha256": "ebef47a3a32c0606f4c3380cdc565f9c65a3a0637c708c17285319bd11af43cb"
  },
  "documents": [
   {
@@ -965,13 +965,29 @@
    "logicalAuthority": "内閣",
    "accountType": "general",
    "account": "一般会計",
+   "sourceUrl": "https://www.cas.go.jp/jp/yosan/pdf/r9_01.pdf",
+   "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r9_01.pdf",
+   "bytes": 12180,
+   "pdfSha256": "45b0b5326a39f7190e4589738fa6edcdcf8e8cebfb2e9cd1fa8fa58040d2f661",
+   "pageCount": 6,
+   "acquisition": "pipeline-fetch",
+   "targetIndex": 59,
+   "kind": "document",
+   "role": null
+  },
+  {
+   "publisherAuthority": "内閣",
+   "publisherDomain": "cas.go.jp",
+   "logicalAuthority": "内閣",
+   "accountType": "general",
+   "account": "一般会計",
    "sourceUrl": "https://www.cas.go.jp/jp/yosan/pdf/r9_02.pdf",
    "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r9_02.pdf",
    "bytes": 11352,
    "pdfSha256": "3c48b65c9ddb99d8251b534d4be7fd8cd2349b984a406da62c83bbc06553f20d",
    "pageCount": 3,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 59,
+   "targetIndex": 60,
    "kind": "document",
    "role": null
   },
@@ -987,7 +1003,7 @@
    "pdfSha256": "0cc3303cba7d002ebea0d107f38cb52486e9ee4abdaebf45bcc8eebadd9f97a2",
    "pageCount": 3,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 60,
+   "targetIndex": 61,
    "kind": "document",
    "role": null
   },
@@ -1003,7 +1019,7 @@
    "pdfSha256": "9c41cfd6417362a0efcf9d3933526227a443c1c6d1b3dd46172f1065b3726241",
    "pageCount": 1,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 61,
+   "targetIndex": 62,
    "kind": "document",
    "role": null
   },
@@ -1019,7 +1035,7 @@
    "pdfSha256": "c4763cd1d31fe79b8bb99fc13d08045a95c49de022470ea521e606a92246ab88",
    "pageCount": 5,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 62,
+   "targetIndex": 63,
    "kind": "document",
    "role": null
   },
@@ -1035,7 +1051,7 @@
    "pdfSha256": "a39014a5fd6e0dadfc4147543732f1375b6ca85635354be1f1d9f7a24186f791",
    "pageCount": 3,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 63,
+   "targetIndex": 64,
    "kind": "document",
    "role": null
   },
@@ -1051,7 +1067,7 @@
    "pdfSha256": "7cec4a11a804fa5ddd267b7055b40da242b07d577ddbeea252e8b93de665efb8",
    "pageCount": 1,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 64,
+   "targetIndex": 65,
    "kind": "document",
    "role": null
   },
@@ -1067,7 +1083,7 @@
    "pdfSha256": "fc9fdaa6ad0c9cc41667f14f776be05185eea9d74745dbcaef0828222c9e49d9",
    "pageCount": 5,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 65,
+   "targetIndex": 66,
    "kind": "document",
    "role": null
   },
@@ -1083,7 +1099,7 @@
    "pdfSha256": "3f09708497da15dde8963da344fa70663ee30051b5bbd11ef6192617abbef6f7",
    "pageCount": 22,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 66,
+   "targetIndex": 67,
    "kind": "document",
    "role": null
   },
@@ -1099,7 +1115,7 @@
    "pdfSha256": "91067d72ac0da2eda8dfea618fd9eb77041dc8d0cfaeae771e486a0fae40cf65",
    "pageCount": 3,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 67,
+   "targetIndex": 68,
    "kind": "document",
    "role": null
   },
@@ -1115,7 +1131,7 @@
    "pdfSha256": "265afd486d00a14d18743a1a7831c238fe20cc64551e57660a28cb088fddfc43",
    "pageCount": 2,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 68,
+   "targetIndex": 69,
    "kind": "document",
    "role": null
   },
@@ -1131,7 +1147,7 @@
    "pdfSha256": "30c12edf5bfc7e2e49225aa16171e3664daed662346fa7866e802e0648598941",
    "pageCount": 5,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 69,
+   "targetIndex": 70,
    "kind": "document",
    "role": null
   },
@@ -1147,7 +1163,7 @@
    "pdfSha256": "52f5a79f0190636547201e6d4378d4a3e4116f0ebfc5649bb10f57d35ebf827d",
    "pageCount": 18,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 70,
+   "targetIndex": 71,
    "kind": "document",
    "role": null
   },
@@ -1163,7 +1179,7 @@
    "pdfSha256": "badff5395b173b36cec2426e43a69f434d92da3e243c3c66523d5ac0a1ec8f14",
    "pageCount": 4,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 71,
+   "targetIndex": 72,
    "kind": "document",
    "role": null
   },
@@ -1179,7 +1195,23 @@
    "pdfSha256": "1b2ad4b723f1f59ce830a545358381e2cbb9c2dbe48ec8a53fd03d19d66a425b",
    "pageCount": 2,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 72,
+   "targetIndex": 73,
+   "kind": "document",
+   "role": null
+  },
+  {
+   "publisherAuthority": "内閣",
+   "publisherDomain": "cas.go.jp",
+   "logicalAuthority": "東日本大震災復興特別会計",
+   "accountType": "special",
+   "account": "東日本大震災復興特別会計",
+   "sourceUrl": "https://www.cas.go.jp/jp/yosan/pdf/r9_16.pdf",
+   "localPdfPath": "data/download/cas.go.jp/jp/yosan/pdf/r9_16.pdf",
+   "bytes": 9021,
+   "pdfSha256": "26a7624663bb07ce0f090bb53d3ba36f6a66bbb8eda87cabfd6f608528cb2541",
+   "pageCount": 2,
+   "acquisition": "pipeline-fetch",
+   "targetIndex": 74,
    "kind": "document",
    "role": null
   },
@@ -1195,7 +1227,7 @@
    "pdfSha256": "4e1d630d4ec4f801c8fe5ad22593a3138ac53bc67bf8b3d77e12005b5574766b",
    "pageCount": 1,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 73,
+   "targetIndex": 75,
    "kind": "document",
    "role": null
   },
@@ -1211,7 +1243,7 @@
    "pdfSha256": "21f390ba1001a63b9d88c1fcd5247bb796e23f3496b144c13a198af609aeecc6",
    "pageCount": 102,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 74,
+   "targetIndex": 76,
    "kind": "document",
    "role": null
   },
@@ -1227,7 +1259,7 @@
    "pdfSha256": "ca7d07f55e10b891cc9a088c93121178f7094d0f286eceec1ee5c8777a316d5d",
    "pageCount": 45,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 75,
+   "targetIndex": 77,
    "kind": "document",
    "role": null
   },
@@ -1243,7 +1275,7 @@
    "pdfSha256": "4a033d798a2d7fb445e73c3539e691779f18927068f7ff2767a16baa5eb65236",
    "pageCount": 22,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 76,
+   "targetIndex": 78,
    "kind": "document",
    "role": null
   },
@@ -1259,7 +1291,7 @@
    "pdfSha256": "e4250f8f7ec1a50cfc2073d1fb9fa97a3093e094ed0a432159fc7de275ca8bb4",
    "pageCount": 88,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 77,
+   "targetIndex": 79,
    "kind": "document",
    "role": null
   },
@@ -1275,7 +1307,7 @@
    "pdfSha256": "cb4d46e420e37022394011868dbf7e0b5adad30b68d19d117dbaa201a1ebe31f",
    "pageCount": 8,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 78,
+   "targetIndex": 80,
    "kind": "document",
    "role": null
   },
@@ -1291,7 +1323,7 @@
    "pdfSha256": "df7e982dfa23b8ba75c72539c73c9974ebb29216c4424318bf661ffd7e5bf62f",
    "pageCount": 32,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 79,
+   "targetIndex": 81,
    "kind": "document",
    "role": null
   },
@@ -1307,7 +1339,7 @@
    "pdfSha256": "a301cd58154624ebb1ead3b87224fdbdd3edeb3eb4034bf969e0c75069fda93a",
    "pageCount": 115,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 80,
+   "targetIndex": 82,
    "kind": "document",
    "role": null
   },
@@ -1323,7 +1355,7 @@
    "pdfSha256": "c0d42214d4d5a06638f344b221e7d2796f7e9601d962624e9880844062532fa2",
    "pageCount": 15,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 81,
+   "targetIndex": 83,
    "kind": "document",
    "role": null
   },
@@ -1339,7 +1371,7 @@
    "pdfSha256": "d91260d27815eea6f82afa374538d860372edda211ace4d3f51da67458c1f2d1",
    "pageCount": 26,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 82,
+   "targetIndex": 84,
    "kind": "document",
    "role": null
   },
@@ -1355,7 +1387,7 @@
    "pdfSha256": "b63a49f88fb07589bdeed22e7c04627f0fe730f82e7c6be3c96ea1be6d0819f3",
    "pageCount": 17,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 83,
+   "targetIndex": 85,
    "kind": "document",
    "role": null
   },
@@ -1371,7 +1403,7 @@
    "pdfSha256": "23c260429f660695822440e0a4cc93de802ca96ffbfe325dd5ad3a558dfb4651",
    "pageCount": 41,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 84,
+   "targetIndex": 86,
    "kind": "document",
    "role": null
   },
@@ -1387,7 +1419,7 @@
    "pdfSha256": "82f0599f6219ab410678168368d8d89bda9c819adc97239e2b3e9022539650b9",
    "pageCount": 30,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 85,
+   "targetIndex": 87,
    "kind": "document",
    "role": null
   },
@@ -1403,7 +1435,23 @@
    "pdfSha256": "b7ff2707e617f9a1a5b95b302d21f2c4ddf22d35de555a7ed2f9ede21255b6e5",
    "pageCount": 16,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 86,
+   "targetIndex": 88,
+   "kind": "document",
+   "role": null
+  },
+  {
+   "publisherAuthority": "公正取引委員会",
+   "publisherDomain": "jftc.go.jp",
+   "logicalAuthority": "内閣府",
+   "accountType": "general",
+   "account": "一般会計",
+   "sourceUrl": "https://www.jftc.go.jp/soshiki/kyotsukoukai/yosan/yosankessan/r9/r9sandanhyou.pdf",
+   "localPdfPath": "data/download/jftc.go.jp/soshiki/kyotsukoukai/yosan/yosankessan/r9/r9sandanhyou.pdf",
+   "bytes": 669523,
+   "pdfSha256": "2278b89f3b132c00cb65858aa994fd5627fddef90d10698ff03dbc24d144e33a",
+   "pageCount": 56,
+   "acquisition": "pipeline-fetch",
+   "targetIndex": 89,
    "kind": "document",
    "role": null
   },
@@ -1419,7 +1467,7 @@
    "pdfSha256": "0d4f4a2634cd3626c8b5b8189f9153f5e14353a7f8c74ba1840277c081469e55",
    "pageCount": 36,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 87,
+   "targetIndex": 90,
    "kind": "document",
    "role": null
   },
@@ -1435,7 +1483,7 @@
    "pdfSha256": "d677bb51bfa8e544cf8eec577e1e68ce2e5a54a9ef42020710cddcd644033a3b",
    "pageCount": 25,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 88,
+   "targetIndex": 91,
    "kind": "document",
    "role": null
   },
@@ -1451,7 +1499,7 @@
    "pdfSha256": "385998e3cba4838299100b7487eeda4555cb7e051678360bb32d56db7c2bc4f6",
    "pageCount": 18,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 89,
+   "targetIndex": 92,
    "kind": "document",
    "role": null
   },
@@ -1467,7 +1515,7 @@
    "pdfSha256": "33cfb25eeb21e7752f2c4ccda3f5d517a3408414b019146e296888333e3b2a90",
    "pageCount": 243,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 90,
+   "targetIndex": 93,
    "kind": "document",
    "role": null
   },
@@ -1483,7 +1531,7 @@
    "pdfSha256": "7084754f4d8675c552cffbd8331c92acddfb2096ae896279b8f0b4763c09b551",
    "pageCount": 15,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 91,
+   "targetIndex": 94,
    "kind": "document",
    "role": null
   },
@@ -1499,7 +1547,119 @@
    "pdfSha256": "0d19769bc07154c5c85db19e1f79a8a60f41c3c7b4d8024c81cc45890e8e39d7",
    "pageCount": 33,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 92,
+   "targetIndex": 95,
+   "kind": "document",
+   "role": null
+  },
+  {
+   "publisherAuthority": "経済産業省",
+   "publisherDomain": "meti.go.jp",
+   "logicalAuthority": "エネルギー対策特別会計",
+   "accountType": "special",
+   "account": "エネルギー対策特別会計",
+   "sourceUrl": "https://www.meti.go.jp/main/yosangaisan/fy2027/pdf/eneden_o.pdf",
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2027/pdf/eneden_o.pdf",
+   "bytes": 59346,
+   "pdfSha256": "fd40561e8b49f91167d64d1d41ee90430f20c44fd216c3013a1a2cac36acfb16",
+   "pageCount": 25,
+   "acquisition": "manual",
+   "targetIndex": 96,
+   "kind": "document",
+   "role": null
+  },
+  {
+   "publisherAuthority": "経済産業省",
+   "publisherDomain": "meti.go.jp",
+   "logicalAuthority": "エネルギー対策特別会計",
+   "accountType": "special",
+   "account": "エネルギー対策特別会計",
+   "sourceUrl": "https://www.meti.go.jp/main/yosangaisan/fy2027/pdf/enegen_o.pdf",
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2027/pdf/enegen_o.pdf",
+   "bytes": 9129,
+   "pdfSha256": "cdc62bc9a8c49045f47523646057aa316d8b3dd12d969bac4ec50d7b55d42cad",
+   "pageCount": 7,
+   "acquisition": "manual",
+   "targetIndex": 97,
+   "kind": "document",
+   "role": null
+  },
+  {
+   "publisherAuthority": "経済産業省",
+   "publisherDomain": "meti.go.jp",
+   "logicalAuthority": "エネルギー対策特別会計",
+   "accountType": "special",
+   "account": "エネルギー対策特別会計",
+   "sourceUrl": "https://www.meti.go.jp/main/yosangaisan/fy2027/pdf/eneju_o.pdf",
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2027/pdf/eneju_o.pdf",
+   "bytes": 38796,
+   "pdfSha256": "fcf9ed053af29937fb36a2739b025769e14ed4dfaa4d71cce1f648cf48d09dbb",
+   "pageCount": 16,
+   "acquisition": "manual",
+   "targetIndex": 98,
+   "kind": "document",
+   "role": null
+  },
+  {
+   "publisherAuthority": "経済産業省",
+   "publisherDomain": "meti.go.jp",
+   "logicalAuthority": "エネルギー対策特別会計",
+   "accountType": "special",
+   "account": "エネルギー対策特別会計",
+   "sourceUrl": "https://www.meti.go.jp/main/yosangaisan/fy2027/pdf/enesen_o.pdf",
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2027/pdf/enesen_o.pdf",
+   "bytes": 12558,
+   "pdfSha256": "a8a4ed67561e09e08ed2cc8e3e8b7197547ab4021f76fe8f4a3517274d1101fc",
+   "pageCount": 8,
+   "acquisition": "manual",
+   "targetIndex": 99,
+   "kind": "document",
+   "role": null
+  },
+  {
+   "publisherAuthority": "経済産業省",
+   "publisherDomain": "meti.go.jp",
+   "logicalAuthority": "東日本大震災復興特別会計",
+   "accountType": "special",
+   "account": "東日本大震災復興特別会計",
+   "sourceUrl": "https://www.meti.go.jp/main/yosangaisan/fy2027/pdf/fukko_o.pdf",
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2027/pdf/fukko_o.pdf",
+   "bytes": 12380,
+   "pdfSha256": "6e6853654ae7407b996f3ae66d8932c033016df0103768c652f490eaab0d58cb",
+   "pageCount": 8,
+   "acquisition": "manual",
+   "targetIndex": 100,
+   "kind": "document",
+   "role": null
+  },
+  {
+   "publisherAuthority": "経済産業省",
+   "publisherDomain": "meti.go.jp",
+   "logicalAuthority": "経済産業省",
+   "accountType": "general",
+   "account": "一般会計",
+   "sourceUrl": "https://www.meti.go.jp/main/yosangaisan/fy2027/pdf/ippan_o.pdf",
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2027/pdf/ippan_o.pdf",
+   "bytes": 212552,
+   "pdfSha256": "67fe8c4f8247a14c37a65308d274f4933e9b28e4981aa04ec5c9d3a7b16f41c6",
+   "pageCount": 87,
+   "acquisition": "manual",
+   "targetIndex": 101,
+   "kind": "document",
+   "role": null
+  },
+  {
+   "publisherAuthority": "経済産業省",
+   "publisherDomain": "meti.go.jp",
+   "logicalAuthority": "特許特別会計",
+   "accountType": "special",
+   "account": "特許特別会計",
+   "sourceUrl": "https://www.meti.go.jp/main/yosangaisan/fy2027/pdf/tokkyo_o.pdf",
+   "localPdfPath": "data/download/meti.go.jp/main/yosangaisan/fy2027/pdf/tokkyo_o.pdf",
+   "bytes": 31551,
+   "pdfSha256": "2272e6821bcfb7d44eab663e3f6d5dc30f433d86def73ec3646bd59b00c692ae",
+   "pageCount": 16,
+   "acquisition": "manual",
+   "targetIndex": 102,
    "kind": "document",
    "role": null
   },
@@ -1515,7 +1675,7 @@
    "pdfSha256": "e0872a5132513670403cdcc51cd0145b13fa10a68a7eb780a609a9fcba1e75a2",
    "pageCount": 5,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 93,
+   "targetIndex": 103,
    "kind": "document",
    "role": null
   },
@@ -1531,7 +1691,7 @@
    "pdfSha256": "a3b46296878662442ea7a558e7df3eed3cdfa1248cf365de3ff10b01aecf5734",
    "pageCount": 7,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 94,
+   "targetIndex": 104,
    "kind": "document",
    "role": null
   },
@@ -1547,7 +1707,7 @@
    "pdfSha256": "cd62ada7d3d838e3d7bd241ec73a5957d1502bf33bade534cc09930fdb32c81e",
    "pageCount": 410,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 95,
+   "targetIndex": 105,
    "kind": "document",
    "role": null
   },
@@ -1563,7 +1723,7 @@
    "pdfSha256": "279afa58c52a7c29fbfe000ceb12f446b363a632684e9fbbd78e18f7422e57f6",
    "pageCount": 28,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 96,
+   "targetIndex": 106,
    "kind": "document",
    "role": null
   },
@@ -1579,7 +1739,7 @@
    "pdfSha256": "ad58227f55c844fe90f9a4b95dd8f86e14c04fec7741ab1325de132cbb772041",
    "pageCount": 911,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 97,
+   "targetIndex": 107,
    "kind": "document",
    "role": null
   },
@@ -1595,7 +1755,7 @@
    "pdfSha256": "4d9f77c73d08ee3b2199a748433d9fd96163a2a2fd55675ec711a8e734604038",
    "pageCount": 52,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 98,
+   "targetIndex": 108,
    "kind": "document",
    "role": null
   },
@@ -1611,7 +1771,7 @@
    "pdfSha256": "b4438cff0c5f481f2e19ed613aefe672de21de57f59276430162a9ef4699429e",
    "pageCount": 9,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 99,
+   "targetIndex": 109,
    "kind": "document",
    "role": null
   },
@@ -1627,7 +1787,7 @@
    "pdfSha256": "4158eb6acba23e973508404cd44e39dbc4488c006cc542b5685ef13bce9c5bce",
    "pageCount": 383,
    "acquisition": "manual",
-   "targetIndex": 100,
+   "targetIndex": 110,
    "kind": "document",
    "role": null
   },
@@ -1643,7 +1803,7 @@
    "pdfSha256": "9b652e4cb5a77afd698e7b5ed555bdaeee9f7d50e31fba5c592713de9285f564",
    "pageCount": 5,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 101,
+   "targetIndex": 111,
    "kind": "document",
    "role": null
   },
@@ -1659,7 +1819,7 @@
    "pdfSha256": "b23af6d3a1576a4a8548d01ee15cc18c7d4c2040b6189b5821c9298e63930910",
    "pageCount": 17,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 102,
+   "targetIndex": 112,
    "kind": "document",
    "role": null
   },
@@ -1675,7 +1835,7 @@
    "pdfSha256": "526d0fbb81f8f7ebd580ce30b5d533b9369cbb0762aa1d98cc2ea13f093eb56c",
    "pageCount": 152,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 103,
+   "targetIndex": 113,
    "kind": "document",
    "role": null
   },
@@ -1691,7 +1851,7 @@
    "pdfSha256": "26a8813cdca485dee3ca1b0fbf05074e6a4aa0d98b293feae6c46512a3b7f2a1",
    "pageCount": 9,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 104,
+   "targetIndex": 114,
    "kind": "document",
    "role": null
   },
@@ -1707,7 +1867,7 @@
    "pdfSha256": "a504824908d00bd1e1079ed8314b8b226da09993c286f5b0b54b791d07f2244e",
    "pageCount": 9,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 105,
+   "targetIndex": 115,
    "kind": "document",
    "role": null
   },
@@ -1723,7 +1883,7 @@
    "pdfSha256": "6185121e63dd791698010115b8b038fcad2bce62938b75513dc604f2806450ee",
    "pageCount": 5,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 106,
+   "targetIndex": 116,
    "kind": "document",
    "role": null
   },
@@ -1739,7 +1899,7 @@
    "pdfSha256": "51bf5fd51399c635215af90601e62f191e08a2c02ab6ba4622e8a160b3ba03e9",
    "pageCount": 11,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 107,
+   "targetIndex": 117,
    "kind": "document",
    "role": null
   },
@@ -1755,7 +1915,7 @@
    "pdfSha256": "5c5054510a8fd42556684dde7269773e7a5a092905d3cbed8681d5315f4c0e89",
    "pageCount": 18,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 108,
+   "targetIndex": 118,
    "kind": "document",
    "role": null
   },
@@ -1771,7 +1931,7 @@
    "pdfSha256": "b5432e8625994783662223dee77b84ecb55d9593143c8ef58899a0228967f6a3",
    "pageCount": 228,
    "acquisition": "manual",
-   "targetIndex": 109,
+   "targetIndex": 119,
    "kind": "document",
    "role": null
   },
@@ -1787,7 +1947,7 @@
    "pdfSha256": "d655900ae70d4419ebd27c89b1c2ec3e78f6f5d47e5f8bd02d559082331ffab5",
    "pageCount": 774,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 110,
+   "targetIndex": 120,
    "kind": "document",
    "role": null
   },
@@ -1803,7 +1963,7 @@
    "pdfSha256": "7ac30ec1665ed536bb8dd6563e512262ce0fb82959f76ebecf6d616804ab520f",
    "pageCount": 16,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 111,
+   "targetIndex": 121,
    "kind": "document",
    "role": null
   },
@@ -1819,7 +1979,7 @@
    "pdfSha256": "e9f8dd33a89b45bd0ed81d38c5ea63a6ae2cbc5ea9a49bf84a4e203f5d6f1278",
    "pageCount": 8,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 112,
+   "targetIndex": 122,
    "kind": "document",
    "role": null
   },
@@ -1835,7 +1995,7 @@
    "pdfSha256": "ebf393ab99ae0cdb177fa349e68c73fad2efa21d9aae41e0a84d75c264282e0f",
    "pageCount": 109,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 113,
+   "targetIndex": 123,
    "kind": "document",
    "role": null
   },
@@ -1851,7 +2011,7 @@
    "pdfSha256": "d60c0bd0cb3c75950843e6a2643df188a90300d284b53fede218bbe075909fc6",
    "pageCount": 19,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 114,
+   "targetIndex": 124,
    "kind": "document",
    "role": null
   },
@@ -1867,7 +2027,7 @@
    "pdfSha256": "59d5789159ddeb1878ff9d58f4cbea2d3f45f760aec76ca6946310a5bc3a729a",
    "pageCount": 77,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 115,
+   "targetIndex": 125,
    "kind": "document",
    "role": null
   },
@@ -1883,7 +2043,7 @@
    "pdfSha256": "038c7fb4ee2733276813b644efcedf5e680fdd75a74c37494cce73ed99a097f6",
    "pageCount": 13,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 116,
+   "targetIndex": 126,
    "kind": "document",
    "role": null
   },
@@ -1899,7 +2059,7 @@
    "pdfSha256": "641d8bee0c401c9bff3587ff3ffa917bccd1a9cf78924a8e618c7b39c40bc430",
    "pageCount": 24,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 117,
+   "targetIndex": 127,
    "kind": "document",
    "role": null
   },
@@ -1915,7 +2075,7 @@
    "pdfSha256": "fbef4edd4de75b9673e604596ee552f678e69f9de7d06966b376c6e19e1ebbf4",
    "pageCount": 8,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 118,
+   "targetIndex": 128,
    "kind": "document",
    "role": null
   },
@@ -1931,7 +2091,7 @@
    "pdfSha256": "d97c43397ab40bd3c13833a41e4051bc1e05c6e250fd8399b6c95cb6862728e9",
    "pageCount": 260,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 119,
+   "targetIndex": 129,
    "kind": "document",
    "role": null
   },
@@ -1947,7 +2107,7 @@
    "pdfSha256": "d8b2906916b5586880215bcc8d4135034e5ecdb308dc81e92282da2a66176938",
    "pageCount": 22,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 120,
+   "targetIndex": 130,
    "kind": "document",
    "role": null
   },
@@ -1963,7 +2123,7 @@
    "pdfSha256": "0dcfa707b1415ecacd0d08c7fba03cfc9a6c67e1fb5944c7b2f4f0636cbc83ff",
    "pageCount": 8,
    "acquisition": "pipeline-fetch",
-   "targetIndex": 121,
+   "targetIndex": 131,
    "kind": "document",
    "role": null
   }

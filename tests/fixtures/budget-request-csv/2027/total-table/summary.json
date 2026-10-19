@@ -2,53 +2,53 @@
   "scope": "FY2027 令和9年度歳出概算要求額総表 raw text → logical rows (v0 deterministic parser; descriptive counts, not an accuracy score)",
   "input": {
     "inputDir": "data/work/budget-request-plain-text/2027",
-    "inputSha256": "8c7fcc5bef2524939aa31b98e7731be12e47fda26e50e5ece486e61328d4f043",
-    "txtEntries": 122
+    "inputSha256": "419d2939e581bd258c9e42e13ff0f51a299021f0c339042e3ba2d6776abb73e5",
+    "txtEntries": 132
   },
   "frozenManifestIntegrity": {
-    "MATCH": 122
+    "MATCH": 132
   },
   "frozenManifestIntegrityDetail": [],
-  "sourceFileCount": 122,
-  "candidateTotalTableSourceCount": 52,
-  "candidateTotalTablePageCount": 131,
-  "tableBlockCount": 62,
-  "titleOnlyPageCount": 111,
-  "logicalRowCount": 2718,
+  "sourceFileCount": 132,
+  "candidateTotalTableSourceCount": 62,
+  "candidateTotalTablePageCount": 146,
+  "tableBlockCount": 72,
+  "titleOnlyPageCount": 130,
+  "logicalRowCount": 2972,
   "rowTypeCounts": {
-    "CODE3": 1112,
-    "DETAIL": 1421,
-    "HIER": 55,
-    "TOTAL": 130
+    "CODE3": 1211,
+    "DETAIL": 1546,
+    "HIER": 68,
+    "TOTAL": 147
   },
   "parseStatusCounts": {
-    "PARSED": 2718
+    "PARSED": 2972
   },
   "rowsWithContinuation": {
-    "CODE3": 105,
-    "DETAIL": 386
+    "CODE3": 130,
+    "DETAIL": 449
   },
   "continuationLineCount": {
-    "CODE3": 107,
-    "DETAIL": 414
+    "CODE3": 137,
+    "DETAIL": 488
   },
-  "unresolvedCount": 6,
+  "unresolvedCount": 7,
   "unresolvedByReason": {
-    "UNKNOWN_HEADER_ZONE_LINE": 6
+    "UNKNOWN_HEADER_ZONE_LINE": 7
   },
   "numericTailFailureCount": 0,
   "unknownRowHeadCount": 0,
   "lineClassCounts": {
-    "CONTEXT": 62,
-    "CONTINUATION": 521,
-    "PAGE_LABEL": 131,
-    "ROW": 2718,
-    "TABLE_HEADER": 780,
-    "TABLE_TITLE": 62,
-    "UNIT": 62,
-    "UNRESOLVED": 6
+    "CONTEXT": 72,
+    "CONTINUATION": 625,
+    "PAGE_LABEL": 146,
+    "ROW": 2972,
+    "TABLE_HEADER": 869,
+    "TABLE_TITLE": 72,
+    "UNIT": 72,
+    "UNRESOLVED": 7
   },
-  "blankLinesInCandidatePages": 810,
+  "blankLinesInCandidatePages": 942,
   "signedCellsByColumn": {
     "previous_general": 4,
     "previous_other": 0,
@@ -56,11 +56,11 @@
     "request_general": 4,
     "request_other": 0,
     "request_total": 4,
-    "difference": 850
+    "difference": 925
   },
   "detailPageShape": {
-    "<blank>": 130,
-    "N": 2558,
+    "<blank>": 147,
+    "N": 2795,
     "電 N": 30
   },
   "arithmeticDiagnostics": {
@@ -934,6 +934,35 @@
       "unresolved": 0
     },
     {
+      "source_file": "budget-request-plain-text/2027/cas.go.jp__jp__yosan__pdf__r9_01.txt",
+      "pageCount": 6,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "cas.go.jp__jp__yosan__pdf__r9_01#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "05 内 閣 所 管 （内閣官房）"
+          ],
+          "rows": 15
+        }
+      ],
+      "rows": 15,
+      "unresolved": 0
+    },
+    {
       "source_file": "budget-request-plain-text/2027/cas.go.jp__jp__yosan__pdf__r9_02.txt",
       "pageCount": 3,
       "endsWithFormFeed": true,
@@ -1071,6 +1100,34 @@
       "titleOnlyPages": [],
       "blocks": [],
       "rows": 0,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2027/cas.go.jp__jp__yosan__pdf__r9_16.txt",
+      "pageCount": 2,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        2
+      ],
+      "titleOnlyPages": [
+        1
+      ],
+      "blocks": [
+        {
+          "table_block_id": "cas.go.jp__jp__yosan__pdf__r9_16#b1",
+          "pages": [
+            2
+          ],
+          "titlePages": [
+            2
+          ],
+          "contextLines": [
+            "9101 東 日 本 大 震 災 復 興 特 別 会 計 （内閣）"
+          ],
+          "rows": 6
+        }
+      ],
+      "rows": 6,
       "unresolved": 0
     },
     {
@@ -1477,6 +1534,35 @@
       "unresolved": 0
     },
     {
+      "source_file": "budget-request-plain-text/2027/jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r9__r9sandanhyou.txt",
+      "pageCount": 56,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r9__r9sandanhyou#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "19 内 閣 府 所 管 (公正取引委員会（公正取引委員会）)"
+          ],
+          "rows": 10
+        }
+      ],
+      "rows": 10,
+      "unresolved": 1
+    },
+    {
       "source_file": "budget-request-plain-text/2027/jinji.go.jp__content__000018368.txt",
       "pageCount": 36,
       "endsWithFormFeed": true,
@@ -1668,6 +1754,219 @@
         }
       ],
       "rows": 80,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2027/meti.go.jp__main__yosangaisan__fy2027__pdf__eneden_o.txt",
+      "pageCount": 25,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5,
+        6
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "meti.go.jp__main__yosangaisan__fy2027__pdf__eneden_o#b1",
+          "pages": [
+            5,
+            6
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "9905 エ ネ ル ギ ー 対 策 特 別 会 計 （電源開発促進勘定）"
+          ],
+          "rows": 32
+        }
+      ],
+      "rows": 32,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2027/meti.go.jp__main__yosangaisan__fy2027__pdf__enegen_o.txt",
+      "pageCount": 7,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "meti.go.jp__main__yosangaisan__fy2027__pdf__enegen_o#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "9905 エ ネ ル ギ ー 対 策 特 別 会 計 （原子力損害賠償支援勘定）"
+          ],
+          "rows": 11
+        }
+      ],
+      "rows": 11,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2027/meti.go.jp__main__yosangaisan__fy2027__pdf__eneju_o.txt",
+      "pageCount": 16,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5,
+        6
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "meti.go.jp__main__yosangaisan__fy2027__pdf__eneju_o#b1",
+          "pages": [
+            5,
+            6
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "9905 エ ネ ル ギ ー 対 策 特 別 会 計 (（エネルギー需給勘定）)"
+          ],
+          "rows": 44
+        }
+      ],
+      "rows": 44,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2027/meti.go.jp__main__yosangaisan__fy2027__pdf__enesen_o.txt",
+      "pageCount": 8,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "meti.go.jp__main__yosangaisan__fy2027__pdf__enesen_o#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "9905 エ ネ ル ギ ー 対 策 特 別 会 計 (（先端半導体・人工知能関連技術勘定）)"
+          ],
+          "rows": 21
+        }
+      ],
+      "rows": 21,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2027/meti.go.jp__main__yosangaisan__fy2027__pdf__fukko_o.txt",
+      "pageCount": 8,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "meti.go.jp__main__yosangaisan__fy2027__pdf__fukko_o#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "9101 東 日 本 大 震 災 復 興 特 別 会 計 （経済産業省）"
+          ],
+          "rows": 14
+        }
+      ],
+      "rows": 14,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2027/meti.go.jp__main__yosangaisan__fy2027__pdf__ippan_o.txt",
+      "pageCount": 87,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5,
+        6,
+        7,
+        8
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "meti.go.jp__main__yosangaisan__fy2027__pdf__ippan_o#b1",
+          "pages": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "27 経済産業省所管 （経済産業省）"
+          ],
+          "rows": 89
+        }
+      ],
+      "rows": 89,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2027/meti.go.jp__main__yosangaisan__fy2027__pdf__tokkyo_o.txt",
+      "pageCount": 16,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "meti.go.jp__main__yosangaisan__fy2027__pdf__tokkyo_o#b1",
+          "pages": [
+            5
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "2703 特 許 特 別 会 計 (特 許（特 許）)"
+          ],
+          "rows": 12
+        }
+      ],
+      "rows": 12,
       "unresolved": 0
     },
     {

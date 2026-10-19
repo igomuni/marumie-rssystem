@@ -2,6 +2,7 @@ source_slug,pdf_sha256,physical_page,items,column_evidence,boundary_x,no_evidenc
 aoc.go.jp__files__documents__2026-09__令和９年度概算要求書（一般会計）_0,962d4351d52f222ab8aaffc901faeb43cedf8842fa101b9536c4a417874d5ad9,2,96,YES,414.627,,7,0,7,0,46,28,22,0
 caa.go.jp__policies__budget__assets__caa_cms_205_260911_01,e690778500b4bf47edef0dbbf05f091d70d3f4e66ee70a0ff14d4dfdffb28da0,2,140,YES,414.627,,12,0,12,0,68,28,44,0
 caa.go.jp__policies__budget__assets__caa_cms_205_260911_02,8755611524b55cf44b90067542b0f36666844a8769e03ebfb11f3678aff9704f,2,105,YES,414.627,,8,0,8,0,50,27,28,0
+cas.go.jp__jp__yosan__pdf__r9_01,45b0b5326a39f7190e4589738fa6edcdcf8e8cebfb2e9cd1fa8fa58040d2f661,3,170,YES,414.627,,15,0,15,0,83,31,56,0
 cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__309e4519__20260827_policies_budget_102,21f390ba1001a63b9d88c1fcd5247bb796e23f3496b144c13a198af609aeecc6,3,386,YES,414.627,,33,12,41,4,190,28,158,10
 cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__a3b08bd5__20260827_policies_budget_104,ca7d07f55e10b891cc9a088c93121178f7094d0f286eceec1ee5c8777a316d5d,3,386,YES,414.627,,33,11,42,2,190,27,164,5
 clb.go.jp__files__topics__5329_ext_05_2,4a033d798a2d7fb445e73c3539e691779f18927068f7ff2767a16baa5eb65236,3,102,YES,414.627,,7,0,7,0,49,31,22,0
@@ -16,6 +17,7 @@ env.go.jp__content__000425955,b63a49f88fb07589bdeed22e7c04627f0fe730f82e7c6be3c9
 fsa.go.jp__common__budget__yosan__9youkyuu-2__01,23c260429f660695822440e0a4cc93de802ca96ffbfe325dd5ad3a558dfb4651,3,164,YES,414.627,,15,0,15,0,80,28,56,0
 jbaudit.go.jp__jbaudit__bud_clo__bud__pdf__r09__20260903_02,82f0599f6219ab410678168368d8d89bda9c819adc97239e2b3e9022539650b9,3,110,YES,414.627,,9,0,9,0,53,27,30,0
 jcrc.go.jp__content__000002960,b7ff2707e617f9a1a5b95b302d21f2c4ddf22d35de555a7ed2f9ede21255b6e5,3,169,YES,414.627,,21,0,21,0,76,28,65,0
+jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r9__r9sandanhyou,2278b89f3b132c00cb65858aa994fd5627fddef90d10698ff03dbc24d144e33a,3,128,YES,414.627,,11,0,11,0,62,28,38,0
 jinji.go.jp__content__000018368,0d4f4a2634cd3626c8b5b8189f9153f5e14353a7f8c74ba1840277c081469e55,3,126,YES,414.627,,10,0,10,0,61,31,34,0
 kunaicho.go.jp__wp-content__uploads__2026__08__r09-02,d677bb51bfa8e544cf8eec577e1e68ce2e5a54a9ef42020710cddcd644033a3b,3,124,YES,414.627,,10,0,10,0,60,28,36,0
 kunaicho.go.jp__wp-content__uploads__2026__08__r09-03,385998e3cba4838299100b7487eeda4555cb7e051678360bb32d56db7c2bc4f6,3,88,YES,414.627,,6,0,6,0,42,28,18,0
@@ -26,6 +28,14 @@ maff.go.jp__j__budget__attach__pdf__r9yokyusho-1,33cfb25eeb21e7752f2c4ccda3f5d51
 maff.go.jp__j__budget__attach__pdf__r9yokyusho-3,7084754f4d8675c552cffbd8331c92acddfb2096ae896279b8f0b4763c09b551,3,301,YES,414.627,,32,1,33,0,148,27,126,0
 maff.go.jp__j__budget__attach__pdf__r9yokyusho-5,0d19769bc07154c5c85db19e1f79a8a60f41c3c7b4d8024c81cc45890e8e39d7,3,553,YES,414.627,,32,32,64,0,274,27,252,0
 maff.go.jp__j__budget__attach__pdf__r9yokyusho-5,0d19769bc07154c5c85db19e1f79a8a60f41c3c7b4d8024c81cc45890e8e39d7,4,159,YES,414.627,,19,0,17,2,77,11,66,5
+meti.go.jp__main__yosangaisan__fy2027__pdf__eneden_o,fd40561e8b49f91167d64d1d41ee90430f20c44fd216c3013a1a2cac36acfb16,3,305,YES,414.627,,32,1,33,0,150,27,128,0
+meti.go.jp__main__yosangaisan__fy2027__pdf__enegen_o,cdc62bc9a8c49045f47523646057aa316d8b3dd12d969bac4ec50d7b55d42cad,3,137,YES,414.627,,12,0,12,0,66,27,44,0
+meti.go.jp__main__yosangaisan__fy2027__pdf__eneju_o,fcf9ed053af29937fb36a2739b025769e14ed4dfaa4d71cce1f648cf48d09dbb,3,409,YES,414.627,,35,19,36,18,197,27,140,45
+meti.go.jp__main__yosangaisan__fy2027__pdf__enesen_o,a8a4ed67561e09e08ed2cc8e3e8b7197547ab4021f76fe8f4a3517274d1101fc,3,222,YES,414.627,,28,0,16,12,105,27,60,30
+meti.go.jp__main__yosangaisan__fy2027__pdf__fukko_o,6e6853654ae7407b996f3ae66d8932c033016df0103768c652f490eaab0d58cb,3,162,YES,414.627,,16,0,14,2,78,27,52,5
+meti.go.jp__main__yosangaisan__fy2027__pdf__ippan_o,67fe8c4f8247a14c37a65308d274f4933e9b28e4981aa04ec5c9d3a7b16f41c6,3,557,YES,414.627,,33,32,63,2,276,28,248,5
+meti.go.jp__main__yosangaisan__fy2027__pdf__ippan_o,67fe8c4f8247a14c37a65308d274f4933e9b28e4981aa04ec5c9d3a7b16f41c6,4,192,YES,414.627,,27,0,15,12,91,11,60,30
+meti.go.jp__main__yosangaisan__fy2027__pdf__tokkyo_o,2272e6821bcfb7d44eab663e3f6d5dc30f433d86def73ec3646bd59b00c692ae,3,159,YES,414.627,,13,0,13,0,77,34,48,0
 mext.go.jp__content__20260907_mxt_kaikesou01-000051991_1,e0872a5132513670403cdcc51cd0145b13fa10a68a7eb780a609a9fcba1e75a2,3,554,YES,414.627,,32,32,64,0,275,27,252,0
 mext.go.jp__content__20260907_mxt_kaikesou01-000051991_1,e0872a5132513670403cdcc51cd0145b13fa10a68a7eb780a609a9fcba1e75a2,4,587,YES,414.627,,37,36,69,4,290,11,276,10
 mext.go.jp__content__20260907_mxt_kaikesou01-000051991_1,e0872a5132513670403cdcc51cd0145b13fa10a68a7eb780a609a9fcba1e75a2,5,394,YES,414.627,,36,11,47,0,195,11,188,0

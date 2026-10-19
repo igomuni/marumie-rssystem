@@ -1,0 +1,12 @@
+要求番号,区分,前年度予算額_一般行政経費,前年度予算額_その他の経費,前年度予算額_計,９年度概算要求額_一般行政経費,９年度概算要求額_その他の経費,９年度概算要求額_計,増△減,明細書頁数,source_page,source_line_start,source_line_end,table_block_id,row_index,row_type,parse_status
+,05 エネルギー対策,0,"11,967,206,114","11,967,206,114",0,"11,763,079,310","11,763,079,310","△204,126,804",3,5,43,43,meti.go.jp__main__yosangaisan__fy2027__pdf__enegen_o#b1,1,HIER,PARSED
+,3 原子力損害賠償支援勘定,0,"11,967,206,114","11,967,206,114",0,"11,763,079,310","11,763,079,310","△204,126,804",3,5,44,44,meti.go.jp__main__yosangaisan__fy2027__pdf__enegen_o#b1,2,HIER,PARSED
+,020 原子力損害賠償支援資金へ繰入,0,"71,500,000","71,500,000",0,"100,000,000","100,000,000","28,500,000",3,5,45,45,meti.go.jp__main__yosangaisan__fy2027__pdf__enegen_o#b1,3,CODE3,PARSED
+1,63‑63 原子力損害賠償支援資金へ繰入れに必要な経費,0,"71,500,000","71,500,000",0,"100,000,000","100,000,000","28,500,000",3,5,46,47,meti.go.jp__main__yosangaisan__fy2027__pdf__enegen_o#b1,4,DETAIL,PARSED
+,030 国債整理基金特別会計へ繰入,0,"11,895,705,131","11,895,705,131",0,"11,663,078,350","11,663,078,350","△232,626,781",3,5,49,49,meti.go.jp__main__yosangaisan__fy2027__pdf__enegen_o#b1,5,CODE3,PARSED
+2,20‑20 国債整理基金特別会計へ繰入れに必要な経費,0,"11,895,705,131","11,895,705,131",0,"11,663,078,350","11,663,078,350","△232,626,781",3,5,50,50,meti.go.jp__main__yosangaisan__fy2027__pdf__enegen_o#b1,6,DETAIL,PARSED
+,050 事務取扱費,0,982,982,0,959,959,△23,3,5,51,51,meti.go.jp__main__yosangaisan__fy2027__pdf__enegen_o#b1,7,CODE3,PARSED
+3,63‑63 事務取扱いに必要な経費,0,982,982,0,959,959,△23,3,5,52,52,meti.go.jp__main__yosangaisan__fy2027__pdf__enegen_o#b1,8,DETAIL,PARSED
+,070 融通証券等事務取扱費一般会計へ繰入,0,1,1,0,1,1,0,3,5,53,53,meti.go.jp__main__yosangaisan__fy2027__pdf__enegen_o#b1,9,CODE3,PARSED
+4,10‑20 融通証券等事務取扱費の財源の一般会計へ繰入れに必要な経費,0,1,1,0,1,1,0,3,5,54,55,meti.go.jp__main__yosangaisan__fy2027__pdf__enegen_o#b1,10,DETAIL,PARSED
+,会計計,0,"11,967,206,114","11,967,206,114",0,"11,763,079,310","11,763,079,310","△204,126,804",,5,57,57,meti.go.jp__main__yosangaisan__fy2027__pdf__enegen_o#b1,11,TOTAL,PARSED

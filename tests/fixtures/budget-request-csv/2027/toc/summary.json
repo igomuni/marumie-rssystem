@@ -15,40 +15,40 @@
     "prefixGapFactor": 1.5
   },
   "population": {
-    "tocPages": 70,
-    "pdfs": 49,
-    "pagesWithColumnEvidence": 70,
+    "tocPages": 80,
+    "pdfs": 58,
+    "pagesWithColumnEvidence": 80,
     "pagesWithoutColumnEvidence": 0
   },
   "counts": {
-    "items": 21510,
+    "items": 23951,
     "itemDisposition": {
-      "blank": 10550,
-      "headerZone": 1598,
-      "entry": 9130,
-      "unresolved": 232
+      "blank": 11735,
+      "headerZone": 1865,
+      "entry": 10004,
+      "unresolved": 347
     },
-    "entries": 2346,
+    "entries": 2574,
     "entriesByShape": {
-      "TITLE_PAGE": 126,
-      "MARKER": 937,
-      "NUMBERED": 1253,
+      "TITLE_PAGE": 145,
+      "MARKER": 1039,
+      "NUMBERED": 1360,
       "CODE": 30
     },
-    "auditRecords": 92,
+    "auditRecords": 138,
     "auditRecordsByKind": {
-      "HOLD_INCOMPLETE_TITLE": 46,
-      "UNOWNED_FRAGMENT": 46
+      "HOLD_INCOMPLETE_TITLE": 69,
+      "UNOWNED_FRAGMENT": 69
     },
     "geometricRows": {
-      "left": 1639,
-      "right": 799
+      "left": 1861,
+      "right": 851
     }
   },
   "inputs": {
     "inventory": {
       "path": "tests/fixtures/budget-request-cover-toc-structure/2027/structure-inventory.json",
-      "sha256": "6bff4613bfc5a87077319a5a31ae470c69d79e7c6948904d0244b238ccad7441"
+      "sha256": "582a2a465c5cc7596ac023af919d19db680e378eb77480d2cf22fb5213a05c81"
     },
     "pdfs": [
       {
@@ -70,6 +70,13 @@
         "pdf_sha256": "8755611524b55cf44b90067542b0f36666844a8769e03ebfb11f3678aff9704f",
         "toc_pages": [
           2
+        ]
+      },
+      {
+        "source_pdf": "data/download/cas.go.jp/jp/yosan/pdf/r9_01.pdf",
+        "pdf_sha256": "45b0b5326a39f7190e4589738fa6edcdcf8e8cebfb2e9cd1fa8fa58040d2f661",
+        "toc_pages": [
+          3
         ]
       },
       {
@@ -165,6 +172,13 @@
         ]
       },
       {
+        "source_pdf": "data/download/jftc.go.jp/soshiki/kyotsukoukai/yosan/yosankessan/r9/r9sandanhyou.pdf",
+        "pdf_sha256": "2278b89f3b132c00cb65858aa994fd5627fddef90d10698ff03dbc24d144e33a",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
         "source_pdf": "data/download/jinji.go.jp/content/000018368.pdf",
         "pdf_sha256": "0d4f4a2634cd3626c8b5b8189f9153f5e14353a7f8c74ba1840277c081469e55",
         "toc_pages": [
@@ -208,6 +222,56 @@
         "toc_pages": [
           3,
           4
+        ]
+      },
+      {
+        "source_pdf": "data/download/meti.go.jp/main/yosangaisan/fy2027/pdf/eneden_o.pdf",
+        "pdf_sha256": "fd40561e8b49f91167d64d1d41ee90430f20c44fd216c3013a1a2cac36acfb16",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/meti.go.jp/main/yosangaisan/fy2027/pdf/enegen_o.pdf",
+        "pdf_sha256": "cdc62bc9a8c49045f47523646057aa316d8b3dd12d969bac4ec50d7b55d42cad",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/meti.go.jp/main/yosangaisan/fy2027/pdf/eneju_o.pdf",
+        "pdf_sha256": "fcf9ed053af29937fb36a2739b025769e14ed4dfaa4d71cce1f648cf48d09dbb",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/meti.go.jp/main/yosangaisan/fy2027/pdf/enesen_o.pdf",
+        "pdf_sha256": "a8a4ed67561e09e08ed2cc8e3e8b7197547ab4021f76fe8f4a3517274d1101fc",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/meti.go.jp/main/yosangaisan/fy2027/pdf/fukko_o.pdf",
+        "pdf_sha256": "6e6853654ae7407b996f3ae66d8932c033016df0103768c652f490eaab0d58cb",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/meti.go.jp/main/yosangaisan/fy2027/pdf/ippan_o.pdf",
+        "pdf_sha256": "67fe8c4f8247a14c37a65308d274f4933e9b28e4981aa04ec5c9d3a7b16f41c6",
+        "toc_pages": [
+          3,
+          4
+        ]
+      },
+      {
+        "source_pdf": "data/download/meti.go.jp/main/yosangaisan/fy2027/pdf/tokkyo_o.pdf",
+        "pdf_sha256": "2272e6821bcfb7d44eab663e3f6d5dc30f433d86def73ec3646bd59b00c692ae",
+        "toc_pages": [
+          3
         ]
       },
       {
