@@ -113,7 +113,7 @@ export function TrendDetailPane({
                   <td className="whitespace-nowrap px-1.5 py-1">
                     {a.src.map(([u, page], i) => (
                       <span key={u} className="mr-1.5">
-                        <a href={urls[u]} target="_blank" rel="noopener noreferrer" title={urls[u]} className="text-emerald-700 underline hover:text-emerald-900 dark:text-emerald-400">
+                        <a href={/^\d+$/.test(page) ? `${urls[u]}#page=${page}` : urls[u]} target="_blank" rel="noopener noreferrer" title={urls[u]} className="text-emerald-700 underline hover:text-emerald-900 dark:text-emerald-400">
                           PDF{a.src.length > 1 ? i + 1 : ''}
                         </a>
                         <span className="text-neutral-500"> ({page})</span>
