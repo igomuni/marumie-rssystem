@@ -15,24 +15,24 @@
     "prefixGapFactor": 1.5
   },
   "population": {
-    "tocPages": 66,
-    "pdfs": 47,
-    "pagesWithColumnEvidence": 66,
+    "tocPages": 70,
+    "pdfs": 49,
+    "pagesWithColumnEvidence": 70,
     "pagesWithoutColumnEvidence": 0
   },
   "counts": {
-    "items": 19968,
+    "items": 21510,
     "itemDisposition": {
-      "blank": 9799,
-      "headerZone": 1521,
-      "entry": 8416,
+      "blank": 10550,
+      "headerZone": 1598,
+      "entry": 9130,
       "unresolved": 232
     },
-    "entries": 2171,
+    "entries": 2346,
     "entriesByShape": {
-      "TITLE_PAGE": 121,
-      "MARKER": 883,
-      "NUMBERED": 1137,
+      "TITLE_PAGE": 126,
+      "MARKER": 937,
+      "NUMBERED": 1253,
       "CODE": 30
     },
     "auditRecords": 92,
@@ -41,14 +41,14 @@
       "UNOWNED_FRAGMENT": 46
     },
     "geometricRows": {
-      "left": 1528,
-      "right": 735
+      "left": 1639,
+      "right": 799
     }
   },
   "inputs": {
     "inventory": {
       "path": "tests/fixtures/budget-request-cover-toc-structure/2027/structure-inventory.json",
-      "sha256": "3f42f34e2a58f8991e36c2b22a16bc024329b2c7dffbe79b79e9cfd1eb65aac4"
+      "sha256": "6bff4613bfc5a87077319a5a31ae470c69d79e7c6948904d0244b238ccad7441"
     },
     "pdfs": [
       {
@@ -255,6 +255,14 @@
         ]
       },
       {
+        "source_pdf": "data/download/mod.go.jp/j/budget/gaisan/r9/gaisanyoukyu.pdf",
+        "pdf_sha256": "4158eb6acba23e973508404cd44e39dbc4488c006cc542b5685ef13bce9c5bce",
+        "toc_pages": [
+          3,
+          4
+        ]
+      },
+      {
         "source_pdf": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2027/2027fukkou_2.pdf",
         "pdf_sha256": "9b652e4cb5a77afd698e7b5ed555bdaeee9f7d50e31fba5c592713de9285f564",
         "toc_pages": [
@@ -309,6 +317,14 @@
         "pdf_sha256": "5c5054510a8fd42556684dde7269773e7a5a092905d3cbed8681d5315f4c0e89",
         "toc_pages": [
           2
+        ]
+      },
+      {
+        "source_pdf": "data/download/mofa.go.jp/mofaj/files/101079808.pdf",
+        "pdf_sha256": "b5432e8625994783662223dee77b84ecb55d9593143c8ef58899a0228967f6a3",
+        "toc_pages": [
+          3,
+          4
         ]
       },
       {

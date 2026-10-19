@@ -3,7 +3,7 @@
  "scope": "frozen v0 specification の literal implementation の full-corpus 出力 manifest。rule 変更・GT 由来の調整なし。open-set safety は NOT EVALUATED",
  "specVersion": "page-classification-v0-frozen",
  "frozenInput": {
-  "plainTextCorpusDigestSha256": "e52711896a7c86b23ffb01cfd1acd71419c6d0c124df3583290ee854cd07e679",
+  "plainTextCorpusDigestSha256": "bf548eb5523653e35b5f8da158b650d5a37a3464b108219a9e92047704fb4a33",
   "phaseAFixtureSha256": null
  },
  "implementation": {
@@ -16,43 +16,43 @@
   "platform": "darwin-arm64"
  },
  "summary": {
-  "totalPages": 4511,
+  "totalPages": 5122,
   "rawStatus": {
-   "EMPTY": 113,
-   "EXTRACTED": 4398
+   "EMPTY": 116,
+   "EXTRACTED": 5006
   },
   "classificationStatus": {
-   "NO_TEXT": 113,
-   "RESOLVED": 4369,
+   "NO_TEXT": 116,
+   "RESOLVED": 4977,
    "UNRESOLVED": 29
   },
   "pageType": {
-   "COVER": 60,
-   "DETAIL": 4050,
-   "STAFFING": 69,
-   "SUMMARY": 124,
-   "TOC": 66,
+   "COVER": 62,
+   "DETAIL": 4635,
+   "STAFFING": 79,
+   "SUMMARY": 131,
+   "TOC": 70,
    "UNRESOLVED": 29,
-   "null": 113
+   "null": 116
   },
   "source": {
-   "DIRECT": 339,
-   "INHERITED": 4030,
-   "null": 142
+   "DIRECT": 348,
+   "INHERITED": 4629,
+   "null": 145
   },
   "unresolvedReason": {
    "NO_ACTIVE_STATE": 29
   },
   "noTextReason": {
-   "NO_TEXT_UNRESOLVED": 113
+   "NO_TEXT_UNRESOLVED": 116
   },
   "resetCounts": {
    "DIRECT_NON_INHERITABLE": 10,
-   "NO_TEXT_UNRESOLVED": 61
+   "NO_TEXT_UNRESOLVED": 62
   },
   "bridgedBlankPages": 0,
   "pageLossOrDuplicate": 0,
-  "corpusClassificationDigestSha256": "5b8844222839f849cb99f2376ba98d771070421ee3ce50521168bc255e238d5e"
+  "corpusClassificationDigestSha256": "ad30130b6680dbdba0a60f13a5541dac905c8d323f83503ad37ee917506a693a"
  },
  "conformance": {
   "totalMismatch": 0
@@ -559,6 +559,11 @@
    "classificationDigestSha256": "0e1cb9adeb2b11504ba49b165aa1f8639272f1b2755aef873bcd8e92a671f2f8"
   },
   {
+   "localPdfPath": "data/download/mod.go.jp/j/budget/gaisan/r9/gaisanyoukyu.pdf",
+   "pageCount": 383,
+   "classificationDigestSha256": "b0afc1a8a989d110d5a6ecd6025f68c15f2f7029fc24a39177e5d5ca243b6bc5"
+  },
+  {
    "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2027/2027fukkou_2.pdf",
    "pageCount": 5,
    "classificationDigestSha256": "53cca989e4257c70594ff430e8080163027e6a289eeeec3ad9876a12774cea73"
@@ -597,6 +602,11 @@
    "localPdfPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2027/2027zaiyuu_2.pdf",
    "pageCount": 18,
    "classificationDigestSha256": "87f34034728ff453703b8939933c2b4a4708f7441c7737c694f2511a5014f11e"
+  },
+  {
+   "localPdfPath": "data/download/mofa.go.jp/mofaj/files/101079808.pdf",
+   "pageCount": 228,
+   "classificationDigestSha256": "8c738d719580d241fdab3a5326da3374bc818a79223f7126a8309f04edd56944"
   },
   {
    "localPdfPath": "data/download/moj.go.jp/content/001470250.pdf",

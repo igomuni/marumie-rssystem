@@ -2,20 +2,20 @@
   "schema": "budget-request-toc-pdf-native-csv/v0/output-hashes",
   "files": {
     "entry-provenance.csv": {
-      "sha256": "f72e960f9029c8b101b818e723b29447aa46351b299aca86293f070a89f87cbc",
-      "bytes": 727798
+      "sha256": "f1eb4843e1ec0e30ef3630949d3a8d5150ce0e49579b006d76a67d9af5a1efbc",
+      "bytes": 782912
     },
     "page-summary.csv": {
-      "sha256": "70c19e026dbeb39cd38b74add178b584ce8301c36b51399cd3718619158bcfa8",
-      "bytes": 10924
+      "sha256": "fceb0a0203d7a34e302d8792c46fa587cce785a152915a9f6a4c5d2f810e7812",
+      "bytes": 11518
     },
     "source-errors.csv": {
       "sha256": "69718ec77d81a565d8d2a6540d76089dcec03fe98d022b4389f90df0db1fabd8",
       "bytes": 21
     },
     "sources.csv": {
-      "sha256": "c7c1abfd1b7c710d8487752fceb7a9da4b89d964c1f2be21ad19570c03a11e61",
-      "bytes": 9819
+      "sha256": "bbefa0b783454dd23ce7e353a3576aab5ad589406aa913f29c77c951c24ea761",
+      "bytes": 10166
     },
     "sources/aoc.go.jp__files__documents__2026-09__令和９年度概算要求書（一般会計）_0.csv": {
       "sha256": "0ca4cab032c9ae6c697a7998d019b6c8e464730f6fbd78f75c6b46d1c17cac35",
@@ -125,6 +125,10 @@
       "sha256": "9f04979652d834bf8920e6451cf6b5c813aea1abc9371b6fafe7be0f2f8186c9",
       "bytes": 1191
     },
+    "sources/mod.go.jp__j__budget__gaisan__r9__gaisanyoukyu.csv": {
+      "sha256": "c00946945447de58ad282e3257d293a3b5866b104235655eb8b14e0c4358b58f",
+      "bytes": 6012
+    },
     "sources/mof.go.jp__about_mof__mof_budget__budget__fy2027__2027fukkou_2.csv": {
       "sha256": "f6db9e54815e8855834a1191fd1fd86dc2043c135dcd15ff4938c61038d80105",
       "bytes": 807
@@ -156,6 +160,10 @@
     "sources/mof.go.jp__about_mof__mof_budget__budget__fy2027__2027zaiyuu_2.csv": {
       "sha256": "67592f66e591836070199022c32e2f2dfd9251df3b70d078f1ada5f823b8b4fa",
       "bytes": 900
+    },
+    "sources/mofa.go.jp__mofaj__files__101079808.csv": {
+      "sha256": "0141320e90752a7666bd14c8bef12beed0623ae3b0ebd1635930d61755cb719d",
+      "bytes": 4446
     },
     "sources/moj.go.jp__content__001470250.csv": {
       "sha256": "8b2f45dfbd1dbf750c5e344b45dc9a25dd0259bc9014f5254b8505f8767d1322",
@@ -206,12 +214,12 @@
       "bytes": 728
     },
     "summary.json": {
-      "sha256": "12a946924765bef5fec891f0c8c3638f6a941203fa2afe60ac6ebde0fa4309a6",
-      "bytes": 13736
+      "sha256": "92c798c6d9becec61e680c44c8fa199daa24992b257a3d40b7089d77a55726b4",
+      "bytes": 14228
     },
     "token-ledger.csv": {
-      "sha256": "307879df12eb6b17e9091b1c83b895e7360fbe07057009a816dcc488d941b72d",
-      "bytes": 3203800
+      "sha256": "8497a6a29d7634c6382a31437865f823642256ee2e5823a88e504e7f85f80bd8",
+      "bytes": 3434223
     },
     "unresolved.csv": {
       "sha256": "a10edcc077bf8eeeceb7503f5f97952b4ca02a8b67258c5e9cbde268fb2608c1",

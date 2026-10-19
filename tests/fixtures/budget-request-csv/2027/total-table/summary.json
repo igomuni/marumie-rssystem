@@ -2,35 +2,35 @@
   "scope": "FY2027 令和9年度歳出概算要求額総表 raw text → logical rows (v0 deterministic parser; descriptive counts, not an accuracy score)",
   "input": {
     "inputDir": "data/work/budget-request-plain-text/2027",
-    "inputSha256": "10662bf70292aee505828afa742b9692e25ba89834e6134512a984fd59813552",
-    "txtEntries": 120
+    "inputSha256": "8c7fcc5bef2524939aa31b98e7731be12e47fda26e50e5ece486e61328d4f043",
+    "txtEntries": 122
   },
   "frozenManifestIntegrity": {
-    "MATCH": 120
+    "MATCH": 122
   },
   "frozenManifestIntegrityDetail": [],
-  "sourceFileCount": 120,
-  "candidateTotalTableSourceCount": 50,
-  "candidateTotalTablePageCount": 124,
-  "tableBlockCount": 60,
-  "titleOnlyPageCount": 107,
-  "logicalRowCount": 2540,
+  "sourceFileCount": 122,
+  "candidateTotalTableSourceCount": 52,
+  "candidateTotalTablePageCount": 131,
+  "tableBlockCount": 62,
+  "titleOnlyPageCount": 111,
+  "logicalRowCount": 2718,
   "rowTypeCounts": {
-    "CODE3": 1058,
-    "DETAIL": 1305,
+    "CODE3": 1112,
+    "DETAIL": 1421,
     "HIER": 55,
-    "TOTAL": 122
+    "TOTAL": 130
   },
   "parseStatusCounts": {
-    "PARSED": 2540
+    "PARSED": 2718
   },
   "rowsWithContinuation": {
-    "CODE3": 104,
-    "DETAIL": 362
+    "CODE3": 105,
+    "DETAIL": 386
   },
   "continuationLineCount": {
-    "CODE3": 106,
-    "DETAIL": 390
+    "CODE3": 107,
+    "DETAIL": 414
   },
   "unresolvedCount": 6,
   "unresolvedByReason": {
@@ -39,16 +39,16 @@
   "numericTailFailureCount": 0,
   "unknownRowHeadCount": 0,
   "lineClassCounts": {
-    "CONTEXT": 60,
-    "CONTINUATION": 496,
-    "PAGE_LABEL": 124,
-    "ROW": 2540,
-    "TABLE_HEADER": 738,
-    "TABLE_TITLE": 60,
-    "UNIT": 60,
+    "CONTEXT": 62,
+    "CONTINUATION": 521,
+    "PAGE_LABEL": 131,
+    "ROW": 2718,
+    "TABLE_HEADER": 780,
+    "TABLE_TITLE": 62,
+    "UNIT": 62,
     "UNRESOLVED": 6
   },
-  "blankLinesInCandidatePages": 755,
+  "blankLinesInCandidatePages": 810,
   "signedCellsByColumn": {
     "previous_general": 4,
     "previous_other": 0,
@@ -56,11 +56,11 @@
     "request_general": 4,
     "request_other": 0,
     "request_total": 4,
-    "difference": 800
+    "difference": 850
   },
   "detailPageShape": {
-    "<blank>": 122,
-    "N": 2388,
+    "<blank>": 130,
+    "N": 2558,
     "電 N": 30
   },
   "arithmeticDiagnostics": {
@@ -1886,6 +1886,41 @@
       "unresolved": 0
     },
     {
+      "source_file": "budget-request-plain-text/2027/mod.go.jp__j__budget__gaisan__r9__gaisanyoukyu.txt",
+      "pageCount": 383,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5,
+        6,
+        7,
+        8
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "mod.go.jp__j__budget__gaisan__r9__gaisanyoukyu#b1",
+          "pages": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "30 防 衛 省 所 管 （防衛省）"
+          ],
+          "rows": 103
+        }
+      ],
+      "rows": 103,
+      "unresolved": 0
+    },
+    {
       "source_file": "budget-request-plain-text/2027/mof.go.jp__about_mof__mof_budget__budget__fy2027__2027fukkou_2.txt",
       "pageCount": 5,
       "endsWithFormFeed": true,
@@ -2121,6 +2156,39 @@
         }
       ],
       "rows": 16,
+      "unresolved": 0
+    },
+    {
+      "source_file": "budget-request-plain-text/2027/mofa.go.jp__mofaj__files__101079808.txt",
+      "pageCount": 228,
+      "endsWithFormFeed": true,
+      "candidatePages": [
+        5,
+        6,
+        7
+      ],
+      "titleOnlyPages": [
+        1,
+        3
+      ],
+      "blocks": [
+        {
+          "table_block_id": "mofa.go.jp__mofaj__files__101079808#b1",
+          "pages": [
+            5,
+            6,
+            7
+          ],
+          "titlePages": [
+            5
+          ],
+          "contextLines": [
+            "22 外 務 省 所 管"
+          ],
+          "rows": 75
+        }
+      ],
+      "rows": 75,
       "unresolved": 0
     },
     {

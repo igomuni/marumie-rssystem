@@ -2,54 +2,54 @@
   "scope": "FY2027 令和9年度歳出概算要求額明細表 (excluding 備考) raw text → logical rows (v0 deterministic parser; descriptive counts, not an accuracy score)",
   "input": {
     "inputDir": "data/work/budget-request-plain-text/2027",
-    "inputSha256": "10662bf70292aee505828afa742b9692e25ba89834e6134512a984fd59813552",
-    "txtEntries": 120
+    "inputSha256": "8c7fcc5bef2524939aa31b98e7731be12e47fda26e50e5ece486e61328d4f043",
+    "txtEntries": 122
   },
   "frozenManifestIntegrity": {
-    "MATCH": 120
+    "MATCH": 122
   },
   "frozenManifestIntegrityDetail": [],
-  "sourceFileCount": 120,
-  "detailTableSourceCount": 114,
-  "detailTablePageCount": 4068,
+  "sourceFileCount": 122,
+  "detailTableSourceCount": 116,
+  "detailTablePageCount": 4653,
   "sourcesWithoutDetailTable": 6,
   "sourcesWithNoTextLayer": [],
   "pagesWithoutHeaderBoundary": 69,
-  "nonBlankLinesInDetailPages": 156090,
+  "nonBlankLinesInDetailPages": 179346,
   "lineClassCounts": {
-    "PAGE_LABEL": 3999,
-    "TABLE_TITLE": 112,
-    "ROW": 35392,
-    "UNIT": 112,
-    "UNRESOLVED": 6749,
-    "TABLE_HEADER": 4021,
-    "CONTINUATION": 14996,
-    "RIGHT_REGION": 89848,
-    "FOOTER_TIMESTAMP": 861
+    "PAGE_LABEL": 4584,
+    "TABLE_TITLE": 114,
+    "ROW": 41027,
+    "UNIT": 114,
+    "UNRESOLVED": 7334,
+    "TABLE_HEADER": 4606,
+    "CONTINUATION": 17587,
+    "RIGHT_REGION": 102909,
+    "FOOTER_TIMESTAMP": 1071
   },
-  "logicalRowCount": 35392,
+  "logicalRowCount": 41027,
   "rowTypeCounts": {
     "CODE1": 19,
-    "CODE2": 1110,
-    "CODE3": 7418,
-    "CODE_5_4_2_4": 18107,
-    "CODE_NN_NNNN": 7276,
-    "CONTEXT": 112,
-    "DETAIL": 1350
+    "CODE2": 1441,
+    "CODE3": 8893,
+    "CODE_5_4_2_4": 21092,
+    "CODE_NN_NNNN": 8002,
+    "CONTEXT": 114,
+    "DETAIL": 1466
   },
   "parseStatusCounts": {
     "AMOUNTS_PLACED_BY_HEADER_WINDOWS": 41,
-    "AMOUNTS_PLACED_BY_PAGE_EDGES": 206,
-    "PARSED": 35145
+    "AMOUNTS_PLACED_BY_PAGE_EDGES": 657,
+    "PARSED": 40329
   },
   "rowsByBlankCells": {
-    "blank:none": 29621,
-    "blank:previous": 98,
-    "blank:previous+request+difference": 5524,
-    "blank:request": 149
+    "blank:none": 33923,
+    "blank:previous": 281,
+    "blank:previous+request+difference": 6406,
+    "blank:request": 417
   },
-  "rowsWithContinuation": 11984,
-  "unresolvedCount": 6749,
+  "rowsWithContinuation": 14242,
+  "unresolvedCount": 7334,
   "unresolvedByReason": {
     "BLANK_CELL_COLUMN_UNDETERMINED": 33,
     "LEFT_FRAGMENT_NOT_ADJACENT": 9,
@@ -57,7 +57,7 @@
     "LEFT_FRAGMENT_WITHOUT_PRECEDING_ROW_ON_PAGE": 13,
     "LEFT_TEXT_CROSSES_BOUNDARY": 12,
     "PAGE_WITHOUT_HEADER_BOUNDARY": 2680,
-    "UNKNOWN_HEADER_ZONE_LINE": 3999
+    "UNKNOWN_HEADER_ZONE_LINE": 4584
   },
   "arithmeticDiagnostics": {
     "rowsWithMismatch": 0
@@ -1847,6 +1847,24 @@
       }
     },
     {
+      "source_file": "budget-request-plain-text/2027/mod.go.jp__j__budget__gaisan__r9__gaisanyoukyu.txt",
+      "pageCount": 383,
+      "detailPages": 375,
+      "pagesWithoutBoundary": [],
+      "rows": 2156,
+      "unresolved": 375,
+      "lineClassCounts": {
+        "PAGE_LABEL": 375,
+        "TABLE_TITLE": 1,
+        "ROW": 2156,
+        "UNIT": 1,
+        "UNRESOLVED": 375,
+        "TABLE_HEADER": 375,
+        "RIGHT_REGION": 9734,
+        "CONTINUATION": 577
+      }
+    },
+    {
       "source_file": "budget-request-plain-text/2027/mof.go.jp__about_mof__mof_budget__budget__fy2027__2027fukkou_2.txt",
       "pageCount": 5,
       "detailPages": 2,
@@ -1987,6 +2005,25 @@
         "TABLE_HEADER": 15,
         "CONTINUATION": 27,
         "RIGHT_REGION": 354
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2027/mofa.go.jp__mofaj__files__101079808.txt",
+      "pageCount": 228,
+      "detailPages": 210,
+      "pagesWithoutBoundary": [],
+      "rows": 3479,
+      "unresolved": 210,
+      "lineClassCounts": {
+        "PAGE_LABEL": 210,
+        "TABLE_TITLE": 1,
+        "ROW": 3479,
+        "UNIT": 1,
+        "UNRESOLVED": 210,
+        "TABLE_HEADER": 210,
+        "CONTINUATION": 2014,
+        "RIGHT_REGION": 3327,
+        "FOOTER_TIMESTAMP": 210
       }
     },
     {
