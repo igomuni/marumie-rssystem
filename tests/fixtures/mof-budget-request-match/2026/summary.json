@@ -1,7 +1,7 @@
 {
  "request_year": "2026",
  "mof_version": "2026",
- "input_sha256": "deba8641b62f6f98162bd310d45efaa648b295a80870f3ae0b7efddef957941b",
+ "input_sha256": "fe19c0059f09222ef6a6a5dec4335024e05189209bfb0a97cfdc3618951d03ed",
  "sources": 66,
  "m0_status": {
   "MATCHED": 207,
@@ -17,7 +17,7 @@
   "PARENT_UNMATCHED": 61
  },
  "m3_status": {
-  "MATCHED": 7740,
+  "MATCHED": 7742,
   "NO_CANDIDATE": 509,
   "PARENT_UNMATCHED": 149
  },
@@ -29,7 +29,7 @@
  "mof_rows_referenced": {
   "kou": 1024,
   "jikou": 1557,
-  "moku": 7308
+  "moku": 7310
  },
  "unmatched_mof_reasons": {
   "kou": {
@@ -41,7 +41,7 @@
   },
   "moku": {
    "kou_not_matched": 123,
-   "kou_matched_no_request_row": 598
+   "kou_matched_no_request_row": 596
   }
  },
  "request_links": {
@@ -55,5 +55,5 @@
  "no_toc_rows": 0,
  "no_toc_sources": 0,
  "request_unclassified_toc_rows": 234,
- "request_moku_rows_without_kou": 1762
+ "request_moku_rows_without_kou": 1766
 }

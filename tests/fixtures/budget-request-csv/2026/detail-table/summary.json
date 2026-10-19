@@ -14,51 +14,52 @@
   "detailTablePageCount": 8407,
   "sourcesWithoutDetailTable": 7,
   "sourcesWithNoTextLayer": [],
-  "pagesWithoutHeaderBoundary": 1,
+  "pagesWithoutHeaderBoundary": 0,
   "nonBlankLinesInDetailPages": 333322,
   "lineClassCounts": {
-    "PAGE_LABEL": 8406,
+    "PAGE_LABEL": 8407,
     "TABLE_TITLE": 131,
-    "ROW": 54409,
+    "ROW": 54533,
     "UNIT": 131,
-    "UNRESOLVED": 9655,
-    "TABLE_HEADER": 8491,
-    "CONTINUATION": 24992,
-    "RIGHT_REGION": 223309,
+    "UNRESOLVED": 9433,
+    "TABLE_HEADER": 8492,
+    "CONTINUATION": 25056,
+    "RIGHT_REGION": 223341,
     "FOOTER_TIMESTAMP": 3798
   },
-  "logicalRowCount": 54409,
+  "logicalRowCount": 54533,
   "rowTypeCounts": {
     "CODE1": 33,
-    "CODE2": 1904,
-    "CODE3": 12481,
-    "CODE_5_4_2_4": 28300,
-    "CODE_NN_NNNN": 9634,
+    "CODE2": 1906,
+    "CODE3": 12493,
+    "CODE_5_4_2_4": 28408,
+    "CODE_NN_NNNN": 9636,
     "CONTEXT": 131,
     "DETAIL": 1926
   },
   "parseStatusCounts": {
     "AMOUNTS_PLACED_BY_HEADER_WINDOWS": 105,
+    "AMOUNTS_PLACED_BY_NEIGHBOUR_EDGES": 120,
     "AMOUNTS_PLACED_BY_PAGE_EDGES": 685,
-    "PARSED": 53619
+    "PARSED": 53623
   },
   "rowsByBlankCells": {
-    "blank:none": 44573,
-    "blank:previous": 352,
-    "blank:previous+request+difference": 9046,
-    "blank:request": 438
+    "blank:difference": 38,
+    "blank:none": 44576,
+    "blank:previous": 378,
+    "blank:previous+request+difference": 9047,
+    "blank:request": 494
   },
-  "rowsWithContinuation": 19823,
-  "unresolvedCount": 9655,
+  "rowsWithContinuation": 19873,
+  "unresolvedCount": 9433,
   "unresolvedByReason": {
-    "BLANK_CELL_COLUMN_UNDETERMINED": 146,
+    "BLANK_CELL_COLUMN_UNDETERMINED": 26,
     "LEFT_FRAGMENT_NOT_ADJACENT": 420,
     "LEFT_FRAGMENT_NOT_ALIGNED": 12,
-    "LEFT_FRAGMENT_WITHOUT_PRECEDING_ROW_ON_PAGE": 320,
+    "LEFT_FRAGMENT_WITHOUT_PRECEDING_ROW_ON_PAGE": 257,
     "LEFT_TEXT_CROSSES_BOUNDARY": 304,
-    "PAGE_WITHOUT_HEADER_BOUNDARY": 40,
     "UNEXPECTED_AMOUNT_COUNT": 7,
-    "UNKNOWN_HEADER_ZONE_LINE": 8406
+    "UNKNOWN_HEADER_ZONE_LINE": 8407
   },
   "arithmeticDiagnostics": {
     "rowsWithMismatch": 0
@@ -987,14 +988,14 @@
       "pageCount": 11,
       "detailPages": 11,
       "pagesWithoutBoundary": [],
-      "rows": 78,
-      "unresolved": 37,
+      "rows": 86,
+      "unresolved": 29,
       "lineClassCounts": {
         "PAGE_LABEL": 11,
         "TABLE_TITLE": 1,
-        "ROW": 78,
+        "ROW": 86,
         "UNIT": 1,
-        "UNRESOLVED": 37,
+        "UNRESOLVED": 29,
         "TABLE_HEADER": 12,
         "CONTINUATION": 29,
         "RIGHT_REGION": 80
@@ -1418,20 +1419,18 @@
       "source_file": "budget-request-plain-text/2026/courts.go.jp__assets__R08saisyutsu_gaisanyoukyusyo_510kb.txt",
       "pageCount": 118,
       "detailPages": 104,
-      "pagesWithoutBoundary": [
-        74
-      ],
-      "rows": 510,
-      "unresolved": 143,
+      "pagesWithoutBoundary": [],
+      "rows": 514,
+      "unresolved": 104,
       "lineClassCounts": {
-        "PAGE_LABEL": 103,
+        "PAGE_LABEL": 104,
         "TABLE_TITLE": 1,
-        "ROW": 510,
+        "ROW": 514,
         "UNIT": 1,
-        "UNRESOLVED": 143,
-        "TABLE_HEADER": 103,
-        "CONTINUATION": 162,
-        "RIGHT_REGION": 2988
+        "UNRESOLVED": 104,
+        "TABLE_HEADER": 104,
+        "CONTINUATION": 163,
+        "RIGHT_REGION": 3020
       }
     },
     {
@@ -1919,16 +1918,16 @@
       "pageCount": 1696,
       "detailPages": 1674,
       "pagesWithoutBoundary": [],
-      "rows": 7105,
-      "unresolved": 1699,
+      "rows": 7106,
+      "unresolved": 1697,
       "lineClassCounts": {
         "PAGE_LABEL": 1674,
         "TABLE_TITLE": 1,
-        "ROW": 7105,
+        "ROW": 7106,
         "UNIT": 1,
-        "UNRESOLVED": 1699,
+        "UNRESOLVED": 1697,
         "TABLE_HEADER": 1674,
-        "CONTINUATION": 3959,
+        "CONTINUATION": 3960,
         "RIGHT_REGION": 48981,
         "FOOTER_TIMESTAMP": 1674
       }
@@ -1995,17 +1994,17 @@
       "pageCount": 934,
       "detailPages": 906,
       "pagesWithoutBoundary": [],
-      "rows": 9439,
-      "unresolved": 972,
+      "rows": 9476,
+      "unresolved": 918,
       "lineClassCounts": {
         "PAGE_LABEL": 906,
         "TABLE_TITLE": 1,
-        "ROW": 9439,
+        "ROW": 9476,
         "UNIT": 1,
-        "UNRESOLVED": 972,
+        "UNRESOLVED": 918,
         "TABLE_HEADER": 906,
         "RIGHT_REGION": 20456,
-        "CONTINUATION": 3790
+        "CONTINUATION": 3807
       }
     },
     {
@@ -2210,17 +2209,17 @@
       "pageCount": 251,
       "detailPages": 243,
       "pagesWithoutBoundary": [],
-      "rows": 3650,
-      "unresolved": 330,
+      "rows": 3701,
+      "unresolved": 243,
       "lineClassCounts": {
         "PAGE_LABEL": 243,
         "TABLE_TITLE": 1,
-        "ROW": 3650,
+        "ROW": 3701,
         "UNIT": 1,
-        "UNRESOLVED": 330,
+        "UNRESOLVED": 243,
         "TABLE_HEADER": 243,
         "RIGHT_REGION": 4635,
-        "CONTINUATION": 2138,
+        "CONTINUATION": 2174,
         "FOOTER_TIMESTAMP": 243
       }
     },
@@ -2391,16 +2390,16 @@
       "pageCount": 381,
       "detailPages": 373,
       "pagesWithoutBoundary": [],
-      "rows": 2748,
-      "unresolved": 410,
+      "rows": 2771,
+      "unresolved": 378,
       "lineClassCounts": {
         "PAGE_LABEL": 373,
         "TABLE_TITLE": 1,
-        "ROW": 2748,
+        "ROW": 2771,
         "UNIT": 1,
-        "UNRESOLVED": 410,
+        "UNRESOLVED": 378,
         "TABLE_HEADER": 373,
-        "CONTINUATION": 1425,
+        "CONTINUATION": 1434,
         "RIGHT_REGION": 9231,
         "FOOTER_TIMESTAMP": 373
       }

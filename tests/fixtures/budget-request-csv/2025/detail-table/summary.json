@@ -19,42 +19,44 @@
   "lineClassCounts": {
     "PAGE_LABEL": 9106,
     "TABLE_TITLE": 127,
-    "ROW": 53868,
+    "ROW": 53960,
     "UNIT": 127,
-    "UNRESOLVED": 10309,
+    "UNRESOLVED": 10143,
     "TABLE_HEADER": 9118,
-    "CONTINUATION": 24309,
+    "CONTINUATION": 24383,
     "RIGHT_REGION": 243731,
     "FOOTER_TIMESTAMP": 3951
   },
-  "logicalRowCount": 53868,
+  "logicalRowCount": 53960,
   "rowTypeCounts": {
     "CODE1": 32,
-    "CODE2": 1955,
-    "CODE3": 12254,
-    "CODE_5_4_2_4": 27978,
+    "CODE2": 1958,
+    "CODE3": 12271,
+    "CODE_5_4_2_4": 28050,
     "CODE_NN_NNNN": 9620,
     "CONTEXT": 127,
     "DETAIL": 1902
   },
   "parseStatusCounts": {
     "AMOUNTS_PLACED_BY_HEADER_WINDOWS": 196,
+    "AMOUNTS_PLACED_BY_NEIGHBOUR_EDGES": 92,
     "AMOUNTS_PLACED_BY_PAGE_EDGES": 582,
     "PARSED": 53090
   },
   "rowsByBlankCells": {
+    "blank:difference": 14,
     "blank:none": 44261,
-    "blank:previous": 394,
+    "blank:previous": 395,
     "blank:previous+request+difference": 8829,
-    "blank:request": 384
+    "blank:request": 461
   },
-  "rowsWithContinuation": 19294,
-  "unresolvedCount": 10309,
+  "rowsWithContinuation": 19343,
+  "unresolvedCount": 10143,
   "unresolvedByReason": {
-    "BLANK_CELL_COLUMN_UNDETERMINED": 109,
+    "BLANK_CELL_COLUMN_UNDETERMINED": 17,
     "LEFT_FRAGMENT_NOT_ADJACENT": 412,
     "LEFT_FRAGMENT_NOT_ALIGNED": 14,
-    "LEFT_FRAGMENT_WITHOUT_PRECEDING_ROW_ON_PAGE": 363,
+    "LEFT_FRAGMENT_WITHOUT_PRECEDING_ROW_ON_PAGE": 289,
     "LEFT_TEXT_CROSSES_BOUNDARY": 302,
     "UNEXPECTED_AMOUNT_COUNT": 3,
     "UNKNOWN_HEADER_ZONE_LINE": 9106
@@ -1421,16 +1423,16 @@
       "pageCount": 248,
       "detailPages": 228,
       "pagesWithoutBoundary": [],
-      "rows": 1736,
-      "unresolved": 238,
+      "rows": 1740,
+      "unresolved": 228,
       "lineClassCounts": {
         "PAGE_LABEL": 228,
         "TABLE_TITLE": 1,
-        "ROW": 1736,
+        "ROW": 1740,
         "UNIT": 1,
-        "UNRESOLVED": 238,
+        "UNRESOLVED": 228,
         "TABLE_HEADER": 228,
-        "CONTINUATION": 797,
+        "CONTINUATION": 803,
         "FOOTER_TIMESTAMP": 228,
         "RIGHT_REGION": 3287
       }
@@ -1840,16 +1842,16 @@
       "pageCount": 1717,
       "detailPages": 1695,
       "pagesWithoutBoundary": [],
-      "rows": 7016,
-      "unresolved": 1728,
+      "rows": 7018,
+      "unresolved": 1725,
       "lineClassCounts": {
         "PAGE_LABEL": 1695,
         "TABLE_TITLE": 1,
-        "ROW": 7016,
+        "ROW": 7018,
         "UNIT": 1,
-        "UNRESOLVED": 1728,
+        "UNRESOLVED": 1725,
         "TABLE_HEADER": 1695,
-        "CONTINUATION": 3881,
+        "CONTINUATION": 3882,
         "RIGHT_REGION": 48401,
         "FOOTER_TIMESTAMP": 1695
       }
@@ -1952,17 +1954,17 @@
       "pageCount": 935,
       "detailPages": 907,
       "pagesWithoutBoundary": [],
-      "rows": 9300,
-      "unresolved": 972,
+      "rows": 9338,
+      "unresolved": 907,
       "lineClassCounts": {
         "PAGE_LABEL": 907,
         "TABLE_TITLE": 1,
-        "ROW": 9300,
+        "ROW": 9338,
         "UNIT": 1,
-        "UNRESOLVED": 972,
+        "UNRESOLVED": 907,
         "TABLE_HEADER": 907,
         "RIGHT_REGION": 20830,
-        "CONTINUATION": 3631
+        "CONTINUATION": 3658
       }
     },
     {
@@ -2131,17 +2133,17 @@
       "pageCount": 240,
       "detailPages": 232,
       "pagesWithoutBoundary": [],
-      "rows": 3557,
-      "unresolved": 285,
+      "rows": 3581,
+      "unresolved": 244,
       "lineClassCounts": {
         "PAGE_LABEL": 232,
         "TABLE_TITLE": 1,
-        "ROW": 3557,
+        "ROW": 3581,
         "UNIT": 1,
-        "UNRESOLVED": 285,
+        "UNRESOLVED": 244,
         "TABLE_HEADER": 232,
         "RIGHT_REGION": 4373,
-        "CONTINUATION": 2077,
+        "CONTINUATION": 2094,
         "FOOTER_TIMESTAMP": 232
       }
     },
@@ -2315,16 +2317,16 @@
       "pageCount": 383,
       "detailPages": 375,
       "pagesWithoutBoundary": [],
-      "rows": 2852,
-      "unresolved": 427,
+      "rows": 2876,
+      "unresolved": 380,
       "lineClassCounts": {
         "PAGE_LABEL": 375,
         "TABLE_TITLE": 1,
-        "ROW": 2852,
+        "ROW": 2876,
         "UNIT": 1,
-        "UNRESOLVED": 427,
+        "UNRESOLVED": 380,
         "TABLE_HEADER": 375,
-        "CONTINUATION": 1486,
+        "CONTINUATION": 1509,
         "RIGHT_REGION": 8696,
         "FOOTER_TIMESTAMP": 375
       }
