@@ -46,3 +46,11 @@ npx tsx scripts/pipeline-v2/build-budget-request-trend-csv.ts   # → tests/fixt
 | FY2027 | 974 | 893 | 50 | 855 |
 
 5 年度すべてに現れるキーは 696、どこかに現れるキーは 1,303。FY2027 の行が少ないのは、厚労省の歳出概算要求書（4 本、文字層なし）が corpus に無いため。
+
+## UI（`/budget-request-trend`、URL 直打ち）
+
+- データ: 同じスクリプトが `public/data/v2/ui/budget-request-trend/kou.json.gz`（キー単位に束ね、元の PDF の URL を持つ。型は `types/budget-request-trend.ts`）を出し、`/api/budget-request-trend` が返す。
+- 画面: 左がフィルタ、中が選択年度の一覧（所管・組織・項名・前年度予算額・要求額・増減・増減率）、右が選んだ項の全年度分の表・棒グラフ・元の PDF へのリンク。
+- 金額は `client/lib/formatBudget.ts` の `formatBudgetShort` と同じ桁数（/sankey-svg に合わせる）で、円・万円・億円・兆円に自動で切り替える。
+- 増減・増減率は、その年度の要求額 − 前年度予算額（その年度の要求書が載せる値どうし）。新規・消滅は前年度のキーとの比較。名称変更の紐づけはしない。
+- 絞り込み・並べ替えは `app/lib/budget-request-trend.ts`（純粋関数）。
