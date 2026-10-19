@@ -20,7 +20,7 @@ import { TrendFilterPane } from '@/client/components/budget-request-trend/TrendF
 import { TrendListPane } from '@/client/components/budget-request-trend/TrendListPane';
 import { TrendDetailPane } from '@/client/components/budget-request-trend/TrendDetailPane';
 
-const rowKey = (r: BudgetRequestTrendRow): string => [r.acct, r.code, r.min, r.sub, r.org, r.name].join('|');
+const rowKey = (r: BudgetRequestTrendRow): string => [r.acct, r.code, r.min, r.sub, r.org, r.name, r.kou ?? ''].join('|');
 const FILTER_WIDTH = { def: 240, min: 180, max: 420 };
 const DETAIL_WIDTH = { def: 430, min: 320, max: 760 };
 const pane = 'min-h-0 min-w-0 overflow-hidden rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900';

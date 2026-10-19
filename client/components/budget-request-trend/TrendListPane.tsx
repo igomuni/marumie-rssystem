@@ -132,6 +132,7 @@ export function TrendListPane({
                   <td className="break-words px-2 py-1 text-left">{orgOf(r)}</td>
                   <td className="break-words px-2 py-1 text-left font-medium">
                     {r.name}
+                    {r.kou && <span className="ml-1 text-[10px] text-neutral-400">({r.kou})</span>}
                     {a && a.src.length > 1 && <span className={`${chip} border-neutral-300 text-neutral-500 dark:border-neutral-600`}>複数書</span>}
                     {a?.mismatch && <span className={`${chip} border-amber-600 text-amber-700 dark:text-amber-400`}>額不一致</span>}
                   </td>

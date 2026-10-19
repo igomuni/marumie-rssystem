@@ -1,31 +1,31 @@
 {
- "sha256": "d633c89b389fbcd950124591e0c8ede57de42966eee3a2199c35f71597c9b73c",
+ "sha256": "abcee5c9da63d398c59346f34ca37e7f0e95eb33331ddaa5e85f784fd919dd6f",
  "years": {
   "2023": {
    "rows": 1098,
-   "distinct_keys": 1016,
-   "duplicated_keys": 56,
+   "distinct_keys": 1018,
+   "duplicated_keys": 54,
    "general_without_org": 1,
    "without_amount": 1
   },
   "2024": {
    "rows": 1101,
-   "distinct_keys": 1013,
-   "duplicated_keys": 60,
+   "distinct_keys": 1014,
+   "duplicated_keys": 59,
    "general_without_org": 0,
    "without_amount": 0
   },
   "2025": {
    "rows": 1157,
-   "distinct_keys": 1060,
-   "duplicated_keys": 69,
+   "distinct_keys": 1061,
+   "duplicated_keys": 68,
    "general_without_org": 0,
    "without_amount": 0
   },
   "2026": {
    "rows": 1181,
-   "distinct_keys": 1102,
-   "duplicated_keys": 53,
+   "distinct_keys": 1103,
+   "duplicated_keys": 52,
    "general_without_org": 0,
    "without_amount": 0
   },

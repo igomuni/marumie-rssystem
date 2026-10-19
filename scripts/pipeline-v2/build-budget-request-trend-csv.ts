@@ -27,6 +27,8 @@ const uiRows = new Map<string, BudgetRequestTrendRow>(); // キー（年度を�
 const uiUrls: string[] = []; const uiUrlIdx = new Map<string, number>();
 const urlIndex = (u: string): number => { let i = uiUrlIdx.get(u); if (i === undefined) { i = uiUrls.length; uiUrls.push(u); uiUrlIdx.set(u, i); } return i; };
 const summary: Record<string, unknown> = {};
+type Row = { r: Rec; code: string; org: string; orgSrc: string; key: string };
+const stages: { year: number; ver: string | null; kou: Rec[]; status: Map<string, string>; recs: Row[]; urlOf: Map<string, string> }[] = [];
 for (const [year, ver] of YEARS) {
   const dir = path.join(MATCH, ver ?? String(year));
   const kou = rd(path.join(dir, 'request-kou.csv'));
@@ -51,21 +53,33 @@ for (const [year, ver] of YEARS) {
   const urlOf = new Map<string, string>();
   const freeze = JSON.parse(fs.readFileSync(path.join('tests', 'fixtures', 'budget-request-pdf-corpus', String(year), 'pdf-corpus-freeze.json'), 'utf8')) as { documents: { localPdfPath: string; sourceUrl: string }[] };
   for (const d of freeze.documents) { const slug = d.localPdfPath.replace(/^data\/download\//, '').replace(/\.pdf$/i, '').replace(/\//g, '__'); urlOf.set(slug, d.sourceUrl); urlOf.set(slug.replace(/\$/g, '%24'), d.sourceUrl); }
-  type Row = { r: Rec; code: string; org: string; orgSrc: string; key: string };
   const recs: Row[] = kou.map(r => {
     const cv = cover.get(r['request_source']); let org = r['org']; let orgSrc = org ? (r['hierarchy'] === 'toc' ? '目次' : '総表') : '';
     if (!org && r['acct'] === 'general') { if (cv?.org) { org = cv.org; orgSrc = '表紙括弧'; } else orgSrc = 'なし'; }
     return { r, code: cv?.code ?? '', org, orgSrc, key: [r['acct'], cv?.code ?? '', r['account'], r['sub'], org, r['request_name']].join('\t') };
   });
+  stages.push({ year, ver, kou, status, recs, urlOf });
+}
+// 同じ要求書の中で、同名の別の項（項コードが違う）が同じキーになるもの（例: 厚生労働調査研究等推進費 087 / 405）は、項コードをキーに足して別の行にする。
+// どの年度かで衝突したキーは全年度で足す（年度をまたぐ紐づけを保つため）
+const codesIn = new Map<string, Set<string>>();
+for (const { year, recs } of stages) for (const x of recs) { const k = `${year}\t${x.r['request_source']}\t${x.key}`; (codesIn.get(k) ?? codesIn.set(k, new Set()).get(k)!).add(x.r['request_code3']); }
+const splitKeys = new Set<string>();
+for (const { year, recs } of stages) for (const x of recs) if (codesIn.get(`${year}\t${x.r['request_source']}\t${x.key}`)!.size > 1) splitKeys.add(x.key);
+for (const { recs } of stages) for (const x of recs) if (splitKeys.has(x.key)) x.key += `\t${x.r['request_code3']}`;
+for (const { year, ver, kou, status, recs, urlOf } of stages) {
   const group = new Map<string, Row[]>(); for (const x of recs) (group.get(x.key) ?? group.set(x.key, []).get(x.key)!).push(x);
   for (const g of group.values()) {
-    const x0 = g[0]; const r0 = x0.r; const acct = r0['acct'] === 'general' ? 0 : 1;
+    // 要求書によって額が違うとき（復興特会は各省の書が自分の取り分だけを載せ、復興庁の書が合計を載せる）は、最も大きい額の行（合計書）を採る。各書の額は srcAmt に残す
+    const big = (x: Row): number[] => [Number(x.r['request_amount'] || 0), Number(x.r['previous_amount'] || 0)];
+    const x0 = g.reduce((m, x) => { const a = big(x), b = big(m); return a[0] > b[0] || (a[0] === b[0] && a[1] > b[1]) ? x : m; }, g[0]); const r0 = x0.r; const acct = r0['acct'] === 'general' ? 0 : 1;
     let u = uiRows.get(x0.key);
-    if (!u) { u = { acct, code: x0.code, min: acct === 0 ? r0['ministry'] : r0['account'], sub: r0['sub'], org: x0.org, orgSrc: x0.orgSrc, name: r0['request_name'], y: {} }; uiRows.set(x0.key, u); }
+    if (!u) { u = { acct, code: x0.code, min: acct === 0 ? r0['ministry'] : r0['account'], sub: r0['sub'], org: x0.org, orgSrc: x0.orgSrc, name: r0['request_name'], ...(splitKeys.has(x0.key.split('\t').slice(0, 6).join('\t')) ? { kou: r0['request_code3'] } : {}), y: {} }; uiRows.set(x0.key, u); }
     const num = (v: string): number | null => (v === '' ? null : Number(v));
-    const src: [number, string][] = [];
-    for (const x of g) { const url = urlOf.get(x.r['request_source']); if (!url) throw new Error(`no URL for ${year} ${x.r['request_source']}`); const e: [number, string] = [urlIndex(url), x.r['request_page']]; if (!src.some(y => y[0] === e[0] && y[1] === e[1])) src.push(e); }
-    u.y[String(year)] = { prev: num(r0['previous_amount']), req: num(r0['request_amount']), src, mismatch: new Set(g.map(y => `${y.r['request_amount']}|${y.r['previous_amount']}`)).size > 1, mof: ver ? status.get(`${r0['request_source']}#${r0['toc_kou_idx']}`) ?? '' : '' };
+    const src: [number, string][] = []; const srcAmt: [number | null, number | null][] = [];
+    for (const x of g) { const url = urlOf.get(x.r['request_source']); if (!url) throw new Error(`no URL for ${year} ${x.r['request_source']}`); const e: [number, string] = [urlIndex(url), x.r['request_page']]; if (!src.some(y => y[0] === e[0] && y[1] === e[1])) { src.push(e); srcAmt.push([num(x.r['previous_amount']), num(x.r['request_amount'])]); } }
+    const mismatch = new Set(g.map(y => `${y.r['request_amount']}|${y.r['previous_amount']}`)).size > 1;
+    u.y[String(year)] = { prev: num(r0['previous_amount']), req: num(r0['request_amount']), src, ...(mismatch ? { srcAmt } : {}), mismatch, mof: ver ? status.get(`${r0['request_source']}#${r0['toc_kou_idx']}`) ?? '' : '' };
   }
   for (const x of recs) {
     const g = group.get(x.key)!; const r = x.r;
