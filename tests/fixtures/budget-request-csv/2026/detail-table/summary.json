@@ -14,25 +14,25 @@
   "detailTablePageCount": 8407,
   "sourcesWithoutDetailTable": 7,
   "sourcesWithNoTextLayer": [],
-  "pagesWithoutHeaderBoundary": 1,
+  "pagesWithoutHeaderBoundary": 0,
   "nonBlankLinesInDetailPages": 333322,
   "lineClassCounts": {
-    "PAGE_LABEL": 8406,
+    "PAGE_LABEL": 8407,
     "TABLE_TITLE": 131,
-    "ROW": 54409,
+    "ROW": 54413,
     "UNIT": 131,
-    "UNRESOLVED": 9655,
-    "TABLE_HEADER": 8491,
-    "CONTINUATION": 24992,
-    "RIGHT_REGION": 223309,
+    "UNRESOLVED": 9616,
+    "TABLE_HEADER": 8492,
+    "CONTINUATION": 24993,
+    "RIGHT_REGION": 223341,
     "FOOTER_TIMESTAMP": 3798
   },
-  "logicalRowCount": 54409,
+  "logicalRowCount": 54413,
   "rowTypeCounts": {
     "CODE1": 33,
     "CODE2": 1904,
-    "CODE3": 12481,
-    "CODE_5_4_2_4": 28300,
+    "CODE3": 12483,
+    "CODE_5_4_2_4": 28302,
     "CODE_NN_NNNN": 9634,
     "CONTEXT": 131,
     "DETAIL": 1926
@@ -40,25 +40,24 @@
   "parseStatusCounts": {
     "AMOUNTS_PLACED_BY_HEADER_WINDOWS": 105,
     "AMOUNTS_PLACED_BY_PAGE_EDGES": 685,
-    "PARSED": 53619
+    "PARSED": 53623
   },
   "rowsByBlankCells": {
-    "blank:none": 44573,
+    "blank:none": 44576,
     "blank:previous": 352,
-    "blank:previous+request+difference": 9046,
+    "blank:previous+request+difference": 9047,
     "blank:request": 438
   },
-  "rowsWithContinuation": 19823,
-  "unresolvedCount": 9655,
+  "rowsWithContinuation": 19824,
+  "unresolvedCount": 9616,
   "unresolvedByReason": {
     "BLANK_CELL_COLUMN_UNDETERMINED": 146,
     "LEFT_FRAGMENT_NOT_ADJACENT": 420,
     "LEFT_FRAGMENT_NOT_ALIGNED": 12,
     "LEFT_FRAGMENT_WITHOUT_PRECEDING_ROW_ON_PAGE": 320,
     "LEFT_TEXT_CROSSES_BOUNDARY": 304,
-    "PAGE_WITHOUT_HEADER_BOUNDARY": 40,
     "UNEXPECTED_AMOUNT_COUNT": 7,
-    "UNKNOWN_HEADER_ZONE_LINE": 8406
+    "UNKNOWN_HEADER_ZONE_LINE": 8407
   },
   "arithmeticDiagnostics": {
     "rowsWithMismatch": 0
@@ -1418,20 +1417,18 @@
       "source_file": "budget-request-plain-text/2026/courts.go.jp__assets__R08saisyutsu_gaisanyoukyusyo_510kb.txt",
       "pageCount": 118,
       "detailPages": 104,
-      "pagesWithoutBoundary": [
-        74
-      ],
-      "rows": 510,
-      "unresolved": 143,
+      "pagesWithoutBoundary": [],
+      "rows": 514,
+      "unresolved": 104,
       "lineClassCounts": {
-        "PAGE_LABEL": 103,
+        "PAGE_LABEL": 104,
         "TABLE_TITLE": 1,
-        "ROW": 510,
+        "ROW": 514,
         "UNIT": 1,
-        "UNRESOLVED": 143,
-        "TABLE_HEADER": 103,
-        "CONTINUATION": 162,
-        "RIGHT_REGION": 2988
+        "UNRESOLVED": 104,
+        "TABLE_HEADER": 104,
+        "CONTINUATION": 163,
+        "RIGHT_REGION": 3020
       }
     },
     {
