@@ -1,0 +1,21 @@
+{
+ "year": 2027,
+ "coverPages": 62,
+ "sources": 52,
+ "rows": 379,
+ "rowKinds": {
+  "HEADER": 62,
+  "TITLE": 62,
+  "SECTION": 152,
+  "SCOPE": 103
+ },
+ "pageStatus": {
+  "RESOLVED": 61,
+  "PARTIAL": 1
+ },
+ "unclassifiedLines": 1,
+ "inventoryPageTextHash": {
+  "match": 62,
+  "mismatch": 0
+ }
+}

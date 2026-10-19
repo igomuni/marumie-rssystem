@@ -12,7 +12,10 @@ year, landing, *urls = sys.argv[1:]
 D = 'docs/inventory/budget-request-sources'; path = f'{D}/fy{year}-expenditure-request-pdfs.csv'
 rows = list(csv.reader(open(path, encoding='utf-8'))); have = {r[0] for r in rows[1:]}
 nf = lambda s: unicodedata.normalize('NFKC', re.sub(r'\s+', '', s))
+fails = []
 for u in urls:
+    cont = u.startswith('continuation:')  # 表題のない続きの頁から始まる PDF（明細表を分割した PDF の 2 本目以降）。表の見出しの「N年度」「概算要求額」で確認する
+    u = u.removeprefix('continuation:')
     if u in have: print('already listed:', u); continue
     p = urlparse(u); host = p.hostname.lower().removeprefix('www.')
     segs = [unquote(s) for s in p.path.split('/') if s]
@@ -23,7 +26,12 @@ for u in urls:
     n = re.search(r'Pages:\s+(\d+)', subprocess.run(['pdfinfo', local], capture_output=True, text=True).stdout).group(1)
     txt = subprocess.run(['pdftotext', '-layout', '-f', '1', '-l', '2', local, '-'], capture_output=True, text=True).stdout
     t = nf(txt); yr = re.search(r'令和(\d+)年度', t)
-    if not (yr and int(yr.group(1)) == int(year) - 2018 and '歳出概算要求' in t): sys.exit(f'STOP: not the FY{year} expenditure request: {local}')
-    rows.append([u, landing, n, hashlib.sha256(b).hexdigest(), yr.group(0) + '|' + ' '.join(l.strip() for l in txt.split('\n') if l.strip())[:60]])
+    ok = bool(yr and int(yr.group(1)) == int(year) - 2018 and '歳出概算要求' in t)
+    head = ' '.join(l.strip() for l in txt.split('\n') if l.strip())[:60]
+    if not ok and cont and re.search(r'前年度.*?' + str(int(year) - 2018) + r'年度.*?概算要求額', t) and '要求事項' in t:
+        rows.append([u, landing, n, hashlib.sha256(b).hexdigest(), '継続頁|' + head]); print('appended (continuation)', u, n, 'pages'); continue
+    if not ok: fails.append(u); print('NOT appended (not the FY%s expenditure request):' % year, local); continue
+    rows.append([u, landing, n, hashlib.sha256(b).hexdigest(), yr.group(0) + '|' + head])
     print('appended', u, n, 'pages')
 csv.writer(open(path, 'w', encoding='utf-8', newline=''), lineterminator='\n').writerows(rows)
+if fails: sys.exit('STOP: %d not appended' % len(fails))

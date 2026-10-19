@@ -1,0 +1,7 @@
+要求番号,区分,前年度予算額_一般行政経費,前年度予算額_その他の経費,前年度予算額_計,９年度概算要求額_一般行政経費,９年度概算要求額_その他の経費,９年度概算要求額_計,増△減,明細書頁数,source_page,source_line_start,source_line_end,table_block_id,row_index,row_type,parse_status
+,01 東日本大震災復興,0,"213,085","213,085",0,"225,610","225,610","12,525",3,5,38,38,npa.go.jp__policies__budget__R9__gaisanyokyu__hukkoutokubetukaikei#b1,1,HIER,PARSED
+,31 復興庁,0,"213,085","213,085",0,"225,610","225,610","12,525",3,5,39,39,npa.go.jp__policies__budget__R9__gaisanyokyu__hukkoutokubetukaikei#b1,2,HIER,PARSED
+,010 復興庁,0,"213,085","213,085",0,"225,610","225,610","12,525",3,5,40,40,npa.go.jp__policies__budget__R9__gaisanyokyu__hukkoutokubetukaikei#b1,3,CODE3,PARSED
+,187 治安復興事業費,0,"213,085","213,085",0,"225,610","225,610","12,525",4,5,41,41,npa.go.jp__policies__budget__R9__gaisanyokyu__hukkoutokubetukaikei#b1,4,CODE3,PARSED
+1,01‑95 安全かつ快適な交通の確保に必要な経費,0,"213,085","213,085",0,"225,610","225,610","12,525",4,5,42,42,npa.go.jp__policies__budget__R9__gaisanyokyu__hukkoutokubetukaikei#b1,5,DETAIL,PARSED
+,会計計,0,"213,085","213,085",0,"225,610","225,610","12,525",,5,43,43,npa.go.jp__policies__budget__R9__gaisanyokyu__hukkoutokubetukaikei#b1,6,TOTAL,PARSED

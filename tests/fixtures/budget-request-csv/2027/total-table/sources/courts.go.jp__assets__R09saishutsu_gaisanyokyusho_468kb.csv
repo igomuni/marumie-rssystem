@@ -1,0 +1,19 @@
+要求番号,区分,前年度予算額_一般行政経費,前年度予算額_その他の経費,前年度予算額_計,９年度概算要求額_一般行政経費,９年度概算要求額_その他の経費,９年度概算要求額_計,増△減,明細書頁数,source_page,source_line_start,source_line_end,table_block_id,row_index,row_type,parse_status
+,010 裁判所,"280,732,972","68,740,833","349,473,805","278,351,075","70,398,309","348,749,384","△724,421",3,5,52,52,courts.go.jp__assets__R09saishutsu_gaisanyokyusho_468kb#b1,1,CODE3,PARSED
+,010 最高裁判所,"73,850,255","12,419,486","86,269,741","73,686,486","8,846,318","82,532,804","△3,736,937",3,5,53,53,courts.go.jp__assets__R09saishutsu_gaisanyokyusho_468kb#b1,2,CODE3,PARSED
+1,01‑95 最高裁判所の事務処理に必要な経費,"73,850,255",0,"73,850,255","73,686,486",0,"73,686,486","△163,769",3,5,54,54,courts.go.jp__assets__R09saishutsu_gaisanyokyusho_468kb#b1,3,DETAIL,PARSED
+2,06‑95 裁判運営の充実に必要な経費,0,"6,060,946","6,060,946",0,"2,283,736","2,283,736","△3,777,210",18,5,55,55,courts.go.jp__assets__R09saishutsu_gaisanyokyusho_468kb#b1,4,DETAIL,PARSED
+3,11‑95 裁判所職員の研修に必要な経費,0,"6,358,540","6,358,540",0,"6,562,582","6,562,582","204,042",29,5,56,56,courts.go.jp__assets__R09saishutsu_gaisanyokyusho_468kb#b1,5,DETAIL,PARSED
+,020 下級裁判所,"206,882,717","11,057,603","217,940,320","204,664,589","12,583,868","217,248,457","△691,863",41,5,57,57,courts.go.jp__assets__R09saishutsu_gaisanyokyusho_468kb#b1,6,CODE3,PARSED
+4,01‑95 下級裁判所の事務処理に必要な経費,"206,882,717",0,"206,882,717","204,664,589",0,"204,664,589","△2,218,128",41,5,58,58,courts.go.jp__assets__R09saishutsu_gaisanyokyusho_468kb#b1,7,DETAIL,PARSED
+5,06‑95 裁判運営の充実に必要な経費,0,"11,057,603","11,057,603",0,"12,583,868","12,583,868","1,526,265",49,5,59,59,courts.go.jp__assets__R09saishutsu_gaisanyokyusho_468kb#b1,8,DETAIL,PARSED
+,030 検察審査費,0,"315,617","315,617",0,"368,306","368,306","52,689",59,5,60,60,courts.go.jp__assets__R09saishutsu_gaisanyokyusho_468kb#b1,9,CODE3,PARSED
+6,06‑95 検察審査業務に必要な経費,0,"315,617","315,617",0,"368,306","368,306","52,689",59,5,61,61,courts.go.jp__assets__R09saishutsu_gaisanyokyusho_468kb#b1,10,DETAIL,PARSED
+,040 裁判費,0,"32,929,554","32,929,554",0,"35,528,966","35,528,966","2,599,412",61,5,62,62,courts.go.jp__assets__R09saishutsu_gaisanyokyusho_468kb#b1,11,CODE3,PARSED
+7,01‑95 裁判に必要な経費,0,"32,929,554","32,929,554",0,"35,528,966","35,528,966","2,599,412",61,5,63,63,courts.go.jp__assets__R09saishutsu_gaisanyokyusho_468kb#b1,12,DETAIL,PARSED
+,050 裁判所施設費,0,"12,010,573","12,010,573",0,"13,062,851","13,062,851","1,052,278",71,5,64,64,courts.go.jp__assets__R09saishutsu_gaisanyokyusho_468kb#b1,13,CODE3,PARSED
+8,01‑95 裁判所施設整備に必要な経費,0,"12,010,573","12,010,573",0,"13,062,851","13,062,851","1,052,278",71,5,65,65,courts.go.jp__assets__R09saishutsu_gaisanyokyusho_468kb#b1,14,DETAIL,PARSED
+,080 裁判所予備経費,0,"8,000","8,000",0,"8,000","8,000",0,72,5,66,66,courts.go.jp__assets__R09saishutsu_gaisanyokyusho_468kb#b1,15,CODE3,PARSED
+9,01‑95 裁判所の予備金に必要な経費,0,"8,000","8,000",0,"8,000","8,000",0,72,5,67,67,courts.go.jp__assets__R09saishutsu_gaisanyokyusho_468kb#b1,16,DETAIL,PARSED
+,組織計,"280,732,972","68,740,833","349,473,805","278,351,075","70,398,309","348,749,384","△724,421",,5,68,68,courts.go.jp__assets__R09saishutsu_gaisanyokyusho_468kb#b1,17,TOTAL,PARSED
+,所管計,"280,732,972","68,740,833","349,473,805","278,351,075","70,398,309","348,749,384","△724,421",,5,69,69,courts.go.jp__assets__R09saishutsu_gaisanyokyusho_468kb#b1,18,TOTAL,PARSED

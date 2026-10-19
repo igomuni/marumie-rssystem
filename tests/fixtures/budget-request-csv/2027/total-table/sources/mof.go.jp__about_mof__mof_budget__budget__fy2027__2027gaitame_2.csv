@@ -1,0 +1,14 @@
+要求番号,区分,前年度予算額_一般行政経費,前年度予算額_その他の経費,前年度予算額_計,９年度概算要求額_一般行政経費,９年度概算要求額_その他の経費,９年度概算要求額_計,増△減,明細書頁数,source_page,source_line_start,source_line_end,table_block_id,row_index,row_type,parse_status
+,05 外国為替資金,0,"1,973,396,598","1,973,396,598",0,"2,335,178,446","2,335,178,446","361,781,848",2,3,47,47,mof.go.jp__about_mof__mof_budget__budget__fy2027__2027gaitame_2#b1,1,HIER,PARSED
+,010 事務取扱費,0,"5,271,800","5,271,800",0,"6,169,136","6,169,136","897,336",2,3,48,48,mof.go.jp__about_mof__mof_budget__budget__fy2027__2027gaitame_2#b1,2,CODE3,PARSED
+1,01‑95 事務取扱いに必要な経費,0,"695,952","695,952",0,"730,721","730,721","34,769",2,3,49,49,mof.go.jp__about_mof__mof_budget__budget__fy2027__2027gaitame_2#b1,3,DETAIL,PARSED
+2,04‑95 外国為替市場及び国際金融システムの安定に必要な経費,0,"4,575,848","4,575,848",0,"5,438,415","5,438,415","862,567",6,3,50,51,mof.go.jp__about_mof__mof_budget__budget__fy2027__2027gaitame_2#b1,4,DETAIL,PARSED
+,020 諸支出金,0,"242,052,856","242,052,856",0,"246,279,153","246,279,153","4,226,297",13,3,52,52,mof.go.jp__about_mof__mof_budget__budget__fy2027__2027gaitame_2#b1,5,CODE3,PARSED
+3,01‑95 手数料等に必要な経費,0,"242,052,856","242,052,856",0,"246,279,153","246,279,153","4,226,297",13,3,53,53,mof.go.jp__about_mof__mof_budget__budget__fy2027__2027gaitame_2#b1,6,DETAIL,PARSED
+,030 国債整理基金特別会計へ繰入,0,"1,426,071,170","1,426,071,170",0,"1,782,729,414","1,782,729,414","356,658,244",14,3,54,54,mof.go.jp__about_mof__mof_budget__budget__fy2027__2027gaitame_2#b1,7,CODE3,PARSED
+4,01‑20 国債整理基金特別会計へ繰入れに必要な経費,0,"1,426,071,170","1,426,071,170",0,"1,782,729,414","1,782,729,414","356,658,244",14,3,55,55,mof.go.jp__about_mof__mof_budget__budget__fy2027__2027gaitame_2#b1,8,DETAIL,PARSED
+,050 融通証券事務取扱費一般会計へ繰入,0,772,772,0,743,743,△29,14,3,56,56,mof.go.jp__about_mof__mof_budget__budget__fy2027__2027gaitame_2#b1,9,CODE3,PARSED
+5,01‑20 融通証券事務取扱費の財源の一般会計へ繰入れに必要な経費,0,772,772,0,743,743,△29,14,3,57,58,mof.go.jp__about_mof__mof_budget__budget__fy2027__2027gaitame_2#b1,10,DETAIL,PARSED
+,090 予備費,0,"300,000,000","300,000,000",0,"300,000,000","300,000,000",0,14,3,59,59,mof.go.jp__about_mof__mof_budget__budget__fy2027__2027gaitame_2#b1,11,CODE3,PARSED
+6,01‑98 予備費,0,"300,000,000","300,000,000",0,"300,000,000","300,000,000",0,14,3,60,60,mof.go.jp__about_mof__mof_budget__budget__fy2027__2027gaitame_2#b1,12,DETAIL,PARSED
+,会計計,0,"1,973,396,598","1,973,396,598",0,"2,335,178,446","2,335,178,446","361,781,848",,3,61,61,mof.go.jp__about_mof__mof_budget__budget__fy2027__2027gaitame_2#b1,13,TOTAL,PARSED

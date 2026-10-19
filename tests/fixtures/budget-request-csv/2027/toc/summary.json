@@ -1,0 +1,430 @@
+{
+  "schema": "budget-request-toc-pdf-native-csv/v0",
+  "extraction": {
+    "library": "pdfjs-dist",
+    "version": "5.4.296",
+    "optionsId": "pdfjs-5.4.296-disableNormalization-true-cmaps-standardfonts-verbosity0-v1"
+  },
+  "parameters": {
+    "rowToleranceFactor": 0.25,
+    "headerBandFactor": 4,
+    "headerBottomToleranceFactor": 0.5,
+    "pageRefRightEdgeFactor": 1,
+    "pageRefZoneLeftFactor": 2,
+    "requestNumberCenterFactor": 0.75,
+    "prefixGapFactor": 1.5
+  },
+  "population": {
+    "tocPages": 70,
+    "pdfs": 49,
+    "pagesWithColumnEvidence": 70,
+    "pagesWithoutColumnEvidence": 0
+  },
+  "counts": {
+    "items": 21510,
+    "itemDisposition": {
+      "blank": 10550,
+      "headerZone": 1598,
+      "entry": 9130,
+      "unresolved": 232
+    },
+    "entries": 2346,
+    "entriesByShape": {
+      "TITLE_PAGE": 126,
+      "MARKER": 937,
+      "NUMBERED": 1253,
+      "CODE": 30
+    },
+    "auditRecords": 92,
+    "auditRecordsByKind": {
+      "HOLD_INCOMPLETE_TITLE": 46,
+      "UNOWNED_FRAGMENT": 46
+    },
+    "geometricRows": {
+      "left": 1639,
+      "right": 799
+    }
+  },
+  "inputs": {
+    "inventory": {
+      "path": "tests/fixtures/budget-request-cover-toc-structure/2027/structure-inventory.json",
+      "sha256": "6bff4613bfc5a87077319a5a31ae470c69d79e7c6948904d0244b238ccad7441"
+    },
+    "pdfs": [
+      {
+        "source_pdf": "data/download/aoc.go.jp/files/documents/2026-09/令和９年度概算要求書（一般会計）_0.pdf",
+        "pdf_sha256": "962d4351d52f222ab8aaffc901faeb43cedf8842fa101b9536c4a417874d5ad9",
+        "toc_pages": [
+          2
+        ]
+      },
+      {
+        "source_pdf": "data/download/caa.go.jp/policies/budget/assets/caa_cms_205_260911_01.pdf",
+        "pdf_sha256": "e690778500b4bf47edef0dbbf05f091d70d3f4e66ee70a0ff14d4dfdffb28da0",
+        "toc_pages": [
+          2
+        ]
+      },
+      {
+        "source_pdf": "data/download/caa.go.jp/policies/budget/assets/caa_cms_205_260911_02.pdf",
+        "pdf_sha256": "8755611524b55cf44b90067542b0f36666844a8769e03ebfb11f3678aff9704f",
+        "toc_pages": [
+          2
+        ]
+      },
+      {
+        "source_pdf": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/309e4519/20260827_policies_budget_102.pdf",
+        "pdf_sha256": "21f390ba1001a63b9d88c1fcd5247bb796e23f3496b144c13a198af609aeecc6",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/a3b08bd5/20260827_policies_budget_104.pdf",
+        "pdf_sha256": "ca7d07f55e10b891cc9a088c93121178f7094d0f286eceec1ee5c8777a316d5d",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/clb.go.jp/files/topics/5329_ext_05_2.pdf",
+        "pdf_sha256": "4a033d798a2d7fb445e73c3539e691779f18927068f7ff2767a16baa5eb65236",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/courts.go.jp/assets/R09saishutsu_gaisanyokyusho_468kb.pdf",
+        "pdf_sha256": "e4250f8f7ec1a50cfc2073d1fb9fa97a3093e094ed0a432159fc7de275ca8bb4",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/dangai.go.jp/info/pdf/r09_saisyutu-gaisan.pdf",
+        "pdf_sha256": "cb4d46e420e37022394011868dbf7e0b5adad30b68d19d117dbaa201a1ebe31f",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/digital.go.jp/assets/contents/node/basic_page/field_ref_resources/3c1082e1-dc3c-4fc8-ac9c-9459a8e8b653/051c06c3/20260904_policies_budget_r8request_table_01.pdf",
+        "pdf_sha256": "df7e982dfa23b8ba75c72539c73c9974ebb29216c4424318bf661ffd7e5bf62f",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/env.go.jp/content/000425952.pdf",
+        "pdf_sha256": "a301cd58154624ebb1ead3b87224fdbdd3edeb3eb4034bf969e0c75069fda93a",
+        "toc_pages": [
+          3,
+          4
+        ]
+      },
+      {
+        "source_pdf": "data/download/env.go.jp/content/000425953.pdf",
+        "pdf_sha256": "c0d42214d4d5a06638f344b221e7d2796f7e9601d962624e9880844062532fa2",
+        "toc_pages": [
+          2
+        ]
+      },
+      {
+        "source_pdf": "data/download/env.go.jp/content/000425954.pdf",
+        "pdf_sha256": "d91260d27815eea6f82afa374538d860372edda211ace4d3f51da67458c1f2d1",
+        "toc_pages": [
+          2
+        ]
+      },
+      {
+        "source_pdf": "data/download/env.go.jp/content/000425955.pdf",
+        "pdf_sha256": "b63a49f88fb07589bdeed22e7c04627f0fe730f82e7c6be3c96ea1be6d0819f3",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/fsa.go.jp/common/budget/yosan/9youkyuu-2/01.pdf",
+        "pdf_sha256": "23c260429f660695822440e0a4cc93de802ca96ffbfe325dd5ad3a558dfb4651",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/jbaudit.go.jp/jbaudit/bud_clo/bud/pdf/r09/20260903_02.pdf",
+        "pdf_sha256": "82f0599f6219ab410678168368d8d89bda9c819adc97239e2b3e9022539650b9",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/jcrc.go.jp/content/000002960.pdf",
+        "pdf_sha256": "b7ff2707e617f9a1a5b95b302d21f2c4ddf22d35de555a7ed2f9ede21255b6e5",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/jinji.go.jp/content/000018368.pdf",
+        "pdf_sha256": "0d4f4a2634cd3626c8b5b8189f9153f5e14353a7f8c74ba1840277c081469e55",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/kunaicho.go.jp/wp-content/uploads/2026/08/r09-02.pdf",
+        "pdf_sha256": "d677bb51bfa8e544cf8eec577e1e68ce2e5a54a9ef42020710cddcd644033a3b",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/kunaicho.go.jp/wp-content/uploads/2026/08/r09-03.pdf",
+        "pdf_sha256": "385998e3cba4838299100b7487eeda4555cb7e051678360bb32d56db7c2bc4f6",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/maff.go.jp/j/budget/attach/pdf/r9yokyusho-1.pdf",
+        "pdf_sha256": "33cfb25eeb21e7752f2c4ccda3f5d517a3408414b019146e296888333e3b2a90",
+        "toc_pages": [
+          3,
+          4,
+          5,
+          6
+        ]
+      },
+      {
+        "source_pdf": "data/download/maff.go.jp/j/budget/attach/pdf/r9yokyusho-3.pdf",
+        "pdf_sha256": "7084754f4d8675c552cffbd8331c92acddfb2096ae896279b8f0b4763c09b551",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/maff.go.jp/j/budget/attach/pdf/r9yokyusho-5.pdf",
+        "pdf_sha256": "0d19769bc07154c5c85db19e1f79a8a60f41c3c7b4d8024c81cc45890e8e39d7",
+        "toc_pages": [
+          3,
+          4
+        ]
+      },
+      {
+        "source_pdf": "data/download/mext.go.jp/content/20260907_mxt_kaikesou01-000051991_1.pdf",
+        "pdf_sha256": "e0872a5132513670403cdcc51cd0145b13fa10a68a7eb780a609a9fcba1e75a2",
+        "toc_pages": [
+          3,
+          4,
+          5
+        ]
+      },
+      {
+        "source_pdf": "data/download/mext.go.jp/content/20260907_mxt_kaikesou01-000051991_8.pdf",
+        "pdf_sha256": "279afa58c52a7c29fbfe000ceb12f446b363a632684e9fbbd78e18f7422e57f6",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/mlit.go.jp/page/content/002021868.pdf",
+        "pdf_sha256": "ad58227f55c844fe90f9a4b95dd8f86e14c04fec7741ab1325de132cbb772041",
+        "toc_pages": [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ]
+      },
+      {
+        "source_pdf": "data/download/mlit.go.jp/page/content/002021873.pdf",
+        "pdf_sha256": "4d9f77c73d08ee3b2199a748433d9fd96163a2a2fd55675ec711a8e734604038",
+        "toc_pages": [
+          3,
+          4
+        ]
+      },
+      {
+        "source_pdf": "data/download/mlit.go.jp/page/content/002021874.pdf",
+        "pdf_sha256": "b4438cff0c5f481f2e19ed613aefe672de21de57f59276430162a9ef4699429e",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/mod.go.jp/j/budget/gaisan/r9/gaisanyoukyu.pdf",
+        "pdf_sha256": "4158eb6acba23e973508404cd44e39dbc4488c006cc542b5685ef13bce9c5bce",
+        "toc_pages": [
+          3,
+          4
+        ]
+      },
+      {
+        "source_pdf": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2027/2027fukkou_2.pdf",
+        "pdf_sha256": "9b652e4cb5a77afd698e7b5ed555bdaeee9f7d50e31fba5c592713de9285f564",
+        "toc_pages": [
+          2
+        ]
+      },
+      {
+        "source_pdf": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2027/2027gaitame_2.pdf",
+        "pdf_sha256": "b23af6d3a1576a4a8548d01ee15cc18c7d4c2040b6189b5821c9298e63930910",
+        "toc_pages": [
+          2
+        ]
+      },
+      {
+        "source_pdf": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2027/2027ippan_2.pdf",
+        "pdf_sha256": "526d0fbb81f8f7ebd580ce30b5d533b9369cbb0762aa1d98cc2ea13f093eb56c",
+        "toc_pages": [
+          3,
+          4
+        ]
+      },
+      {
+        "source_pdf": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2027/2027jisinn_2.pdf",
+        "pdf_sha256": "26a8813cdca485dee3ca1b0fbf05074e6a4aa0d98b293feae6c46512a3b7f2a1",
+        "toc_pages": [
+          2
+        ]
+      },
+      {
+        "source_pdf": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2027/2027kokusaiseirikikinn_2.pdf",
+        "pdf_sha256": "a504824908d00bd1e1079ed8314b8b226da09993c286f5b0b54b791d07f2244e",
+        "toc_pages": [
+          2
+        ]
+      },
+      {
+        "source_pdf": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2027/2027tokuzai_2.pdf",
+        "pdf_sha256": "6185121e63dd791698010115b8b038fcad2bce62938b75513dc604f2806450ee",
+        "toc_pages": [
+          2
+        ]
+      },
+      {
+        "source_pdf": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2027/2027tousi_2.pdf",
+        "pdf_sha256": "51bf5fd51399c635215af90601e62f191e08a2c02ab6ba4622e8a160b3ba03e9",
+        "toc_pages": [
+          2
+        ]
+      },
+      {
+        "source_pdf": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2027/2027zaiyuu_2.pdf",
+        "pdf_sha256": "5c5054510a8fd42556684dde7269773e7a5a092905d3cbed8681d5315f4c0e89",
+        "toc_pages": [
+          2
+        ]
+      },
+      {
+        "source_pdf": "data/download/mofa.go.jp/mofaj/files/101079808.pdf",
+        "pdf_sha256": "b5432e8625994783662223dee77b84ecb55d9593143c8ef58899a0228967f6a3",
+        "toc_pages": [
+          3,
+          4
+        ]
+      },
+      {
+        "source_pdf": "data/download/moj.go.jp/content/001470250.pdf",
+        "pdf_sha256": "d655900ae70d4419ebd27c89b1c2ec3e78f6f5d47e5f8bd02d559082331ffab5",
+        "toc_pages": [
+          3,
+          4
+        ]
+      },
+      {
+        "source_pdf": "data/download/ndl.go.jp/file/aboutus/outline/finances/r09_budgetrequest.pdf",
+        "pdf_sha256": "7ac30ec1665ed536bb8dd6563e512262ce0fb82959f76ebecf6d616804ab520f",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/npa.go.jp/policies/budget/R9/gaisanyokyu/hukkoutokubetukaikei.pdf",
+        "pdf_sha256": "e9f8dd33a89b45bd0ed81d38c5ea63a6ae2cbc5ea9a49bf84a4e203f5d6f1278",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/npa.go.jp/policies/budget/R9/gaisanyokyu/ippankaikei.pdf",
+        "pdf_sha256": "ebf393ab99ae0cdb177fa349e68c73fad2efa21d9aae41e0a84d75c264282e0f",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/ppc.go.jp/files/pdf/260831_youkyuu.pdf",
+        "pdf_sha256": "d60c0bd0cb3c75950843e6a2643df188a90300d284b53fede218bbe075909fc6",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/reconstruction.go.jp/files/user/topics/cat-55/cat-57/cat-58/2026_fukkochougaisansaisyutsu.pdf",
+        "pdf_sha256": "59d5789159ddeb1878ff9d58f4cbea2d3f45f760aec76ca6946310a5bc3a729a",
+        "toc_pages": [
+          3,
+          4,
+          5
+        ]
+      },
+      {
+        "source_pdf": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r9gaisan-yokyusyo.pdf",
+        "pdf_sha256": "038c7fb4ee2733276813b644efcedf5e680fdd75a74c37494cce73ed99a097f6",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/shugiin.go.jp/internet/itdb_annai.nsf/html/statics/osirase/kaikei-saishutsugaisan9.pdf/%24File/kaikei-saishutsugaisan9.pdf",
+        "pdf_sha256": "641d8bee0c401c9bff3587ff3ffa917bccd1a9cf78924a8e618c7b39c40bc430",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/sotsui.go.jp/budget/images/r9budget_yokyu.pdf",
+        "pdf_sha256": "fbef4edd4de75b9673e604596ee552f678e69f9de7d06966b376c6e19e1ebbf4",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/soumu.go.jp/main_content/001091979.pdf",
+        "pdf_sha256": "d97c43397ab40bd3c13833a41e4051bc1e05c6e250fd8399b6c95cb6862728e9",
+        "toc_pages": [
+          3,
+          4
+        ]
+      },
+      {
+        "source_pdf": "data/download/soumu.go.jp/main_content/001091981.pdf",
+        "pdf_sha256": "d8b2906916b5586880215bcc8d4135034e5ecdb308dc81e92282da2a66176938",
+        "toc_pages": [
+          3
+        ]
+      },
+      {
+        "source_pdf": "data/download/soumu.go.jp/main_content/001091982.pdf",
+        "pdf_sha256": "0dcfa707b1415ecacd0d08c7fba03cfc9a6c67e1fb5944c7b2f4f0636cbc83ff",
+        "toc_pages": [
+          3
+        ]
+      }
+    ],
+    "code": [
+      {
+        "path": "scripts/pipeline-v2/lib/budget-request-toc-pdf-native-csv.ts",
+        "sha256": "8692116d08788f98f8aaeea4a1977a1a88cbae1e5c0bd8cd26c836de41f2f68a"
+      },
+      {
+        "path": "scripts/pipeline-v2/build-budget-request-toc-pdf-native-csv.ts",
+        "sha256": "a776552053049f53f627ac7bb85e8228494078af8de10254c6251c351d5778b0"
+      }
+    ]
+  }
+}

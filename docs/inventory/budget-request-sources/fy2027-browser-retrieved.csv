@@ -1,0 +1,3 @@
+year,authority,pdf_url,local_path,bytes,pages,sha256,method,status
+2027,防衛省,https://www.mod.go.jp/j/budget/gaisan/r9/gaisanyoukyu.pdf,data/download/mod.go.jp/j/budget/gaisan/r9/gaisanyoukyu.pdf,772975,383,4158eb6acba23e973508404cd44e39dbc4488c006cc542b5685ef13bce9c5bce,codex-computer-use-chrome,verified
+2027,外務省,https://www.mofa.go.jp/mofaj/files/101079808.pdf,data/download/mofa.go.jp/mofaj/files/101079808.pdf,765798,228,b5432e8625994783662223dee77b84ecb55d9593143c8ef58899a0228967f6a3,codex-computer-use-chrome,verified

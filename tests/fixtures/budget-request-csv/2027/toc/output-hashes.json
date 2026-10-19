@@ -1,0 +1,229 @@
+{
+  "schema": "budget-request-toc-pdf-native-csv/v0/output-hashes",
+  "files": {
+    "entry-provenance.csv": {
+      "sha256": "f1eb4843e1ec0e30ef3630949d3a8d5150ce0e49579b006d76a67d9af5a1efbc",
+      "bytes": 782912
+    },
+    "page-summary.csv": {
+      "sha256": "fceb0a0203d7a34e302d8792c46fa587cce785a152915a9f6a4c5d2f810e7812",
+      "bytes": 11518
+    },
+    "source-errors.csv": {
+      "sha256": "69718ec77d81a565d8d2a6540d76089dcec03fe98d022b4389f90df0db1fabd8",
+      "bytes": 21
+    },
+    "sources.csv": {
+      "sha256": "bbefa0b783454dd23ce7e353a3576aab5ad589406aa913f29c77c951c24ea761",
+      "bytes": 10166
+    },
+    "sources/aoc.go.jp__files__documents__2026-09__令和９年度概算要求書（一般会計）_0.csv": {
+      "sha256": "0ca4cab032c9ae6c697a7998d019b6c8e464730f6fbd78f75c6b46d1c17cac35",
+      "bytes": 427
+    },
+    "sources/caa.go.jp__policies__budget__assets__caa_cms_205_260911_01.csv": {
+      "sha256": "cc9007dc5743e38822df38e35291a6c16542d5e699761ffb9ae5da3ad24aca0a",
+      "bytes": 678
+    },
+    "sources/caa.go.jp__policies__budget__assets__caa_cms_205_260911_02.csv": {
+      "sha256": "3acd72aab5f9aebce3ed48ac30048f0aec55fee73085d2595eaec512a2aed6e2",
+      "bytes": 379
+    },
+    "sources/cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__309e4519__20260827_policies_budget_102.csv": {
+      "sha256": "1df3fa8a73440b3e15cf6f59bb9410d13bac26878d988118088a919d5c208949",
+      "bytes": 2256
+    },
+    "sources/cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__a3b08bd5__20260827_policies_budget_104.csv": {
+      "sha256": "c58c66f873a9239d3f409f7218feecc2013d9df86a4c0dcec9ccac405265c828",
+      "bytes": 2541
+    },
+    "sources/clb.go.jp__files__topics__5329_ext_05_2.csv": {
+      "sha256": "77881f40f5daa02163006ecf144355e369406a943f1bbce756fa61f9aacffad1",
+      "bytes": 342
+    },
+    "sources/courts.go.jp__assets__R09saishutsu_gaisanyokyusho_468kb.csv": {
+      "sha256": "90ea810ee0980a34c8a01fc4e8d895f65427ff8e6c9ded7fbdc7d262f89ed3c4",
+      "bytes": 863
+    },
+    "sources/dangai.go.jp__info__pdf__r09_saisyutu-gaisan.csv": {
+      "sha256": "f39afd89163560b6ab0e6e87c3ff559025b2278d85988418ddbe1e4264eb8f6f",
+      "bytes": 309
+    },
+    "sources/digital.go.jp__assets__contents__node__basic_page__field_ref_resources__3c1082e1-dc3c-4fc8-ac9c-9459a8e8b653__051c06c3__20260904_policies_budget_r8request_table_01.csv": {
+      "sha256": "764e772b1ff58d4103d49707f4ab01d0f4a4c95b7ff41aad121ca0faeaeecfd8",
+      "bytes": 571
+    },
+    "sources/env.go.jp__content__000425952.csv": {
+      "sha256": "eedd4500d78b4632af71524cdfcd0dd5b13c892f1f51a96eafb120eaf4a3028a",
+      "bytes": 5127
+    },
+    "sources/env.go.jp__content__000425953.csv": {
+      "sha256": "a337ff4d0d6bd926a054d86b1092b00911a08a74ac204c4db496e939d2a1d171",
+      "bytes": 2528
+    },
+    "sources/env.go.jp__content__000425954.csv": {
+      "sha256": "9149630b56d1016e74af6a7cb8fb3e6e7b3c57e43eabce60d2f7da37d295d1ae",
+      "bytes": 2044
+    },
+    "sources/env.go.jp__content__000425955.csv": {
+      "sha256": "ba80abf7a3d521c5d49fa0b870ba8100dafca4f9c004ac0b5587a3401813fe83",
+      "bytes": 1867
+    },
+    "sources/fsa.go.jp__common__budget__yosan__9youkyuu-2__01.csv": {
+      "sha256": "1b7423a5c2d455ee7c7c27f88cb21cce79a2f3728cb054171ead460c0cb54337",
+      "bytes": 708
+    },
+    "sources/jbaudit.go.jp__jbaudit__bud_clo__bud__pdf__r09__20260903_02.csv": {
+      "sha256": "263085ba778e925be2c8219268c96b9684a541b931c90a6fffbb241a09dafd2b",
+      "bytes": 436
+    },
+    "sources/jcrc.go.jp__content__000002960.csv": {
+      "sha256": "0fe63624fb4c9043b21dbb795955380b403ee3f951961df987f355f93b1de220",
+      "bytes": 868
+    },
+    "sources/jinji.go.jp__content__000018368.csv": {
+      "sha256": "88e7704d533db200acbabe6fe7e7acea1364da05c3c826f8b91afcbd0ac57878",
+      "bytes": 508
+    },
+    "sources/kunaicho.go.jp__wp-content__uploads__2026__08__r09-02.csv": {
+      "sha256": "02bad87446aaa83b13c993e7cc7add789e42d39a28538dabde1ddab7a0d907ba",
+      "bytes": 406
+    },
+    "sources/kunaicho.go.jp__wp-content__uploads__2026__08__r09-03.csv": {
+      "sha256": "75c3da21c9eefa0220237a9ebd82a46ec3ba5e8b09e02c143ca905650f99206b",
+      "bytes": 261
+    },
+    "sources/maff.go.jp__j__budget__attach__pdf__r9yokyusho-1.csv": {
+      "sha256": "b3a3af409341511a4f320afd780d4dd3d83db9a431ff7002db8c380a5a98843c",
+      "bytes": 13429
+    },
+    "sources/maff.go.jp__j__budget__attach__pdf__r9yokyusho-3.csv": {
+      "sha256": "fda624058225398bbcb84f2dc7296b21e453e8aef6b9434f74022028c49ae961",
+      "bytes": 1782
+    },
+    "sources/maff.go.jp__j__budget__attach__pdf__r9yokyusho-5.csv": {
+      "sha256": "c0074167c95a5c9f23faa3599e579f5dbec774891a0f17c7b826a705bcf23c70",
+      "bytes": 4205
+    },
+    "sources/mext.go.jp__content__20260907_mxt_kaikesou01-000051991_1.csv": {
+      "sha256": "0fa8db8588f4375680527a40f38ae55123819bf7b68d08da2688c4a63ebee428",
+      "bytes": 12619
+    },
+    "sources/mext.go.jp__content__20260907_mxt_kaikesou01-000051991_8.csv": {
+      "sha256": "9149630b56d1016e74af6a7cb8fb3e6e7b3c57e43eabce60d2f7da37d295d1ae",
+      "bytes": 2044
+    },
+    "sources/mlit.go.jp__page__content__002021868.csv": {
+      "sha256": "d1877cb1a767d21751419b04f712b0637739369b9092ae5445dfd65d3d410355",
+      "bytes": 29390
+    },
+    "sources/mlit.go.jp__page__content__002021873.csv": {
+      "sha256": "31685ffeb7d5687d133b6f1624c16f46004c03d30b867fdeec7a0dd376f32e7a",
+      "bytes": 4042
+    },
+    "sources/mlit.go.jp__page__content__002021874.csv": {
+      "sha256": "9f04979652d834bf8920e6451cf6b5c813aea1abc9371b6fafe7be0f2f8186c9",
+      "bytes": 1191
+    },
+    "sources/mod.go.jp__j__budget__gaisan__r9__gaisanyoukyu.csv": {
+      "sha256": "c00946945447de58ad282e3257d293a3b5866b104235655eb8b14e0c4358b58f",
+      "bytes": 6012
+    },
+    "sources/mof.go.jp__about_mof__mof_budget__budget__fy2027__2027fukkou_2.csv": {
+      "sha256": "f6db9e54815e8855834a1191fd1fd86dc2043c135dcd15ff4938c61038d80105",
+      "bytes": 807
+    },
+    "sources/mof.go.jp__about_mof__mof_budget__budget__fy2027__2027gaitame_2.csv": {
+      "sha256": "8c24922a619e0b7be1b3c9f01310b9df5e5fa67125ee1d5610fc91a91a0cd7cd",
+      "bytes": 779
+    },
+    "sources/mof.go.jp__about_mof__mof_budget__budget__fy2027__2027ippan_2.csv": {
+      "sha256": "3bee40d2f2e56e1daa27b27da49bb24a519cb5e3300c5c193cf0c667b5078d94",
+      "bytes": 5620
+    },
+    "sources/mof.go.jp__about_mof__mof_budget__budget__fy2027__2027jisinn_2.csv": {
+      "sha256": "e7d0704023510bbf83f41d0f890e1763313d4040dbaeeab9032af48f7ec15c8c",
+      "bytes": 457
+    },
+    "sources/mof.go.jp__about_mof__mof_budget__budget__fy2027__2027kokusaiseirikikinn_2.csv": {
+      "sha256": "b2358d23c8e8d0572551bc0ab615fc77dd6a7d6718b5d3c1f43bf5e436164085",
+      "bytes": 925
+    },
+    "sources/mof.go.jp__about_mof__mof_budget__budget__fy2027__2027tokuzai_2.csv": {
+      "sha256": "7f7338f2e397d86e84aa37d7799095f2482221c5ce9cc1e9889ee3df86ac77a6",
+      "bytes": 476
+    },
+    "sources/mof.go.jp__about_mof__mof_budget__budget__fy2027__2027tousi_2.csv": {
+      "sha256": "5c30a80003c09ab198951c0e0a8f319407d3f2a11771d8c50f75c95f698c7e24",
+      "bytes": 850
+    },
+    "sources/mof.go.jp__about_mof__mof_budget__budget__fy2027__2027zaiyuu_2.csv": {
+      "sha256": "67592f66e591836070199022c32e2f2dfd9251df3b70d078f1ada5f823b8b4fa",
+      "bytes": 900
+    },
+    "sources/mofa.go.jp__mofaj__files__101079808.csv": {
+      "sha256": "0141320e90752a7666bd14c8bef12beed0623ae3b0ebd1635930d61755cb719d",
+      "bytes": 4446
+    },
+    "sources/moj.go.jp__content__001470250.csv": {
+      "sha256": "8b2f45dfbd1dbf750c5e344b45dc9a25dd0259bc9014f5254b8505f8767d1322",
+      "bytes": 4768
+    },
+    "sources/ndl.go.jp__file__aboutus__outline__finances__r09_budgetrequest.csv": {
+      "sha256": "f6f155d4fd39de0c505200204df832c023f0e184d0bf3ac0dc80998359b94caf",
+      "bytes": 542
+    },
+    "sources/npa.go.jp__policies__budget__R9__gaisanyokyu__hukkoutokubetukaikei.csv": {
+      "sha256": "3964e2248d1ab9a14a4ec9753a8aa59b03a1706f3c9f6e19e9e02418b8320dd4",
+      "bytes": 332
+    },
+    "sources/npa.go.jp__policies__budget__R9__gaisanyokyu__ippankaikei.csv": {
+      "sha256": "44a589f852cef32ab2ef6b8aea6aea9dc660541f1492566b1e1fc570c18913c5",
+      "bytes": 1831
+    },
+    "sources/ppc.go.jp__files__pdf__260831_youkyuu.csv": {
+      "sha256": "6edc73e6393db722be1509ceb05a5e5b5ac375e6f838e953e69574ed871e53af",
+      "bytes": 386
+    },
+    "sources/reconstruction.go.jp__files__user__topics__cat-55__cat-57__cat-58__2026_fukkochougaisansaisyutsu.csv": {
+      "sha256": "9f1e08cc842be8da70b2fde7e730c6787d190d3bfb7e0fc90c4753497fa42e1b",
+      "bytes": 8315
+    },
+    "sources/sangiin.go.jp__jpn__annai__oshirase__pdf__r9gaisan-yokyusyo.csv": {
+      "sha256": "9b5a85cfe10cbde35a88d76efdf2c24e98a3e51b6b2937811169e1ad34a3b8f1",
+      "bytes": 448
+    },
+    "sources/shugiin.go.jp__internet__itdb_annai.nsf__html__statics__osirase__kaikei-saishutsugaisan9.pdf__%24File__kaikei-saishutsugaisan9.csv": {
+      "sha256": "2d42a0da4a4360ee81ce99bd2468c7381b9e79900188da94c5c0da22bb637689",
+      "bytes": 534
+    },
+    "sources/sotsui.go.jp__budget__images__r9budget_yokyu.csv": {
+      "sha256": "c2be2fa063be4880f95191832104782bf7abc3d9918db29a4e571f5838632644",
+      "bytes": 265
+    },
+    "sources/soumu.go.jp__main_content__001091979.csv": {
+      "sha256": "e6581f0382a59777bef0ce8fd77b7e61cbe5d838e178c237325ae80c1af99dc5",
+      "bytes": 5450
+    },
+    "sources/soumu.go.jp__main_content__001091981.csv": {
+      "sha256": "0d772ddef553bd7992a209c447d05745ca118797495f29a285f5ff37db14537f",
+      "bytes": 1522
+    },
+    "sources/soumu.go.jp__main_content__001091982.csv": {
+      "sha256": "b25ff9a12f046231b4f716e4f7a4f5ccfbe4427279a2b66719e6f92ad4cb29cd",
+      "bytes": 728
+    },
+    "summary.json": {
+      "sha256": "92c798c6d9becec61e680c44c8fa199daa24992b257a3d40b7089d77a55726b4",
+      "bytes": 14228
+    },
+    "token-ledger.csv": {
+      "sha256": "8497a6a29d7634c6382a31437865f823642256ee2e5823a88e504e7f85f80bd8",
+      "bytes": 3434223
+    },
+    "unresolved.csv": {
+      "sha256": "a10edcc077bf8eeeceb7503f5f97952b4ca02a8b67258c5e9cbde268fb2608c1",
+      "bytes": 46896
+    }
+  }
+}
