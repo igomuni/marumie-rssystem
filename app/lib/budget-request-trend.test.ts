@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { BudgetRequestTrendRow, BudgetRequestTrendYear } from '@/types/budget-request-trend';
 import { INITIAL_TREND_FILTERS, assessmentGap, changeRate, filterRows, isGone, isNew, patternOf, sortRows, textMatches } from './budget-request-trend';
 
-const Y = (prev: number | null, req: number | null, extra: Partial<BudgetRequestTrendYear> = {}): BudgetRequestTrendYear => ({ prev, req, src: [[0, '1']], mismatch: false, mof: '', ...extra });
+const Y = (prev: number | null, req: number | null, extra: Partial<BudgetRequestTrendYear> = {}): BudgetRequestTrendYear => ({ prev, req, src: [[0, '1', '3']], mismatch: false, mof: '', ...extra });
 const row = (name: string, y: Record<string, BudgetRequestTrendYear>, o: Partial<BudgetRequestTrendRow> = {}): BudgetRequestTrendRow =>
   ({ acct: 0, code: '19', min: '内閣府', sub: '', org: '本府', orgSrc: '目次', name, y, ...o });
 const YEARS = [2025, 2026, 2027];
@@ -10,7 +10,7 @@ const rows = [
   row('継続費', { '2025': Y(100, 120), '2026': Y(110, 200), '2027': Y(150, 150) }),
   row('新設費', { '2027': Y(0, 50) }),
   row('廃止費', { '2025': Y(10, 10), '2026': Y(10, 10) }),
-  row('特会費', { '2027': Y(100, 90, { src: [[0, '1'], [1, '2']] }) }, { acct: 1, min: '東日本大震災復興特別会計', sub: '勘定A', org: '' }),
+  row('特会費', { '2027': Y(100, 90, { src: [[0, '1', '3'], [1, '2', '4']] }) }, { acct: 1, min: '東日本大震災復興特別会計', sub: '勘定A', org: '' }),
 ];
 
 describe('budget-request-trend', () => {

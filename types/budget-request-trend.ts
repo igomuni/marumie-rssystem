@@ -6,8 +6,8 @@ export interface BudgetRequestTrendYear {
   prev: number | null;
   /** 概算要求額 */
   req: number | null;
-  /** 載っている要求書: [urls の添字, 要求書内の頁] */
-  src: [number, string][];
+  /** 載っている要求書: [urls の添字, 目次の頁（紙面の印字）, PDF の通し頁（引けないときは空）] */
+  src: [number, string, string][];
   /** 要求書ごとの [前年度予算額, 概算要求額]（src と同じ並び。mismatch のときだけ）。prev / req は最も大きい額の書（合計書）の値 */
   srcAmt?: [number | null, number | null][];
   /** 同じキーが複数の要求書にあり、金額が一致しない */

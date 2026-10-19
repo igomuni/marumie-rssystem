@@ -21,14 +21,14 @@ const MATCH = path.join('tests', 'fixtures', 'mof-budget-request-match');
 const rd = (p: string): Rec[] => readCsv(fs.readFileSync(p, 'utf8'));
 const cell = (v: unknown): string => { const s = v === null || v === undefined ? '' : String(v); return /[",\n\r]/u.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
 
-const header = ['年度', '会計区分', '所管コード', '所管', '特別会計', '勘定', '組織', '組織の出所', '項名', '項コード', '前年度予算額_千円', '要求額_千円', '増減_千円', '要求書', '頁', '階層', '複数書', '金額不一致', 'MOF突合(参考)'];
+const header = ['年度', '会計区分', '所管コード', '所管', '特別会計', '勘定', '組織', '組織の出所', '項名', '項コード', '前年度予算額_千円', '要求額_千円', '増減_千円', '要求書', '頁', 'PDF頁', '階層', '複数書', '金額不一致', 'MOF突合(参考)'];
 const rows: unknown[][] = [];
 const uiRows = new Map<string, BudgetRequestTrendRow>(); // キー（年度をまたぐ）→ 行
 const uiUrls: string[] = []; const uiUrlIdx = new Map<string, number>();
 const urlIndex = (u: string): number => { let i = uiUrlIdx.get(u); if (i === undefined) { i = uiUrls.length; uiUrls.push(u); uiUrlIdx.set(u, i); } return i; };
 const summary: Record<string, unknown> = {};
 type Row = { r: Rec; code: string; org: string; orgSrc: string; key: string };
-const stages: { year: number; ver: string | null; kou: Rec[]; status: Map<string, string>; recs: Row[]; urlOf: Map<string, string> }[] = [];
+const stages: { year: number; ver: string | null; kou: Rec[]; status: Map<string, string>; recs: Row[]; urlOf: Map<string, string>; pdfPageOf: (src: string, page: string) => string }[] = [];
 for (const [year, ver] of YEARS) {
   const dir = path.join(MATCH, ver ?? String(year));
   const kou = rd(path.join(dir, 'request-kou.csv'));
@@ -53,12 +53,30 @@ for (const [year, ver] of YEARS) {
   const urlOf = new Map<string, string>();
   const freeze = JSON.parse(fs.readFileSync(path.join('tests', 'fixtures', 'budget-request-pdf-corpus', String(year), 'pdf-corpus-freeze.json'), 'utf8')) as { documents: { localPdfPath: string; sourceUrl: string }[] };
   for (const d of freeze.documents) { const slug = d.localPdfPath.replace(/^data\/download\//, '').replace(/\.pdf$/i, '').replace(/\//g, '__'); urlOf.set(slug, d.sourceUrl); urlOf.set(slug.replace(/\$/g, '%24'), d.sourceUrl); }
+  // 目次の頁は紙面に印字された頁（`4復興特` `エ1` のような接頭辞・接尾辞つきもある）。PDF の通し頁は、明細表の各行の 頁 と source_page（PDF の頁）の対応から引く。
+  // 明細表が無い要求書は引けず、空にする
+  const labelPage = new Map<string, Map<string, number>>(); const digitPage = new Map<string, Map<string, Set<number>>>();
+  const detailDir = path.join('tests', 'fixtures', 'budget-request-csv', String(year), 'detail-table', 'sources');
+  if (fs.existsSync(detailDir)) for (const f of fs.readdirSync(detailDir).filter(x => x.endsWith('.csv'))) {
+    const slug = f.slice(0, -4); const lm = new Map<string, number>(); const dm = new Map<string, Set<number>>();
+    for (const r of rd(path.join(detailDir, f))) {
+      const lab = ns(r['頁'] ?? ''); const pg = Number(r['source_page']); if (!lab || !pg) continue;
+      if (!lm.has(lab)) lm.set(lab, pg);
+      for (const d of lab.match(/\d+/g) ?? []) (dm.get(d) ?? dm.set(d, new Set()).get(d)!).add(pg);
+    }
+    labelPage.set(slug, lm); digitPage.set(slug, dm);
+  }
+  const pdfPageOf = (src: string, page: string): string => {
+    const hit = labelPage.get(src)?.get(ns(page)); if (hit) return String(hit);
+    const set = /^\d+$/.test(page) ? digitPage.get(src)?.get(page) : undefined;
+    return set && set.size === 1 ? String([...set][0]) : '';
+  };
   const recs: Row[] = kou.map(r => {
     const cv = cover.get(r['request_source']); let org = r['org']; let orgSrc = org ? (r['hierarchy'] === 'toc' ? '目次' : '総表') : '';
     if (!org && r['acct'] === 'general') { if (cv?.org) { org = cv.org; orgSrc = '表紙括弧'; } else orgSrc = 'なし'; }
     return { r, code: cv?.code ?? '', org, orgSrc, key: [r['acct'], cv?.code ?? '', r['account'], r['sub'], org, r['request_name']].join('\t') };
   });
-  stages.push({ year, ver, kou, status, recs, urlOf });
+  stages.push({ year, ver, kou, status, recs, urlOf, pdfPageOf });
 }
 // 同じ要求書の中で、同名の別の項（項コードが違う）が同じキーになるもの（例: 厚生労働調査研究等推進費 087 / 405）は、項コードをキーに足して別の行にする。
 // どの年度かで衝突したキーは全年度で足す（年度をまたぐ紐づけを保つため）
@@ -67,7 +85,7 @@ for (const { year, recs } of stages) for (const x of recs) { const k = `${year}\
 const splitKeys = new Set<string>();
 for (const { year, recs } of stages) for (const x of recs) if (codesIn.get(`${year}\t${x.r['request_source']}\t${x.key}`)!.size > 1) splitKeys.add(x.key);
 for (const { recs } of stages) for (const x of recs) if (splitKeys.has(x.key)) x.key += `\t${x.r['request_code3']}`;
-for (const { year, ver, kou, status, recs, urlOf } of stages) {
+for (const { year, ver, kou, status, recs, urlOf, pdfPageOf } of stages) {
   const group = new Map<string, Row[]>(); for (const x of recs) (group.get(x.key) ?? group.set(x.key, []).get(x.key)!).push(x);
   for (const g of group.values()) {
     // 要求書によって額が違うとき（復興特会は各省の書が自分の取り分だけを載せ、復興庁の書が合計を載せる）は、最も大きい額の行（合計書）を採る。各書の額は srcAmt に残す
@@ -76,8 +94,8 @@ for (const { year, ver, kou, status, recs, urlOf } of stages) {
     let u = uiRows.get(x0.key);
     if (!u) { u = { acct, code: x0.code, min: acct === 0 ? r0['ministry'] : r0['account'], sub: r0['sub'], org: x0.org, orgSrc: x0.orgSrc, name: r0['request_name'], ...(splitKeys.has(x0.key.split('\t').slice(0, 6).join('\t')) ? { kou: r0['request_code3'] } : {}), y: {} }; uiRows.set(x0.key, u); }
     const num = (v: string): number | null => (v === '' ? null : Number(v));
-    const src: [number, string][] = []; const srcAmt: [number | null, number | null][] = [];
-    for (const x of g) { const url = urlOf.get(x.r['request_source']); if (!url) throw new Error(`no URL for ${year} ${x.r['request_source']}`); const e: [number, string] = [urlIndex(url), x.r['request_page']]; if (!src.some(y => y[0] === e[0] && y[1] === e[1])) { src.push(e); srcAmt.push([num(x.r['previous_amount']), num(x.r['request_amount'])]); } }
+    const src: [number, string, string][] = []; const srcAmt: [number | null, number | null][] = [];
+    for (const x of g) { const url = urlOf.get(x.r['request_source']); if (!url) throw new Error(`no URL for ${year} ${x.r['request_source']}`); const e: [number, string, string] = [urlIndex(url), x.r['request_page'], pdfPageOf(x.r['request_source'], x.r['request_page'])]; if (!src.some(y => y[0] === e[0] && y[1] === e[1])) { src.push(e); srcAmt.push([num(x.r['previous_amount']), num(x.r['request_amount'])]); } }
     const mismatch = new Set(g.map(y => `${y.r['request_amount']}|${y.r['previous_amount']}`)).size > 1;
     u.y[String(year)] = { prev: num(r0['previous_amount']), req: num(r0['request_amount']), src, ...(mismatch ? { srcAmt } : {}), mismatch, mof: ver ? status.get(`${r0['request_source']}#${r0['toc_kou_idx']}`) ?? '' : '' };
   }
@@ -85,7 +103,7 @@ for (const { year, ver, kou, status, recs, urlOf } of stages) {
     const g = group.get(x.key)!; const r = x.r;
     const a = r['request_amount'] === '' ? null : Number(r['request_amount']); const p = r['previous_amount'] === '' ? null : Number(r['previous_amount']);
     const mismatch = new Set(g.map(y => `${y.r['request_amount']}|${y.r['previous_amount']}`)).size > 1;
-    rows.push([year, r['acct'] === 'general' ? '一般' : r['acct'] === 'special' ? '特別' : '', x.code, r['ministry'], r['account'], r['sub'], x.org, x.orgSrc, r['request_name'], r['request_code3'], p ?? '', a ?? '', a !== null && p !== null ? a - p : '', r['request_source'], r['request_page'], r['hierarchy'], g.length > 1 ? 1 : 0, mismatch ? 1 : 0, ver ? status.get(`${r['request_source']}#${r['toc_kou_idx']}`) ?? '' : '']);
+    rows.push([year, r['acct'] === 'general' ? '一般' : r['acct'] === 'special' ? '特別' : '', x.code, r['ministry'], r['account'], r['sub'], x.org, x.orgSrc, r['request_name'], r['request_code3'], p ?? '', a ?? '', a !== null && p !== null ? a - p : '', r['request_source'], r['request_page'], pdfPageOf(r['request_source'], r['request_page']), r['hierarchy'], g.length > 1 ? 1 : 0, mismatch ? 1 : 0, ver ? status.get(`${r['request_source']}#${r['toc_kou_idx']}`) ?? '' : '']);
   }
   summary[String(year)] = { rows: recs.length, distinct_keys: group.size, duplicated_keys: [...group.values()].filter(g => g.length > 1).length, general_without_org: recs.filter(x => x.r['acct'] === 'general' && !x.org).length, without_amount: kou.filter(r => r['request_amount'] === '').length };
 }
