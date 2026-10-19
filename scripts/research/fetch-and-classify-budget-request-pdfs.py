@@ -2,12 +2,14 @@
 """掲載ページに現れた PDF の候補を取得し、先頭 2 ページの本文で概算要求書かどうかを分類する（記述のみ）。
 
   python3 -I scripts/research/fetch-and-classify-budget-request-pdfs.py <year> <out.csv>
-候補 = (a) リンクの文字か URL に「概算要求・歳出・要求書・総表・明細・gaisan・yokyu」と年度のしるし（令和8・R8・2026 など）がある PDF、
+候補 = (a) リンクの文字か URL に「概算要求・歳出・要求書・総表・明細・gaisan・yokyu」があり、他の年度のしるし（令和・R・西暦。lib_budget_request_discovery.is_other_year）がない PDF（年度の記載がなくてもよい。例: リンク文字が「概算要求書」だけ）、
        (b) 上の条件に当たる PDF が 1 つもない掲載ページ（リンクが 90 本以下）のすべての PDF、(c) 一覧に直接載る PDF。
 取得先は data/download/{domain}/{URL の path}（既存ファイルは再取得しない。1 秒間隔）。各 PDF について HTTP 状態・bytes・SHA-256・%PDF の有無・頁数と、
 先頭 2 ページの本文に現れる印（年度・概算要求・歳出・総表・明細表・目次）を記録する。判定（目録に入れるか）はしない。
 """
 import csv, hashlib, os, re, subprocess, sys, time, unicodedata
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from lib_budget_request_discovery import is_other_year
 from urllib.parse import urlparse, unquote
 
 year, out = sys.argv[1:3]
@@ -15,16 +17,19 @@ D = 'docs/inventory/budget-request-sources'
 links = list(csv.DictReader(open(f'{D}/fy{year}-pdf-links.csv', encoding='utf-8')))
 pages = {r['landing_url']: r for r in csv.DictReader(open(f'{D}/fy{year}-landing-pages.csv', encoding='utf-8'))}
 nf = lambda s: unicodedata.normalize('NFKC', s)
-K = re.compile(r'概算要求|歳出|要求書|総表|明細|gaisan|yokyu|youkyu', re.I)
+K = re.compile(r'概算要求|歳出|要求書|総表|明細|表紙|目次|gaisan|yokyu|youkyu', re.I)
 N = int(year) - 2018  # 令和N年度（FY2026=8, FY2023=5）
-Y = re.compile(rf'令和{N}|R0?{N}(?!\d)|fy{year}|{year}|(?<!\d){N}年度|{N}(?:youkyu|yokyu)', re.I)
+seeds = set()  # 財務省のリンク先一覧に載る掲載ページ
+for k in ('general', 'special'):
+    for r in csv.DictReader(open(f'{D}/fy{year}-{k}-link-list.csv', encoding='utf-8')):
+        seeds.update(x.strip() for x in r['links'].split())
 by_page = {}
 for l in links: by_page.setdefault(l['landing_url'], []).append(l)
 cand = {}
 for u, ls in by_page.items():
-    hit = [l for l in ls if K.search(nf(l['link_text']) + ' ' + l['pdf_url']) and Y.search(nf(l['link_text']) + ' ' + l['pdf_url'])]
+    hit = [l for l in ls if K.search(nf(l['link_text']) + ' ' + l['pdf_url']) and not is_other_year(nf(l['link_text']) + ' ' + l['pdf_url'], N)]
     for l in hit: cand.setdefault(l['pdf_url'], (u, 'keyword'))
-    if not hit and len(ls) <= 90:
+    if not hit and len(ls) <= 90 and u in seeds:  # 財務省の一覧に載る掲載ページ（深くたどったページは対象外）
         for l in ls: cand.setdefault(l['pdf_url'], (u, 'page_without_keyword_hit'))
     if pages.get(u, {}).get('http') == 'direct_pdf':
         for l in ls: cand.setdefault(l['pdf_url'], (u, 'direct'))
@@ -73,7 +78,7 @@ for i, (pu, (landing, why)) in enumerate(sorted(cand.items())):
         txt = subprocess.run(['pdftotext', '-layout', '-f', '1', '-l', '2', local, '-'], capture_output=True, text=True).stdout
         t = nf(re.sub(r'\s+', '', txt))
         yr = re.search(r'令和(\d+)年度', t)
-        marks = ';'.join(k for k, pat in (('歳出概算要求', '歳出概算要求'), ('概算要求', '概算要求'), ('総表', '総表'), ('明細表', '明細表'), ('目次', '目次'), ('歳入概算', '歳入')) if re.search(pat, t))
+        marks = ';'.join(k for k, pat in (('歳出概算要求', '歳出概算要求'), ('概算要求', '概算要求'), ('総表', '総表'), ('明細表', '明細表'), ('目次', '目次'), ('歳入概算', '歳入'), ('明細継続', rf'要求事項.*?前年度.*?{N}年度.*?概算要求額')) if re.search(pat, t))
         first = (yr.group(0) if yr else '') + '|' + ' '.join(l.strip() for l in txt.split('\n') if l.strip())[:60]
         if not txt.strip(): marks = 'no_text_layer'
     rows.append([pu, landing, why, code if not ok else (code if code != 'cached' else 'cached'), size, hashlib.sha256(open(local, 'rb').read()).hexdigest() if ok else '', int(pdf), pages_n, marks, first])
