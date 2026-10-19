@@ -1,6 +1,7 @@
 'use client';
 
 import type { BudgetRequestTrendRow } from '@/types/budget-request-trend';
+import { AccountBadge } from '@/client/components/mof-kou/Badge';
 import { assessmentGap, groupOf, orgOf, yearOf } from '@/app/lib/budget-request-trend';
 import { changeColor, formatSen, formatSenSigned } from './format';
 
@@ -35,8 +36,9 @@ export function TrendDetailPane({
   return (
     <div className="flex flex-col gap-3 p-3 text-xs">
       <div>
-        <div className="text-[11px] text-neutral-500">
-          {groupOf(row)}{orgOf(row) ? ` › ${orgOf(row)}` : ''} · 所管コード {row.code}
+        <div className="flex flex-wrap items-center gap-x-1.5 text-[11px] text-neutral-500">
+          <AccountBadge accountType={row.acct === 0 ? 'general' : 'special'} />
+          <span>{groupOf(row)}{orgOf(row) ? ` › ${orgOf(row)}` : ''} · 所管コード {row.code}</span>
         </div>
         <h2 className="mt-0.5 text-base font-semibold leading-snug">{row.name}</h2>
       </div>

@@ -8,7 +8,9 @@ import { MAX_REGEX_PATTERN_LENGTH } from '@/app/lib/sankey-query';
 
 export type PatternFilter = 'all' | 'all5' | 'new' | 'gone';
 export type ChangeFilter = '' | 'up10' | 'up50' | 'dn10' | 'dn50';
-export type TrendSortKey = 'group' | 'org' | 'name' | 'prev' | 'req' | 'diff' | 'rate';
+export type TrendSortKey = 'acct' | 'group' | 'org' | 'name' | 'pattern' | 'prev' | 'req' | 'diff' | 'rate';
+/** 出現パターン（選択年度と前年度の比較）。最初の年度は判定しない */
+export type TrendPattern = '新規' | '継続' | '消滅';
 export type TrendSortDir = 1 | -1;
 
 export interface TrendFilters {
@@ -31,8 +33,8 @@ export interface TrendFilters {
 
 export const INITIAL_TREND_FILTERS: TrendFilters = { name: '', nameRegex: false, org: '', orgRegex: false, acct: 'all', groups: [], pattern: 'all', change: '', shared: false, mismatch: false };
 
-/** 所管の表示名。特別会計は［特］を付ける */
-export const groupOf = (r: BudgetRequestTrendRow): string => (r.acct === 0 ? r.min : `［特］${r.min}`);
+/** 所管の表示名（特別会計は特別会計名）。会計の区別は acct（一般 / 特別）の列で示す */
+export const groupOf = (r: BudgetRequestTrendRow): string => r.min;
 /** 組織の列の表示。特別会計は勘定 */
 export const orgOf = (r: BudgetRequestTrendRow): string => (r.acct === 0 ? r.org : r.sub);
 
@@ -68,6 +70,12 @@ export function textMatches(haystack: string, query: string, regex: boolean): bo
   return haystack.toLocaleLowerCase().includes(q.toLocaleLowerCase());
 }
 
+export function patternOf(r: BudgetRequestTrendRow, year: number, firstYear: number): TrendPattern | null {
+  if (year <= firstYear) return null;
+  const now = !!yearOf(r, year), before = !!yearOf(r, year - 1);
+  return now && before ? '継続' : now ? '新規' : before ? '消滅' : null;
+}
+
 export function filterRows(rows: readonly BudgetRequestTrendRow[], f: TrendFilters, year: number, years: readonly number[]): BudgetRequestTrendRow[] {
   const first = years[0];
   const groups = new Set(f.groups);
@@ -94,8 +102,12 @@ export function filterRows(rows: readonly BudgetRequestTrendRow[], f: TrendFilte
   });
 }
 
-function sortValue(r: BudgetRequestTrendRow, key: TrendSortKey, year: number): string | number | null {
+const PATTERN_ORDER: Record<TrendPattern, number> = { 新規: 0, 継続: 1, 消滅: 2 };
+
+function sortValue(r: BudgetRequestTrendRow, key: TrendSortKey, year: number, firstYear: number): string | number | null {
   switch (key) {
+    case 'acct': return r.acct;
+    case 'pattern': { const p = patternOf(r, year, firstYear); return p === null ? null : PATTERN_ORDER[p]; }
     case 'group': return groupOf(r);
     case 'org': return orgOf(r);
     case 'name': return r.name;
@@ -107,9 +119,9 @@ function sortValue(r: BudgetRequestTrendRow, key: TrendSortKey, year: number): s
 }
 
 /** 値の無い行は昇順・降順どちらでも末尾 */
-export function sortRows(rows: readonly BudgetRequestTrendRow[], key: TrendSortKey, dir: TrendSortDir, year: number): BudgetRequestTrendRow[] {
+export function sortRows(rows: readonly BudgetRequestTrendRow[], key: TrendSortKey, dir: TrendSortDir, year: number, firstYear: number): BudgetRequestTrendRow[] {
   return [...rows].sort((a, b) => {
-    const x = sortValue(a, key, year), y = sortValue(b, key, year);
+    const x = sortValue(a, key, year, firstYear), y = sortValue(b, key, year, firstYear);
     if (x === null && y === null) return 0;
     if (x === null) return 1;
     if (y === null) return -1;

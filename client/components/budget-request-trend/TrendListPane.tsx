@@ -1,14 +1,15 @@
 'use client';
 
 import type { BudgetRequestTrendRow } from '@/types/budget-request-trend';
-import { changeAmount, changeRate, groupOf, isGone, isNew, orgOf, yearOf, type TrendSortDir, type TrendSortKey } from '@/app/lib/budget-request-trend';
+import { AccountBadge } from '@/client/components/mof-kou/Badge';
+import { changeAmount, changeRate, groupOf, orgOf, patternOf, yearOf, type TrendSortDir, type TrendSortKey } from '@/app/lib/budget-request-trend';
 import { changeColor, formatRate, formatSen, formatSenSigned } from './format';
 
 const MAX_ROWS = 600;
 const MIN_COLUMN_WIDTH = 48;
 
 /** 列幅の既定（px）。所管は「［特］子ども・子育て支援」が折り返さない幅 */
-export const DEFAULT_COLUMN_WIDTHS: Record<TrendSortKey, number> = { group: 184, org: 130, name: 220, prev: 112, req: 100, diff: 100, rate: 76 };
+export const DEFAULT_COLUMN_WIDTHS: Record<TrendSortKey, number> = { acct: 56, group: 184, org: 130, name: 220, pattern: 76, prev: 112, req: 100, diff: 100, rate: 76 };
 
 const chip = 'ml-1 rounded-full border px-1.5 text-[10px] align-middle';
 
@@ -46,9 +47,11 @@ export function TrendListPane({
     { req: 0, prev: 0 }
   );
   const cols: { key: TrendSortKey; label: string; left?: boolean }[] = [
+    { key: 'acct', label: '会計', left: true },
     { key: 'group', label: '所管', left: true },
     { key: 'org', label: '組織', left: true },
     { key: 'name', label: '項名', left: true },
+    { key: 'pattern', label: '出現パターン', left: true },
     { key: 'prev', label: '前年度予算額' },
     { key: 'req', label: '要求額' },
     { key: 'diff', label: '増減' },
@@ -113,6 +116,7 @@ export function TrendListPane({
               const a = yearOf(r, year);
               const d = changeAmount(r, year), t = changeRate(r, year);
               const key = rowKey(r);
+              const pattern = patternOf(r, year, firstYear);
               const selected = key === selectedKey;
               return (
                 <tr
@@ -123,15 +127,15 @@ export function TrendListPane({
                   onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(r); } }}
                   className={`cursor-pointer border-b border-neutral-100 dark:border-neutral-800 ${selected ? 'bg-emerald-50 dark:bg-emerald-950/40' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/60'}`}
                 >
+                  <td className="px-2 py-1 text-left"><AccountBadge accountType={r.acct === 0 ? 'general' : 'special'} /></td>
                   <td className="break-words px-2 py-1 text-left">{groupOf(r)}</td>
                   <td className="break-words px-2 py-1 text-left">{orgOf(r)}</td>
                   <td className="break-words px-2 py-1 text-left font-medium">
                     {r.name}
-                    {isNew(r, year, firstYear) && <span className={`${chip} border-emerald-600 text-emerald-700 dark:text-emerald-400`}>新規</span>}
-                    {isGone(r, year, firstYear) && <span className={`${chip} border-orange-600 text-orange-700 dark:text-orange-400`}>この年度に無い</span>}
                     {a && a.src.length > 1 && <span className={`${chip} border-neutral-300 text-neutral-500 dark:border-neutral-600`}>共管</span>}
                     {a?.mismatch && <span className={`${chip} border-amber-600 text-amber-700 dark:text-amber-400`}>額不一致</span>}
                   </td>
+                  <td className={`whitespace-nowrap px-2 py-1 text-left ${pattern === '新規' ? 'text-emerald-700 dark:text-emerald-400' : pattern === '消滅' ? 'text-orange-700 dark:text-orange-400' : 'text-neutral-500'}`}>{pattern ?? '–'}</td>
                   <td className="whitespace-nowrap px-2 py-1 text-right tabular-nums">{formatSen(a?.prev ?? null)}</td>
                   <td className="whitespace-nowrap px-2 py-1 text-right tabular-nums">{formatSen(a?.req ?? null)}</td>
                   <td className={`whitespace-nowrap px-2 py-1 text-right tabular-nums ${changeColor(d)}`}>{formatSenSigned(d)}</td>
@@ -140,10 +144,10 @@ export function TrendListPane({
               );
             })}
             {rows.length > MAX_ROWS && (
-              <tr><td colSpan={7} className="px-2 py-2 text-neutral-500">上位 {MAX_ROWS} 項を表示（全 {rows.length.toLocaleString()} 項）。絞り込みで減らしてください。</td></tr>
+              <tr><td colSpan={9} className="px-2 py-2 text-neutral-500">上位 {MAX_ROWS} 項を表示（全 {rows.length.toLocaleString()} 項）。絞り込みで減らしてください。</td></tr>
             )}
             {rows.length === 0 && (
-              <tr><td colSpan={7} className="px-2 py-8 text-center text-neutral-500">条件に合う項がありません。</td></tr>
+              <tr><td colSpan={9} className="px-2 py-8 text-center text-neutral-500">条件に合う項がありません。</td></tr>
             )}
           </tbody>
         </table>

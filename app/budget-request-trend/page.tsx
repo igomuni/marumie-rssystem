@@ -67,7 +67,7 @@ export default function BudgetRequestTrendPage() {
 
   const rows = useMemo(() => {
     if (!data || activeYear === null) return [];
-    return sortRows(filterRows(data.rows, filters, activeYear, data.years), sortKey, sortDir, activeYear);
+    return sortRows(filterRows(data.rows, filters, activeYear, data.years), sortKey, sortDir, activeYear, data.years[0]);
   }, [data, filters, sortKey, sortDir, activeYear]);
 
   const selected = useMemo(() => (data && selectedKey ? data.rows.find(r => rowKey(r) === selectedKey) ?? null : null), [data, selectedKey]);
@@ -90,7 +90,7 @@ export default function BudgetRequestTrendPage() {
   const lastYear = years[years.length - 1];
   const onSort = (k: TrendSortKey) => {
     if (k === sortKey) setSortDir(d => (d === 1 ? -1 : 1));
-    else { setSortKey(k); setSortDir(k === 'group' || k === 'org' || k === 'name' ? 1 : -1); }
+    else { setSortKey(k); setSortDir(k === 'acct' || k === 'group' || k === 'org' || k === 'name' || k === 'pattern' ? 1 : -1); }
   };
 
   return (

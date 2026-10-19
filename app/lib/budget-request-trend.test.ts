@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { BudgetRequestTrendRow, BudgetRequestTrendYear } from '@/types/budget-request-trend';
-import { INITIAL_TREND_FILTERS, assessmentGap, changeRate, filterRows, isGone, isNew, sortRows, textMatches } from './budget-request-trend';
+import { INITIAL_TREND_FILTERS, assessmentGap, changeRate, filterRows, isGone, isNew, patternOf, sortRows, textMatches } from './budget-request-trend';
 
 const Y = (prev: number | null, req: number | null, extra: Partial<BudgetRequestTrendYear> = {}): BudgetRequestTrendYear => ({ prev, req, src: [[0, '1']], mismatch: false, mof: '', ...extra });
 const row = (name: string, y: Record<string, BudgetRequestTrendYear>, o: Partial<BudgetRequestTrendRow> = {}): BudgetRequestTrendRow =>
@@ -24,6 +24,13 @@ describe('budget-request-trend', () => {
     expect(isGone(rows[2], 2027, 2025)).toBe(true);
     expect(isNew(rows[0], 2025, 2025)).toBe(false);
   });
+  it('labels the appearance pattern against the previous year (none for the first year)', () => {
+    expect(patternOf(rows[0], 2027, 2025)).toBe('継続');
+    expect(patternOf(rows[1], 2027, 2025)).toBe('新規');
+    expect(patternOf(rows[2], 2027, 2025)).toBe('消滅');
+    expect(patternOf(rows[0], 2025, 2025)).toBeNull();
+    expect(sortRows(rows, 'pattern', 1, 2027, 2025).map(r => r.name)).toEqual(['新設費', '特会費', '継続費', '廃止費']);
+  });
   it('lists only the keys present in the selected year, except for the gone pattern', () => {
     expect(filterRows(rows, INITIAL_TREND_FILTERS, 2027, YEARS).map(r => r.name)).toEqual(['継続費', '新設費', '特会費']);
     expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, pattern: 'gone' }, 2027, YEARS).map(r => r.name)).toEqual(['廃止費']);
@@ -31,13 +38,13 @@ describe('budget-request-trend', () => {
   });
   it('filters by account, ministry group, shared and change', () => {
     expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, acct: 1 }, 2027, YEARS).map(r => r.name)).toEqual(['特会費']);
-    expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, groups: ['［特］東日本大震災復興特別会計'] }, 2027, YEARS).map(r => r.name)).toEqual(['特会費']);
+    expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, groups: ['東日本大震災復興特別会計'] }, 2027, YEARS).map(r => r.name)).toEqual(['特会費']);
     expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, shared: true }, 2027, YEARS).map(r => r.name)).toEqual(['特会費']);
     expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, change: 'dn10' }, 2027, YEARS).map(r => r.name)).toEqual(['特会費']);
   });
   it('sorts with missing values last in both directions', () => {
-    expect(sortRows(rows.slice(0, 2), 'rate', -1, 2027).map(r => r.name)).toEqual(['継続費', '新設費']);
-    expect(sortRows(rows.slice(0, 2), 'rate', 1, 2027).map(r => r.name)).toEqual(['継続費', '新設費']);
+    expect(sortRows(rows.slice(0, 2), 'rate', -1, 2027, 2025).map(r => r.name)).toEqual(['継続費', '新設費']);
+    expect(sortRows(rows.slice(0, 2), 'rate', 1, 2027, 2025).map(r => r.name)).toEqual(['継続費', '新設費']);
   });
   it('matches text like /sankey-svg: case-insensitive, regex only when asked, invalid or long regex matches nothing', () => {
     expect(textMatches('Digital庁', 'digital', false)).toBe(true);
