@@ -231,7 +231,7 @@ export interface DetailRow {
   page_label: string;
   /** Amount text without whitespace (△ kept in front of the digits); '' = the cell is blank in the raw text. */
   cells: Record<AmountColumn, string>;
-  parse_status: 'PARSED' | 'AMOUNTS_PLACED_BY_PAGE_EDGES' | 'AMOUNTS_PLACED_BY_HEADER_WINDOWS';
+  parse_status: 'PARSED' | 'AMOUNTS_PLACED_BY_PAGE_EDGES' | 'AMOUNTS_PLACED_BY_HEADER_WINDOWS' | 'AMOUNTS_PLACED_BY_NEIGHBOUR_EDGES';
   continuationLines: number;
 }
 
@@ -325,6 +325,24 @@ function parseHeadLine(index: number, line: string, windows: Window[]): ParsedLi
 }
 
 /** Parse one source text. `sourceFile` is a stable identifier (archive entry path). */
+/**
+ * Right edges of the three amount columns of one page: the median right end of each column over the rows whose three
+ * amounts pass the header windows and 要求額−前年度＝増減 (the arithmetic only selects calibration rows). null unless there
+ * are at least three such rows and their edges agree (spread ≤ EDGE_SPREAD_MAX).
+ */
+function measurePageEdges(lines: string[], q: number, headerEnd: number, guard: Window[]): number[] | null {
+  const samples: number[][] = [[], [], []];
+  lines.forEach((l, i) => {
+    if (i <= headerEnd || l.trim() === '' || l.length - l.trimStart().length >= q) return;
+    const p = parseHeadLine(i, l, guard);
+    if (p && p.tokens.length === 3 && signedValue(p.tokens[2].raw) === signedValue(p.tokens[1].raw) - signedValue(p.tokens[0].raw)) {
+      p.ends.forEach((e, k) => samples[k].push(e));
+    }
+  });
+  const measurable = samples[0].length >= 3 && samples.every(xs => Math.max(...xs) - Math.min(...xs) <= EDGE_SPREAD_MAX);
+  return measurable ? samples.map(median) : null;
+}
+
 export function parseDetailSource(text: string, sourceFile: string): SourceResult {
   const { pages } = splitPages(text);
   // 1-based file line number of each page's first line (FF is not a newline).
@@ -341,6 +359,30 @@ export function parseDetailSource(text: string, sourceFile: string): SourceResul
   };
   const tally = (cls: LineClass) => { result.lineClassCounts[cls] = (result.lineClassCounts[cls] ?? 0) + 1; };
   let rowIndex = 0;
+
+  // Neighbour-page column offsets: where the right edge of each amount column lies relative to the right end of its heading
+  // word on the second heading line, measured on the pages that have enough consistent rows. The last resort for a blank-cell
+  // row that neither its page edges nor the header windows decide: the offsets of the nearest measured page before and the
+  // nearest after it (of the same document) are used when they agree (within EDGE_TOLERANCE per column; at the start or end
+  // of the document the one neighbour alone). It follows the heading when the table is shifted from page to page.
+  const wordEnds = (w: Window[]) => w.map((x, k) => x[0] - HEADER_WORD_WINDOWS[k][1][0]);
+  const measuredOffsets: (number[] | null)[] = pages.map(pageText => {
+    if (!isDetailTablePage(pageText)) return null;
+    const ls = pageText.split('\n').map(l => l.replace(/\f/gu, ''));
+    const h = headerBoundary(ls);
+    if (!h) return null;
+    const e = measurePageEdges(ls, h.boundary, h.headerEnd, h.windows.map(w => [Math.min(w[0], h.remarksStart), Math.min(w[1], h.remarksStart)] as Window));
+    if (!e) return null;
+    const we = wordEnds(h.windows);
+    return e.map((x, k) => x - we[k]);
+  });
+  const neighbourOffsets = (pi: number): number[] | null => {
+    let before: number[] | null = null, after: number[] | null = null;
+    for (let j = pi - 1; j >= 0 && !before; j--) before = measuredOffsets[j];
+    for (let j = pi + 1; j < pages.length && !after; j++) after = measuredOffsets[j];
+    if (before && after) return [0, 1, 2].every(k => Math.abs(before![k] - after![k]) <= EDGE_TOLERANCE) ? [0, 1, 2].map(k => (before![k] + after![k]) / 2) : null;
+    return before ?? after;
+  };
 
   pages.forEach((pageText, pi) => {
     if (!isDetailTablePage(pageText)) return;
@@ -367,16 +409,7 @@ export function parseDetailSource(text: string, sourceFile: string): SourceResul
     // the measured edges (±3) then replace the header windows. The windows never reach right of the 備考 heading.
     const clamp = (w: Window): Window => [Math.min(w[0], remarksStart), Math.min(w[1], remarksStart)];
     const guard = headerWindows.map(clamp);
-    const edgeSamples: number[][] = [[], [], []];
-    lines.forEach((l, i) => {
-      if (i <= headerEnd || l.trim() === '' || l.length - l.trimStart().length >= q) return;
-      const p = parseHeadLine(i, l, guard);
-      if (p && p.tokens.length === 3 && signedValue(p.tokens[2].raw) === signedValue(p.tokens[1].raw) - signedValue(p.tokens[0].raw)) {
-        p.ends.forEach((e, k) => edgeSamples[k].push(e));
-      }
-    });
-    const measurable = edgeSamples[0].length >= 3 && edgeSamples.every(xs => Math.max(...xs) - Math.min(...xs) <= EDGE_SPREAD_MAX);
-    const edges = measurable ? edgeSamples.map(median) : null;
+    const edges = measurePageEdges(lines, q, headerEnd, guard);
     const pageWindows: Window[] = edges ? edges.map(e => clamp([e - EDGE_ACCEPT, e + EDGE_ACCEPT])) : guard;
 
     const firstNonBlank = lines.findIndex(l => l.trim() !== '');
@@ -462,6 +495,15 @@ export function parseDetailSource(text: string, sourceFile: string): SourceResul
               return near.length === 1 ? near[0] : -1;
             });
             if (cols[0] >= 0 && cols[1] >= 0 && cols[0] !== cols[1]) { placed = cols.map(k => AMOUNT_COLUMNS[k]); status = 'AMOUNTS_PLACED_BY_HEADER_WINDOWS'; }
+          }
+          const nOffsets = placed ? null : neighbourOffsets(pi);
+          if (!placed && nOffsets) {
+            const neighbourEdges = wordEnds(headerWindows).map((w, k) => w + nOffsets[k]);
+            const cols = p.ends.map(e => {
+              const near = [0, 1, 2].filter(k => Math.abs(e - neighbourEdges[k]) <= EDGE_TOLERANCE);
+              return near.length === 1 ? near[0] : -1;
+            });
+            if (cols[0] >= 0 && cols[1] >= 0 && cols[0] !== cols[1]) { placed = cols.map(k => AMOUNT_COLUMNS[k]); status = 'AMOUNTS_PLACED_BY_NEIGHBOUR_EDGES'; }
           }
           if (!placed) { unresolved(i, 'BLANK_CELL_COLUMN_UNDETERMINED'); open = null; return; }
           placed.forEach((col, k) => { cells[col] = squeeze(p.tokens[k].raw); });

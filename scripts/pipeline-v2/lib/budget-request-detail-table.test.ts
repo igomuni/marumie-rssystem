@@ -292,3 +292,26 @@ describe('accounting and CSV output', () => {
     expect(renderUnresolvedCsv(parseFixture('undetermined').unresolved)).toContain('13054‑2202‑08‑2010');
   });
 });
+
+describe('heading layouts of the FY2027 courts PDF and neighbour-page placement', () => {
+  const fixture27 = (name: string) => fs.readFileSync(path.join(process.cwd(), 'tests/fixtures/budget-request-detail-table/2027', `${name}.txt`), 'utf8');
+
+  it('finds the boundary of a 3-line heading whose 番号 is on the third line', () => {
+    const r = parseDetailSource(fixture27('courts-header-number-on-third-line'), 'courts-3');
+    expect(r.pagesWithoutBoundary).toEqual([]);
+    expect(r.rows.some(row => row.row_type !== 'CONTEXT')).toBe(true);
+  });
+
+  it('finds the boundary of a 2-line heading that splits the column names across both lines', () => {
+    const r = parseDetailSource(fixture27('courts-header-split-two-line'), 'courts-split');
+    expect(r.pagesWithoutBoundary).toEqual([]);
+    expect(r.rows.some(row => row.row_type !== 'CONTEXT')).toBe(true);
+  });
+
+  it('places a row with a blank request cell by the heading-relative edges of the neighbouring measured pages (and never by arithmetic)', () => {
+    const r = parseDetailSource(fixture27('mlit-blank-request-neighbour-pages'), 'mlit-neighbour');
+    const placed = r.rows.filter(row => row.parse_status === 'AMOUNTS_PLACED_BY_NEIGHBOUR_EDGES');
+    expect(placed.length).toBeGreaterThan(0);
+    for (const row of placed) expect([row.cells.previous, row.cells.request, row.cells.difference].filter(c => c !== '')).toHaveLength(2);
+  });
+});

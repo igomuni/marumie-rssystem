@@ -19,26 +19,27 @@
   "lineClassCounts": {
     "PAGE_LABEL": 4653,
     "TABLE_TITLE": 114,
-    "ROW": 41512,
+    "ROW": 41530,
     "UNIT": 114,
-    "UNRESOLVED": 4723,
+    "UNRESOLVED": 4696,
     "TABLE_HEADER": 4742,
-    "CONTINUATION": 17744,
+    "CONTINUATION": 17753,
     "RIGHT_REGION": 104673,
     "FOOTER_TIMESTAMP": 1071
   },
-  "logicalRowCount": 41512,
+  "logicalRowCount": 41530,
   "rowTypeCounts": {
     "CODE1": 19,
     "CODE2": 1443,
-    "CODE3": 9050,
-    "CODE_5_4_2_4": 21357,
+    "CODE3": 9052,
+    "CODE_5_4_2_4": 21373,
     "CODE_NN_NNNN": 8055,
     "CONTEXT": 114,
     "DETAIL": 1474
   },
   "parseStatusCounts": {
     "AMOUNTS_PLACED_BY_HEADER_WINDOWS": 41,
+    "AMOUNTS_PLACED_BY_NEIGHBOUR_EDGES": 18,
     "AMOUNTS_PLACED_BY_PAGE_EDGES": 657,
     "PARSED": 40814
   },
@@ -46,15 +47,15 @@
     "blank:none": 34338,
     "blank:previous": 281,
     "blank:previous+request+difference": 6476,
-    "blank:request": 417
+    "blank:request": 435
   },
-  "rowsWithContinuation": 14380,
-  "unresolvedCount": 4723,
+  "rowsWithContinuation": 14387,
+  "unresolvedCount": 4696,
   "unresolvedByReason": {
-    "BLANK_CELL_COLUMN_UNDETERMINED": 33,
+    "BLANK_CELL_COLUMN_UNDETERMINED": 15,
     "LEFT_FRAGMENT_NOT_ADJACENT": 9,
     "LEFT_FRAGMENT_NOT_ALIGNED": 3,
-    "LEFT_FRAGMENT_WITHOUT_PRECEDING_ROW_ON_PAGE": 13,
+    "LEFT_FRAGMENT_WITHOUT_PRECEDING_ROW_ON_PAGE": 4,
     "LEFT_TEXT_CROSSES_BOUNDARY": 12,
     "UNKNOWN_HEADER_ZONE_LINE": 4653
   },
@@ -1448,16 +1449,16 @@
       "pageCount": 115,
       "detailPages": 107,
       "pagesWithoutBoundary": [],
-      "rows": 1793,
-      "unresolved": 114,
+      "rows": 1797,
+      "unresolved": 107,
       "lineClassCounts": {
         "PAGE_LABEL": 107,
         "TABLE_TITLE": 1,
-        "ROW": 1793,
+        "ROW": 1797,
         "UNIT": 1,
-        "UNRESOLVED": 114,
+        "UNRESOLVED": 107,
         "TABLE_HEADER": 107,
-        "CONTINUATION": 847,
+        "CONTINUATION": 850,
         "FOOTER_TIMESTAMP": 107,
         "RIGHT_REGION": 1558
       }
@@ -1726,17 +1727,17 @@
       "pageCount": 911,
       "detailPages": 883,
       "pagesWithoutBoundary": [],
-      "rows": 9607,
-      "unresolved": 908,
+      "rows": 9612,
+      "unresolved": 902,
       "lineClassCounts": {
         "PAGE_LABEL": 883,
         "TABLE_TITLE": 1,
-        "ROW": 9607,
+        "ROW": 9612,
         "UNIT": 1,
-        "UNRESOLVED": 908,
+        "UNRESOLVED": 902,
         "TABLE_HEADER": 883,
         "RIGHT_REGION": 19210,
-        "CONTINUATION": 3995
+        "CONTINUATION": 3996
       }
     },
     {
@@ -2125,16 +2126,16 @@
       "pageCount": 260,
       "detailPages": 252,
       "pagesWithoutBoundary": [],
-      "rows": 2571,
-      "unresolved": 266,
+      "rows": 2580,
+      "unresolved": 252,
       "lineClassCounts": {
         "PAGE_LABEL": 252,
         "TABLE_TITLE": 1,
-        "ROW": 2571,
+        "ROW": 2580,
         "UNIT": 1,
-        "UNRESOLVED": 266,
+        "UNRESOLVED": 252,
         "TABLE_HEADER": 252,
-        "CONTINUATION": 1346,
+        "CONTINUATION": 1351,
         "FOOTER_TIMESTAMP": 252,
         "RIGHT_REGION": 5020
       }

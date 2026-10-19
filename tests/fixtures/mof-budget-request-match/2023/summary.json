@@ -1,7 +1,7 @@
 {
  "request_year": "2023",
  "mof_version": "2023",
- "input_sha256": "ce2cbdc18d5678d243def5aecbca8d77923664b32f8de9af834eb63b3cc5445b",
+ "input_sha256": "082385c16b871e8d0bd06373508776c999d7acde2f62dcfc7b51dc6a052c7d6f",
  "sources": 64,
  "m0_status": {
   "MATCHED": 183,
@@ -22,8 +22,8 @@
   "OUT_OF_SCOPE": 10
  },
  "m3_status": {
-  "MATCHED": 7243,
-  "NO_CANDIDATE": 437,
+  "MATCHED": 7246,
+  "NO_CANDIDATE": 439,
   "PARENT_UNMATCHED": 280
  },
  "mof_rows": {
@@ -34,7 +34,7 @@
  "mof_rows_referenced": {
   "kou": 938,
   "jikou": 1430,
-  "moku": 6768
+  "moku": 6771
  },
  "unmatched_mof_reasons": {
   "kou": {
@@ -45,7 +45,7 @@
    "kou_not_matched": 141
   },
   "moku": {
-   "kou_matched_no_request_row": 705,
+   "kou_matched_no_request_row": 702,
    "kou_not_matched": 573
   }
  },
