@@ -11,7 +11,7 @@ import * as path from 'path';
 import { amount, buildPositionTree, buildPositionTreeFromDetail, buildTocTree, hy, mofAmountJikou, mofAmountKou, mofAmountMoku, ns, readCsv, type Rec, type TocTree } from './lib/mof-budget-request-match';
 
 const [yearArg, ver, outDir] = process.argv.slice(2);
-if (!/^20(23|24|25|26)$/.test(yearArg ?? '') || !['2023', '2024', '2025', '2025_teishutsu', '2026'].includes(ver ?? '') || !outDir) throw new Error('usage: build-mof-budget-request-match.ts <2023|2024|2025|2026> <2023|2024|2025|2025_teishutsu|2026> <out-dir>');
+if (!/^20(23|24|25|26|27)$/.test(yearArg ?? '') || !['2023', '2024', '2025', '2025_teishutsu', '2026'].includes(ver ?? '') || !outDir) throw new Error('usage: build-mof-budget-request-match.ts <2023|2024|2025|2026|2027> <2023|2024|2025|2025_teishutsu|2026> <out-dir>');
 const REQ = path.join('tests', 'fixtures', 'budget-request-csv', yearArg);
 const MOF = path.join('tests', 'fixtures', 'mof-archive-csv', ver);
 fs.mkdirSync(outDir, { recursive: true });
@@ -135,23 +135,35 @@ function seqLink<T, U>(items: T[], rows: U[], same: (a: T, b: U) => boolean): (U
   return out;
 }
 const totAmt = (r: Rec) => amount(r[Object.keys(r).find(k => /概算要求額_計$/.test(k)) ?? '']);
+const totPrev = (r: Rec) => amount(r[Object.keys(r).find(k => /前年度予算額_計$/.test(k)) ?? '']);
 const detAmt = (r: Rec) => amount(r[Object.keys(r).find(k => /概算要求額$/.test(k)) ?? '']);
 
 const scopeText = (key: string): string => { const c = scopeOfKou.get(key); return c && c.ok ? (c.acct === 'general' ? `${c.ministry}|${c.org ?? ""}` : `${c.account}|${c.sub}`) : ''; };
 
 // ---------------------------------------------------------------- M1
 type Cand = number[];
+const reqKou: unknown[][] = []; // 概算要求の木だけから決めた項の所属（MOF の判定を使わない）
 const m1: unknown[][] = []; const m1Match = new Map<string, number>(); // `${slug}#${kouIdx}` → MOF kou 行（MATCHED のみ）
 const refKou = new Set<string>();
 const linkStats = { kou_total_table_linked: 0, kou_total: 0, jikou_total_table_linked: 0, jikou_detail_linked: 0, jikou_total: 0 };
 const kouAcct = new Map<string, Acct>();
 for (const s of sources) {
   const t = trees.get(s); if (!t) continue;
-  const tcode3 = (totalV.get(s) ?? []).filter(r => r['row_type'] === 'CODE3').map(r => { const m = /^(\d{3})\s*(.+)$/.exec(r['区分']); return { code: m?.[1] ?? '', name: ns(m?.[2]), amt: totAmt(r) }; });
+  // 目次を持たない source の組織: 総表で、組織計（TOTAL）の後ろ（または表の始め）にある CODE3 の行のうち、次の行も CODE3 のものが組織の見出し行（項には必ず明細が続く）
+  const totRows = totalV.get(s) ?? []; let orgNow: string | null = null;
+  const tcode3 = totRows.flatMap((r, i) => {
+    if (r['row_type'] === 'TOTAL') { orgNow = null; return []; }
+    if (r['row_type'] !== 'CODE3') return [];
+    const m = /^(\d{3})\s*(.+)$/.exec(r['区分']);
+    if (orgNow === null && totRows[i + 1]?.['row_type'] === 'CODE3') orgNow = ns(m?.[2]);
+    return [{ code: m?.[1] ?? '', name: ns(m?.[2]), amt: totAmt(r), prev: totPrev(r), org: orgNow }];
+  });
   const links = seqLink(t.kous, tcode3, (k, r) => k.code === r.code && k.name === r.name);
   t.kous.forEach((k, i) => {
     const sc = scopeOfKou.get(`${s}#${k.idx}`)!; linkStats.kou_total++; if (links[i]) linkStats.kou_total_table_linked++;
     const reqAmt = links[i]?.amt ?? '';
+    const cx = ctxOf.get(s);
+    reqKou.push([s, k.idx, k.code, k.name, k.page, cx?.acct ?? '', k.ministry ?? (cx?.acct === 'general' ? cx.key : ''), k.org ?? (cx?.acct === 'general' && t.hierarchy !== 'toc' ? links[i]?.org ?? '' : ''), k.account ?? (cx?.acct === 'special' ? cx.key : ''), k.sub ?? '', reqAmt, links[i]?.prev ?? '', t.hierarchy]);
     const head = [s, k.idx, k.code, k.name, k.page];
     if (!sc.ok) { m1.push([...head, '', '', 0, sc.reason === 'no_context' ? 'OUT_OF_SCOPE' : 'PARENT_UNMATCHED', sc.reason, reqAmt, '', '', '']); return; }
     const a = sc.acct!; kouAcct.set(`${s}#${k.idx}`, a);
@@ -166,6 +178,7 @@ for (const s of sources) {
     }
   });
 }
+writeCsv('request-kou.csv', ['request_source', 'toc_kou_idx', 'request_code3', 'request_name', 'request_page', 'acct', 'ministry', 'org', 'account', 'sub', 'request_amount', 'previous_amount', 'hierarchy'], reqKou);
 writeCsv('m1-kou.csv', ['request_source', 'toc_kou_idx', 'request_code3', 'request_name', 'request_page', 'mof_row', 'mof_name', 'candidate_count', 'status', 'reason', 'request_amount', 'mof_amount', 'amount_diff', 'request_scope', 'hierarchy'], m1.map(r => [...r, trees.get(String(r[0]))?.hierarchy ?? '']));
 
 // ---------------------------------------------------------------- M2
