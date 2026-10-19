@@ -117,7 +117,7 @@ export interface LegacySectionIdentity {
   sectionName: string;
 }
 
-async function fetchGzipJson<T>(url: string, signal: AbortSignal): Promise<T> {
+export async function fetchGzipJson<T>(url: string, signal: AbortSignal): Promise<T> {
   const response = await fetch(url, { signal });
   if (!response.ok) throw new Error(`${url}: ${response.status}`);
   if (!response.body || typeof DecompressionStream === 'undefined') {

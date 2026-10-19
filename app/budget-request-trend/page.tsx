@@ -4,7 +4,8 @@
  * 概算要求の年度推移（項の粒度, FY2023〜）。
  *
  * 左にフィルタ、中に選択年度の一覧（前年度予算額・要求額・増減）、右に選んだ項の全年度分の表・グラフ・元の PDF へのリンク。
- * データは /api/budget-request-trend（public/data/v2/ui/budget-request-trend/kou.json.gz）。仕様: docs/budget-request-trend-csv.md。
+ * データは静的ファイル /data/v2/ui/budget-request-trend/kou.json.gz をブラウザが直接取得する（Vercel の関数には public/data を同梱しないため API を経由しない。
+ * 他の v2 データと同じ方式）。仕様: docs/budget-request-trend-csv.md。
  * MOF の予算書との突合には依存しない。名称が変わった項は別の行（新規・消滅）になる。
  */
 
@@ -12,6 +13,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
 import { usePersistedState } from '@/client/hooks/usePersistedState';
+import { fetchGzipJson } from '@/app/lib/v2-public-linkage';
 import type { BudgetRequestTrendData, BudgetRequestTrendRow } from '@/types/budget-request-trend';
 import { INITIAL_TREND_FILTERS, filterRows, sortRows, type TrendFilters, type TrendSortDir, type TrendSortKey } from '@/app/lib/budget-request-trend';
 import { TrendFilterPane } from '@/client/components/budget-request-trend/TrendFilterPane';
@@ -52,14 +54,11 @@ export default function BudgetRequestTrendPage() {
   const [columnWidths, setColumnWidths] = usePersistedState<Record<string, number>>('budget-request-trend:columnWidths', {});
 
   useEffect(() => {
-    fetch('/api/budget-request-trend')
-      .then(async res => {
-        const body = await res.json();
-        if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
-        return body as BudgetRequestTrendData;
-      })
+    const controller = new AbortController();
+    fetchGzipJson<BudgetRequestTrendData>('/data/v2/ui/budget-request-trend/kou.json.gz', controller.signal)
       .then(setData)
-      .catch(e => setError(e instanceof Error ? e.message : String(e)));
+      .catch(e => { if (!controller.signal.aborted) setError(e instanceof Error ? e.message : String(e)); });
+    return () => controller.abort();
   }, []);
 
   const years = data?.years ?? [];
