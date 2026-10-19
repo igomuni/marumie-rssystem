@@ -131,7 +131,7 @@ export function TrendFilterPane({
           <h3 className={heading}>印</h3>
           <label className={row}>
             <input type="checkbox" checked={filters.shared} onChange={e => set({ shared: e.target.checked })} />
-            共管（複数の要求書に載る）
+            複数の要求書に載る
             <span className={count}>{counts.shared}</span>
           </label>
           <label className={row}>
