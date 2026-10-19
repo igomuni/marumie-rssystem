@@ -33,11 +33,19 @@ for (const [year, ver] of YEARS) {
   const status = new Map<string, string>();
   if (ver) for (const r of rd(path.join(dir, 'm1-kou.csv'))) status.set(`${r['request_source']}#${r['toc_kou_idx']}`, r['status']);
   // 表紙の見出し（所管コードと、括弧内の組織）。source ごとに 1 つ
-  const cover = new Map<string, { code: string; org: string }>();
+  const cover = new Map<string, { code: string; org: string; name: string }>();
   const coverDir = path.join('tests', 'fixtures', 'budget-request-csv', String(year), 'cover', 'sources');
   for (const f of fs.readdirSync(coverDir).filter(x => x.endsWith('.csv')).sort()) {
     const h = rd(path.join(coverDir, f)).find(r => r['kind'] === 'HEADER'); if (!h) continue;
-    cover.set(f.slice(0, -4), { code: h['code'], org: /[（(](.*)[）)]$/.exec(ns(h['name']))?.[1] ?? '' });
+    cover.set(f.slice(0, -4), { code: h['code'], org: /[（(](.*)[）)]$/.exec(ns(h['name']))?.[1] ?? '', name: ns(h['name']) });
+  }
+  // 明細表に CONTEXT 行が無く、会計・所管・特別会計名が決まらなかった行は、表紙の見出しで補う
+  // （コードが 2 桁なら一般会計の所管、4 桁なら特別会計。例: `19 内閣府所管（金融庁）`、`9101 東日本大震災復興特別会計（総務本省等）`）
+  for (const r of kou) {
+    const cv = cover.get(r['request_source']); if (!cv) continue;
+    if (!r['acct']) r['acct'] = cv.code.length === 2 ? 'general' : 'special';
+    if (r['acct'] === 'general' && !r['ministry']) r['ministry'] = cv.name.replace(/所管.*$/, '');
+    if (r['acct'] === 'special' && !r['account']) r['account'] = cv.name.replace(/特別会計.*$/, '');
   }
   // 要求書の slug（data/download 以下のパスの `/` を `__` にしたもの）→ 元の PDF の URL
   const urlOf = new Map<string, string>();

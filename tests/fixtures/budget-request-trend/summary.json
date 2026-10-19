@@ -1,10 +1,10 @@
 {
- "sha256": "ecc3640f465e946faeee0ada2b7bb57138bb547fb28d9eb5184a96aee9d4bc4e",
+ "sha256": "ccbb42e48f0e7b83ee97b7e78d102b18b80681c05b41d5049246bd1eb5d5b228",
  "years": {
   "2023": {
    "rows": 1098,
-   "distinct_keys": 1018,
-   "duplicated_keys": 54,
+   "distinct_keys": 1016,
+   "duplicated_keys": 56,
    "general_without_org": 1,
    "without_amount": 1
   },
@@ -31,8 +31,8 @@
   },
   "2027": {
    "rows": 974,
-   "distinct_keys": 893,
-   "duplicated_keys": 50,
+   "distinct_keys": 890,
+   "duplicated_keys": 53,
    "general_without_org": 0,
    "without_amount": 0
   }
