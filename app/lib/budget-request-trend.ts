@@ -25,7 +25,7 @@ export interface TrendFilters {
   groups: string[];
   pattern: PatternFilter;
   change: ChangeFilter;
-  /** 共管（その年度に複数の要求書に載る）だけ */
+  /** その年度に複数の要求書に載る行だけ */
   shared: boolean;
   /** その年度に金額が一致しない要求書がある行だけ */
   mismatch: boolean;

@@ -21,7 +21,7 @@ const MATCH = path.join('tests', 'fixtures', 'mof-budget-request-match');
 const rd = (p: string): Rec[] => readCsv(fs.readFileSync(p, 'utf8'));
 const cell = (v: unknown): string => { const s = v === null || v === undefined ? '' : String(v); return /[",\n\r]/u.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
 
-const header = ['年度', '会計区分', '所管コード', '所管', '特別会計', '勘定', '組織', '組織の出所', '項名', '項コード', '前年度予算額_千円', '要求額_千円', '増減_千円', '要求書', '頁', '階層', '共管重複', '金額不一致', 'MOF突合(参考)'];
+const header = ['年度', '会計区分', '所管コード', '所管', '特別会計', '勘定', '組織', '組織の出所', '項名', '項コード', '前年度予算額_千円', '要求額_千円', '増減_千円', '要求書', '頁', '階層', '複数書', '金額不一致', 'MOF突合(参考)'];
 const rows: unknown[][] = [];
 const uiRows = new Map<string, BudgetRequestTrendRow>(); // キー（年度をまたぐ）→ 行
 const uiUrls: string[] = []; const uiUrlIdx = new Map<string, number>();

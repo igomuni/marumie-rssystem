@@ -82,7 +82,7 @@ export function TrendListPane({
         <span><b className="tabular-nums text-neutral-800 dark:text-neutral-100">{rows.length.toLocaleString()}</b> 項</span>
         <span>要求額 合計 <b className="tabular-nums text-neutral-800 dark:text-neutral-100">{formatSen(sum.req)}</b></span>
         <span>前年度予算額 合計 <b className="tabular-nums text-neutral-800 dark:text-neutral-100">{formatSen(sum.prev)}</b></span>
-        <span className="text-neutral-400">共管で複数の要求書に載る同一キーは1行にまとめて数えています</span>
+        <span className="text-neutral-400">複数の要求書に載る同一キーは1行にまとめて数えています</span>
       </div>
       <div className="min-h-0 flex-1 overflow-auto">
         <table className="border-collapse text-xs" style={{ width: tableWidth, tableLayout: 'fixed' }}>
@@ -132,7 +132,7 @@ export function TrendListPane({
                   <td className="break-words px-2 py-1 text-left">{orgOf(r)}</td>
                   <td className="break-words px-2 py-1 text-left font-medium">
                     {r.name}
-                    {a && a.src.length > 1 && <span className={`${chip} border-neutral-300 text-neutral-500 dark:border-neutral-600`}>共管</span>}
+                    {a && a.src.length > 1 && <span className={`${chip} border-neutral-300 text-neutral-500 dark:border-neutral-600`}>複数書</span>}
                     {a?.mismatch && <span className={`${chip} border-amber-600 text-amber-700 dark:text-amber-400`}>額不一致</span>}
                   </td>
                   <td className={`whitespace-nowrap px-2 py-1 text-left ${pattern === '新規' ? 'text-emerald-700 dark:text-emerald-400' : pattern === '消滅' ? 'text-orange-700 dark:text-orange-400' : 'text-neutral-500'}`}>{pattern ?? '–'}</td>
