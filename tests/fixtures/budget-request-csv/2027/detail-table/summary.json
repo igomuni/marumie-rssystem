@@ -2,62 +2,62 @@
   "scope": "FY2027 令和9年度歳出概算要求額明細表 (excluding 備考) raw text → logical rows (v0 deterministic parser; descriptive counts, not an accuracy score)",
   "input": {
     "inputDir": "data/work/budget-request-plain-text/2027",
-    "inputSha256": "8c7fcc5bef2524939aa31b98e7731be12e47fda26e50e5ece486e61328d4f043",
-    "txtEntries": 122
+    "inputSha256": "419d2939e581bd258c9e42e13ff0f51a299021f0c339042e3ba2d6776abb73e5",
+    "txtEntries": 132
   },
   "frozenManifestIntegrity": {
-    "MATCH": 122
+    "MATCH": 132
   },
   "frozenManifestIntegrityDetail": [],
-  "sourceFileCount": 122,
-  "detailTableSourceCount": 116,
-  "detailTablePageCount": 4653,
-  "sourcesWithoutDetailTable": 6,
+  "sourceFileCount": 132,
+  "detailTableSourceCount": 124,
+  "detailTablePageCount": 4815,
+  "sourcesWithoutDetailTable": 8,
   "sourcesWithNoTextLayer": [],
   "pagesWithoutHeaderBoundary": 0,
-  "nonBlankLinesInDetailPages": 179346,
+  "nonBlankLinesInDetailPages": 185753,
   "lineClassCounts": {
-    "PAGE_LABEL": 4653,
-    "TABLE_TITLE": 114,
-    "ROW": 41530,
-    "UNIT": 114,
-    "UNRESOLVED": 4696,
-    "TABLE_HEADER": 4742,
-    "CONTINUATION": 17753,
-    "RIGHT_REGION": 104673,
-    "FOOTER_TIMESTAMP": 1071
+    "PAGE_LABEL": 4815,
+    "TABLE_TITLE": 122,
+    "ROW": 43668,
+    "UNIT": 122,
+    "UNRESOLVED": 4858,
+    "TABLE_HEADER": 4905,
+    "CONTINUATION": 19115,
+    "RIGHT_REGION": 106954,
+    "FOOTER_TIMESTAMP": 1194
   },
-  "logicalRowCount": 41530,
+  "logicalRowCount": 43668,
   "rowTypeCounts": {
-    "CODE1": 19,
-    "CODE2": 1443,
-    "CODE3": 9052,
-    "CODE_5_4_2_4": 21373,
-    "CODE_NN_NNNN": 8055,
-    "CONTEXT": 114,
-    "DETAIL": 1474
+    "CODE1": 23,
+    "CODE2": 1471,
+    "CODE3": 9537,
+    "CODE_5_4_2_4": 22427,
+    "CODE_NN_NNNN": 8498,
+    "CONTEXT": 122,
+    "DETAIL": 1590
   },
   "parseStatusCounts": {
     "AMOUNTS_PLACED_BY_HEADER_WINDOWS": 41,
     "AMOUNTS_PLACED_BY_NEIGHBOUR_EDGES": 18,
-    "AMOUNTS_PLACED_BY_PAGE_EDGES": 657,
-    "PARSED": 40814
+    "AMOUNTS_PLACED_BY_PAGE_EDGES": 701,
+    "PARSED": 42908
   },
   "rowsByBlankCells": {
-    "blank:none": 34338,
-    "blank:previous": 281,
-    "blank:previous+request+difference": 6476,
-    "blank:request": 435
+    "blank:none": 36054,
+    "blank:previous": 324,
+    "blank:previous+request+difference": 6854,
+    "blank:request": 436
   },
-  "rowsWithContinuation": 14387,
-  "unresolvedCount": 4696,
+  "rowsWithContinuation": 15239,
+  "unresolvedCount": 4858,
   "unresolvedByReason": {
     "BLANK_CELL_COLUMN_UNDETERMINED": 15,
     "LEFT_FRAGMENT_NOT_ADJACENT": 9,
     "LEFT_FRAGMENT_NOT_ALIGNED": 3,
     "LEFT_FRAGMENT_WITHOUT_PRECEDING_ROW_ON_PAGE": 4,
     "LEFT_TEXT_CROSSES_BOUNDARY": 12,
-    "UNKNOWN_HEADER_ZONE_LINE": 4653
+    "UNKNOWN_HEADER_ZONE_LINE": 4815
   },
   "arithmeticDiagnostics": {
     "rowsWithMismatch": 0
@@ -1575,6 +1575,24 @@
       }
     },
     {
+      "source_file": "budget-request-plain-text/2027/jftc.go.jp__soshiki__kyotsukoukai__yosan__yosankessan__r9__r9sandanhyou.txt",
+      "pageCount": 56,
+      "detailPages": 39,
+      "pagesWithoutBoundary": [],
+      "rows": 235,
+      "unresolved": 39,
+      "lineClassCounts": {
+        "PAGE_LABEL": 39,
+        "TABLE_TITLE": 1,
+        "ROW": 235,
+        "UNIT": 1,
+        "UNRESOLVED": 39,
+        "TABLE_HEADER": 40,
+        "CONTINUATION": 80,
+        "RIGHT_REGION": 550
+      }
+    },
+    {
       "source_file": "budget-request-plain-text/2027/jinji.go.jp__content__000018368.txt",
       "pageCount": 36,
       "detailPages": 27,
@@ -1683,6 +1701,138 @@
         "TABLE_HEADER": 25,
         "CONTINUATION": 143,
         "RIGHT_REGION": 166
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2027/meti.go.jp__main__yosangaisan__fy2027__pdf__eneden_o.txt",
+      "pageCount": 25,
+      "detailPages": 19,
+      "pagesWithoutBoundary": [],
+      "rows": 278,
+      "unresolved": 19,
+      "lineClassCounts": {
+        "PAGE_LABEL": 19,
+        "TABLE_TITLE": 1,
+        "ROW": 278,
+        "UNIT": 1,
+        "UNRESOLVED": 19,
+        "TABLE_HEADER": 19,
+        "CONTINUATION": 133,
+        "FOOTER_TIMESTAMP": 19,
+        "RIGHT_REGION": 326
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2027/meti.go.jp__main__yosangaisan__fy2027__pdf__enegen_o.txt",
+      "pageCount": 7,
+      "detailPages": 1,
+      "pagesWithoutBoundary": [],
+      "rows": 16,
+      "unresolved": 1,
+      "lineClassCounts": {
+        "PAGE_LABEL": 1,
+        "TABLE_TITLE": 1,
+        "ROW": 16,
+        "UNIT": 1,
+        "UNRESOLVED": 1,
+        "TABLE_HEADER": 1,
+        "CONTINUATION": 10,
+        "RIGHT_REGION": 3,
+        "FOOTER_TIMESTAMP": 1
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2027/meti.go.jp__main__yosangaisan__fy2027__pdf__eneju_o.txt",
+      "pageCount": 16,
+      "detailPages": 10,
+      "pagesWithoutBoundary": [],
+      "rows": 187,
+      "unresolved": 10,
+      "lineClassCounts": {
+        "PAGE_LABEL": 10,
+        "TABLE_TITLE": 1,
+        "ROW": 187,
+        "UNIT": 1,
+        "UNRESOLVED": 10,
+        "TABLE_HEADER": 10,
+        "CONTINUATION": 172,
+        "FOOTER_TIMESTAMP": 10,
+        "RIGHT_REGION": 49
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2027/meti.go.jp__main__yosangaisan__fy2027__pdf__enesen_o.txt",
+      "pageCount": 8,
+      "detailPages": 2,
+      "pagesWithoutBoundary": [],
+      "rows": 31,
+      "unresolved": 2,
+      "lineClassCounts": {
+        "PAGE_LABEL": 2,
+        "TABLE_TITLE": 1,
+        "ROW": 31,
+        "UNIT": 1,
+        "UNRESOLVED": 2,
+        "TABLE_HEADER": 2,
+        "CONTINUATION": 58,
+        "FOOTER_TIMESTAMP": 2
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2027/meti.go.jp__main__yosangaisan__fy2027__pdf__fukko_o.txt",
+      "pageCount": 8,
+      "detailPages": 2,
+      "pagesWithoutBoundary": [],
+      "rows": 33,
+      "unresolved": 2,
+      "lineClassCounts": {
+        "PAGE_LABEL": 2,
+        "TABLE_TITLE": 1,
+        "ROW": 33,
+        "UNIT": 1,
+        "UNRESOLVED": 2,
+        "TABLE_HEADER": 2,
+        "CONTINUATION": 35,
+        "RIGHT_REGION": 13,
+        "FOOTER_TIMESTAMP": 2
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2027/meti.go.jp__main__yosangaisan__fy2027__pdf__ippan_o.txt",
+      "pageCount": 87,
+      "detailPages": 79,
+      "pagesWithoutBoundary": [],
+      "rows": 1168,
+      "unresolved": 79,
+      "lineClassCounts": {
+        "PAGE_LABEL": 79,
+        "TABLE_TITLE": 1,
+        "ROW": 1168,
+        "UNIT": 1,
+        "UNRESOLVED": 79,
+        "TABLE_HEADER": 79,
+        "CONTINUATION": 817,
+        "FOOTER_TIMESTAMP": 79,
+        "RIGHT_REGION": 1228
+      }
+    },
+    {
+      "source_file": "budget-request-plain-text/2027/meti.go.jp__main__yosangaisan__fy2027__pdf__tokkyo_o.txt",
+      "pageCount": 16,
+      "detailPages": 10,
+      "pagesWithoutBoundary": [],
+      "rows": 190,
+      "unresolved": 10,
+      "lineClassCounts": {
+        "PAGE_LABEL": 10,
+        "TABLE_TITLE": 1,
+        "ROW": 190,
+        "UNIT": 1,
+        "UNRESOLVED": 10,
+        "TABLE_HEADER": 10,
+        "CONTINUATION": 57,
+        "FOOTER_TIMESTAMP": 10,
+        "RIGHT_REGION": 112
       }
     },
     {
