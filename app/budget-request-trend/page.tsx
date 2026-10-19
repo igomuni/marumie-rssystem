@@ -19,7 +19,25 @@ import { TrendListPane } from '@/client/components/budget-request-trend/TrendLis
 import { TrendDetailPane } from '@/client/components/budget-request-trend/TrendDetailPane';
 
 const rowKey = (r: BudgetRequestTrendRow): string => [r.acct, r.code, r.min, r.sub, r.org, r.name].join('|');
+const FILTER_WIDTH = { def: 240, min: 180, max: 420 };
+const DETAIL_WIDTH = { def: 430, min: 320, max: 760 };
 const pane = 'min-h-0 min-w-0 overflow-hidden rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900';
+
+/** ペイン間のつまみ。ドラッグで隣のペインの幅を変える（xl 以上のみ）。dir: 1 = 右へ動かすと広がる、-1 = 左へ動かすと広がる */
+function Splitter({ label, width, limits, dir, onChange }: { label: string; width: number; limits: { min: number; max: number }; dir: 1 | -1; onChange: (w: number) => void }) {
+  const start = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const x0 = e.clientX, w0 = width;
+    const move = (ev: MouseEvent) => onChange(Math.min(limits.max, Math.max(limits.min, w0 + dir * (ev.clientX - x0))));
+    const up = () => { window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); document.body.style.cursor = ''; };
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', up);
+    document.body.style.cursor = 'col-resize';
+  };
+  return (
+    <div role="separator" aria-orientation="vertical" aria-label={label} onMouseDown={start} className="hidden w-1.5 shrink-0 cursor-col-resize rounded hover:bg-emerald-500/40 xl:block" />
+  );
+}
 
 export default function BudgetRequestTrendPage() {
   const [data, setData] = useState<BudgetRequestTrendData | null>(null);
@@ -29,6 +47,9 @@ export default function BudgetRequestTrendPage() {
   const [sortKey, setSortKey] = useState<TrendSortKey>('req');
   const [sortDir, setSortDir] = useState<TrendSortDir>(-1);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [filterWidth, setFilterWidth] = usePersistedState('budget-request-trend:filterWidth', FILTER_WIDTH.def);
+  const [detailWidth, setDetailWidth] = usePersistedState('budget-request-trend:detailWidth', DETAIL_WIDTH.def);
+  const [columnWidths, setColumnWidths] = usePersistedState<Record<string, number>>('budget-request-trend:columnWidths', {});
 
   useEffect(() => {
     fetch('/api/budget-request-trend')
@@ -86,16 +107,12 @@ export default function BudgetRequestTrendPage() {
           <PageNavMenu current="/budget-request-trend" />
         </div>
       </header>
-      {activeYear === lastYear && (
-        <p className="mx-3 mb-2 shrink-0 border-l-[3px] border-amber-600 bg-amber-50 px-2.5 py-1.5 text-xs dark:bg-amber-950/40">
-          FY{lastYear} は厚生労働省の歳出概算要求書（文字層なし）が未収録のため、厚労省の項が出ません。合計や「消滅」の絞り込みは、この欠けを含みます。
-        </p>
-      )}
-      <main className="grid min-h-0 flex-1 grid-cols-1 gap-3 px-3 pb-3 lg:grid-cols-[240px_minmax(0,1fr)] xl:grid-cols-[240px_minmax(0,1fr)_430px]">
-        <section aria-label="フィルタ" className={pane}>
+      <main className="grid min-h-0 flex-1 grid-cols-1 gap-3 px-3 pb-3 lg:grid-cols-[240px_minmax(0,1fr)] xl:flex xl:gap-0">
+        <section aria-label="フィルタ" className={`${pane} xl:w-[var(--fw)] xl:shrink-0`} style={{ '--fw': `${filterWidth}px` } as React.CSSProperties}>
           <TrendFilterPane rows={data.rows} years={years} year={activeYear} filters={filters} onChange={setFilters} />
         </section>
-        <section aria-label="項の一覧" className={pane}>
+        <Splitter label="フィルタの幅" width={filterWidth} limits={FILTER_WIDTH} dir={1} onChange={setFilterWidth} />
+        <section aria-label="項の一覧" className={`${pane} xl:min-w-0 xl:flex-1`}>
           <TrendListPane
             rows={rows}
             year={activeYear}
@@ -106,9 +123,12 @@ export default function BudgetRequestTrendPage() {
             selectedKey={selectedKey}
             rowKey={rowKey}
             onSelect={r => setSelectedKey(rowKey(r))}
+            widths={columnWidths}
+            onWidthsChange={setColumnWidths}
           />
         </section>
-        <section aria-label="詳細（全年度）" className={`${pane} overflow-auto lg:col-span-2 xl:col-span-1`}>
+        <Splitter label="詳細の幅" width={detailWidth} limits={DETAIL_WIDTH} dir={-1} onChange={setDetailWidth} />
+        <section aria-label="詳細（全年度）" className={`${pane} overflow-auto lg:col-span-2 xl:col-span-1 xl:w-[var(--dw)] xl:shrink-0`} style={{ '--dw': `${detailWidth}px` } as React.CSSProperties}>
           <TrendDetailPane row={selected} years={years} year={activeYear} urls={data.urls} />
         </section>
       </main>

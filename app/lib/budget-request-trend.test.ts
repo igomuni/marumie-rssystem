@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { BudgetRequestTrendRow, BudgetRequestTrendYear } from '@/types/budget-request-trend';
-import { INITIAL_TREND_FILTERS, assessmentGap, changeRate, filterRows, isGone, isNew, sortRows } from './budget-request-trend';
+import { INITIAL_TREND_FILTERS, assessmentGap, changeRate, filterRows, isGone, isNew, sortRows, textMatches } from './budget-request-trend';
 
 const Y = (prev: number | null, req: number | null, extra: Partial<BudgetRequestTrendYear> = {}): BudgetRequestTrendYear => ({ prev, req, src: [[0, '1']], mismatch: false, mof: '', ...extra });
 const row = (name: string, y: Record<string, BudgetRequestTrendYear>, o: Partial<BudgetRequestTrendRow> = {}): BudgetRequestTrendRow =>
@@ -38,6 +38,20 @@ describe('budget-request-trend', () => {
   it('sorts with missing values last in both directions', () => {
     expect(sortRows(rows.slice(0, 2), 'rate', -1, 2027).map(r => r.name)).toEqual(['継続費', '新設費']);
     expect(sortRows(rows.slice(0, 2), 'rate', 1, 2027).map(r => r.name)).toEqual(['継続費', '新設費']);
+  });
+  it('matches text like /sankey-svg: case-insensitive, regex only when asked, invalid or long regex matches nothing', () => {
+    expect(textMatches('Digital庁', 'digital', false)).toBe(true);
+    expect(textMatches('a.b', '.*', false)).toBe(false); // 通常の検索では .* は文字どおり
+    expect(textMatches('子ども家庭庁', '^子ども.*庁$', true)).toBe(true);
+    expect(textMatches('Digital庁', 'DIGITAL', true)).toBe(true);
+    expect(textMatches('x', '(', true)).toBe(false);
+    expect(textMatches('x', 'x'.repeat(129), true)).toBe(false);
+    expect(textMatches('x', '  ', false)).toBe(true);
+  });
+  it('searches the item name and the organization separately', () => {
+    expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, name: '特会', org: '' }, 2027, YEARS).map(r => r.name)).toEqual(['特会費']);
+    expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, org: '本府' }, 2027, YEARS).map(r => r.name)).toEqual(['継続費', '新設費']);
+    expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, org: '勘定[AB]', orgRegex: true }, 2027, YEARS).map(r => r.name)).toEqual(['特会費']);
   });
   it('computes the assessment gap from next year previous amount', () => {
     expect(assessmentGap(rows[0], 2025)).toBe(110 - 120);

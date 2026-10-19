@@ -12,10 +12,12 @@ export interface RegexTextFilterProps {
   onChange: (value: string) => void;
   useRegex: boolean;
   onToggleRegex: (useRegex: boolean) => void;
+  /** 正規表現の最大文字数（超えると不正扱い。/sankey-svg は 128） */
+  maxRegexLength?: number;
 }
 
-export function RegexTextFilter({ label, note, value, onChange, useRegex, onToggleRegex }: RegexTextFilterProps) {
-  const invalid = useRegex && value !== '' && !isValidRegex(value);
+export function RegexTextFilter({ label, note, value, onChange, useRegex, onToggleRegex, maxRegexLength }: RegexTextFilterProps) {
+  const invalid = useRegex && value !== '' && (!isValidRegex(value) || (maxRegexLength !== undefined && value.length > maxRegexLength));
   return (
     <div className="space-y-1">
       <span className="text-neutral-500" title={note}>

@@ -2,6 +2,8 @@
 
 import { useMemo } from 'react';
 import type { BudgetRequestTrendRow } from '@/types/budget-request-trend';
+import { RegexTextFilter } from '@/client/components/mof-kou/RegexTextFilter';
+import { MAX_REGEX_PATTERN_LENGTH } from '@/app/lib/sankey-query';
 import { INITIAL_TREND_FILTERS, groupOf, inAllYears, isGone, isNew, yearOf, type ChangeFilter, type PatternFilter, type TrendFilters } from '@/app/lib/budget-request-trend';
 
 const section = 'flex flex-col gap-1.5 border-b border-neutral-200 px-3 py-2.5 dark:border-neutral-800';
@@ -59,15 +61,22 @@ export function TrendFilterPane({
         </button>
       </div>
       <div className="min-h-0 flex-1 overflow-auto">
-        <div className={section}>
-          <h3 className={heading}>項名・組織で検索</h3>
-          <input
-            type="search"
-            value={filters.q}
-            onChange={e => set({ q: e.target.value })}
-            placeholder="例: 教育 / 防衛 / 予備費"
-            aria-label="項名・組織で検索"
-            className="w-full rounded border border-neutral-300 bg-white px-2 py-1 text-xs dark:border-neutral-700 dark:bg-neutral-900"
+        <div className={`${section} text-xs`}>
+          <RegexTextFilter
+            label="項名"
+            value={filters.name}
+            onChange={name => set({ name })}
+            useRegex={filters.nameRegex}
+            onToggleRegex={nameRegex => set({ nameRegex })}
+            maxRegexLength={MAX_REGEX_PATTERN_LENGTH}
+          />
+          <RegexTextFilter
+            label="組織（特別会計は勘定）"
+            value={filters.org}
+            onChange={org => set({ org })}
+            useRegex={filters.orgRegex}
+            onToggleRegex={orgRegex => set({ orgRegex })}
+            maxRegexLength={MAX_REGEX_PATTERN_LENGTH}
           />
         </div>
         <div className={section}>

@@ -5,6 +5,10 @@ import { changeAmount, changeRate, groupOf, isGone, isNew, orgOf, yearOf, type T
 import { changeColor, formatRate, formatSen, formatSenSigned } from './format';
 
 const MAX_ROWS = 600;
+const MIN_COLUMN_WIDTH = 48;
+
+/** 列幅の既定（px）。所管は「［特］子ども・子育て支援」が折り返さない幅 */
+export const DEFAULT_COLUMN_WIDTHS: Record<TrendSortKey, number> = { group: 184, org: 130, name: 220, prev: 112, req: 100, diff: 100, rate: 76 };
 
 const chip = 'ml-1 rounded-full border px-1.5 text-[10px] align-middle';
 
@@ -18,6 +22,8 @@ export function TrendListPane({
   selectedKey,
   rowKey,
   onSelect,
+  widths,
+  onWidthsChange,
 }: {
   /** 絞り込み・並べ替え済み */
   rows: readonly BudgetRequestTrendRow[];
@@ -29,6 +35,8 @@ export function TrendListPane({
   selectedKey: string | null;
   rowKey: (r: BudgetRequestTrendRow) => string;
   onSelect: (r: BudgetRequestTrendRow) => void;
+  widths: Record<string, number>;
+  onWidthsChange: (updater: (prev: Record<string, number>) => Record<string, number>) => void;
 }) {
   const sum = rows.reduce(
     (s, r) => {
@@ -41,12 +49,29 @@ export function TrendListPane({
     { key: 'group', label: '所管', left: true },
     { key: 'org', label: '組織', left: true },
     { key: 'name', label: '項名', left: true },
-    { key: 'prev', label: `FY${year} 前年度予算額` },
-    { key: 'req', label: `FY${year} 要求額` },
+    { key: 'prev', label: '前年度予算額' },
+    { key: 'req', label: '要求額' },
     { key: 'diff', label: '増減' },
     { key: 'rate', label: '増減率' },
   ];
   const shown = rows.slice(0, MAX_ROWS);
+  const widthOf = (k: TrendSortKey) => widths[k] ?? DEFAULT_COLUMN_WIDTHS[k];
+  const tableWidth = cols.reduce((n, c) => n + widthOf(c.key), 0);
+
+  function startResize(e: React.MouseEvent, key: TrendSortKey) {
+    e.preventDefault();
+    e.stopPropagation();
+    const startX = e.clientX, startWidth = widthOf(key);
+    const onMove = (ev: MouseEvent) => onWidthsChange(w => ({ ...w, [key]: Math.max(MIN_COLUMN_WIDTH, startWidth + ev.clientX - startX) }));
+    const onUp = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      document.body.style.cursor = '';
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    document.body.style.cursor = 'col-resize';
+  }
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -57,7 +82,8 @@ export function TrendListPane({
         <span className="text-neutral-400">共管で複数の要求書に載る同一キーは1行にまとめて数えています</span>
       </div>
       <div className="min-h-0 flex-1 overflow-auto">
-        <table className="w-full border-collapse text-xs">
+        <table className="border-collapse text-xs" style={{ width: tableWidth, tableLayout: 'fixed' }}>
+          <colgroup>{cols.map(c => <col key={c.key} style={{ width: widthOf(c.key) }} />)}</colgroup>
           <thead>
             <tr>
               {cols.map(c => (
@@ -65,11 +91,19 @@ export function TrendListPane({
                   key={c.key}
                   scope="col"
                   aria-sort={sortKey === c.key ? (sortDir > 0 ? 'ascending' : 'descending') : undefined}
-                  className={`sticky top-0 z-10 cursor-pointer select-none whitespace-nowrap border-b border-neutral-200 bg-neutral-100 px-2 py-1.5 font-semibold text-neutral-500 dark:border-neutral-800 dark:bg-neutral-800 ${c.left ? 'text-left' : 'text-right'}`}
+                  className={`sticky top-0 z-10 cursor-pointer select-none overflow-hidden whitespace-nowrap border-b border-neutral-200 bg-neutral-100 px-2 py-1.5 font-semibold text-neutral-500 dark:border-neutral-800 dark:bg-neutral-800 ${c.left ? 'text-left' : 'text-right'}`}
                   onClick={() => onSort(c.key)}
                 >
                   {c.label}
                   {sortKey === c.key ? (sortDir > 0 ? ' ▲' : ' ▼') : ''}
+                  <span
+                    role="separator"
+                    aria-orientation="vertical"
+                    aria-label={`${c.label}の列幅`}
+                    onMouseDown={e => startResize(e, c.key)}
+                    onClick={e => e.stopPropagation()}
+                    className="absolute right-0 top-0 h-full w-1.5 cursor-col-resize hover:bg-emerald-500/40"
+                  />
                 </th>
               ))}
             </tr>
@@ -89,9 +123,9 @@ export function TrendListPane({
                   onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(r); } }}
                   className={`cursor-pointer border-b border-neutral-100 dark:border-neutral-800 ${selected ? 'bg-emerald-50 dark:bg-emerald-950/40' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/60'}`}
                 >
-                  <td className="px-2 py-1 text-left">{groupOf(r)}</td>
-                  <td className="px-2 py-1 text-left">{orgOf(r)}</td>
-                  <td className="min-w-[12rem] px-2 py-1 text-left font-medium">
+                  <td className="break-words px-2 py-1 text-left">{groupOf(r)}</td>
+                  <td className="break-words px-2 py-1 text-left">{orgOf(r)}</td>
+                  <td className="break-words px-2 py-1 text-left font-medium">
                     {r.name}
                     {isNew(r, year, firstYear) && <span className={`${chip} border-emerald-600 text-emerald-700 dark:text-emerald-400`}>新規</span>}
                     {isGone(r, year, firstYear) && <span className={`${chip} border-orange-600 text-orange-700 dark:text-orange-400`}>この年度に無い</span>}
