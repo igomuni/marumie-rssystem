@@ -2,7 +2,7 @@
 
 import type { BudgetRequestTrendRow } from '@/types/budget-request-trend';
 import { AccountBadge } from '@/client/components/mof-kou/Badge';
-import { assessmentGap, groupOf, orgOf, yearOf } from '@/app/lib/budget-request-trend';
+import { assessmentGap, groupOf, orgOf, publisherOf, yearOf } from '@/app/lib/budget-request-trend';
 import { changeColor, formatSen, formatSenSigned } from './format';
 
 const W = 380, H = 180, LEFT = 74, BOTTOM = 22, TOP = 10, BAR = 34;
@@ -114,7 +114,7 @@ export function TrendDetailPane({
                     {a.src.map(([u, page, pdfPage], i) => (
                       <span key={u} className="mr-1.5">
                         <a href={pdfPage ? `${urls[u]}#page=${pdfPage}` : urls[u]} target="_blank" rel="noopener noreferrer" title={urls[u]} className="text-emerald-700 underline hover:text-emerald-900 dark:text-emerald-400">
-                          PDF{a.src.length > 1 ? i + 1 : ''}
+                          PDF{a.src.length > 1 ? i + 1 : ''} {publisherOf(urls[u])}
                         </a>
                         <span className="text-neutral-500"> ({page})</span>
                         {a.srcAmt?.[i] && <span className="text-neutral-400"> {formatSen(a.srcAmt[i][1])}</span>}

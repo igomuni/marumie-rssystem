@@ -121,6 +121,7 @@ export default function BudgetRequestTrendPage() {
             onSort={onSort}
             selectedKey={selectedKey}
             rowKey={rowKey}
+            urls={data.urls}
             onSelect={r => setSelectedKey(rowKey(r))}
             widths={columnWidths}
             onWidthsChange={setColumnWidths}

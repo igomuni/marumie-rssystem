@@ -56,3 +56,4 @@ npx tsx scripts/pipeline-v2/build-budget-request-trend-csv.ts   # → tests/fixt
 - 金額は `client/lib/formatBudget.ts` の `formatBudgetShort` と同じ桁数（/sankey-svg に合わせる）で、円・万円・億円・兆円に自動で切り替える。
 - 増減・増減率は、その年度の要求額 − 前年度予算額（その年度の要求書が載せる値どうし）。新規・消滅は前年度のキーとの比較。名称変更の紐づけはしない。
 - 絞り込み・並べ替えは `app/lib/budget-request-trend.ts`（純粋関数）。
+- 要求書の公開元（PDF のドメイン → 府省庁名、`publisherOf`）は、キーに使わず表示だけに使う。詳細の PDF リンクに府省名を付け、一覧の「複数書」バッジのツールチップに載っている府省を出す。特別会計の共管（どの府省の書にも載る）や、復興特会の各省の取り分の内訳を追うため。

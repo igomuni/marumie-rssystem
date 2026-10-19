@@ -2,7 +2,7 @@
 
 import type { BudgetRequestTrendRow } from '@/types/budget-request-trend';
 import { AccountBadge } from '@/client/components/mof-kou/Badge';
-import { changeAmount, changeRate, groupOf, orgOf, patternOf, yearOf, type TrendSortDir, type TrendSortKey } from '@/app/lib/budget-request-trend';
+import { changeAmount, changeRate, groupOf, orgOf, patternOf, publisherOf, yearOf, type TrendSortDir, type TrendSortKey } from '@/app/lib/budget-request-trend';
 import { changeColor, formatRate, formatSen, formatSenSigned } from './format';
 
 const MAX_ROWS = 600;
@@ -22,6 +22,7 @@ export function TrendListPane({
   onSort,
   selectedKey,
   rowKey,
+  urls,
   onSelect,
   widths,
   onWidthsChange,
@@ -35,6 +36,8 @@ export function TrendListPane({
   onSort: (k: TrendSortKey) => void;
   selectedKey: string | null;
   rowKey: (r: BudgetRequestTrendRow) => string;
+  /** 要求書の URL（src の添字が指す） */
+  urls: readonly string[];
   onSelect: (r: BudgetRequestTrendRow) => void;
   widths: Record<string, number>;
   onWidthsChange: (updater: (prev: Record<string, number>) => Record<string, number>) => void;
@@ -133,7 +136,7 @@ export function TrendListPane({
                   <td className="break-words px-2 py-1 text-left font-medium">
                     {r.name}
                     {r.kou && <span className="ml-1 text-[10px] text-neutral-400">({r.kou})</span>}
-                    {a && a.src.length > 1 && <span className={`${chip} border-neutral-300 text-neutral-500 dark:border-neutral-600`}>複数書</span>}
+                    {a && a.src.length > 1 && <span title={[...new Set(a.src.map(([u]) => publisherOf(urls[u])))].join('、')} className={`${chip} border-neutral-300 text-neutral-500 dark:border-neutral-600`}>複数書</span>}
                     {a?.mismatch && <span className={`${chip} border-amber-600 text-amber-700 dark:text-amber-400`}>額不一致</span>}
                   </td>
                   <td className={`whitespace-nowrap px-2 py-1 text-left ${pattern === '新規' ? 'text-emerald-700 dark:text-emerald-400' : pattern === '消滅' ? 'text-orange-700 dark:text-orange-400' : 'text-neutral-500'}`}>{pattern ?? '–'}</td>

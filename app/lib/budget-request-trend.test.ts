@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { BudgetRequestTrendRow, BudgetRequestTrendYear } from '@/types/budget-request-trend';
-import { INITIAL_TREND_FILTERS, assessmentGap, changeRate, filterRows, isGone, isNew, patternOf, sortRows, textMatches } from './budget-request-trend';
+import { INITIAL_TREND_FILTERS, assessmentGap, changeRate, filterRows, isGone, isNew, patternOf, publisherOf, sortRows, textMatches } from './budget-request-trend';
 
 const Y = (prev: number | null, req: number | null, extra: Partial<BudgetRequestTrendYear> = {}): BudgetRequestTrendYear => ({ prev, req, src: [[0, '1', '3']], mismatch: false, mof: '', ...extra });
 const row = (name: string, y: Record<string, BudgetRequestTrendYear>, o: Partial<BudgetRequestTrendRow> = {}): BudgetRequestTrendRow =>
@@ -63,5 +63,9 @@ describe('budget-request-trend', () => {
   it('computes the assessment gap from next year previous amount', () => {
     expect(assessmentGap(rows[0], 2025)).toBe(110 - 120);
     expect(assessmentGap(rows[0], 2027)).toBeNull();
+  });
+  it('maps a request book URL to the publishing ministry by domain', () => {
+    expect(publisherOf('https://www.env.go.jp/content/x.pdf')).toBe('環境省');
+    expect(publisherOf('https://www.unknown.example/x.pdf')).toBe('unknown.example');
   });
 });

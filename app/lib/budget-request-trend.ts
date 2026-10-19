@@ -135,3 +135,20 @@ export function assessmentGap(r: BudgetRequestTrendRow, year: number): number | 
   const a = yearOf(r, year), n = yearOf(r, year + 1);
   return a && n && a.req !== null && n.prev !== null ? n.prev - a.req : null;
 }
+
+/** 要求書の公開元（PDF のドメイン）→ 府省庁名。載っている要求書の「どの府省の書か」を示す（キーには使わない） */
+const PUBLISHER_BY_HOST: Record<string, string> = {
+  'aoc.go.jp': 'サイバー通信情報監理委員会', 'caa.go.jp': '消費者庁', 'cao.go.jp': '内閣府', 'cas.go.jp': '内閣官房', 'cfa.go.jp': 'こども家庭庁', 'clb.go.jp': '内閣法制局',
+  'courts.go.jp': '裁判所', 'dangai.go.jp': '裁判官弾劾裁判所', 'digital.go.jp': 'デジタル庁', 'env.go.jp': '環境省', 'fsa.go.jp': '金融庁', 'jbaudit.go.jp': '会計検査院',
+  'jcrc.go.jp': '公害等調整委員会', 'jftc.go.jp': '公正取引委員会', 'jinji.go.jp': '人事院', 'kunaicho.go.jp': '宮内庁', 'maff.go.jp': '農林水産省', 'meti.go.jp': '経済産業省',
+  'mext.go.jp': '文部科学省', 'mhlw.go.jp': '厚生労働省', 'mlit.go.jp': '国土交通省', 'mod.go.jp': '防衛省', 'mof.go.jp': '財務省', 'mofa.go.jp': '外務省', 'moj.go.jp': '法務省',
+  'ndl.go.jp': '国立国会図書館', 'npa.go.jp': '警察庁', 'ppc.go.jp': '個人情報保護委員会', 'reconstruction.go.jp': '復興庁', 'sangiin.go.jp': '参議院', 'shugiin.go.jp': '衆議院',
+  'sotsui.go.jp': '裁判官訴追委員会', 'soumu.go.jp': '総務省',
+};
+
+/** 要求書の URL → 公開元の府省庁名（未知のドメインはドメインのまま） */
+export function publisherOf(url: string): string {
+  let host = '';
+  try { host = new URL(url).hostname.replace(/^www\./, ''); } catch { return ''; }
+  return PUBLISHER_BY_HOST[host] ?? host;
+}
