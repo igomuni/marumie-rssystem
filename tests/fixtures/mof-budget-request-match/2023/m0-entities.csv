@@ -40,8 +40,8 @@ env.go.jp__content__000070061,toc:所管,31 復興庁,復興庁,,OUT_OF_SCOPE,sp
 env.go.jp__content__000070061,toc:組織,010 復興庁,復興庁,,OUT_OF_SCOPE,special_source_has_org_label
 fsa.go.jp__common__budget__yosan__5youkyuu-2__01,context,19 内閣府所管(金融庁（金融庁）),内閣府,内閣府,MATCHED,general
 fsa.go.jp__common__budget__yosan__5youkyuu-2__01,toc:組織,100 金融庁,金融庁,金融庁,MATCHED,
-fsa.go.jp__common__budget__yosan__5youkyuu-2__02,context,,,,OUT_OF_SCOPE,no_context
-fsa.go.jp__common__budget__yosan__5youkyuu-2__02,toc:組織,100 金融庁,金融庁,,OUT_OF_SCOPE,no_context
+fsa.go.jp__common__budget__yosan__5youkyuu-2__02,context,(cover) 19 内閣府所管(金融庁（金融庁）),内閣府,内閣府,MATCHED,general
+fsa.go.jp__common__budget__yosan__5youkyuu-2__02,toc:組織,100 金融庁,金融庁,金融庁,MATCHED,
 fsa.go.jp__common__budget__yosan__5youkyuu-2__03,context,19 内閣府所管(金融庁（金融庁）),内閣府,内閣府,MATCHED,general
 jbaudit.go.jp__jbaudit__bud_clo__bud__pdf__r05__20220905_2,context,04 会計検査院所管,会計検査院,会計検査院,MATCHED,general
 jbaudit.go.jp__jbaudit__bud_clo__bud__pdf__r05__20220905_2,toc:組織,010 会計検査院,会計検査院,会計検査院,MATCHED,
@@ -188,8 +188,8 @@ ndl.go.jp__jp__aboutus__outline__r05_budgetrequest,context,02 国会所管（国
 ndl.go.jp__jp__aboutus__outline__r05_budgetrequest,toc:組織,030 国立国会図書館,国立国会図書館,国立国会図書館,MATCHED,
 npa.go.jp__policies__budget__r5__gaisanyokyu__ippankaikei,context,19 内閣府所管,内閣府,内閣府,MATCHED,general
 npa.go.jp__policies__budget__r5__gaisanyokyu__ippankaikei,toc:組織,070 警察庁,警察庁,警察庁,MATCHED,
-ppc.go.jp__files__pdf__220831youkyu,context,,,,OUT_OF_SCOPE,no_context
-ppc.go.jp__files__pdf__220831youkyu,toc:組織,096 個人情報保護委員会,個人情報保護委員会,,OUT_OF_SCOPE,no_context
+ppc.go.jp__files__pdf__220831youkyu,context,(cover) 19 内閣府所管（個人情報保護委員会）,内閣府,内閣府,MATCHED,general
+ppc.go.jp__files__pdf__220831youkyu,toc:組織,096 個人情報保護委員会,個人情報保護委員会,個人情報保護委員会,MATCHED,
 reconstruction.go.jp__files__user__topics__2022_fukkochougaisansaisyutsu,context,9101 東日本大震災復興特別会計,東日本大震災復興,東日本大震災復興,MATCHED,special
 reconstruction.go.jp__files__user__topics__2022_fukkochougaisansaisyutsu,toc:会計,01 東日本大震災復興,東日本大震災復興,東日本大震災復興,MATCHED,
 reconstruction.go.jp__files__user__topics__2022_fukkochougaisansaisyutsu,toc:所管,20 総務省,総務省,,OUT_OF_SCOPE,special_source_has_ministry_label

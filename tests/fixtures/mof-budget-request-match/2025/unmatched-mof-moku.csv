@@ -119,7 +119,7 @@ moku-general:457,general,009,地方創生支援費,情報処理業務庁費,kou_
 moku-general:458,general,009,地方創生支援費,地方創生支援委託費,kou_matched_no_request_row,内閣府,内閣本府,,
 moku-general:459,general,009,地方創生支援費,地方創生支援事業費補助金,kou_matched_no_request_row,内閣府,内閣本府,,
 moku-general:460,general,009,地方創生支援費,新しい地方経済・生活環境創生交付金,kou_matched_no_request_row,内閣府,内閣本府,,
-moku-general:461,general,052,地方創生基盤整備事業推進費,新しい地方経済・生活環境創生基盤整備交付金,kou_matched_no_request_row,内閣府,内閣本府,,
+moku-general:461,general,052,地方創生基盤整備事業推進費,新しい地方経済・生活環境創生基盤整備交付金,kou_not_matched,内閣府,内閣本府,,
 moku-general:462,general,013,防災政策費,非常勤職員手当,kou_matched_no_request_row,内閣府,内閣本府,,
 moku-general:463,general,013,防災政策費,職員旅費,kou_matched_no_request_row,内閣府,内閣本府,,
 moku-general:464,general,013,防災政策費,委員等旅費,kou_matched_no_request_row,内閣府,内閣本府,,

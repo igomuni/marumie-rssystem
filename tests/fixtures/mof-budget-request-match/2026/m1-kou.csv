@@ -116,7 +116,7 @@ cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e45
 cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__bdd2b4b4__20250918_policies_budget_84,6,060,出生後休業支援等給付費等育児休業等給付勘定へ繰入,25,kou-special:154,出生後休業支援等給付費等育児休業等給付勘定へ繰入,1,MATCHED,,80116237,77242000,2874237,子ども・子育て支援|子ども・子育て支援勘定,toc
 cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__bdd2b4b4__20250918_policies_budget_84,7,070,諸支出金,25,kou-special:155,諸支出金,1,MATCHED,,493633,493633,0,子ども・子育て支援|子ども・子育て支援勘定,toc
 cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__bdd2b4b4__20250918_policies_budget_84,8,075,子ども・子育て支援特例公債事務取扱費一般会計へ繰入,25,kou-special:156,子ども・子育て支援特例公債事務取扱費一般会計へ繰入,1,MATCHED,,877,707,170,子ども・子育て支援|子ども・子育て支援勘定,toc
-cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__bdd2b4b4__20250918_policies_budget_84,9,080,国民年金事業費等年金特別会計へ繰入,25,,,0,NO_CANDIDATE,name_no_match,15172500,,,子ども・子育て支援|子ども・子育て支援勘定,toc
+cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__bdd2b4b4__20250918_policies_budget_84,9,080,国民年金事業費等年金特別会計へ繰入,25,kou-special:157,国民年金事業費年金特別会計へ繰入,1,NEAR_NAME,name_near,15172500,15172500,0,子ども・子育て支援|子ども・子育て支援勘定,toc
 cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__bdd2b4b4__20250918_policies_budget_84,10,085,国債整理基金特別会計へ繰入,26,kou-special:158,国債整理基金特別会計へ繰入,1,MATCHED,,44181248,38275013,5906235,子ども・子育て支援|子ども・子育て支援勘定,toc
 cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__bdd2b4b4__20250918_policies_budget_84,11,090,予備費,26,kou-special:160,予備費,1,MATCHED,,4000000,4000000,0,子ども・子育て支援|子ども・子育て支援勘定,toc
 cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__bdd2b4b4__20250918_policies_budget_84,12,010,育児休業給付費,27,kou-special:161,育児休業給付費,1,MATCHED,,891075131,889621697,1453434,子ども・子育て支援|育児休業等給付勘定,toc
@@ -710,7 +710,7 @@ mhlw.go.jp__wp__yosan__yosan__26syokan__dl__05-4b-01,5,050,業務取扱費,10,ko
 mhlw.go.jp__wp__yosan__yosan__26syokan__dl__05-4b-01,6,060,出生後休業支援等給付費等育児休業等給付勘定へ繰入,25,kou-special:154,出生後休業支援等給付費等育児休業等給付勘定へ繰入,1,MATCHED,,80116237,77242000,2874237,子ども・子育て支援|子ども・子育て支援勘定,toc
 mhlw.go.jp__wp__yosan__yosan__26syokan__dl__05-4b-01,7,070,諸支出金,25,kou-special:155,諸支出金,1,MATCHED,,493633,493633,0,子ども・子育て支援|子ども・子育て支援勘定,toc
 mhlw.go.jp__wp__yosan__yosan__26syokan__dl__05-4b-01,8,075,子ども・子育て支援特例公債事務取扱費一般会計へ繰入,25,kou-special:156,子ども・子育て支援特例公債事務取扱費一般会計へ繰入,1,MATCHED,,877,707,170,子ども・子育て支援|子ども・子育て支援勘定,toc
-mhlw.go.jp__wp__yosan__yosan__26syokan__dl__05-4b-01,9,080,国民年金事業費等年金特別会計へ繰入,25,,,0,NO_CANDIDATE,name_no_match,15172500,,,子ども・子育て支援|子ども・子育て支援勘定,toc
+mhlw.go.jp__wp__yosan__yosan__26syokan__dl__05-4b-01,9,080,国民年金事業費等年金特別会計へ繰入,25,kou-special:157,国民年金事業費年金特別会計へ繰入,1,NEAR_NAME,name_near,15172500,15172500,0,子ども・子育て支援|子ども・子育て支援勘定,toc
 mhlw.go.jp__wp__yosan__yosan__26syokan__dl__05-4b-01,10,085,国債整理基金特別会計へ繰入,26,kou-special:158,国債整理基金特別会計へ繰入,1,MATCHED,,44181248,38275013,5906235,子ども・子育て支援|子ども・子育て支援勘定,toc
 mhlw.go.jp__wp__yosan__yosan__26syokan__dl__05-4b-01,11,090,予備費,26,kou-special:160,予備費,1,MATCHED,,4000000,4000000,0,子ども・子育て支援|子ども・子育て支援勘定,toc
 mhlw.go.jp__wp__yosan__yosan__26syokan__dl__05-4b-01,12,010,育児休業給付費,27,kou-special:161,育児休業給付費,1,MATCHED,,891075131,889621697,1453434,子ども・子育て支援|育児休業等給付勘定,toc
@@ -1072,7 +1072,7 @@ npa.go.jp__policies__budget__r8__gaisanyokyu__hukkoutokubetukaikei,0,185,治安�
 npa.go.jp__policies__budget__r8__gaisanyokyu__hukkoutokubetukaikei,1,187,治安復興事業費,5,kou-special:233,治安復興事業費,1,MATCHED,,213085,213085,0,東日本大震災復興|,toc
 npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei,0,010,警察庁共通費,3,kou-general:103,警察庁共通費,1,MATCHED,,100602985,102901804,-2298819,内閣府|警察庁,toc
 npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei,1,020,警察庁施設費,23,kou-general:104,警察庁施設費,1,MATCHED,,8247690,9562899,-1315209,内閣府|警察庁,toc
-npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei,2,030,匿名・流動型犯罪グループ対策推進費,25,,,0,NO_CANDIDATE,name_no_match,311634,,,内閣府|警察庁,toc
+npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei,2,030,匿名・流動型犯罪グループ対策推進費,25,kou-general:105,匿名・流動型犯罪グループ対策費,1,NEAR_NAME,name_near,311634,311580,54,内閣府|警察庁,toc
 npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei,3,040,犯罪被害者等支援推進費,26,kou-general:106,犯罪被害者等支援推進費,1,MATCHED,,2128606,2032084,96522,内閣府|警察庁,toc
 npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei,4,050,警察情報通信基盤費,28,kou-general:107,警察情報通信基盤費,1,MATCHED,,34062521,19526893,14535628,内閣府|警察庁,toc
 npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei,5,060,生活安全警察費,33,kou-general:108,生活安全警察費,1,MATCHED,,83495,56504,26991,内閣府|警察庁,toc

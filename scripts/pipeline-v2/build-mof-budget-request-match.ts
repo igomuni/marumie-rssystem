@@ -85,6 +85,19 @@ for (const t of trees.values()) if (t.hierarchy === 'position' && !ctxOf.has(t.s
   for (const [x, rows] of detail) if (x !== t.slug && famOf(x) === famOf(t.slug)) { const r = rows.find(y => y['row_type'] === 'CONTEXT'); const m = r ? /^(\d+)\s*(.+)$/.exec(r['事項']) : null; if (m) { const nm = ns(m[2]); const acct: Acct = m[1].length === 2 ? 'general' : 'special'; others.add(JSON.stringify([acct, acct === 'general' ? nm.split('所管')[0] : nm.replace(/特別会計.*$/, '')])); } }
   if (others.size === 1) { const [acct, key] = JSON.parse([...others][0]) as [Acct, string]; ctxOf.set(t.slug, { acct, key, raw: '(family)' }); }
 }
+// 文脈（所管・会計）が明細表から引けなかった source（明細表のヘッダが読めない抜粋版。FY2023 の個人情報保護委員会、金融庁の 1 冊）は、表紙の見出し（`19 内閣府所管（個人情報保護委員会）`）から補う。
+// 括弧内は組織の候補（`金融庁（金融庁）` は 1 つにする）。MOF の組織にあるときだけ使う
+const coverOrg = new Map<string, string>();
+for (const t of trees.values()) if (!ctxOf.has(t.slug)) {
+  const f = path.join(REQ, 'cover', 'sources', `${t.slug}.csv`); if (!fs.existsSync(f)) continue;
+  const h = rd(f).find(r => r['kind'] === 'HEADER'); if (!h) continue;
+  const name = ns(h['name']); const acct: Acct = (h['code'] ?? '').length === 2 ? 'general' : 'special';
+  ctxOf.set(t.slug, { acct, key: acct === 'general' ? name.split('所管')[0] : name.replace(/特別会計.*$/, ''), raw: `(cover) ${h['code']} ${h['name']}` });
+  const o = /[（(](.*)[）)]$/.exec(name)?.[1]; if (o) coverOrg.set(t.slug, o.replace(/^(.+)[（(]\1[）)]$/, '$1'));
+}
+// 名称が変わった組織・項（MOF 側の呼び方に合わせる。FY2023 の厚労省 国立更生援護機関 → 国立障害者リハビリテーションセンター）
+const RENAMES: [string, string][] = [['国立更生援護機関', '国立障害者リハビリテーションセンター'], ['国立更生援護所', '国立障害者リハビリテーションセンター']];
+const ren = (s: string): string => RENAMES.reduce((x, [a, b]) => x.split(a).join(b), s);
 const sources = [...new Set([...trees.keys(), ...detailV.keys(), ...totalV.keys()])].sort();
 
 // ---------------------------------------------------------------- M0
@@ -114,7 +127,7 @@ for (const s of sources) {
   for (const k of t.kous) {
     if (!c) { scopeOfKou.set(`${s}#${k.idx}`, { ok: false, reason: 'no_context' }); continue; }
     if (c.acct === 'general') {
-      const min = k.ministry ?? c.key; const org2 = k.org;
+      const min = k.ministry ?? c.key; const org0 = k.org ?? (coverOrg.get(s) && orgsOf.get(k.ministry ?? c.key)?.has(coverOrg.get(s)!) ? coverOrg.get(s)! : null); const org2 = org0 !== null && !orgsOf.get(min)?.has(org0) && orgsOf.get(min)?.has(ren(org0)) ? ren(org0) : org0;
       if (t.hierarchy !== 'toc') { if (!ministries.has(min)) scopeOfKou.set(`${s}#${k.idx}`, { ok: false, reason: 'ministry_unmatched' }); else scopeOfKou.set(`${s}#${k.idx}`, { ok: true, reason: '', acct: 'general', ministry: min }); }
       else if (!ministries.has(min)) scopeOfKou.set(`${s}#${k.idx}`, { ok: false, reason: 'ministry_unmatched' });
       else if (org2 === null || !orgsOf.get(min)?.has(org2)) scopeOfKou.set(`${s}#${k.idx}`, { ok: false, reason: org2 === null ? 'no_org_label' : 'org_unmatched' });
@@ -167,7 +180,11 @@ for (const s of sources) {
     const head = [s, k.idx, k.code, k.name, k.page];
     if (!sc.ok) { m1.push([...head, '', '', 0, sc.reason === 'no_context' ? 'OUT_OF_SCOPE' : 'PARENT_UNMATCHED', sc.reason, reqAmt, '', '', '']); return; }
     const a = sc.acct!; kouAcct.set(`${s}#${k.idx}`, a);
-    const c: Cand = a === 'general' && sc.org === undefined ? (kouByMinName.get(`${sc.ministry}|${k.name}`) ?? []) : (kouIdx[a].get(a === 'general' ? [sc.ministry, sc.org, k.name].join('|') : [sc.account, sc.sub, k.name].join('|')) ?? []);
+    let c: Cand = a === 'general' && sc.org === undefined ? (kouByMinName.get(`${sc.ministry}|${k.name}`) ?? []) : (kouIdx[a].get(a === 'general' ? [sc.ministry, sc.org, k.name].join('|') : [sc.account, sc.sub, k.name].join('|')) ?? []);
+    if (c.length === 0 && a === 'general' && ren(k.name) !== k.name) c = kouIdx[a].get([sc.ministry, sc.org, ren(k.name)].join('|')) ?? []; // 名称の変更
+    // 組織が分からない source（TOC なし）で、同名の項が複数の組織にあるときは、総表の行の並びから決めた組織で絞る
+    const linkOrg = links[i]?.org;
+    if (a === 'general' && sc.org === undefined && c.length > 1 && linkOrg) { const narrowed = c.filter(ci => ns(mofRaw['kou-general'][ci]['組織']) === linkOrg); if (narrowed.length >= 1) c = narrowed; }
     const st = c.length === 0 ? 'NO_CANDIDATE' : c.length === 1 ? 'MATCHED' : 'AMBIGUOUS';
     if (c.length === 1) m1Match.set(`${s}#${k.idx}`, c[0]);
     if (c.length === 0) m1.push([...head, '', '', 0, st, 'name_no_match', reqAmt, '', '', scopeText(`${s}#${k.idx}`)]);
@@ -179,6 +196,26 @@ for (const s of sources) {
   });
 }
 writeCsv('request-kou.csv', ['request_source', 'toc_kou_idx', 'request_code3', 'request_name', 'request_page', 'acct', 'ministry', 'org', 'account', 'sub', 'request_amount', 'previous_amount', 'hierarchy'], reqKou);
+// 名前が近い組（NEAR_NAME。MATCHED には入れない）: 候補なしの概算要求の項と、どの項にも対応していない MOF の項で、同じ所属、編集距離 2 以内（6 文字以上）、
+// 金額（概算要求額と MOF の額）が 5% 以内、かつ両側で 1 対 1 に決まるもの。表記ゆれ（例: 国民年金事業費等年金特別会計へ繰入）の確認用
+const lev = (a: string, b: string): number => { let d = Array.from({ length: b.length + 1 }, (_, j) => j); for (let i = 1; i <= a.length; i++) { const p = d; d = [i]; for (let j = 1; j <= b.length; j++) d[j] = Math.min(p[j] + 1, d[j - 1] + 1, p[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); } return d[b.length]; };
+{
+  const free: { a: Acct; i: number; scope: string; name: string; amt: number | null }[] = [];
+  for (const a of ['general', 'special'] as const) mofRaw[`kou-${a}`].forEach((r, i) => { if (!refKou.has(id(`kou-${a}`, i))) free.push({ a, i, scope: a === 'general' ? `${ns(r['所管'])}|${ns(r['組織'])}` : `${ns(r['特別会計'])}|${ns(r['勘定'])}`, name: ns(r['項名']), amt: mofAmountKou(r) }); });
+  const near = new Map<number, number[]>();
+  m1.forEach((row, ri) => {
+    if (row[8] !== 'NO_CANDIDATE' || row[9] !== 'name_no_match' || typeof row[10] !== 'number') return;
+    const name = ns(String(row[3])); const hits = free.map((f, fi) => ({ f, fi })).filter(({ f }) => f.scope === row[13] && Math.min(name.length, f.name.length) >= 6 && lev(name, f.name) <= 2 && f.amt !== null && Math.abs((row[10] as number) - f.amt) <= 0.05 * Math.max(Math.abs(f.amt), 1));
+    if (hits.length === 1) near.set(ri, [hits[0].fi]);
+  });
+  // 1 つの MOF の項に複数の概算要求の行が当たるのは、同じ項が複数の府省の書に載るとき（名前が同じ）だけ許す
+  const takenBy = new Map<number, Set<string>>(); for (const [ri, [fi]] of near) (takenBy.get(fi) ?? takenBy.set(fi, new Set()).get(fi)!).add(ns(String(m1[ri][3])));
+  for (const [ri, [fi]] of near) {
+    if ((takenBy.get(fi)?.size ?? 0) !== 1) continue; const f = free[fi]; const r = mofRaw[`kou-${f.a}`][f.i]; const row = m1[ri];
+    row[5] = id(`kou-${f.a}`, f.i); row[6] = r['項名']; row[7] = 1; row[8] = 'NEAR_NAME'; row[9] = 'name_near'; row[11] = f.amt ?? ''; row[12] = typeof row[10] === 'number' && f.amt !== null ? row[10] - f.amt : '';
+    refKou.add(id(`kou-${f.a}`, f.i));
+  }
+}
 writeCsv('m1-kou.csv', ['request_source', 'toc_kou_idx', 'request_code3', 'request_name', 'request_page', 'mof_row', 'mof_name', 'candidate_count', 'status', 'reason', 'request_amount', 'mof_amount', 'amount_diff', 'request_scope', 'hierarchy'], m1.map(r => [...r, trees.get(String(r[0]))?.hierarchy ?? '']));
 
 // ---------------------------------------------------------------- M2
