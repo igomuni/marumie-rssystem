@@ -30,9 +30,11 @@ export interface TrendFilters {
   shared: boolean;
   /** その年度に金額が一致しない要求書がある行だけ */
   mismatch: boolean;
+  /** その年度に、目に「繰入」を含む項だけ */
+  transfer: boolean;
 }
 
-export const INITIAL_TREND_FILTERS: TrendFilters = { name: '', nameRegex: false, org: '', orgRegex: false, accts: [], groups: [], pattern: 'all', change: '', shared: false, mismatch: false };
+export const INITIAL_TREND_FILTERS: TrendFilters = { name: '', nameRegex: false, org: '', orgRegex: false, accts: [], groups: [], pattern: 'all', change: '', shared: false, mismatch: false, transfer: false };
 
 /**
  * 所管 = 載っている要求書の公開元（PDF のドメイン由来の府省庁名）。会計の区別は acct（一般 / 特別）の列で示す。
@@ -125,6 +127,7 @@ export function filterRows(rows: readonly BudgetRequestTrendRow[], f: TrendFilte
     if (f.pattern === 'new' && !isNew(r, year, first)) return false;
     if (f.shared && !(a && a.src.length > 1)) return false;
     if (f.mismatch && !(a && a.mismatch)) return false;
+    if (f.transfer && !(a?.xfer && a.xfer.length > 0)) return false;
     return true;
   });
   return kept.flatMap(r => recordsOf(r, year, urls)).filter(x => {
