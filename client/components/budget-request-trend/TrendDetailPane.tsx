@@ -114,7 +114,7 @@ export function TrendDetailPane({
                     {a.src.map(([u, page, pdfPage], i) => (
                       <span key={u} className="mr-1.5">
                         <a href={pdfPage ? `${urls[u]}#page=${pdfPage}` : urls[u]} target="_blank" rel="noopener noreferrer" title={urls[u]} className="text-emerald-700 underline hover:text-emerald-900 dark:text-emerald-400">
-                          PDF{a.src.length > 1 ? i + 1 : ''} {publisherOf(urls[u])}
+                          {publisherOf(urls[u])}
                         </a>
                         <span className="text-neutral-500"> ({page})</span>
                         {a.srcAmt?.[i] && <span className="text-neutral-400"> {formatSen(a.srcAmt[i][1])}</span>}

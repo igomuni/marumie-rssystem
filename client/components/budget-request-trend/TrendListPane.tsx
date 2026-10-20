@@ -1,7 +1,7 @@
 'use client';
 
 import type { BudgetRequestTrendRow } from '@/types/budget-request-trend';
-import { orgOf, patternOf, publisherOf, recordChange, recordRate, yearOf, type TrendRecord, type TrendSortDir, type TrendSortKey } from '@/app/lib/budget-request-trend';
+import { acctLabelOf, orgOf, patternOf, publisherOf, recordChange, recordRate, yearOf, type TrendRecord, type TrendSortDir, type TrendSortKey } from '@/app/lib/budget-request-trend';
 import { changeColor, formatRate, formatSen, formatSenSigned } from './format';
 
 const MAX_ROWS = 600;
@@ -129,7 +129,7 @@ export function TrendListPane({
                   className={`cursor-pointer border-b border-neutral-100 dark:border-neutral-800 ${selected ? 'bg-emerald-50 dark:bg-emerald-950/40' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/60'}`}
                 >
                   <td className="break-words px-2 py-1 text-left">{x.group}</td>
-                  <td className="break-words px-2 py-1 text-left">{r.acct === 0 ? '一般会計' : `${r.min}特別会計`}</td>
+                  <td className="break-words px-2 py-1 text-left">{acctLabelOf(r)}</td>
                   <td className="break-words px-2 py-1 text-left">{orgOf(r)}</td>
                   <td className="break-words px-2 py-1 text-left font-medium">
                     {r.name}
