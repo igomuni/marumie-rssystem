@@ -124,8 +124,10 @@ for (const [year, ver] of YEARS) {
     if (!/^\d+$/.test(page)) return null; const n = Number(page);
     const pairs: [number, number][] = [];
     for (const [lab, pg] of labelPage.get(src) ?? []) { const m = lab.match(/\d+/g); if (m && m.length === 1) pairs.push([Number(m[0]), pg]); }
-    const lo = pairs.filter(x => x[0] < n).sort((x, y) => y[0] - x[0])[0], hi = pairs.filter(x => x[0] > n).sort((x, y) => x[0] - y[0])[0];
-    if (!lo || !hi || lo[1] - lo[0] !== hi[1] - hi[0] || n - lo[0] > 8 || hi[0] - n > 8) return null;
+    const below = pairs.filter(x => x[0] < n).sort((x, y) => y[0] - x[0]), lo = below[0], hi = pairs.filter(x => x[0] > n).sort((x, y) => x[0] - y[0])[0];
+    // 前後の頁ラベルで差が同じとき。後ろに頁ラベルが無い（以降が画像の頁）ときは、直前の 2 つの頁ラベルで差が同じとき
+    const ok = lo && n - lo[0] <= 8 && (hi ? hi[0] - n <= 8 && lo[1] - lo[0] === hi[1] - hi[0] : below[1] !== undefined && lo[1] - lo[0] === below[1][1] - below[1][0]);
+    if (!ok) return null;
     const pg = n + (lo[1] - lo[0]);
     return { slug: src, pdfPage: String(pg), basis: '推定', image: textlessPages(src).has(pg) };
   };
