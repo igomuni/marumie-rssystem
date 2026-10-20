@@ -89,6 +89,22 @@ for (const [year, ver] of YEARS) {
     }
     labelPage.set(slug, lm); digitPage.set(slug, dm);
   }
+  // 明細表の CSV が無い書（明細表のヘッダが読めなかったもの。例: FY2023 の個人情報保護委員会の `(補正後予算額)` ヘッダ）は、plain text の各頁の先頭行にある印字頁（`内（個） 3`、`4 内（個）`）から頁ラベルを作る
+  for (const slug of new Set(kou.map(r => r['request_source']))) {
+    if (labelPage.has(slug)) continue;
+    const file = path.join('data', 'work', 'budget-request-plain-text', String(year), `${slug}.txt`); if (!fs.existsSync(file)) continue;
+    const t = fs.readFileSync(file, 'utf8').split('\f'); if (t[t.length - 1] === '') t.pop();
+    const lm = new Map<string, number>(); const dm = new Map<string, Set<number>>();
+    let inDetail = false; // 明細表の表題（`令和５年度歳出概算要求額明細表`）の頁から先だけ。総表や目次の頁は含めない
+    t.forEach((page, i) => {
+      if (!inDetail && page.split('\n').some(l => /^令和.{1,3}年度歳出概算要求額明細表$/.test(ns(l)))) inDetail = true;
+      if (!inDetail) return;
+      const first = ns(page.split('\n').find(l => l.trim() !== '') ?? ''); const m = /^(\d+)([^\d]{1,8})$/.exec(first) ?? /^([^\d]{1,8})(\d+)$/.exec(first); if (!m) return;
+      const digits = /^\d+$/.test(m[1]) ? m[1] : m[2]; if (!lm.has(first)) lm.set(first, i + 1);
+      (dm.get(digits) ?? dm.set(digits, new Set()).get(digits)!).add(i + 1);
+    });
+    if (lm.size > 0) { labelPage.set(slug, lm); digitPage.set(slug, dm); }
+  }
   // 繰入: 項の下の目の名前に「繰入」を含むもの（例: `交付税及び譲与税配付金特別会計へ繰入`）の繰入先。明細表の CODE3（項）の行に続く CODE_ 行（目）から引く。
   // 同じ要求書の中で項コードと項名が同じ項が複数あれば、まとめて扱う
   const xfers = new Map<string, Map<string, Set<string>>>();

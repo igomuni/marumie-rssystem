@@ -1000,7 +1000,7 @@
 2023,一般,19,内閣府,,,警察庁,目次,サイバー警察費,110,218852,1545820,1326968,npa.go.jp__policies__budget__r5__gaisanyokyu__ippankaikei,54,56,npa.go.jp__policies__budget__r5__gaisanyokyu__ippankaikei,項,0,toc,0,0,,MATCHED
 2023,一般,19,内閣府,,,警察庁,目次,科学警察研究所,120,2001378,2029282,27904,npa.go.jp__policies__budget__r5__gaisanyokyu__ippankaikei,57,59,npa.go.jp__policies__budget__r5__gaisanyokyu__ippankaikei,項,0,toc,0,0,,MATCHED
 2023,一般,19,内閣府,,,警察庁,目次,警察活動基盤整備費,130,88478427,99855939,11377512,npa.go.jp__policies__budget__r5__gaisanyokyu__ippankaikei,66,68,npa.go.jp__policies__budget__r5__gaisanyokyu__ippankaikei,項,0,toc,0,0,,MATCHED
-2023,一般,19,内閣府,,,個人情報保護委員会,目次,個人情報保護委員会,001,3129301,3074662,-54639,ppc.go.jp__files__pdf__220831youkyu,3,,ppc.go.jp__files__pdf__220831youkyu,,0,toc,0,0,,OUT_OF_SCOPE
+2023,一般,19,内閣府,,,個人情報保護委員会,目次,個人情報保護委員会,001,3129301,3074662,-54639,ppc.go.jp__files__pdf__220831youkyu,3,7,ppc.go.jp__files__pdf__220831youkyu,頁ラベル,0,toc,0,0,,OUT_OF_SCOPE
 2023,特別,9101,総務省,東日本大震災復興,,総務本省,目次,地方交付税交付金,228,91942648,0,-91942648,reconstruction.go.jp__files__user__topics__2022_fukkochougaisansaisyutsu,9,11,reconstruction.go.jp__files__user__topics__2022_fukkochougaisansaisyutsu,項,0,toc,1,0,交付税及び譲与税配付金特別会計へ繰入,MATCHED
 2023,特別,9101,財務省,東日本大震災復興,,財務本省,目次,復興債費,330,20378314,25217163,4838849,reconstruction.go.jp__files__user__topics__2022_fukkochougaisansaisyutsu,9,11,reconstruction.go.jp__files__user__topics__2022_fukkochougaisansaisyutsu,項,0,toc,1,0,復興債償還財源等国債整理基金特別会計へ繰入,MATCHED
 2023,特別,9101,財務省,東日本大震災復興,,財務本省,目次,復興加速化・福島再生予備費,334,150000000,100000000,-50000000,reconstruction.go.jp__files__user__topics__2022_fukkochougaisansaisyutsu,10,12,reconstruction.go.jp__files__user__topics__2022_fukkochougaisansaisyutsu,項,0,toc,1,0,,MATCHED
@@ -5507,6 +5507,6 @@
 2027,特別,9502,,交付税及び譲与税配付金,,,,諸支出金,060,242140,229712,-12428,soumu.go.jp__main_content__001091981,16,20,soumu.go.jp__main_content__001091981,項,0,toc,0,0,,
 2027,特別,9502,,交付税及び譲与税配付金,,,,国債整理基金特別会計へ繰入,070,26778905580,24819225042,-1959680538,soumu.go.jp__main_content__001091981,17,21,soumu.go.jp__main_content__001091981,項,0,toc,0,0,国債整理基金特別会計へ繰入,
 2027,特別,9502,,交付税及び譲与税配付金,,,,予備費,090,2530000,2530000,0,soumu.go.jp__main_content__001091981,18,22,soumu.go.jp__main_content__001091981,項,0,toc,0,0,,
-2027,特別,9101,総務省,東日本大震災復興,,総務本省,目次,地方交付税交付金,228,45595444,0,-45595444,soumu.go.jp__main_content__001091982,3,7,soumu.go.jp__main_content__001091981,頁ラベル,0,toc,1,0,,
-2027,特別,9101,復興庁,東日本大震災復興,,復興庁,目次,生活基盤行政復興政策費,213,198896,220373,21477,soumu.go.jp__main_content__001091982,3,7,soumu.go.jp__main_content__001091981,頁ラベル,0,toc,1,0,,
-2027,特別,9101,復興庁,東日本大震災復興,,復興庁,目次,生活基盤行政復興事業費,225,46666,0,-46666,soumu.go.jp__main_content__001091982,3,7,soumu.go.jp__main_content__001091981,頁ラベル,0,toc,1,0,,
+2027,特別,9101,総務省,東日本大震災復興,,総務本省,目次,地方交付税交付金,228,45595444,0,-45595444,soumu.go.jp__main_content__001091982,3,7,soumu.go.jp__main_content__001091982,頁ラベル,0,toc,1,0,,
+2027,特別,9101,復興庁,東日本大震災復興,,復興庁,目次,生活基盤行政復興政策費,213,198896,220373,21477,soumu.go.jp__main_content__001091982,3,7,soumu.go.jp__main_content__001091982,頁ラベル,0,toc,1,0,,
+2027,特別,9101,復興庁,東日本大震災復興,,復興庁,目次,生活基盤行政復興事業費,225,46666,0,-46666,soumu.go.jp__main_content__001091982,3,7,soumu.go.jp__main_content__001091982,頁ラベル,0,toc,1,0,,
