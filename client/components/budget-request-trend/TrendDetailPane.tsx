@@ -14,6 +14,7 @@ export function TrendDetailPane({
   urls,
   rows,
   onSelectRow,
+  onSelectYear,
 }: {
   row: BudgetRequestTrendRow | null;
   years: readonly number[];
@@ -22,6 +23,8 @@ export function TrendDetailPane({
   /** 全行（紐づけ候補の行を引く） */
   rows: readonly BudgetRequestTrendRow[];
   onSelectRow: (r: BudgetRequestTrendRow) => void;
+  /** グラフの年度・年度の表の行をクリックしたとき、一覧の年度を切り替える */
+  onSelectYear: (y: number) => void;
 }) {
   if (!row) {
     return <p className="p-6 text-center text-xs text-neutral-500">一覧から項を選ぶと、全年度の推移とグラフ、元の PDF へのリンクが出ます。</p>;
@@ -84,7 +87,8 @@ export function TrendDetailPane({
           const x = LEFT + i * (BAR + gap);
           const selected = y === year;
           return (
-            <g key={y}>
+            <g key={y} onClick={() => onSelectYear(y)} className="cursor-pointer">
+              <rect x={x - gap / 2} y={0} width={BAR + gap} height={H} fill="transparent" />
               {a ? (
                 <>
                   <rect x={x} y={H - BOTTOM - h(a.req)} width={BAR} height={h(a.req)} className="fill-emerald-700 dark:fill-emerald-400" opacity={selected ? 1 : 0.6} />
@@ -118,7 +122,7 @@ export function TrendDetailPane({
               const hl = y === year ? 'bg-emerald-50 dark:bg-emerald-950/40' : '';
               if (!a) {
                 return (
-                  <tr key={y} className={`border-t border-neutral-100 dark:border-neutral-800 ${hl}`}>
+                  <tr key={y} onClick={() => onSelectYear(y)} className={`cursor-pointer border-t border-neutral-100 dark:border-neutral-800 ${hl}`}>
                     <td className="px-1.5 py-1">FY{y}</td>
                     <td colSpan={5} className="px-1.5 py-1 text-neutral-500">この年度の要求書に載っていません</td>
                   </tr>
@@ -127,7 +131,7 @@ export function TrendDetailPane({
               const ch = a.req !== null && a.prev !== null ? a.req - a.prev : null;
               const gapV = assessmentGap(row, y);
               return (
-                <tr key={y} className={`border-t border-neutral-100 dark:border-neutral-800 ${hl}`}>
+                <tr key={y} onClick={() => onSelectYear(y)} className={`cursor-pointer border-t border-neutral-100 dark:border-neutral-800 ${hl}`}>
                   <td className="px-1.5 py-1">FY{y}</td>
                   <td className="whitespace-nowrap px-1.5 py-1 text-right tabular-nums">{formatSen(a.prev)}</td>
                   <td className="whitespace-nowrap px-1.5 py-1 text-right tabular-nums">{formatSen(a.req)}</td>
@@ -136,7 +140,7 @@ export function TrendDetailPane({
                   <td className="whitespace-nowrap px-1.5 py-1">
                     {a.src.map(([u, page, pdfPage], i) => (
                       <span key={u} className="mr-1.5">
-                        <a href={pdfPage ? `${urls[u]}#page=${pdfPage}` : urls[u]} target="_blank" rel="noopener noreferrer" title={urls[u]} className="text-emerald-700 underline hover:text-emerald-900 dark:text-emerald-400">
+                        <a onClick={e => e.stopPropagation()} href={pdfPage ? `${urls[u]}#page=${pdfPage}` : urls[u]} target="_blank" rel="noopener noreferrer" title={urls[u]} className="text-emerald-700 underline hover:text-emerald-900 dark:text-emerald-400">
                           {publisherOf(urls[u])}
                         </a>
                         <span className="text-neutral-500"> ({page})</span>

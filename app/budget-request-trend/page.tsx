@@ -129,7 +129,7 @@ export default function BudgetRequestTrendPage() {
         </section>
         <Splitter label="詳細の幅" width={detailWidth} limits={DETAIL_WIDTH} dir={-1} onChange={setDetailWidth} />
         <section aria-label="詳細（全年度）" className={`${pane} overflow-auto lg:col-span-2 xl:col-span-1 xl:w-[var(--dw)] xl:shrink-0`} style={{ '--dw': `${detailWidth}px` } as React.CSSProperties}>
-          <TrendDetailPane row={selected} years={years} year={activeYear} urls={data.urls} rows={data.rows} onSelectRow={r => setSelectedKey(rowKey(r))} />
+          <TrendDetailPane row={selected} years={years} year={activeYear} urls={data.urls} rows={data.rows} onSelectRow={r => setSelectedKey(rowKey(r))} onSelectYear={setYear} />
         </section>
       </main>
     </div>
