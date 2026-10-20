@@ -75,4 +75,8 @@ describe('budget-request-trend', () => {
     expect(groupOf(shared, 2027, URLS)).toBe('環境省、経済産業省');
     expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, groups: ['経済産業省'] }, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['特会費']);
   });
+  it('filters items whose 目 include a 繰入 in the selected year', () => {
+    const withXfer = [row('繰入費', { '2027': Y(10, 20, { xfer: ['国債整理基金特別会計へ繰入'] }) }), ...rows];
+    expect(filterRows(withXfer, { ...INITIAL_TREND_FILTERS, transfer: true }, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['繰入費']);
+  });
 });

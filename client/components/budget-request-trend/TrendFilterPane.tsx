@@ -46,6 +46,7 @@ export function TrendFilterPane({
       isGone: rows.filter(r => isGone(r, year, first)).length,
       shared: rows.filter(r => (yearOf(r, year)?.src.length ?? 0) > 1).length,
       mismatch: rows.filter(r => yearOf(r, year)?.mismatch).length,
+      transfer: rows.filter(r => (yearOf(r, year)?.xfer?.length ?? 0) > 0).length,
     }),
     [rows, years, year, first]
   );
@@ -140,6 +141,11 @@ export function TrendFilterPane({
             <input type="checkbox" checked={filters.mismatch} onChange={e => set({ mismatch: e.target.checked })} />
             額不一致（書によって金額が違う）
             <span className={count}>{counts.mismatch}</span>
+          </label>
+          <label className={row}>
+            <input type="checkbox" checked={filters.transfer} onChange={e => set({ transfer: e.target.checked })} />
+            繰入（目に「繰入」を含む）
+            <span className={count}>{counts.transfer}</span>
           </label>
         </div>
       </div>

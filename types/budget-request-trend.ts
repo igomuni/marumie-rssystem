@@ -10,6 +10,8 @@ export interface BudgetRequestTrendYear {
   src: [number, string, string][];
   /** 要求書ごとの [前年度予算額, 概算要求額]（src と同じ並び。mismatch のときだけ）。prev / req は最も大きい額の書（合計書）の値 */
   srcAmt?: [number | null, number | null][];
+  /** 項の下の目に「繰入」を含むときの繰入先（目名。例: 国債整理基金特別会計へ繰入）。会計をまたぐ合計では二重になりうる */
+  xfer?: string[];
   /** 同じキーが複数の要求書にあり、金額が一致しない */
   mismatch: boolean;
   /** MOF 突合の状態（参考。MOF の版が無い年度は空） */
