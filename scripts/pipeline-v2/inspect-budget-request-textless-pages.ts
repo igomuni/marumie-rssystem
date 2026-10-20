@@ -1,6 +1,6 @@
 /**
  * 概算要求書 PDF の「文字層のない頁」を目視で確認するための、ローカル用の HTML を作る（リポジトリには出力を入れない）。
- *   npx tsx scripts/pipeline-v2/inspect-budget-request-textless-pages.ts --year=2027 [--include-blank] [--dpi=60] [--out=<dir>]
+ *   npx tsx scripts/pipeline-v2/inspect-budget-request-textless-pages.ts --year=2027 [--include-blank] [--dpi=60] [--zoom-dpi=130] [--out=<dir>]
  * 入力: data/work/budget-request-plain-text/{year}/*.txt（頁は \f 区切り。空の頁が文字層なし）、凍結 PDF コーパス（PDF の場所）、
  *       tests/fixtures/budget-request-trend/kou.csv（その頁にリンクされる年度推移の項。任意）
  * 判定: `pdfimages -list` で画像のある頁を「画像」（黒塗り・スキャンの可能性）、無い頁を「空白」とする。既定は画像の頁だけをサムネイルにする。
@@ -15,6 +15,7 @@ import { readCsv } from './lib/mof-budget-request-match';
 const arg = (name: string) => process.argv.find(a => a.startsWith(`--${name}=`))?.slice(name.length + 3);
 const YEAR = Number(arg('year') ?? '2027');
 const DPI = Number(arg('dpi') ?? '60');
+const ZOOM_DPI = Number(arg('zoom-dpi') ?? '130'); // マウスを載せたときの拡大画像
 const INCLUDE_BLANK = process.argv.includes('--include-blank');
 const OUT = arg('out') ?? path.join('data', 'work', 'budget-request-textless-pages', String(YEAR));
 const TEXT_DIR = path.join('data', 'work', 'budget-request-plain-text', String(YEAR));
@@ -36,7 +37,7 @@ if (fs.existsSync(trendCsv)) {
 }
 
 fs.mkdirSync(path.join(OUT, 'thumbs'), { recursive: true });
-type Item = { slug: string; page: number; pages: number; kind: '画像' | '空白'; thumb: string | null };
+type Item = { slug: string; page: number; pages: number; kind: '画像' | '空白'; thumb: string | null; large: string | null };
 const items: Item[] = [];
 for (const file of fs.readdirSync(TEXT_DIR).filter(f => f.endsWith('.txt')).sort()) {
   const slug = file.slice(0, -4);
@@ -50,13 +51,13 @@ for (const file of fs.readdirSync(TEXT_DIR).filter(f => f.endsWith('.txt')).sort
   }
   for (const page of empty) {
     const kind = withImage.has(page) ? '画像' : '空白';
-    let thumb: string | null = null;
+    let thumb: string | null = null, large: string | null = null;
     if (kind === '画像' || INCLUDE_BLANK) {
-      thumb = `thumbs/${slug.replace(/[^A-Za-z0-9._-]/g, '_')}_p${page}`;
-      execFileSync('pdftoppm', ['-f', String(page), '-l', String(page), '-r', String(DPI), '-png', '-singlefile', doc.localPdfPath, path.join(OUT, thumb)]);
-      thumb += '.png';
+      const base = `thumbs/${slug.replace(/[^A-Za-z0-9._-]/g, '_')}_p${page}`;
+      for (const [suffix, dpi] of [['', DPI], ['_L', ZOOM_DPI]] as const) execFileSync('pdftoppm', ['-f', String(page), '-l', String(page), '-r', String(dpi), '-png', '-singlefile', doc.localPdfPath, path.join(OUT, base + suffix)]);
+      thumb = `${base}.png`; large = `${base}_L.png`;
     }
-    items.push({ slug, page, pages: pages.length, kind, thumb });
+    items.push({ slug, page, pages: pages.length, kind, thumb, large });
   }
 }
 
@@ -68,7 +69,7 @@ const sections = [...bySlug].sort((a, b) => b[1].filter(i => i.kind === '画像'
   const cards = list.map(i => {
     const linked = trendByPage.get(`${slug}#${i.page}`) ?? [];
     return `<figure class="${i.kind === '画像' ? 'img' : 'blank'}">
-  <a href="file://${encodeURI(abs)}#page=${i.page}" target="_blank">${i.thumb ? `<img src="${esc(i.thumb)}" loading="lazy" alt="p${i.page}">` : '<div class="ph">サムネイルなし</div>'}</a>
+  <a href="file://${encodeURI(abs)}#page=${i.page}" target="_blank">${i.thumb ? `<img src="${esc(i.thumb)}" data-large="${esc(i.large!)}" loading="lazy" alt="p${i.page}">` : '<div class="ph">サムネイルなし</div>'}</a>
   <figcaption><b>p${i.page}</b> / ${i.pages} 頁 <span class="k">${i.kind}</span>${linked.length ? `<div class="t">リンクされる項: ${esc(linked.join('、'))}</div>` : ''}</figcaption>
 </figure>`;
   }).join('\n');
@@ -80,8 +81,17 @@ const sections = [...bySlug].sort((a, b) => b[1].filter(i => i.kind === '画像'
 fs.writeFileSync(path.join(OUT, 'index.html'), `<!doctype html><meta charset="utf-8"><title>FY${YEAR} 文字層のない頁</title>
 <style>body{font:14px/1.5 sans-serif;margin:16px}h2{font-size:15px;margin:24px 0 2px}small{color:#666;font-weight:normal}.grid{display:flex;flex-wrap:wrap;gap:10px}
 figure{margin:0;border:1px solid #ccc;padding:4px;width:260px}figure.img{border-color:#d33}figure.blank{opacity:.6}img{width:100%;display:block}.ph{height:60px;color:#888;display:flex;align-items:center;justify-content:center}
+#zoom{position:fixed;display:none;z-index:10;border:2px solid #333;background:#fff;box-shadow:0 4px 20px rgba(0,0,0,.4);pointer-events:none;max-width:60vw;max-height:94vh}
 figcaption{font-size:12px}.k{margin-left:4px;color:#d33}.blank .k{color:#666}.t{color:#06c}</style>
 <h1>FY${YEAR} 文字層のない頁</h1>
 <p>画像 ${count.画像} 頁（黒塗り・スキャンの可能性。赤枠）/ 空白 ${count.空白} 頁${INCLUDE_BLANK ? '' : '（サムネイルなし。--include-blank で作る）'}。サムネイルをクリックすると、その頁の PDF が開く（ローカルの PDF）。</p>
-${sections}`);
+${sections}
+<img id="zoom" alt="">
+<script>
+const z=document.getElementById('zoom');
+document.addEventListener('mouseover',e=>{const t=e.target;if(t.tagName==='IMG'&&t.dataset.large){z.src=t.dataset.large;z.style.display='block';place(e)}});
+document.addEventListener('mousemove',e=>{if(z.style.display==='block')place(e)});
+document.addEventListener('mouseout',e=>{if(e.target.tagName==='IMG'&&e.target.dataset.large)z.style.display='none'});
+function place(e){const w=z.offsetWidth,h=z.offsetHeight;let x=e.clientX+16;if(x+w>innerWidth)x=Math.max(0,e.clientX-w-16);let y=Math.min(Math.max(8,e.clientY-h/2),innerHeight-h-8);z.style.left=x+'px';z.style.top=y+'px'}
+</script>`);
 console.log(JSON.stringify({ year: YEAR, ...count, out: path.join(OUT, 'index.html') }));
