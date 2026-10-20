@@ -35,6 +35,11 @@
    "duplicated_keys": 55,
    "general_without_org": 0,
    "without_amount": 0
+  },
+  "links": {
+   "moved": 6,
+   "renamed": 9,
+   "candidates": 1
   }
  }
 }

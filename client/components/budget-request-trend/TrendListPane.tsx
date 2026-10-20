@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import type { BudgetRequestTrendRow } from '@/types/budget-request-trend';
 import { acctLabelOf, orgOf, patternOf, publisherOf, recordChange, recordRate, yearOf, type TrendRecord, type TrendSortDir, type TrendSortKey } from '@/app/lib/budget-request-trend';
 import { changeColor, formatRate, formatSen, formatSenSigned } from './format';
@@ -56,7 +57,16 @@ export function TrendListPane({
     { key: 'diff', label: '増減' },
     { key: 'rate', label: '増減率' },
   ];
-  const shown = rows.slice(0, MAX_ROWS);
+  // 選択中の項が上位 MAX_ROWS 件の外にあっても表示に含め、年度の切り替え・選択の変更のときに一覧をそこまでスクロールする
+  const selectedIdx = selectedKey === null ? -1 : rows.findIndex(x => rowKey(x.row) === selectedKey);
+  const shown = rows.slice(0, Math.max(MAX_ROWS, selectedIdx + 1));
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (selectedKey === null) return;
+    const el = [...(scrollRef.current?.querySelectorAll<HTMLElement>('tr[data-row-key]') ?? [])].find(e => e.dataset.rowKey === selectedKey);
+    el?.scrollIntoView({ block: 'nearest' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- 年度の切り替えと選択の変更だけで動かす（フィルタや並べ替えでは動かさない）
+  }, [year, selectedKey]);
   const widthOf = (k: TrendSortKey) => widths[k] ?? DEFAULT_COLUMN_WIDTHS[k];
   const tableWidth = cols.reduce((n, c) => n + widthOf(c.key), 0);
 
@@ -83,7 +93,7 @@ export function TrendListPane({
         <span>前年度予算額 合計 <b className="tabular-nums text-neutral-800 dark:text-neutral-100">{formatSen(sum.prev)}</b></span>
         <span className="text-neutral-400">複数の府省の書に載る項は府省ごとに1行です（合計は二重に数えます）</span>
       </div>
-      <div className="min-h-0 flex-1 overflow-auto">
+      <div ref={scrollRef} className="min-h-0 flex-1 overflow-auto">
         <table className="border-collapse text-xs" style={{ width: tableWidth, tableLayout: 'fixed' }}>
           <colgroup>{cols.map(c => <col key={c.key} style={{ width: widthOf(c.key) }} />)}</colgroup>
           <thead>
@@ -122,6 +132,7 @@ export function TrendListPane({
               return (
                 <tr
                   key={key}
+                  data-row-key={rk}
                   tabIndex={0}
                   aria-selected={selected}
                   onClick={() => onSelect(x)}
@@ -136,6 +147,10 @@ export function TrendListPane({
                     {r.kou && <span className="ml-1 text-[10px] text-neutral-400">({r.kou})</span>}
                     {a && a.src.length > 1 && <span title={[...new Set(a.src.map(([u]) => publisherOf(urls[u])))].join('、')} className={`${chip} border-neutral-300 text-neutral-500 dark:border-neutral-600`}>複数書</span>}
                     {a?.xfer && a.xfer.length > 0 && <span title={`${a.xfer.join('、')}（会計をまたぐ合計では二重になりえます）`} className={`${chip} border-sky-600 text-sky-700 dark:text-sky-400`}>繰入</span>}
+                    {a?.from !== undefined && <span title="前年度に消えた同名の項と金額が近い。詳細で確認できます" className={`${chip} border-violet-600 text-violet-700 dark:text-violet-400`}>紐づけ候補</span>}
+                    {a?.moved && <span title={`${a.moved.kind}: ${a.moved.from} から`} className={`${chip} border-violet-600 text-violet-700 dark:text-violet-400`}>{a.moved.kind}</span>}
+                    {a?.newAcct && <span title="この会計・勘定は前年度に無く、この年度に初出です" className={`${chip} border-emerald-600 text-emerald-700 dark:text-emerald-400`}>会計新設</span>}
+                    {a?.codeChanged && <span title="所管コードが前の年度から変わりました" className={`${chip} border-neutral-400 text-neutral-500`}>コード変更</span>}
                     {a?.mismatch && <span className={`${chip} border-amber-600 text-amber-700 dark:text-amber-400`}>額不一致</span>}
                   </td>
                   <td className={`whitespace-nowrap px-2 py-1 text-left ${pattern === '新規' ? 'text-emerald-700 dark:text-emerald-400' : pattern === '消滅' ? 'text-orange-700 dark:text-orange-400' : 'text-neutral-500'}`}>{pattern ?? '–'}</td>
@@ -146,8 +161,8 @@ export function TrendListPane({
                 </tr>
               );
             })}
-            {rows.length > MAX_ROWS && (
-              <tr><td colSpan={9} className="px-2 py-2 text-neutral-500">上位 {MAX_ROWS} 項を表示（全 {rows.length.toLocaleString()} 項）。絞り込みで減らしてください。</td></tr>
+            {rows.length > shown.length && (
+              <tr><td colSpan={9} className="px-2 py-2 text-neutral-500">上位 {shown.length.toLocaleString()} 件を表示（全 {rows.length.toLocaleString()} 項）。絞り込みで減らしてください。</td></tr>
             )}
             {rows.length === 0 && (
               <tr><td colSpan={9} className="px-2 py-8 text-center text-neutral-500">条件に合う項がありません。</td></tr>

@@ -32,9 +32,15 @@ export interface TrendFilters {
   mismatch: boolean;
   /** その年度に、目に「繰入」を含む項だけ */
   transfer: boolean;
+  /** その年度に所管コードが前の年度から変わった行だけ */
+  codeChange: boolean;
+  /** その年度に会計・勘定が新設された行だけ */
+  newAcct: boolean;
+  /** その年度に前の項からつないだ（移管・改称）行だけ */
+  moved: boolean;
 }
 
-export const INITIAL_TREND_FILTERS: TrendFilters = { name: '', nameRegex: false, org: '', orgRegex: false, accts: [], groups: [], pattern: 'all', change: '', shared: false, mismatch: false, transfer: false };
+export const INITIAL_TREND_FILTERS: TrendFilters = { name: '', nameRegex: false, org: '', orgRegex: false, accts: [], groups: [], pattern: 'all', change: '', shared: false, mismatch: false, transfer: false, codeChange: false, newAcct: false, moved: false };
 
 /**
  * 所管 = 載っている要求書の公開元（PDF のドメイン由来の府省庁名）。会計の区別は acct（一般 / 特別）の列で示す。
@@ -128,6 +134,9 @@ export function filterRows(rows: readonly BudgetRequestTrendRow[], f: TrendFilte
     if (f.shared && !(a && a.src.length > 1)) return false;
     if (f.mismatch && !(a && a.mismatch)) return false;
     if (f.transfer && !(a?.xfer && a.xfer.length > 0)) return false;
+    if (f.codeChange && !a?.codeChanged) return false;
+    if (f.newAcct && !a?.newAcct) return false;
+    if (f.moved && !a?.moved) return false;
     return true;
   });
   return kept.flatMap(r => recordsOf(r, year, urls)).filter(x => {

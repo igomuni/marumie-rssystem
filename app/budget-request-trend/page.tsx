@@ -20,7 +20,7 @@ import { TrendFilterPane } from '@/client/components/budget-request-trend/TrendF
 import { TrendListPane } from '@/client/components/budget-request-trend/TrendListPane';
 import { TrendDetailPane } from '@/client/components/budget-request-trend/TrendDetailPane';
 
-const rowKey = (r: BudgetRequestTrendRow): string => [r.acct, r.code, r.min, r.sub, r.org, r.name, r.kou ?? ''].join('|');
+const rowKey = (r: BudgetRequestTrendRow): string => [r.acct, r.min, r.sub, r.org, r.name, r.kou ?? ''].join('|');
 const FILTER_WIDTH = { def: 240, min: 180, max: 420 };
 const DETAIL_WIDTH = { def: 430, min: 320, max: 760 };
 const pane = 'min-h-0 min-w-0 overflow-hidden rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900';
@@ -129,7 +129,7 @@ export default function BudgetRequestTrendPage() {
         </section>
         <Splitter label="詳細の幅" width={detailWidth} limits={DETAIL_WIDTH} dir={-1} onChange={setDetailWidth} />
         <section aria-label="詳細（全年度）" className={`${pane} overflow-auto lg:col-span-2 xl:col-span-1 xl:w-[var(--dw)] xl:shrink-0`} style={{ '--dw': `${detailWidth}px` } as React.CSSProperties}>
-          <TrendDetailPane row={selected} years={years} year={activeYear} urls={data.urls} />
+          <TrendDetailPane row={selected} years={years} year={activeYear} urls={data.urls} rows={data.rows} onSelectRow={r => setSelectedKey(rowKey(r))} onSelectYear={setYear} />
         </section>
       </main>
     </div>

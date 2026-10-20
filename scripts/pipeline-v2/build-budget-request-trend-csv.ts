@@ -21,6 +21,8 @@ const MATCH = path.join('tests', 'fixtures', 'mof-budget-request-match');
 const rd = (p: string): Rec[] => readCsv(fs.readFileSync(p, 'utf8'));
 const cell = (v: unknown): string => { const s = v === null || v === undefined ? '' : String(v); return /[",\n\r]/u.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
 
+// キーの所管部分: 一般会計は所管名、特別会計は空（特別会計名・勘定がキーに入る）。所管コード（表紙）はキーにしない（年金特会 9207 → 2507 のようにコードだけ変わる）
+const scopeOf = (r: Rec): string => (r['acct'] === 'general' ? r['ministry'] : '');
 const header = ['年度', '会計区分', '所管コード', '所管', '特別会計', '勘定', '組織', '組織の出所', '項名', '項コード', '前年度予算額_千円', '要求額_千円', '増減_千円', '要求書', '頁', 'PDF頁', '階層', '複数書', '金額不一致', '繰入先', 'MOF突合(参考)'];
 const rows: unknown[][] = [];
 const uiRows = new Map<string, BudgetRequestTrendRow>(); // キー（年度をまたぐ）→ 行
@@ -97,15 +99,15 @@ for (const [year, ver] of YEARS) {
   const recs: Row[] = kou.map(r => {
     const cv = cover.get(r['request_source']); let org = r['org']; let orgSrc = org ? (r['hierarchy'] === 'toc' ? '目次' : '総表') : '';
     if (!org && r['acct'] === 'general') { if (cv?.org) { org = cv.org; orgSrc = '表紙括弧'; } else orgSrc = 'なし'; }
-    return { r, code: cv?.code ?? '', org, orgSrc, key: [r['acct'], cv?.code ?? '', r['account'], r['sub'], org, r['request_name']].join('\t') };
+    return { r, code: cv?.code ?? '', org, orgSrc, key: [r['acct'], scopeOf(r), r['account'], r['sub'], org, r['request_name']].join('\t') };
   });
   // 組織が引けなかった特別会計の行（目次の無い抜粋版など）は、同じ年度・所管コード・特別会計・勘定・項名で他の書が示す組織が 1 つに決まるときに、それで補う
-  const orgsOfItem = new Map<string, Set<string>>(); const itemKey = (x: Row): string => [x.r['acct'], x.code, x.r['account'], x.r['sub'], x.r['request_name']].join('\t');
+  const orgsOfItem = new Map<string, Set<string>>(); const itemKey = (x: Row): string => [x.r['acct'], scopeOf(x.r), x.r['account'], x.r['sub'], x.r['request_name']].join('\t');
   for (const x of recs) if (x.r['acct'] === 'special' && x.org) (orgsOfItem.get(itemKey(x)) ?? orgsOfItem.set(itemKey(x), new Set()).get(itemKey(x))!).add(x.org);
   for (const x of recs) {
     if (x.r['acct'] !== 'special' || x.org) continue;
     const set = orgsOfItem.get(itemKey(x)); if (!set || set.size !== 1) continue;
-    x.org = [...set][0]; x.orgSrc = '他の書'; x.key = [x.r['acct'], x.code, x.r['account'], x.r['sub'], x.org, x.r['request_name']].join('\t');
+    x.org = [...set][0]; x.orgSrc = '他の書'; x.key = [x.r['acct'], scopeOf(x.r), x.r['account'], x.r['sub'], x.org, x.r['request_name']].join('\t');
   }
   stages.push({ year, ver, kou, status, recs, urlOf, pdfPageOf, xferOf });
 }
@@ -129,7 +131,8 @@ for (const { year, ver, kou, status, recs, urlOf, pdfPageOf, xferOf } of stages)
     for (const x of g) { const url = urlOf.get(x.r['request_source']); if (!url) throw new Error(`no URL for ${year} ${x.r['request_source']}`); const e: [number, string, string] = [urlIndex(url), x.r['request_page'], pdfPageOf(x.r['request_source'], x.r['request_page'])]; if (!src.some(y => y[0] === e[0] && y[1] === e[1])) { src.push(e); srcAmt.push([num(x.r['previous_amount']), num(x.r['request_amount'])]); } }
     const mismatch = new Set(g.map(y => `${y.r['request_amount']}|${y.r['previous_amount']}`)).size > 1;
     const xfer = [...new Set(g.flatMap(x => xferOf(x.r['request_source'], x.r['request_code3'], x.r['request_name'])))].sort();
-    u.y[String(year)] = { prev: num(r0['previous_amount']), req: num(r0['request_amount']), src, ...(mismatch ? { srcAmt } : {}), ...(xfer.length > 0 ? { xfer } : {}), mismatch, mof: ver ? status.get(`${r0['request_source']}#${r0['toc_kou_idx']}`) ?? '' : '' };
+    u.code = x0.code;
+    u.y[String(year)] = { code: x0.code, prev: num(r0['previous_amount']), req: num(r0['request_amount']), src, ...(mismatch ? { srcAmt } : {}), ...(xfer.length > 0 ? { xfer } : {}), mismatch, mof: ver ? status.get(`${r0['request_source']}#${r0['toc_kou_idx']}`) ?? '' : '' };
   }
   for (const x of recs) {
     const g = group.get(x.key)!; const r = x.r;
@@ -142,7 +145,62 @@ for (const { year, ver, kou, status, recs, urlOf, pdfPageOf, xferOf } of stages)
 fs.mkdirSync(outDir, { recursive: true });
 const csv = [header, ...rows].map(r => r.map(cell).join(',')).join('\n') + '\n';
 fs.writeFileSync(path.join(outDir, 'kou.csv'), csv);
-const ui: BudgetRequestTrendData = { years: YEARS.map(([y]) => y), urls: uiUrls, rows: [...uiRows.values()] };
+// 紐づけ: 前年度に無い項（新規）と、その年度に無い項（消滅）で、次をすべて満たすものを対応づける。
+//   会計区分が同じ、項名が同じかほぼ同じ（編集距離 2 以内、6 文字以上。例: 児童手当等交付金 / 児童手当交付金）、
+//   新規側の前年度予算額が消滅側の要求額の ±30% 以内（どちらも 0 超）、同名に近い候補が 1 対 1 に決まる。
+// そのうち、移管元が特定できるもの（次のどちらか）は 1 つの行につなぐ（`moved`）。それ以外は候補のまま（`from` / `to`）。
+//   改称: 所管（特別会計は特別会計名）と勘定が同じで、組織か項名だけが変わった（例: 地方環境事務所 → 地方環境局）
+//   移管: 移管先の会計・勘定（特別会計 + 勘定）がその年度に新設された（前年度に無い）。移管元は消滅側の項（例: 年金特会 → 子ども・子育て支援特会）
+const editDistance = (a: string, b: string): number => {
+  const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...new Array<number>(b.length).fill(0)]);
+  for (let j = 1; j <= b.length; j++) d[0][j] = j;
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+  return d[a.length][b.length];
+};
+const nameNear = (a: string, b: string): boolean => a === b || (Math.min(a.length, b.length) >= 6 && editDistance(a, b) <= 2);
+const placeOf = (r: BudgetRequestTrendRow): string => `${r.acct}\t${r.min}\t${r.sub}`; // 所管（特別会計名）+ 勘定
+const describe = (r: BudgetRequestTrendRow): string => [r.min, r.sub, r.org].filter(Boolean).join(' › ') + (r.name ? `「${r.name}」` : '');
+let live = [...uiRows.values()];
+const placeFirstYear = new Map<string, number>(); // つなぐ前の、特別会計 + 勘定が最初に現れた年度
+for (const r of live) for (const y of Object.keys(r.y)) placeFirstYear.set(placeOf(r), Math.min(placeFirstYear.get(placeOf(r)) ?? 9999, Number(y)));
+const linkCount = { moved: 0, renamed: 0, candidates: 0 };
+const candidatePairs: { g: BudgetRequestTrendRow; n: BudgetRequestTrendRow; a: string; b: string }[] = [];
+for (let i = 0; i + 1 < YEARS.length; i++) {
+  const a = String(YEARS[i][0]), b = String(YEARS[i + 1][0]);
+  const placesA = new Set(live.filter(r => r.y[a]).map(placeOf));
+  const gone = live.filter(r => r.y[a] && !r.y[b]);
+  const added = live.filter(r => r.y[b] && !r.y[a]);
+  const near = (g: BudgetRequestTrendRow, n: BudgetRequestTrendRow): boolean => {
+    const req = g.y[a].req, prev = n.y[b].prev;
+    return g.acct === n.acct && nameNear(g.name, n.name) && !!req && !!prev && req > 0 && prev > 0 && Math.abs(prev - req) / req <= 0.3;
+  };
+  const removed = new Set<BudgetRequestTrendRow>();
+  for (const g of gone) {
+    const ns_ = added.filter(n => near(g, n));
+    if (ns_.length !== 1 || gone.filter(g2 => near(g2, ns_[0])).length !== 1) continue;
+    const n = ns_[0];
+    const kind = placeOf(g) === placeOf(n) ? '改称' : !placesA.has(placeOf(n)) ? '移管' : null;
+    if (!kind || Object.keys(g.y).some(y => y in n.y)) { candidatePairs.push({ g, n, a, b }); continue; }
+    n.y = { ...g.y, ...n.y }; n.y[b].moved = { kind, from: describe(g) }; removed.add(g);
+    linkCount[kind === '移管' ? 'moved' : 'renamed']++;
+  }
+  live = live.filter(r => !removed.has(r));
+}
+// データの状態: 所管コードの変更（前の年度から）、会計・勘定の新設（前年度にその特別会計 + 勘定が無い）
+for (const r of live) {
+  let prevCode = '';
+  for (const [y] of YEARS.slice().map(([v]) => [String(v)] as [string])) {
+    const e = r.y[y]; if (!e) continue;
+    if (prevCode && e.code && e.code !== prevCode && !e.moved) e.codeChanged = true;
+    if (e.code) prevCode = e.code;
+    if (r.acct === 1 && placeFirstYear.get(placeOf(r)) === Number(y) && Number(y) > YEARS[0][0]) e.newAcct = true;
+  }
+}
+const uiList = live;
+const indexOf = new Map(uiList.map((r, i) => [r, i]));
+for (const { g, n, a, b } of candidatePairs) { if (indexOf.has(g) && indexOf.has(n)) { g.y[a].to = indexOf.get(n); n.y[b].from = indexOf.get(g); linkCount.candidates++; } }
+summary['links'] = linkCount;
+const ui: BudgetRequestTrendData = { years: YEARS.map(([y]) => y), urls: uiUrls, rows: uiList };
 const uiDir = path.join('public', 'data', 'v2', 'ui', 'budget-request-trend');
 fs.mkdirSync(uiDir, { recursive: true });
 fs.writeFileSync(path.join(uiDir, 'kou.json.gz'), zlib.gzipSync(JSON.stringify(ui), { level: 9, mtime: 0 } as zlib.ZlibOptions));

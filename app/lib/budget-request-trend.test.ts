@@ -3,7 +3,7 @@ import type { BudgetRequestTrendRow, BudgetRequestTrendYear } from '@/types/budg
 import { INITIAL_TREND_FILTERS, assessmentGap, groupOf, recordsOf, changeRate, filterRows, isGone, isNew, patternOf, publisherOf, sortRows, textMatches } from './budget-request-trend';
 
 const URLS = ['https://www.env.go.jp/a.pdf', 'https://www.meti.go.jp/b.pdf'];
-const Y = (prev: number | null, req: number | null, extra: Partial<BudgetRequestTrendYear> = {}): BudgetRequestTrendYear => ({ prev, req, src: [[0, '1', '3']], mismatch: false, mof: '', ...extra });
+const Y = (prev: number | null, req: number | null, extra: Partial<BudgetRequestTrendYear> = {}): BudgetRequestTrendYear => ({ code: '19', prev, req, src: [[0, '1', '3']], mismatch: false, mof: '', ...extra });
 const row = (name: string, y: Record<string, BudgetRequestTrendYear>, o: Partial<BudgetRequestTrendRow> = {}): BudgetRequestTrendRow =>
   ({ acct: 0, code: '19', min: '内閣府', sub: '', org: '本府', orgSrc: '目次', name, y, ...o });
 const YEARS = [2025, 2026, 2027];
