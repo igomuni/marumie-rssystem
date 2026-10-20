@@ -67,7 +67,7 @@ for (const [year, ver] of YEARS) {
   for (const d of freeze.documents) { const slug = d.localPdfPath.replace(/^data\/download\//, '').replace(/\.pdf$/i, '').replace(/\//g, '__'); urlOf.set(slug, d.sourceUrl); urlOf.set(slug.replace(/\$/g, '%24'), d.sourceUrl); }
   // 目次の頁は紙面に印字された頁（`4復興特` `エ1` のような接頭辞・接尾辞つきもある）。PDF の通し頁は、明細表の各行の 頁 と source_page（PDF の頁）の対応から引く。
   // 明細表が無い要求書は引けず、空にする
-  const detailKou = new Map<string, { code: string; name: string; org: string; pg: number }[]>();
+  const detailKou = new Map<string, { code: string; name: string; org: string; pg: number; req: number | null }[]>();
   const labelPage = new Map<string, Map<string, number>>(); const digitPage = new Map<string, Map<string, Set<number>>>();
   const detailDir = path.join('tests', 'fixtures', 'budget-request-csv', String(year), 'detail-table', 'sources');
   if (fs.existsSync(detailDir)) for (const f of fs.readdirSync(detailDir).filter(x => x.endsWith('.csv'))) {
@@ -79,7 +79,8 @@ for (const [year, ver] of YEARS) {
       if (r['row_type'] !== 'CODE3') return;
       const m = /^(\d+)(.*)$/.exec(ns(r['事項'] ?? '')); if (!m || !Number(r['source_page'])) return;
       if (rowsOf[i + 1]?.['row_type'] === 'CODE3' && orgNow === '') { orgNow = m[2]; return; }
-      (detailKou.get(slug) ?? detailKou.set(slug, []).get(slug)!).push({ code: m[1], name: m[2], org: orgNow, pg: Number(r['source_page']) });
+      const reqKey = Object.keys(r).find(k => k.endsWith('年度概算要求額')); const reqV = reqKey ? Number((r[reqKey] ?? '').replace(/[,\s]/g, '').replace('△', '-')) : NaN;
+      (detailKou.get(slug) ?? detailKou.set(slug, []).get(slug)!).push({ code: m[1], name: m[2], org: orgNow, pg: Number(r['source_page']), req: Number.isFinite(reqV) && reqKey && (r[reqKey] ?? '') !== '' ? reqV : null });
     });
     for (const r of rowsOf) {
       const lab = ns(r['頁'] ?? ''); const pg = Number(r['source_page']); if (!lab || !pg) continue;
@@ -103,12 +104,12 @@ for (const [year, ver] of YEARS) {
   const xferOf = (src: string, code: string, name: string): string[] => [...(xfers.get(src)?.get(`${code}\t${ns(name)}`) ?? [])];
   // 分冊の書（文科省など。表紙・目次・総表だけの PDF と、明細表を持つ複数の PDF に分かれる）は、目次の頁を、同じ書の分冊の頁ラベルから探す。
   // 書の同定は slug から日付と末尾の連番を除いたもの。分冊のうちちょうど 1 つの PDF の 1 頁に当たるときだけ採る
-  const bookOf = (slug: string): string => slug.replace(/\d{8}[-_]/, '').replace(/_+\d+$/, '');
+  const bookOf = (slug: string): string => slug.replace(/\d{8}[-_]/, '').replace(/(_+[a-z]?)\d+$/, '$1'); // 末尾の連番を除く（`e1` / `e2` のような英字つきは英字を残して別の書にする）
   const slugsOfBook = new Map<string, string[]>(); for (const slug of labelPage.keys()) (slugsOfBook.get(bookOf(slug)) ?? slugsOfBook.set(bookOf(slug), []).get(bookOf(slug))!).push(slug);
   // 項コード + 項名で、同じ書（分冊を含む）の明細表の項の行を探し、その行の PDF の頁（source_page）をそのまま使う。複数に当たるときは組織で絞る。
   // 決まらない行は、目次の印字頁を明細表の頁ラベルに引き当てる（上のラベル方式）
-  const kouIndex = new Map<string, { slug: string; org: string; pg: number }[]>();
-  for (const [slug, list] of detailKou) for (const k of list) { const key = `${bookOf(slug)}\t${k.code}\t${k.name}`; (kouIndex.get(key) ?? kouIndex.set(key, []).get(key)!).push({ slug, org: k.org, pg: k.pg }); }
+  const kouIndex = new Map<string, { slug: string; org: string; pg: number; req: number | null }[]>();
+  for (const [slug, list] of detailKou) for (const k of list) { const key = `${bookOf(slug)}\t${k.code}\t${k.name}`; (kouIndex.get(key) ?? kouIndex.set(key, []).get(key)!).push({ slug, org: k.org, pg: k.pg, req: k.req }); }
   // 文字層のない頁（画像の頁。plain text で空の頁）。明細表の行が取り込めず、項の見出しも引けない
   const textless = new Map<string, Set<number>>();
   const textlessPages = (slug: string): Set<number> => {
@@ -131,7 +132,11 @@ for (const [year, ver] of YEARS) {
   const locate = (r: Rec, org: string): Located | null => {
     const src = r['request_source'], page = r['request_page'];
     const cands = kouIndex.get(`${bookOf(src)}\t${r['request_code3']}\t${ns(r['request_name'])}`) ?? [];
-    const pick = cands.length === 1 ? cands : cands.filter(c => org && c.org === ns(org));
+    let pick = cands.length === 1 ? cands : cands.filter(c => org && c.org === ns(org));
+    // 項が複数の PDF にまたがる（内閣府・内閣官房の分冊）ときは、各 PDF の要求額の合計が項の要求額に一致すれば、最初の PDF の最初の頁を採る
+    if (pick.length !== 1 && cands.length > 1 && r['request_amount'] !== '' && cands.every(c => c.req !== null) && cands.reduce((n, c) => n + (c.req ?? 0), 0) === Number(r['request_amount'])) {
+      pick = [[...cands].sort((a, b) => (a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : a.pg - b.pg))[0]];
+    }
     if (pick.length === 1) return { slug: pick[0].slug, pdfPage: String(pick[0].pg), basis: '項', image: false };
     const find = (slug: string): number[] => {
       const hit = labelPage.get(slug)?.get(ns(page)); if (hit) return [hit];
