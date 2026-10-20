@@ -970,6 +970,6 @@ soumu.go.jp__main_content__001091981,4,050,事務取扱費,15,special,,,交付�
 soumu.go.jp__main_content__001091981,5,060,諸支出金,16,special,,,交付税及び譲与税配付金,,229712,242140,toc
 soumu.go.jp__main_content__001091981,6,070,国債整理基金特別会計へ繰入,17,special,,,交付税及び譲与税配付金,,24819225042,26778905580,toc
 soumu.go.jp__main_content__001091981,7,090,予備費,18,special,,,交付税及び譲与税配付金,,2530000,2530000,toc
-soumu.go.jp__main_content__001091982,0,228,地方交付税交付金,3,,総務省,総務本省,,,0,45595444,toc
-soumu.go.jp__main_content__001091982,1,213,生活基盤行政復興政策費,3,,復興庁,復興庁,,,220373,198896,toc
-soumu.go.jp__main_content__001091982,2,225,生活基盤行政復興事業費,3,,復興庁,復興庁,,,0,46666,toc
+soumu.go.jp__main_content__001091982,0,228,地方交付税交付金,3,special,総務省,総務本省,東日本大震災復興,,0,45595444,toc
+soumu.go.jp__main_content__001091982,1,213,生活基盤行政復興政策費,3,special,復興庁,復興庁,東日本大震災復興,,220373,198896,toc
+soumu.go.jp__main_content__001091982,2,225,生活基盤行政復興事業費,3,special,復興庁,復興庁,東日本大震災復興,,0,46666,toc

@@ -10,7 +10,7 @@ jikou-general:113,general,288,地方創生地域産業基盤整備事業推進�
 jikou-general:114,general,289,地域経済活性化支援費,地域経済活性化の支援に必要な経費,kou_not_matched,内閣府,内閣本府,,
 jikou-general:125,general,291,科学技術・イノベーション推進事務局,研究開発の推進に必要な経費,kou_matched_no_request_row,内閣府,科学技術・イノベーション推進事務局,,
 jikou-general:136,general,063,独立行政法人北方領土問題対策協会施設整備費,独立行政法人北方領土問題対策協会施設整備に必要な経費,kou_not_matched,内閣府,北方対策本部,,
-jikou-general:165,general,144,匿名・流動型犯罪グループ対策費,匿名・流動型犯罪グループに対する取組の推進に必要な経費,kou_not_matched,内閣府,警察庁,,
+jikou-general:165,general,144,匿名・流動型犯罪グループ対策費,匿名・流動型犯罪グループに対する取組の推進に必要な経費,kou_matched_no_request_row,内閣府,警察庁,,
 jikou-general:172,general,145,交通反則者納金財源交通安全対策特別交付金等交付税及び譲与税配付金特別会計へ繰入,交通反則者納金財源の交通安全対策特別交付金等に係る交付税及び譲与税配付金特別会計へ繰入れに必要な経費,kou_not_matched,内閣府,警察庁,,
 jikou-general:186,general,331,サイバー通信情報監理委員会,サイバー通信情報監理委員会に必要な経費,kou_not_matched,内閣府,サイバー通信情報監理委員会,,
 jikou-general:187,general,331,サイバー通信情報監理委員会,サイバー通信情報監理の適正な実施に必要な経費,kou_not_matched,内閣府,サイバー通信情報監理委員会,,
@@ -96,7 +96,7 @@ jikou-special:181,special,06,児童手当等子ども・子育て支援特別会
 jikou-special:187,special,03,子ども・子育て支援推進費,子どものための教育・保育事業に必要な経費,kou_matched_no_request_row,内閣府及び厚生労働省,,子ども・子育て支援,子ども・子育て支援勘定
 jikou-special:188,special,04,乳児等のための支援給付費,乳児等のための支援給付に必要な経費,kou_not_matched,内閣府及び厚生労働省,,子ども・子育て支援,子ども・子育て支援勘定
 jikou-special:194,special,10,子ども・子育て支援特例公債事務取扱費一般会計へ繰入,子ども・子育て支援特例公債事務取扱費の財源の一般会計へ繰入れに必要な経費,kou_matched_no_request_row,内閣府及び厚生労働省,,子ども・子育て支援,子ども・子育て支援勘定
-jikou-special:195,special,11,国民年金事業費年金特別会計へ繰入,国民年金事業費の財源の年金特別会計国民年金勘定へ繰入れに必要な経費,kou_not_matched,内閣府及び厚生労働省,,子ども・子育て支援,子ども・子育て支援勘定
+jikou-special:195,special,11,国民年金事業費年金特別会計へ繰入,国民年金事業費の財源の年金特別会計国民年金勘定へ繰入れに必要な経費,kou_matched_no_request_row,内閣府及び厚生労働省,,子ども・子育て支援,子ども・子育て支援勘定
 jikou-special:197,special,13,一般会計へ繰入,一般会計へ繰入れに必要な経費,kou_not_matched,内閣府及び厚生労働省,,子ども・子育て支援,子ども・子育て支援勘定
 jikou-special:239,special,14,東日本大震災復興土地改良事業費負担金等収入東日本大震災復興特別会計へ繰入,東日本大震災復興に係る東日本大震災復興特別会計へ繰入れに必要な経費,kou_not_matched,農林水産省,,食料安定供給,国営土地改良事業勘定
 jikou-special:281,special,71,福島国際研究教育機構関連事業費,新産業創出等研究開発等施策の推進に必要な経費,kou_matched_no_request_row,復興庁,復興庁,東日本大震災復興,

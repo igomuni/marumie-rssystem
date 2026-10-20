@@ -441,7 +441,7 @@ moku-general:832,general,101,沖縄総合事務局,自動車重量税,kou_matche
 moku-general:833,general,101,沖縄総合事務局,国有資産所在市町村交付金,kou_matched_no_request_row,内閣府,沖縄総合事務局,,
 moku-general:834,general,101,沖縄総合事務局,交際費,kou_matched_no_request_row,内閣府,沖縄総合事務局,,
 moku-general:835,general,101,沖縄総合事務局,賠償償還及払戻金,kou_matched_no_request_row,内閣府,沖縄総合事務局,,
-moku-general:1069,general,144,匿名・流動型犯罪グループ対策費,警察装備費,kou_not_matched,内閣府,警察庁,,
+moku-general:1069,general,144,匿名・流動型犯罪グループ対策費,警察装備費,kou_matched_no_request_row,内閣府,警察庁,,
 moku-general:1085,general,136,交通警察費,都道府県警察施設災害復旧費補助金,kou_matched_no_request_row,内閣府,警察庁,,
 moku-general:1086,general,145,交通反則者納金財源交通安全対策特別交付金等交付税及び譲与税配付金特別会計へ繰入,交通反則者納金財源の交付税及び譲与税配付金特別会計へ繰入,kou_not_matched,内閣府,警察庁,,
 moku-general:1193,general,331,サイバー通信情報監理委員会,職員基本給,kou_not_matched,内閣府,サイバー通信情報監理委員会,,
@@ -698,7 +698,7 @@ moku-special:589,special,04,諸支出金,貨幣交換差減補填金,kou_matched
 moku-special:598,special,04,諸支出金,貨幣交換差減補填金,kou_matched_no_request_row,厚生労働省,,年金,厚生年金勘定
 moku-special:650,special,03,子ども・子育て支援推進費,子どものための教育・保育給付災害臨時特例補助金,kou_matched_no_request_row,内閣府及び厚生労働省,,子ども・子育て支援,子ども・子育て支援勘定
 moku-special:653,special,04,乳児等のための支援給付費,乳児等のための支援給付交付金,kou_not_matched,内閣府及び厚生労働省,,子ども・子育て支援,子ども・子育て支援勘定
-moku-special:683,special,11,国民年金事業費年金特別会計へ繰入,年金特別会計国民年金勘定へ繰入,kou_not_matched,内閣府及び厚生労働省,,子ども・子育て支援,子ども・子育て支援勘定
+moku-special:683,special,11,国民年金事業費年金特別会計へ繰入,年金特別会計国民年金勘定へ繰入,kou_matched_no_request_row,内閣府及び厚生労働省,,子ども・子育て支援,子ども・子育て支援勘定
 moku-special:685,special,13,一般会計へ繰入,一般会計へ繰入,kou_not_matched,内閣府及び厚生労働省,,子ども・子育て支援,子ども・子育て支援勘定
 moku-special:772,special,01,事務取扱費,貨幣交換差減補填金,kou_matched_no_request_row,農林水産省,,食料安定供給,業務勘定
 moku-special:797,special,14,東日本大震災復興土地改良事業費負担金等収入東日本大震災復興特別会計へ繰入,土地改良事業費負担金収入繰入,kou_not_matched,農林水産省,,食料安定供給,国営土地改良事業勘定
