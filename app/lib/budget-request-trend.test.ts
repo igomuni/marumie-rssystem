@@ -39,7 +39,7 @@ describe('budget-request-trend', () => {
   });
   it('filters by account, ministry group, shared and change', () => {
     expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, acct: 1 }, 2027, YEARS, URLS).map(r => r.name)).toEqual(['特会費']);
-    expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, groups: ['環境省'] }, 2027, YEARS, URLS).map(r => r.name)).toEqual(['特会費']);
+    expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, groups: ['経済産業省'] }, 2027, YEARS, URLS).map(r => r.name)).toEqual(['特会費']);
     expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, shared: true }, 2027, YEARS, URLS).map(r => r.name)).toEqual(['特会費']);
     expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, change: 'dn10' }, 2027, YEARS, URLS).map(r => r.name)).toEqual(['特会費']);
   });
