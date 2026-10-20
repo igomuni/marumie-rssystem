@@ -20,8 +20,8 @@ export interface TrendFilters {
   /** 組織（特別会計は勘定）の検索。規則は項名と同じ */
   org: string;
   orgRegex: boolean;
-  /** 会計の絞り込み（0 = 一般, 1 = 特別）。空なら絞り込まない */
-  accts: (0 | 1)[];
+  /** 会計の絞り込み（acctLabelOf の値: 一般会計 / ○○特別会計）。空なら絞り込まない */
+  accts: string[];
   /** 所管の絞り込み（groupsOf の値。どれかが載っていれば一致）。空なら絞り込まない */
   groups: string[];
   pattern: PatternFilter;
@@ -69,6 +69,8 @@ export function recordsOf(r: BudgetRequestTrendRow, year: number, urls: readonly
 
 export const recordChange = (x: TrendRecord): number | null => (x.req !== null && x.prev !== null ? x.req - x.prev : null);
 export const recordRate = (x: TrendRecord): number | null => (x.req !== null && x.prev !== null && x.prev !== 0 ? (x.req - x.prev) / x.prev : null);
+/** 会計の表示名。一般会計、または特別会計ごと（○○特別会計） */
+export const acctLabelOf = (r: BudgetRequestTrendRow): string => (r.acct === 0 ? '一般会計' : `${r.min}特別会計`);
 /** 組織の列の表示。特別会計は勘定 */
 export const orgOf = (r: BudgetRequestTrendRow): string => (r.acct === 0 ? r.org : r.sub);
 
@@ -116,7 +118,7 @@ export function filterRows(rows: readonly BudgetRequestTrendRow[], f: TrendFilte
   const kept = rows.filter(r => {
     const a = yearOf(r, year);
     if (f.pattern === 'gone') { if (!isGone(r, year, first)) return false; } else if (!a) return false;
-    if (f.accts.length > 0 && !f.accts.includes(r.acct)) return false;
+    if (f.accts.length > 0 && !f.accts.includes(acctLabelOf(r))) return false;
     if (!textMatches(r.name, f.name, f.nameRegex)) return false;
     if (!textMatches(`${r.org} ${r.sub}`, f.org, f.orgRegex)) return false;
     if (f.pattern === 'all5' && !inAllYears(r, years)) return false;
