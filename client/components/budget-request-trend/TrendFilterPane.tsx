@@ -47,6 +47,9 @@ export function TrendFilterPane({
       shared: rows.filter(r => (yearOf(r, year)?.src.length ?? 0) > 1).length,
       mismatch: rows.filter(r => yearOf(r, year)?.mismatch).length,
       transfer: rows.filter(r => (yearOf(r, year)?.xfer?.length ?? 0) > 0).length,
+      codeChange: rows.filter(r => yearOf(r, year)?.codeChanged).length,
+      newAcct: rows.filter(r => yearOf(r, year)?.newAcct).length,
+      moved: rows.filter(r => yearOf(r, year)?.moved).length,
     }),
     [rows, years, year, first]
   );
@@ -146,6 +149,21 @@ export function TrendFilterPane({
             <input type="checkbox" checked={filters.transfer} onChange={e => set({ transfer: e.target.checked })} />
             繰入（目に「繰入」を含む）
             <span className={count}>{counts.transfer}</span>
+          </label>
+          <label className={row}>
+            <input type="checkbox" checked={filters.codeChange} onChange={e => set({ codeChange: e.target.checked })} />
+            所管コードの変更（前の年度から）
+            <span className={count}>{counts.codeChange}</span>
+          </label>
+          <label className={row}>
+            <input type="checkbox" checked={filters.newAcct} onChange={e => set({ newAcct: e.target.checked })} />
+            会計・勘定の新設（この年度に初出）
+            <span className={count}>{counts.newAcct}</span>
+          </label>
+          <label className={row}>
+            <input type="checkbox" checked={filters.moved} onChange={e => set({ moved: e.target.checked })} />
+            移管・改称（前の項からつないだ）
+            <span className={count}>{counts.moved}</span>
           </label>
         </div>
       </div>

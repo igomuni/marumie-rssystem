@@ -137,6 +137,9 @@ export function TrendListPane({
                     {a && a.src.length > 1 && <span title={[...new Set(a.src.map(([u]) => publisherOf(urls[u])))].join('、')} className={`${chip} border-neutral-300 text-neutral-500 dark:border-neutral-600`}>複数書</span>}
                     {a?.xfer && a.xfer.length > 0 && <span title={`${a.xfer.join('、')}（会計をまたぐ合計では二重になりえます）`} className={`${chip} border-sky-600 text-sky-700 dark:text-sky-400`}>繰入</span>}
                     {a?.from !== undefined && <span title="前年度に消えた同名の項と金額が近い。詳細で確認できます" className={`${chip} border-violet-600 text-violet-700 dark:text-violet-400`}>紐づけ候補</span>}
+                    {a?.moved && <span title={`${a.moved.kind}: ${a.moved.from} から`} className={`${chip} border-violet-600 text-violet-700 dark:text-violet-400`}>{a.moved.kind}</span>}
+                    {a?.newAcct && <span title="この会計・勘定は前年度に無く、この年度に初出です" className={`${chip} border-emerald-600 text-emerald-700 dark:text-emerald-400`}>会計新設</span>}
+                    {a?.codeChanged && <span title="所管コードが前の年度から変わりました" className={`${chip} border-neutral-400 text-neutral-500`}>コード変更</span>}
                     {a?.mismatch && <span className={`${chip} border-amber-600 text-amber-700 dark:text-amber-400`}>額不一致</span>}
                   </td>
                   <td className={`whitespace-nowrap px-2 py-1 text-left ${pattern === '新規' ? 'text-emerald-700 dark:text-emerald-400' : pattern === '消滅' ? 'text-orange-700 dark:text-orange-400' : 'text-neutral-500'}`}>{pattern ?? '–'}</td>

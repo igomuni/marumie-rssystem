@@ -36,6 +36,10 @@
    "general_without_org": 0,
    "without_amount": 0
   },
-  "linkCandidates": 17
+  "links": {
+   "moved": 6,
+   "renamed": 9,
+   "candidates": 1
+  }
  }
 }

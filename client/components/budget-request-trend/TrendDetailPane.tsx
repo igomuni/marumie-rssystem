@@ -36,6 +36,11 @@ export function TrendDetailPane({
   if (yearOf(row, last) && !yearOf(row, last - 1)) notes.push(`FY${last - 1} に同じキーが無く、FY${last} で初めて出ました。新設の項か、名称変更の可能性があります（紐づけは未対応）。`);
   if (!yearOf(row, last) && yearOf(row, last - 1)) notes.push(`FY${last} に同じキーが無い項です。廃止、名称変更、または FY${last} の未収録（例: 厚生労働省）の可能性があります。`);
   if (present.some(y => (yearOf(row, y)?.src.length ?? 0) > 1)) notes.push('同じ項が複数の要求書に載っている年度があります。額が同じ書どうしは按分されておらず、所管をまたいだ合計では二重になります。');
+  for (const y of present) {
+    const e = yearOf(row, y)!;
+    if (e.moved) notes.push(`FY${y}: 前の項（${e.moved.from}）から${e.moved.kind === '移管' ? '移管された' : '改称・組織変更された'}項としてつないでいます（${e.moved.kind === '移管' ? '移管先の会計・勘定がこの年度に新設' : '所管・勘定は同じ'}、同名に近く、前年度予算額が前年の要求額に近い）。`);
+    if (e.newAcct) notes.push(`FY${y}: ${row.min}${row.sub ? `（${row.sub}）` : ''}はこの年度に初めて現れた会計・勘定です（corpus に前年度の書が無いだけの場合もあります）。`);
+  }
   const xfers = [...new Set(present.flatMap(y => yearOf(row, y)?.xfer ?? []))];
   if (xfers.length > 0) notes.push(`この項の目に繰入があります（${xfers.join('、')}）。受け側の会計にも載るため、会計をまたぐ合計では二重になりえます。`);
   if (present.some(y => yearOf(row, y)?.mismatch)) notes.push('同じキーで、要求書によって額が違う年度があります（各書が取り分だけを載せている場合は、最も大きい額＝合計書の額を表示しています）。各書の額は PDF の右に示します。');

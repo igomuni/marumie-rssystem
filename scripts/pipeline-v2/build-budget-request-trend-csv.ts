@@ -145,8 +145,12 @@ for (const { year, ver, kou, status, recs, urlOf, pdfPageOf, xferOf } of stages)
 fs.mkdirSync(outDir, { recursive: true });
 const csv = [header, ...rows].map(r => r.map(cell).join(',')).join('\n') + '\n';
 fs.writeFileSync(path.join(outDir, 'kou.csv'), csv);
-// 紐づけの候補（キーは変えず、候補として示すだけ）: 前年度に無い項（新規）と、その年度に無い項（消滅）で、会計区分が同じ、項名が同じかほぼ同じ（編集距離 2 以内、6 文字以上。例: 児童手当等交付金 / 児童手当交付金）、
-// 新規側の前年度予算額が消滅側の要求額の ±30% 以内（どちらも 0 超）、かつ同名の候補が 1 対 1 に決まるもの（例: 年金特会 → 子ども・子育て支援特会）
+// 紐づけ: 前年度に無い項（新規）と、その年度に無い項（消滅）で、次をすべて満たすものを対応づける。
+//   会計区分が同じ、項名が同じかほぼ同じ（編集距離 2 以内、6 文字以上。例: 児童手当等交付金 / 児童手当交付金）、
+//   新規側の前年度予算額が消滅側の要求額の ±30% 以内（どちらも 0 超）、同名に近い候補が 1 対 1 に決まる。
+// そのうち、移管元が特定できるもの（次のどちらか）は 1 つの行につなぐ（`moved`）。それ以外は候補のまま（`from` / `to`）。
+//   改称: 所管（特別会計は特別会計名）と勘定が同じで、組織か項名だけが変わった（例: 地方環境事務所 → 地方環境局）
+//   移管: 移管先の会計・勘定（特別会計 + 勘定）がその年度に新設された（前年度に無い）。移管元は消滅側の項（例: 年金特会 → 子ども・子育て支援特会）
 const editDistance = (a: string, b: string): number => {
   const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...new Array<number>(b.length).fill(0)]);
   for (let j = 1; j <= b.length; j++) d[0][j] = j;
@@ -154,23 +158,48 @@ const editDistance = (a: string, b: string): number => {
   return d[a.length][b.length];
 };
 const nameNear = (a: string, b: string): boolean => a === b || (Math.min(a.length, b.length) >= 6 && editDistance(a, b) <= 2);
-const uiList = [...uiRows.values()];
-let candidates = 0;
+const placeOf = (r: BudgetRequestTrendRow): string => `${r.acct}\t${r.min}\t${r.sub}`; // 所管（特別会計名）+ 勘定
+const describe = (r: BudgetRequestTrendRow): string => [r.min, r.sub, r.org].filter(Boolean).join(' › ') + (r.name ? `「${r.name}」` : '');
+let live = [...uiRows.values()];
+const placeFirstYear = new Map<string, number>(); // つなぐ前の、特別会計 + 勘定が最初に現れた年度
+for (const r of live) for (const y of Object.keys(r.y)) placeFirstYear.set(placeOf(r), Math.min(placeFirstYear.get(placeOf(r)) ?? 9999, Number(y)));
+const linkCount = { moved: 0, renamed: 0, candidates: 0 };
+const candidatePairs: { g: BudgetRequestTrendRow; n: BudgetRequestTrendRow; a: string; b: string }[] = [];
 for (let i = 0; i + 1 < YEARS.length; i++) {
   const a = String(YEARS[i][0]), b = String(YEARS[i + 1][0]);
-  const gone = uiList.map((r, idx) => ({ r, idx })).filter(x => x.r.y[a] && !x.r.y[b]);
-  const added = uiList.map((r, idx) => ({ r, idx })).filter(x => x.r.y[b] && !x.r.y[a]);
-  const near = (g: { r: BudgetRequestTrendRow }, n: { r: BudgetRequestTrendRow }): boolean => {
-    const req = g.r.y[a].req, prev = n.r.y[b].prev;
-    return g.r.acct === n.r.acct && nameNear(g.r.name, n.r.name) && !!req && !!prev && req > 0 && prev > 0 && Math.abs(prev - req) / req <= 0.3;
+  const placesA = new Set(live.filter(r => r.y[a]).map(placeOf));
+  const gone = live.filter(r => r.y[a] && !r.y[b]);
+  const added = live.filter(r => r.y[b] && !r.y[a]);
+  const near = (g: BudgetRequestTrendRow, n: BudgetRequestTrendRow): boolean => {
+    const req = g.y[a].req, prev = n.y[b].prev;
+    return g.acct === n.acct && nameNear(g.name, n.name) && !!req && !!prev && req > 0 && prev > 0 && Math.abs(prev - req) / req <= 0.3;
   };
+  const removed = new Set<BudgetRequestTrendRow>();
   for (const g of gone) {
     const ns_ = added.filter(n => near(g, n));
     if (ns_.length !== 1 || gone.filter(g2 => near(g2, ns_[0])).length !== 1) continue;
-    g.r.y[a].to = ns_[0].idx; ns_[0].r.y[b].from = g.idx; candidates++;
+    const n = ns_[0];
+    const kind = placeOf(g) === placeOf(n) ? '改称' : !placesA.has(placeOf(n)) ? '移管' : null;
+    if (!kind || Object.keys(g.y).some(y => y in n.y)) { candidatePairs.push({ g, n, a, b }); continue; }
+    n.y = { ...g.y, ...n.y }; n.y[b].moved = { kind, from: describe(g) }; removed.add(g);
+    linkCount[kind === '移管' ? 'moved' : 'renamed']++;
+  }
+  live = live.filter(r => !removed.has(r));
+}
+// データの状態: 所管コードの変更（前の年度から）、会計・勘定の新設（前年度にその特別会計 + 勘定が無い）
+for (const r of live) {
+  let prevCode = '';
+  for (const [y] of YEARS.slice().map(([v]) => [String(v)] as [string])) {
+    const e = r.y[y]; if (!e) continue;
+    if (prevCode && e.code && e.code !== prevCode && !e.moved) e.codeChanged = true;
+    if (e.code) prevCode = e.code;
+    if (r.acct === 1 && placeFirstYear.get(placeOf(r)) === Number(y) && Number(y) > YEARS[0][0]) e.newAcct = true;
   }
 }
-summary['linkCandidates'] = candidates;
+const uiList = live;
+const indexOf = new Map(uiList.map((r, i) => [r, i]));
+for (const { g, n, a, b } of candidatePairs) { if (indexOf.has(g) && indexOf.has(n)) { g.y[a].to = indexOf.get(n); n.y[b].from = indexOf.get(g); linkCount.candidates++; } }
+summary['links'] = linkCount;
 const ui: BudgetRequestTrendData = { years: YEARS.map(([y]) => y), urls: uiUrls, rows: uiList };
 const uiDir = path.join('public', 'data', 'v2', 'ui', 'budget-request-trend');
 fs.mkdirSync(uiDir, { recursive: true });
