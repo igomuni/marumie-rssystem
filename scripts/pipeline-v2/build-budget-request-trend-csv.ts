@@ -41,6 +41,16 @@ for (const [year, ver] of YEARS) {
     const h = rd(path.join(coverDir, f)).find(r => r['kind'] === 'HEADER'); if (!h) continue;
     cover.set(f.slice(0, -4), { code: h['code'], org: /[（(](.*)[）)]$/.exec(ns(h['name']))?.[1] ?? '', name: ns(h['name']) });
   }
+  // 表紙の頁が無い書（総表・明細表から始まる抜粋版。例: 環境省 FY2026 のエネルギー対策・復興、金融庁 FY2023）は、明細表の先頭の CONTEXT 行の見出し
+  // （`9905 エネルギー対策特別会計(…)`、`19 内閣府所管(金融庁…)`）から、表紙と同じ形で補う
+  for (const slug of new Set(kou.map(r => r['request_source']))) {
+    if (cover.has(slug)) continue;
+    const f = path.join('tests', 'fixtures', 'budget-request-csv', String(year), 'detail-table', 'sources', `${slug}.csv`);
+    if (!fs.existsSync(f)) continue;
+    const ctx = rd(f).find(r => r['row_type'] === 'CONTEXT'); const m = ctx && /^(\d+)(.*)$/.exec(ns(ctx['事項'])); if (!m) continue;
+    const org = /[（(](.*)[）)]$/.exec(m[2])?.[1] ?? '';
+    cover.set(slug, { code: m[1], org: org.replace(/^(.+)[（(]\1[）)]$/, '$1'), name: m[2] }); // `金融庁（金融庁）` は 1 つに
+  }
   // 明細表に CONTEXT 行が無く、会計・所管・特別会計名が決まらなかった行は、表紙の見出しで補う
   // （コードが 2 桁なら一般会計の所管、4 桁なら特別会計。例: `19 内閣府所管（金融庁）`、`9101 東日本大震災復興特別会計（総務本省等）`）
   for (const r of kou) {
