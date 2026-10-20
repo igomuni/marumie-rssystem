@@ -1,38 +1,38 @@
 {
- "sha256": "7ec9f2a0715fc3c88cdda8d31f8a203d12a9d2e8525fb9407417036ed04e66c5",
+ "sha256": "47c59ea4dc5040dea4c304263ec592e7804d4ba735f510536341b0dc59e6d9b8",
  "years": {
   "2023": {
    "rows": 1098,
-   "distinct_keys": 1017,
-   "duplicated_keys": 54,
+   "distinct_keys": 1014,
+   "duplicated_keys": 55,
    "general_without_org": 0,
    "without_amount": 1
   },
   "2024": {
    "rows": 1101,
-   "distinct_keys": 1014,
-   "duplicated_keys": 59,
+   "distinct_keys": 1012,
+   "duplicated_keys": 60,
    "general_without_org": 0,
    "without_amount": 0
   },
   "2025": {
    "rows": 1157,
-   "distinct_keys": 1061,
-   "duplicated_keys": 68,
+   "distinct_keys": 1058,
+   "duplicated_keys": 70,
    "general_without_org": 0,
    "without_amount": 0
   },
   "2026": {
    "rows": 1181,
-   "distinct_keys": 1086,
-   "duplicated_keys": 69,
+   "distinct_keys": 1081,
+   "duplicated_keys": 73,
    "general_without_org": 0,
    "without_amount": 0
   },
   "2027": {
    "rows": 974,
-   "distinct_keys": 890,
-   "duplicated_keys": 53,
+   "distinct_keys": 887,
+   "duplicated_keys": 55,
    "general_without_org": 0,
    "without_amount": 0
   }
