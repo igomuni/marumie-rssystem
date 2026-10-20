@@ -130,15 +130,15 @@ export function TrendFilterPane({
           </select>
         </div>
         <div className={section}>
-          <h3 className={heading}>印</h3>
+          <h3 className={heading}>データの状態</h3>
           <label className={row}>
             <input type="checkbox" checked={filters.shared} onChange={e => set({ shared: e.target.checked })} />
-            複数の要求書に載る
+            複数書（複数の要求書に載る）
             <span className={count}>{counts.shared}</span>
           </label>
           <label className={row}>
             <input type="checkbox" checked={filters.mismatch} onChange={e => set({ mismatch: e.target.checked })} />
-            金額不一致
+            額不一致（書によって金額が違う）
             <span className={count}>{counts.mismatch}</span>
           </label>
         </div>
