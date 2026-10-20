@@ -42,6 +42,8 @@ export function TrendDetailPane({
   for (const y of present) {
     const e = yearOf(row, y)!;
     if (e.moved) notes.push(`FY${y}: 前の項（${e.moved.from}）から${e.moved.kind === '移管' ? '移管された' : '改称・組織変更された'}項としてつないでいます（${e.moved.kind === '移管' ? '移管先の会計・勘定がこの年度に新設' : '所管・勘定は同じ'}、同名に近く、前年度予算額が前年の要求額に近い）。`);
+    if (e.imagePage) notes.push(`FY${y}: この項の PDF の頁は画像で文字層がなく、明細表の目以下が取り込めていません。リンクの頁は前後の頁から推定した値です。金額は総表の値です。`);
+    else if (e.pdfEst) notes.push(`FY${y}: PDF のリンクの頁は、前後の頁ラベルから推定した値です。`);
     if (e.newAcct) notes.push(`FY${y}: ${row.min}${row.sub ? `（${row.sub}）` : ''}はこの年度に初めて現れた会計・勘定です（corpus に前年度の書が無いだけの場合もあります）。`);
   }
   const xfers = [...new Set(present.flatMap(y => yearOf(row, y)?.xfer ?? []))];

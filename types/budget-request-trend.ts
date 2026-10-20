@@ -16,6 +16,10 @@ export interface BudgetRequestTrendYear {
   xfer?: string[];
   /** 同じキーが複数の要求書にあり、金額が一致しない */
   mismatch: boolean;
+  /** PDF の頁を、前後の頁ラベルの差から推定した（明細表の行から引けなかった） */
+  pdfEst?: boolean;
+  /** 推定した頁に文字層が無い（画像の頁）。明細表の目以下が取り込めていない */
+  imagePage?: boolean;
   /** 前の項をこの項につないだ（移管元が特定できた）。kind: 移管 = 新設の会計・勘定へ、改称 = 同じ所管・勘定で組織か項名が変わった。from = 前の項（所管 › 勘定 › 組織「項名」） */
   moved?: { kind: '移管' | '改称'; from: string };
   /** 所管コードが前の年度から変わった */

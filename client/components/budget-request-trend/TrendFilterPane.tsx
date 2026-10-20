@@ -50,6 +50,7 @@ export function TrendFilterPane({
       codeChange: rows.filter(r => yearOf(r, year)?.codeChanged).length,
       newAcct: rows.filter(r => yearOf(r, year)?.newAcct).length,
       moved: rows.filter(r => yearOf(r, year)?.moved).length,
+      imagePage: rows.filter(r => yearOf(r, year)?.imagePage).length,
     }),
     [rows, years, year, first]
   );
@@ -164,6 +165,11 @@ export function TrendFilterPane({
             <input type="checkbox" checked={filters.moved} onChange={e => set({ moved: e.target.checked })} />
             移管・改称（前の項からつないだ）
             <span className={count}>{counts.moved}</span>
+          </label>
+          <label className={row}>
+            <input type="checkbox" checked={filters.imagePage} onChange={e => set({ imagePage: e.target.checked })} />
+            画像頁（PDF の該当頁に文字層なし）
+            <span className={count}>{counts.imagePage}</span>
           </label>
         </div>
       </div>
