@@ -188,7 +188,7 @@ for (const { year, ver, kou, status, recs, urlOf, pdfOf, xferOf } of stages) {
     const locs = g.map(x => pdfOf(x.r, x.org));
     const xfer = [...new Set(g.flatMap(x => xferOf(x.r['request_source'], x.r['request_code3'], x.r['request_name'])))].sort();
     u.code = x0.code;
-    u.y[String(year)] = { code: x0.code, prev: num(r0['previous_amount']), req: num(r0['request_amount']), src, ...(mismatch ? { srcAmt } : {}), ...(xfer.length > 0 ? { xfer } : {}), ...(locs.some(l => l?.basis === '推定') ? { pdfEst: true } : {}), ...(locs.some(l => l?.image) ? { imagePage: true } : {}), mismatch, mof: ver ? status.get(`${r0['request_source']}#${r0['toc_kou_idx']}`) ?? '' : '' };
+    u.y[String(year)] = { code: x0.code, prev: num(r0['previous_amount']), req: num(r0['request_amount']), src, ...(mismatch ? { srcAmt } : {}), ...(xfer.length > 0 ? { xfer } : {}), ...(locs.some(l => l?.basis === '推定') ? { pdfEst: true } : {}), ...(locs.some(l => l?.image) ? { imagePage: true } : {}), ...(locs.some(l => !l?.pdfPage) ? { noPdfPage: true } : {}), mismatch, mof: ver ? status.get(`${r0['request_source']}#${r0['toc_kou_idx']}`) ?? '' : '' };
   }
   for (const x of recs) {
     const g = group.get(x.key)!; const r = x.r;

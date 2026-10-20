@@ -18,6 +18,8 @@ export interface BudgetRequestTrendYear {
   mismatch: boolean;
   /** PDF の頁を、前後の頁ラベルの差から推定した（明細表の行から引けなかった） */
   pdfEst?: boolean;
+  /** PDF の頁が引けなかった（リンクは PDF の先頭を開く）載り先がある */
+  noPdfPage?: boolean;
   /** 推定した頁に文字層が無い（画像の頁）。明細表の目以下が取り込めていない */
   imagePage?: boolean;
   /** 前の項をこの項につないだ（移管元が特定できた）。kind: 移管 = 新設の会計・勘定へ、改称 = 同じ所管・勘定で組織か項名が変わった。from = 前の項（所管 › 勘定 › 組織「項名」） */

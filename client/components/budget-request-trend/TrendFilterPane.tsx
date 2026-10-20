@@ -51,6 +51,7 @@ export function TrendFilterPane({
       newAcct: rows.filter(r => yearOf(r, year)?.newAcct).length,
       moved: rows.filter(r => yearOf(r, year)?.moved).length,
       imagePage: rows.filter(r => yearOf(r, year)?.imagePage).length,
+      noPdfPage: rows.filter(r => yearOf(r, year)?.noPdfPage).length,
     }),
     [rows, years, year, first]
   );
@@ -170,6 +171,11 @@ export function TrendFilterPane({
             <input type="checkbox" checked={filters.imagePage} onChange={e => set({ imagePage: e.target.checked })} />
             画像頁（PDF の該当頁に文字層なし）
             <span className={count}>{counts.imagePage}</span>
+          </label>
+          <label className={row}>
+            <input type="checkbox" checked={filters.noPdfPage} onChange={e => set({ noPdfPage: e.target.checked })} />
+            PDF頁なし（頁が引けず、リンクは先頭）
+            <span className={count}>{counts.noPdfPage}</span>
           </label>
         </div>
       </div>

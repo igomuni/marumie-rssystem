@@ -40,9 +40,11 @@ export interface TrendFilters {
   moved: boolean;
   /** その年度に PDF の該当頁が画像（文字層なし）の行だけ */
   imagePage: boolean;
+  /** その年度に PDF の頁が引けなかった行だけ */
+  noPdfPage: boolean;
 }
 
-export const INITIAL_TREND_FILTERS: TrendFilters = { name: '', nameRegex: false, org: '', orgRegex: false, accts: [], groups: [], pattern: 'all', change: '', shared: false, mismatch: false, transfer: false, codeChange: false, newAcct: false, moved: false, imagePage: false };
+export const INITIAL_TREND_FILTERS: TrendFilters = { name: '', nameRegex: false, org: '', orgRegex: false, accts: [], groups: [], pattern: 'all', change: '', shared: false, mismatch: false, transfer: false, codeChange: false, newAcct: false, moved: false, imagePage: false, noPdfPage: false };
 
 /**
  * 所管 = 載っている要求書の公開元（PDF のドメイン由来の府省庁名）。会計の区別は acct（一般 / 特別）の列で示す。
@@ -140,6 +142,7 @@ export function filterRows(rows: readonly BudgetRequestTrendRow[], f: TrendFilte
     if (f.newAcct && !a?.newAcct) return false;
     if (f.moved && !a?.moved) return false;
     if (f.imagePage && !a?.imagePage) return false;
+    if (f.noPdfPage && !a?.noPdfPage) return false;
     return true;
   });
   return kept.flatMap(r => recordsOf(r, year, urls)).filter(x => {
