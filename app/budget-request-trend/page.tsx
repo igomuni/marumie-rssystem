@@ -66,7 +66,7 @@ export default function BudgetRequestTrendPage() {
 
   const rows = useMemo(() => {
     if (!data || activeYear === null) return [];
-    return sortRows(filterRows(data.rows, filters, activeYear, data.years, data.urls), sortKey, sortDir, activeYear, data.years[0], data.urls);
+    return sortRows(filterRows(data.rows, filters, activeYear, data.years, data.urls), sortKey, sortDir, activeYear, data.years[0]);
   }, [data, filters, sortKey, sortDir, activeYear]);
 
   const selected = useMemo(() => (data && selectedKey ? data.rows.find(r => rowKey(r) === selectedKey) ?? null : null), [data, selectedKey]);
@@ -122,7 +122,7 @@ export default function BudgetRequestTrendPage() {
             selectedKey={selectedKey}
             rowKey={rowKey}
             urls={data.urls}
-            onSelect={r => setSelectedKey(rowKey(r))}
+            onSelect={x => setSelectedKey(rowKey(x.row))}
             widths={columnWidths}
             onWidthsChange={setColumnWidths}
           />

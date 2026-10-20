@@ -45,6 +45,29 @@ export function groupsOf(r: BudgetRequestTrendRow, year: number, urls: readonly 
   return names.length > 0 ? names : [r.min];
 }
 export const groupOf = (r: BudgetRequestTrendRow, year: number, urls: readonly string[]): string => groupsOf(r, year, urls).join('、');
+
+/** 一覧の 1 行 = 項 × 所管（公開元の府省）。複数の府省の書に載る項は府省ごとに 1 件。金額はその府省の書の値 */
+export interface TrendRecord {
+  row: BudgetRequestTrendRow;
+  group: string;
+  prev: number | null;
+  req: number | null;
+}
+
+export function recordsOf(r: BudgetRequestTrendRow, year: number, urls: readonly string[]): TrendRecord[] {
+  const a = yearOf(r, year);
+  return groupsOf(r, year, urls).map(group => {
+    if (!a) return { row: r, group, prev: null, req: null };
+    // 書ごとの額（額不一致のときだけ持つ）があれば、その府省の書のうち最も大きい額
+    const mine = a.srcAmt ? a.src.map((s, i) => ({ g: publisherOf(urls[s[0]] ?? ''), amt: a.srcAmt![i] })).filter(x => x.g === group) : [];
+    if (mine.length === 0) return { row: r, group, prev: a.prev, req: a.req };
+    const best = mine.reduce((m, x) => ((x.amt[1] ?? 0) > (m.amt[1] ?? 0) ? x : m));
+    return { row: r, group, prev: best.amt[0], req: best.amt[1] };
+  });
+}
+
+export const recordChange = (x: TrendRecord): number | null => (x.req !== null && x.prev !== null ? x.req - x.prev : null);
+export const recordRate = (x: TrendRecord): number | null => (x.req !== null && x.prev !== null && x.prev !== 0 ? (x.req - x.prev) / x.prev : null);
 /** 組織の列の表示。特別会計は勘定 */
 export const orgOf = (r: BudgetRequestTrendRow): string => (r.acct === 0 ? r.org : r.sub);
 
@@ -86,22 +109,25 @@ export function patternOf(r: BudgetRequestTrendRow, year: number, firstYear: num
   return now && before ? '継続' : now ? '新規' : before ? '消滅' : null;
 }
 
-export function filterRows(rows: readonly BudgetRequestTrendRow[], f: TrendFilters, year: number, years: readonly number[], urls: readonly string[]): BudgetRequestTrendRow[] {
+export function filterRows(rows: readonly BudgetRequestTrendRow[], f: TrendFilters, year: number, years: readonly number[], urls: readonly string[]): TrendRecord[] {
   const first = years[0];
   const groups = new Set(f.groups);
-  return rows.filter(r => {
+  const kept = rows.filter(r => {
     const a = yearOf(r, year);
     if (f.pattern === 'gone') { if (!isGone(r, year, first)) return false; } else if (!a) return false;
     if (f.acct !== 'all' && r.acct !== f.acct) return false;
-    if (groups.size > 0 && !groupsOf(r, year, urls).some(g => groups.has(g))) return false;
     if (!textMatches(r.name, f.name, f.nameRegex)) return false;
     if (!textMatches(`${r.org} ${r.sub}`, f.org, f.orgRegex)) return false;
     if (f.pattern === 'all5' && !inAllYears(r, years)) return false;
     if (f.pattern === 'new' && !isNew(r, year, first)) return false;
     if (f.shared && !(a && a.src.length > 1)) return false;
     if (f.mismatch && !(a && a.mismatch)) return false;
+    return true;
+  });
+  return kept.flatMap(r => recordsOf(r, year, urls)).filter(x => {
+    if (groups.size > 0 && !groups.has(x.group)) return false;
     if (f.change) {
-      const t = changeRate(r, year);
+      const t = recordRate(x);
       if (t === null) return false;
       if (f.change === 'up10' && !(t >= 0.1)) return false;
       if (f.change === 'up50' && !(t >= 0.5)) return false;
@@ -114,24 +140,25 @@ export function filterRows(rows: readonly BudgetRequestTrendRow[], f: TrendFilte
 
 const PATTERN_ORDER: Record<TrendPattern, number> = { 新規: 0, 継続: 1, 消滅: 2 };
 
-function sortValue(r: BudgetRequestTrendRow, key: TrendSortKey, year: number, firstYear: number, urls: readonly string[]): string | number | null {
+function sortValue(x: TrendRecord, key: TrendSortKey, year: number, firstYear: number): string | number | null {
+  const r = x.row;
   switch (key) {
-    case 'acct': return r.acct;
+    case 'acct': return `${r.acct}${r.min}`;
     case 'pattern': { const p = patternOf(r, year, firstYear); return p === null ? null : PATTERN_ORDER[p]; }
-    case 'group': return groupOf(r, year, urls);
+    case 'group': return x.group;
     case 'org': return orgOf(r);
     case 'name': return r.name;
-    case 'prev': return yearOf(r, year)?.prev ?? null;
-    case 'req': return yearOf(r, year)?.req ?? null;
-    case 'diff': return changeAmount(r, year);
-    case 'rate': return changeRate(r, year);
+    case 'prev': return x.prev;
+    case 'req': return x.req;
+    case 'diff': return recordChange(x);
+    case 'rate': return recordRate(x);
   }
 }
 
 /** 値の無い行は昇順・降順どちらでも末尾 */
-export function sortRows(rows: readonly BudgetRequestTrendRow[], key: TrendSortKey, dir: TrendSortDir, year: number, firstYear: number, urls: readonly string[]): BudgetRequestTrendRow[] {
-  return [...rows].sort((a, b) => {
-    const x = sortValue(a, key, year, firstYear, urls), y = sortValue(b, key, year, firstYear, urls);
+export function sortRows(records: readonly TrendRecord[], key: TrendSortKey, dir: TrendSortDir, year: number, firstYear: number): TrendRecord[] {
+  return [...records].sort((a, b) => {
+    const x = sortValue(a, key, year, firstYear), y = sortValue(b, key, year, firstYear);
     if (x === null && y === null) return 0;
     if (x === null) return 1;
     if (y === null) return -1;
