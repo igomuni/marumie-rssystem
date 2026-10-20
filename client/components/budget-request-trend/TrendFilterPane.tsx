@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import type { BudgetRequestTrendRow } from '@/types/budget-request-trend';
 import { RegexTextFilter } from '@/client/components/mof-kou/RegexTextFilter';
 import { MAX_REGEX_PATTERN_LENGTH } from '@/app/lib/sankey-query';
-import { INITIAL_TREND_FILTERS, groupOf, inAllYears, isGone, isNew, yearOf, type ChangeFilter, type PatternFilter, type TrendFilters } from '@/app/lib/budget-request-trend';
+import { INITIAL_TREND_FILTERS, groupsOf, inAllYears, isGone, isNew, yearOf, type ChangeFilter, type PatternFilter, type TrendFilters } from '@/app/lib/budget-request-trend';
 
 const section = 'flex flex-col gap-1.5 border-b border-neutral-200 px-3 py-2.5 dark:border-neutral-800';
 const heading = 'text-[11px] font-semibold tracking-wide text-neutral-500';
@@ -14,12 +14,14 @@ const count = 'ml-auto tabular-nums text-neutral-400';
 export function TrendFilterPane({
   rows,
   years,
+  urls,
   year,
   filters,
   onChange,
 }: {
   rows: readonly BudgetRequestTrendRow[];
   years: readonly number[];
+  urls: readonly string[];
   year: number;
   filters: TrendFilters;
   onChange: (f: TrendFilters) => void;
@@ -27,9 +29,9 @@ export function TrendFilterPane({
   const first = years[0];
   const groups = useMemo(() => {
     const m = new Map<string, number>();
-    for (const r of rows) m.set(groupOf(r), (m.get(groupOf(r)) ?? 0) + 1);
+    for (const r of rows) if (yearOf(r, year)) for (const g of groupsOf(r, year, urls)) m.set(g, (m.get(g) ?? 0) + 1);
     return [...m.entries()].sort((a, b) => b[1] - a[1]);
-  }, [rows]);
+  }, [rows, year, urls]);
   const counts = useMemo(
     () => ({
       acct0: rows.filter(r => r.acct === 0).length,

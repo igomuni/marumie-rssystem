@@ -21,7 +21,7 @@ export interface TrendFilters {
   org: string;
   orgRegex: boolean;
   acct: 'all' | 0 | 1;
-  /** 所管の絞り込み（groupOf の値）。空なら絞り込まない */
+  /** 所管の絞り込み（groupsOf の値。どれかが載っていれば一致）。空なら絞り込まない */
   groups: string[];
   pattern: PatternFilter;
   change: ChangeFilter;
@@ -33,8 +33,41 @@ export interface TrendFilters {
 
 export const INITIAL_TREND_FILTERS: TrendFilters = { name: '', nameRegex: false, org: '', orgRegex: false, acct: 'all', groups: [], pattern: 'all', change: '', shared: false, mismatch: false };
 
-/** 所管の表示名（特別会計は特別会計名）。会計の区別は acct（一般 / 特別）の列で示す */
-export const groupOf = (r: BudgetRequestTrendRow): string => r.min;
+/**
+ * 所管 = 載っている要求書の公開元（PDF のドメイン由来の府省庁名）。会計の区別は acct（一般 / 特別）の列で示す。
+ * その年度に無い行（消滅）は、直近の載っている年度の要求書で決める。要求書が引けなければ表紙の所管名（特別会計は特別会計名）
+ */
+export function groupsOf(r: BudgetRequestTrendRow, year: number, urls: readonly string[]): string[] {
+  const ys = Object.keys(r.y).map(Number).sort((a, b) => b - a);
+  const y = ys.find(v => v <= year) ?? ys[0];
+  const a = y === undefined ? undefined : r.y[String(y)];
+  const names = a ? [...new Set(a.src.map(([u]) => publisherOf(urls[u] ?? '')).filter(Boolean))] : [];
+  return names.length > 0 ? names : [r.min];
+}
+export const groupOf = (r: BudgetRequestTrendRow, year: number, urls: readonly string[]): string => groupsOf(r, year, urls).join('、');
+
+/** 一覧の 1 行 = 項 × 所管（公開元の府省）。複数の府省の書に載る項は府省ごとに 1 件。金額はその府省の書の値 */
+export interface TrendRecord {
+  row: BudgetRequestTrendRow;
+  group: string;
+  prev: number | null;
+  req: number | null;
+}
+
+export function recordsOf(r: BudgetRequestTrendRow, year: number, urls: readonly string[]): TrendRecord[] {
+  const a = yearOf(r, year);
+  return groupsOf(r, year, urls).map(group => {
+    if (!a) return { row: r, group, prev: null, req: null };
+    // 書ごとの額（額不一致のときだけ持つ）があれば、その府省の書のうち最も大きい額
+    const mine = a.srcAmt ? a.src.map((s, i) => ({ g: publisherOf(urls[s[0]] ?? ''), amt: a.srcAmt![i] })).filter(x => x.g === group) : [];
+    if (mine.length === 0) return { row: r, group, prev: a.prev, req: a.req };
+    const best = mine.reduce((m, x) => ((x.amt[1] ?? 0) > (m.amt[1] ?? 0) ? x : m));
+    return { row: r, group, prev: best.amt[0], req: best.amt[1] };
+  });
+}
+
+export const recordChange = (x: TrendRecord): number | null => (x.req !== null && x.prev !== null ? x.req - x.prev : null);
+export const recordRate = (x: TrendRecord): number | null => (x.req !== null && x.prev !== null && x.prev !== 0 ? (x.req - x.prev) / x.prev : null);
 /** 組織の列の表示。特別会計は勘定 */
 export const orgOf = (r: BudgetRequestTrendRow): string => (r.acct === 0 ? r.org : r.sub);
 
@@ -76,22 +109,25 @@ export function patternOf(r: BudgetRequestTrendRow, year: number, firstYear: num
   return now && before ? '継続' : now ? '新規' : before ? '消滅' : null;
 }
 
-export function filterRows(rows: readonly BudgetRequestTrendRow[], f: TrendFilters, year: number, years: readonly number[]): BudgetRequestTrendRow[] {
+export function filterRows(rows: readonly BudgetRequestTrendRow[], f: TrendFilters, year: number, years: readonly number[], urls: readonly string[]): TrendRecord[] {
   const first = years[0];
   const groups = new Set(f.groups);
-  return rows.filter(r => {
+  const kept = rows.filter(r => {
     const a = yearOf(r, year);
     if (f.pattern === 'gone') { if (!isGone(r, year, first)) return false; } else if (!a) return false;
     if (f.acct !== 'all' && r.acct !== f.acct) return false;
-    if (groups.size > 0 && !groups.has(groupOf(r))) return false;
     if (!textMatches(r.name, f.name, f.nameRegex)) return false;
     if (!textMatches(`${r.org} ${r.sub}`, f.org, f.orgRegex)) return false;
     if (f.pattern === 'all5' && !inAllYears(r, years)) return false;
     if (f.pattern === 'new' && !isNew(r, year, first)) return false;
     if (f.shared && !(a && a.src.length > 1)) return false;
     if (f.mismatch && !(a && a.mismatch)) return false;
+    return true;
+  });
+  return kept.flatMap(r => recordsOf(r, year, urls)).filter(x => {
+    if (groups.size > 0 && !groups.has(x.group)) return false;
     if (f.change) {
-      const t = changeRate(r, year);
+      const t = recordRate(x);
       if (t === null) return false;
       if (f.change === 'up10' && !(t >= 0.1)) return false;
       if (f.change === 'up50' && !(t >= 0.5)) return false;
@@ -104,23 +140,24 @@ export function filterRows(rows: readonly BudgetRequestTrendRow[], f: TrendFilte
 
 const PATTERN_ORDER: Record<TrendPattern, number> = { 新規: 0, 継続: 1, 消滅: 2 };
 
-function sortValue(r: BudgetRequestTrendRow, key: TrendSortKey, year: number, firstYear: number): string | number | null {
+function sortValue(x: TrendRecord, key: TrendSortKey, year: number, firstYear: number): string | number | null {
+  const r = x.row;
   switch (key) {
-    case 'acct': return r.acct;
+    case 'acct': return `${r.acct}${r.min}`;
     case 'pattern': { const p = patternOf(r, year, firstYear); return p === null ? null : PATTERN_ORDER[p]; }
-    case 'group': return groupOf(r);
+    case 'group': return x.group;
     case 'org': return orgOf(r);
     case 'name': return r.name;
-    case 'prev': return yearOf(r, year)?.prev ?? null;
-    case 'req': return yearOf(r, year)?.req ?? null;
-    case 'diff': return changeAmount(r, year);
-    case 'rate': return changeRate(r, year);
+    case 'prev': return x.prev;
+    case 'req': return x.req;
+    case 'diff': return recordChange(x);
+    case 'rate': return recordRate(x);
   }
 }
 
 /** 値の無い行は昇順・降順どちらでも末尾 */
-export function sortRows(rows: readonly BudgetRequestTrendRow[], key: TrendSortKey, dir: TrendSortDir, year: number, firstYear: number): BudgetRequestTrendRow[] {
-  return [...rows].sort((a, b) => {
+export function sortRows(records: readonly TrendRecord[], key: TrendSortKey, dir: TrendSortDir, year: number, firstYear: number): TrendRecord[] {
+  return [...records].sort((a, b) => {
     const x = sortValue(a, key, year, firstYear), y = sortValue(b, key, year, firstYear);
     if (x === null && y === null) return 0;
     if (x === null) return 1;
@@ -134,4 +171,21 @@ export function sortRows(rows: readonly BudgetRequestTrendRow[], key: TrendSortK
 export function assessmentGap(r: BudgetRequestTrendRow, year: number): number | null {
   const a = yearOf(r, year), n = yearOf(r, year + 1);
   return a && n && a.req !== null && n.prev !== null ? n.prev - a.req : null;
+}
+
+/** 要求書の公開元（PDF のドメイン）→ 府省庁名。載っている要求書の「どの府省の書か」を示す（キーには使わない） */
+const PUBLISHER_BY_HOST: Record<string, string> = {
+  'aoc.go.jp': 'サイバー通信情報監理委員会', 'caa.go.jp': '消費者庁', 'cao.go.jp': '内閣府', 'cas.go.jp': '内閣官房', 'cfa.go.jp': 'こども家庭庁', 'clb.go.jp': '内閣法制局',
+  'courts.go.jp': '裁判所', 'dangai.go.jp': '裁判官弾劾裁判所', 'digital.go.jp': 'デジタル庁', 'env.go.jp': '環境省', 'fsa.go.jp': '金融庁', 'jbaudit.go.jp': '会計検査院',
+  'jcrc.go.jp': '公害等調整委員会', 'jftc.go.jp': '公正取引委員会', 'jinji.go.jp': '人事院', 'kunaicho.go.jp': '宮内庁', 'maff.go.jp': '農林水産省', 'meti.go.jp': '経済産業省',
+  'mext.go.jp': '文部科学省', 'mhlw.go.jp': '厚生労働省', 'mlit.go.jp': '国土交通省', 'mod.go.jp': '防衛省', 'mof.go.jp': '財務省', 'mofa.go.jp': '外務省', 'moj.go.jp': '法務省',
+  'ndl.go.jp': '国立国会図書館', 'npa.go.jp': '警察庁', 'ppc.go.jp': '個人情報保護委員会', 'reconstruction.go.jp': '復興庁', 'sangiin.go.jp': '参議院', 'shugiin.go.jp': '衆議院',
+  'sotsui.go.jp': '裁判官訴追委員会', 'soumu.go.jp': '総務省',
+};
+
+/** 要求書の URL → 公開元の府省庁名（未知のドメインはドメインのまま） */
+export function publisherOf(url: string): string {
+  let host = '';
+  try { host = new URL(url).hostname.replace(/^www\./, ''); } catch { return ''; }
+  return PUBLISHER_BY_HOST[host] ?? host;
 }

@@ -20,7 +20,7 @@ import { TrendFilterPane } from '@/client/components/budget-request-trend/TrendF
 import { TrendListPane } from '@/client/components/budget-request-trend/TrendListPane';
 import { TrendDetailPane } from '@/client/components/budget-request-trend/TrendDetailPane';
 
-const rowKey = (r: BudgetRequestTrendRow): string => [r.acct, r.code, r.min, r.sub, r.org, r.name].join('|');
+const rowKey = (r: BudgetRequestTrendRow): string => [r.acct, r.code, r.min, r.sub, r.org, r.name, r.kou ?? ''].join('|');
 const FILTER_WIDTH = { def: 240, min: 180, max: 420 };
 const DETAIL_WIDTH = { def: 430, min: 320, max: 760 };
 const pane = 'min-h-0 min-w-0 overflow-hidden rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900';
@@ -66,7 +66,7 @@ export default function BudgetRequestTrendPage() {
 
   const rows = useMemo(() => {
     if (!data || activeYear === null) return [];
-    return sortRows(filterRows(data.rows, filters, activeYear, data.years), sortKey, sortDir, activeYear, data.years[0]);
+    return sortRows(filterRows(data.rows, filters, activeYear, data.years, data.urls), sortKey, sortDir, activeYear, data.years[0]);
   }, [data, filters, sortKey, sortDir, activeYear]);
 
   const selected = useMemo(() => (data && selectedKey ? data.rows.find(r => rowKey(r) === selectedKey) ?? null : null), [data, selectedKey]);
@@ -108,7 +108,7 @@ export default function BudgetRequestTrendPage() {
       </header>
       <main className="grid min-h-0 flex-1 grid-cols-1 gap-3 px-3 pb-3 lg:grid-cols-[240px_minmax(0,1fr)] xl:flex xl:gap-0">
         <section aria-label="フィルタ" className={`${pane} xl:w-[var(--fw)] xl:shrink-0`} style={{ '--fw': `${filterWidth}px` } as React.CSSProperties}>
-          <TrendFilterPane rows={data.rows} years={years} year={activeYear} filters={filters} onChange={setFilters} />
+          <TrendFilterPane rows={data.rows} years={years} urls={data.urls} year={activeYear} filters={filters} onChange={setFilters} />
         </section>
         <Splitter label="フィルタの幅" width={filterWidth} limits={FILTER_WIDTH} dir={1} onChange={setFilterWidth} />
         <section aria-label="項の一覧" className={`${pane} xl:min-w-0 xl:flex-1`}>
@@ -121,7 +121,8 @@ export default function BudgetRequestTrendPage() {
             onSort={onSort}
             selectedKey={selectedKey}
             rowKey={rowKey}
-            onSelect={r => setSelectedKey(rowKey(r))}
+            urls={data.urls}
+            onSelect={x => setSelectedKey(rowKey(x.row))}
             widths={columnWidths}
             onWidthsChange={setColumnWidths}
           />

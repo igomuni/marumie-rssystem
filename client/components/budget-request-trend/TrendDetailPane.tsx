@@ -2,7 +2,7 @@
 
 import type { BudgetRequestTrendRow } from '@/types/budget-request-trend';
 import { AccountBadge } from '@/client/components/mof-kou/Badge';
-import { assessmentGap, groupOf, orgOf, yearOf } from '@/app/lib/budget-request-trend';
+import { assessmentGap, groupOf, orgOf, publisherOf, yearOf } from '@/app/lib/budget-request-trend';
 import { changeColor, formatSen, formatSenSigned } from './format';
 
 const W = 380, H = 180, LEFT = 74, BOTTOM = 22, TOP = 10, BAR = 34;
@@ -30,17 +30,17 @@ export function TrendDetailPane({
   const notes: string[] = [];
   if (yearOf(row, last) && !yearOf(row, last - 1)) notes.push(`FY${last - 1} に同じキーが無く、FY${last} で初めて出ました。新設の項か、名称変更の可能性があります（紐づけは未対応）。`);
   if (!yearOf(row, last) && yearOf(row, last - 1)) notes.push(`FY${last} に同じキーが無い項です。廃止、名称変更、または FY${last} の未収録（例: 厚生労働省）の可能性があります。`);
-  if (present.some(y => (yearOf(row, y)?.src.length ?? 0) > 1)) notes.push('同じ項が複数の要求書に載っている年度があります。額は按分されていません。所管をまたいだ合計では二重になります。');
-  if (present.some(y => yearOf(row, y)?.mismatch)) notes.push('同じキーで、要求書によって額が違う年度があります。');
+  if (present.some(y => (yearOf(row, y)?.src.length ?? 0) > 1)) notes.push('同じ項が複数の要求書に載っている年度があります。額が同じ書どうしは按分されておらず、所管をまたいだ合計では二重になります。');
+  if (present.some(y => yearOf(row, y)?.mismatch)) notes.push('同じキーで、要求書によって額が違う年度があります（各書が取り分だけを載せている場合は、最も大きい額＝合計書の額を表示しています）。各書の額は PDF の右に示します。');
 
   return (
     <div className="flex flex-col gap-3 p-3 text-xs">
       <div>
         <div className="flex flex-wrap items-center gap-x-1.5 text-[11px] text-neutral-500">
           <AccountBadge accountType={row.acct === 0 ? 'general' : 'special'} />
-          <span>{groupOf(row)}{orgOf(row) ? ` › ${orgOf(row)}` : ''} · 所管コード {row.code}</span>
+          <span>{groupOf(row, year, urls)}{orgOf(row) ? ` › ${orgOf(row)}` : ''} · 所管コード {row.code}</span>
         </div>
-        <h2 className="mt-0.5 text-base font-semibold leading-snug">{row.name}</h2>
+        <h2 className="mt-0.5 text-base font-semibold leading-snug">{row.name}{row.kou && <span className="ml-1 text-xs font-normal text-neutral-400">(項コード {row.kou})</span>}</h2>
       </div>
       <div className="flex flex-wrap gap-x-4 text-[11px] text-neutral-500">
         <span><i className="mr-1 inline-block h-2.5 w-2.5 bg-emerald-700 align-[-1px] dark:bg-emerald-400" />要求額</span>
@@ -111,12 +111,13 @@ export function TrendDetailPane({
                   <td className={`whitespace-nowrap px-1.5 py-1 text-right tabular-nums ${changeColor(ch)}`}>{formatSenSigned(ch)}</td>
                   <td className={`whitespace-nowrap px-1.5 py-1 text-right tabular-nums ${changeColor(gapV)}`}>{formatSenSigned(gapV)}</td>
                   <td className="whitespace-nowrap px-1.5 py-1">
-                    {a.src.map(([u, page], i) => (
+                    {a.src.map(([u, page, pdfPage], i) => (
                       <span key={u} className="mr-1.5">
-                        <a href={/^\d+$/.test(page) ? `${urls[u]}#page=${page}` : urls[u]} target="_blank" rel="noopener noreferrer" title={urls[u]} className="text-emerald-700 underline hover:text-emerald-900 dark:text-emerald-400">
-                          PDF{a.src.length > 1 ? i + 1 : ''}
+                        <a href={pdfPage ? `${urls[u]}#page=${pdfPage}` : urls[u]} target="_blank" rel="noopener noreferrer" title={urls[u]} className="text-emerald-700 underline hover:text-emerald-900 dark:text-emerald-400">
+                          PDF{a.src.length > 1 ? i + 1 : ''} {publisherOf(urls[u])}
                         </a>
                         <span className="text-neutral-500"> ({page})</span>
+                        {a.srcAmt?.[i] && <span className="text-neutral-400"> {formatSen(a.srcAmt[i][1])}</span>}
                       </span>
                     ))}
                   </td>
