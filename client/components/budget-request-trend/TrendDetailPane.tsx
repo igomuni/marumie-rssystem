@@ -38,7 +38,7 @@ export function TrendDetailPane({
       <div>
         <div className="flex flex-wrap items-center gap-x-1.5 text-[11px] text-neutral-500">
           <AccountBadge accountType={row.acct === 0 ? 'general' : 'special'} />
-          <span>{groupOf(row)}{orgOf(row) ? ` › ${orgOf(row)}` : ''} · 所管コード {row.code}</span>
+          <span>{groupOf(row, year, urls)}{orgOf(row) ? ` › ${orgOf(row)}` : ''} · 所管コード {row.code}</span>
         </div>
         <h2 className="mt-0.5 text-base font-semibold leading-snug">{row.name}{row.kou && <span className="ml-1 text-xs font-normal text-neutral-400">(項コード {row.kou})</span>}</h2>
       </div>

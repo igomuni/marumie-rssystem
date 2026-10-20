@@ -131,7 +131,7 @@ export function TrendListPane({
                   className={`cursor-pointer border-b border-neutral-100 dark:border-neutral-800 ${selected ? 'bg-emerald-50 dark:bg-emerald-950/40' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/60'}`}
                 >
                   <td className="px-2 py-1 text-left"><AccountBadge accountType={r.acct === 0 ? 'general' : 'special'} /></td>
-                  <td className="break-words px-2 py-1 text-left">{groupOf(r)}</td>
+                  <td className="break-words px-2 py-1 text-left">{groupOf(r, year, urls)}</td>
                   <td className="break-words px-2 py-1 text-left">{orgOf(r)}</td>
                   <td className="break-words px-2 py-1 text-left font-medium">
                     {r.name}

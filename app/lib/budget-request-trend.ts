@@ -21,7 +21,7 @@ export interface TrendFilters {
   org: string;
   orgRegex: boolean;
   acct: 'all' | 0 | 1;
-  /** 所管の絞り込み（groupOf の値）。空なら絞り込まない */
+  /** 所管の絞り込み（groupsOf の値。どれかが載っていれば一致）。空なら絞り込まない */
   groups: string[];
   pattern: PatternFilter;
   change: ChangeFilter;
@@ -33,8 +33,18 @@ export interface TrendFilters {
 
 export const INITIAL_TREND_FILTERS: TrendFilters = { name: '', nameRegex: false, org: '', orgRegex: false, acct: 'all', groups: [], pattern: 'all', change: '', shared: false, mismatch: false };
 
-/** 所管の表示名（特別会計は特別会計名）。会計の区別は acct（一般 / 特別）の列で示す */
-export const groupOf = (r: BudgetRequestTrendRow): string => r.min;
+/**
+ * 所管 = 載っている要求書の公開元（PDF のドメイン由来の府省庁名）。会計の区別は acct（一般 / 特別）の列で示す。
+ * その年度に無い行（消滅）は、直近の載っている年度の要求書で決める。要求書が引けなければ表紙の所管名（特別会計は特別会計名）
+ */
+export function groupsOf(r: BudgetRequestTrendRow, year: number, urls: readonly string[]): string[] {
+  const ys = Object.keys(r.y).map(Number).sort((a, b) => b - a);
+  const y = ys.find(v => v <= year) ?? ys[0];
+  const a = y === undefined ? undefined : r.y[String(y)];
+  const names = a ? [...new Set(a.src.map(([u]) => publisherOf(urls[u] ?? '')).filter(Boolean))] : [];
+  return names.length > 0 ? names : [r.min];
+}
+export const groupOf = (r: BudgetRequestTrendRow, year: number, urls: readonly string[]): string => groupsOf(r, year, urls).join('、');
 /** 組織の列の表示。特別会計は勘定 */
 export const orgOf = (r: BudgetRequestTrendRow): string => (r.acct === 0 ? r.org : r.sub);
 
@@ -76,14 +86,14 @@ export function patternOf(r: BudgetRequestTrendRow, year: number, firstYear: num
   return now && before ? '継続' : now ? '新規' : before ? '消滅' : null;
 }
 
-export function filterRows(rows: readonly BudgetRequestTrendRow[], f: TrendFilters, year: number, years: readonly number[]): BudgetRequestTrendRow[] {
+export function filterRows(rows: readonly BudgetRequestTrendRow[], f: TrendFilters, year: number, years: readonly number[], urls: readonly string[]): BudgetRequestTrendRow[] {
   const first = years[0];
   const groups = new Set(f.groups);
   return rows.filter(r => {
     const a = yearOf(r, year);
     if (f.pattern === 'gone') { if (!isGone(r, year, first)) return false; } else if (!a) return false;
     if (f.acct !== 'all' && r.acct !== f.acct) return false;
-    if (groups.size > 0 && !groups.has(groupOf(r))) return false;
+    if (groups.size > 0 && !groupsOf(r, year, urls).some(g => groups.has(g))) return false;
     if (!textMatches(r.name, f.name, f.nameRegex)) return false;
     if (!textMatches(`${r.org} ${r.sub}`, f.org, f.orgRegex)) return false;
     if (f.pattern === 'all5' && !inAllYears(r, years)) return false;
@@ -104,11 +114,11 @@ export function filterRows(rows: readonly BudgetRequestTrendRow[], f: TrendFilte
 
 const PATTERN_ORDER: Record<TrendPattern, number> = { 新規: 0, 継続: 1, 消滅: 2 };
 
-function sortValue(r: BudgetRequestTrendRow, key: TrendSortKey, year: number, firstYear: number): string | number | null {
+function sortValue(r: BudgetRequestTrendRow, key: TrendSortKey, year: number, firstYear: number, urls: readonly string[]): string | number | null {
   switch (key) {
     case 'acct': return r.acct;
     case 'pattern': { const p = patternOf(r, year, firstYear); return p === null ? null : PATTERN_ORDER[p]; }
-    case 'group': return groupOf(r);
+    case 'group': return groupOf(r, year, urls);
     case 'org': return orgOf(r);
     case 'name': return r.name;
     case 'prev': return yearOf(r, year)?.prev ?? null;
@@ -119,9 +129,9 @@ function sortValue(r: BudgetRequestTrendRow, key: TrendSortKey, year: number, fi
 }
 
 /** 値の無い行は昇順・降順どちらでも末尾 */
-export function sortRows(rows: readonly BudgetRequestTrendRow[], key: TrendSortKey, dir: TrendSortDir, year: number, firstYear: number): BudgetRequestTrendRow[] {
+export function sortRows(rows: readonly BudgetRequestTrendRow[], key: TrendSortKey, dir: TrendSortDir, year: number, firstYear: number, urls: readonly string[]): BudgetRequestTrendRow[] {
   return [...rows].sort((a, b) => {
-    const x = sortValue(a, key, year, firstYear), y = sortValue(b, key, year, firstYear);
+    const x = sortValue(a, key, year, firstYear, urls), y = sortValue(b, key, year, firstYear, urls);
     if (x === null && y === null) return 0;
     if (x === null) return 1;
     if (y === null) return -1;
