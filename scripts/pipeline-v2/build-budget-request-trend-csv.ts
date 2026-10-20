@@ -198,13 +198,12 @@ for (const { year, ver, kou, status, recs, urlOf, pdfOf, xferOf } of stages) {
     let u = uiRows.get(x0.key);
     if (!u) { u = { acct, code: x0.code, min: acct === 0 ? r0['ministry'] : r0['account'], sub: r0['sub'], org: x0.org, orgSrc: x0.orgSrc, name: r0['request_name'], ...(splitKeys.has(x0.key.split('\t').slice(0, 6).join('\t')) ? { kou: r0['request_code3'] } : {}), y: {} }; uiRows.set(x0.key, u); }
     const num = (v: string): number | null => (v === '' ? null : Number(v));
-    const src: [number, string, string][] = []; const srcAmt: [number | null, number | null][] = [];
-    for (const x of g) { const loc = pdfOf(x.r, x.org); const pdfSlug = loc?.slug ?? x.r['request_source']; const url = urlOf.get(pdfSlug); if (!url) throw new Error(`no URL for ${year} ${pdfSlug}`); const e: [number, string, string] = [urlIndex(url), x.r['request_page'], loc?.pdfPage ?? '']; if (!src.some(y => y[0] === e[0] && y[1] === e[1])) { src.push(e); srcAmt.push([num(x.r['previous_amount']), num(x.r['request_amount'])]); } }
+    const src: [number, string, string, string][] = []; const srcAmt: [number | null, number | null][] = [];
+    for (const x of g) { const loc = pdfOf(x.r, x.org); const pdfSlug = loc?.slug ?? x.r['request_source']; const url = urlOf.get(pdfSlug); if (!url) throw new Error(`no URL for ${year} ${pdfSlug}`); const e: [number, string, string, string] = [urlIndex(url), x.r['request_page'], loc?.pdfPage ?? '', loc?.image ? 'i' : loc?.basis === '推定' ? 'e' : '']; if (!src.some(y => y[0] === e[0] && y[1] === e[1])) { src.push(e); srcAmt.push([num(x.r['previous_amount']), num(x.r['request_amount'])]); } }
     const mismatch = new Set(g.map(y => `${y.r['request_amount']}|${y.r['previous_amount']}`)).size > 1;
-    const locs = g.map(x => pdfOf(x.r, x.org));
     const xfer = [...new Set(g.flatMap(x => xferOf(x.r['request_source'], x.r['request_code3'], x.r['request_name'])))].sort();
     u.code = x0.code;
-    u.y[String(year)] = { code: x0.code, prev: num(r0['previous_amount']), req: num(r0['request_amount']), src, ...(mismatch ? { srcAmt } : {}), ...(xfer.length > 0 ? { xfer } : {}), ...(locs.some(l => l?.basis === '推定') ? { pdfEst: true } : {}), ...(locs.some(l => l?.image) ? { imagePage: true } : {}), ...(locs.some(l => !l?.pdfPage) ? { noPdfPage: true } : {}), mismatch, mof: ver ? status.get(`${r0['request_source']}#${r0['toc_kou_idx']}`) ?? '' : '' };
+    u.y[String(year)] = { code: x0.code, prev: num(r0['previous_amount']), req: num(r0['request_amount']), src, ...(mismatch ? { srcAmt } : {}), ...(xfer.length > 0 ? { xfer } : {}), mismatch, mof: ver ? status.get(`${r0['request_source']}#${r0['toc_kou_idx']}`) ?? '' : '' };
   }
   for (const x of recs) {
     const g = group.get(x.key)!; const r = x.r;

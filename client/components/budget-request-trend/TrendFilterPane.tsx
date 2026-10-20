@@ -5,7 +5,7 @@ import type { BudgetRequestTrendRow } from '@/types/budget-request-trend';
 import { MultiSelectCombo } from '@/client/components/mof-kou/MultiSelectCombo';
 import { RegexTextFilter } from '@/client/components/mof-kou/RegexTextFilter';
 import { MAX_REGEX_PATTERN_LENGTH } from '@/app/lib/sankey-query';
-import { INITIAL_TREND_FILTERS, acctLabelOf, groupsOf, inAllYears, isGone, isNew, yearOf, type ChangeFilter, type PatternFilter, type TrendFilters } from '@/app/lib/budget-request-trend';
+import { INITIAL_TREND_FILTERS, acctLabelOf, groupsOf, recordsOf, inAllYears, isGone, isNew, yearOf, type ChangeFilter, type PatternFilter, type TrendFilters } from '@/app/lib/budget-request-trend';
 
 const section = 'flex flex-col gap-1.5 border-b border-neutral-200 px-3 py-2.5 dark:border-neutral-800';
 const heading = 'text-[11px] font-semibold tracking-wide text-neutral-500';
@@ -39,6 +39,8 @@ export function TrendFilterPane({
     for (const r of rows) if (yearOf(r, year)) m.set(acctLabelOf(r), (m.get(acctLabelOf(r)) ?? 0) + 1);
     return [...m.entries()].sort((a, b) => (a[0] === '一般会計' ? -1 : b[0] === '一般会計' ? 1 : b[1] - a[1]));
   }, [rows, year]);
+  // 頁の状態は所管（府省）ごとのレコードで数える
+  const pdfStates = useMemo(() => rows.flatMap(r => (yearOf(r, year) ? recordsOf(r, year, urls) : [])), [rows, year, urls]);
   const counts = useMemo(
     () => ({
       all5: rows.filter(r => inAllYears(r, years)).length,
@@ -50,10 +52,10 @@ export function TrendFilterPane({
       codeChange: rows.filter(r => yearOf(r, year)?.codeChanged).length,
       newAcct: rows.filter(r => yearOf(r, year)?.newAcct).length,
       moved: rows.filter(r => yearOf(r, year)?.moved).length,
-      imagePage: rows.filter(r => yearOf(r, year)?.imagePage).length,
-      noPdfPage: rows.filter(r => yearOf(r, year)?.noPdfPage).length,
+      imagePage: pdfStates.filter(x => x.imagePage).length,
+      noPdfPage: pdfStates.filter(x => x.noPdfPage).length,
     }),
-    [rows, years, year, first]
+    [rows, years, year, first, pdfStates]
   );
   const [open, setOpen] = useState<'group' | 'acct' | null>(null);
   // コンボの選択肢は「名称（件数）」。選択状態は名称で持つ（年度を替えて選択肢に無い名称は、そのまま残す）

@@ -79,4 +79,10 @@ describe('budget-request-trend', () => {
     const withXfer = [row('繰入費', { '2027': Y(10, 20, { xfer: ['国債整理基金特別会計へ繰入'] }) }), ...rows];
     expect(filterRows(withXfer, { ...INITIAL_TREND_FILTERS, transfer: true }, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['繰入費']);
   });
+  it('flags a missing PDF page only on the publisher whose book lacks it', () => {
+    const partly = row('一部だけ頁なし', { '2027': Y(10, 20, { src: [[0, '1', '3'], [1, '2', '']] }) });
+    const rs = recordsOf(partly, 2027, URLS);
+    expect(rs.map(x => [x.group, x.noPdfPage])).toEqual([['環境省', false], ['経済産業省', true]]);
+    expect(filterRows([partly], { ...INITIAL_TREND_FILTERS, noPdfPage: true }, 2027, YEARS, URLS).map(x => x.group)).toEqual(['経済産業省']);
+  });
 });

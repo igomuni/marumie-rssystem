@@ -151,8 +151,8 @@ export function TrendListPane({
                     {a?.moved && <span title={`${a.moved.kind}: ${a.moved.from} から`} className={`${chip} border-violet-600 text-violet-700 dark:text-violet-400`}>{a.moved.kind}</span>}
                     {a?.newAcct && <span title="この会計・勘定は前年度に無く、この年度に初出です" className={`${chip} border-emerald-600 text-emerald-700 dark:text-emerald-400`}>会計新設</span>}
                     {a?.codeChanged && <span title="所管コードが前の年度から変わりました" className={`${chip} border-neutral-400 text-neutral-500`}>コード変更</span>}
-                    {a?.imagePage && <span title="PDF の該当頁は画像で文字層がなく、明細表の目以下が取り込めていません。リンクの頁は推定です" className={`${chip} border-rose-500 text-rose-600 dark:text-rose-400`}>画像頁</span>}
-                    {a?.noPdfPage && <span title="PDF の頁が引けなかったため、リンクは PDF の先頭を開きます" className={`${chip} border-neutral-400 text-neutral-500`}>PDF頁なし</span>}
+                    {x.imagePage && <span title="PDF の該当頁は画像で文字層がなく、明細表の目以下が取り込めていません。リンクの頁は推定です" className={`${chip} border-rose-500 text-rose-600 dark:text-rose-400`}>画像頁</span>}
+                    {x.noPdfPage && <span title="PDF の頁が引けなかったため、リンクは PDF の先頭を開きます" className={`${chip} border-neutral-400 text-neutral-500`}>PDF頁なし</span>}
                     {a?.mismatch && <span className={`${chip} border-amber-600 text-amber-700 dark:text-amber-400`}>額不一致</span>}
                   </td>
                   <td className={`whitespace-nowrap px-2 py-1 text-left ${pattern === '新規' ? 'text-emerald-700 dark:text-emerald-400' : pattern === '消滅' ? 'text-orange-700 dark:text-orange-400' : 'text-neutral-500'}`}>{pattern ?? '–'}</td>

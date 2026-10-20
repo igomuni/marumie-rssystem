@@ -65,17 +65,24 @@ export interface TrendRecord {
   group: string;
   prev: number | null;
   req: number | null;
+  /** この所管の書の載り先に、PDF の頁が引けなかったものがある */
+  noPdfPage: boolean;
+  /** この所管の書の載り先に、推定した頁が画像（文字層なし）のものがある */
+  imagePage: boolean;
 }
 
 export function recordsOf(r: BudgetRequestTrendRow, year: number, urls: readonly string[]): TrendRecord[] {
   const a = yearOf(r, year);
   return groupsOf(r, year, urls).map(group => {
-    if (!a) return { row: r, group, prev: null, req: null };
+    // この所管の書の載り先だけで、頁の状態を判定する（複数の府省の書に載る項で、片方だけ頁が引けなくても、もう片方には付けない）
+    const mySrc = a ? a.src.filter(s => publisherOf(urls[s[0]] ?? '') === group) : [];
+    const flags = { noPdfPage: mySrc.some(s => !s[2]), imagePage: mySrc.some(s => s[3] === 'i') };
+    if (!a) return { row: r, group, prev: null, req: null, ...flags };
     // 書ごとの額（額不一致のときだけ持つ）があれば、その府省の書のうち最も大きい額
     const mine = a.srcAmt ? a.src.map((s, i) => ({ g: publisherOf(urls[s[0]] ?? ''), amt: a.srcAmt![i] })).filter(x => x.g === group) : [];
-    if (mine.length === 0) return { row: r, group, prev: a.prev, req: a.req };
+    if (mine.length === 0) return { row: r, group, prev: a.prev, req: a.req, ...flags };
     const best = mine.reduce((m, x) => ((x.amt[1] ?? 0) > (m.amt[1] ?? 0) ? x : m));
-    return { row: r, group, prev: best.amt[0], req: best.amt[1] };
+    return { row: r, group, prev: best.amt[0], req: best.amt[1], ...flags };
   });
 }
 
@@ -141,12 +148,12 @@ export function filterRows(rows: readonly BudgetRequestTrendRow[], f: TrendFilte
     if (f.codeChange && !a?.codeChanged) return false;
     if (f.newAcct && !a?.newAcct) return false;
     if (f.moved && !a?.moved) return false;
-    if (f.imagePage && !a?.imagePage) return false;
-    if (f.noPdfPage && !a?.noPdfPage) return false;
     return true;
   });
   return kept.flatMap(r => recordsOf(r, year, urls)).filter(x => {
     if (groups.size > 0 && !groups.has(x.group)) return false;
+    if (f.imagePage && !x.imagePage) return false;
+    if (f.noPdfPage && !x.noPdfPage) return false;
     if (f.change) {
       const t = recordRate(x);
       if (t === null) return false;
