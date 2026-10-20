@@ -99,6 +99,14 @@ for (const [year, ver] of YEARS) {
     if (!org && r['acct'] === 'general') { if (cv?.org) { org = cv.org; orgSrc = '表紙括弧'; } else orgSrc = 'なし'; }
     return { r, code: cv?.code ?? '', org, orgSrc, key: [r['acct'], cv?.code ?? '', r['account'], r['sub'], org, r['request_name']].join('\t') };
   });
+  // 組織が引けなかった特別会計の行（目次の無い抜粋版など）は、同じ年度・所管コード・特別会計・勘定・項名で他の書が示す組織が 1 つに決まるときに、それで補う
+  const orgsOfItem = new Map<string, Set<string>>(); const itemKey = (x: Row): string => [x.r['acct'], x.code, x.r['account'], x.r['sub'], x.r['request_name']].join('\t');
+  for (const x of recs) if (x.r['acct'] === 'special' && x.org) (orgsOfItem.get(itemKey(x)) ?? orgsOfItem.set(itemKey(x), new Set()).get(itemKey(x))!).add(x.org);
+  for (const x of recs) {
+    if (x.r['acct'] !== 'special' || x.org) continue;
+    const set = orgsOfItem.get(itemKey(x)); if (!set || set.size !== 1) continue;
+    x.org = [...set][0]; x.orgSrc = '他の書'; x.key = [x.r['acct'], x.code, x.r['account'], x.r['sub'], x.org, x.r['request_name']].join('\t');
+  }
   stages.push({ year, ver, kou, status, recs, urlOf, pdfPageOf, xferOf });
 }
 // 同じ要求書の中で、同名の別の項（項コードが違う）が同じキーになるもの（例: 厚生労働調査研究等推進費 087 / 405）は、項コードをキーに足して別の行にする。

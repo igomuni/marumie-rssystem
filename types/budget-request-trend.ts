@@ -29,7 +29,7 @@ export interface BudgetRequestTrendRow {
   /** 勘定（特別会計のみ） */
   sub: string;
   org: string;
-  /** 組織の出所: 目次 / 総表 / 表紙括弧 / なし */
+  /** 組織の出所: 目次 / 総表 / 表紙括弧 / 他の書 / なし */
   orgSrc: string;
   name: string;
   /** 項コード（同じ要求書に同名の別の項があるときだけ。キーに含める） */
