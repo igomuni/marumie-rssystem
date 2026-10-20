@@ -48,7 +48,7 @@ export function TrendListPane({
   const cols: { key: TrendSortKey; label: string; left?: boolean }[] = [
     { key: 'group', label: '所管', left: true },
     { key: 'acct', label: '会計', left: true },
-    { key: 'org', label: '組織', left: true },
+    { key: 'org', label: '組織／勘定', left: true },
     { key: 'name', label: '項名', left: true },
     { key: 'pattern', label: '出現パターン', left: true },
     { key: 'prev', label: '前年度予算額' },
