@@ -89,6 +89,22 @@ for (const [year, ver] of YEARS) {
     }
     labelPage.set(slug, lm); digitPage.set(slug, dm);
   }
+  // 明細表の CSV が無い書（明細表のヘッダが読めなかったもの。例: FY2023 の個人情報保護委員会の `(補正後予算額)` ヘッダ）は、plain text の各頁の先頭行にある印字頁（`内（個） 3`、`4 内（個）`）から頁ラベルを作る
+  for (const slug of new Set(kou.map(r => r['request_source']))) {
+    if (labelPage.has(slug)) continue;
+    const file = path.join('data', 'work', 'budget-request-plain-text', String(year), `${slug}.txt`); if (!fs.existsSync(file)) continue;
+    const t = fs.readFileSync(file, 'utf8').split('\f'); if (t[t.length - 1] === '') t.pop();
+    const lm = new Map<string, number>(); const dm = new Map<string, Set<number>>();
+    let inDetail = false; // 明細表の表題（`令和５年度歳出概算要求額明細表`）の頁から先だけ。総表や目次の頁は含めない
+    t.forEach((page, i) => {
+      if (!inDetail && page.split('\n').some(l => /^令和.{1,3}年度歳出概算要求額明細表$/.test(ns(l)))) inDetail = true;
+      if (!inDetail) return;
+      const first = ns(page.split('\n').find(l => l.trim() !== '') ?? ''); const m = /^(\d+)([^\d]{1,8})$/.exec(first) ?? /^([^\d]{1,8})(\d+)$/.exec(first); if (!m) return;
+      const digits = /^\d+$/.test(m[1]) ? m[1] : m[2]; if (!lm.has(first)) lm.set(first, i + 1);
+      (dm.get(digits) ?? dm.set(digits, new Set()).get(digits)!).add(i + 1);
+    });
+    if (lm.size > 0) { labelPage.set(slug, lm); digitPage.set(slug, dm); }
+  }
   // 繰入: 項の下の目の名前に「繰入」を含むもの（例: `交付税及び譲与税配付金特別会計へ繰入`）の繰入先。明細表の CODE3（項）の行に続く CODE_ 行（目）から引く。
   // 同じ要求書の中で項コードと項名が同じ項が複数あれば、まとめて扱う
   const xfers = new Map<string, Map<string, Set<string>>>();
@@ -124,8 +140,10 @@ for (const [year, ver] of YEARS) {
     if (!/^\d+$/.test(page)) return null; const n = Number(page);
     const pairs: [number, number][] = [];
     for (const [lab, pg] of labelPage.get(src) ?? []) { const m = lab.match(/\d+/g); if (m && m.length === 1) pairs.push([Number(m[0]), pg]); }
-    const lo = pairs.filter(x => x[0] < n).sort((x, y) => y[0] - x[0])[0], hi = pairs.filter(x => x[0] > n).sort((x, y) => x[0] - y[0])[0];
-    if (!lo || !hi || lo[1] - lo[0] !== hi[1] - hi[0] || n - lo[0] > 8 || hi[0] - n > 8) return null;
+    const below = pairs.filter(x => x[0] < n).sort((x, y) => y[0] - x[0]), lo = below[0], hi = pairs.filter(x => x[0] > n).sort((x, y) => x[0] - y[0])[0];
+    // 前後の頁ラベルで差が同じとき。後ろに頁ラベルが無い（以降が画像の頁）ときは、直前の 2 つの頁ラベルで差が同じとき
+    const ok = lo && n - lo[0] <= 8 && (hi ? hi[0] - n <= 8 && lo[1] - lo[0] === hi[1] - hi[0] : below[1] !== undefined && lo[1] - lo[0] === below[1][1] - below[1][0]);
+    if (!ok) return null;
     const pg = n + (lo[1] - lo[0]);
     return { slug: src, pdfPage: String(pg), basis: '推定', image: textlessPages(src).has(pg) };
   };
@@ -180,13 +198,12 @@ for (const { year, ver, kou, status, recs, urlOf, pdfOf, xferOf } of stages) {
     let u = uiRows.get(x0.key);
     if (!u) { u = { acct, code: x0.code, min: acct === 0 ? r0['ministry'] : r0['account'], sub: r0['sub'], org: x0.org, orgSrc: x0.orgSrc, name: r0['request_name'], ...(splitKeys.has(x0.key.split('\t').slice(0, 6).join('\t')) ? { kou: r0['request_code3'] } : {}), y: {} }; uiRows.set(x0.key, u); }
     const num = (v: string): number | null => (v === '' ? null : Number(v));
-    const src: [number, string, string][] = []; const srcAmt: [number | null, number | null][] = [];
-    for (const x of g) { const loc = pdfOf(x.r, x.org); const pdfSlug = loc?.slug ?? x.r['request_source']; const url = urlOf.get(pdfSlug); if (!url) throw new Error(`no URL for ${year} ${pdfSlug}`); const e: [number, string, string] = [urlIndex(url), x.r['request_page'], loc?.pdfPage ?? '']; if (!src.some(y => y[0] === e[0] && y[1] === e[1])) { src.push(e); srcAmt.push([num(x.r['previous_amount']), num(x.r['request_amount'])]); } }
+    const src: [number, string, string, string][] = []; const srcAmt: [number | null, number | null][] = [];
+    for (const x of g) { const loc = pdfOf(x.r, x.org); const pdfSlug = loc?.slug ?? x.r['request_source']; const url = urlOf.get(pdfSlug); if (!url) throw new Error(`no URL for ${year} ${pdfSlug}`); const e: [number, string, string, string] = [urlIndex(url), x.r['request_page'], loc?.pdfPage ?? '', loc?.image ? 'i' : loc?.basis === '推定' ? 'e' : '']; if (!src.some(y => y[0] === e[0] && y[1] === e[1])) { src.push(e); srcAmt.push([num(x.r['previous_amount']), num(x.r['request_amount'])]); } }
     const mismatch = new Set(g.map(y => `${y.r['request_amount']}|${y.r['previous_amount']}`)).size > 1;
-    const locs = g.map(x => pdfOf(x.r, x.org));
     const xfer = [...new Set(g.flatMap(x => xferOf(x.r['request_source'], x.r['request_code3'], x.r['request_name'])))].sort();
     u.code = x0.code;
-    u.y[String(year)] = { code: x0.code, prev: num(r0['previous_amount']), req: num(r0['request_amount']), src, ...(mismatch ? { srcAmt } : {}), ...(xfer.length > 0 ? { xfer } : {}), ...(locs.some(l => l?.basis === '推定') ? { pdfEst: true } : {}), ...(locs.some(l => l?.image) ? { imagePage: true } : {}), mismatch, mof: ver ? status.get(`${r0['request_source']}#${r0['toc_kou_idx']}`) ?? '' : '' };
+    u.y[String(year)] = { code: x0.code, prev: num(r0['previous_amount']), req: num(r0['request_amount']), src, ...(mismatch ? { srcAmt } : {}), ...(xfer.length > 0 ? { xfer } : {}), mismatch, mof: ver ? status.get(`${r0['request_source']}#${r0['toc_kou_idx']}`) ?? '' : '' };
   }
   for (const x of recs) {
     const g = group.get(x.key)!; const r = x.r;

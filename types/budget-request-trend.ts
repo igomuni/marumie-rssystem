@@ -8,18 +8,14 @@ export interface BudgetRequestTrendYear {
   prev: number | null;
   /** 概算要求額 */
   req: number | null;
-  /** 載っている要求書: [urls の添字, 目次の頁（紙面の印字）, PDF の通し頁（引けないときは空）] */
-  src: [number, string, string][];
+  /** 載っている要求書: [urls の添字, 目次の頁（紙面の印字）, PDF の通し頁（引けないときは空）, 頁の状態（'e' = 前後の頁ラベルから推定、'i' = 推定した頁が画像で文字層なし、空 = 明細表から引けた）] */
+  src: [number, string, string, string?][];
   /** 要求書ごとの [前年度予算額, 概算要求額]（src と同じ並び。mismatch のときだけ）。prev / req は最も大きい額の書（合計書）の値 */
   srcAmt?: [number | null, number | null][];
   /** 項の下の目に「繰入」を含むときの繰入先（目名。例: 国債整理基金特別会計へ繰入）。会計をまたぐ合計では二重になりうる */
   xfer?: string[];
   /** 同じキーが複数の要求書にあり、金額が一致しない */
   mismatch: boolean;
-  /** PDF の頁を、前後の頁ラベルの差から推定した（明細表の行から引けなかった） */
-  pdfEst?: boolean;
-  /** 推定した頁に文字層が無い（画像の頁）。明細表の目以下が取り込めていない */
-  imagePage?: boolean;
   /** 前の項をこの項につないだ（移管元が特定できた）。kind: 移管 = 新設の会計・勘定へ、改称 = 同じ所管・勘定で組織か項名が変わった。from = 前の項（所管 › 勘定 › 組織「項名」） */
   moved?: { kind: '移管' | '改称'; from: string };
   /** 所管コードが前の年度から変わった */
