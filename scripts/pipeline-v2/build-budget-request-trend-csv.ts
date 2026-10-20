@@ -21,6 +21,8 @@ const MATCH = path.join('tests', 'fixtures', 'mof-budget-request-match');
 const rd = (p: string): Rec[] => readCsv(fs.readFileSync(p, 'utf8'));
 const cell = (v: unknown): string => { const s = v === null || v === undefined ? '' : String(v); return /[",\n\r]/u.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
 
+// キーの所管部分: 一般会計は所管名、特別会計は空（特別会計名・勘定がキーに入る）。所管コード（表紙）はキーにしない（年金特会 9207 → 2507 のようにコードだけ変わる）
+const scopeOf = (r: Rec): string => (r['acct'] === 'general' ? r['ministry'] : '');
 const header = ['年度', '会計区分', '所管コード', '所管', '特別会計', '勘定', '組織', '組織の出所', '項名', '項コード', '前年度予算額_千円', '要求額_千円', '増減_千円', '要求書', '頁', 'PDF頁', '階層', '複数書', '金額不一致', '繰入先', 'MOF突合(参考)'];
 const rows: unknown[][] = [];
 const uiRows = new Map<string, BudgetRequestTrendRow>(); // キー（年度をまたぐ）→ 行
@@ -97,15 +99,15 @@ for (const [year, ver] of YEARS) {
   const recs: Row[] = kou.map(r => {
     const cv = cover.get(r['request_source']); let org = r['org']; let orgSrc = org ? (r['hierarchy'] === 'toc' ? '目次' : '総表') : '';
     if (!org && r['acct'] === 'general') { if (cv?.org) { org = cv.org; orgSrc = '表紙括弧'; } else orgSrc = 'なし'; }
-    return { r, code: cv?.code ?? '', org, orgSrc, key: [r['acct'], cv?.code ?? '', r['account'], r['sub'], org, r['request_name']].join('\t') };
+    return { r, code: cv?.code ?? '', org, orgSrc, key: [r['acct'], scopeOf(r), r['account'], r['sub'], org, r['request_name']].join('\t') };
   });
   // 組織が引けなかった特別会計の行（目次の無い抜粋版など）は、同じ年度・所管コード・特別会計・勘定・項名で他の書が示す組織が 1 つに決まるときに、それで補う
-  const orgsOfItem = new Map<string, Set<string>>(); const itemKey = (x: Row): string => [x.r['acct'], x.code, x.r['account'], x.r['sub'], x.r['request_name']].join('\t');
+  const orgsOfItem = new Map<string, Set<string>>(); const itemKey = (x: Row): string => [x.r['acct'], scopeOf(x.r), x.r['account'], x.r['sub'], x.r['request_name']].join('\t');
   for (const x of recs) if (x.r['acct'] === 'special' && x.org) (orgsOfItem.get(itemKey(x)) ?? orgsOfItem.set(itemKey(x), new Set()).get(itemKey(x))!).add(x.org);
   for (const x of recs) {
     if (x.r['acct'] !== 'special' || x.org) continue;
     const set = orgsOfItem.get(itemKey(x)); if (!set || set.size !== 1) continue;
-    x.org = [...set][0]; x.orgSrc = '他の書'; x.key = [x.r['acct'], x.code, x.r['account'], x.r['sub'], x.org, x.r['request_name']].join('\t');
+    x.org = [...set][0]; x.orgSrc = '他の書'; x.key = [x.r['acct'], scopeOf(x.r), x.r['account'], x.r['sub'], x.org, x.r['request_name']].join('\t');
   }
   stages.push({ year, ver, kou, status, recs, urlOf, pdfPageOf, xferOf });
 }
@@ -129,7 +131,8 @@ for (const { year, ver, kou, status, recs, urlOf, pdfPageOf, xferOf } of stages)
     for (const x of g) { const url = urlOf.get(x.r['request_source']); if (!url) throw new Error(`no URL for ${year} ${x.r['request_source']}`); const e: [number, string, string] = [urlIndex(url), x.r['request_page'], pdfPageOf(x.r['request_source'], x.r['request_page'])]; if (!src.some(y => y[0] === e[0] && y[1] === e[1])) { src.push(e); srcAmt.push([num(x.r['previous_amount']), num(x.r['request_amount'])]); } }
     const mismatch = new Set(g.map(y => `${y.r['request_amount']}|${y.r['previous_amount']}`)).size > 1;
     const xfer = [...new Set(g.flatMap(x => xferOf(x.r['request_source'], x.r['request_code3'], x.r['request_name'])))].sort();
-    u.y[String(year)] = { prev: num(r0['previous_amount']), req: num(r0['request_amount']), src, ...(mismatch ? { srcAmt } : {}), ...(xfer.length > 0 ? { xfer } : {}), mismatch, mof: ver ? status.get(`${r0['request_source']}#${r0['toc_kou_idx']}`) ?? '' : '' };
+    u.code = x0.code;
+    u.y[String(year)] = { code: x0.code, prev: num(r0['previous_amount']), req: num(r0['request_amount']), src, ...(mismatch ? { srcAmt } : {}), ...(xfer.length > 0 ? { xfer } : {}), mismatch, mof: ver ? status.get(`${r0['request_source']}#${r0['toc_kou_idx']}`) ?? '' : '' };
   }
   for (const x of recs) {
     const g = group.get(x.key)!; const r = x.r;
@@ -142,7 +145,26 @@ for (const { year, ver, kou, status, recs, urlOf, pdfPageOf, xferOf } of stages)
 fs.mkdirSync(outDir, { recursive: true });
 const csv = [header, ...rows].map(r => r.map(cell).join(',')).join('\n') + '\n';
 fs.writeFileSync(path.join(outDir, 'kou.csv'), csv);
-const ui: BudgetRequestTrendData = { years: YEARS.map(([y]) => y), urls: uiUrls, rows: [...uiRows.values()] };
+// 紐づけの候補（キーは変えず、候補として示すだけ）: 前年度に無い項（新規）と、その年度に無い項（消滅）で、会計区分と項名が同じ、
+// 新規側の前年度予算額が消滅側の要求額の ±20% 以内（どちらも 0 超）、かつ同名の候補が 1 対 1 に決まるもの（例: 年金特会 → 子ども・子育て支援特会）
+const uiList = [...uiRows.values()];
+let candidates = 0;
+for (let i = 0; i + 1 < YEARS.length; i++) {
+  const a = String(YEARS[i][0]), b = String(YEARS[i + 1][0]);
+  const gone = uiList.map((r, idx) => ({ r, idx })).filter(x => x.r.y[a] && !x.r.y[b]);
+  const added = uiList.map((r, idx) => ({ r, idx })).filter(x => x.r.y[b] && !x.r.y[a]);
+  const near = (g: { r: BudgetRequestTrendRow }, n: { r: BudgetRequestTrendRow }): boolean => {
+    const req = g.r.y[a].req, prev = n.r.y[b].prev;
+    return g.r.acct === n.r.acct && g.r.name === n.r.name && !!req && !!prev && req > 0 && prev > 0 && Math.abs(prev - req) / req <= 0.2;
+  };
+  for (const g of gone) {
+    const ns_ = added.filter(n => near(g, n));
+    if (ns_.length !== 1 || gone.filter(g2 => near(g2, ns_[0])).length !== 1) continue;
+    g.r.y[a].to = ns_[0].idx; ns_[0].r.y[b].from = g.idx; candidates++;
+  }
+}
+summary['linkCandidates'] = candidates;
+const ui: BudgetRequestTrendData = { years: YEARS.map(([y]) => y), urls: uiUrls, rows: uiList };
 const uiDir = path.join('public', 'data', 'v2', 'ui', 'budget-request-trend');
 fs.mkdirSync(uiDir, { recursive: true });
 fs.writeFileSync(path.join(uiDir, 'kou.json.gz'), zlib.gzipSync(JSON.stringify(ui), { level: 9, mtime: 0 } as zlib.ZlibOptions));

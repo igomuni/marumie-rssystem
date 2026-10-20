@@ -12,11 +12,16 @@ export function TrendDetailPane({
   years,
   year,
   urls,
+  rows,
+  onSelectRow,
 }: {
   row: BudgetRequestTrendRow | null;
   years: readonly number[];
   year: number;
   urls: readonly string[];
+  /** 全行（紐づけ候補の行を引く） */
+  rows: readonly BudgetRequestTrendRow[];
+  onSelectRow: (r: BudgetRequestTrendRow) => void;
 }) {
   if (!row) {
     return <p className="p-6 text-center text-xs text-neutral-500">一覧から項を選ぶと、全年度の推移とグラフ、元の PDF へのリンクが出ます。</p>;
@@ -35,12 +40,23 @@ export function TrendDetailPane({
   if (xfers.length > 0) notes.push(`この項の目に繰入があります（${xfers.join('、')}）。受け側の会計にも載るため、会計をまたぐ合計では二重になりえます。`);
   if (present.some(y => yearOf(row, y)?.mismatch)) notes.push('同じキーで、要求書によって額が違う年度があります（各書が取り分だけを載せている場合は、最も大きい額＝合計書の額を表示しています）。各書の額は PDF の右に示します。');
 
+  // 所管コードは年度で変わることがある（例: 年金特会 9207 → 2507）。年度順に、変わった所で区切って示す
+  const codes = present.reduce<string[]>((acc, y) => { const c = yearOf(row, y)?.code ?? ''; if (c && acc[acc.length - 1] !== c) acc.push(c); return acc; }, []);
+  // 紐づけの候補: 同名で、翌年度に新規の項の前年度予算額が、この項の要求額に近い（キーは別のまま）
+  const links = present.flatMap(y => {
+    const a = yearOf(row, y)!;
+    const out: { text: string; target: BudgetRequestTrendRow }[] = [];
+    if (a.from !== undefined && rows[a.from]) { const t = rows[a.from], b = yearOf(t, y - 1); out.push({ text: `FY${y - 1} の「${t.name}」（${groupOf(t, y - 1, urls)}${orgOf(t) ? ` › ${orgOf(t)}` : ''}、要求額 ${formatSen(b?.req ?? null)}）が、FY${y} の前年度予算額 ${formatSen(a.prev)} と近い同名の項です`, target: t }); }
+    if (a.to !== undefined && rows[a.to]) { const t = rows[a.to], b = yearOf(t, y + 1); out.push({ text: `FY${y + 1} に新規の「${t.name}」（${groupOf(t, y + 1, urls)}${orgOf(t) ? ` › ${orgOf(t)}` : ''}、前年度予算額 ${formatSen(b?.prev ?? null)}）が、FY${y} の要求額 ${formatSen(a.req)} と近い同名の項です`, target: t }); }
+    return out;
+  });
+
   return (
     <div className="flex flex-col gap-3 p-3 text-xs">
       <div>
         <div className="flex flex-wrap items-center gap-x-1.5 text-[11px] text-neutral-500">
           <AccountBadge accountType={row.acct === 0 ? 'general' : 'special'} />
-          <span>{groupOf(row, year, urls)}{orgOf(row) ? ` › ${orgOf(row)}` : ''} · 所管コード {row.code}</span>
+          <span>{groupOf(row, year, urls)}{orgOf(row) ? ` › ${orgOf(row)}` : ''} · 所管コード {codes.length > 0 ? codes.join(' → ') : row.code}</span>
         </div>
         <h2 className="mt-0.5 text-base font-semibold leading-snug">{row.name}{row.kou && <span className="ml-1 text-xs font-normal text-neutral-400">(項コード {row.kou})</span>}</h2>
       </div>
@@ -130,6 +146,16 @@ export function TrendDetailPane({
         </table>
       </div>
       <p className="text-[11px] text-neutral-500">査定差 = 翌年度の「前年度予算額」− その年度の要求額（負なら要求より予算が少ない）。選択中の年度は色付き。FY{first}〜FY{last}。</p>
+      {links.length > 0 && (
+        <div className="rounded border-l-[3px] border-sky-600 bg-sky-50 px-2.5 py-1.5 text-neutral-800 dark:bg-sky-950/40 dark:text-neutral-200">
+          <p className="font-medium">紐づけの候補（キーは別の行のまま）</p>
+          {links.map(l => (
+            <p key={l.text} className="mt-0.5">
+              {l.text}。<button type="button" onClick={() => onSelectRow(l.target)} className="text-sky-700 underline hover:text-sky-900 dark:text-sky-400">その項を開く</button>
+            </p>
+          ))}
+        </div>
+      )}
       {notes.length > 0 && (
         <div className="rounded border-l-[3px] border-amber-600 bg-amber-50 px-2.5 py-1.5 text-neutral-800 dark:bg-amber-950/40 dark:text-neutral-200">
           {notes.map(n => <p key={n}>{n}</p>)}

@@ -2,6 +2,8 @@
 
 /** 1 年度の値。金額は千円。 */
 export interface BudgetRequestTrendYear {
+  /** その年度の表紙の所管コード（年度で変わることがある。例: 年金特会 9207 → 2507） */
+  code: string;
   /** 前年度予算額（その年度の要求書が載せる値） */
   prev: number | null;
   /** 概算要求額 */
@@ -14,15 +16,19 @@ export interface BudgetRequestTrendYear {
   xfer?: string[];
   /** 同じキーが複数の要求書にあり、金額が一致しない */
   mismatch: boolean;
+  /** 紐づけの候補: この項は前年度に無く、rows の添字の項（前年度に在り、この年度に無い）が同じ項かもしれない */
+  from?: number;
+  /** 紐づけの候補: この項はこの年度の翌年度に無く、rows の添字の項（翌年度に新規）が同じ項かもしれない */
+  to?: number;
   /** MOF 突合の状態（参考。MOF の版が無い年度は空） */
   mof: string;
 }
 
-/** 項 1 件（年度をまたぐキー: 会計区分 + 所管コード + 特別会計 + 勘定 + 組織 + 項名） */
+/** 項 1 件（年度をまたぐキー: 会計区分 + 所管（一般会計のみ）+ 特別会計 + 勘定 + 組織 + 項名） */
 export interface BudgetRequestTrendRow {
   /** 0 = 一般会計, 1 = 特別会計 */
   acct: 0 | 1;
-  /** 表紙の所管コード */
+  /** 最新年度の表紙の所管コード */
   code: string;
   /** 一般会計は所管名、特別会計は特別会計名 */
   min: string;

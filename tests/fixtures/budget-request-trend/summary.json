@@ -35,6 +35,7 @@
    "duplicated_keys": 55,
    "general_without_org": 0,
    "without_amount": 0
-  }
+  },
+  "linkCandidates": 8
  }
 }
