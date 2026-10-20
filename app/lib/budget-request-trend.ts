@@ -20,7 +20,8 @@ export interface TrendFilters {
   /** 組織（特別会計は勘定）の検索。規則は項名と同じ */
   org: string;
   orgRegex: boolean;
-  acct: 'all' | 0 | 1;
+  /** 会計の絞り込み（0 = 一般, 1 = 特別）。空なら絞り込まない */
+  accts: (0 | 1)[];
   /** 所管の絞り込み（groupsOf の値。どれかが載っていれば一致）。空なら絞り込まない */
   groups: string[];
   pattern: PatternFilter;
@@ -31,7 +32,7 @@ export interface TrendFilters {
   mismatch: boolean;
 }
 
-export const INITIAL_TREND_FILTERS: TrendFilters = { name: '', nameRegex: false, org: '', orgRegex: false, acct: 'all', groups: [], pattern: 'all', change: '', shared: false, mismatch: false };
+export const INITIAL_TREND_FILTERS: TrendFilters = { name: '', nameRegex: false, org: '', orgRegex: false, accts: [], groups: [], pattern: 'all', change: '', shared: false, mismatch: false };
 
 /**
  * 所管 = 載っている要求書の公開元（PDF のドメイン由来の府省庁名）。会計の区別は acct（一般 / 特別）の列で示す。
@@ -115,7 +116,7 @@ export function filterRows(rows: readonly BudgetRequestTrendRow[], f: TrendFilte
   const kept = rows.filter(r => {
     const a = yearOf(r, year);
     if (f.pattern === 'gone') { if (!isGone(r, year, first)) return false; } else if (!a) return false;
-    if (f.acct !== 'all' && r.acct !== f.acct) return false;
+    if (f.accts.length > 0 && !f.accts.includes(r.acct)) return false;
     if (!textMatches(r.name, f.name, f.nameRegex)) return false;
     if (!textMatches(`${r.org} ${r.sub}`, f.org, f.orgRegex)) return false;
     if (f.pattern === 'all5' && !inAllYears(r, years)) return false;

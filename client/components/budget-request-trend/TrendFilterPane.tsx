@@ -1,7 +1,8 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type { BudgetRequestTrendRow } from '@/types/budget-request-trend';
+import { MultiSelectCombo } from '@/client/components/mof-kou/MultiSelectCombo';
 import { RegexTextFilter } from '@/client/components/mof-kou/RegexTextFilter';
 import { MAX_REGEX_PATTERN_LENGTH } from '@/app/lib/sankey-query';
 import { INITIAL_TREND_FILTERS, groupsOf, inAllYears, isGone, isNew, yearOf, type ChangeFilter, type PatternFilter, type TrendFilters } from '@/app/lib/budget-request-trend';
@@ -34,8 +35,8 @@ export function TrendFilterPane({
   }, [rows, year, urls]);
   const counts = useMemo(
     () => ({
-      acct0: rows.filter(r => r.acct === 0).length,
-      acct1: rows.filter(r => r.acct === 1).length,
+      acct0: rows.filter(r => r.acct === 0 && yearOf(r, year)).length,
+      acct1: rows.filter(r => r.acct === 1 && yearOf(r, year)).length,
       all5: rows.filter(r => inAllYears(r, years)).length,
       isNew: rows.filter(r => isNew(r, year, first)).length,
       isGone: rows.filter(r => isGone(r, year, first)).length,
@@ -44,6 +45,8 @@ export function TrendFilterPane({
     }),
     [rows, years, year, first]
   );
+  const [acctOpen, setAcctOpen] = useState(false);
+  const acctLabels = [`一般会計（${counts.acct0.toLocaleString()}）`, `特別会計（${counts.acct1.toLocaleString()}）`];
   const set = (patch: Partial<TrendFilters>) => onChange({ ...filters, ...patch });
   const newGoneDisabled = year === first;
   const pattern = (value: PatternFilter, label: string, n: number | null, disabled = false) => (
@@ -83,13 +86,14 @@ export function TrendFilterPane({
         </div>
         <div className={section}>
           <h3 className={heading}>会計</h3>
-          {([['all', 'すべて', rows.length], [0, '一般会計', counts.acct0], [1, '特別会計', counts.acct1]] as const).map(([v, label, n]) => (
-            <label key={String(v)} className={row}>
-              <input type="radio" name="acct" checked={filters.acct === v} onChange={() => set({ acct: v })} />
-              {label}
-              <span className={count}>{n.toLocaleString()}</span>
-            </label>
-          ))}
+          <MultiSelectCombo
+            label="会計"
+            options={acctLabels}
+            selected={filters.accts.map(v => acctLabels[v])}
+            onChange={next => set({ accts: ([0, 1] as const).filter(v => next.includes(acctLabels[v])) })}
+            open={acctOpen}
+            onOpenChange={setAcctOpen}
+          />
         </div>
         <div className={section}>
           <h3 className={heading}>所管</h3>
