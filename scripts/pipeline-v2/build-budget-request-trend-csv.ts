@@ -145,8 +145,15 @@ for (const { year, ver, kou, status, recs, urlOf, pdfPageOf, xferOf } of stages)
 fs.mkdirSync(outDir, { recursive: true });
 const csv = [header, ...rows].map(r => r.map(cell).join(',')).join('\n') + '\n';
 fs.writeFileSync(path.join(outDir, 'kou.csv'), csv);
-// 紐づけの候補（キーは変えず、候補として示すだけ）: 前年度に無い項（新規）と、その年度に無い項（消滅）で、会計区分と項名が同じ、
+// 紐づけの候補（キーは変えず、候補として示すだけ）: 前年度に無い項（新規）と、その年度に無い項（消滅）で、会計区分が同じ、項名が同じかほぼ同じ（編集距離 2 以内、6 文字以上。例: 児童手当等交付金 / 児童手当交付金）、
 // 新規側の前年度予算額が消滅側の要求額の ±20% 以内（どちらも 0 超）、かつ同名の候補が 1 対 1 に決まるもの（例: 年金特会 → 子ども・子育て支援特会）
+const editDistance = (a: string, b: string): number => {
+  const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...new Array<number>(b.length).fill(0)]);
+  for (let j = 1; j <= b.length; j++) d[0][j] = j;
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+  return d[a.length][b.length];
+};
+const nameNear = (a: string, b: string): boolean => a === b || (Math.min(a.length, b.length) >= 6 && editDistance(a, b) <= 2);
 const uiList = [...uiRows.values()];
 let candidates = 0;
 for (let i = 0; i + 1 < YEARS.length; i++) {
@@ -155,7 +162,7 @@ for (let i = 0; i + 1 < YEARS.length; i++) {
   const added = uiList.map((r, idx) => ({ r, idx })).filter(x => x.r.y[b] && !x.r.y[a]);
   const near = (g: { r: BudgetRequestTrendRow }, n: { r: BudgetRequestTrendRow }): boolean => {
     const req = g.r.y[a].req, prev = n.r.y[b].prev;
-    return g.r.acct === n.r.acct && g.r.name === n.r.name && !!req && !!prev && req > 0 && prev > 0 && Math.abs(prev - req) / req <= 0.2;
+    return g.r.acct === n.r.acct && nameNear(g.r.name, n.r.name) && !!req && !!prev && req > 0 && prev > 0 && Math.abs(prev - req) / req <= 0.2;
   };
   for (const g of gone) {
     const ns_ = added.filter(n => near(g, n));
