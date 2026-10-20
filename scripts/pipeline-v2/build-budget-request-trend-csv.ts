@@ -30,7 +30,7 @@ const uiUrls: string[] = []; const uiUrlIdx = new Map<string, number>();
 const urlIndex = (u: string): number => { let i = uiUrlIdx.get(u); if (i === undefined) { i = uiUrls.length; uiUrls.push(u); uiUrlIdx.set(u, i); } return i; };
 const summary: Record<string, unknown> = {};
 type Row = { r: Rec; code: string; org: string; orgSrc: string; key: string };
-const stages: { year: number; ver: string | null; kou: Rec[]; status: Map<string, string>; recs: Row[]; urlOf: Map<string, string>; pdfPageOf: (src: string, page: string) => string; pdfSlugOf: (src: string, page: string) => string; xferOf: (src: string, code: string, name: string) => string[] }[] = [];
+const stages: { year: number; ver: string | null; kou: Rec[]; status: Map<string, string>; recs: Row[]; urlOf: Map<string, string>; pdfPageOf: (r: Rec, org: string) => string; pdfSlugOf: (r: Rec, org: string) => string; xferOf: (src: string, code: string, name: string) => string[] }[] = [];
 for (const [year, ver] of YEARS) {
   const dir = path.join(MATCH, ver ?? String(year));
   const kou = rd(path.join(dir, 'request-kou.csv'));
@@ -67,11 +67,21 @@ for (const [year, ver] of YEARS) {
   for (const d of freeze.documents) { const slug = d.localPdfPath.replace(/^data\/download\//, '').replace(/\.pdf$/i, '').replace(/\//g, '__'); urlOf.set(slug, d.sourceUrl); urlOf.set(slug.replace(/\$/g, '%24'), d.sourceUrl); }
   // 目次の頁は紙面に印字された頁（`4復興特` `エ1` のような接頭辞・接尾辞つきもある）。PDF の通し頁は、明細表の各行の 頁 と source_page（PDF の頁）の対応から引く。
   // 明細表が無い要求書は引けず、空にする
+  const detailKou = new Map<string, { code: string; name: string; org: string; pg: number }[]>();
   const labelPage = new Map<string, Map<string, number>>(); const digitPage = new Map<string, Map<string, Set<number>>>();
   const detailDir = path.join('tests', 'fixtures', 'budget-request-csv', String(year), 'detail-table', 'sources');
   if (fs.existsSync(detailDir)) for (const f of fs.readdirSync(detailDir).filter(x => x.endsWith('.csv'))) {
     const slug = f.slice(0, -4); const lm = new Map<string, number>(); const dm = new Map<string, Set<number>>();
-    for (const r of rd(path.join(detailDir, f))) {
+    const rowsOf = rd(path.join(detailDir, f)); let orgNow = '';
+    rowsOf.forEach((r, i) => {
+      // 明細表の項（CODE3）の行: 組織の見出しは、CODE3 の直後に CODE3 が続く行（総表と同じ規則。CONTEXT で区切る）
+      if (r['row_type'] === 'CONTEXT') orgNow = '';
+      if (r['row_type'] !== 'CODE3') return;
+      const m = /^(\d+)(.*)$/.exec(ns(r['事項'] ?? '')); if (!m || !Number(r['source_page'])) return;
+      if (rowsOf[i + 1]?.['row_type'] === 'CODE3' && orgNow === '') { orgNow = m[2]; return; }
+      (detailKou.get(slug) ?? detailKou.set(slug, []).get(slug)!).push({ code: m[1], name: m[2], org: orgNow, pg: Number(r['source_page']) });
+    });
+    for (const r of rowsOf) {
       const lab = ns(r['頁'] ?? ''); const pg = Number(r['source_page']); if (!lab || !pg) continue;
       if (!lm.has(lab)) lm.set(lab, pg);
       for (const d of lab.match(/\d+/g) ?? []) (dm.get(d) ?? dm.set(d, new Set()).get(d)!).add(pg);
@@ -95,7 +105,15 @@ for (const [year, ver] of YEARS) {
   // 書の同定は slug から日付と末尾の連番を除いたもの。分冊のうちちょうど 1 つの PDF の 1 頁に当たるときだけ採る
   const bookOf = (slug: string): string => slug.replace(/\d{8}[-_]/, '').replace(/_+\d+$/, '');
   const slugsOfBook = new Map<string, string[]>(); for (const slug of labelPage.keys()) (slugsOfBook.get(bookOf(slug)) ?? slugsOfBook.set(bookOf(slug), []).get(bookOf(slug))!).push(slug);
-  const locate = (src: string, page: string): { slug: string; pdfPage: string } | null => {
+  // 項コード + 項名で、同じ書（分冊を含む）の明細表の項の行を探し、その行の PDF の頁（source_page）をそのまま使う。複数に当たるときは組織で絞る。
+  // 決まらない行は、目次の印字頁を明細表の頁ラベルに引き当てる（上のラベル方式）
+  const kouIndex = new Map<string, { slug: string; org: string; pg: number }[]>();
+  for (const [slug, list] of detailKou) for (const k of list) { const key = `${bookOf(slug)}\t${k.code}\t${k.name}`; (kouIndex.get(key) ?? kouIndex.set(key, []).get(key)!).push({ slug, org: k.org, pg: k.pg }); }
+  const locate = (r: Rec, org: string): { slug: string; pdfPage: string } | null => {
+    const src = r['request_source'], page = r['request_page'];
+    const cands = kouIndex.get(`${bookOf(src)}\t${r['request_code3']}\t${ns(r['request_name'])}`) ?? [];
+    const pick = cands.length === 1 ? cands : cands.filter(c => org && c.org === ns(org));
+    if (pick.length === 1) return { slug: pick[0].slug, pdfPage: String(pick[0].pg) };
     const find = (slug: string): number[] => {
       const hit = labelPage.get(slug)?.get(ns(page)); if (hit) return [hit];
       const set = /^\d+$/.test(page) ? digitPage.get(slug)?.get(page) : undefined;
@@ -106,8 +124,8 @@ for (const [year, ver] of YEARS) {
     const hits = (slugsOfBook.get(bookOf(src)) ?? []).filter(x => x !== src).flatMap(x => find(x).map(pg => ({ slug: x, pdfPage: String(pg) })));
     return hits.length === 1 ? hits[0] : null;
   };
-  const pdfPageOf = (src: string, page: string): string => locate(src, page)?.pdfPage ?? '';
-  const pdfSlugOf = (src: string, page: string): string => locate(src, page)?.slug ?? src;
+  const pdfPageOf = (r: Rec, org: string): string => locate(r, org)?.pdfPage ?? '';
+  const pdfSlugOf = (r: Rec, org: string): string => locate(r, org)?.slug ?? r['request_source'];
   const recs: Row[] = kou.map(r => {
     const cv = cover.get(r['request_source']); let org = r['org']; let orgSrc = org ? (r['hierarchy'] === 'toc' ? '目次' : '総表') : '';
     if (!org && r['acct'] === 'general') { if (cv?.org) { org = cv.org; orgSrc = '表紙括弧'; } else orgSrc = 'なし'; }
@@ -140,7 +158,7 @@ for (const { year, ver, kou, status, recs, urlOf, pdfPageOf, pdfSlugOf, xferOf }
     if (!u) { u = { acct, code: x0.code, min: acct === 0 ? r0['ministry'] : r0['account'], sub: r0['sub'], org: x0.org, orgSrc: x0.orgSrc, name: r0['request_name'], ...(splitKeys.has(x0.key.split('\t').slice(0, 6).join('\t')) ? { kou: r0['request_code3'] } : {}), y: {} }; uiRows.set(x0.key, u); }
     const num = (v: string): number | null => (v === '' ? null : Number(v));
     const src: [number, string, string][] = []; const srcAmt: [number | null, number | null][] = [];
-    for (const x of g) { const pdfSlug = pdfSlugOf(x.r['request_source'], x.r['request_page']); const url = urlOf.get(pdfSlug); if (!url) throw new Error(`no URL for ${year} ${pdfSlug}`); const e: [number, string, string] = [urlIndex(url), x.r['request_page'], pdfPageOf(x.r['request_source'], x.r['request_page'])]; if (!src.some(y => y[0] === e[0] && y[1] === e[1])) { src.push(e); srcAmt.push([num(x.r['previous_amount']), num(x.r['request_amount'])]); } }
+    for (const x of g) { const pdfSlug = pdfSlugOf(x.r, x.org); const url = urlOf.get(pdfSlug); if (!url) throw new Error(`no URL for ${year} ${pdfSlug}`); const e: [number, string, string] = [urlIndex(url), x.r['request_page'], pdfPageOf(x.r, x.org)]; if (!src.some(y => y[0] === e[0] && y[1] === e[1])) { src.push(e); srcAmt.push([num(x.r['previous_amount']), num(x.r['request_amount'])]); } }
     const mismatch = new Set(g.map(y => `${y.r['request_amount']}|${y.r['previous_amount']}`)).size > 1;
     const xfer = [...new Set(g.flatMap(x => xferOf(x.r['request_source'], x.r['request_code3'], x.r['request_name'])))].sort();
     u.code = x0.code;
@@ -150,7 +168,7 @@ for (const { year, ver, kou, status, recs, urlOf, pdfPageOf, pdfSlugOf, xferOf }
     const g = group.get(x.key)!; const r = x.r;
     const a = r['request_amount'] === '' ? null : Number(r['request_amount']); const p = r['previous_amount'] === '' ? null : Number(r['previous_amount']);
     const mismatch = new Set(g.map(y => `${y.r['request_amount']}|${y.r['previous_amount']}`)).size > 1;
-    rows.push([year, r['acct'] === 'general' ? '一般' : r['acct'] === 'special' ? '特別' : '', x.code, r['ministry'], r['account'], r['sub'], x.org, x.orgSrc, r['request_name'], r['request_code3'], p ?? '', a ?? '', a !== null && p !== null ? a - p : '', r['request_source'], r['request_page'], pdfPageOf(r['request_source'], r['request_page']), pdfSlugOf(r['request_source'], r['request_page']), r['hierarchy'], g.length > 1 ? 1 : 0, mismatch ? 1 : 0, xferOf(r['request_source'], r['request_code3'], r['request_name']).join('、'), ver ? status.get(`${r['request_source']}#${r['toc_kou_idx']}`) ?? '' : '']);
+    rows.push([year, r['acct'] === 'general' ? '一般' : r['acct'] === 'special' ? '特別' : '', x.code, r['ministry'], r['account'], r['sub'], x.org, x.orgSrc, r['request_name'], r['request_code3'], p ?? '', a ?? '', a !== null && p !== null ? a - p : '', r['request_source'], r['request_page'], pdfPageOf(r, x.org), pdfSlugOf(r, x.org), r['hierarchy'], g.length > 1 ? 1 : 0, mismatch ? 1 : 0, xferOf(r['request_source'], r['request_code3'], r['request_name']).join('、'), ver ? status.get(`${r['request_source']}#${r['toc_kou_idx']}`) ?? '' : '']);
   }
   summary[String(year)] = { rows: recs.length, distinct_keys: group.size, duplicated_keys: [...group.values()].filter(g => g.length > 1).length, general_without_org: recs.filter(x => x.r['acct'] === 'general' && !x.org).length, without_amount: kou.filter(r => r['request_amount'] === '').length };
 }
