@@ -5,7 +5,7 @@ import type { BudgetRequestMofKind, BudgetRequestMofRow } from '@/types/budget-r
 import { MultiSelectCombo } from '@/client/components/mof-kou/MultiSelectCombo';
 import { RegexTextFilter } from '@/client/components/mof-kou/RegexTextFilter';
 import { MAX_REGEX_PATTERN_LENGTH } from '@/app/lib/sankey-query';
-import { INITIAL_MOF_FILTERS, KIND_LABEL, acctLabelOf, groupOf, type MofDiffFilter, type MofFilters } from '@/app/lib/budget-request-mof';
+import { INITIAL_MOF_FILTERS, JOINT, KIND_LABEL, acctLabelOf, isJoint, publishersOf, type MofDiffFilter, type MofFilters } from '@/app/lib/budget-request-mof';
 import { TYPE_INFO, TYPE_ORDER } from './typeInfo';
 
 const section = 'flex flex-col gap-1.5 border-b border-neutral-200 px-3 py-2.5 dark:border-neutral-800';
@@ -18,7 +18,12 @@ const KIND_NOTE: Record<BudgetRequestMofKind, string> = { matched: '', mofOnly: 
 export function MofFilterPane({ rows, urls, year, filters, onChange }: { rows: readonly BudgetRequestMofRow[]; urls: readonly string[]; year: number; filters: MofFilters; onChange: (f: MofFilters) => void }) {
   const inYear = useMemo(() => rows.filter(r => r.y === year), [rows, year]);
   const tally = (keys: string[][]) => { const m = new Map<string, number>(); for (const ks of keys) for (const k of ks) m.set(k, (m.get(k) ?? 0) + 1); return m; };
-  const groups = useMemo(() => [...tally(inYear.map(r => groupOf(r, urls).split('、')))].sort((a, b) => b[1] - a[1]), [inYear, urls]);
+  // 所管の選択肢: 府省ごと（件数はその府省が載せている項。共管の項も数える）と、末尾に「共管」（複数の府省の項）
+  const groups = useMemo(() => {
+    const list = [...tally(inYear.map(r => publishersOf(r, urls)))].sort((a, b) => b[1] - a[1]);
+    const joint = inYear.filter(r => isJoint(r, urls)).length;
+    return joint > 0 ? [...list, [JOINT, joint] as [string, number]] : list;
+  }, [inYear, urls]);
   const accts = useMemo(() => [...tally(inYear.map(r => [acctLabelOf(r)]))].sort((a, b) => (a[0] === '一般会計' ? -1 : b[0] === '一般会計' ? 1 : b[1] - a[1])), [inYear]);
   const kindCount = useMemo(() => tally(inYear.map(r => [r.kind])), [inYear]);
   const typeCount = useMemo(() => tally(inYear.map(r => r.types)), [inYear]);

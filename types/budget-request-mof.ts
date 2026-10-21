@@ -13,7 +13,7 @@ export interface BudgetRequestMofRow {
   kind: BudgetRequestMofKind;
   /** 0 = 一般会計, 1 = 特別会計 */
   acct: 0 | 1;
-  /** 所管（一覧の「所管」。特別会計は MOF の所管、概算要求のみは要求書の所管） */
+  /** 予算書・要求書の所管（要求書の無い行の所管に使う）。特別会計の MOF のみの行は、共管所管名か、共管の会計なら「、」「及び」で列挙した所管 */
   grp: string;
   /** 一般会計は所管名、特別会計は特別会計名 */
   min: string;

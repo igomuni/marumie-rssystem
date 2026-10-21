@@ -147,7 +147,8 @@ for (const [year, ver] of VERSIONS) {
     const r = mof.get(u['mof_row']); if (!r) throw new Error(`no MOF row ${ver} ${u['mof_row']}`);
     const acct = u['mof_row'].startsWith('kou-special') ? 1 : 0;
     push({
-      y: year, kind: 'mofOnly', acct, grp: ns(r['所管']), min: acct === 0 ? ns(r['所管']) : ns(r['特別会計']), sub: acct === 1 ? ns(r['勘定']) : '', org: acct === 0 ? ns(r['組織']) : '',
+      // 所管: 特別会計で予算書に共管所管名があればそれ（東日本大震災復興は項ごとに復興庁・総務省・財務省）。無ければ予算書の所管（共管の会計は「、」「及び」で列挙）
+      y: year, kind: 'mofOnly', acct, grp: acct === 1 && ns(r['共管所管名']) ? ns(r['共管所管名']) : ns(r['所管']), min: acct === 0 ? ns(r['所管']) : ns(r['特別会計']), sub: acct === 1 ? ns(r['勘定']) : '', org: acct === 0 ? ns(r['組織']) : '',
       name: ns(r['項名']), mof: mofAmt(r), mofPrev: mofPrevOf(r), req: null, reqPrev: null, books: [], types: PLACEHOLDER.test(ns(r['項名'])) ? ['編成で決まる'] : [],
     });
   }

@@ -2,7 +2,7 @@
 
 import type { BudgetRequestMofRow } from '@/types/budget-request-mof';
 import { AccountBadge } from '@/client/components/mof-kou/Badge';
-import { KIND_LABEL, diffOf, groupOf, orgOf, rateOf } from '@/app/lib/budget-request-mof';
+import { KIND_LABEL, diffOf, groupOf, isJoint, orgOf, publishersOf, rateOf } from '@/app/lib/budget-request-mof';
 import { publisherOf } from '@/app/lib/budget-request-trend';
 import { changeColor, formatRate, formatSen, formatSenSigned } from '@/client/components/budget-request-trend/format';
 import { TYPE_INFO } from './typeInfo';
@@ -27,6 +27,7 @@ export function MofDetailPane({ row, urls, version }: { row: BudgetRequestMofRow
         </div>
         <h2 className="mt-1 text-sm font-semibold">{row.name}</h2>
         {row.mofName && <p className="text-[11px] text-neutral-500">予算書の項名: {row.mofName}</p>}
+        {isJoint(row, urls) && <p className="text-[11px] text-neutral-500">所管の府省: {publishersOf(row, urls).join('、')}</p>}
         {row.kind !== 'matched' && <p className="mt-1 text-[11px] text-neutral-500"><b>{KIND_LABEL[row.kind]}</b>: {KIND_NOTE[row.kind]}</p>}
       </div>
       <table className="w-full border-collapse">

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import type { BudgetRequestMofRow } from '@/types/budget-request-mof';
-import { KIND_LABEL, acctLabelOf, diffOf, groupOf, mofRowKey, orgOf, rateOf, type MofSortDir, type MofSortKey } from '@/app/lib/budget-request-mof';
+import { KIND_LABEL, acctLabelOf, diffOf, groupOf, isJoint, mofRowKey, publishersOf, orgOf, rateOf, type MofSortDir, type MofSortKey } from '@/app/lib/budget-request-mof';
 import { changeColor, formatRate, formatSen, formatSenSigned } from '@/client/components/budget-request-trend/format';
 import { TYPE_INFO } from './typeInfo';
 
@@ -107,7 +107,7 @@ export function MofListPane({
                   onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(r); } }}
                   className={`cursor-pointer border-b border-neutral-100 dark:border-neutral-800 ${selected ? 'bg-emerald-50 dark:bg-emerald-950/40' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/60'}`}
                 >
-                  <td className="break-words px-2 py-1 text-left">{groupOf(r, urls)}</td>
+                  <td className={`break-words px-2 py-1 text-left ${isJoint(r, urls) ? 'text-neutral-500' : ''}`} title={isJoint(r, urls) ? publishersOf(r, urls).join('、') : undefined}>{groupOf(r, urls)}</td>
                   <td className="break-words px-2 py-1 text-left">{acctLabelOf(r)}</td>
                   <td className="break-words px-2 py-1 text-left">
                     {orgOf(r)}
