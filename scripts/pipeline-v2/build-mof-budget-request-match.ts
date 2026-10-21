@@ -160,6 +160,7 @@ const m1: unknown[][] = []; const m1Match = new Map<string, number>(); // `${slu
 const refKou = new Set<string>();
 const linkStats = { kou_total_table_linked: 0, kou_total: 0, jikou_total_table_linked: 0, jikou_detail_linked: 0, jikou_total: 0 };
 const kouAcct = new Map<string, Acct>();
+const zeroKou = new Set<string>(); // 額0の項（総表で前年度予算額・概算要求額とも 0）の `${slug}#${kouIdx}`
 for (const s of sources) {
   const t = trees.get(s); if (!t) continue;
   // 目次を持たない source の組織: 総表で、組織計（TOTAL）の後ろ（または表の始め）にある CODE3 の行のうち、次の行も CODE3 のものが組織の見出し行（項には必ず明細が続く）
@@ -180,6 +181,7 @@ for (const s of sources) {
     const head = [s, k.idx, k.code, k.name, k.page];
     if (!sc.ok) { m1.push([...head, '', '', 0, sc.reason === 'no_context' ? 'OUT_OF_SCOPE' : 'PARENT_UNMATCHED', sc.reason, reqAmt, '', '', '']); return; }
     const a = sc.acct!; kouAcct.set(`${s}#${k.idx}`, a);
+    if (links[i]?.amt === 0 && links[i]?.prev === 0) zeroKou.add(`${s}#${k.idx}`);
     let c: Cand = a === 'general' && sc.org === undefined ? (kouByMinName.get(`${sc.ministry}|${k.name}`) ?? []) : (kouIdx[a].get(a === 'general' ? [sc.ministry, sc.org, k.name].join('|') : [sc.account, sc.sub, k.name].join('|')) ?? []);
     if (c.length === 0 && a === 'general' && ren(k.name) !== k.name) c = kouIdx[a].get([sc.ministry, sc.org, ren(k.name)].join('|')) ?? []; // 名称の変更
     // 組織が分からない source（TOC なし）で、同名の項が複数の組織にあるときは、総表の行の並びから決めた組織で絞る
@@ -196,6 +198,18 @@ for (const s of sources) {
   });
 }
 writeCsv('request-kou.csv', ['request_source', 'toc_kou_idx', 'request_code3', 'request_name', 'request_page', 'acct', 'ministry', 'org', 'account', 'sub', 'request_amount', 'previous_amount', 'hierarchy'], reqKou);
+// 額0の項（ZERO_AMOUNT）: 候補なしのものは、名前が見つからないのではなく額のない科目なので分けて数える。
+// 同じ MOF の項に額のある項も対応しているときは、額0の項の対応を外す（同名の額0の項が別の所属にある。例: 厚生労働調査研究等推進費）。
+// 額0の項だけが対応する MOF の項（0 と 0、または編成で額が付いたもの）は対応のまま残す。
+{
+  const keyOf = (row: unknown[]) => `${row[0]}#${row[1]}`;
+  const nonZeroMof = new Set(m1.filter(r => r[8] === 'MATCHED' && !zeroKou.has(keyOf(r))).map(r => String(r[5])));
+  for (const row of m1) {
+    if (!zeroKou.has(keyOf(row))) continue;
+    if (row[8] === 'NO_CANDIDATE') { row[8] = 'ZERO_AMOUNT'; row[9] = 'zero_prev_and_request'; }
+    else if (row[8] === 'MATCHED' && nonZeroMof.has(String(row[5]))) { row[5] = ''; row[6] = ''; row[7] = 0; row[8] = 'ZERO_AMOUNT'; row[9] = 'zero_duplicate_of_nonzero'; row[11] = ''; row[12] = ''; m1Match.delete(keyOf(row)); }
+  }
+}
 // 名前が近い組（NEAR_NAME。MATCHED には入れない）: 候補なしの概算要求の項と、どの項にも対応していない MOF の項で、同じ所属、編集距離 2 以内（6 文字以上）、
 // 金額（概算要求額と MOF の額）が 5% 以内、かつ両側で 1 対 1 に決まるもの。表記ゆれ（例: 国民年金事業費等年金特別会計へ繰入）の確認用
 const lev = (a: string, b: string): number => { let d = Array.from({ length: b.length + 1 }, (_, j) => j); for (let i = 1; i <= a.length; i++) { const p = d; d = [i]; for (let j = 1; j <= b.length; j++) d[j] = Math.min(p[j] + 1, d[j - 1] + 1, p[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); } return d[b.length]; };
