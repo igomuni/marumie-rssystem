@@ -98,13 +98,22 @@ for (const [year, ver] of VERSIONS) {
     const top = qs.reduce((a, q) => ((num(q.m['request_amount']) ?? -Infinity) > (num(a.m['request_amount']) ?? -Infinity) ? q : a), qs[0]);
     const { types, jikouText, orgJikouText } = reqTypes(qs);
     const books = qs.map(bookOf).filter((b, i, all) => all.findIndex(x => x[0] === b[0] && x[1] === b[1]) === i);
-    if (books.length > 1) types.add(new Set(amts).size > 1 ? '持ち分' : '複数書');
+    // 統合: 名前の違う複数の要求の項が、1 つの予算の項になった（突合の項名の対応表。例: FY2023 こども家庭推進費 + こども家庭調査研究等推進費 → こども政策推進費）。
+    // 要求額・前年度予算額は、要求の項ごとの値（その項の最も大きい額）を足す。同じ名前の行どうしは複数書・持ち分
+    const names = [...new Set(qs.map(q => ns(q.m['request_name'])))];
+    let req = num(top.m['request_amount']), reqPrev = num(top.k?.['previous_amount']);
+    if (names.length > 1) {
+      types.add('統合');
+      const tops = names.map(n => qs.filter(q => ns(q.m['request_name']) === n).reduce((a, q) => ((num(q.m['request_amount']) ?? -Infinity) > (num(a.m['request_amount']) ?? -Infinity) ? q : a)));
+      req = tops.reduce((s, q) => s + (num(q.m['request_amount']) ?? 0), 0); reqPrev = tops.reduce((s, q) => s + (num(q.k?.['previous_amount']) ?? 0), 0);
+    } else if (books.length > 1) types.add(new Set(amts).size > 1 ? '持ち分' : '複数書');
     if (qs.some(q => q.m['status'] === 'NEAR_NAME')) types.add('名前が近い');
+    if (qs.some(q => q.m['reason'] === 'kou_renamed')) types.add('改称');
     if (PLACEHOLDER.test(ns(r['項名']))) types.add('編成で決まる');
-    const mofName = ns(r['項名']) !== ns(top.m['request_name']) ? ns(r['項名']) : undefined;
+    const mofName = ns(r['項名']) !== ns(top.m['request_name']) || names.length > 1 ? ns(r['項名']) : undefined;
     push({
       y: year, kind: 'matched', acct, grp: ns(r['所管']), min: acct === 0 ? ns(r['所管']) : ns(r['特別会計']), sub: acct === 1 ? ns(r['勘定']) : '', org: acct === 0 ? ns(r['組織']) : '',
-      name: ns(top.m['request_name']), mof: mofAmt(r), mofPrev: mofPrevOf(r), req: num(top.m['request_amount']), reqPrev: num(top.k?.['previous_amount']), books, types: [...types],
+      name: names.length > 1 ? names.join(' ＋ ') : ns(top.m['request_name']), mof: mofAmt(r), mofPrev: mofPrevOf(r), req, reqPrev, books, types: [...types],
       ...(jikouText ? { jikouText } : {}), ...(orgJikouText ? { orgJikouText } : {}), ...(mofName ? { mofName } : {}),
     });
   }
