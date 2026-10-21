@@ -48,12 +48,12 @@ npx tsx scripts/pipeline-v2/build-mof-budget-request-match.ts <2024|2025|2026> <
 | `request-no-toc.csv` | 木を作れなかった source の行（`OUT_OF_SCOPE`／`no_toc`）。現在は 0 行 |
 | `summary.json` | 層ごとの `status` の件数、MOF の網羅、概算要求側の自己整合、入力の SHA-256 |
 
-`status`: `MATCHED`（MOF の候補が 1 つ）、`AMBIGUOUS`（2 つ以上。候補ごとに 1 行）、`NO_CANDIDATE`（名称が一致する候補なし）、`PARENT_UNMATCHED`（上位が一意に対応せず探していない）、`OUT_OF_SCOPE`（`no_context` など）、`NEAR_NAME`（候補なしの項と、どの項にも対応していない MOF の項で、同じ所属・名前が近い・金額 5% 以内で 1 対 1 のもの。MATCHED には数えない）、`EMPTY`（空の項。下記）。MOF の行の id は `{表}:{行番号}`（例 `kou-general:37`、行番号は CSV のデータ行の 1 始まり）。
+`status`: `MATCHED`（MOF の候補が 1 つ）、`AMBIGUOUS`（2 つ以上。候補ごとに 1 行）、`NO_CANDIDATE`（名称が一致する候補なし）、`PARENT_UNMATCHED`（上位が一意に対応せず探していない）、`OUT_OF_SCOPE`（`no_context` など）、`NEAR_NAME`（候補なしの項と、どの項にも対応していない MOF の項で、同じ所属・名前が近い・金額 5% 以内で 1 対 1 のもの。MATCHED には数えない）、`ZERO_AMOUNT`（額0の項。下記）。MOF の行の id は `{表}:{行番号}`（例 `kou-general:37`、行番号は CSV のデータ行の 1 始まり）。
 
-**空の項（`EMPTY`）**: 総表で前年度予算額・概算要求額がともに 0 の項。要求書は額のない科目も項の行として載せる。
-- 候補がないものは、名前が見つからないのではなく額のない科目なので、`NO_CANDIDATE` と分けて `EMPTY`（`zero_prev_and_request`）とする。
-- 同じ MOF の項に額のある項も対応しているときは、空の項の対応を外して `EMPTY`（`zero_duplicate_of_nonzero`）とする。同名の空の項が別の所属にあるときに起きる（例: 厚生労働調査研究等推進費）。
-- 空の項だけが対応する MOF の項は、対応のまま残す。MOF の予算書にも額 0 の項があり（独立行政法人の施設整備費など）、また要求が 0 で編成で額が付く項がある（例: FY2026 の原子力損害賠償支援資金へ繰入）。
+**額0の項（`ZERO_AMOUNT`）**: 総表で前年度予算額・概算要求額がともに 0 と印字された項（空欄は含めない）。要求書は額のない科目も項の行として載せる。
+- 候補がないものは、名前が見つからないのではなく額のない科目なので、`NO_CANDIDATE` と分けて `ZERO_AMOUNT`（`zero_prev_and_request`）とする。
+- 同じ MOF の項に額のある項も対応しているときは、額0の項の対応を外して `ZERO_AMOUNT`（`zero_duplicate_of_nonzero`）とする。同名の額0の項が別の所属にあるときに起きる（例: 厚生労働調査研究等推進費）。
+- 額0の項だけが対応する MOF の項は、対応のまま残す。MOF の予算書にも額 0 の項があり（独立行政法人の施設整備費など）、また要求が 0 で編成で額が付く項がある（例: FY2026 の原子力損害賠償支援資金へ繰入）。
 
 ## 現在の結果（概算要求の行のうち MOF に一意に対応した割合）
 | 層 | FY2024 × MOF 2024 | FY2025 × MOF 提出時（成立後も同数） |

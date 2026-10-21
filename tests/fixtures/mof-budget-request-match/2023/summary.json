@@ -10,7 +10,7 @@
  },
  "m1_status": {
   "MATCHED": 1028,
-  "EMPTY": 46,
+  "ZERO_AMOUNT": 46,
   "NO_CANDIDATE": 23,
   "NEAR_NAME": 1
  },
