@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { BudgetRequestTrendRow, BudgetRequestTrendYear } from '@/types/budget-request-trend';
-import { INITIAL_TREND_FILTERS, assessmentGap, groupOf, recordsOf, changeRate, filterRows, isGone, isNew, patternOf, publisherOf, sortRows, textMatches } from './budget-request-trend';
+import { INITIAL_TREND_FILTERS, assessmentGap, groupOf, jikouKeyOf, mergeJikou, recordsOf, changeRate, filterRows, isGone, isNew, patternOf, publisherOf, sortRows, textMatches } from './budget-request-trend';
 
 const URLS = ['https://www.env.go.jp/a.pdf', 'https://www.meti.go.jp/b.pdf'];
 const Y = (prev: number | null, req: number | null, extra: Partial<BudgetRequestTrendYear> = {}): BudgetRequestTrendYear => ({ code: '19', prev, req, src: [[0, '1', '3']], mismatch: false, mof: '', ...extra });
@@ -8,6 +8,7 @@ const row = (name: string, y: Record<string, BudgetRequestTrendYear>, o: Partial
   ({ acct: 0, code: '19', min: '内閣府', sub: '', org: '本府', orgSrc: '目次', name, y, ...o });
 const YEARS = [2025, 2026, 2027];
 const recs = (rs: readonly BudgetRequestTrendRow[]) => rs.flatMap(r => recordsOf(r, 2027, URLS));
+const recordsOfNames = (xs: readonly { row: BudgetRequestTrendRow }[]) => xs.map(x => x.row.name);
 const rows = [
   row('継続費', { '2025': Y(100, 120), '2026': Y(110, 200), '2027': Y(150, 150) }),
   row('新設費', { '2027': Y(0, 50) }),
@@ -84,5 +85,14 @@ describe('budget-request-trend', () => {
     const rs = recordsOf(partly, 2027, URLS);
     expect(rs.map(x => [x.group, x.noPdfPage])).toEqual([['環境省', false], ['経済産業省', true]]);
     expect(filterRows([partly], { ...INITIAL_TREND_FILTERS, noPdfPage: true }, 2027, YEARS, URLS).map(x => x.group)).toEqual(['経済産業省']);
+  });
+  it('merges the 事項要求 candidates into the year values by key and filters on them', () => {
+    const data = { years: YEARS, urls: URLS, rows };
+    const merged = mergeJikou(data, { years: { '2027': [[jikouKeyOf(rows[0]), ['印'], '（事項要求）'], ['0|無い|||項', ['要求0'], '']], '2026': [[jikouKeyOf(rows[3]), ['要求0'], '']] } });
+    expect(merged.rows[0].y['2027'].jikou).toEqual({ forms: ['印'], text: '（事項要求）' });
+    expect(merged.rows[0].y['2026'].jikou).toBeUndefined();
+    expect(merged.rows[3].y['2026']).toBeUndefined(); // その年度に載っていない行には付けない
+    expect(rows[0].y['2027'].jikou).toBeUndefined(); // 元のデータは変えない
+    expect(recordsOfNames(filterRows(merged.rows, { ...INITIAL_TREND_FILTERS, jikou: true }, 2027, YEARS, URLS))).toEqual(['継続費']);
   });
 });

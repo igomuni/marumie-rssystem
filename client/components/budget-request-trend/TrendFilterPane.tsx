@@ -54,6 +54,7 @@ export function TrendFilterPane({
       moved: rows.filter(r => yearOf(r, year)?.moved).length,
       imagePage: pdfStates.filter(x => x.imagePage).length,
       noPdfPage: pdfStates.filter(x => x.noPdfPage).length,
+      jikou: rows.filter(r => yearOf(r, year)?.jikou).length,
     }),
     [rows, years, year, first, pdfStates]
   );
@@ -178,6 +179,11 @@ export function TrendFilterPane({
             <input type="checkbox" checked={filters.noPdfPage} onChange={e => set({ noPdfPage: e.target.checked })} />
             PDF頁なし（頁が引けず、リンクは先頭）
             <span className={count}>{counts.noPdfPage}</span>
+          </label>
+          <label className={row}>
+            <input type="checkbox" checked={filters.jikou} onChange={e => set({ jikou: e.target.checked })} />
+            事項要求（備考に記載がある）
+            <span className={count}>{counts.jikou}</span>
           </label>
         </div>
       </div>

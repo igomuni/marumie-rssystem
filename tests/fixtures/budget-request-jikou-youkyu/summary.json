@@ -1,0 +1,74 @@
+{
+ "2023": {
+  "occurrences": 149,
+  "joined_to_kou": 88,
+  "on_org_rows": 27,
+  "unplaced": 34,
+  "kou_with_forms": 95,
+  "kou_trend_rows_with_marks": 68,
+  "forms": {
+   "印": 60,
+   "要求0": 28,
+   "要求0・場所ごと": 3,
+   "文": 11,
+   "一括計上": 1
+  }
+ },
+ "2024": {
+  "occurrences": 113,
+  "joined_to_kou": 93,
+  "on_org_rows": 11,
+  "unplaced": 9,
+  "kou_with_forms": 95,
+  "kou_trend_rows_with_marks": 67,
+  "forms": {
+   "印": 60,
+   "文": 12,
+   "要求0": 31,
+   "一括計上": 1
+  }
+ },
+ "2025": {
+  "occurrences": 96,
+  "joined_to_kou": 75,
+  "on_org_rows": 10,
+  "unplaced": 11,
+  "kou_with_forms": 79,
+  "kou_trend_rows_with_marks": 54,
+  "forms": {
+   "印": 46,
+   "要求0": 27,
+   "文": 11,
+   "一括計上": 1
+  }
+ },
+ "2026": {
+  "occurrences": 82,
+  "joined_to_kou": 63,
+  "on_org_rows": 12,
+  "unplaced": 7,
+  "kou_with_forms": 71,
+  "kou_trend_rows_with_marks": 45,
+  "forms": {
+   "印": 40,
+   "文": 5,
+   "要求0": 23,
+   "要求0・場所ごと": 4,
+   "一括計上": 1
+  }
+ },
+ "2027": {
+  "occurrences": 73,
+  "joined_to_kou": 47,
+  "on_org_rows": 23,
+  "unplaced": 3,
+  "kou_with_forms": 62,
+  "kou_trend_rows_with_marks": 34,
+  "forms": {
+   "印": 33,
+   "要求0": 27,
+   "文": 3,
+   "一括計上": 1
+  }
+ }
+}

@@ -146,6 +146,7 @@ export function TrendListPane({
                     {r.name}
                     {r.kou && <span className="ml-1 text-[10px] text-neutral-400">({r.kou})</span>}
                     {a && a.src.length > 1 && <span title={[...new Set(a.src.map(([u]) => publisherOf(urls[u])))].join('、')} className={`${chip} border-neutral-300 text-neutral-500 dark:border-neutral-600`}>複数書</span>}
+                    {a?.jikou && <span title={`項の中に事項要求（金額を示さない要求）あり: ${a.jikou.forms.join('、')}${a.jikou.text ? `（${a.jikou.text}）` : ''}`} className={`${chip} border-fuchsia-600 text-fuchsia-700 dark:text-fuchsia-400`}>事項要求</span>}
                     {a?.xfer && a.xfer.length > 0 && <span title={`${a.xfer.join('、')}（会計をまたぐ合計では二重になりえます）`} className={`${chip} border-sky-600 text-sky-700 dark:text-sky-400`}>繰入</span>}
                     {a?.from !== undefined && <span title="前年度に消えた同名の項と金額が近い。詳細で確認できます" className={`${chip} border-violet-600 text-violet-700 dark:text-violet-400`}>紐づけ候補</span>}
                     {a?.moved && <span title={`${a.moved.kind}: ${a.moved.from} から`} className={`${chip} border-violet-600 text-violet-700 dark:text-violet-400`}>{a.moved.kind}</span>}
