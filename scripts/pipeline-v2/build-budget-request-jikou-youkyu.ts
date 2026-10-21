@@ -120,8 +120,9 @@ for (const year of YEARS) {
     // MOF との比較（参考）: 要求0 の項は、当初予算でも 0（終了など）か、編成で額が付いたか
     const vsMof = !hasMof ? '' : it.mof === null ? 'MOFに対応なし' : it.mof > req ? '当初>要求' : it.mof === req ? '当初=要求' : '当初<要求';
     const acct = r['会計区分'] === '特別' ? 1 : 0;
+    // UI に出すのは、備考に「事項要求」と書かれた項（印・文）だけ。要求0（前年度限りの経費・終了・移管なども含む）と一括計上（額は示している）は CSV にだけ残す。
     // 行のキーは UI の jikouKeyOf（app/lib/budget-request-trend.ts）と同じ並び: 会計区分 | 所管（特別会計は特別会計名）| 勘定 | 組織 | 項名
-    (ui.years[String(year)] ??= []).push([[acct, acct === 1 ? r['特別会計'] : r['所管'], r['勘定'], r['組織'], r['項名']].join('|'), forms, it.hits[0]?.text ?? '']);
+    if (forms.some(f => f === '印' || f === '文')) (ui.years[String(year)] ??= []).push([[acct, acct === 1 ? r['特別会計'] : r['所管'], r['勘定'], r['組織'], r['項名']].join('|'), forms.filter(f => f === '印' || f === '文'), it.hits[0]?.text ?? '']);
     kouRows.push([year, r['会計区分'], r['所管'], r['特別会計'], r['勘定'], r['組織'], r['項名'], r['項コード'], r['前年度予算額_千円'], r['要求額_千円'], it.mof ?? '', vsMof, forms.join(';'), [...new Set(it.hits.map(h => h.level))].join('・'), it.hits[0]?.text ?? '', it.books.join(' '), r['頁'], r['PDF頁']]);
   }
   summary[String(year)] = { occurrences: total, joined_to_kou: [...hitsOf.values()].reduce((a, h) => a + h.length, 0), on_org_rows: orgHits.length, unplaced, kou_with_forms: items.size, kou_trend_rows_with_marks: joined, forms: count };

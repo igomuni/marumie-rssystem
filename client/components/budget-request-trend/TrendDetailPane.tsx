@@ -6,14 +6,8 @@ import { assessmentGap, groupOf, orgOf, publisherOf, yearOf } from '@/app/lib/bu
 import { changeColor, formatSen, formatSenSigned } from './format';
 
 const W = 380, H = 180, LEFT = 74, BOTTOM = 22, TOP = 10, BAR = 34;
-// 事項要求の候補の形（docs/budget-request-jikou-youkyu.md）
-const JIKOU_FORM: Record<string, string> = {
-  印: '備考に「（事項要求）」',
-  文: '備考で事項要求に言及',
-  要求0: '前年度に額があり要求額が 0',
-  '要求0・場所ごと': '同じ勘定・組織の項がすべて要求額 0',
-  一括計上: '目が括弧書きだけで予算書に同じ項がない（推進費などに一括）',
-};
+// 事項要求の記載の形（docs/budget-request-jikou-youkyu.md）
+const JIKOU_FORM: Record<string, string> = { 印: '備考に「（事項要求）」', 文: '備考で事項要求に言及' };
 
 export function TrendDetailPane({
   row,
@@ -60,8 +54,7 @@ export function TrendDetailPane({
   for (const y of present) { const j = yearOf(row, y)?.jikou; if (j) { const k = j.forms.join(';'); (jikouYears.get(k) ?? jikouYears.set(k, []).get(k)!).push(y); } }
   for (const [k, ys] of jikouYears) {
     const forms = k.split(';'); const text = yearOf(row, ys[ys.length - 1])?.jikou?.text;
-    const partial = forms.includes('印') || forms.includes('文');
-    notes.push(`${ys.map(y => `FY${y}`).join('・')}: 金額を示さない要求（事項要求など）の候補です（${forms.map(f => JIKOU_FORM[f] ?? f).join('、')}）。${text ? `備考:「${text}」。` : ''}${partial ? '要求額には、金額を示していない分が含まれません。' : forms.some(f => f.startsWith('要求0')) ? '事業の終了で 0 の場合もあります。' : ''}`);
+    notes.push(`${ys.map(y => `FY${y}`).join('・')}: 項の中に事項要求（金額を示さない要求）があります（${forms.map(f => JIKOU_FORM[f] ?? f).join('、')}）。${text ? `備考:「${text}」。` : ''}要求額には、金額を示していない分が含まれません。`);
   }
   const xfers = [...new Set(present.flatMap(y => yearOf(row, y)?.xfer ?? []))];
   if (xfers.length > 0) notes.push(`この項の目に繰入があります（${xfers.join('、')}）。受け側の会計にも載るため、会計をまたぐ合計では二重になりえます。`);

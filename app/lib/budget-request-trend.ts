@@ -42,7 +42,7 @@ export interface TrendFilters {
   imagePage: boolean;
   /** その年度に PDF の頁が引けなかった行だけ */
   noPdfPage: boolean;
-  /** その年度に金額を示さない要求（事項要求など）の候補の行だけ */
+  /** その年度に、備考に事項要求の記載がある行だけ */
   jikou: boolean;
 }
 

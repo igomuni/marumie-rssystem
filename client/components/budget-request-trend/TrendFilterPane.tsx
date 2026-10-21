@@ -182,7 +182,7 @@ export function TrendFilterPane({
           </label>
           <label className={row}>
             <input type="checkbox" checked={filters.jikou} onChange={e => set({ jikou: e.target.checked })} />
-            事項要求（金額を示さない要求の候補）
+            事項要求（備考に記載がある）
             <span className={count}>{counts.jikou}</span>
           </label>
         </div>
