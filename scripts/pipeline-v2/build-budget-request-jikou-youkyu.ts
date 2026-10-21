@@ -99,8 +99,11 @@ for (const year of YEARS) {
   const hasMof = fs.existsSync(m1);
   if (hasMof) for (const r of rd(m1)) {
     const key = keyOf(r['request_source'], r['request_code3'], ns(r['request_name']));
-    if (!statusOf.has(key)) statusOf.set(key, r['status']);
-    if ((r['status'] === 'MATCHED' || r['status'] === 'NEAR_NAME') && num(r['mof_amount']) !== null && !mofOf.has(key)) mofOf.set(key, num(r['mof_amount'])!);
+    // 同じ書に同名同コードの項が別の所属にあることがある（例: 外務省の外務本省と在外公館の地域別外交費）。所属（request_scope）つきのキーでも引けるようにする
+    for (const k of [`${key}\t${r['request_scope']}`, key]) {
+      if (!statusOf.has(k)) statusOf.set(k, r['status']);
+      if ((r['status'] === 'MATCHED' || r['status'] === 'NEAR_NAME') && num(r['mof_amount']) !== null && !mofOf.has(k)) mofOf.set(k, num(r['mof_amount'])!);
+    }
   }
 
   // 勘定ごと（組織ごと）0: 同じ場所（特別会計は特別会計＋勘定、一般会計は所管＋組織）の項が 2 つ以上あり、すべて要求額 0、前年度の合計が正
@@ -112,7 +115,10 @@ for (const year of YEARS) {
   type Item = { r: Rec; forms: Set<string>; hits: Hit[]; mof: number | null; books: string[] };
   const items = new Map<string, Item>(); let joined = 0;
   for (const r of rowsY) {
-    const key = keyOf(r['PDFの要求書'] || r['要求書'], r['項コード'], r['項名']); const reqKey = keyOf(r['要求書'], r['項コード'], r['項名']);
+    const key = keyOf(r['PDFの要求書'] || r['要求書'], r['項コード'], r['項名']); const reqKey0 = keyOf(r['要求書'], r['項コード'], r['項名']);
+    // 所属つきのキー（m1 の request_scope と同じ形: 一般会計は 所管|組織、特別会計は 特別会計|勘定）。無ければ所属なしのキー
+    const scoped = `${reqKey0}\t${r['会計区分'] === '特別' ? `${r['特別会計']}|${r['勘定']}` : `${r['所管']}|${r['組織']}`}`;
+    const reqKey = statusOf.has(scoped) ? scoped : reqKey0;
     const prev = num(r['前年度予算額_千円']); const req = num(r['要求額_千円']);
     const hits = hitsOf.get(key) ?? []; if (hitsOf.has(key)) joined++;
     const moku = mokuOf.get(key) ?? [];
