@@ -12,7 +12,7 @@ export const TYPE_INFO: Record<BudgetRequestMofType, { color: string; text: stri
   持ち分: { color: 'border-neutral-300 text-neutral-500 dark:border-neutral-600', text: '各書が持ち分を載せる（復興特会など）。要求額は最も大きい額（合計書）' },
   名前が近い: { color: 'border-neutral-300 text-neutral-500 dark:border-neutral-600', text: '項名がわずかに違う MOF の項に対応（表記ゆれ）' },
   改称: { color: 'border-neutral-300 text-neutral-500 dark:border-neutral-600', text: '要求の項名が予算書で変わった（原文と予算書の目で確かめた対応表。例: FY2023 のこども家庭庁）' },
-  統合: { color: 'border-neutral-300 text-neutral-500 dark:border-neutral-600', text: '複数の要求の項が、予算書で 1 つの項になった。要求額は足した額' },
+  統合: { color: 'border-neutral-300 text-neutral-500 dark:border-neutral-600', text: '複数の要求の項（名前の違う項や、同じ書の項コード違いの同名の項）が、予算書で 1 つの項になった。要求額は足した額' },
 };
 
 export const TYPE_ORDER: BudgetRequestMofType[] = ['事項要求', '組織に事項要求', '要求額0', '一括計上', '一括計上の配分先', '編成で決まる', '複数書', '持ち分', '名前が近い', '改称', '統合'];

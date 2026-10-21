@@ -101,10 +101,14 @@ for (const [year, ver] of VERSIONS) {
     // 統合: 名前の違う複数の要求の項が、1 つの予算の項になった（突合の項名の対応表。例: FY2023 こども家庭推進費 + こども家庭調査研究等推進費 → こども政策推進費）。
     // 要求額・前年度予算額は、要求の項ごとの値（その項の最も大きい額）を足す。同じ名前の行どうしは複数書・持ち分
     const names = [...new Set(qs.map(q => ns(q.m['request_name'])))];
+    // 同じ書に項コードの違う同名の項があり、どちらも同じ予算の項に対応する（例: FY2023 国土交通本省の情報化推進費 642 と 800（自動車分））も統合
+    const sameBookCodes = qs.some(a => qs.some(b => a.m['request_source'] === b.m['request_source'] && a.m['request_code3'] !== b.m['request_code3']));
+    const itemOf = (q: Req) => (sameBookCodes ? `${ns(q.m['request_name'])}|${q.m['request_code3']}` : ns(q.m['request_name']));
+    const items = [...new Set(qs.map(itemOf))];
     let req = num(top.m['request_amount']), reqPrev = num(top.k?.['previous_amount']);
-    if (names.length > 1) {
+    if (items.length > 1) {
       types.add('統合');
-      const tops = names.map(n => qs.filter(q => ns(q.m['request_name']) === n).reduce((a, q) => ((num(q.m['request_amount']) ?? -Infinity) > (num(a.m['request_amount']) ?? -Infinity) ? q : a)));
+      const tops = items.map(n => qs.filter(q => itemOf(q) === n).reduce((a, q) => ((num(q.m['request_amount']) ?? -Infinity) > (num(a.m['request_amount']) ?? -Infinity) ? q : a)));
       req = tops.reduce((s, q) => s + (num(q.m['request_amount']) ?? 0), 0); reqPrev = tops.reduce((s, q) => s + (num(q.k?.['previous_amount']) ?? 0), 0);
     } else if (books.length > 1) {
       // 複数書: 同じ府省（公開元のドメイン）の要求書が複数あるときだけ（複数所管の項は、所管の列で分かるので付けない）。額が違えば持ち分
