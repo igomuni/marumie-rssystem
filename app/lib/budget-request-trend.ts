@@ -100,15 +100,19 @@ export const yearOf = (r: BudgetRequestTrendRow, year: number): BudgetRequestTre
 /** 事項要求の候補（jikou.json.gz）の行のキー: 会計区分 + 所管（特別会計は特別会計名）+ 勘定 + 組織 + 項名。項コードは含めない（同じキーの行すべてに付ける） */
 export const jikouKeyOf = (r: Pick<BudgetRequestTrendRow, 'acct' | 'min' | 'sub' | 'org' | 'name'>): string => [r.acct, r.min, r.sub, r.org, r.name].join('|');
 
-/** 事項要求の候補を、行の年度の値（jikou）に合流させる。元のデータは変えない */
+/** 組織の行の事項要求のキー: 会計区分 + 所管（特別会計は特別会計名）+ 勘定 + 組織 */
+export const jikouOrgKeyOf = (r: Pick<BudgetRequestTrendRow, 'acct' | 'min' | 'sub' | 'org'>): string => [r.acct, r.min, r.sub, r.org].join('|');
+
+/** 事項要求の記載を、行の年度の値に合流させる（項の記載は jikou、組織の行の記載は orgJikou）。元のデータは変えない */
 export function mergeJikou(data: BudgetRequestTrendData, jk: BudgetRequestJikouData): BudgetRequestTrendData {
   const byYear = new Map(Object.entries(jk.years).map(([y, list]) => [y, new Map(list.map(([k, forms, text]) => [k, { forms, text }]))]));
+  const orgByYear = new Map(Object.entries(jk.orgs ?? {}).map(([y, list]) => [y, new Map(list)]));
   const rows = data.rows.map(r => {
-    const key = jikouKeyOf(r);
+    const key = jikouKeyOf(r); const orgKey = jikouOrgKeyOf(r);
     let y: BudgetRequestTrendRow['y'] | null = null;
     for (const [yr, v] of Object.entries(r.y)) {
-      const hit = byYear.get(yr)?.get(key);
-      if (hit) { y ??= { ...r.y }; y[yr] = { ...v, jikou: hit }; }
+      const hit = byYear.get(yr)?.get(key); const org = r.org ? orgByYear.get(yr)?.get(orgKey) : undefined;
+      if (hit || org !== undefined) { y ??= { ...r.y }; y[yr] = { ...v, ...(hit ? { jikou: hit } : {}), ...(org !== undefined ? { orgJikou: org } : {}) }; }
     }
     return y ? { ...r, y } : r;
   });

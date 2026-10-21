@@ -37,10 +37,11 @@ for (const year of YEARS) {
   const rowsY = trend.filter(r => r['年度'] === String(year));
   const keyOf = (slug: string, code: string, name: string) => `${bookOf(slug)}\t${code}\t${name}`;
   // 年度推移 CSV にある項（要求書・PDF の要求書のどちらでも）。明細表の CODE3 のうち、これに当たる行だけを項の区切りにする（内閣府などは事項にも 3 桁のコードが付く）
+  const knownOrg = new Set(rowsY.map(r => r['組織']).filter(Boolean)); // 年度推移 CSV にある組織の名前
   const knownKou = new Set(rowsY.flatMap(r => [keyOf(r['要求書'], r['項コード'], r['項名']), ...(r['PDFの要求書'] ? [keyOf(r['PDFの要求書'], r['項コード'], r['項名'])] : [])]));
   // 項ごと（`${slug}\t${code}\t${name}`）: 範囲内の「事項要求」と、目の名前
   const hitsOf = new Map<string, Hit[]>(); const mokuOf = new Map<string, string[]>();
-  const orgHits: Hit[] = []; let unplaced = 0; let total = 0;
+  const orgHits: (Hit & { slug: string; org: string; remark: string })[] = []; let unplaced = 0; let total = 0;
   for (const f of fs.readdirSync(path.join(TEXT, String(year))).filter(x => x.endsWith('.txt')).sort()) {
     const slug = f.slice(0, -4);
     const lines = fs.readFileSync(path.join(TEXT, String(year), f), 'utf8').split('\n');
@@ -54,7 +55,9 @@ for (const year of YEARS) {
       if (t === 'CODE3') {
         const codeKey = (x: Rec | undefined) => { const mm = x && x['row_type'] === 'CODE3' ? /^(\d+)(.*)$/.exec(ns(x['事項'])) : null; return mm ? keyOf(slug, mm[1], mm[2]) : ''; };
         const m = /^(\d+)(.*)$/.exec(ns(r['事項'])); const key = codeKey(r);
-        const isOrg = knownKou.has(codeKey(rows[i + 1])); // 組織の見出し: 直後が項の行（直後が項でない 3 桁の行なら事項の見出し。例: 011 経常事務費 → 006 一般事務費）
+        // 組織の見出し: 年度推移 CSV にある組織の名前で、直後が項の行。直後が項でない 3 桁の行なら事項の見出し（例: 011 経常事務費 → 006 一般事務費）。
+        // 組織の名前でない行は、直後が項でも事項（項の範囲の最後の事項。例: FY2027 国土交通省の 075 経済安全保障の強化のための船舶のサプライチェーンの強靱化）
+        const isOrg = !!m && knownOrg.has(m[2]) && knownKou.has(codeKey(rows[i + 1]));
         if (knownKou.has(key)) { cur = key; role.push('項'); } else if (isOrg || !m) { cur = null; role.push('組織'); } else role.push('事項'); // 項でない CODE3（事項の 3 桁コード）は範囲を区切らない
       } else if (t === 'CONTEXT') { cur = null; special = /特別会計/.test(ns(r['事項'])); }
       else if ((t === 'CODE2' || t === 'CODE1') && special) cur = null; // 一般会計の書の 2 桁・1 桁の行は事項の番号（例: 文部科学省の 02 産業教育総合推進事業）
@@ -74,7 +77,19 @@ for (const year of YEARS) {
       const kou = near ? kouAt[k] : null;
       markRows.push([year, slug, page, line, hit.kind, level, hit.rowName, kou ? kou.split('\t')[2] : '', hit.text]);
       if (kou) (hitsOf.get(kou) ?? hitsOf.set(kou, []).get(kou)!).push(hit);
-      else if (level === '組織') orgHits.push(hit); else unplaced++;
+      else if (level === '組織') {
+        // 組織の行の備考: 組織の行から次の明細表の行まで（同じ頁、10 行まで）の、備考の列の文字。組織全体の事項要求の中身（例: 国土強靱化実施中期計画に基づく取組…）。
+        // 備考の列の位置は、印の「（」の桁（印は備考の列の先頭に出る）。それより左で始まる行（折り返した組織名など）と、表頭・頁ラベル（例: 国（保） 859）は除く
+        const from = starts[k]; const next = k + 1 < starts.length ? starts[k + 1] : from + 10; const block: string[] = [];
+        for (let j = from - 1; j < Math.min(next - 1, from + 10) && pageOf[j] === page; j++) block.push(lines[j].replace(/\f/g, ''));
+        const col = Math.max(0, l.replace(/\f/g, '').search(/[（(]\s*事/));
+        // 組織の行は、先頭の「コード 組織名 前年度 要求 増減」を除いた残り（金額の 3 つ目より右）
+        const head = /^\s*\d{3}\s.*?\s△?\s*[\d,]+\s+△?\s*[\d,]+\s+△?\s*[\d,]+/.exec(block[0]);
+        const rest = block.slice(1).filter(x => x.search(/\S/) >= col - 1 && !/前\s*年\s*度|^\s*\S{1,8}\s+\d{1,4}\s*$/.test(x)).map(x => x.slice(Math.min(col, x.search(/\S/))));
+        const remark = [head ? block[0].slice(head[0].length) : block[0].slice(col), ...rest]
+          .join(' ').replace(/[（(]\s*事\s*項\s*要\s*求\s*[)）]/g, '').replace(/\s+/g, ' ').trim() + (from - 1 + block.length < next - 1 ? '…' : ''); // 10 行・頁の終わりで切れたら「…」
+        orgHits.push({ ...hit, slug, org: ns(r!['事項']).replace(/^\d+/, ''), remark });
+      } else unplaced++;
     });
   }
 
@@ -113,6 +128,15 @@ for (const year of YEARS) {
     const it = items.get(id) ?? items.set(id, { r, forms: new Set(), hits: [], mof: null, books: [] }).get(id)!;
     for (const f of forms) it.forms.add(f); it.hits.push(...hits); if (it.mof === null) it.mof = mofOf.get(reqKey) ?? null; if (!it.books.includes(r['要求書'])) it.books.push(r['要求書']);
   }
+  // 組織の行の事項要求（UI は組織の列のバッジ）。キーは 会計区分 | 所管 | 勘定 | 組織（jikouOrgKeyOf と同じ並び）。所管は同じ書の年度推移 CSV の行から引く
+  const orgUi = new Map<string, string[]>();
+  for (const h of orgHits) {
+    const t = rowsY.find(r => r['組織'] === h.org && [r['要求書'], r['PDFの要求書']].some(x => x && bookOf(x) === bookOf(h.slug))) ?? rowsY.find(r => r['組織'] === h.org);
+    if (!t) continue;
+    const acct = t['会計区分'] === '特別' ? 1 : 0; const key = [acct, acct === 1 ? t['特別会計'] : t['所管'], t['勘定'], h.org].join('|');
+    const list = orgUi.get(key) ?? orgUi.set(key, []).get(key)!; if (h.remark && !list.includes(h.remark)) list.push(h.remark);
+  }
+  if (orgUi.size > 0) (ui.orgs ??= {})[String(year)] = [...orgUi].map(([k, v]) => [k, v.join(' ／ ')]);
   const count: Record<string, number> = {};
   for (const it of items.values()) {
     const r = it.r; const forms = [...it.forms]; for (const fm of forms) count[fm] = (count[fm] ?? 0) + 1;
@@ -125,7 +149,7 @@ for (const year of YEARS) {
     if (forms.some(f => f === '印' || f === '文')) (ui.years[String(year)] ??= []).push([[acct, acct === 1 ? r['特別会計'] : r['所管'], r['勘定'], r['組織'], r['項名']].join('|'), forms.filter(f => f === '印' || f === '文'), it.hits[0]?.text ?? '']);
     kouRows.push([year, r['会計区分'], r['所管'], r['特別会計'], r['勘定'], r['組織'], r['項名'], r['項コード'], r['前年度予算額_千円'], r['要求額_千円'], it.mof ?? '', vsMof, forms.join(';'), [...new Set(it.hits.map(h => h.level))].join('・'), it.hits[0]?.text ?? '', it.books.join(' '), r['頁'], r['PDF頁']]);
   }
-  summary[String(year)] = { occurrences: total, joined_to_kou: [...hitsOf.values()].reduce((a, h) => a + h.length, 0), on_org_rows: orgHits.length, unplaced, kou_with_forms: items.size, kou_trend_rows_with_marks: joined, forms: count };
+  summary[String(year)] = { occurrences: total, joined_to_kou: [...hitsOf.values()].reduce((a, h) => a + h.length, 0), on_org_rows: orgHits.length, orgs_with_marks: orgUi.size, unplaced, kou_with_forms: items.size, kou_trend_rows_with_marks: joined, forms: count };
 }
 
 writeCsv('kou.csv', ['年度', '会計区分', '所管', '特別会計', '勘定', '組織', '項名', '項コード', '前年度予算額_千円', '要求額_千円', 'MOF当初額_千円(参考)', 'MOFとの比較(参考)', '形', '印の行の階層', '根拠の行', '要求書', '頁', 'PDF頁'], kouRows);

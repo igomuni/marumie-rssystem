@@ -56,6 +56,10 @@ export function TrendDetailPane({
     const forms = k.split(';'); const text = yearOf(row, ys[ys.length - 1])?.jikou?.text;
     notes.push(`${ys.map(y => `FY${y}`).join('・')}: 項の中に事項要求（金額を示さない要求）があります（${forms.map(f => JIKOU_FORM[f] ?? f).join('、')}）。${text ? `備考:「${text}」。` : ''}要求額には、金額を示していない分が含まれません。`);
   }
+  // 組織の行の事項要求: 同じ備考の年度をまとめる
+  const orgJikouYears = new Map<string, number[]>();
+  for (const y of present) { const t = yearOf(row, y)?.orgJikou; if (t !== undefined) (orgJikouYears.get(t) ?? orgJikouYears.set(t, []).get(t)!).push(y); }
+  for (const [t, ys] of orgJikouYears) notes.push(`${ys.map(y => `FY${y}`).join('・')}: ${row.org}には、組織として事項要求（金額を示さない要求）があります。${t ? `備考:「${t}」。` : ''}どの項に含まれるかは要求書に書かれていません。`);
   const xfers = [...new Set(present.flatMap(y => yearOf(row, y)?.xfer ?? []))];
   if (xfers.length > 0) notes.push(`この項の目に繰入があります（${xfers.join('、')}）。受け側の会計にも載るため、会計をまたぐ合計では二重になりえます。`);
   if (present.some(y => yearOf(row, y)?.mismatch)) notes.push('同じキーで、要求書によって額が違う年度があります（各書が取り分だけを載せている場合は、最も大きい額＝合計書の額を表示しています）。各書の額は PDF の右に示します。');

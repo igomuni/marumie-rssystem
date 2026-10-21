@@ -141,7 +141,10 @@ export function TrendListPane({
                 >
                   <td className="break-words px-2 py-1 text-left">{x.group}</td>
                   <td className="break-words px-2 py-1 text-left">{acctLabelOf(r)}</td>
-                  <td className="break-words px-2 py-1 text-left">{orgOf(r)}</td>
+                  <td className="break-words px-2 py-1 text-left">
+                    {orgOf(r)}
+                    {a?.orgJikou !== undefined && <span title={`組織として事項要求（金額を示さない要求）があります。どの項に含まれるかは要求書に書かれていません${a.orgJikou ? `（備考: ${a.orgJikou}）` : ''}`} className={`${chip} border-neutral-300 text-neutral-500 dark:border-neutral-600`}>事項要求</span>}
+                  </td>
                   <td className="break-words px-2 py-1 text-left font-medium">
                     {r.name}
                     {r.kou && <span className="ml-1 text-[10px] text-neutral-400">({r.kou})</span>}
