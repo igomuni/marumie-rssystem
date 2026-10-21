@@ -22,7 +22,7 @@ export interface MofFilters {
   nameRegex: boolean;
   /** 型（どれかを持てば一致。空なら絞り込まない） */
   types: BudgetRequestMofType[];
-  /** 仮置きの項を除く */
+  /** 編成で決まる項（予備費・国債費・地方交付税交付金・地方特例交付金・繰入）を除く */
   noPlaceholder: boolean;
   diff: MofDiffFilter;
 }
@@ -62,7 +62,7 @@ export function filterMofRows(rows: readonly BudgetRequestMofRow[], f: MofFilter
     if (!textMatches(orgOf(r), f.org, f.orgRegex)) return false;
     if (!textMatches(`${r.name} ${r.mofName ?? ''}`, f.name, f.nameRegex)) return false;
     if (types.size > 0 && !r.types.some(t => types.has(t))) return false;
-    if (f.noPlaceholder && r.types.includes('仮置き')) return false;
+    if (f.noPlaceholder && r.types.includes('編成で決まる')) return false;
     if (f.diff) {
       const d = diffOf(r), t = rateOf(r);
       if (f.diff === 'up10' || f.diff === 'dn10') { if (t === null || (f.diff === 'up10' ? t < 0.1 : t > -0.1)) return false; }

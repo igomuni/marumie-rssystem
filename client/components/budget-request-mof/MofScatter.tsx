@@ -8,14 +8,14 @@ import { changeColor, formatSen, formatSenSigned } from '@/client/components/bud
 /**
  * 分布図: 横軸 = 概算要求額、縦軸 = 当初予算額（どちらも対数、千円）。対角線（要求 = 当初）より上は予算が要求を上回った項。
  * 0 の値は軸の外側の帯に置く（対数で描けないため）。要求か予算のどちらかが無い行（MOF のみ・概算要求のみ）は描かない。
- * 色は 3 つ（散布図で全組の判別を満たすのは 3 色まで）: 仮置き / 金額を示さない要求の手がかり（事項要求・要求0・一括計上の配分先）/ その他。
+ * 色は 3 つ（散布図で全組の判別を満たすのは 3 色まで）: 編成で決まる項 / 金額を示さない要求を含む（事項要求・要求額0・一括計上の配分先）/ 通常の要求。
  */
 const SERIES = [
-  { label: '仮置き', cls: 'fill-[#2a78d6] dark:fill-[#3987e5]', swatch: 'bg-[#2a78d6] dark:bg-[#3987e5]' },
-  { label: '事項要求・要求0など', cls: 'fill-[#eb6834] dark:fill-[#d95926]', swatch: 'bg-[#eb6834] dark:bg-[#d95926]' },
-  { label: 'その他', cls: 'fill-[#1baf7a] dark:fill-[#199e70]', swatch: 'bg-[#1baf7a] dark:bg-[#199e70]' },
+  { label: '編成で決まる項', cls: 'fill-[#2a78d6] dark:fill-[#3987e5]', swatch: 'bg-[#2a78d6] dark:bg-[#3987e5]' },
+  { label: '金額を示さない要求を含む', cls: 'fill-[#eb6834] dark:fill-[#d95926]', swatch: 'bg-[#eb6834] dark:bg-[#d95926]' },
+  { label: '通常の要求', cls: 'fill-[#1baf7a] dark:fill-[#199e70]', swatch: 'bg-[#1baf7a] dark:bg-[#199e70]' },
 ] as const;
-const seriesOf = (r: BudgetRequestMofRow): 0 | 1 | 2 => (r.types.includes('仮置き') ? 0 : r.types.some(t => t === '事項要求' || t === '要求0' || t === '一括計上の配分先') ? 1 : 2);
+const seriesOf = (r: BudgetRequestMofRow): 0 | 1 | 2 => (r.types.includes('編成で決まる') ? 0 : r.types.some(t => t === '事項要求' || t === '要求額0' || t === '一括計上の配分先') ? 1 : 2);
 
 const M = { left: 72, right: 16, top: 12, bottom: 40 };
 const ZERO_BAND = 18; // 0 の帯の幅（px）

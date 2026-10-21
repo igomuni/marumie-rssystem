@@ -7,7 +7,7 @@ const R = (name: string, o: Partial<BudgetRequestMofRow> = {}): BudgetRequestMof
   ({ y: 2026, kind: 'matched', acct: 0, grp: '国土交通省', min: '国土交通省', sub: '', org: '気象庁', name, mof: 110, mofPrev: 100, req: 100, reqPrev: 100, books: [[0, '1', '3', 100]], types: [], ...o });
 const rows = [
   R('気象官署共通費', { types: ['組織に事項要求'] }),
-  R('予備費', { mof: 1000, req: 500, types: ['仮置き'] }),
+  R('予備費', { mof: 1000, req: 500, types: ['編成で決まる'] }),
   R('MOFのみの項', { kind: 'mofOnly', req: null, reqPrev: null, books: [] }),
   R('額0の項', { kind: 'zero', mof: null, req: 0, reqPrev: 0 }),
   R('特会の項', { acct: 1, grp: '内閣府、文部科学省、経済産業省及び環境省', min: 'エネルギー対策', sub: 'エネルギー需給勘定', org: '', books: [[1, '2', '', 50], [2, '3', '', 50]], mof: 40, req: 50 }),

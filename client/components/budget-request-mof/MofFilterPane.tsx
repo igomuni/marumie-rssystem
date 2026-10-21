@@ -81,8 +81,8 @@ export function MofFilterPane({ rows, urls, year, filters, onChange }: { rows: r
           </select>
           <label className={row}>
             <input type="checkbox" checked={filters.noPlaceholder} onChange={e => set({ noPlaceholder: e.target.checked })} />
-            仮置きの項を除く
-            <span className={count}>{(typeCount.get('仮置き') ?? 0).toLocaleString()}</span>
+            編成で決まる項を除く
+            <span className={count}>{(typeCount.get('編成で決まる') ?? 0).toLocaleString()}</span>
           </label>
         </div>
         <div className={section}>

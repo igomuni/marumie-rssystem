@@ -20,7 +20,7 @@ const VERSIONS: [number, string][] = [[2023, '2023'], [2024, '2024'], [2025, '20
 const MATCH = path.join('tests', 'fixtures', 'mof-budget-request-match');
 const rd = (p: string) => readCsv(fs.readFileSync(p, 'utf8'));
 const num = (s: string | undefined): number | null => { const t = (s ?? '').replace(/[\s,]/g, ''); if (!/^△?\d+$/.test(t)) return null; return t.startsWith('△') ? -Number(t.slice(1)) : Number(t); };
-/** 仮置き: 編成で地方財政対策・金利・財投計画・受け側の会計などに合わせて決まる項（予備費・国債費・地方交付税交付金・地方特例交付金・繰入） */
+/** 編成で決まる項: 編成で地方財政対策・金利・財投計画・受け側の会計などに合わせて決まる項（予備費・国債費・地方交付税交付金・地方特例交付金・繰入） */
 const PLACEHOLDER = /予備費|国債費|地方交付税交付金|地方特例交付金|繰入$/;
 
 const trend = rd(path.join('tests', 'fixtures', 'budget-request-trend', 'kou.csv'));
@@ -75,7 +75,7 @@ for (const [year, ver] of VERSIONS) {
       if (!q.t) continue;
       const id = idOf(q.t); const forms = formsOf.get(id) ?? [];
       if (forms.includes('印') || forms.includes('文')) { types.add('事項要求'); jikouText ??= jikouTextOf.get(id); }
-      if (forms.some(f => f.startsWith('要求0'))) types.add(lumpPlaces.has(`${q.t['所管']}|${q.t['組織']}`) ? '一括計上の配分先' : '要求0');
+      if (forms.some(f => f.startsWith('要求0'))) types.add(lumpPlaces.has(`${q.t['所管']}|${q.t['組織']}`) ? '一括計上の配分先' : '要求額0');
       if (forms.includes('一括計上')) types.add('一括計上');
       const acct = q.t['会計区分'] === '特別' ? 1 : 0;
       const ok = [acct, acct === 1 ? q.t['特別会計'] : q.t['所管'], q.t['勘定'], q.t['組織']].join('|'); // jikouOrgKeyOf と同じ並び
@@ -100,7 +100,7 @@ for (const [year, ver] of VERSIONS) {
     const books = qs.map(bookOf).filter((b, i, all) => all.findIndex(x => x[0] === b[0] && x[1] === b[1]) === i);
     if (books.length > 1) types.add(new Set(amts).size > 1 ? '持ち分' : '複数書');
     if (qs.some(q => q.m['status'] === 'NEAR_NAME')) types.add('名前が近い');
-    if (PLACEHOLDER.test(ns(r['項名']))) types.add('仮置き');
+    if (PLACEHOLDER.test(ns(r['項名']))) types.add('編成で決まる');
     const mofName = ns(r['項名']) !== ns(top.m['request_name']) ? ns(r['項名']) : undefined;
     push({
       y: year, kind: 'matched', acct, grp: ns(r['所管']), min: acct === 0 ? ns(r['所管']) : ns(r['特別会計']), sub: acct === 1 ? ns(r['勘定']) : '', org: acct === 0 ? ns(r['組織']) : '',
@@ -122,7 +122,7 @@ for (const [year, ver] of VERSIONS) {
     const { types, jikouText, orgJikouText } = reqTypes(qs);
     const books = qs.map(bookOf).filter((b, i, all) => all.findIndex(x => x[0] === b[0] && x[1] === b[1]) === i);
     if (books.length > 1) types.add('複数書');
-    if (PLACEHOLDER.test(ns(q0.m['request_name']))) types.add('仮置き');
+    if (PLACEHOLDER.test(ns(q0.m['request_name']))) types.add('編成で決まる');
     const top = qs.reduce((a, q) => ((num(q.m['request_amount']) ?? -Infinity) > (num(a.m['request_amount']) ?? -Infinity) ? q : a), q0);
     push({
       y: year, kind: q0.m['status'] === 'ZERO_AMOUNT' ? 'zero' : 'reqOnly', acct,
@@ -139,7 +139,7 @@ for (const [year, ver] of VERSIONS) {
     const acct = u['mof_row'].startsWith('kou-special') ? 1 : 0;
     push({
       y: year, kind: 'mofOnly', acct, grp: ns(r['所管']), min: acct === 0 ? ns(r['所管']) : ns(r['特別会計']), sub: acct === 1 ? ns(r['勘定']) : '', org: acct === 0 ? ns(r['組織']) : '',
-      name: ns(r['項名']), mof: mofAmt(r), mofPrev: mofPrevOf(r), req: null, reqPrev: null, books: [], types: PLACEHOLDER.test(ns(r['項名'])) ? ['仮置き'] : [],
+      name: ns(r['項名']), mof: mofAmt(r), mofPrev: mofPrevOf(r), req: null, reqPrev: null, books: [], types: PLACEHOLDER.test(ns(r['項名'])) ? ['編成で決まる'] : [],
     });
   }
   const yearRows = rows.filter(x => x.y === year && (x.kind === 'matched' || x.kind === 'mofOnly'));
