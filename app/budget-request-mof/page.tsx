@@ -3,7 +3,7 @@
 /**
  * 概算要求と当初予算（MOF の予算書・政府案）の差（項の粒度, FY2023〜2026）。
  *
- * 左にフィルタ、中に選択年度の一覧（要求額・当初予算額・差）、右に選んだ項の要求書へのリンクと差の理由の型。
+ * 左にフィルタ、中に選択年度の一覧（要求額・当初予算額・差）または分布図（横軸 = 要求額、縦軸 = 当初予算額）、右に選んだ項の要求書へのリンクと差の理由の型。
  * データは静的ファイル /data/v2/ui/budget-request-mof/kou.json.gz をブラウザが直接取得する（Vercel の関数には public/data を同梱しないため API を経由しない）。
  * 仕様: docs/budget-request-mof-ui.md。年度推移（/budget-request-trend）とは別のページ（MOF との突合を年度推移に混ぜない）。
  */
@@ -18,6 +18,7 @@ import { INITIAL_MOF_FILTERS, filterMofRows, mofRowKey, sortMofRows, type MofFil
 import { MofFilterPane } from '@/client/components/budget-request-mof/MofFilterPane';
 import { MofListPane } from '@/client/components/budget-request-mof/MofListPane';
 import { MofDetailPane } from '@/client/components/budget-request-mof/MofDetailPane';
+import { MofScatter } from '@/client/components/budget-request-mof/MofScatter';
 
 const FILTER_WIDTH = { def: 240, min: 180, max: 420 };
 const DETAIL_WIDTH = { def: 400, min: 300, max: 700 };
@@ -49,6 +50,7 @@ export default function BudgetRequestMofPage() {
   const [filterWidth, setFilterWidth] = usePersistedState('budget-request-mof:filterWidth', FILTER_WIDTH.def);
   const [detailWidth, setDetailWidth] = usePersistedState('budget-request-mof:detailWidth', DETAIL_WIDTH.def);
   const [columnWidths, setColumnWidths] = usePersistedState<Record<string, number>>('budget-request-mof:columnWidths', {});
+  const [view, setView] = usePersistedState<'list' | 'scatter'>('budget-request-mof:view', 'list');
 
   useEffect(() => {
     const controller = new AbortController();
@@ -90,8 +92,19 @@ export default function BudgetRequestMofPage() {
           <MofFilterPane rows={data.rows} urls={data.urls} year={activeYear} filters={filters} onChange={setFilters} />
         </section>
         <Splitter label="フィルタの幅" width={filterWidth} limits={FILTER_WIDTH} dir={1} onChange={setFilterWidth} />
-        <section aria-label="項の一覧" className={`${pane} overflow-hidden xl:min-w-0 xl:flex-1`}>
-          <MofListPane rows={rows} urls={data.urls} sortKey={sortKey} sortDir={sortDir} onSort={onSort} selectedKey={selectedKey} onSelect={r => setSelectedKey(mofRowKey(r))} widths={columnWidths} onWidthsChange={setColumnWidths} />
+        <section aria-label="項の一覧" className={`${pane} flex flex-col overflow-hidden xl:min-w-0 xl:flex-1`}>
+          <div role="tablist" aria-label="表示" className="flex shrink-0 gap-1 border-b border-neutral-200 px-3 pt-2 text-xs dark:border-neutral-800">
+            {(['list', 'scatter'] as const).map(v => (
+              <button key={v} type="button" role="tab" aria-selected={view === v} onClick={() => setView(v)} className={`rounded-t border-b-2 px-2.5 py-1 ${view === v ? 'border-emerald-600 font-semibold text-neutral-900 dark:text-neutral-100' : 'border-transparent text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200'}`}>
+                {v === 'list' ? '一覧' : '分布図'}
+              </button>
+            ))}
+          </div>
+          <div className="min-h-0 flex-1">
+            {view === 'list'
+              ? <MofListPane rows={rows} urls={data.urls} sortKey={sortKey} sortDir={sortDir} onSort={onSort} selectedKey={selectedKey} onSelect={r => setSelectedKey(mofRowKey(r))} widths={columnWidths} onWidthsChange={setColumnWidths} />
+              : <MofScatter rows={rows} selectedKey={selectedKey} onSelect={r => setSelectedKey(mofRowKey(r))} />}
+          </div>
         </section>
         <Splitter label="詳細の幅" width={detailWidth} limits={DETAIL_WIDTH} dir={-1} onChange={setDetailWidth} />
         <section aria-label="詳細" className={`${pane} overflow-auto lg:col-span-2 xl:col-span-1 xl:w-[var(--dw)] xl:shrink-0`} style={{ '--dw': `${detailWidth}px` } as React.CSSProperties}>
