@@ -57,13 +57,11 @@ export function publishersOf(r: BudgetRequestMofRow, urls: readonly string[]): s
 export const isJoint = (r: BudgetRequestMofRow, urls: readonly string[]): boolean => publishersOf(r, urls).length > 1;
 
 /**
- * 所管の表示（一覧の列）。単独の府省はその名前。複数所管は、東日本大震災復興は「復興庁（取りまとめ）」（予算書の共管所管名と合計の書の府省）、
- * それ以外は「N所管」（同じ要求書を各府省が載せていて、データから主の府省は決められない）。府省名の一覧はツールチップ・詳細に出す
+ * 所管の表示（一覧の列）。単独の府省はその名前。複数所管は「N所管」（東日本大震災復興の持ち分も同じ）（同じ要求書を各府省が載せていて、データから主の府省は決められない）。府省名の一覧はツールチップ・詳細に出す
  */
 export function groupOf(r: BudgetRequestMofRow, urls: readonly string[]): string {
   const pubs = publishersOf(r, urls);
   if (pubs.length <= 1) return pubs[0] ?? r.grp;
-  if (r.acct === 1 && r.min === '東日本大震災復興' && pubs.includes('復興庁')) return '復興庁（取りまとめ）';
   return `${pubs.length}所管`;
 }
 

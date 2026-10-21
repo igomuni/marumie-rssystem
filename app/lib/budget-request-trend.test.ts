@@ -77,9 +77,9 @@ describe('budget-request-trend', () => {
     expect(recordsOf(shared, 2027, URLS).map(x => [x.group, x.groups])).toEqual([['2所管', ['環境省', '経済産業省']]]);
     expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, groups: ['経済産業省'] }, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['特会費']);
     expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, groups: ['複数所管'] }, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['特会費']);
-    // 東日本大震災復興は各省の持ち分と復興庁の合計の書: 復興庁（取りまとめ）
+    // 東日本大震災復興（各省の持ち分と復興庁の合計の書）も N所管
     const fukko = row('復興費', { '2027': Y(1, 2, { src: [[0, '1', '3'], [2, '1', '3']] }) }, { acct: 1, min: '東日本大震災復興', sub: '', org: '' });
-    expect(recordsOf(fukko, 2027, [...URLS, 'https://www.reconstruction.go.jp/x.pdf'])[0].group).toBe('復興庁（取りまとめ）');
+    expect(recordsOf(fukko, 2027, [...URLS, 'https://www.reconstruction.go.jp/x.pdf'])[0].group).toBe('2所管');
   });
   it('filters items whose 目 include a 繰入 in the selected year', () => {
     const withXfer = [row('繰入費', { '2027': Y(10, 20, { xfer: ['国債整理基金特別会計へ繰入'] }) }), ...rows];

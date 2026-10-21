@@ -32,11 +32,11 @@ describe('budget-request-mof', () => {
     expect(filterMofRows(rows, { ...INITIAL_MOF_FILTERS, diff: 'up10' }, 2026, URLS).map(r => r.name)).toEqual(['気象官署共通費', '予備費']);
     expect(filterMofRows(rows, { ...INITIAL_MOF_FILTERS, diff: 'dn10' }, 2026, URLS).map(r => r.name)).toEqual(['特会の項']);
   });
-  it('labels items of several ministries as N所管 (東日本大震災復興 by 復興庁), and filters by any ministry or by 複数所管', () => {
+  it('labels items of several ministries as N所管 (東日本大震災復興 too), and filters by any ministry or by 複数所管', () => {
     expect(groupOf(rows[4], URLS)).toBe('2所管');
     expect(publishersOf(rows[4], URLS)).toEqual(['経済産業省', '環境省']);
     expect(groupOf(R('x', { acct: 1, grp: '内閣府及び厚生労働省', books: [] }), URLS)).toBe('2所管');
-    expect(groupOf(R('x', { acct: 1, min: '東日本大震災復興', books: [[0, '1', '', 1], [3, '1', '', 1]] }), [...URLS, 'https://www.reconstruction.go.jp/x.pdf'])).toBe('復興庁（取りまとめ）');
+    expect(groupOf(R('x', { acct: 1, min: '東日本大震災復興', books: [[0, '1', '', 1], [3, '1', '', 1]] }), [...URLS, 'https://www.reconstruction.go.jp/x.pdf'])).toBe('2所管');
     expect(filterMofRows(rows, { ...INITIAL_MOF_FILTERS, groups: ['複数所管'] }, 2026, URLS).map(r => r.name)).toEqual(['特会の項']);
     expect(isJoint(rows[0], URLS)).toBe(false);
     // 一般会計も公開元（内閣府の外局は、予算書の所管が内閣府でも、それぞれの府省）

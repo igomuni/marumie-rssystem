@@ -65,12 +65,11 @@ export const groupOf = (r: BudgetRequestTrendRow, year: number, urls: readonly s
 export const MULTI_GROUP = '複数所管';
 
 /**
- * 所管の表示（一覧の列）。単独の府省はその名前。複数所管（複数の府省の要求書に載る項）は「N所管」。
- * 東日本大震災復興は「復興庁（取りまとめ）」（各省が持ち分を載せ、復興庁の書が合計）。府省名の一覧はツールチップ・詳細に出す
+ * 所管の表示（一覧の列）。単独の府省はその名前。複数所管（複数の府省の要求書に載る項。東日本大震災復興の持ち分も含む）は「N所管」。
+ * 府省名の一覧はツールチップ・詳細に出す
  */
 export function groupLabelOf(r: BudgetRequestTrendRow, groups: readonly string[]): string {
   if (groups.length <= 1) return groups[0] ?? r.min;
-  if (r.acct === 1 && r.min === '東日本大震災復興' && groups.includes('復興庁')) return '復興庁（取りまとめ）';
   return `${groups.length}所管`;
 }
 
