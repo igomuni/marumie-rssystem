@@ -42,7 +42,10 @@ describe('budget-request-trend', () => {
   it('filters by account, ministry group, shared and change', () => {
     expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, accts: ['東日本大震災復興特別会計特別会計'] }, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['特会費']);
     expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, groups: ['経済産業省'] }, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['特会費']);
-    expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, shared: true }, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['特会費']);
+    // 複数書は同じ府省の複数の要求書だけ（特会費は環境省・経済産業省の複数所管なので含めない）
+    expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, shared: true }, 2027, YEARS, URLS).map(r => r.row.name)).toEqual([]);
+    const split = row('分冊費', { '2027': Y(5, 6, { src: [[0, '1', '3'], [3, '1', '']] }) });
+    expect(filterRows([split], { ...INITIAL_TREND_FILTERS, shared: true }, 2027, YEARS, [...URLS, 'https://www.env.go.jp/y.pdf']).map(r => r.row.name)).toEqual(['分冊費']);
     expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, change: 'dn10' }, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['特会費']);
   });
   it('sorts with missing values last in both directions', () => {

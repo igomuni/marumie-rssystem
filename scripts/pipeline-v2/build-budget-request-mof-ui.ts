@@ -106,7 +106,12 @@ for (const [year, ver] of VERSIONS) {
       types.add('統合');
       const tops = names.map(n => qs.filter(q => ns(q.m['request_name']) === n).reduce((a, q) => ((num(q.m['request_amount']) ?? -Infinity) > (num(a.m['request_amount']) ?? -Infinity) ? q : a)));
       req = tops.reduce((s, q) => s + (num(q.m['request_amount']) ?? 0), 0); reqPrev = tops.reduce((s, q) => s + (num(q.k?.['previous_amount']) ?? 0), 0);
-    } else if (books.length > 1) types.add(new Set(amts).size > 1 ? '持ち分' : '複数書');
+    } else if (books.length > 1) {
+      // 複数書: 同じ府省（公開元のドメイン）の要求書が複数あるときだけ（複数所管の項は、所管の列で分かるので付けない）。額が違えば持ち分
+      const hosts = new Set(books.map(([u]) => new URL(urls[u]).hostname.replace(/^www\./, '')));
+      // 額の取れない書（総表の無い分冊。例: FY2023 金融庁の明細表だけの PDF）は比べない
+      if (new Set(amts.filter(x => x !== null)).size > 1) types.add('持ち分'); else if (hosts.size === 1) types.add('複数書');
+    }
     if (qs.some(q => q.m['status'] === 'NEAR_NAME')) types.add('名前が近い');
     if (qs.some(q => q.m['reason'] === 'kou_renamed')) types.add('改称');
     if (PLACEHOLDER.test(ns(r['項名']))) types.add('編成で決まる');
@@ -130,7 +135,7 @@ for (const [year, ver] of VERSIONS) {
     const q0 = qs[0]; const k = q0.k; const acct = k?.['acct'] === 'special' ? 1 : 0;
     const { types, jikouText, orgJikouText } = reqTypes(qs);
     const books = qs.map(bookOf).filter((b, i, all) => all.findIndex(x => x[0] === b[0] && x[1] === b[1]) === i);
-    if (books.length > 1) types.add('複数書');
+    if (books.length > 1 && new Set(books.map(([u]) => new URL(urls[u]).hostname.replace(/^www\./, ''))).size === 1) types.add('複数書'); // 同じ府省の要求書が複数あるときだけ
     if (PLACEHOLDER.test(ns(q0.m['request_name']))) types.add('編成で決まる');
     const top = qs.reduce((a, q) => ((num(q.m['request_amount']) ?? -Infinity) > (num(a.m['request_amount']) ?? -Infinity) ? q : a), q0);
     push({

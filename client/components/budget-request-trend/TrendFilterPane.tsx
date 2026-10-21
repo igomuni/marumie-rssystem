@@ -5,7 +5,7 @@ import type { BudgetRequestTrendRow } from '@/types/budget-request-trend';
 import { MultiSelectCombo } from '@/client/components/mof-kou/MultiSelectCombo';
 import { RegexTextFilter } from '@/client/components/mof-kou/RegexTextFilter';
 import { MAX_REGEX_PATTERN_LENGTH } from '@/app/lib/sankey-query';
-import { INITIAL_TREND_FILTERS, MULTI_GROUP, acctLabelOf, groupsOf, recordsOf, inAllYears, isGone, isNew, yearOf, type ChangeFilter, type PatternFilter, type TrendFilters } from '@/app/lib/budget-request-trend';
+import { INITIAL_TREND_FILTERS, MULTI_GROUP, acctLabelOf, groupsOf, isSharedBooks, recordsOf, inAllYears, isGone, isNew, yearOf, type ChangeFilter, type PatternFilter, type TrendFilters } from '@/app/lib/budget-request-trend';
 
 const section = 'flex flex-col gap-1.5 border-b border-neutral-200 px-3 py-2.5 dark:border-neutral-800';
 const heading = 'text-[11px] font-semibold tracking-wide text-neutral-500';
@@ -49,7 +49,7 @@ export function TrendFilterPane({
       all5: rows.filter(r => inAllYears(r, years)).length,
       isNew: rows.filter(r => isNew(r, year, first)).length,
       isGone: rows.filter(r => isGone(r, year, first)).length,
-      shared: rows.filter(r => (yearOf(r, year)?.src.length ?? 0) > 1).length,
+      shared: pdfStates.filter(isSharedBooks).length,
       mismatch: rows.filter(r => yearOf(r, year)?.mismatch).length,
       transfer: rows.filter(r => (yearOf(r, year)?.xfer?.length ?? 0) > 0).length,
       codeChange: rows.filter(r => yearOf(r, year)?.codeChanged).length,
@@ -145,7 +145,7 @@ export function TrendFilterPane({
           <h3 className={heading}>データの状態</h3>
           <label className={row}>
             <input type="checkbox" checked={filters.shared} onChange={e => set({ shared: e.target.checked })} />
-            複数書（複数の要求書に載る）
+            複数書（同じ所管の複数の要求書に載る）
             <span className={count}>{counts.shared}</span>
           </label>
           <label className={row}>

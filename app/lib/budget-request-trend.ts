@@ -26,7 +26,7 @@ export interface TrendFilters {
   groups: string[];
   pattern: PatternFilter;
   change: ChangeFilter;
-  /** その年度に複数の要求書に載る行だけ */
+  /** その年度に、同じ府省の複数の要求書に載る行だけ（isSharedBooks。複数所管の項は含めない） */
   shared: boolean;
   /** その年度に金額が一致しない要求書がある行だけ */
   mismatch: boolean;
@@ -79,6 +79,8 @@ export function groupLabelOf(r: BudgetRequestTrendRow, groups: readonly string[]
  */
 export interface TrendRecord {
   row: BudgetRequestTrendRow;
+  /** 年度 */
+  year: number;
   /** 所管の表示（groupLabelOf） */
   group: string;
   /** 所管の府省（公開元）。複数所管なら 2 つ以上 */
@@ -91,13 +93,16 @@ export interface TrendRecord {
   imagePageBy: string[];
 }
 
+/** 複数書: 同じ府省の要求書が複数あり、同じ項が載る（例: FY2023 金融庁の分冊）。複数所管の項は、所管の列で分かるので含めない */
+export const isSharedBooks = (x: TrendRecord): boolean => x.groups.length === 1 && (yearOf(x.row, x.year)?.src.length ?? 0) > 1;
+
 export function recordsOf(r: BudgetRequestTrendRow, year: number, urls: readonly string[]): TrendRecord[] {
   const a = yearOf(r, year);
   const groups = groupsOf(r, year, urls);
   const pubOf = (s: [number, ...unknown[]]) => publisherOf(urls[s[0]] ?? '');
   const noPdfPageBy = a ? [...new Set(a.src.filter(s => !s[2]).map(pubOf))] : [];
   const imagePageBy = a ? [...new Set(a.src.filter(s => s[3] === 'i').map(pubOf))] : [];
-  return [{ row: r, group: groupLabelOf(r, groups), groups, prev: a ? a.prev : null, req: a ? a.req : null, noPdfPageBy, imagePageBy }];
+  return [{ row: r, year, group: groupLabelOf(r, groups), groups, prev: a ? a.prev : null, req: a ? a.req : null, noPdfPageBy, imagePageBy }];
 }
 
 export const recordChange = (x: TrendRecord): number | null => (x.req !== null && x.prev !== null ? x.req - x.prev : null);
@@ -178,7 +183,6 @@ export function filterRows(rows: readonly BudgetRequestTrendRow[], f: TrendFilte
     if (!textMatches(`${r.org} ${r.sub}`, f.org, f.orgRegex)) return false;
     if (f.pattern === 'all5' && !inAllYears(r, years)) return false;
     if (f.pattern === 'new' && !isNew(r, year, first)) return false;
-    if (f.shared && !(a && a.src.length > 1)) return false;
     if (f.mismatch && !(a && a.mismatch)) return false;
     if (f.transfer && !(a?.xfer && a.xfer.length > 0)) return false;
     if (f.codeChange && !a?.codeChanged) return false;
@@ -190,6 +194,7 @@ export function filterRows(rows: readonly BudgetRequestTrendRow[], f: TrendFilte
   return kept.flatMap(r => recordsOf(r, year, urls)).filter(x => {
     // 所管: 選んだ府省が載せている項（複数所管の項も含む）。「複数所管」を選ぶと複数所管の項
     if (groups.size > 0 && !(x.groups.some(g => groups.has(g)) || (groups.has(MULTI_GROUP) && x.groups.length > 1))) return false;
+    if (f.shared && !isSharedBooks(x)) return false;
     if (f.imagePage && x.imagePageBy.length === 0) return false;
     if (f.noPdfPage && x.noPdfPageBy.length === 0) return false;
     if (f.change) {
