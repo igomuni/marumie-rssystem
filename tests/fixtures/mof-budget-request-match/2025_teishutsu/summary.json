@@ -1,7 +1,7 @@
 {
  "request_year": "2025",
  "mof_version": "2025_teishutsu",
- "input_sha256": "78877780b3f279a7d12120f8ce9777d7d26315b728ab3d3fd2390e91d6e3f9ce",
+ "input_sha256": "b6dd6d48bcdf69b0df2fe2935d2fab47c568d3d57b4eab17af200cf51d2ca63a",
  "sources": 65,
  "m0_status": {
   "MATCHED": 206,
@@ -9,8 +9,8 @@
  },
  "m1_status": {
   "MATCHED": 1093,
-  "NO_CANDIDATE": 63,
-  "AMBIGUOUS": 2
+  "EMPTY": 49,
+  "NO_CANDIDATE": 15
  },
  "m2_status": {
   "MATCHED": 1666,
@@ -18,7 +18,7 @@
   "PARENT_UNMATCHED": 65
  },
  "m3_status": {
-  "MATCHED": 7721,
+  "MATCHED": 7724,
   "NO_CANDIDATE": 462,
   "PARENT_UNMATCHED": 92
  },
@@ -28,21 +28,21 @@
   "moku": 8030
  },
  "mof_rows_referenced": {
-  "kou": 1005,
-  "jikou": 1534,
-  "moku": 7272
+  "kou": 1004,
+  "jikou": 1535,
+  "moku": 7275
  },
  "unmatched_mof_reasons": {
   "kou": {
-   "no_request_row": 55
+   "no_request_row": 56
   },
   "jikou": {
-   "kou_not_matched": 57,
-   "kou_matched_no_request_row": 61
+   "kou_not_matched": 58,
+   "kou_matched_no_request_row": 59
   },
   "moku": {
-   "kou_matched_no_request_row": 661,
-   "kou_not_matched": 97
+   "kou_matched_no_request_row": 657,
+   "kou_not_matched": 98
   }
  },
  "request_links": {

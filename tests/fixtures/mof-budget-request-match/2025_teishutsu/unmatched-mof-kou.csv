@@ -1,6 +1,7 @@
 mof_row,account,kou_code,kou_name,item_name,reason,ministry,organization,special_account,sub_account
 kou-general:11,general,022,国立国会図書館施設費,,no_request_row,国会,国立国会図書館,,
 kou-general:29,general,002,内閣本府施設費,,no_request_row,内閣府,内閣本府,,
+kou-general:37,general,052,地方創生基盤整備事業推進費,,no_request_row,内閣府,内閣本府,,
 kou-general:39,general,014,事前防災対策総合推進費,,no_request_row,内閣府,内閣本府,,
 kou-general:61,general,059,独立行政法人国立公文書館施設整備費,,no_request_row,内閣府,内閣本府,,
 kou-general:62,general,287,物価高騰対応地方創生推進費,,no_request_row,内閣府,内閣本府,,

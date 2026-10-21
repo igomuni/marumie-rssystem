@@ -82,7 +82,7 @@ cao.go.jp__yosan__soshiki__r08__pdf__00,1,01-95,地方創生推進事務局の�
 cao.go.jp__yosan__soshiki__r08__pdf__00,2,11-95,地方創生の推進に係る計画認定等に必要な経費,7,43,kou-general:71,jikou-general:117,1,MATCHED,,true,1425760,1557673,-131913,内閣府|,position
 cao.go.jp__yosan__soshiki__r08__pdf__00,3,01-95,総合特区の推進調整に必要な経費,7,44,kou-general:72,jikou-general:118,1,MATCHED,,true,4000,3000,1000,内閣府|,position
 cao.go.jp__yosan__soshiki__r08__pdf__00,4,01-95,地方創生の推進に必要な経費,7,45,kou-general:73,jikou-general:119,1,MATCHED,,true,500000,500000,0,内閣府|,position
-cao.go.jp__yosan__soshiki__r08__pdf__00,5,01-48,地方創生の推進のための基盤整備事業に必要な経費,7,46,kou-general:38,jikou-general:60,1,MATCHED,,true,0,55777000,-55777000,内閣府|,position
+cao.go.jp__yosan__soshiki__r08__pdf__00,5,01-48,地方創生の推進のための基盤整備事業に必要な経費,7,46,,,0,PARENT_UNMATCHED,kou_not_matched_uniquely,,0,,,内閣府|,position
 cao.go.jp__yosan__soshiki__r08__pdf__00,6,01-95,特定地域づくり事業の推進に必要な経費,7,47,kou-general:74,jikou-general:120,1,MATCHED,,true,560000,615020,-55020,内閣府|,position
 cao.go.jp__yosan__soshiki__r08__pdf__00,1,01-95,知的財産戦略推進事務局の運営に必要な経費,9,48,kou-general:75,jikou-general:121,1,MATCHED,,true,236869,232510,4359,内閣府|,position
 cao.go.jp__yosan__soshiki__r08__pdf__00,1,01-95,科学技術・イノベーション推進事務局の運営に必要な経費,11,49,kou-general:76,jikou-general:122,1,MATCHED,,true,855803,834555,21248,内閣府|,position
@@ -771,7 +771,7 @@ mhlw.go.jp__wp__yosan__yosan__26syokan__dl__05-1b-01,51,01-95,医薬品の承認
 mhlw.go.jp__wp__yosan__yosan__26syokan__dl__05-1b-01,52,05-06,医薬品等による健康被害の救済に必要な経費,590,18,kou-general:365,jikou-general:610,1,MATCHED,,true,503104,503104,0,厚生労働省|厚生労働本省,toc
 mhlw.go.jp__wp__yosan__yosan__26syokan__dl__05-1b-01,53,10-95,医薬品の安全対策等の推進に必要な経費,606,18,kou-general:365,jikou-general:611,1,MATCHED,,true,595556,533808,61748,厚生労働省|厚生労働本省,toc
 mhlw.go.jp__wp__yosan__yosan__26syokan__dl__05-1b-01,54,05-95,医薬品の適正使用の推進に必要な経費,633,19,kou-general:366,jikou-general:612,1,MATCHED,,true,100236,96659,3577,厚生労働省|厚生労働本省,toc
-mhlw.go.jp__wp__yosan__yosan__26syokan__dl__05-1b-01,55,07-07,厚生労働調査研究等の推進に必要な経費,641,20,kou-general:417,jikou-general:700,1,MATCHED,,true,0,18825381,-18825381,厚生労働省|厚生労働本省,toc
+mhlw.go.jp__wp__yosan__yosan__26syokan__dl__05-1b-01,55,07-07,厚生労働調査研究等の推進に必要な経費,641,20,,,0,PARENT_UNMATCHED,kou_not_matched_uniquely,,0,,,厚生労働省|厚生労働本省,toc
 mhlw.go.jp__wp__yosan__yosan__26syokan__dl__05-1b-01,56,01-95,独立行政法人医薬品医療機器総合機構運営費交付金に必要な経費,642,21,kou-general:370,jikou-general:619,1,MATCHED,,true,2412346,2562542,-150196,厚生労働省|厚生労働本省,toc
 mhlw.go.jp__wp__yosan__yosan__26syokan__dl__05-1b-01,57,05-07,血液製剤対策に必要な経費,646,22,kou-general:367,jikou-general:613,1,MATCHED,,true,523873,503890,19983,厚生労働省|厚生労働本省,toc
 mhlw.go.jp__wp__yosan__yosan__26syokan__dl__05-1b-01,58,23-95,血液製剤対策の推進に必要な経費,650,22,kou-general:367,jikou-general:614,1,MATCHED,,true,124640,150913,-26273,厚生労働省|厚生労働本省,toc
