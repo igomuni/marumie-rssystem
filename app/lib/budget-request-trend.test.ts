@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { BudgetRequestTrendRow, BudgetRequestTrendYear } from '@/types/budget-request-trend';
-import { INITIAL_TREND_FILTERS, assessmentGap, groupOf, jikouKeyOf, mergeJikou, recordsOf, changeRate, filterRows, isGone, isNew, patternOf, publisherOf, sortRows, textMatches } from './budget-request-trend';
+import { INITIAL_TREND_FILTERS, assessmentGap, groupOf, jikouKeyOf, jikouOrgKeyOf, mergeJikou, recordsOf, changeRate, filterRows, isGone, isNew, patternOf, publisherOf, sortRows, textMatches } from './budget-request-trend';
 
 const URLS = ['https://www.env.go.jp/a.pdf', 'https://www.meti.go.jp/b.pdf'];
 const Y = (prev: number | null, req: number | null, extra: Partial<BudgetRequestTrendYear> = {}): BudgetRequestTrendYear => ({ code: '19', prev, req, src: [[0, '1', '3']], mismatch: false, mof: '', ...extra });
@@ -94,5 +94,12 @@ describe('budget-request-trend', () => {
     expect(merged.rows[3].y['2026']).toBeUndefined(); // その年度に載っていない行には付けない
     expect(rows[0].y['2027'].jikou).toBeUndefined(); // 元のデータは変えない
     expect(recordsOfNames(filterRows(merged.rows, { ...INITIAL_TREND_FILTERS, jikou: true }, 2027, YEARS, URLS))).toEqual(['継続費']);
+  });
+  it('merges the organisation-level 事項要求 into every row of that organisation, separately from the item-level one', () => {
+    const merged = mergeJikou({ years: YEARS, urls: URLS, rows }, { years: {}, orgs: { '2027': [[jikouOrgKeyOf(rows[0]), '国土強靱化…']] } });
+    expect(merged.rows[0].y['2027'].orgJikou).toBe('国土強靱化…');
+    expect(merged.rows[1].y['2027'].orgJikou).toBe('国土強靱化…'); // 同じ組織（本府）の別の項
+    expect(merged.rows[0].y['2027'].jikou).toBeUndefined();
+    expect(merged.rows[3].y['2027'].orgJikou).toBeUndefined(); // 組織が空の特別会計の行には付けない
   });
 });

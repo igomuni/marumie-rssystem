@@ -30,6 +30,8 @@ export interface BudgetRequestTrendYear {
   mof: string;
   /** 備考に事項要求（金額を示さない要求）の記載がある。jikou.json.gz からページで合流する。仕様: docs/budget-request-jikou-youkyu.md */
   jikou?: BudgetRequestJikou;
+  /** この項の組織の行の備考に事項要求の記載がある（組織全体の事項要求。どの項に含まれるかは要求書に書かれていない）。値は備考の本文 */
+  orgJikou?: string;
 }
 
 /** 事項要求の記載の形（印 = 「（事項要求）」 / 文 = 文中の言及）と、最初の出現の行 */
@@ -68,4 +70,6 @@ export interface BudgetRequestTrendData {
 /** /budget-request-trend 用の事項要求の記載（scripts/pipeline-v2/build-budget-request-jikou-youkyu.ts が出力）。年度（西暦の文字列）→ [行のキー（jikouKeyOf）, 形, 根拠の行] */
 export interface BudgetRequestJikouData {
   years: Record<string, [string, string[], string][]>;
+  /** 組織の行の事項要求: 年度 → [組織のキー（jikouOrgKeyOf）, 備考の本文] */
+  orgs?: Record<string, [string, string][]>;
 }
