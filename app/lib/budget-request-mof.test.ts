@@ -35,6 +35,9 @@ describe('budget-request-mof', () => {
   it('labels special accounts by the publishers of the request books, and joint MOF-only items as 共管', () => {
     expect(groupOf(rows[4], URLS)).toBe('経済産業省、環境省');
     expect(groupOf(R('x', { acct: 1, grp: '内閣府及び厚生労働省', books: [] }), URLS)).toBe('共管');
+    // 一般会計も公開元（内閣府の外局は、予算書の所管が内閣府でも、それぞれの府省）
+    expect(groupOf(R('保育対策費', { grp: '内閣府', org: 'こども家庭庁', books: [[3, '1', '2', 1]] }), [...URLS, 'https://www.cfa.go.jp/x.pdf'])).toBe('こども家庭庁');
+    expect(groupOf(R('MOFのみ', { grp: '内閣府', books: [] }), URLS)).toBe('内閣府');
     expect(filterMofRows(rows, { ...INITIAL_MOF_FILTERS, groups: ['環境省'] }, 2026, URLS).map(r => r.name)).toEqual(['特会の項']);
   });
   it('sorts by the signed difference with missing values last, and keys rows uniquely', () => {

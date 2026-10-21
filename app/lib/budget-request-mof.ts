@@ -40,11 +40,11 @@ export const acctLabelOf = (r: BudgetRequestMofRow): string => (r.acct === 0 ? '
 export const orgOf = (r: BudgetRequestMofRow): string => (r.acct === 0 ? r.org : r.sub);
 
 /**
- * 所管（一覧の列・フィルタ）。一般会計は所管名。特別会計は、要求書の公開元の府省（PDF のドメイン由来。複数は「、」）。
+ * 所管（一覧の列・フィルタ）。年度推移（/budget-request-trend）と同じく、要求書の公開元の府省（PDF のドメイン由来。複数は「、」）。
+ * 内閣府の外局（こども家庭庁・消費者庁・金融庁など）は、それぞれの府省になる（予算書の所管はどれも内閣府）。
  * 要求書の無い行（MOF のみ）は MOF の所管で、共管（「、」「及び」で列挙）は「共管」とする
  */
 export function groupOf(r: BudgetRequestMofRow, urls: readonly string[]): string {
-  if (r.acct === 0) return r.grp;
   const pubs = [...new Set(r.books.map(([u]) => publisherOf(urls[u])))];
   if (pubs.length > 0) return pubs.join('、');
   return /、|及び/.test(r.grp) ? '共管' : r.grp;
