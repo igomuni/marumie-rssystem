@@ -24,7 +24,8 @@ import { TrendDetailPane } from '@/client/components/budget-request-trend/TrendD
 const rowKey = (r: BudgetRequestTrendRow): string => [r.acct, r.min, r.sub, r.org, r.name, r.kou ?? ''].join('|');
 const FILTER_WIDTH = { def: 240, min: 180, max: 420 };
 const DETAIL_WIDTH = { def: 430, min: 320, max: 760 };
-const pane = 'min-h-0 min-w-0 overflow-hidden rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900';
+// overflow は枠ごとに付ける（overflow-hidden と overflow-auto を同時に付けると hidden が効き、詳細がスクロールできない）
+const pane = 'min-h-0 min-w-0 rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900';
 
 /** ペイン間のつまみ。ドラッグで隣のペインの幅を変える（xl 以上のみ）。dir: 1 = 右へ動かすと広がる、-1 = 左へ動かすと広がる */
 function Splitter({ label, width, limits, dir, onChange }: { label: string; width: number; limits: { min: number; max: number }; dir: 1 | -1; onChange: (w: number) => void }) {
@@ -109,11 +110,11 @@ export default function BudgetRequestTrendPage() {
         </div>
       </header>
       <main className="grid min-h-0 flex-1 grid-cols-1 gap-3 px-3 pb-3 lg:grid-cols-[240px_minmax(0,1fr)] xl:flex xl:gap-0">
-        <section aria-label="フィルタ" className={`${pane} xl:w-[var(--fw)] xl:shrink-0`} style={{ '--fw': `${filterWidth}px` } as React.CSSProperties}>
+        <section aria-label="フィルタ" className={`${pane} overflow-hidden xl:w-[var(--fw)] xl:shrink-0`} style={{ '--fw': `${filterWidth}px` } as React.CSSProperties}>
           <TrendFilterPane rows={data.rows} years={years} urls={data.urls} year={activeYear} filters={filters} onChange={setFilters} />
         </section>
         <Splitter label="フィルタの幅" width={filterWidth} limits={FILTER_WIDTH} dir={1} onChange={setFilterWidth} />
-        <section aria-label="項の一覧" className={`${pane} xl:min-w-0 xl:flex-1`}>
+        <section aria-label="項の一覧" className={`${pane} overflow-hidden xl:min-w-0 xl:flex-1`}>
           <TrendListPane
             rows={rows}
             year={activeYear}
