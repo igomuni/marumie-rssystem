@@ -22,6 +22,7 @@ const PAGES = [
   { href: '/mof-hierarchy', label: '予算書 階層フロー（MOF）' },
   { href: '/mof-sankey', label: '予算書 項×RS事業（MOF）' },
   { href: '/budget-request-trend', label: '概算要求 年度推移' },
+  { href: '/budget-request-mof', label: '概算要求と当初予算' },
 ] as const;
 
 export type NavPageHref = (typeof PAGES)[number]['href'];
