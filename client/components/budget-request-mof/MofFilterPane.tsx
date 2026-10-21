@@ -18,7 +18,7 @@ const KIND_NOTE: Record<BudgetRequestMofKind, string> = { matched: '', mofOnly: 
 export function MofFilterPane({ rows, urls, year, filters, onChange }: { rows: readonly BudgetRequestMofRow[]; urls: readonly string[]; year: number; filters: MofFilters; onChange: (f: MofFilters) => void }) {
   const inYear = useMemo(() => rows.filter(r => r.y === year), [rows, year]);
   const tally = (keys: string[][]) => { const m = new Map<string, number>(); for (const ks of keys) for (const k of ks) m.set(k, (m.get(k) ?? 0) + 1); return m; };
-  // 所管の選択肢: 府省ごと（件数はその府省が載せている項。共管の項も数える）と、末尾に「共管」（複数の府省の項）
+  // 所管の選択肢: 府省ごと（件数はその府省が載せている項。複数所管の項も数える）と、末尾に「複数所管」
   const groups = useMemo(() => {
     const list = [...tally(inYear.map(r => publishersOf(r, urls)))].sort((a, b) => b[1] - a[1]);
     const joint = inYear.filter(r => isJoint(r, urls)).length;

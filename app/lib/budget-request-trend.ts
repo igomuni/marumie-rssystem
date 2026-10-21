@@ -22,7 +22,7 @@ export interface TrendFilters {
   orgRegex: boolean;
   /** 会計の絞り込み（acctLabelOf の値: 一般会計 / ○○特別会計）。空なら絞り込まない */
   accts: string[];
-  /** 所管の絞り込み（groupsOf の値。どれかが載っていれば一致）。空なら絞り込まない */
+  /** 所管の絞り込み（groupsOf の値。どれかが載っていれば一致。MULTI_GROUP は複数所管の項）。空なら絞り込まない */
   groups: string[];
   pattern: PatternFilter;
   change: ChangeFilter;
@@ -61,31 +61,44 @@ export function groupsOf(r: BudgetRequestTrendRow, year: number, urls: readonly 
 }
 export const groupOf = (r: BudgetRequestTrendRow, year: number, urls: readonly string[]): string => groupsOf(r, year, urls).join('、');
 
-/** 一覧の 1 行 = 項 × 所管（公開元の府省）。複数の府省の書に載る項は府省ごとに 1 件。金額はその府省の書の値 */
+/** 複数所管の行を選ぶ所管フィルタの選択肢 */
+export const MULTI_GROUP = '複数所管';
+
+/**
+ * 所管の表示（一覧の列）。単独の府省はその名前。複数所管（複数の府省の要求書に載る項）は「N所管」。
+ * 東日本大震災復興は「復興庁（取りまとめ）」（各省が持ち分を載せ、復興庁の書が合計）。府省名の一覧はツールチップ・詳細に出す
+ */
+export function groupLabelOf(r: BudgetRequestTrendRow, groups: readonly string[]): string {
+  if (groups.length <= 1) return groups[0] ?? r.min;
+  if (r.acct === 1 && r.min === '東日本大震災復興' && groups.includes('復興庁')) return '復興庁（取りまとめ）';
+  return `${groups.length}所管`;
+}
+
+/**
+ * 一覧の 1 行 = 項。複数の府省の要求書に載る項も 1 行（同じ要求書を各府省が載せる同額と、東日本大震災復興の持ち分）。
+ * 金額はその年度の値（書ごとに額が違うときは最も大きい額＝合計書）
+ */
 export interface TrendRecord {
   row: BudgetRequestTrendRow;
+  /** 所管の表示（groupLabelOf） */
   group: string;
+  /** 所管の府省（公開元）。複数所管なら 2 つ以上 */
+  groups: string[];
   prev: number | null;
   req: number | null;
-  /** この所管の書の載り先に、PDF の頁が引けなかったものがある */
-  noPdfPage: boolean;
-  /** この所管の書の載り先に、推定した頁が画像（文字層なし）のものがある */
-  imagePage: boolean;
+  /** PDF の頁が引けなかった書の府省（空なら無し） */
+  noPdfPageBy: string[];
+  /** 推定した頁が画像（文字層なし）の書の府省（空なら無し） */
+  imagePageBy: string[];
 }
 
 export function recordsOf(r: BudgetRequestTrendRow, year: number, urls: readonly string[]): TrendRecord[] {
   const a = yearOf(r, year);
-  return groupsOf(r, year, urls).map(group => {
-    // この所管の書の載り先だけで、頁の状態を判定する（複数の府省の書に載る項で、片方だけ頁が引けなくても、もう片方には付けない）
-    const mySrc = a ? a.src.filter(s => publisherOf(urls[s[0]] ?? '') === group) : [];
-    const flags = { noPdfPage: mySrc.some(s => !s[2]), imagePage: mySrc.some(s => s[3] === 'i') };
-    if (!a) return { row: r, group, prev: null, req: null, ...flags };
-    // 書ごとの額（額不一致のときだけ持つ）があれば、その府省の書のうち最も大きい額
-    const mine = a.srcAmt ? a.src.map((s, i) => ({ g: publisherOf(urls[s[0]] ?? ''), amt: a.srcAmt![i] })).filter(x => x.g === group) : [];
-    if (mine.length === 0) return { row: r, group, prev: a.prev, req: a.req, ...flags };
-    const best = mine.reduce((m, x) => ((x.amt[1] ?? 0) > (m.amt[1] ?? 0) ? x : m));
-    return { row: r, group, prev: best.amt[0], req: best.amt[1], ...flags };
-  });
+  const groups = groupsOf(r, year, urls);
+  const pubOf = (s: [number, ...unknown[]]) => publisherOf(urls[s[0]] ?? '');
+  const noPdfPageBy = a ? [...new Set(a.src.filter(s => !s[2]).map(pubOf))] : [];
+  const imagePageBy = a ? [...new Set(a.src.filter(s => s[3] === 'i').map(pubOf))] : [];
+  return [{ row: r, group: groupLabelOf(r, groups), groups, prev: a ? a.prev : null, req: a ? a.req : null, noPdfPageBy, imagePageBy }];
 }
 
 export const recordChange = (x: TrendRecord): number | null => (x.req !== null && x.prev !== null ? x.req - x.prev : null);
@@ -176,9 +189,10 @@ export function filterRows(rows: readonly BudgetRequestTrendRow[], f: TrendFilte
     return true;
   });
   return kept.flatMap(r => recordsOf(r, year, urls)).filter(x => {
-    if (groups.size > 0 && !groups.has(x.group)) return false;
-    if (f.imagePage && !x.imagePage) return false;
-    if (f.noPdfPage && !x.noPdfPage) return false;
+    // 所管: 選んだ府省が載せている項（複数所管の項も含む）。「複数所管」を選ぶと複数所管の項
+    if (groups.size > 0 && !(x.groups.some(g => groups.has(g)) || (groups.has(MULTI_GROUP) && x.groups.length > 1))) return false;
+    if (f.imagePage && x.imagePageBy.length === 0) return false;
+    if (f.noPdfPage && x.noPdfPageBy.length === 0) return false;
     if (f.change) {
       const t = recordRate(x);
       if (t === null) return false;

@@ -32,18 +32,18 @@ describe('budget-request-trend', () => {
     expect(patternOf(rows[1], 2027, 2025)).toBe('新規');
     expect(patternOf(rows[2], 2027, 2025)).toBe('消滅');
     expect(patternOf(rows[0], 2025, 2025)).toBeNull();
-    expect(sortRows(recs(rows), 'pattern', 1, 2027, 2025).map(r => r.row.name)).toEqual(['新設費', '特会費', '特会費', '継続費', '廃止費']);
+    expect(sortRows(recs(rows), 'pattern', 1, 2027, 2025).map(r => r.row.name)).toEqual(['新設費', '特会費', '継続費', '廃止費']);
   });
   it('lists only the keys present in the selected year, except for the gone pattern', () => {
-    expect(filterRows(rows, INITIAL_TREND_FILTERS, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['継続費', '新設費', '特会費', '特会費']);
+    expect(filterRows(rows, INITIAL_TREND_FILTERS, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['継続費', '新設費', '特会費']);
     expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, pattern: 'gone' }, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['廃止費']);
     expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, pattern: 'all5' }, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['継続費']);
   });
   it('filters by account, ministry group, shared and change', () => {
-    expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, accts: ['東日本大震災復興特別会計特別会計'] }, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['特会費', '特会費']);
+    expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, accts: ['東日本大震災復興特別会計特別会計'] }, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['特会費']);
     expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, groups: ['経済産業省'] }, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['特会費']);
-    expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, shared: true }, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['特会費', '特会費']);
-    expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, change: 'dn10' }, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['特会費', '特会費']);
+    expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, shared: true }, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['特会費']);
+    expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, change: 'dn10' }, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['特会費']);
   });
   it('sorts with missing values last in both directions', () => {
     expect(sortRows(recs(rows.slice(0, 2)), 'rate', -1, 2027, 2025).map(r => r.row.name)).toEqual(['継続費', '新設費']);
@@ -59,9 +59,9 @@ describe('budget-request-trend', () => {
     expect(textMatches('x', '  ', false)).toBe(true);
   });
   it('searches the item name and the organization separately', () => {
-    expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, name: '特会', org: '' }, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['特会費', '特会費']);
+    expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, name: '特会', org: '' }, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['特会費']);
     expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, org: '本府' }, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['継続費', '新設費']);
-    expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, org: '勘定[AB]', orgRegex: true }, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['特会費', '特会費']);
+    expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, org: '勘定[AB]', orgRegex: true }, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['特会費']);
   });
   it('computes the assessment gap from next year previous amount', () => {
     expect(assessmentGap(rows[0], 2025)).toBe(110 - 120);
@@ -71,20 +71,24 @@ describe('budget-request-trend', () => {
     expect(publisherOf('https://www.env.go.jp/content/x.pdf')).toBe('環境省');
     expect(publisherOf('https://www.unknown.example/x.pdf')).toBe('unknown.example');
   });
-  it('uses the publishing ministries of the request books as the 所管 (any match filters)', () => {
+  it('uses the publishing ministries of the request books as the 所管: one row labelled N所管, any ministry or 複数所管 filters', () => {
     const shared = rows.find(r => r.name === '特会費')!;
     expect(groupOf(shared, 2027, URLS)).toBe('環境省、経済産業省');
+    expect(recordsOf(shared, 2027, URLS).map(x => [x.group, x.groups])).toEqual([['2所管', ['環境省', '経済産業省']]]);
     expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, groups: ['経済産業省'] }, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['特会費']);
+    expect(filterRows(rows, { ...INITIAL_TREND_FILTERS, groups: ['複数所管'] }, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['特会費']);
+    // 東日本大震災復興は各省の持ち分と復興庁の合計の書: 復興庁（取りまとめ）
+    const fukko = row('復興費', { '2027': Y(1, 2, { src: [[0, '1', '3'], [2, '1', '3']] }) }, { acct: 1, min: '東日本大震災復興', sub: '', org: '' });
+    expect(recordsOf(fukko, 2027, [...URLS, 'https://www.reconstruction.go.jp/x.pdf'])[0].group).toBe('復興庁（取りまとめ）');
   });
   it('filters items whose 目 include a 繰入 in the selected year', () => {
     const withXfer = [row('繰入費', { '2027': Y(10, 20, { xfer: ['国債整理基金特別会計へ繰入'] }) }), ...rows];
     expect(filterRows(withXfer, { ...INITIAL_TREND_FILTERS, transfer: true }, 2027, YEARS, URLS).map(r => r.row.name)).toEqual(['繰入費']);
   });
-  it('flags a missing PDF page only on the publisher whose book lacks it', () => {
+  it('records which publisher book lacks the PDF page on the single row', () => {
     const partly = row('一部だけ頁なし', { '2027': Y(10, 20, { src: [[0, '1', '3'], [1, '2', '']] }) });
-    const rs = recordsOf(partly, 2027, URLS);
-    expect(rs.map(x => [x.group, x.noPdfPage])).toEqual([['環境省', false], ['経済産業省', true]]);
-    expect(filterRows([partly], { ...INITIAL_TREND_FILTERS, noPdfPage: true }, 2027, YEARS, URLS).map(x => x.group)).toEqual(['経済産業省']);
+    expect(recordsOf(partly, 2027, URLS).map(x => x.noPdfPageBy)).toEqual([['経済産業省']]);
+    expect(filterRows([partly], { ...INITIAL_TREND_FILTERS, noPdfPage: true }, 2027, YEARS, URLS).map(x => x.row.name)).toEqual(['一部だけ頁なし']);
   });
   it('merges the 事項要求 candidates into the year values by key and filters on them', () => {
     const data = { years: YEARS, urls: URLS, rows };
