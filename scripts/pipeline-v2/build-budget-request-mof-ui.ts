@@ -11,7 +11,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as zlib from 'zlib';
-import { ns, readCsv, type Rec } from './lib/mof-budget-request-match';
+import { mofAmountKou, ns, readCsv, type Rec } from './lib/mof-budget-request-match';
 import type { BudgetRequestJikouData } from '../../types/budget-request-trend';
 import type { BudgetRequestMofData, BudgetRequestMofRow, BudgetRequestMofType } from '../../types/budget-request-mof';
 
@@ -44,8 +44,9 @@ for (const [year, ver] of VERSIONS) {
   // MOF の項（id: kou-general:N / kou-special:N。N は CSV のデータ行の 1 始まり）
   const mof = new Map<string, Rec>();
   for (const a of ['general', 'special'] as const) rd(path.join('tests', 'fixtures', 'mof-archive-csv', ver, `kou-${a}.csv`)).forEach((r, i) => mof.set(`kou-${a}:${i + 1}`, r));
-  const mofAmt = (r: Rec) => num(r[Object.keys(r).find(k => /年度(要求額|予定額)\(千円\)の合計$/.test(k)) ?? '']);
-  const mofPrevOf = (r: Rec) => num(r[Object.keys(r).find(k => /前年度予算額\(千円\)の合計$/.test(k)) ?? '']);
+  // 額の列名は版で違う（提出時の令和6・7年度は「…要求額の合計」で「(千円)」なし。単位はどれも千円）。突合と同じ関数で読む
+  const mofAmt = mofAmountKou;
+  const mofPrevOf = (r: Rec) => num(r[Object.keys(r).find(k => /^前年度予算額.*の合計$/.test(k)) ?? '']);
 
   // 要求側: request-kou.csv（要求の年度のディレクトリ。2025_teishutsu には無い）と、年度推移 CSV の行（PDF の頁・識別）
   const reqKou = new Map(rd(path.join(MATCH, Y, 'request-kou.csv')).map(r => [`${r['request_source']}#${r['toc_kou_idx']}`, r]));
@@ -141,6 +142,8 @@ for (const [year, ver] of VERSIONS) {
       name: ns(r['項名']), mof: mofAmt(r), mofPrev: mofPrevOf(r), req: null, reqPrev: null, books: [], types: PLACEHOLDER.test(ns(r['項名'])) ? ['仮置き'] : [],
     });
   }
+  const yearRows = rows.filter(x => x.y === year && (x.kind === 'matched' || x.kind === 'mofOnly'));
+  if (yearRows.length > 0 && yearRows.every(x => x.mof === null)) throw new Error(`${ver}: MOF の額の列が読めない（列名を確認）`);
   const typeCount: Record<string, number> = {}; for (const r of rows.filter(x => x.y === year)) for (const t of r.types) typeCount[t] = (typeCount[t] ?? 0) + 1;
   summary[Y] = { version: ver, rows: count, types: typeCount };
 }
