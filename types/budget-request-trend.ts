@@ -28,6 +28,14 @@ export interface BudgetRequestTrendYear {
   to?: number;
   /** MOF 突合の状態（参考。MOF の版が無い年度は空） */
   mof: string;
+  /** 金額を示さない要求（事項要求など）の候補。jikou.json.gz からページで合流する。仕様: docs/budget-request-jikou-youkyu.md */
+  jikou?: BudgetRequestJikou;
+}
+
+/** 金額を示さない要求の候補の形（印 / 文 / 要求0 / 要求0・場所ごと / 一括計上）と、最初の「事項要求」の出現の行 */
+export interface BudgetRequestJikou {
+  forms: string[];
+  text: string;
 }
 
 /** 項 1 件（年度をまたぐキー: 会計区分 + 所管（一般会計のみ）+ 特別会計 + 勘定 + 組織 + 項名） */
@@ -55,4 +63,9 @@ export interface BudgetRequestTrendData {
   /** 元の PDF の URL */
   urls: string[];
   rows: BudgetRequestTrendRow[];
+}
+
+/** /budget-request-trend 用の事項要求の候補（scripts/pipeline-v2/build-budget-request-jikou-youkyu.ts が出力）。年度（西暦の文字列）→ [行のキー（jikouKeyOf）, 形, 根拠の行] */
+export interface BudgetRequestJikouData {
+  years: Record<string, [string, string[], string][]>;
 }

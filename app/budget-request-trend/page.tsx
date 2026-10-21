@@ -6,6 +6,7 @@
  * 左にフィルタ、中に選択年度の一覧（前年度予算額・要求額・増減）、右に選んだ項の全年度分の表・グラフ・元の PDF へのリンク。
  * データは静的ファイル /data/v2/ui/budget-request-trend/kou.json.gz をブラウザが直接取得する（Vercel の関数には public/data を同梱しないため API を経由しない。
  * 他の v2 データと同じ方式）。仕様: docs/budget-request-trend-csv.md。
+ * 事項要求の候補（jikou.json.gz、仕様: docs/budget-request-jikou-youkyu.md）は別に取得して年度の値に合流する。取得できなくても一覧は出す。
  * MOF の予算書との突合には依存しない。名称が変わった項は別の行（新規・消滅）になる。
  */
 
@@ -14,8 +15,8 @@ import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
 import { usePersistedState } from '@/client/hooks/usePersistedState';
 import { fetchGzipJson } from '@/app/lib/v2-public-linkage';
-import type { BudgetRequestTrendData, BudgetRequestTrendRow } from '@/types/budget-request-trend';
-import { INITIAL_TREND_FILTERS, filterRows, sortRows, type TrendFilters, type TrendSortDir, type TrendSortKey } from '@/app/lib/budget-request-trend';
+import type { BudgetRequestJikouData, BudgetRequestTrendData, BudgetRequestTrendRow } from '@/types/budget-request-trend';
+import { INITIAL_TREND_FILTERS, filterRows, mergeJikou, sortRows, type TrendFilters, type TrendSortDir, type TrendSortKey } from '@/app/lib/budget-request-trend';
 import { TrendFilterPane } from '@/client/components/budget-request-trend/TrendFilterPane';
 import { TrendListPane } from '@/client/components/budget-request-trend/TrendListPane';
 import { TrendDetailPane } from '@/client/components/budget-request-trend/TrendDetailPane';
@@ -55,8 +56,9 @@ export default function BudgetRequestTrendPage() {
 
   useEffect(() => {
     const controller = new AbortController();
+    const jikou = fetchGzipJson<BudgetRequestJikouData>('/data/v2/ui/budget-request-trend/jikou.json.gz', controller.signal).catch(() => null);
     fetchGzipJson<BudgetRequestTrendData>('/data/v2/ui/budget-request-trend/kou.json.gz', controller.signal)
-      .then(setData)
+      .then(async d => { const jk = await jikou; setData(jk ? mergeJikou(d, jk) : d); })
       .catch(e => { if (!controller.signal.aborted) setError(e instanceof Error ? e.message : String(e)); });
     return () => controller.abort();
   }, []);

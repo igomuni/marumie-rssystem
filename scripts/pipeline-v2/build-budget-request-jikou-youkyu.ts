@@ -4,10 +4,12 @@
  * 使い方: npx tsx scripts/pipeline-v2/build-budget-request-jikou-youkyu.ts [out-dir]   # 既定 tests/fixtures/budget-request-jikou-youkyu
  * 入力: tests/fixtures/budget-request-trend/kou.csv（項の一覧と金額）、tests/fixtures/budget-request-csv/{year}/detail-table/sources/*.csv（明細表の行）、
  *       data/work/budget-request-plain-text/{year}/*.txt（備考の文字。明細表 CSV は備考を持たない）、tests/fixtures/mof-budget-request-match/{year}/m1-kou.csv（MOF の当初額。参考）
- * 出力: kou.csv（形が 1 つ以上ある項）、marks.csv（「事項要求」の出現ごとの行）、summary.json
+ * 出力: kou.csv（形が 1 つ以上ある項）、marks.csv（「事項要求」の出現ごとの行）、summary.json、public/data/v2/ui/budget-request-trend/jikou.json.gz（/budget-request-trend 用）
  */
 import * as fs from 'fs';
 import * as path from 'path';
+import * as zlib from 'zlib';
+import type { BudgetRequestJikouData } from '../../types/budget-request-trend';
 import { ns, readCsv, type Rec } from './lib/mof-budget-request-match';
 
 const OUT = process.argv[2] ?? path.join('tests', 'fixtures', 'budget-request-jikou-youkyu');
@@ -28,6 +30,7 @@ type Hit = { kind: '印' | '文'; level: string; rowName: string; page: number; 
 const trend = rd(path.join('tests', 'fixtures', 'budget-request-trend', 'kou.csv'));
 const kouRows: unknown[][] = []; const markRows: unknown[][] = [];
 const summary: Record<string, unknown> = {};
+const ui: BudgetRequestJikouData = { years: {} };
 
 for (const year of YEARS) {
   const detailDir = path.join('tests', 'fixtures', 'budget-request-csv', String(year), 'detail-table', 'sources');
@@ -67,7 +70,7 @@ for (const year of YEARS) {
       const near = k >= 0 && Number(rows[k]['source_page']) === page && line - starts[k] <= 12;
       const r = near ? rows[k] : null;
       const level = r ? role[k] : '不明';
-      const hit: Hit = { kind: MARK.test(flat) ? '印' : '文', level, rowName: r ? ns(r['事項']) : '', page, line, text: l.replace(/\f/g, '').trim() };
+      const hit: Hit = { kind: MARK.test(flat) ? '印' : '文', level, rowName: r ? ns(r['事項']) : '', page, line, text: l.replace(/\f/g, '').replace(/\s+/g, ' ').trim() }; // 列の位置合わせの空白は詰める
       const kou = near ? kouAt[k] : null;
       markRows.push([year, slug, page, line, hit.kind, level, hit.rowName, kou ? kou.split('\t')[2] : '', hit.text]);
       if (kou) (hitsOf.get(kou) ?? hitsOf.set(kou, []).get(kou)!).push(hit);
@@ -116,6 +119,9 @@ for (const year of YEARS) {
     const req = num(r['要求額_千円']) ?? 0;
     // MOF との比較（参考）: 要求0 の項は、当初予算でも 0（終了など）か、編成で額が付いたか
     const vsMof = !hasMof ? '' : it.mof === null ? 'MOFに対応なし' : it.mof > req ? '当初>要求' : it.mof === req ? '当初=要求' : '当初<要求';
+    const acct = r['会計区分'] === '特別' ? 1 : 0;
+    // 行のキーは UI の jikouKeyOf（app/lib/budget-request-trend.ts）と同じ並び: 会計区分 | 所管（特別会計は特別会計名）| 勘定 | 組織 | 項名
+    (ui.years[String(year)] ??= []).push([[acct, acct === 1 ? r['特別会計'] : r['所管'], r['勘定'], r['組織'], r['項名']].join('|'), forms, it.hits[0]?.text ?? '']);
     kouRows.push([year, r['会計区分'], r['所管'], r['特別会計'], r['勘定'], r['組織'], r['項名'], r['項コード'], r['前年度予算額_千円'], r['要求額_千円'], it.mof ?? '', vsMof, forms.join(';'), [...new Set(it.hits.map(h => h.level))].join('・'), it.hits[0]?.text ?? '', it.books.join(' '), r['頁'], r['PDF頁']]);
   }
   summary[String(year)] = { occurrences: total, joined_to_kou: [...hitsOf.values()].reduce((a, h) => a + h.length, 0), on_org_rows: orgHits.length, unplaced, kou_with_forms: items.size, kou_trend_rows_with_marks: joined, forms: count };
@@ -123,5 +129,7 @@ for (const year of YEARS) {
 
 writeCsv('kou.csv', ['年度', '会計区分', '所管', '特別会計', '勘定', '組織', '項名', '項コード', '前年度予算額_千円', '要求額_千円', 'MOF当初額_千円(参考)', 'MOFとの比較(参考)', '形', '印の行の階層', '根拠の行', '要求書', '頁', 'PDF頁'], kouRows);
 writeCsv('marks.csv', ['年度', '要求書', 'PDF頁', '行', '種類', '階層', '行の名前', '項名', '本文'], markRows);
+const uiDir = path.join('public', 'data', 'v2', 'ui', 'budget-request-trend'); fs.mkdirSync(uiDir, { recursive: true });
+fs.writeFileSync(path.join(uiDir, 'jikou.json.gz'), zlib.gzipSync(JSON.stringify(ui), { level: 9, mtime: 0 } as zlib.ZlibOptions));
 fs.writeFileSync(path.join(OUT, 'summary.json'), JSON.stringify(summary, null, 1) + '\n');
 console.log(JSON.stringify(summary));

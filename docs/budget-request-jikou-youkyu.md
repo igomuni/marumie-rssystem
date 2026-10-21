@@ -3,8 +3,10 @@
 概算要求書のうち、金額をすべては示していない要求の候補を、項の単位で拾う。FY2023〜2027 が対象。
 
 ```bash
-npx tsx scripts/pipeline-v2/build-budget-request-jikou-youkyu.ts   # → tests/fixtures/budget-request-jikou-youkyu/{kou.csv,marks.csv,summary.json}
+npx tsx scripts/pipeline-v2/build-budget-request-jikou-youkyu.ts   # → tests/fixtures/budget-request-jikou-youkyu/{kou.csv,marks.csv,summary.json}、public/data/v2/ui/budget-request-trend/jikou.json.gz
 ```
+
+年度推移 CSV（`build-budget-request-trend-csv.ts`）の後に実行する。
 
 ## 入力
 
@@ -65,6 +67,17 @@ npx tsx scripts/pipeline-v2/build-budget-request-jikou-youkyu.ts   # → tests/f
 **`marks.csv`:** 「事項要求」の出現ごとに 1 行。列は、年度、要求書、PDF 頁（plain text の頁）、行、種類（印・文）、階層、行の名前、項名（結びついた項）、本文。
 
 **`summary.json`:** 年度ごとの出現数、項に結びついた数、組織の行の数、結びつかない数、形ごとの項の数。
+
+**`public/data/v2/ui/budget-request-trend/jikou.json.gz`（/budget-request-trend 用）**
+
+- 形: `{ years: { "2026": [[キー, 形の配列, 根拠の行], …] } }`（型は `BudgetRequestJikouData`）。
+- キーは `会計区分(0|1)|所管（特別会計は特別会計名）|勘定|組織|項名`。`app/lib/budget-request-trend.ts` の `jikouKeyOf` と同じ並び。
+- ページは `kou.json.gz` と一緒に取得し、`mergeJikou` で年度の値の `jikou` に合流する。取得できないときは合流しない。
+- UI では次の 3 か所に出る。
+  - 「データの状態」のフィルタ「事項要求」
+  - 一覧のバッジ
+  - 詳細の注（同じ形の年度は 1 つにまとめる）
+- 移管・改称で前の項をつないだ行は、つなぐ前の年度の項のキーが異なるため、その年度には付かない。
 
 ## 注意
 

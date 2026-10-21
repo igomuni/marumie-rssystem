@@ -3,7 +3,7 @@
  * データ: types/budget-request-trend.ts。仕様: docs/budget-request-trend-csv.md。
  * 増減・増減率は、その年度の「要求額 − 前年度予算額」（その年度の要求書が載せる値どうし）。
  */
-import type { BudgetRequestTrendRow, BudgetRequestTrendYear } from '@/types/budget-request-trend';
+import type { BudgetRequestJikouData, BudgetRequestTrendData, BudgetRequestTrendRow, BudgetRequestTrendYear } from '@/types/budget-request-trend';
 import { MAX_REGEX_PATTERN_LENGTH } from '@/app/lib/sankey-query';
 
 export type PatternFilter = 'all' | 'all5' | 'new' | 'gone';
@@ -42,9 +42,11 @@ export interface TrendFilters {
   imagePage: boolean;
   /** その年度に PDF の頁が引けなかった行だけ */
   noPdfPage: boolean;
+  /** その年度に金額を示さない要求（事項要求など）の候補の行だけ */
+  jikou: boolean;
 }
 
-export const INITIAL_TREND_FILTERS: TrendFilters = { name: '', nameRegex: false, org: '', orgRegex: false, accts: [], groups: [], pattern: 'all', change: '', shared: false, mismatch: false, transfer: false, codeChange: false, newAcct: false, moved: false, imagePage: false, noPdfPage: false };
+export const INITIAL_TREND_FILTERS: TrendFilters = { name: '', nameRegex: false, org: '', orgRegex: false, accts: [], groups: [], pattern: 'all', change: '', shared: false, mismatch: false, transfer: false, codeChange: false, newAcct: false, moved: false, imagePage: false, noPdfPage: false, jikou: false };
 
 /**
  * 所管 = 載っている要求書の公開元（PDF のドメイン由来の府省庁名）。会計の区別は acct（一般 / 特別）の列で示す。
@@ -94,6 +96,24 @@ export const acctLabelOf = (r: BudgetRequestTrendRow): string => (r.acct === 0 ?
 export const orgOf = (r: BudgetRequestTrendRow): string => (r.acct === 0 ? r.org : r.sub);
 
 export const yearOf = (r: BudgetRequestTrendRow, year: number): BudgetRequestTrendYear | undefined => r.y[String(year)];
+
+/** 事項要求の候補（jikou.json.gz）の行のキー: 会計区分 + 所管（特別会計は特別会計名）+ 勘定 + 組織 + 項名。項コードは含めない（同じキーの行すべてに付ける） */
+export const jikouKeyOf = (r: Pick<BudgetRequestTrendRow, 'acct' | 'min' | 'sub' | 'org' | 'name'>): string => [r.acct, r.min, r.sub, r.org, r.name].join('|');
+
+/** 事項要求の候補を、行の年度の値（jikou）に合流させる。元のデータは変えない */
+export function mergeJikou(data: BudgetRequestTrendData, jk: BudgetRequestJikouData): BudgetRequestTrendData {
+  const byYear = new Map(Object.entries(jk.years).map(([y, list]) => [y, new Map(list.map(([k, forms, text]) => [k, { forms, text }]))]));
+  const rows = data.rows.map(r => {
+    const key = jikouKeyOf(r);
+    let y: BudgetRequestTrendRow['y'] | null = null;
+    for (const [yr, v] of Object.entries(r.y)) {
+      const hit = byYear.get(yr)?.get(key);
+      if (hit) { y ??= { ...r.y }; y[yr] = { ...v, jikou: hit }; }
+    }
+    return y ? { ...r, y } : r;
+  });
+  return { ...data, rows };
+}
 
 export function changeAmount(r: BudgetRequestTrendRow, year: number): number | null {
   const a = yearOf(r, year);
@@ -148,6 +168,7 @@ export function filterRows(rows: readonly BudgetRequestTrendRow[], f: TrendFilte
     if (f.codeChange && !a?.codeChanged) return false;
     if (f.newAcct && !a?.newAcct) return false;
     if (f.moved && !a?.moved) return false;
+    if (f.jikou && !a?.jikou) return false;
     return true;
   });
   return kept.flatMap(r => recordsOf(r, year, urls)).filter(x => {
