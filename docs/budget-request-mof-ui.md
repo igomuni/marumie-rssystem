@@ -3,7 +3,7 @@
 概算要求額と、MOF の予算書の当初予算額（国会への提出時の政府案）を、項ごとに並べる。差の理由の型をバッジで示す。対象は FY2023〜2026（FY2027 は予算書が未公表）。年度推移（`/budget-request-trend`）とは別のページにする。年度推移には MOF との突合を混ぜない。
 
 ```bash
-npx tsx scripts/pipeline-v2/build-budget-request-mof-ui.ts   # → public/data/v2/ui/budget-request-mof/kou.json.gz、tests/fixtures/budget-request-mof/summary.json
+npx tsx scripts/pipeline-v2/build-budget-request-mof-ui.ts   # → public/data/v2/ui/budget-request-mof/{kou,detail}.json.gz、tests/fixtures/budget-request-mof/summary.json
 ```
 
 実行の順番:
@@ -11,7 +11,8 @@ npx tsx scripts/pipeline-v2/build-budget-request-mof-ui.ts   # → public/data/v
 1. MOF 突合（`build-mof-budget-request-match.ts`）
 2. 年度推移 CSV（`build-budget-request-trend-csv.ts`）
 3. 事項要求の検知（`build-budget-request-jikou-youkyu.ts`）
-4. このスクリプト
+4. 事項・目の年度推移（`build-budget-request-trend-detail-csv.ts`。詳細の事項・目の要求側）
+5. このスクリプト
 
 ## MOF の版
 
@@ -40,6 +41,20 @@ npx tsx scripts/pipeline-v2/build-budget-request-mof-ui.ts   # → public/data/v
 FY2026 は、対応あり 1,035、MOF のみ 49、概算要求のみ 9、額0の項 42。年度ごとの数は `tests/fixtures/budget-request-mof/summary.json`。
 
 **差** は、当初予算額 − 要求額（正なら要求より予算が大きい）。差率は、差 ÷ 要求額。
+
+**前年度予算額:** 概算要求書は前年度の当初予算額を、予算書は前年度の**補正後**の額（補正予算の改予算額）を載せる。例: 消費者庁共通費 FY2026 の予算書の前年度予算額 5,232,537 千円は、FY2025 の改予算額（当初 5,212,333）。補正で額の変わった項では、両者は違う。FY2026 の予算書の項の前年度予算額は、一般会計 824 項のうち 556 が補正後の額に一致し（補正で変わらない項は 154 が当初と同じ）、特別会計 260 項のうち 68 が補正後、177 が当初と同じ。残り（一般会計 114、特別会計 15）は項の新設・組替えなどで、内訳は未確認。
+
+## 事項・目
+
+詳細のタブ（事項・目）で、要求側と予算書の事項・目を名前でつないで並べる。`detail.json.gz`（行のキー `mofRowKey` → 内訳。型は `types/budget-request-mof.ts` の `BudgetRequestMofDetail`）。つなぐ処理は `scripts/pipeline-v2/lib/budget-request-mof-detail.ts`。
+
+- **要求側:** 年度推移の事項・目（`tests/fixtures/budget-request-trend/{jikou.csv,moku/{year}.csv}`）。目は分冊の明細表から取っており、総表の書とは書が違うので、要求書ではなく項の識別（会計区分＋所管（特別会計は特別会計名）＋勘定＋組織＋項名）で引く。同じ MOF の項に複数の要求行が対応するときは、要求額の最も大きい行（合計書）の内訳だけ。統合は、要求の項ごとの内訳を足す。
+- **予算書側:** `tests/fixtures/mof-archive-csv/{ver}/{jikou,moku}-{general,special}.csv`。項の識別は、一般会計が所管＋組織＋項コード＋項名、特別会計が特別会計＋勘定＋項コード＋項名（どちらも項の CSV で一意）。
+- **目:** 予算書の目は項ごと（事項をまたいだ額）なので、要求側も事項をまたいで目名で足す。予算書に事項 × 目の額は無い。
+- **つなぐ鍵は名前**（幅と空白をそろえたもの）。目のコードは分類で、1 つのコードに複数の目が入る（FY2026 で予算書の項の中の重複 1,421）ので鍵にしない。コードが同じで片側に 1 つずつ残る目には、改称（国際防災機関等拠出金 → 国際防災戦略事務局拠出金）も別の目への差し替え（経済新生政策調査費 → 成果連動型民間委託契約方式推進調査費）もあり、組にはしない。
+- **目のコード:** 主要経費＋目的別-目別（例: `95016-16`）。中段（財政法・経済性質・使途）は、特別会計の要求書の原文（例: `65061-9-18`）と予算書とで桁の取り方が違うので使わない。表示と並びにだけ使う。
+- **並び:** 予算書の順。要求にだけある行は、同じコードの予算書の行の後ろ（無ければ末尾）。
+- 対応ありの項の事項・目の一致の数は、`summary.json` の年度ごとの `jikou` / `moku`（`kou` 項の数、`sameSet` 集合が同じ項、`bothEq` / `bothNe` 両側にあり額が同じ / 違う、`reqOnly(Zero)` 要求のみ（うち要求額0）、`mofOnly(Zero)` 予算のみ（うち当初0））。FY2026 の目は、両側 7,768・要求のみ 454（うち要求額0 が 376）・予算のみ 151。要求書は額のない目も載せる。
 
 ## 差の理由の型
 
@@ -99,10 +114,11 @@ FY2026 は、対応あり 1,035、MOF のみ 49、概算要求のみ 9、額0の
 
 **詳細（右）**
 
-- 要求額・当初予算額・それぞれの前年度予算額・差
-- 要求書へのリンク（`#page=`）
-- 型の説明。事項要求には、備考の行を添える
+タブで「項 / 事項 / 目」を切り替える（ラベルに事項・目の数。両側の和集合）。
+
+- 項: 要求額・当初予算額・それぞれの前年度予算額（上記の注記つき）・差、要求書へのリンク（`#page=`）、型の説明（事項要求には備考の行を添える）
+- 事項・目: 名前・要求額・当初予算額・差の表と計。片側にしか無い行は、無い側を「—」にし「要求のみ」「予算のみ」の印。目は名前の下にコード。計が項の額と合わないときは差を注記する
 
 **絞り込み・並べ替え:** `app/lib/budget-request-mof.ts`（純粋関数）。
 
-**保存:** 年度・表示（一覧 / 分布図）・フィルタ・並べ替え・選んだ項・ペインと列の幅は、ブラウザ（localStorage、キーは `budget-request-mof:*`）に保存し、再読み込みしても戻らない。フィルタは保存値を既定値の上に重ねて読む（項目が増えても欠けない）。
+**保存:** 年度・表示（一覧 / 分布図）・詳細のタブ・フィルタ・並べ替え・選んだ項・ペインと列の幅は、ブラウザ（localStorage、キーは `budget-request-mof:*`）に保存し、再読み込みしても戻らない。フィルタは保存値を既定値の上に重ねて読む（項目が増えても欠けない）。
