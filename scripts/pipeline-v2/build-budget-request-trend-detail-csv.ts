@@ -157,7 +157,9 @@ for (const year of YEARS) {
     else if (sum(allMoku.map(mokuReq)) === kouReq) st.kou.kou_eq_moku++;
     else { st.kou.kou_ne_moku++; kouNeMoku.push([k['要求書'], k['項名'], kouReq, sum(allMoku.map(mokuReq)), reasonOf(i, pagesOf(dj, noJikouMoku.get(i) ?? []))]); }
   });
-  summary[String(year)] = { ...st, orphan_moku: orphanMoku, kou_ne_moku_by_reason: Object.fromEntries([...new Set(kouNeMoku.map(x => String(x[4])))].map(r => [r, kouNeMoku.filter(x => x[4] === r).length])), kou_ne_moku: kouNeMoku, kou_ne_jikou: kouNeJikou, unlisted_kou: [...unlisted.values()].map(u => [u.book, u.code, u.name, u.req]) };
+  // 名前に残った PDF の外字（PDF_GAIJI に無い私用領域のコード。ブラウザでは表示されない）
+  const gaiji = [...jikouRows, ...mokuRows].filter(r => r[0] === year).flatMap(r => [String(r[10] ?? ''), String(r[8] ?? ''), String(r[11] ?? '')]).join('').match(/[\uE000-\uF8FF]/g)?.length ?? 0;
+  summary[String(year)] = { ...st, gaiji_left_in_names: gaiji, orphan_moku: orphanMoku, kou_ne_moku_by_reason: Object.fromEntries([...new Set(kouNeMoku.map(x => String(x[4])))].map(r => [r, kouNeMoku.filter(x => x[4] === r).length])), kou_ne_moku: kouNeMoku, kou_ne_jikou: kouNeJikou, unlisted_kou: [...unlisted.values()].map(u => [u.book, u.code, u.name, u.req]) };
 }
 fs.mkdirSync(outDir, { recursive: true });
 const uiDir = path.join('public', 'data', 'v2', 'ui', 'budget-request-trend'); fs.mkdirSync(uiDir, { recursive: true });

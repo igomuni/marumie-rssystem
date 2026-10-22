@@ -1,11 +1,11 @@
 {
  "sha256": {
-  "jikou.csv": "4cbb605bdd2bb954ff39544a7cecc73ae9b842756d672a48daa8efbf591c9905",
-  "moku/2023.csv": "b3b4861119af49d4bcd8849eb961d24255469b3895f9dca931eeb9468f094c8d",
-  "moku/2024.csv": "bde0496689373f7bfcd02746ec5386cac5512b959e677d048a7a0b0bbfa807c4",
-  "moku/2025.csv": "4bead760e261e2d3d4431b408e3739775d612b59431fc508898290258288e3b7",
-  "moku/2026.csv": "c358ae2e9cc1e851e098c39041cac57fab465f997a882d3ceee14a0d0abe978a",
-  "moku/2027.csv": "8095dfd6f8d0d6951674cdcc1f3df844d033a1f9e2602d05f8ba5bede187a1ae"
+  "jikou.csv": "b3ff8dc78dcdc581bb08203f339cba337e52be360794cf1de4aeaf59ae95207e",
+  "moku/2023.csv": "4e3bd390e3ef62917d3d38d1a9f0ad447d75d86ccc9244a0ed29e19979b3a06e",
+  "moku/2024.csv": "45f6a804c8e9f16c0ddb770ad5b7211461f57b45633360e244d69983079a14c7",
+  "moku/2025.csv": "a184b78179b6ba48ef11d3e52ee9bd9dca76806642fb7f70613e6b002647e621",
+  "moku/2026.csv": "f85fd423b3cfb7cc88056e5e92228b5a4933ae4128d0a67930ebb96f71ed58ee",
+  "moku/2027.csv": "1d976bbbbbfaa78d7f28b00d532200a54a6700aa13207cc56c62959773b05d53"
  },
  "years": {
   "2023": {
@@ -33,6 +33,7 @@
    },
    "moku_rows": 27516,
    "moku_groups": 9624,
+   "gaiji_left_in_names": 0,
    "orphan_moku": {
     "no_kou_in_book": 0,
     "before_first_kou": 0,
@@ -202,6 +203,7 @@
    },
    "moku_rows": 26690,
    "moku_groups": 9424,
+   "gaiji_left_in_names": 0,
    "orphan_moku": {
     "no_kou_in_book": 0,
     "before_first_kou": 0,
@@ -334,6 +336,7 @@
    },
    "moku_rows": 28036,
    "moku_groups": 9977,
+   "gaiji_left_in_names": 0,
    "orphan_moku": {
     "no_kou_in_book": 0,
     "before_first_kou": 0,
@@ -424,6 +427,7 @@
    },
    "moku_rows": 28383,
    "moku_groups": 10158,
+   "gaiji_left_in_names": 0,
    "orphan_moku": {
     "no_kou_in_book": 0,
     "before_first_kou": 0,
@@ -529,6 +533,7 @@
    },
    "moku_rows": 22398,
    "moku_groups": 8536,
+   "gaiji_left_in_names": 0,
    "orphan_moku": {
     "no_kou_in_book": 0,
     "before_first_kou": 14,

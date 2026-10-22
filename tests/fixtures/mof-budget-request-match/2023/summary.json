@@ -15,13 +15,13 @@
   "NEAR_NAME": 1
  },
  "m2_status": {
-  "MATCHED": 1586,
-  "NO_CANDIDATE": 83,
+  "MATCHED": 1587,
+  "NO_CANDIDATE": 82,
   "PARENT_UNMATCHED": 63
  },
  "m3_status": {
-  "MATCHED": 7364,
-  "NO_CANDIDATE": 453,
+  "MATCHED": 7389,
+  "NO_CANDIDATE": 428,
   "PARENT_UNMATCHED": 149
  },
  "mof_rows": {
@@ -31,19 +31,19 @@
  },
  "mof_rows_referenced": {
   "kou": 956,
-  "jikou": 1451,
-  "moku": 6889
+  "jikou": 1452,
+  "moku": 6910
  },
  "unmatched_mof_reasons": {
   "kou": {
    "no_request_row": 87
   },
   "jikou": {
-   "kou_matched_no_request_row": 84,
+   "kou_matched_no_request_row": 83,
    "kou_not_matched": 115
   },
   "moku": {
-   "kou_matched_no_request_row": 683,
+   "kou_matched_no_request_row": 662,
    "kou_not_matched": 474
   }
  },

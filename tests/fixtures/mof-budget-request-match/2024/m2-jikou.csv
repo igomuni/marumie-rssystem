@@ -1356,7 +1356,7 @@ mof.go.jp__about_mof__mof_budget__budget__fy2024__2024gaitame_2,6,01-95,防衛�
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024gaitame_2,7,01-98,予備費,17,5,kou-special:20,jikou-special:36,1,MATCHED,,true,300000000,300000000,0,外国為替資金|,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2,1,01-95,財務本省一般行政に必要な経費,5,0,kou-general:220,jikou-general:364,1,MATCHED,,true,62144339,57559282,4585057,財務省|財務本省,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2,2,06-95,国際会議等に必要な経費,40,0,kou-general:220,jikou-general:365,1,MATCHED,,true,1159606,907724,251882,財務省|財務本省,toc
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2,3,11-95,貨幣交換差減補金に必要な経費,45,0,kou-general:220,,0,NO_CANDIDATE,name_no_match,,197613193,,,財務省|財務本省,toc
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2,3,11-95,貨幣交換差減補填金に必要な経費,45,0,kou-general:220,jikou-general:366,1,MATCHED,,true,197613193,166262782,31350411,財務省|財務本省,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2,4,16-95,審議会等に必要な経費,46,0,kou-general:220,jikou-general:367,1,MATCHED,,true,34534,34322,212,財務省|財務本省,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2,5,21-95,財務総合政策研究所に必要な経費,50,0,kou-general:220,jikou-general:368,1,MATCHED,,true,503100,475079,28021,財務省|財務本省,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2,6,01-95,財務本省施設整備に必要な経費,64,1,kou-general:221,jikou-general:369,1,MATCHED,,true,263277,263277,0,財務省|財務本省,toc
@@ -1690,7 +1690,7 @@ soumu.go.jp__main_content__000901372,50,11-95,消防庁施設整備に必要な�
 soumu.go.jp__main_content__000901375,1,01-31,地方交付税交付金に必要な経費,3,0,kou-special:1,jikou-special:1,1,MATCHED,,true,18569003717,18182791774,386211943,交付税及び譲与税配付金|,toc
 soumu.go.jp__main_content__000901375,2,02-31,東日本大震災復興に係る地方交付税交付金に必要な経費,4,0,kou-special:1,jikou-special:2,1,MATCHED,,true,0,61117207,-61117207,交付税及び譲与税配付金|,toc
 soumu.go.jp__main_content__000901375,3,01-32,地方特例交付金に必要な経費,5,1,kou-special:2,jikou-special:3,1,MATCHED,,true,195900000,1120800000,-924900000,交付税及び譲与税配付金|,toc
-soumu.go.jp__main_content__000901375,4,05-32,新型コロナウイルス感染症対策地方税減収補特別交付金に必要な経費,6,1,kou-special:2,,0,NO_CANDIDATE,name_no_match,,11200000,,,交付税及び譲与税配付金|,toc
+soumu.go.jp__main_content__000901375,4,05-32,新型コロナウイルス感染症対策地方税減収補填特別交付金に必要な経費,6,1,kou-special:2,jikou-special:4,1,MATCHED,,true,11200000,11200000,0,交付税及び譲与税配付金|,toc
 soumu.go.jp__main_content__000901375,5,01-95,交通安全対策特別交付金に必要な経費,7,2,kou-special:3,jikou-special:5,1,MATCHED,,true,49439484,48680148,759336,交付税及び譲与税配付金|,toc
 soumu.go.jp__main_content__000901375,6,01-33,地方揮発油譲与税譲与金に必要な経費,8,3,kou-special:4,jikou-special:6,1,MATCHED,,true,212800000,215300000,-2500000,交付税及び譲与税配付金|,toc
 soumu.go.jp__main_content__000901375,7,06-33,石油ガス譲与税譲与金に必要な経費,9,3,kou-special:4,jikou-special:8,1,MATCHED,,true,4500000,4300000,200000,交付税及び譲与税配付金|,toc

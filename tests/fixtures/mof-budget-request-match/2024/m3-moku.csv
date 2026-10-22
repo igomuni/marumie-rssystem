@@ -331,7 +331,7 @@ cao.go.jp__yosan__soshiki__r06__pdf__e1,6,63191,122,08,職員旅費,9,1394650,ko
 cao.go.jp__yosan__soshiki__r06__pdf__e1,6,63191,122,08,赴任旅費,2,31219,kou-special:61,moku-special:254,1,MATCHED,,31219,0,position
 cao.go.jp__yosan__soshiki__r06__pdf__e1,6,63191,123,09,庁費,8,1207559,kou-special:61,moku-special:256,1,MATCHED,,1154255,53304,position
 cao.go.jp__yosan__soshiki__r06__pdf__e1,6,63191,123,09,情報処理業務庁費,5,2930064,kou-special:61,moku-special:257,1,MATCHED,,2501128,428936,position
-cao.go.jp__yosan__soshiki__r06__pdf__e1,6,63191,959,18,貨幣交換差減補金,4,198395,kou-special:61,,0,NO_CANDIDATE,name_or_code_no_match,,,position
+cao.go.jp__yosan__soshiki__r06__pdf__e1,6,63191,959,18,貨幣交換差減補填金,4,198395,kou-special:61,moku-special:268,1,MATCHED,,198396,-1,position
 cao.go.jp__yosan__soshiki__r06__pdf__e1,6,63191,129,06,諸謝金,7,36693,kou-special:61,moku-special:252,1,MATCHED,,36399,294,position
 cao.go.jp__yosan__soshiki__r06__pdf__e1,6,63191,122,08,委員等旅費,8,121954,kou-special:61,moku-special:255,1,MATCHED,,116715,5239,position
 cao.go.jp__yosan__soshiki__r06__pdf__e1,6,63199,133,09,消費税,3,2824,kou-special:61,moku-special:264,1,MATCHED,,2824,0,position
@@ -1013,7 +1013,7 @@ env.go.jp__content__000157012,6,63191,123,09,国有特許外国出願費,1,1312,
 env.go.jp__content__000157012,6,63191,123,09,研究開発設備撤去費,1,155,kou-special:47,moku-special:205,1,MATCHED,,155,0,toc
 env.go.jp__content__000157012,6,63199,133,09,消費税,2,7778005,kou-special:47,moku-special:206,1,MATCHED,,7778005,0,toc
 env.go.jp__content__000157012,6,63191,944,15,不動産購入費,1,0,kou-special:47,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
-env.go.jp__content__000157012,6,63191,959,18,貨幣交換差減補金,2,223739,kou-special:47,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
+env.go.jp__content__000157012,6,63191,959,18,貨幣交換差減補填金,2,223739,kou-special:47,moku-special:208,1,MATCHED,,223739,0,toc
 env.go.jp__content__000157012,6,63191,306,22,一般会計へ繰入,1,0,kou-special:47,moku-special:209,1,MATCHED,,0,0,toc
 env.go.jp__content__000157012,7,63191,306,22,電源開発促進勘定へ繰入,1,52316310,kou-special:48,moku-special:210,1,MATCHED,,56309984,-3993674,toc
 env.go.jp__content__000157012,8,63191,959,18,賠償償還及払戻金,2,200,kou-special:49,moku-special:211,1,MATCHED,,200,0,toc
@@ -1063,7 +1063,7 @@ env.go.jp__content__000157013,6,63191,122,08,職員旅費,9,1394650,kou-special:
 env.go.jp__content__000157013,6,63191,122,08,赴任旅費,2,31219,kou-special:61,moku-special:254,1,MATCHED,,31219,0,toc
 env.go.jp__content__000157013,6,63191,123,09,庁費,8,1207559,kou-special:61,moku-special:256,1,MATCHED,,1154255,53304,toc
 env.go.jp__content__000157013,6,63191,123,09,情報処理業務庁費,5,2930064,kou-special:61,moku-special:257,1,MATCHED,,2501128,428936,toc
-env.go.jp__content__000157013,6,63191,959,18,貨幣交換差減補金,4,198395,kou-special:61,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
+env.go.jp__content__000157013,6,63191,959,18,貨幣交換差減補填金,4,198395,kou-special:61,moku-special:268,1,MATCHED,,198396,-1,toc
 env.go.jp__content__000157013,6,63191,129,06,諸謝金,7,36693,kou-special:61,moku-special:252,1,MATCHED,,36399,294,toc
 env.go.jp__content__000157013,6,63191,122,08,委員等旅費,8,121954,kou-special:61,moku-special:255,1,MATCHED,,116715,5239,toc
 env.go.jp__content__000157013,6,63199,133,09,消費税,3,2824,kou-special:61,moku-special:264,1,MATCHED,,2824,0,toc
@@ -1444,7 +1444,7 @@ maff.go.jp__j__budget__attach__pdf__230901-2,10,65061,2405,16,株式会社日本
 maff.go.jp__j__budget__attach__pdf__230901-2,10,65061,2405,16,株式会社日本政策金融公庫補給金,1,17541650,kou-general:446,moku-general:4146,1,MATCHED,,17663481,-121831,toc
 maff.go.jp__j__budget__attach__pdf__230901-2,10,65061,1959,24,株式会社日本政策金融公庫出資金,1,74000,kou-general:446,moku-general:4148,1,MATCHED,,74000,0,toc
 maff.go.jp__j__budget__attach__pdf__230901-2,10,65061,2405,16,農業保険事業事務費負担金,1,38323580,kou-general:446,moku-general:4142,1,MATCHED,,35836515,2487065,toc
-maff.go.jp__j__budget__attach__pdf__230901-2,10,65061,2405,16,農業経営収入保険特約補金造成費交付金,1,22241797,kou-general:446,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
+maff.go.jp__j__budget__attach__pdf__230901-2,10,65061,2405,16,農業経営収入保険特約補填金造成費交付金,1,22241797,kou-general:446,moku-general:4145,1,MATCHED,,20000366,2241431,toc
 maff.go.jp__j__budget__attach__pdf__230901-2,10,65061,2405,16,特例付加年金助成補助金,1,734632,kou-general:446,moku-general:4137,1,MATCHED,,690632,44000,toc
 maff.go.jp__j__budget__attach__pdf__230901-2,10,65061,2715,16,農業者年金給付費等負担金,1,118112236,kou-general:446,moku-general:4141,1,MATCHED,,75384339,42727897,toc
 maff.go.jp__j__budget__attach__pdf__230901-2,11,65061,2405,16,独立行政法人農業者年金基金特例付加年金勘定運営費交付金,1,809619,kou-general:447,moku-general:4150,1,MATCHED,,756459,53160,toc
@@ -2083,7 +2083,7 @@ maff.go.jp__j__budget__attach__pdf__230901-6,19,65061,123,09,電子計算機等�
 maff.go.jp__j__budget__attach__pdf__230901-6,19,65061,123,09,国有財産管理処分庁費,1,85031,kou-special:167,moku-special:708,1,MATCHED,,84856,175,toc
 maff.go.jp__j__budget__attach__pdf__230901-6,19,65199,133,09,消費税,1,11615426,kou-special:167,moku-special:710,1,MATCHED,,20159644,-8544218,toc
 maff.go.jp__j__budget__attach__pdf__230901-6,19,65029,135,16,国有資産所在市町村交付金,1,123,kou-special:167,moku-special:713,1,MATCHED,,123,0,toc
-maff.go.jp__j__budget__attach__pdf__230901-6,19,65061,959,18,貨幣交換差減補金,1,10,kou-special:167,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
+maff.go.jp__j__budget__attach__pdf__230901-6,19,65061,959,18,貨幣交換差減補填金,1,10,kou-special:167,moku-special:715,1,MATCHED,,10,0,toc
 maff.go.jp__j__budget__attach__pdf__230901-6,19,65061,306,22,一般会計へ繰入,2,9197,kou-special:167,moku-special:716,1,MATCHED,,9197,0,toc
 maff.go.jp__j__budget__attach__pdf__230901-6,19,65061,111,05,委員手当,3,486,kou-special:167,moku-special:695,1,MATCHED,,488,-2,toc
 maff.go.jp__j__budget__attach__pdf__230901-6,19,65061,122,08,委員等旅費,3,2350,kou-special:167,moku-special:705,1,MATCHED,,2350,0,toc
@@ -2167,7 +2167,7 @@ meti.go.jp__main__yosangaisan__fy2024__pdf__eneden_o,6,63191,122,08,職員旅費
 meti.go.jp__main__yosangaisan__fy2024__pdf__eneden_o,6,63191,122,08,赴任旅費,2,31219,kou-special:61,moku-special:254,1,MATCHED,,31219,0,toc
 meti.go.jp__main__yosangaisan__fy2024__pdf__eneden_o,6,63191,123,09,庁費,8,1207559,kou-special:61,moku-special:256,1,MATCHED,,1154255,53304,toc
 meti.go.jp__main__yosangaisan__fy2024__pdf__eneden_o,6,63191,123,09,情報処理業務庁費,5,2930064,kou-special:61,moku-special:257,1,MATCHED,,2501128,428936,toc
-meti.go.jp__main__yosangaisan__fy2024__pdf__eneden_o,6,63191,959,18,貨幣交換差減補金,4,198395,kou-special:61,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
+meti.go.jp__main__yosangaisan__fy2024__pdf__eneden_o,6,63191,959,18,貨幣交換差減補填金,4,198395,kou-special:61,moku-special:268,1,MATCHED,,198396,-1,toc
 meti.go.jp__main__yosangaisan__fy2024__pdf__eneden_o,6,63191,129,06,諸謝金,7,36693,kou-special:61,moku-special:252,1,MATCHED,,36399,294,toc
 meti.go.jp__main__yosangaisan__fy2024__pdf__eneden_o,6,63191,122,08,委員等旅費,8,121954,kou-special:61,moku-special:255,1,MATCHED,,116715,5239,toc
 meti.go.jp__main__yosangaisan__fy2024__pdf__eneden_o,6,63199,133,09,消費税,3,2824,kou-special:61,moku-special:264,1,MATCHED,,2824,0,toc
@@ -2251,7 +2251,7 @@ meti.go.jp__main__yosangaisan__fy2024__pdf__eneju_o,6,63191,123,09,国有特許�
 meti.go.jp__main__yosangaisan__fy2024__pdf__eneju_o,6,63191,123,09,研究開発設備撤去費,1,155,kou-special:47,moku-special:205,1,MATCHED,,155,0,toc
 meti.go.jp__main__yosangaisan__fy2024__pdf__eneju_o,6,63199,133,09,消費税,2,7778005,kou-special:47,moku-special:206,1,MATCHED,,7778005,0,toc
 meti.go.jp__main__yosangaisan__fy2024__pdf__eneju_o,6,63191,944,15,不動産購入費,1,0,kou-special:47,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
-meti.go.jp__main__yosangaisan__fy2024__pdf__eneju_o,6,63191,959,18,貨幣交換差減補金,2,223739,kou-special:47,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
+meti.go.jp__main__yosangaisan__fy2024__pdf__eneju_o,6,63191,959,18,貨幣交換差減補填金,2,223739,kou-special:47,moku-special:208,1,MATCHED,,223739,0,toc
 meti.go.jp__main__yosangaisan__fy2024__pdf__eneju_o,6,63191,306,22,一般会計へ繰入,1,0,kou-special:47,moku-special:209,1,MATCHED,,0,0,toc
 meti.go.jp__main__yosangaisan__fy2024__pdf__eneju_o,7,63191,306,22,電源開発促進勘定へ繰入,1,52316310,kou-special:48,moku-special:210,1,MATCHED,,56309984,-3993674,toc
 meti.go.jp__main__yosangaisan__fy2024__pdf__eneju_o,8,63191,959,18,賠償償還及払戻金,2,200,kou-special:49,moku-special:211,1,MATCHED,,200,0,toc
@@ -2517,7 +2517,7 @@ meti.go.jp__main__yosangaisan__fy2024__pdf__tokkyo_o,1,95199,3,09,自動車重�
 meti.go.jp__main__yosangaisan__fy2024__pdf__tokkyo_o,1,95199,3,09,消費税,1,191013,kou-special:178,moku-special:776,1,MATCHED,,191013,0,toc
 meti.go.jp__main__yosangaisan__fy2024__pdf__tokkyo_o,1,95062,9,17,交際費,1,499,kou-special:178,moku-special:789,1,MATCHED,,499,0,toc
 meti.go.jp__main__yosangaisan__fy2024__pdf__tokkyo_o,1,95062,9,18,賠償償還及払戻金,1,572345,kou-special:178,moku-special:790,1,MATCHED,,572345,0,toc
-meti.go.jp__main__yosangaisan__fy2024__pdf__tokkyo_o,1,95062,9,18,貨幣交換差減補金,1,154498,kou-special:178,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
+meti.go.jp__main__yosangaisan__fy2024__pdf__tokkyo_o,1,95062,9,18,貨幣交換差減補填金,1,154498,kou-special:178,moku-special:791,1,MATCHED,,193124,-38626,toc
 meti.go.jp__main__yosangaisan__fy2024__pdf__tokkyo_o,1,95062,6,22,一般会計へ繰入,1,1650,kou-special:178,moku-special:792,1,MATCHED,,1650,0,toc
 meti.go.jp__main__yosangaisan__fy2024__pdf__tokkyo_o,1,95062,5,14,工業所有権研究等委託費,1,554572,kou-special:178,moku-special:777,1,MATCHED,,554572,0,toc
 meti.go.jp__main__yosangaisan__fy2024__pdf__tokkyo_o,1,95062,5,16,中小企業等知的財産活動支援事業費補助金,2,937138,kou-special:178,moku-special:782,1,MATCHED,,937138,0,toc
@@ -3043,7 +3043,7 @@ mext.go.jp__content__20230914-mxt_kaikesou01-000031817_08,6,63191,122,08,職員�
 mext.go.jp__content__20230914-mxt_kaikesou01-000031817_08,6,63191,122,08,赴任旅費,2,31219,kou-special:61,moku-special:254,1,MATCHED,,31219,0,toc
 mext.go.jp__content__20230914-mxt_kaikesou01-000031817_08,6,63191,123,09,庁費,8,1207559,kou-special:61,moku-special:256,1,MATCHED,,1154255,53304,toc
 mext.go.jp__content__20230914-mxt_kaikesou01-000031817_08,6,63191,123,09,情報処理業務庁費,5,2930064,kou-special:61,moku-special:257,1,MATCHED,,2501128,428936,toc
-mext.go.jp__content__20230914-mxt_kaikesou01-000031817_08,6,63191,959,18,貨幣交換差減補金,4,198395,kou-special:61,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
+mext.go.jp__content__20230914-mxt_kaikesou01-000031817_08,6,63191,959,18,貨幣交換差減補填金,4,198395,kou-special:61,moku-special:268,1,MATCHED,,198396,-1,toc
 mext.go.jp__content__20230914-mxt_kaikesou01-000031817_08,6,63191,129,06,諸謝金,7,36693,kou-special:61,moku-special:252,1,MATCHED,,36399,294,toc
 mext.go.jp__content__20230914-mxt_kaikesou01-000031817_08,6,63191,122,08,委員等旅費,8,121954,kou-special:61,moku-special:255,1,MATCHED,,116715,5239,toc
 mext.go.jp__content__20230914-mxt_kaikesou01-000031817_08,6,63199,133,09,消費税,3,2824,kou-special:61,moku-special:264,1,MATCHED,,2824,0,toc
@@ -4170,7 +4170,7 @@ mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-2b-01,11,08081,122,08,証人等�
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-2b-01,11,08081,123,09,障害等級等認定庁費,2,988366,kou-special:79,moku-special:362,1,MATCHED,,988366,0,toc
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-2b-01,11,08081,111,05,非常勤職員手当,3,280055,kou-special:79,moku-special:346,1,MATCHED,,280055,0,toc
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-2b-01,11,08081,123,09,労働保険業務庁費,4,1437945,kou-special:79,moku-special:361,1,MATCHED,,1436671,1274,toc
-mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-2b-01,11,08081,959,18,貨幣交換差減補金,1,9215,kou-special:79,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
+mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-2b-01,11,08081,959,18,貨幣交換差減補填金,1,9215,kou-special:79,moku-special:372,1,MATCHED,,10320,-1105,toc
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-2b-01,12,08081,202,08,施設施工旅費,2,3585,kou-special:80,moku-special:374,1,MATCHED,,3585,0,toc
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-2b-01,12,08081,203,09,施設施工庁費,2,120136,kou-special:80,moku-special:375,1,MATCHED,,120136,0,toc
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-2b-01,12,08081,204,15,施設整備費,3,1426348,kou-special:80,moku-special:376,1,MATCHED,,1426348,0,toc
@@ -4308,7 +4308,7 @@ mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-2b-01,33,08085,123,09,各所修�
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-2b-01,33,08029,135,16,国有資産所在市町村交付金,1,16390,kou-special:101,moku-special:512,1,MATCHED,,16390,0,toc
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-2b-01,33,08085,125,14,雇用保険活用援助事業委託費,4,1481010,kou-special:101,moku-special:510,1,MATCHED,,1495605,-14595,toc
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-2b-01,33,08085,725,16,国際社会保障協会等分担金,3,21281,kou-special:101,moku-special:513,1,MATCHED,,21892,-611,toc
-mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-2b-01,33,08085,959,18,貨幣交換差減補金,1,16588,kou-special:101,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
+mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-2b-01,33,08085,959,18,貨幣交換差減補填金,1,16588,kou-special:101,moku-special:517,1,MATCHED,,16588,0,toc
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-2b-01,33,08085,725,16,世界公共雇用サービス協会拠出金,1,9636,kou-special:101,moku-special:515,1,MATCHED,,9834,-198,toc
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-2b-01,33,08085,725,16,経済協力開発機構拠出金,1,37413,kou-special:101,moku-special:514,1,MATCHED,,38182,-769,toc
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-2b-01,33,08085,959,18,賠償償還及払戻金,1,45000,kou-special:101,moku-special:516,1,MATCHED,,45000,0,toc
@@ -4361,7 +4361,7 @@ mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01,1,02081,305,16,国家公務
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01,1,02081,306,22,厚生年金勘定へ繰入,1,140338539,kou-special:114,moku-special:561,1,MATCHED,,130895260,9443279,toc
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01,1,02081,306,22,国民年金勘定へ繰入,1,71432802,kou-special:114,moku-special:560,1,MATCHED,,71329598,103204,toc
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01,2,06081,959,18,賠償償還及払戻金,1,8715,kou-special:115,moku-special:562,1,MATCHED,,7764,951,toc
-mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01,2,06081,959,18,貨幣交換差減補金,1,2245,kou-special:115,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
+mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01,2,06081,959,18,貨幣交換差減補填金,1,2245,kou-special:115,moku-special:563,1,MATCHED,,1757,488,toc
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01,2,06081,306,22,支払調整金繰入,1,712305,kou-special:115,moku-special:564,1,MATCHED,,712305,0,toc
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01,3,98110,959,99,(予備費),1,117000000,kou-special:116,moku-special:565,1,MATCHED,,60000000,57000000,toc
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01,4,02081,509,21,国民年金給付費,1,234330380,kou-special:119,moku-special:568,1,MATCHED,,231209408,3120972,toc
@@ -4370,7 +4370,7 @@ mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01,6,02081,509,21,福祉年金
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01,7,02081,306,22,基礎年金勘定へ繰入,1,3707794167,kou-special:120,moku-special:569,1,MATCHED,,3880840800,-173046633,toc
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01,8,06081,306,22,業務勘定へ繰入,1,65491868,kou-special:121,moku-special:570,1,MATCHED,,64416807,1075061,toc
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01,9,06081,959,18,賠償償還及払戻金,1,57875412,kou-special:122,moku-special:571,1,MATCHED,,64724645,-6849233,toc
-mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01,9,06081,959,18,貨幣交換差減補金,1,1000,kou-special:122,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
+mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01,9,06081,959,18,貨幣交換差減補填金,1,1000,kou-special:122,moku-special:572,1,MATCHED,,1000,0,toc
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01,9,06081,306,22,支払調整金繰入,1,3500,kou-special:122,moku-special:573,1,MATCHED,,3500,0,toc
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01,10,98110,959,99,(予備費),1,900000,kou-special:123,moku-special:574,1,MATCHED,,500000,400000,toc
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01,11,02081,509,21,保険給付費,1,24567351225,kou-special:124,moku-special:576,1,MATCHED,,24953650424,-386299199,toc
@@ -4380,7 +4380,7 @@ mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01,12,02081,305,16,国家公�
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01,13,02081,306,22,基礎年金勘定へ繰入,1,20341655464,kou-special:126,moku-special:578,1,MATCHED,,20856890003,-515234539,toc
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01,14,06081,306,22,業務勘定へ繰入,1,282552206,kou-special:127,moku-special:579,1,MATCHED,,256314011,26238195,toc
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01,15,06081,959,18,賠償償還及払戻金,1,13985992,kou-special:128,moku-special:580,1,MATCHED,,14278682,-292690,toc
-mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01,15,06081,959,18,貨幣交換差減補金,1,11518,kou-special:128,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
+mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01,15,06081,959,18,貨幣交換差減補填金,1,11518,kou-special:128,moku-special:581,1,MATCHED,,10892,626,toc
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01,15,06081,716,22,一般会計へ繰入,1,163540,kou-special:128,moku-special:582,1,MATCHED,,90286,73254,toc
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01,15,06081,306,22,支払調整金繰入,1,2890789,kou-special:128,moku-special:583,1,MATCHED,,2890789,0,toc
 mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-3b-01,16,98110,959,99,(予備費),1,98000000,kou-special:129,moku-special:584,1,MATCHED,,50000000,48000000,toc
@@ -4496,7 +4496,7 @@ mlit.go.jp__page__content__001630393,10,95016,3,09,各所修繕,2,186547,kou-spe
 mlit.go.jp__page__content__001630393,10,95199,3,09,自動車重量税,1,1960,kou-special:190,moku-special:826,1,MATCHED,,1960,0,toc
 mlit.go.jp__page__content__001630393,10,95199,3,09,消費税,1,1683,kou-special:190,moku-special:827,1,MATCHED,,1683,0,toc
 mlit.go.jp__page__content__001630393,10,95029,5,16,国有資産所在市町村交付金,1,18151,kou-special:190,moku-special:831,1,MATCHED,,18151,0,toc
-mlit.go.jp__page__content__001630393,10,95016,9,18,貨幣交換差減補金,1,498,kou-special:190,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
+mlit.go.jp__page__content__001630393,10,95016,9,18,貨幣交換差減補填金,1,498,kou-special:190,moku-special:833,1,MATCHED,,498,0,toc
 mlit.go.jp__page__content__001630393,10,95016,5,14,自動車基準・認証制度国際化対策事業委託費,1,457810,kou-special:190,moku-special:829,1,MATCHED,,452810,5000,toc
 mlit.go.jp__page__content__001630393,10,95054,5,14,自動車検査基準策定調査等委託費,2,1180443,kou-special:190,moku-special:828,1,MATCHED,,1165443,15000,toc
 mlit.go.jp__page__content__001630393,11,95016,2,08,施設施工旅費,1,6483,kou-special:191,moku-special:835,1,MATCHED,,4811,1672,toc
@@ -4535,7 +4535,7 @@ mlit.go.jp__page__content__001630393,13,43199,3,09,消費税,1,0,kou-special:193
 mlit.go.jp__page__content__001630393,13,43059,4,15,施設整備費,1,808333,kou-special:193,moku-special:867,1,MATCHED,,769455,38878,toc
 mlit.go.jp__page__content__001630393,13,43029,5,16,国有資産所在市町村交付金,2,9453595,kou-special:193,moku-special:870,1,MATCHED,,9453595,0,toc
 mlit.go.jp__page__content__001630393,13,43059,9,18,賠償償還及払戻金,1,49510,kou-special:193,moku-special:871,1,MATCHED,,49510,0,toc
-mlit.go.jp__page__content__001630393,13,43059,9,18,貨幣交換差減補金,1,7406,kou-special:193,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
+mlit.go.jp__page__content__001630393,13,43059,9,18,貨幣交換差減補填金,1,7406,kou-special:193,moku-special:873,1,MATCHED,,7406,0,toc
 mlit.go.jp__page__content__001630393,13,43059,9,18,施設運営関連見舞金,1,2740,kou-special:193,moku-special:872,1,MATCHED,,2740,0,toc
 mlit.go.jp__page__content__001630393,13,43059,6,22,一般会計へ繰入,2,35090,kou-special:193,moku-special:874,1,MATCHED,,35090,0,toc
 mlit.go.jp__page__content__001630393,13,43059,5,00,航空機騒音障害対策費補助,1,4018,kou-special:193,moku-special:876,1,MATCHED,,4018,0,toc
@@ -6278,7 +6278,7 @@ mof.go.jp__about_mof__mof_budget__budget__fy2024__2024gaitame_2,0,95016,115,16,�
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024gaitame_2,0,95089,111,05,児童手当,1,3180,kou-special:15,moku-special:58,1,MATCHED,,3560,-380,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024gaitame_2,0,95016,122,08,赴任旅費,1,2261,kou-special:15,moku-special:61,1,MATCHED,,2261,0,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024gaitame_2,0,95016,959,18,賠償償還及払戻金,1,10,kou-special:15,moku-special:67,1,MATCHED,,10,0,toc
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024gaitame_2,0,95016,959,18,貨幣交換差減補金,1,134943,kou-special:15,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024gaitame_2,0,95016,959,18,貨幣交換差減補填金,1,134943,kou-special:15,moku-special:68,1,MATCHED,,134943,0,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024gaitame_2,0,95016,123,09,庁費,8,837068,kou-special:15,moku-special:63,1,MATCHED,,529044,308024,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024gaitame_2,0,95016,123,09,情報処理業務庁費,2,1664250,kou-special:15,moku-special:64,1,MATCHED,,1676891,-12641,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024gaitame_2,0,95016,122,08,職員旅費,4,232498,kou-special:15,moku-special:60,1,MATCHED,,191390,41108,toc
@@ -6288,7 +6288,7 @@ mof.go.jp__about_mof__mof_budget__budget__fy2024__2024gaitame_2,0,95016,123,09,�
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024gaitame_2,1,95016,123,09,立替電信料,1,165,kou-special:16,moku-special:69,1,MATCHED,,168,-3,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024gaitame_2,1,95016,123,09,手数料,1,17636102,kou-special:16,moku-special:70,1,MATCHED,,17656531,-20429,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024gaitame_2,1,95016,123,09,外国為替事務取扱手数料,1,167445,kou-special:16,moku-special:71,1,MATCHED,,167445,0,toc
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024gaitame_2,1,95016,959,18,償還差額補金,1,496233243,kou-special:16,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024gaitame_2,1,95016,959,18,償還差額補填金,1,496233243,kou-special:16,moku-special:72,1,MATCHED,,505920608,-9687365,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024gaitame_2,1,95016,959,18,払戻金,1,40000,kou-special:16,moku-special:73,1,MATCHED,,40000,0,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024gaitame_2,1,95016,919,18,支払利子,1,1128474,kou-special:16,moku-special:74,1,MATCHED,,1137967,-9493,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024gaitame_2,2,20100,306,22,国債整理基金特別会計へ繰入,1,488229558,kou-special:18,moku-special:76,1,MATCHED,,489149360,-919802,toc
@@ -6330,7 +6330,7 @@ mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2,0,95016,2129,06,�
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2,0,95016,2122,08,主要国首脳会議開催業務職員旅費,1,0,kou-general:220,moku-general:2360,1,MATCHED,,0,0,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2,0,95016,2122,08,主要国首脳会議開催業務委員等旅費,1,0,kou-general:220,moku-general:2361,1,MATCHED,,0,0,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2,0,95016,2725,16,関税協力理事会等分担金,3,221135,kou-general:220,moku-general:2376,1,MATCHED,,221434,-299,toc
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2,0,95016,2959,18,貨幣交換差減補金,1,197613193,kou-general:220,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2,0,95016,2959,18,貨幣交換差減補填金,1,197613193,kou-general:220,moku-general:2379,1,MATCHED,,166262782,31350411,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2,0,95016,2111,05,委員手当,3,20959,kou-general:220,moku-general:2344,1,MATCHED,,20872,87,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2,0,95016,2123,09,国会図書館支部庁費,1,3356,kou-general:220,moku-general:2363,1,MATCHED,,3356,0,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024ippan_2,0,95016,2122,08,外国人招へい旅費,2,2308,kou-general:220,moku-general:2359,1,MATCHED,,2308,0,toc
@@ -6578,14 +6578,14 @@ mof.go.jp__about_mof__mof_budget__budget__fy2024__2024kokusaiseirikikinn_2,0,201
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024kokusaiseirikikinn_2,0,20100,919,18,利子及割引料,20,11143884389,kou-special:12,moku-special:44,1,MATCHED,,11505004888,-361120499,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024kokusaiseirikikinn_2,0,20100,123,09,証書等製造費,1,2149,kou-special:12,moku-special:38,1,MATCHED,,3223,-1074,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024kokusaiseirikikinn_2,0,20100,123,09,国債事務取扱手数料,6,23405314,kou-special:12,moku-special:39,1,MATCHED,,23822857,-417543,toc
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024kokusaiseirikikinn_2,0,20100,959,18,貨幣交換差減補金,2,93,kou-special:12,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024kokusaiseirikikinn_2,0,20100,959,18,貨幣交換差減補填金,2,93,kou-special:12,moku-special:41,1,MATCHED,,124,-31,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024kokusaiseirikikinn_2,0,20100,959,18,賠償償還及払戻金,1,823000,kou-special:12,moku-special:40,1,MATCHED,,823000,0,toc
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024kokusaiseirikikinn_2,0,20100,959,18,売却及償還差額補金,1,29000000,kou-special:12,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024kokusaiseirikikinn_2,0,20100,959,18,売却及償還差額補填金,1,29000000,kou-special:12,moku-special:42,1,MATCHED,,98000000,-69000000,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024kokusaiseirikikinn_2,1,20100,959,18,債務償還費,3,3389113350,kou-special:13,moku-special:48,1,MATCHED,,3334058200,55055150,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024kokusaiseirikikinn_2,1,20100,919,18,利子及割引料,4,21443061,kou-special:13,moku-special:49,1,MATCHED,,25400394,-3957333,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024kokusaiseirikikinn_2,1,20100,123,09,国債事務取扱手数料,1,72721,kou-special:13,moku-special:45,1,MATCHED,,68695,4026,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024kokusaiseirikikinn_2,1,20100,123,09,株式売払手数料,1,4102014,kou-special:13,moku-special:46,1,MATCHED,,4102014,0,toc
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024kokusaiseirikikinn_2,1,20100,959,18,売却及償還差額補金,1,144283,kou-special:13,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024kokusaiseirikikinn_2,1,20100,959,18,売却及償還差額補填金,1,144283,kou-special:13,moku-special:47,1,MATCHED,,403508,-259225,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024kokusaiseirikikinn_2,2,20100,959,18,債務償還費,2,506200000,kou-special:14,moku-special:52,1,MATCHED,,850832800,-344632800,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024kokusaiseirikikinn_2,2,20100,919,18,利子及割引料,2,54635259,kou-special:14,moku-special:53,1,MATCHED,,62242345,-7607086,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024kokusaiseirikikinn_2,2,20100,123,09,国債事務取扱手数料,1,48462,kou-special:14,moku-special:50,1,MATCHED,,54479,-6017,toc
@@ -6617,7 +6617,7 @@ mof.go.jp__about_mof__mof_budget__budget__fy2024__2024tousi_2,1,95016,3,09,庁�
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024tousi_2,1,95016,3,09,情報処理業務庁費,1,6821,kou-special:29,moku-special:121,1,MATCHED,,6675,146,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024tousi_2,1,95016,3,09,国有財産管理処分庁費,1,750356,kou-special:29,moku-special:122,1,MATCHED,,749986,370,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024tousi_2,1,95016,9,18,賠償償還及払戻金,1,100,kou-special:29,moku-special:124,1,MATCHED,,100,0,toc
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024tousi_2,1,95016,9,18,貨幣交換差減補金,1,5,kou-special:29,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024tousi_2,1,95016,9,18,貨幣交換差減補填金,1,5,kou-special:29,moku-special:125,1,MATCHED,,5,0,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024tousi_2,1,95016,9,06,諸謝金,1,1288,kou-special:29,moku-special:117,1,MATCHED,,1288,0,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024tousi_2,1,95016,2,08,委員等旅費,1,101,kou-special:29,moku-special:119,1,MATCHED,,101,0,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024tousi_2,2,20100,6,22,国債整理基金特別会計へ繰入,1,143,kou-special:32,moku-special:128,1,MATCHED,,145,-2,toc
@@ -6641,7 +6641,7 @@ mof.go.jp__about_mof__mof_budget__budget__fy2024__2024zaiyuu_2,1,95016,1,05,非�
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024zaiyuu_2,1,95016,2,08,職員旅費,3,18534,kou-special:22,moku-special:90,1,MATCHED,,15727,2807,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024zaiyuu_2,1,95016,3,09,情報処理業務庁費,3,2917345,kou-special:22,moku-special:95,1,MATCHED,,2567677,349668,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024zaiyuu_2,1,95016,9,18,賠償償還及払戻金,1,300,kou-special:22,moku-special:99,1,MATCHED,,300,0,toc
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024zaiyuu_2,1,95016,9,18,貨幣交換差減補金,1,300,kou-special:22,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024zaiyuu_2,1,95016,9,18,貨幣交換差減補填金,1,300,kou-special:22,moku-special:100,1,MATCHED,,300,0,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024zaiyuu_2,1,95016,9,06,諸謝金,2,2687,kou-special:22,moku-special:89,1,MATCHED,,2687,0,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024zaiyuu_2,1,95016,2,08,融資先調査及検査旅費,1,32461,kou-special:22,moku-special:91,1,MATCHED,,32426,35,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024zaiyuu_2,1,95016,2,08,委員等旅費,3,6550,kou-special:22,moku-special:93,1,MATCHED,,4251,2299,toc
@@ -6649,7 +6649,7 @@ mof.go.jp__about_mof__mof_budget__budget__fy2024__2024zaiyuu_2,1,95016,1,05,委�
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024zaiyuu_2,1,95016,3,09,通信専用料,1,26503,kou-special:22,moku-special:96,1,MATCHED,,26503,0,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024zaiyuu_2,1,95016,3,09,電子計算機等借料,1,729459,kou-special:22,moku-special:97,1,MATCHED,,729459,0,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024zaiyuu_2,2,95016,3,09,運用手数料,1,24800,kou-special:23,moku-special:102,1,MATCHED,,22457,2343,toc
-mof.go.jp__about_mof__mof_budget__budget__fy2024__2024zaiyuu_2,2,95016,9,18,売却及償還差額補金,1,31959668,kou-special:23,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
+mof.go.jp__about_mof__mof_budget__budget__fy2024__2024zaiyuu_2,2,95016,9,18,売却及償還差額補填金,1,31959668,kou-special:23,moku-special:103,1,MATCHED,,31959668,0,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024zaiyuu_2,2,95016,9,18,預託金利子,1,211843437,kou-special:23,moku-special:104,1,MATCHED,,375019696,-163176259,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024zaiyuu_2,2,95016,9,18,支払利子,1,22559590,kou-special:23,moku-special:105,1,MATCHED,,28552055,-5992465,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2024__2024zaiyuu_2,3,20100,6,22,国債整理基金特別会計へ繰入,1,17425844244,kou-special:25,moku-special:107,1,MATCHED,,15453960228,1971884016,toc
@@ -7155,7 +7155,7 @@ reconstruction.go.jp__files__user__topics__2023_fukkochougaisansaisyutsu,7,95199
 reconstruction.go.jp__files__user__topics__2023_fukkochougaisansaisyutsu,7,95199,133,09,消費税,1,77349,kou-special:208,moku-special:947,1,MATCHED,,77349,0,toc
 reconstruction.go.jp__files__user__topics__2023_fukkochougaisansaisyutsu,7,95016,129,17,交際費,1,1020,kou-special:208,moku-special:949,1,MATCHED,,1020,0,toc
 reconstruction.go.jp__files__user__topics__2023_fukkochougaisansaisyutsu,7,95016,959,18,賠償償還及払戻金,1,200,kou-special:208,moku-special:950,1,MATCHED,,200,0,toc
-reconstruction.go.jp__files__user__topics__2023_fukkochougaisansaisyutsu,7,95016,959,18,貨幣交換差減補金,1,1000,kou-special:208,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
+reconstruction.go.jp__files__user__topics__2023_fukkochougaisansaisyutsu,7,95016,959,18,貨幣交換差減補填金,1,1000,kou-special:208,moku-special:951,1,MATCHED,,1000,0,toc
 reconstruction.go.jp__files__user__topics__2023_fukkochougaisansaisyutsu,7,95016,123,09,各所修繕,1,17379,kou-special:208,moku-special:945,1,MATCHED,,17379,0,toc
 reconstruction.go.jp__files__user__topics__2023_fukkochougaisansaisyutsu,7,95016,123,09,復興政策調査費,8,1751423,kou-special:208,moku-special:943,1,MATCHED,,1579030,172393,toc
 reconstruction.go.jp__files__user__topics__2023_fukkochougaisansaisyutsu,8,95016,405,16,復興特区支援利子補給金,1,399795,kou-special:209,moku-special:953,1,MATCHED,,398800,995,toc
@@ -7849,7 +7849,7 @@ soumu.go.jp__main_content__000901372,35,95014,1203,09,施設施工庁費,1,957,k
 soumu.go.jp__main_content__000901372,35,95014,1204,15,施設整備費,1,110431,kou-general:165,moku-general:1720,1,MATCHED,,44000,66431,toc
 soumu.go.jp__main_content__000901375,0,31021,865,16,地方交付税交付金,2,18569003717,kou-special:1,moku-special:1,1,MATCHED,,18243908981,325094736,toc
 soumu.go.jp__main_content__000901375,1,32021,865,16,地方特例交付金,1,195900000,kou-special:2,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
-soumu.go.jp__main_content__000901375,1,32021,865,16,固定資産税減収補特別交付金,1,11200000,kou-special:2,,0,NO_CANDIDATE,name_or_code_no_match,,,toc
+soumu.go.jp__main_content__000901375,1,32021,865,16,固定資産税減収補填特別交付金,1,11200000,kou-special:2,moku-special:4,1,MATCHED,,11200000,0,toc
 soumu.go.jp__main_content__000901375,2,95029,825,16,交通安全対策特別交付金,1,49439484,kou-special:3,moku-special:5,1,MATCHED,,48680148,759336,toc
 soumu.go.jp__main_content__000901375,3,33021,865,16,地方揮発油譲与税譲与金,1,212800000,kou-special:4,moku-special:6,1,MATCHED,,215300000,-2500000,toc
 soumu.go.jp__main_content__000901375,3,33021,865,16,石油ガス譲与税譲与金,1,4500000,kou-special:4,moku-special:8,1,MATCHED,,4300000,200000,toc

@@ -1388,7 +1388,7 @@ mof.go.jp__about_mof__mof_budget__budget__fy2023__2023gaitame_2,5,01-20,融通�
 mof.go.jp__about_mof__mof_budget__budget__fy2023__2023gaitame_2,6,01-98,予備費,15,4,kou-special:20,jikou-special:37,1,MATCHED,,true,300000000,300000000,0,外国為替資金|,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2023__2023ippann_2,1,01-95,財務本省一般行政に必要な経費,5,0,kou-general:221,jikou-general:371,1,MATCHED,,true,56602443,56501686,100757,財務省|財務本省,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2023__2023ippann_2,2,06-95,国際会議等に必要な経費,40,0,kou-general:221,jikou-general:372,1,MATCHED,,true,1336849,1248037,88812,財務省|財務本省,toc
-mof.go.jp__about_mof__mof_budget__budget__fy2023__2023ippann_2,3,11-95,貨幣交換差減補金に必要な経費,45,0,kou-general:221,,0,NO_CANDIDATE,name_no_match,,156502082,,,財務省|財務本省,toc
+mof.go.jp__about_mof__mof_budget__budget__fy2023__2023ippann_2,3,11-95,貨幣交換差減補填金に必要な経費,45,0,kou-general:221,jikou-general:373,1,MATCHED,,true,156502082,197613193,-41111111,財務省|財務本省,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2023__2023ippann_2,4,16-95,審議会等に必要な経費,46,0,kou-general:221,jikou-general:374,1,MATCHED,,true,35911,31645,4266,財務省|財務本省,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2023__2023ippann_2,5,21-95,財務総合政策研究所に必要な経費,50,0,kou-general:221,jikou-general:375,1,MATCHED,,true,494947,460461,34486,財務省|財務本省,toc
 mof.go.jp__about_mof__mof_budget__budget__fy2023__2023ippann_2,6,01-95,財務本省施設整備に必要な経費,64,1,kou-general:222,jikou-general:376,1,MATCHED,,true,261302,261302,0,財務省|財務本省,toc

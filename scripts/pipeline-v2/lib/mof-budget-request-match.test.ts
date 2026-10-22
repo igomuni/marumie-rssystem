@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildPositionTree, buildTocTree, supplementTocTree, totalTableKouHeads } from './mof-budget-request-match';
+import { buildPositionTree, buildTocTree, ns, supplementTocTree, totalTableKouHeads } from './mof-budget-request-match';
 
 // 総表 CSV の行（必要な列だけ）
 const tot = (row_type: string, 区分: string, req = '', 要求番号 = '') => ({ row_type, 区分, '８年度概算要求額_計': req, 要求番号, source_page: '1' });
@@ -50,5 +50,12 @@ describe('buildPositionTree', () => {
     const t = buildPositionTree('env', total, () => false);
     expect(t.kous.map(k => k.code)).toEqual(['017', '019', '020']);
     expect(t.jikous.map(j => [j.reqNo, j.kouIdx])).toEqual([['4', 0], ['5', 0], ['6', 1], ['7', 2]]);
+  });
+});
+
+describe('ns', () => {
+  it('turns the confirmed PDF gaiji into the character and leaves unknown private-use code points as they are', () => {
+    expect(ns('貨幣交換差減補\uE5E3 金')).toBe('貨幣交換差減補填金');
+    expect(ns('Ａ４\uEF63５冊')).toBe('A4\uEF635冊');
   });
 });

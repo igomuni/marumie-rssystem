@@ -20,7 +20,6 @@ jikou-general:231,general,001,防災庁,防災庁一般行政に必要な経費,
 jikou-general:243,general,009,地方交付税交付金,地方交付税交付金財源の交付税及び譲与税配付金特別会計へ繰入れに必要な経費,kou_matched_no_request_row,総務省,総務本省,,
 jikou-general:245,general,010,地方特例交付金,新型コロナウイルス感染症対策地方税減収補填特別交付金財源の交付税及び譲与税配付金特別会計へ繰入れに必要な経費,kou_matched_no_request_row,総務省,総務本省,,
 jikou-general:258,general,032,特定高周波数無線局開設価額競争落札金財源特定高周波数対策費,特定高周波数無線局開設価額競争落札金財源特定高周波数対策に必要な経費,kou_not_matched,総務省,総務本省,,
-jikou-general:385,general,001,財務本省共通費,貨幣交換差減補填金に必要な経費,kou_matched_no_request_row,財務省,財務本省,,
 jikou-general:399,general,008,国債費,社会資本整備事業特別会計整理収入等の国債整理基金特別会計へ繰入れに必要な経費,kou_matched_no_request_row,財務省,財務本省,,
 jikou-general:404,general,008,国債費,公債等に係る償還及び発行に関する諸費財源の国債整理基金特別会計へ繰入れに必要な経費,kou_matched_no_request_row,財務省,財務本省,,
 jikou-general:423,general,015,産業投資支出財政投融資特別会計へ繰入,産業投資支出の財源の財政投融資特別会計投資勘定へ繰入れに必要な経費,kou_not_matched,財務省,財務本省,,
@@ -81,7 +80,6 @@ jikou-general:1216,general,018,独立行政法人環境再生保全機構運営�
 jikou-general:1220,general,023,石綿健康被害救済事務費労働保険特別会計へ繰入,石綿健康被害救済事務の財源の労働保険特別会計徴収勘定へ繰入れに必要な経費,kou_matched_no_request_row,環境省,環境本省,,
 jikou-general:1232,general,033,地方環境対策費,人と自然のふれあいの推進に必要な経費,kou_matched_no_request_row,環境省,地方環境事務所,,
 jikou-general:1241,general,053,電源開発促進税財源電源利用対策及原子力安全規制対策費エネルギー対策特別会計へ繰入,電源開発促進税財源の電源利用対策及原子力安全規制対策に係るエネルギー対策特別会計電源開発促進勘定へ繰入れに必要な経費,kou_matched_no_request_row,環境省,原子力規制委員会,,
-jikou-special:4,special,02,地方特例交付金,新型コロナウイルス感染症対策地方税減収補填特別交付金に必要な経費,kou_matched_no_request_row,内閣府、総務省及び財務省,,交付税及び譲与税配付金,
 jikou-special:46,special,05,地方公共団体金融機構納付金収入交付税及び譲与税配付金特別会計へ繰入,地方公共団体金融機構納付金収入交付税及び譲与税配付金特別会計へ繰入れに必要な経費,kou_matched_no_request_row,財務省及び国土交通省,,財政投融資,投資勘定
 jikou-special:47,special,11,先端半導体・人工知能関連技術対策エネルギー対策特別会計へ繰入,先端半導体・人工知能関連技術対策費用の財源のエネルギー対策特別会計先端半導体・人工知能関連技術勘定へ繰入れに必要な経費,kou_matched_no_request_row,財務省及び国土交通省,,財政投融資,投資勘定
 jikou-special:80,special,13,脱炭素成長型経済構造移行推進機構出資,脱炭素成長型経済構造移行推進機構出資に必要な経費,kou_not_matched,内閣府、文部科学省、経済産業省及び環境省,,エネルギー対策,電源開発促進勘定

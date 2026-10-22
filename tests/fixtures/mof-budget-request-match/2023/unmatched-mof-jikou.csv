@@ -79,7 +79,6 @@ jikou-general:314,general,081,公安審査委員会,公安審査委員会に必�
 jikou-general:315,general,091,公安調査庁共通費,公安調査庁一般行政に必要な経費,kou_not_matched,法務省,公安調査庁,,
 jikou-general:316,general,091,公安調査庁共通費,公安調査庁研修所に必要な経費,kou_not_matched,法務省,公安調査庁,,
 jikou-general:317,general,092,破壊的団体等調査費,破壊的団体等の調査に必要な経費,kou_not_matched,法務省,公安調査庁,,
-jikou-general:373,general,001,財務本省共通費,貨幣交換差減補填金に必要な経費,kou_matched_no_request_row,財務省,財務本省,,
 jikou-general:387,general,008,国債費,社会資本整備事業特別会計整理収入等の国債整理基金特別会計へ繰入れに必要な経費,kou_matched_no_request_row,財務省,財務本省,,
 jikou-general:392,general,008,国債費,公債等に係る償還及び発行に関する諸費財源の国債整理基金特別会計へ繰入れに必要な経費,kou_matched_no_request_row,財務省,財務本省,,
 jikou-general:411,general,066,防衛力強化のための資金へ繰入,防衛力強化のための資金へ繰入れに必要な経費,kou_not_matched,財務省,財務本省,,
