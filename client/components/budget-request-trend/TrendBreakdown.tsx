@@ -101,9 +101,11 @@ export function JikouTab({ row, years, year, detail, onSelectYear }: { row: Budg
 function MokuByJikou({ b, year }: { b: BudgetRequestTrendDetailKou; year: number }) {
   const groups = [...(b.m.some(m => m[0] === -1) ? [-1] : []), ...b.j.map((_, i) => i)];
   const fromSub = b.m.some(m => m[5] > 0), blanks = b.m.some(m => m[6] > 0);
+  // 目の数は、タブのラベル・一覧の列と同じく、事項をまたいで目名 + 目別で数える
+  const nMoku = new Set(b.m.map(m => `${m[1]}|${m[2]}`)).size;
   return (
     <div className="flex flex-col gap-3">
-      <p className="mt-1 text-[11px] font-semibold text-neutral-500">FY{year} の事項ごとの目（事項 {b.j.length}・目 {b.m.length}。同じ事項の中の同じ目は足してある）</p>
+      <p className="mt-1 text-[11px] font-semibold text-neutral-500">FY{year} の事項ごとの目（事項 {b.j.length}・目 {nMoku}{b.m.length !== nMoku ? `。2 つ以上の事項にまたがる目があり、下は ${b.m.length} 行` : ''}。同じ事項の中の同じ目は足してある）</p>
       {groups.map(gi => {
         const ms = b.m.filter(m => m[0] === gi); const j = gi >= 0 ? b.j[gi] : null;
         return (
