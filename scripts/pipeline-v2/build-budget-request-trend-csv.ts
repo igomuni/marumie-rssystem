@@ -168,7 +168,7 @@ for (const [year, ver] of YEARS) {
   };
   const pdfOf = (r: Rec, org: string): Located | null => locate(r, org);
   const recs: Row[] = kou.map(r => {
-    const cv = cover.get(r['request_source']); let org = r['org']; let orgSrc = org ? (r['hierarchy'] === 'toc' ? '目次' : '総表') : '';
+    const cv = cover.get(r['request_source']); let org = r['org']; let orgSrc = org ? (r['hierarchy'] === 'toc' || r['hierarchy'] === 'toc_total' ? '目次' : '総表') : ''; // toc_total: 目次から漏れ、総表から補った項。組織は目次の直前の項から
     if (!org && r['acct'] === 'general') { if (cv?.org) { org = cv.org; orgSrc = '表紙括弧'; } else orgSrc = 'なし'; }
     return { r, code: cv?.code ?? '', org, orgSrc, key: [r['acct'], scopeOf(r), r['account'], r['sub'], org, r['request_name']].join('\t') };
   });

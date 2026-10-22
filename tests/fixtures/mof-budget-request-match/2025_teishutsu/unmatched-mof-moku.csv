@@ -4,9 +4,6 @@ moku-general:47,general,001,衆議院,育児休業手当金等国家公務員共
 moku-general:79,general,011,参議院,国会運営事務処理等庁費,kou_matched_no_request_row,国会,参議院,,
 moku-general:91,general,011,参議院,育児休業手当金等国家公務員共済組合負担金,kou_matched_no_request_row,国会,参議院,,
 moku-general:126,general,021,国立国会図書館,育児休業手当金等国家公務員共済組合負担金,kou_matched_no_request_row,国会,国立国会図書館,,
-moku-general:132,general,022,国立国会図書館施設費,施設施工旅費,kou_not_matched,国会,国立国会図書館,,
-moku-general:133,general,022,国立国会図書館施設費,施設施工庁費,kou_not_matched,国会,国立国会図書館,,
-moku-general:134,general,022,国立国会図書館施設費,施設整備費,kou_not_matched,国会,国立国会図書館,,
 moku-general:187,general,001,最高裁判所,育児休業手当金等国家公務員共済組合負担金,kou_matched_no_request_row,裁判所,裁判所,,
 moku-general:222,general,004,裁判費,民事裁判発送料,kou_matched_no_request_row,裁判所,裁判所,,
 moku-general:223,general,004,裁判費,刑事裁判等特別送達料,kou_matched_no_request_row,裁判所,裁判所,,
@@ -452,7 +449,6 @@ moku-general:951,general,107,沖縄農業農村整備事業工事諸費,工事�
 moku-general:990,general,111,宮内庁,育児休業手当金等国家公務員共済組合負担金,kou_matched_no_request_row,内閣府,宮内庁,,
 moku-general:1024,general,121,公正取引委員会,育児休業手当金等国家公務員共済組合負担金,kou_matched_no_request_row,内閣府,公正取引委員会,,
 moku-general:1081,general,136,交通警察費,都道府県警察施設災害復旧費補助金,kou_matched_no_request_row,内閣府,警察庁,,
-moku-general:1082,general,145,交通反則者納金財源交通安全対策特別交付金等交付税及び譲与税配付金特別会計へ繰入,交通反則者納金財源の交付税及び譲与税配付金特別会計へ繰入,kou_not_matched,内閣府,警察庁,,
 moku-general:1108,general,140,犯罪被害者等支援推進費,諸謝金,kou_not_matched,内閣府,警察庁,,
 moku-general:1109,general,140,犯罪被害者等支援推進費,犯罪被害給付金,kou_not_matched,内閣府,警察庁,,
 moku-general:1110,general,140,犯罪被害者等支援推進費,警察装備費,kou_not_matched,内閣府,警察庁,,
@@ -539,7 +535,6 @@ moku-general:2858,general,032,研究開発推進費,国立研究開発法人物�
 moku-general:2859,general,032,研究開発推進費,宇宙開発支援基金補助金,kou_matched_no_request_row,文部科学省,文部科学本省,,
 moku-general:2860,general,032,研究開発推進費,国立研究開発法人日本原子力研究開発機構設備整備費補助金,kou_matched_no_request_row,文部科学省,文部科学本省,,
 moku-general:2861,general,032,研究開発推進費,原子力施設廃止措置促進事業費補助金,kou_matched_no_request_row,文部科学省,文部科学本省,,
-moku-general:2886,general,044,電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ繰入,電源開発促進税財源のエネルギー対策特別会計へ繰入,kou_not_matched,文部科学省,文部科学本省,,
 moku-general:2894,general,054,公立文教施設整備費,公立社会教育施設災害復旧費補助金,kou_matched_no_request_row,文部科学省,文部科学本省,,
 moku-general:2899,general,054,公立文教施設整備費,空調設備整備臨時特例交付金,kou_matched_no_request_row,文部科学省,文部科学本省,,
 moku-general:2918,general,058,国際交流・協力推進費,外国人研修生研究旅費,kou_matched_no_request_row,文部科学省,文部科学本省,,
@@ -613,8 +608,6 @@ moku-general:4847,general,021,独立行政法人日本貿易振興機構施設�
 moku-general:4850,general,022,半導体・人工知能関連技術基盤強化対策費,半導体・人工知能関連技術基盤強化対策委託費,kou_not_matched,経済産業省,経済産業本省,,
 moku-general:4851,general,022,半導体・人工知能関連技術基盤強化対策費,半導体・人工知能関連技術基盤強化対策費補助金,kou_not_matched,経済産業省,経済産業本省,,
 moku-general:4888,general,072,産業保安監督官署施設費,不動産購入費,kou_not_matched,経済産業省,産業保安監督官署,,
-moku-general:4905,general,083,石油石炭税財源燃料安定供給対策及エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入,石油石炭税財源のエネルギー対策特別会計へ繰入,kou_not_matched,経済産業省,資源エネルギー庁,,
-moku-general:4906,general,084,電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ繰入,電源開発促進税財源のエネルギー対策特別会計へ繰入,kou_not_matched,経済産業省,資源エネルギー庁,,
 moku-general:4907,general,090,電源利用対策費エネルギー対策特別会計へ繰入,エネルギー対策特別会計へ繰入,kou_not_matched,経済産業省,資源エネルギー庁,,
 moku-general:4908,general,088,エネルギー需給構造高度化対策費,エネルギー価格激変緩和対策事業委託費,kou_not_matched,経済産業省,資源エネルギー庁,,
 moku-general:4909,general,088,エネルギー需給構造高度化対策費,エネルギー価格激変緩和対策事業費補助金,kou_not_matched,経済産業省,資源エネルギー庁,,
@@ -662,11 +655,9 @@ moku-general:6160,general,235,海洋気象観測船建造費,船舶建造費,kou
 moku-general:6188,general,251,海上保安官署共通費,船員食料手当,kou_matched_no_request_row,国土交通省,海上保安庁,,
 moku-general:6209,general,253,船舶交通安全及海上治安対策費,船員食料手当,kou_matched_no_request_row,国土交通省,海上保安庁,,
 moku-general:6292,general,001,環境本省共通費,育児休業手当金等国家公務員共済組合負担金,kou_matched_no_request_row,環境省,環境本省,,
-moku-general:6310,general,003,石油石炭税財源エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入,石油石炭税財源のエネルギー対策特別会計へ繰入,kou_not_matched,環境省,環境本省,,
 moku-general:6348,general,006,資源循環政策推進費,循環型社会形成推進事業費補助金,kou_matched_no_request_row,環境省,環境本省,,
 moku-general:6349,general,006,資源循環政策推進費,災害等廃棄物処理促進費補助金,kou_matched_no_request_row,環境省,環境本省,,
 moku-general:6489,general,027,自然公園等施設災害復旧事業費,国定公園施設災害復旧事業費補助,kou_not_matched,環境省,環境本省,,
-moku-general:6562,general,053,電源開発促進税財源電源利用対策及原子力安全規制対策費エネルギー対策特別会計へ繰入,電源開発促進税財源のエネルギー対策特別会計へ繰入,kou_not_matched,環境省,原子力規制委員会,,
 moku-general:6580,general,001,防衛本省共通費,指定場所生活調整金,kou_matched_no_request_row,防衛省,防衛本省,,
 moku-general:6602,general,001,防衛本省共通費,育児休業手当金等国家公務員共済組合負担金,kou_matched_no_request_row,防衛省,防衛本省,,
 moku-general:6656,general,021,防衛力基盤強化推進費,自衛隊奨学生貸与金,kou_matched_no_request_row,防衛省,防衛本省,,
@@ -688,7 +679,6 @@ moku-special:120,special,02,事務取扱費,産業投資業務庁費,kou_matched
 moku-special:123,special,02,事務取扱費,貨幣交換差減補填金,kou_matched_no_request_row,財務省及び国土交通省,,財政投融資,投資勘定
 moku-special:126,special,11,先端半導体・人工知能関連技術対策エネルギー対策特別会計へ繰入,エネルギー対策特別会計先端半導体・人工知能関連技術勘定へ繰入,kou_not_matched,財務省及び国土交通省,,財政投融資,投資勘定
 moku-special:154,special,01,燃料安定供給対策費,天然ガス流通合理化事業費補助金,kou_matched_no_request_row,内閣府、文部科学省、経済産業省及び環境省,,エネルギー対策,エネルギー需給勘定
-moku-special:181,special,16,脱炭素成長型経済構造移行推進国立研究開発法人新エネルギー・産業技術総合開発機構運営費,国立研究開発法人新エネルギー・産業技術総合開発機構エネルギー需給勘定運営費交付金,kou_not_matched,内閣府、文部科学省、経済産業省及び環境省,,エネルギー対策,エネルギー需給勘定
 moku-special:202,special,06,事務取扱費,貨幣交換差減補填金,kou_matched_no_request_row,内閣府、文部科学省、経済産業省及び環境省,,エネルギー対策,エネルギー需給勘定
 moku-special:204,special,20,石油石炭税財源エネルギー需給構造高度化対策費先端半導体・人工知能関連技術勘定へ繰入,先端半導体・人工知能関連技術勘定へ繰入,kou_not_matched,内閣府、文部科学省、経済産業省及び環境省,,エネルギー対策,エネルギー需給勘定
 moku-special:205,special,21,脱炭素成長型経済構造移行推進先端半導体・人工知能関連技術勘定へ繰入,先端半導体・人工知能関連技術勘定へ繰入,kou_not_matched,内閣府、文部科学省、経済産業省及び環境省,,エネルギー対策,エネルギー需給勘定
@@ -749,7 +739,6 @@ moku-special:702,special,04,出生後休業支援等給付業務費,育児休業
 moku-special:703,special,04,出生後休業支援等給付業務費,国家公務員共済組合負担金,kou_not_matched,内閣府及び厚生労働省,,子ども・子育て支援,育児休業等給付勘定
 moku-special:705,special,06,保険料返還金等労働保険特別会計へ繰入,労働保険特別会計徴収勘定へ繰入,kou_matched_no_request_row,内閣府及び厚生労働省,,子ども・子育て支援,育児休業等給付勘定
 moku-special:761,special,01,事務取扱費,貨幣交換差減補填金,kou_matched_no_request_row,農林水産省,,食料安定供給,業務勘定
-moku-special:786,special,14,東日本大震災復興土地改良事業費負担金等収入東日本大震災復興特別会計へ繰入,土地改良事業費負担金収入繰入,kou_not_matched,農林水産省,,食料安定供給,国営土地改良事業勘定
 moku-special:835,special,02,事務取扱費,貨幣交換差減補填金,kou_matched_no_request_row,経済産業省,,特許,
 moku-special:877,special,05,業務取扱費,貨幣交換差減補填金,kou_matched_no_request_row,国土交通省,,自動車安全,自動車検査登録勘定
 moku-special:917,special,01,空港等維持運営費,貨幣交換差減補填金,kou_matched_no_request_row,国土交通省,,自動車安全,空港整備勘定

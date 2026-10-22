@@ -45,7 +45,10 @@ for (const year of YEARS) {
     const t = buildTocTree(f.slice(0, -4), rd(path.join(tocDir, f)));
     for (const j of t.jikous) if (j.kouIdx !== null) { const k = `${t.slug}#${j.kouIdx}`; (tocJikou.get(k) ?? tocJikou.set(k, new Set()).get(k)!).add(j.name); }
   }
-  const refsOf = (b: string): KouRef[] => (books.get(b) ?? []).map(i => ({ code: reqKou[i]['request_code3'], name: reqKou[i]['request_name'], jikouNames: reqKou[i]['hierarchy'] === 'toc' ? tocJikou.get(`${reqKou[i]['request_source']}#${reqKou[i]['toc_kou_idx']}`) : undefined }));
+  // request-kou の `toc_kou_idx` は、総表から補った項（hierarchy = toc_total）を含めた添字。目次そのものの添字は、source ごとに toc の行を順に数えて求める
+  const rawTocIdx = new Map<number, number>(); const seenToc = new Map<string, number>();
+  reqKou.forEach((r, i) => { if (r['hierarchy'] !== 'toc') return; const n = seenToc.get(r['request_source']) ?? 0; rawTocIdx.set(i, n); seenToc.set(r['request_source'], n + 1); });
+  const refsOf = (b: string): KouRef[] => (books.get(b) ?? []).map(i => ({ code: reqKou[i]['request_code3'], name: reqKou[i]['request_name'], jikouNames: rawTocIdx.has(i) ? tocJikou.get(`${reqKou[i]['request_source']}#${rawTocIdx.get(i)}`) : undefined }));
   const sourcesOf = (kind: string): Map<string, Rec[]> => {
     const dir = path.join('tests', 'fixtures', 'budget-request-csv', String(year), kind, 'sources'); const m = new Map<string, Rec[]>();
     for (const f of fs.readdirSync(dir).filter(x => x.endsWith('.csv')).sort()) m.set(f.slice(0, -4), rd(path.join(dir, f)));
@@ -69,7 +72,7 @@ for (const year of YEARS) {
     textless.set(slug, set); return set;
   };
   const reasonOf = (i: number, pages: Map<string, number[]>): string => {
-    if (reqKou[i]['hierarchy'] !== 'toc') return '位置で決めた項（目次なし）';
+    if (reqKou[i]['hierarchy'].startsWith('position')) return '位置で決めた項（目次なし）';
     if (sameNameOrg.has(i)) return '組織と同名の項（項の額が組織計）';
     if ([...pages.keys()].some(x => (unresolved.get(x) ?? 0) > 0)) return '明細表の未解決の行あり';
     if ([...pages].some(([x, pg]) => { const lo = Math.min(...pg), hi = Math.max(...pg) + 1; return [...textlessOf(x)].some(n => n >= lo && n <= hi); })) return '画像の頁あり';
@@ -140,7 +143,7 @@ for (const year of YEARS) {
     // 項の検算
     if (kouReq === null) { st.kou.kou_no_amount++; return; }
     const tsum = sum(tj.map(x => x.j.req));
-    if (tj.length === 0) st.kou.kou_no_jikou++; else if (tsum === kouReq) st.kou.kou_eq_jikou++; else { st.kou.kou_ne_jikou++; kouNeJikou.push([k['要求書'], k['項名'], kouReq, tsum, reqKou[i]['hierarchy'] !== 'toc' ? '位置で決めた項（目次なし）' : sameNameOrg.has(i) ? '組織と同名の項（項の額が組織計）' : '']); }
+    if (tj.length === 0) st.kou.kou_no_jikou++; else if (tsum === kouReq) st.kou.kou_eq_jikou++; else { st.kou.kou_ne_jikou++; kouNeJikou.push([k['要求書'], k['項名'], kouReq, tsum, reqKou[i]['hierarchy'].startsWith('position') ? '位置で決めた項（目次なし）' : sameNameOrg.has(i) ? '組織と同名の項（項の額が組織計）' : '']); }
     if (allMoku.length === 0) { if (image) st.kou.kou_no_moku_image++; else st.kou.kou_no_moku++; }
     else if (allMoku.some(m => mokuReq(m) === null)) st.kou.kou_moku_blank++;
     else if (sum(allMoku.map(mokuReq)) === kouReq) st.kou.kou_eq_moku++;

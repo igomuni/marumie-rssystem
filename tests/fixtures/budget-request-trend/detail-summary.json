@@ -1,50 +1,49 @@
 {
  "sha256": {
-  "jikou.csv": "206a1b86ecec427f78384fddf1bf638b0ca3e45736e3e05792803547c7add0d4",
-  "moku/2023.csv": "a439d6360e5b2c26169a49b1251856c5f314e5ccccd5dab70b18648cfe8539ef",
-  "moku/2024.csv": "6d1cb11c065a776903d1d862dfa8f19827bee64fa90c7376c8cdfb3cd3da4972",
-  "moku/2025.csv": "eaa68f5811f5690699884328521360b123e0b0a4e5615ca607fe69067bca9d43",
-  "moku/2026.csv": "8d75cd9471758f3b90fea002039abbf0122a0d60e3c628ca1bf1e776c138d505",
-  "moku/2027.csv": "b90cf184d10ad9649ae8542f5c540946b54fc752e8b0e36b14264d8c55106c74"
+  "jikou.csv": "4cbb605bdd2bb954ff39544a7cecc73ae9b842756d672a48daa8efbf591c9905",
+  "moku/2023.csv": "b3b4861119af49d4bcd8849eb961d24255469b3895f9dca931eeb9468f094c8d",
+  "moku/2024.csv": "bde0496689373f7bfcd02746ec5386cac5512b959e677d048a7a0b0bbfa807c4",
+  "moku/2025.csv": "4bead760e261e2d3d4431b408e3739775d612b59431fc508898290258288e3b7",
+  "moku/2026.csv": "c358ae2e9cc1e851e098c39041cac57fab465f997a882d3ceee14a0d0abe978a",
+  "moku/2027.csv": "8095dfd6f8d0d6951674cdcc1f3df844d033a1f9e2602d05f8ba5bede187a1ae"
  },
  "years": {
   "2023": {
    "kou": {
-    "total": 1098,
-    "kou_eq_jikou": 1089,
-    "kou_ne_jikou": 6,
+    "total": 1105,
+    "kou_eq_jikou": 1099,
+    "kou_ne_jikou": 3,
     "kou_no_jikou": 2,
     "kou_no_amount": 1,
-    "kou_eq_moku": 1022,
-    "kou_ne_moku": 18,
+    "kou_eq_moku": 1032,
+    "kou_ne_moku": 15,
     "kou_moku_blank": 45,
     "kou_no_moku": 12,
     "kou_no_moku_image": 0
    },
    "jikou": {
-    "total": 1769,
+    "total": 1775,
     "from_detail_only": 8,
-    "eq": 1645,
+    "eq": 1651,
     "ne": 18,
     "blank": 72,
     "no_moku": 26,
     "no_moku_image": 0,
     "no_amount": 8
    },
-   "moku_rows": 27510,
-   "moku_groups": 9618,
+   "moku_rows": 27516,
+   "moku_groups": 9624,
    "orphan_moku": {
     "no_kou_in_book": 0,
     "before_first_kou": 0,
     "after_context": 0,
-    "in_unlisted_kou": 6
+    "in_unlisted_kou": 0
    },
    "kou_ne_moku_by_reason": {
     "位置で決めた項（目次なし）": 2,
     "明細表の未解決の行あり": 11,
     "明細表の無い分冊あり": 1,
-    "組織と同名の項（項の額が組織計）": 2,
-    "未分類": 2
+    "未分類": 1
    },
    "kou_ne_moku": [
     [
@@ -118,24 +117,10 @@
      "明細表の無い分冊あり"
     ],
     [
-     "jbaudit.go.jp__jbaudit__bud_clo__bud__pdf__r05__20220905_2",
-     "会計検査院",
-     15645671,
-     15634308,
-     "組織と同名の項（項の額が組織計）"
-    ],
-    [
      "jcrc.go.jp__content__000001355",
      "カジノ管理委員会",
      3408541,
      3401796,
-     "未分類"
-    ],
-    [
-     "maff.go.jp__j__budget__attach__pdf__220831-2",
-     "東日本大震災復興土地改良事業費負担金等収入一般会計へ繰入",
-     1005,
-     26939,
      "未分類"
     ],
     [
@@ -165,13 +150,6 @@
      2195134,
      2187970,
      "明細表の未解決の行あり"
-    ],
-    [
-     "shugiin.go.jp__internet__itdb_annai.nsf__html__statics__osirase__kaikei-saishutsugaisan5.pdf__%24File__kaikei-saishutsugaisan5",
-     "衆議院",
-     67336439,
-     65014942,
-     "組織と同名の項（項の額が組織計）"
     ]
    ],
    "kou_ne_jikou": [
@@ -190,109 +168,50 @@
      ""
     ],
     [
-     "jbaudit.go.jp__jbaudit__bud_clo__bud__pdf__r05__20220905_2",
-     "会計検査院",
-     15645671,
-     15634308,
-     "組織と同名の項（項の額が組織計）"
-    ],
-    [
-     "maff.go.jp__j__budget__attach__pdf__220831-2",
-     "東日本大震災復興土地改良事業費負担金等収入一般会計へ繰入",
-     1005,
-     26939,
-     ""
-    ],
-    [
      "mlit.go.jp__page__content__001514155",
      "離島振興事業費",
      50989718,
      50879718,
      ""
-    ],
-    [
-     "shugiin.go.jp__internet__itdb_annai.nsf__html__statics__osirase__kaikei-saishutsugaisan5.pdf__%24File__kaikei-saishutsugaisan5",
-     "衆議院",
-     67336439,
-     65014942,
-     "組織と同名の項（項の額が組織計）"
     ]
    ],
-   "unlisted_kou": [
-    [
-     "env.go.jp__content__",
-     "019",
-     "石油石炭税財源エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入",
-     169733800
-    ],
-    [
-     "env.go.jp__content__",
-     "550",
-     "電源開発促進税財源電源利用対策及原子力安全規制対策費エネルギー対策特別会計へ繰入",
-     39945741
-    ],
-    [
-     "meti.go.jp__main__yosangaisan__fy2023__pdf__ippan_o",
-     "030",
-     "石油石炭税財源燃料安定供給対策及エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入",
-     393185151
-    ],
-    [
-     "meti.go.jp__main__yosangaisan__fy2023__pdf__ippan_o",
-     "040",
-     "電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ繰入",
-     151070322
-    ],
-    [
-     "mext.go.jp__content__mxt_kaikesou01-000024974_",
-     "440",
-     "電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ繰入",
-     107422541
-    ],
-    [
-     "npa.go.jp__policies__budget__r5__gaisanyokyu__ippankaikei",
-     "065",
-     "交通反則者納金財源交通安全対策特別交付金等交付税及び譲与税配付金特別会計へ繰入",
-     52320196
-    ]
-   ]
+   "unlisted_kou": []
   },
   "2024": {
    "kou": {
-    "total": 1101,
-    "kou_eq_jikou": 1098,
-    "kou_ne_jikou": 3,
+    "total": 1109,
+    "kou_eq_jikou": 1109,
+    "kou_ne_jikou": 0,
     "kou_no_jikou": 0,
     "kou_no_amount": 0,
-    "kou_eq_moku": 1028,
-    "kou_ne_moku": 16,
+    "kou_eq_moku": 1039,
+    "kou_ne_moku": 13,
     "kou_moku_blank": 46,
     "kou_no_moku": 11,
     "kou_no_moku_image": 0
    },
    "jikou": {
-    "total": 1746,
+    "total": 1753,
     "from_detail_only": 0,
-    "eq": 1642,
+    "eq": 1649,
     "ne": 13,
     "blank": 66,
     "no_moku": 25,
     "no_moku_image": 0,
     "no_amount": 0
    },
-   "moku_rows": 26683,
-   "moku_groups": 9417,
+   "moku_rows": 26690,
+   "moku_groups": 9424,
    "orphan_moku": {
     "no_kou_in_book": 0,
     "before_first_kou": 0,
     "after_context": 0,
-    "in_unlisted_kou": 7
+    "in_unlisted_kou": 0
    },
    "kou_ne_moku_by_reason": {
     "位置で決めた項（目次なし）": 2,
     "明細表の未解決の行あり": 10,
-    "組織と同名の項（項の額が組織計）": 2,
-    "未分類": 2
+    "未分類": 1
    },
    "kou_ne_moku": [
     [
@@ -315,20 +234,6 @@
      7617566,
      7611889,
      "明細表の未解決の行あり"
-    ],
-    [
-     "jbaudit.go.jp__jbaudit__bud_clo__bud__pdf__r06__20230906_02",
-     "会計検査院",
-     16073345,
-     16071702,
-     "組織と同名の項（項の額が組織計）"
-    ],
-    [
-     "maff.go.jp__j__budget__attach__pdf__230901-6",
-     "東日本大震災復興土地改良事業費負担金等収入一般会計へ繰入",
-     1005,
-     26939,
-     "未分類"
     ],
     [
      "mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01",
@@ -399,119 +304,46 @@
      3318101,
      3328822,
      "未分類"
-    ],
-    [
-     "shugiin.go.jp__internet__itdb_annai.nsf__html__statics__osirase__kaikei-saishutsugaisan6.pdf__%24File__kaikei-saishutsugaisan6",
-     "衆議院",
-     68569853,
-     66379545,
-     "組織と同名の項（項の額が組織計）"
     ]
    ],
-   "kou_ne_jikou": [
-    [
-     "jbaudit.go.jp__jbaudit__bud_clo__bud__pdf__r06__20230906_02",
-     "会計検査院",
-     16073345,
-     16071702,
-     "組織と同名の項（項の額が組織計）"
-    ],
-    [
-     "maff.go.jp__j__budget__attach__pdf__230901-6",
-     "東日本大震災復興土地改良事業費負担金等収入一般会計へ繰入",
-     1005,
-     26939,
-     ""
-    ],
-    [
-     "shugiin.go.jp__internet__itdb_annai.nsf__html__statics__osirase__kaikei-saishutsugaisan6.pdf__%24File__kaikei-saishutsugaisan6",
-     "衆議院",
-     68569853,
-     66379545,
-     "組織と同名の項（項の額が組織計）"
-    ]
-   ],
-   "unlisted_kou": [
-    [
-     "env.go.jp__content__",
-     "018",
-     "脱炭素成長型経済構造移行費用財源脱炭素化産業成長促進対策費エネルギー対策特別会計へ繰入",
-     43560
-    ],
-    [
-     "env.go.jp__content__",
-     "019",
-     "石油石炭税財源エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入",
-     166955940
-    ],
-    [
-     "env.go.jp__content__",
-     "550",
-     "電源開発促進税財源電源利用対策及原子力安全規制対策費エネルギー対策特別会計へ繰入",
-     40870750
-    ],
-    [
-     "meti.go.jp__main__yosangaisan__fy2024__pdf__ippan_o",
-     "030",
-     "石油石炭税財源燃料安定供給対策及エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入",
-     383348847
-    ],
-    [
-     "meti.go.jp__main__yosangaisan__fy2024__pdf__ippan_o",
-     "040",
-     "電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ繰入",
-     155063500
-    ],
-    [
-     "mext.go.jp__content__mxt_kaikesou01-000031817_",
-     "440",
-     "電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ繰入",
-     111589349
-    ],
-    [
-     "npa.go.jp__policies__budget__r6__gaisanyokyu__ippankaikei",
-     "065",
-     "交通反則者納金財源交通安全対策特別交付金等交付税及び譲与税配付金特別会計へ繰入",
-     49447941
-    ]
-   ]
+   "kou_ne_jikou": [],
+   "unlisted_kou": []
   },
   "2025": {
    "kou": {
-    "total": 1157,
-    "kou_eq_jikou": 1154,
-    "kou_ne_jikou": 3,
+    "total": 1167,
+    "kou_eq_jikou": 1167,
+    "kou_ne_jikou": 0,
     "kou_no_jikou": 0,
     "kou_no_amount": 0,
-    "kou_eq_moku": 1100,
-    "kou_ne_moku": 9,
+    "kou_eq_moku": 1113,
+    "kou_ne_moku": 6,
     "kou_moku_blank": 38,
     "kou_no_moku": 9,
     "kou_no_moku_image": 1
    },
    "jikou": {
-    "total": 1836,
+    "total": 1845,
     "from_detail_only": 0,
-    "eq": 1732,
+    "eq": 1741,
     "ne": 6,
     "blank": 76,
     "no_moku": 21,
     "no_moku_image": 1,
     "no_amount": 0
    },
-   "moku_rows": 28025,
-   "moku_groups": 9966,
+   "moku_rows": 28036,
+   "moku_groups": 9977,
    "orphan_moku": {
     "no_kou_in_book": 0,
     "before_first_kou": 0,
     "after_context": 0,
-    "in_unlisted_kou": 25
+    "in_unlisted_kou": 14
    },
    "kou_ne_moku_by_reason": {
     "位置で決めた項（目次なし）": 2,
-    "組織と同名の項（項の額が組織計）": 2,
-    "未分類": 2,
-    "明細表の未解決の行あり": 3
+    "明細表の未解決の行あり": 3,
+    "未分類": 1
    },
    "kou_ne_moku": [
     [
@@ -527,20 +359,6 @@
      53237195,
      19844539,
      "位置で決めた項（目次なし）"
-    ],
-    [
-     "jbaudit.go.jp__jbaudit__bud_clo__bud__pdf__r07__20240904_02",
-     "会計検査院",
-     15947883,
-     15945065,
-     "組織と同名の項（項の額が組織計）"
-    ],
-    [
-     "maff.go.jp__j__budget__attach__pdf__240902-6",
-     "東日本大震災復興土地改良事業費負担金等収入一般会計へ繰入",
-     1005,
-     26939,
-     "未分類"
     ],
     [
      "mext.go.jp__content__20240911-mxt_kaikesou01-000038011_1",
@@ -569,93 +387,10 @@
      14452105,
      14428436,
      "未分類"
-    ],
-    [
-     "shugiin.go.jp__internet__itdb_annai.nsf__html__statics__osirase__kaikei-saishutsugaisan7.pdf__%24File__kaikei-saishutsugaisan7",
-     "衆議院",
-     70287383,
-     68084558,
-     "組織と同名の項（項の額が組織計）"
     ]
    ],
-   "kou_ne_jikou": [
-    [
-     "jbaudit.go.jp__jbaudit__bud_clo__bud__pdf__r07__20240904_02",
-     "会計検査院",
-     15947883,
-     15945065,
-     "組織と同名の項（項の額が組織計）"
-    ],
-    [
-     "maff.go.jp__j__budget__attach__pdf__240902-6",
-     "東日本大震災復興土地改良事業費負担金等収入一般会計へ繰入",
-     1005,
-     26939,
-     ""
-    ],
-    [
-     "shugiin.go.jp__internet__itdb_annai.nsf__html__statics__osirase__kaikei-saishutsugaisan7.pdf__%24File__kaikei-saishutsugaisan7",
-     "衆議院",
-     70287383,
-     68084558,
-     "組織と同名の項（項の額が組織計）"
-    ]
-   ],
+   "kou_ne_jikou": [],
    "unlisted_kou": [
-    [
-     "env.go.jp__content__",
-     "019",
-     "石油石炭税財源エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入",
-     153121300
-    ],
-    [
-     "env.go.jp__content__",
-     "550",
-     "電源開発促進税財源電源利用対策及原子力安全規制対策費エネルギー対策特別会計へ繰入",
-     39350810
-    ],
-    [
-     "env.go.jp__content__",
-     "170",
-     "脱炭素成長型経済構造移行推進国立研究開発法人新エネルギー・産業技術総合開発機構運営費",
-     40000000
-    ],
-    [
-     "meti.go.jp__main__yosangaisan__fy2025__pdf__eneju_o",
-     "170",
-     "脱炭素成長型経済構造移行推進国立研究開発法人新エネルギー・産業技術総合開発機構運営費",
-     40000000
-    ],
-    [
-     "meti.go.jp__main__yosangaisan__fy2025__pdf__ippan_o",
-     "030",
-     "石油石炭税財源燃料安定供給対策及エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入",
-     345321734
-    ],
-    [
-     "meti.go.jp__main__yosangaisan__fy2025__pdf__ippan_o",
-     "040",
-     "電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ繰入",
-     164182980
-    ],
-    [
-     "mext.go.jp__content__mxt_kaikesou01-000038011_",
-     "440",
-     "電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ繰入",
-     106661748
-    ],
-    [
-     "ndl.go.jp__file__aboutus__outline__finances__r07_budgetrequest",
-     "020",
-     "国立国会図書館施設費",
-     1593074
-    ],
-    [
-     "npa.go.jp__policies__budget__r7__gaisanyokyu__ippankaikei",
-     "065",
-     "交通反則者納金財源交通安全対策特別交付金等交付税及び譲与税配付金特別会計へ繰入",
-     48045473
-    ],
     [
      "cao.go.jp__yosan__soshiki__r07__pdf__",
      "020",
@@ -666,40 +401,39 @@
   },
   "2026": {
    "kou": {
-    "total": 1181,
-    "kou_eq_jikou": 1173,
-    "kou_ne_jikou": 8,
+    "total": 1188,
+    "kou_eq_jikou": 1188,
+    "kou_ne_jikou": 0,
     "kou_no_jikou": 0,
     "kou_no_amount": 0,
-    "kou_eq_moku": 1121,
-    "kou_ne_moku": 14,
+    "kou_eq_moku": 1135,
+    "kou_ne_moku": 8,
     "kou_moku_blank": 37,
-    "kou_no_moku": 8,
+    "kou_no_moku": 7,
     "kou_no_moku_image": 1
    },
    "jikou": {
-    "total": 1854,
+    "total": 1864,
     "from_detail_only": 0,
-    "eq": 1757,
-    "ne": 10,
+    "eq": 1771,
+    "ne": 8,
     "blank": 64,
-    "no_moku": 22,
+    "no_moku": 20,
     "no_moku_image": 1,
     "no_amount": 0
    },
-   "moku_rows": 28371,
-   "moku_groups": 10146,
+   "moku_rows": 28383,
+   "moku_groups": 10158,
    "orphan_moku": {
     "no_kou_in_book": 0,
     "before_first_kou": 0,
     "after_context": 0,
-    "in_unlisted_kou": 37
+    "in_unlisted_kou": 25
    },
    "kou_ne_moku_by_reason": {
-    "位置で決めた項（目次なし）": 6,
-    "組織と同名の項（項の額が組織計）": 2,
-    "未分類": 2,
+    "位置で決めた項（目次なし）": 3,
     "明細表の未解決の行あり": 3,
+    "未分類": 1,
     "画像の頁あり": 1
    },
    "kou_ne_moku": [
@@ -723,41 +457,6 @@
      60784431,
      30414294,
      "位置で決めた項（目次なし）"
-    ],
-    [
-     "env.go.jp__content__000337066",
-     "帰還困難区域等における鳥獣捕獲等緊急対策事業",
-     412719,
-     42330912,
-     "位置で決めた項（目次なし）"
-    ],
-    [
-     "env.go.jp__content__000337066",
-     "特定帰還居住区域整備事業",
-     48811888,
-     48986961,
-     "位置で決めた項（目次なし）"
-    ],
-    [
-     "env.go.jp__content__000337066",
-     "福島県環境創造センター運営等事業",
-     482466,
-     3458370,
-     "位置で決めた項（目次なし）"
-    ],
-    [
-     "jbaudit.go.jp__jbaudit__bud_clo__bud__pdf__r08__20250903_02",
-     "会計検査院",
-     16775579,
-     16747219,
-     "組織と同名の項（項の額が組織計）"
-    ],
-    [
-     "maff.go.jp__j__budget__attach__pdf__r8yokyusho-6",
-     "東日本大震災復興土地改良事業費負担金等収入一般会計へ繰入",
-     1005,
-     26939,
-     "未分類"
     ],
     [
      "mext.go.jp__content__20250909-mxt_kaikesou01-000044539_1",
@@ -793,134 +492,10 @@
      15442036,
      17366156,
      "画像の頁あり"
-    ],
-    [
-     "shugiin.go.jp__internet__itdb_annai.nsf__html__statics__osirase__kaikei-saishutsugaisan8.pdf__%24File__kaikei-saishutsugaisan8",
-     "衆議院",
-     71155564,
-     68862155,
-     "組織と同名の項（項の額が組織計）"
     ]
    ],
-   "kou_ne_jikou": [
-    [
-     "env.go.jp__content__000337066",
-     "環境保全復興政策費",
-     95580453,
-     804210,
-     "位置で決めた項（目次なし）"
-    ],
-    [
-     "env.go.jp__content__000337066",
-     "環境モニタリング調査",
-     804210,
-     412719,
-     "位置で決めた項（目次なし）"
-    ],
-    [
-     "env.go.jp__content__000337066",
-     "帰還困難区域等における鳥獣捕獲等緊急対策事業",
-     412719,
-     90730081,
-     "位置で決めた項（目次なし）"
-    ],
-    [
-     "env.go.jp__content__000337066",
-     "特定帰還居住区域整備事業",
-     48811888,
-     657539,
-     "位置で決めた項（目次なし）"
-    ],
-    [
-     "env.go.jp__content__000337066",
-     "福島県環境創造センター運営等事業",
-     482466,
-     2975904,
-     "位置で決めた項（目次なし）"
-    ],
-    [
-     "jbaudit.go.jp__jbaudit__bud_clo__bud__pdf__r08__20250903_02",
-     "会計検査院",
-     16775579,
-     16747219,
-     "組織と同名の項（項の額が組織計）"
-    ],
-    [
-     "maff.go.jp__j__budget__attach__pdf__r8yokyusho-6",
-     "東日本大震災復興土地改良事業費負担金等収入一般会計へ繰入",
-     1005,
-     26939,
-     ""
-    ],
-    [
-     "shugiin.go.jp__internet__itdb_annai.nsf__html__statics__osirase__kaikei-saishutsugaisan8.pdf__%24File__kaikei-saishutsugaisan8",
-     "衆議院",
-     71155564,
-     68862155,
-     "組織と同名の項（項の額が組織計）"
-    ]
-   ],
+   "kou_ne_jikou": [],
    "unlisted_kou": [
-    [
-     "env.go.jp__content__",
-     "019",
-     "石油石炭税財源エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入",
-     164800000
-    ],
-    [
-     "env.go.jp__content__",
-     "550",
-     "電源開発促進税財源電源利用対策及原子力安全規制対策費エネルギー対策特別会計へ繰入",
-     44025730
-    ],
-    [
-     "meti.go.jp__main__yosangaisan__fy2026__pdf__eneju_o",
-     "083",
-     "石油石炭税財源エネルギー需給構造高度化対策費先端半導体・人工知能関連技術勘定へ繰入",
-     0
-    ],
-    [
-     "meti.go.jp__main__yosangaisan__fy2026__pdf__eneju_o",
-     "170",
-     "脱炭素成長型経済構造移行推進国立研究開発法人新エネルギー・産業技術総合開発機構運営費",
-     8500000
-    ],
-    [
-     "meti.go.jp__main__yosangaisan__fy2026__pdf__enesen_o",
-     "040",
-     "エネルギー需給構造高度化対策国立研究開発法人新エネルギー・産業技術総合開発機構運営費",
-     0
-    ],
-    [
-     "meti.go.jp__main__yosangaisan__fy2026__pdf__ippan_o",
-     "030",
-     "石油石炭税財源燃料安定供給対策及エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入",
-     402395843
-    ],
-    [
-     "meti.go.jp__main__yosangaisan__fy2026__pdf__ippan_o",
-     "040",
-     "電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ繰入",
-     152505953
-    ],
-    [
-     "mext.go.jp__content__mxt_kaikesou01-000044539_",
-     "440",
-     "電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ繰入",
-     115954146
-    ],
-    [
-     "ndl.go.jp__file__aboutus__outline__finances__r08_budgetrequest",
-     "020",
-     "国立国会図書館施設費",
-     1849963
-    ],
-    [
-     "npa.go.jp__policies__budget__r8__gaisanyokyu__ippankaikei",
-     "095",
-     "交通反則者納金財源交通安全対策特別交付金等交付税及び譲与税配付金特別会計へ繰入",
-     43925007
-    ],
     [
      "cao.go.jp__yosan__soshiki__r08__pdf__",
      "020",
@@ -931,41 +506,39 @@
   },
   "2027": {
    "kou": {
-    "total": 974,
-    "kou_eq_jikou": 971,
-    "kou_ne_jikou": 3,
+    "total": 987,
+    "kou_eq_jikou": 987,
+    "kou_ne_jikou": 0,
     "kou_no_jikou": 0,
     "kou_no_amount": 0,
-    "kou_eq_moku": 914,
-    "kou_ne_moku": 11,
+    "kou_eq_moku": 930,
+    "kou_ne_moku": 8,
     "kou_moku_blank": 38,
     "kou_no_moku": 11,
     "kou_no_moku_image": 0
    },
    "jikou": {
-    "total": 1534,
+    "total": 1546,
     "from_detail_only": 0,
-    "eq": 1451,
+    "eq": 1463,
     "ne": 10,
     "blank": 55,
     "no_moku": 18,
     "no_moku_image": 0,
     "no_amount": 0
    },
-   "moku_rows": 22386,
-   "moku_groups": 8524,
+   "moku_rows": 22398,
+   "moku_groups": 8536,
    "orphan_moku": {
     "no_kou_in_book": 0,
     "before_first_kou": 14,
     "after_context": 0,
-    "in_unlisted_kou": 27
+    "in_unlisted_kou": 15
    },
    "kou_ne_moku_by_reason": {
     "位置で決めた項（目次なし）": 3,
     "画像の頁あり": 4,
-    "明細表の無い分冊あり": 1,
-    "組織と同名の項（項の額が組織計）": 2,
-    "未分類": 1
+    "明細表の無い分冊あり": 1
    },
    "kou_ne_moku": [
     [
@@ -1011,20 +584,6 @@
      "画像の頁あり"
     ],
     [
-     "jbaudit.go.jp__jbaudit__bud_clo__bud__pdf__r09__20260903_02",
-     "会計検査院",
-     16764788,
-     16617589,
-     "組織と同名の項（項の額が組織計）"
-    ],
-    [
-     "maff.go.jp__j__budget__attach__pdf__r9yokyusho-5",
-     "東日本大震災復興土地改良事業費負担金等収入一般会計へ繰入",
-     1005,
-     26939,
-     "未分類"
-    ],
-    [
      "moj.go.jp__content__001470250",
      "公安調査庁共通費",
      15922925,
@@ -1037,111 +596,10 @@
      2637398,
      209714,
      "画像の頁あり"
-    ],
-    [
-     "shugiin.go.jp__internet__itdb_annai.nsf__html__statics__osirase__kaikei-saishutsugaisan9.pdf__%24File__kaikei-saishutsugaisan9",
-     "衆議院",
-     71562777,
-     69279193,
-     "組織と同名の項（項の額が組織計）"
     ]
    ],
-   "kou_ne_jikou": [
-    [
-     "jbaudit.go.jp__jbaudit__bud_clo__bud__pdf__r09__20260903_02",
-     "会計検査院",
-     16764788,
-     16617589,
-     "組織と同名の項（項の額が組織計）"
-    ],
-    [
-     "maff.go.jp__j__budget__attach__pdf__r9yokyusho-5",
-     "東日本大震災復興土地改良事業費負担金等収入一般会計へ繰入",
-     1005,
-     26939,
-     ""
-    ],
-    [
-     "shugiin.go.jp__internet__itdb_annai.nsf__html__statics__osirase__kaikei-saishutsugaisan9.pdf__%24File__kaikei-saishutsugaisan9",
-     "衆議院",
-     71562777,
-     69279193,
-     "組織と同名の項（項の額が組織計）"
-    ]
-   ],
+   "kou_ne_jikou": [],
    "unlisted_kou": [
-    [
-     "env.go.jp__content__",
-     "019",
-     "石油石炭税財源エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入",
-     97263000
-    ],
-    [
-     "env.go.jp__content__",
-     "550",
-     "電源開発促進税財源電源利用対策及原子力安全規制対策費エネルギー対策特別会計へ繰入",
-     45145424
-    ],
-    [
-     "env.go.jp__content__",
-     "083",
-     "石油石炭税財源エネルギー需給構造高度化対策費先端半導体・人工知能関連技術勘定へ繰入",
-     5144087
-    ],
-    [
-     "env.go.jp__content__",
-     "170",
-     "脱炭素成長型経済構造移行推進国立研究開発法人新エネルギー・産業技術総合開発機構運営費",
-     15280000
-    ],
-    [
-     "meti.go.jp__main__yosangaisan__fy2027__pdf__eneju_o",
-     "083",
-     "石油石炭税財源エネルギー需給構造高度化対策費先端半導体・人工知能関連技術勘定へ繰入",
-     5144087
-    ],
-    [
-     "meti.go.jp__main__yosangaisan__fy2027__pdf__eneju_o",
-     "170",
-     "脱炭素成長型経済構造移行推進国立研究開発法人新エネルギー・産業技術総合開発機構運営費",
-     15280000
-    ],
-    [
-     "meti.go.jp__main__yosangaisan__fy2027__pdf__enesen_o",
-     "040",
-     "エネルギー需給構造高度化対策国立研究開発法人新エネルギー・産業技術総合開発機構運営費",
-     5144087
-    ],
-    [
-     "meti.go.jp__main__yosangaisan__fy2027__pdf__enesen_o",
-     "080",
-     "脱炭素成長型経済構造移行推進国立研究開発法人新エネルギー・産業技術総合開発機構運営費",
-     0
-    ],
-    [
-     "meti.go.jp__main__yosangaisan__fy2027__pdf__ippan_o",
-     "030",
-     "石油石炭税財源燃料安定供給対策及エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入",
-     375813157
-    ],
-    [
-     "meti.go.jp__main__yosangaisan__fy2027__pdf__ippan_o",
-     "040",
-     "電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ繰入",
-     151206596
-    ],
-    [
-     "mext.go.jp__content__mxt_kaikesou01-000051991_",
-     "440",
-     "電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ繰入",
-     118598051
-    ],
-    [
-     "npa.go.jp__policies__budget__R9__gaisanyokyu__ippankaikei",
-     "095",
-     "交通反則者納金財源交通安全対策特別交付金等交付税及び譲与税配付金特別会計へ繰入",
-     40911272
-    ],
     [
      "cao.go.jp__yosan__soshiki__r09__pdf__",
      "020",

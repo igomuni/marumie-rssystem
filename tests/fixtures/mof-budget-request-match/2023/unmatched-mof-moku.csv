@@ -404,7 +404,6 @@ moku-general:986,general,121,公正取引委員会,施設整備費,kou_matched_n
 moku-general:1008,general,131,警察庁共通費,主要国首脳会議開催業務職員旅費,kou_matched_no_request_row,内閣府,警察庁,,
 moku-general:1017,general,131,警察庁共通費,主要国首脳会議開催業務庁費,kou_matched_no_request_row,内閣府,警察庁,,
 moku-general:1047,general,136,交通警察費,都道府県警察施設災害復旧費補助金,kou_matched_no_request_row,内閣府,警察庁,,
-moku-general:1048,general,145,交通反則者納金財源交通安全対策特別交付金等交付税及び譲与税配付金特別会計へ繰入,交通反則者納金財源の交付税及び譲与税配付金特別会計へ繰入,kou_not_matched,内閣府,警察庁,,
 moku-general:1111,general,143,警察活動基盤整備費,船舶購入費,kou_matched_no_request_row,内閣府,警察庁,,
 moku-general:1114,general,143,警察活動基盤整備費,都道府県警察施設災害復旧費補助金,kou_matched_no_request_row,内閣府,警察庁,,
 moku-general:1116,general,221,個人情報保護委員会,職員基本給,kou_matched_no_request_row,内閣府,個人情報保護委員会,,
@@ -863,7 +862,6 @@ moku-general:2843,general,032,研究開発推進費,国立研究開発法人理�
 moku-general:2844,general,032,研究開発推進費,国立研究開発法人量子科学技術研究開発機構設備整備費補助金,kou_matched_no_request_row,文部科学省,文部科学本省,,
 moku-general:2845,general,032,研究開発推進費,国立研究開発法人物質・材料研究機構設備整備費補助金,kou_matched_no_request_row,文部科学省,文部科学本省,,
 moku-general:2846,general,032,研究開発推進費,国立研究開発法人日本原子力研究開発機構設備整備費補助金,kou_matched_no_request_row,文部科学省,文部科学本省,,
-moku-general:2871,general,044,電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ繰入,電源開発促進税財源のエネルギー対策特別会計へ繰入,kou_not_matched,文部科学省,文部科学本省,,
 moku-general:2877,general,054,公立文教施設整備費,部活動地域移行促進公立学校施設整備費補助金,kou_matched_no_request_row,文部科学省,文部科学本省,,
 moku-general:2879,general,054,公立文教施設整備費,公立社会教育施設災害復旧費補助金,kou_matched_no_request_row,文部科学省,文部科学本省,,
 moku-general:2913,general,058,国際交流・協力推進費,海外留学促進事業委託費,kou_matched_no_request_row,文部科学省,文部科学本省,,
@@ -1005,8 +1003,6 @@ moku-general:4942,general,071,産業保安監督官署,施設整備費,kou_not_m
 moku-general:4943,general,071,産業保安監督官署,交際費,kou_not_matched,経済産業省,産業保安監督官署,,
 moku-general:4962,general,082,鉱物資源安定供給確保費,鉱物資源安定供給確保事業委託費,kou_matched_no_request_row,経済産業省,資源エネルギー庁,,
 moku-general:4963,general,082,鉱物資源安定供給確保費,鉱物資源安定供給確保事業費補助金,kou_matched_no_request_row,経済産業省,資源エネルギー庁,,
-moku-general:4965,general,083,石油石炭税財源燃料安定供給対策及エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入,石油石炭税財源のエネルギー対策特別会計へ繰入,kou_not_matched,経済産業省,資源エネルギー庁,,
-moku-general:4966,general,084,電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ繰入,電源開発促進税財源のエネルギー対策特別会計へ繰入,kou_not_matched,経済産業省,資源エネルギー庁,,
 moku-general:4969,general,086,脱炭素化産業成長促進対策費,脱炭素化産業成長促進対策費補助金,kou_not_matched,経済産業省,資源エネルギー庁,,
 moku-general:4971,general,088,エネルギー需給構造高度化対策費,エネルギー価格激変緩和対策事業費補助金,kou_not_matched,経済産業省,資源エネルギー庁,,
 moku-general:4987,general,102,中小企業政策推進費,非常勤職員手当,kou_not_matched,経済産業省,中小企業庁,,
@@ -1043,7 +1039,6 @@ moku-general:6304,general,257,船舶交通安全基盤災害復旧事業費,船�
 moku-general:6305,general,265,船舶交通安全基盤災害復旧事業工事諸費,超過勤務手当,kou_not_matched,国土交通省,海上保安庁,,
 moku-general:6306,general,265,船舶交通安全基盤災害復旧事業工事諸費,工事施行旅費,kou_not_matched,国土交通省,海上保安庁,,
 moku-general:6307,general,265,船舶交通安全基盤災害復旧事業工事諸費,工事雑費,kou_not_matched,国土交通省,海上保安庁,,
-moku-general:6350,general,003,石油石炭税財源エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入,石油石炭税財源のエネルギー対策特別会計へ繰入,kou_not_matched,環境省,環境本省,,
 moku-general:6356,general,004,地球環境保全費,主要国首脳会議開催業務職員旅費,kou_matched_no_request_row,環境省,環境本省,,
 moku-general:6359,general,004,地球環境保全費,主要国首脳会議開催業務庁費,kou_matched_no_request_row,環境省,環境本省,,
 moku-general:6365,general,004,地球環境保全費,政府開発援助アジア開発銀行等拠出金,kou_matched_no_request_row,環境省,環境本省,,
@@ -1052,7 +1047,6 @@ moku-general:6438,general,011,化学物質対策推進費,汚染土壌処理業�
 moku-general:6484,general,015,環境政策基盤整備費,新産業創出等研究開発推進事業費補助金,kou_matched_no_request_row,環境省,環境本省,,
 moku-general:6533,general,029,脱炭素化産業成長促進対策費,脱炭素化産業成長促進対策委託費,kou_not_matched,環境省,環境本省,,
 moku-general:6534,general,029,脱炭素化産業成長促進対策費,脱炭素化産業成長促進対策費補助金,kou_not_matched,環境省,環境本省,,
-moku-general:6609,general,053,電源開発促進税財源電源利用対策及原子力安全規制対策費エネルギー対策特別会計へ繰入,電源開発促進税財源のエネルギー対策特別会計へ繰入,kou_not_matched,環境省,原子力規制委員会,,
 moku-general:6652,general,002,防衛本省施設費,施設施工旅費,kou_matched_no_request_row,防衛省,防衛本省,,
 moku-general:6653,general,002,防衛本省施設費,施設施工庁費,kou_matched_no_request_row,防衛省,防衛本省,,
 moku-general:6654,general,002,防衛本省施設費,施設整備費,kou_matched_no_request_row,防衛省,防衛本省,,
@@ -1142,7 +1136,6 @@ moku-special:552,special,03,諸支出金,貨幣交換差減補填金,kou_matched
 moku-special:561,special,04,諸支出金,貨幣交換差減補填金,kou_matched_no_request_row,内閣府及び厚生労働省,,年金,国民年金勘定
 moku-special:570,special,04,諸支出金,貨幣交換差減補填金,kou_matched_no_request_row,内閣府及び厚生労働省,,年金,厚生年金勘定
 moku-special:588,special,02,地域子ども・子育て支援及仕事・子育て両立支援事業費,仕事・子育て両立支援事業適正化業務委託費,kou_matched_no_request_row,内閣府及び厚生労働省,,年金,子ども・子育て支援勘定
-moku-special:730,special,14,東日本大震災復興土地改良事業費負担金等収入東日本大震災復興特別会計へ繰入,土地改良事業費負担金収入繰入,kou_not_matched,農林水産省,,食料安定供給,国営土地改良事業勘定
 moku-special:779,special,02,事務取扱費,貨幣交換差減補填金,kou_matched_no_request_row,経済産業省,,特許,
 moku-special:789,special,01,自動車損害賠償保障事業費,自動車損害賠償保障事業委託費,kou_not_matched,国土交通省,,自動車安全,自動車事故対策勘定
 moku-special:790,special,01,自動車損害賠償保障事業費,払戻金,kou_not_matched,国土交通省,,自動車安全,自動車事故対策勘定
