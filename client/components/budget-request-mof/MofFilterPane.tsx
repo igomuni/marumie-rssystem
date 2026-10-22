@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import type { BudgetRequestMofKind, BudgetRequestMofRow } from '@/types/budget-request-mof';
 import { MultiSelectCombo } from '@/client/components/mof-kou/MultiSelectCombo';
+import { NONE_SELECTED } from '@/app/lib/filter-selection';
 import { RegexTextFilter } from '@/client/components/mof-kou/RegexTextFilter';
 import { MAX_REGEX_PATTERN_LENGTH } from '@/app/lib/sankey-query';
 import { INITIAL_MOF_FILTERS, JOINT, KIND_LABEL, acctLabelOf, isJoint, publishersOf, type MofDiffFilter, type MofFilters } from '@/app/lib/budget-request-mof';
@@ -29,14 +30,16 @@ export function MofFilterPane({ rows, urls, year, filters, onChange }: { rows: r
   const typeCount = useMemo(() => tally(inYear.map(r => r.types)), [inYear]);
   const [open, setOpen] = useState<'group' | 'acct' | null>(null);
   const set = (patch: Partial<MofFilters>) => onChange({ ...filters, ...patch });
-  // コンボの選択肢は「名称（件数）」。選択状態は名称で持つ（年度を替えて選択肢に無い名称は、そのまま残す）
+  // コンボの選択肢は「名称（件数）」。選択状態は名称で持つ（年度を替えて選択肢に無い名称は、件数 0 で選択肢に残す）
   const comboProps = (entries: [string, number][], selected: string[], key: 'groups' | 'accts', field: 'group' | 'acct') => {
-    const labelOf = new Map(entries.map(([name, n]) => [name, `${name}（${n.toLocaleString()}）`]));
+    // 選んだのにこの年度に無い名前も、件数 0 の選択肢として出す（見えないまま絞り込んで 0 件になるのを防ぎ、外せるようにする）
+    const all: [string, number][] = [...entries, ...selected.filter(v => v !== NONE_SELECTED && !entries.some(([n]) => n === v)).map(v => [v, 0] as [string, number])];
+    const labelOf = new Map(all.map(([name, n]) => [name, `${name}（${n.toLocaleString()}）`]));
     const nameOf = new Map([...labelOf].map(([name, label]) => [label, name]));
     return {
       options: [...labelOf.values()],
-      selected: selected.filter(v => labelOf.has(v)).map(v => labelOf.get(v)!),
-      onChange: (next: string[]) => set({ [key]: [...selected.filter(v => !labelOf.has(v)), ...next.map(l => nameOf.get(l)!)] } as Partial<MofFilters>),
+      selected: selected.map(v => (v === NONE_SELECTED ? v : labelOf.get(v) ?? v)),
+      onChange: (next: string[]) => set({ [key]: next.map(l => (l === NONE_SELECTED ? l : nameOf.get(l) ?? l)) } as Partial<MofFilters>),
       open: open === field,
       onOpenChange: (o: boolean) => setOpen(o ? field : open === field ? null : open),
     };
