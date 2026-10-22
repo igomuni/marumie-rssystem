@@ -32,6 +32,9 @@ export interface BudgetRequestTrendYear {
   jikou?: BudgetRequestJikou;
   /** この項の組織の行の備考に事項要求の記載がある（組織全体の事項要求。どの項に含まれるかは要求書に書かれていない）。値は備考の本文 */
   orgJikou?: string;
+  /** 事項・目の数（detail.json.gz からページで合流する。目は事項をまたいで目名 + 目別で数える） */
+  nJikou?: number;
+  nMoku?: number;
 }
 
 /** 事項要求の記載の形（印 = 「（事項要求）」 / 文 = 文中の言及）と、最初の出現の行 */

@@ -17,7 +17,7 @@ import { YearSelect } from '@/components/navigation/YearSelect';
 import { usePersistedState } from '@/client/hooks/usePersistedState';
 import { fetchGzipJson } from '@/app/lib/v2-public-linkage';
 import type { BudgetRequestJikouData, BudgetRequestTrendData, BudgetRequestTrendDetailData, BudgetRequestTrendRow } from '@/types/budget-request-trend';
-import { INITIAL_TREND_FILTERS, filterRows, mergeJikou, sortRows, type TrendFilters, type TrendSortDir, type TrendSortKey } from '@/app/lib/budget-request-trend';
+import { INITIAL_TREND_FILTERS, filterRows, mergeDetailCounts, mergeJikou, sortRows, type TrendFilters, type TrendSortDir, type TrendSortKey } from '@/app/lib/budget-request-trend';
 import { TrendFilterPane } from '@/client/components/budget-request-trend/TrendFilterPane';
 import { TrendListPane } from '@/client/components/budget-request-trend/TrendListPane';
 import { TrendDetailPane, type TrendDetailTab } from '@/client/components/budget-request-trend/TrendDetailPane';
@@ -45,7 +45,7 @@ function Splitter({ label, width, limits, dir, onChange }: { label: string; widt
 }
 
 export default function BudgetRequestTrendPage() {
-  const [data, setData] = useState<BudgetRequestTrendData | null>(null);
+  const [baseData, setData] = useState<BudgetRequestTrendData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [year, setYear] = usePersistedState<number | null>('budget-request-trend:year', null);
   const [filters, setFilters] = useState<TrendFilters>(INITIAL_TREND_FILTERS);
@@ -71,6 +71,8 @@ export default function BudgetRequestTrendPage() {
     return () => controller.abort();
   }, []);
 
+  // 事項・目の数は、内訳（detail.json.gz）が届いたら行の年度の値に合流する（一覧の「事項」「目」の列と並べ替え）
+  const data = useMemo(() => (baseData && detail ? mergeDetailCounts(baseData, detail) : baseData), [baseData, detail]);
   const years = data?.years ?? [];
   const activeYear = data ? (year !== null && years.includes(year) ? year : years[years.length - 1]) : null;
 
@@ -99,7 +101,7 @@ export default function BudgetRequestTrendPage() {
   const lastYear = years[years.length - 1];
   const onSort = (k: TrendSortKey) => {
     if (k === sortKey) setSortDir(d => (d === 1 ? -1 : 1));
-    else { setSortKey(k); setSortDir(k === 'acct' || k === 'group' || k === 'org' || k === 'name' || k === 'pattern' ? 1 : -1); }
+    else { setSortKey(k); setSortDir(k === 'acct' || k === 'group' || k === 'org' || k === 'name' || k === 'pattern' ? 1 : -1); } // 事項・目の数は多い順から
   };
 
   return (

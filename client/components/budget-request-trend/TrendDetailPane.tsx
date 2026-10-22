@@ -108,7 +108,7 @@ export function TrendDetailPane({
         detailError ? <p className="text-red-700">事項・目の内訳の読み込みに失敗しました。</p>
           : !detail ? <p className="text-neutral-500">事項・目の内訳を読み込み中…</p>
           : tab === 'jikou' ? <JikouTab row={row} years={years} year={year} detail={detail} onSelectYear={onSelectYear} />
-          : <MokuTab row={row} year={year} detail={detail} />
+          : <MokuTab row={row} years={years} year={year} detail={detail} onSelectYear={onSelectYear} />
       ) : (<>
       <div className="flex flex-wrap gap-x-4 text-[11px] text-neutral-500">
         <span><i className="mr-1 inline-block h-2.5 w-2.5 bg-emerald-700 align-[-1px] dark:bg-emerald-400" />要求額</span>

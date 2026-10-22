@@ -24,49 +24,69 @@ function Missing({ year }: { year: number }) {
   return <p className="text-neutral-500">FY{year} の内訳はありません（この年度の要求書に無い、明細表が取れていない、または項の名前・所属がこの年度で違う）。</p>;
 }
 
-/** 事項の年度推移: 行 = 事項名、列 = 年度の要求額（総表の値） */
+/**
+ * 年度の表: 行 = 事項・目、列 = 年度の要求額。列の年度を押すと年度が切り替わる。最後に計（項の要求額と合わなければ色付き）。
+ * value が undefined の年度は、その行がその年度に無い
+ */
+function YearMatrix({ row, years, year, onSelectYear, head, keys, label, badge, value, has, totalLabel }: {
+  row: BudgetRequestTrendRow; years: readonly number[]; year: number; onSelectYear: (y: number) => void;
+  head: string; keys: string[]; label: (k: string) => string; badge?: (k: string) => React.ReactNode;
+  value: (y: number, k: string) => number | null | undefined; has: (y: number) => boolean; totalLabel: string;
+}) {
+  const hl = (y: number) => (y === year ? 'bg-emerald-50 dark:bg-emerald-950/40' : '');
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full border-collapse">
+        <thead>
+          <tr className="text-[11px] text-neutral-500">
+            <th className={`${th} text-left`}>{head}</th>
+            {years.map(y => (
+              <th key={y} onClick={() => onSelectYear(y)} className={`${th} cursor-pointer text-right ${y === year ? 'bg-emerald-50 text-neutral-900 dark:bg-emerald-950/40 dark:text-neutral-100' : ''}`}>{y}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {keys.map(k => (
+            <tr key={k} className="border-t border-neutral-100 dark:border-neutral-800">
+              <td className="px-1.5 py-1">{label(k)}{badge?.(k)}</td>
+              {years.map(y => { const v = value(y, k); return <td key={y} className={`${num} ${hl(y)}`}>{v === undefined ? <span className="text-neutral-400">–</span> : formatSen(v)}</td>; })}
+            </tr>
+          ))}
+          <tr className="border-t border-neutral-300 font-medium dark:border-neutral-600">
+            <td className="px-1.5 py-1">{totalLabel}</td>
+            {years.map(y => {
+              if (!has(y)) return <td key={y} className={`${num} ${hl(y)}`}><span className="text-neutral-400">–</span></td>;
+              const s = keys.reduce((t, k) => t + (value(y, k) ?? 0), 0); const kou = yearOf(row, y)?.req ?? null;
+              return <td key={y} title={s !== kou ? `項の要求額 ${formatSen(kou)} と合わない` : undefined} className={`${num} ${hl(y)} ${s !== kou ? 'text-amber-700 dark:text-amber-400' : ''}`}>{formatSen(s)}</td>;
+            })}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/** 並び: 選択中の年度の順、続けてほかの年度にだけあるもの（新しい年度から） */
+const orderKeys = (years: readonly number[], year: number, keysOf: (y: number) => string[]): string[] => {
+  const out: string[] = [];
+  for (const y of [year, ...[...years].reverse()]) for (const k of keysOf(y)) if (!out.includes(k)) out.push(k);
+  return out;
+};
+
+/** 事項の年度推移（行 = 事項名、列 = 年度の要求額。総表の値）と、選択中の年度の事項ごとの目 */
 export function JikouTab({ row, years, year, detail, onSelectYear }: { row: BudgetRequestTrendRow; years: readonly number[]; year: number; detail: BudgetRequestTrendDetailData; onSelectYear: (y: number) => void }) {
   const byYear = new Map(years.map(y => [y, breakdownOf(detail, row, y)]));
   if (![...byYear.values()].some(Boolean)) return <Missing year={year} />;
-  // 並び: 選択中の年度の順、続けてほかの年度にだけある事項（新しい年度から）
-  const names: string[] = [];
-  for (const y of [year, ...[...years].reverse()]) for (const j of byYear.get(y)?.j ?? []) if (!names.includes(j[1])) names.push(j[1]);
+  const names = orderKeys(years, year, y => (byYear.get(y)?.j ?? []).map(j => j[1]));
   const cell = (y: number, name: string) => byYear.get(y)?.j.find(j => j[1] === name);
   const cur = byYear.get(year);
   const odd = cur?.j.filter(j => j[5] !== '一致') ?? [];
   return (
     <div className="flex flex-col gap-2">
       <p className="text-[11px] text-neutral-500">事項ごとの要求額（総表の値）。列の年度を押すと、その年度に切り替わります。選択中の年度は色付き。</p>
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="text-[11px] text-neutral-500">
-              <th className={`${th} text-left`}>事項</th>
-              {years.map(y => (
-                <th key={y} onClick={() => onSelectYear(y)} className={`${th} cursor-pointer text-right ${y === year ? 'bg-emerald-50 text-neutral-900 dark:bg-emerald-950/40 dark:text-neutral-100' : ''}`}>{y}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {names.map(n => (
-              <tr key={n} className="border-t border-neutral-100 dark:border-neutral-800">
-                <td className="px-1.5 py-1">
-                  {n}
-                  {cell(year, n) && cell(year, n)![5] !== '一致' && <span className="ml-1 text-[10px] text-amber-700 dark:text-amber-400" title={STATUS_NOTE[cell(year, n)![5]]}>{cell(year, n)![5]}</span>}
-                </td>
-                {years.map(y => <td key={y} className={`${num} ${y === year ? 'bg-emerald-50 dark:bg-emerald-950/40' : ''}`}>{cell(y, n) ? formatSen(cell(y, n)![3]) : <span className="text-neutral-400">–</span>}</td>)}
-              </tr>
-            ))}
-            <tr className="border-t border-neutral-300 font-medium dark:border-neutral-600">
-              <td className="px-1.5 py-1">事項の計</td>
-              {years.map(y => {
-                const b = byYear.get(y); const s = b ? b.j.reduce((t, j) => t + (j[3] ?? 0), 0) : null; const kou = yearOf(row, y)?.req ?? null;
-                return <td key={y} title={b && s !== kou ? `項の要求額 ${formatSen(kou)} と合わない` : undefined} className={`${num} ${y === year ? 'bg-emerald-50 dark:bg-emerald-950/40' : ''} ${b && s !== kou ? 'text-amber-700 dark:text-amber-400' : ''}`}>{b ? formatSen(s) : <span className="text-neutral-400">–</span>}</td>;
-              })}
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <YearMatrix row={row} years={years} year={year} onSelectYear={onSelectYear} head="事項" keys={names} label={n => n} totalLabel="事項の計"
+        badge={n => { const c = cell(year, n); return c && c[5] !== '一致' ? <span className="ml-1 text-[10px] text-amber-700 dark:text-amber-400" title={STATUS_NOTE[c[5]]}>{c[5]}</span> : null; }}
+        value={(y, n) => { const c = cell(y, n); return c ? c[3] : undefined; }} has={y => !!byYear.get(y)} />
       {odd.length > 0 && (
         <div className="rounded border-l-[3px] border-amber-600 bg-amber-50 px-2.5 py-1.5 text-neutral-800 dark:bg-amber-950/40 dark:text-neutral-200">
           {odd.map(j => <p key={j[1]}>FY{year}「{j[1]}」: {STATUS_NOTE[j[5]] ?? j[5]}{j[4] !== null ? `（目の合計 ${formatSen(j[4])}、事項の額 ${formatSen(j[3])}）` : ''}。</p>)}
@@ -140,7 +160,7 @@ function MokuFootnote({ fromSub, blanks }: { fromSub: boolean; blanks: boolean }
 }
 
 /** 選択中の年度の目を項全体で集計（目名 + 目別で、事項をまたいで足す）。各目の下に事項ごとの内訳 */
-export function MokuTab({ row, year, detail }: { row: BudgetRequestTrendRow; year: number; detail: BudgetRequestTrendDetailData }) {
+export function MokuTab({ row, years, year, detail, onSelectYear }: { row: BudgetRequestTrendRow; years: readonly number[]; year: number; detail: BudgetRequestTrendDetailData; onSelectYear: (y: number) => void }) {
   const b = breakdownOf(detail, row, year);
   if (!b) return <Missing year={year} />;
   type G = { name: string; prev: number | null; req: number | null; fromSub: number; blanks: number; parts: { jikou: string; prev: number | null; req: number | null }[] };
@@ -156,9 +176,16 @@ export function MokuTab({ row, year, detail }: { row: BudgetRequestTrendRow; yea
   const list = [...groups.values()];
   const total = (f: 'prev' | 'req') => list.reduce((t, g) => t + (g[f] ?? 0), 0);
   const kouReq = yearOf(row, year)?.req ?? null;
+  // 年度の表: 目名 + 目別ごとに、事項をまたいで足した要求額
+  const sums = new Map(years.map(y => { const bb = breakdownOf(detail, row, y); const m = new Map<string, number | null>(); for (const x of bb?.m ?? []) { const k = `${x[1]}|${x[2]}`; m.set(k, x[4] === null ? m.get(k) ?? null : (m.get(k) ?? 0) + x[4]); } return [y, bb ? m : null]; }));
+  const keys = orderKeys(years, year, y => [...(sums.get(y)?.keys() ?? [])]);
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-[11px] text-neutral-500">FY{year}・目 {list.length}。項の中の同じ目（目名 + 目別）を事項をまたいで足した額。各目の下は事項ごとの内訳（2 つ以上の事項にまたがる目だけ）。</p>
+      <p className="text-[11px] text-neutral-500">目ごとの要求額（項の中の同じ目を事項をまたいで足した額）。列の年度を押すと、その年度に切り替わります。選択中の年度は色付き。</p>
+      <YearMatrix row={row} years={years} year={year} onSelectYear={onSelectYear} head="目" keys={keys} label={k => k.split('|')[0]} totalLabel="目の計"
+        value={(y, k) => { const m = sums.get(y); return m && m.has(k) ? m.get(k)! : undefined; }} has={y => !!sums.get(y)} />
+      <p className="mt-1 text-[11px] font-semibold text-neutral-500">FY{year} の目（目 {list.length}）と事項ごとの内訳</p>
+      <p className="text-[11px] text-neutral-500">項の中の同じ目（目名 + 目別）を事項をまたいで足した額。各目の下は事項ごとの内訳（2 つ以上の事項にまたがる目だけ）。</p>
       <table className="w-full border-collapse">
         <thead>
           <tr className="text-[11px] text-neutral-500">
