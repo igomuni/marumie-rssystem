@@ -43,10 +43,13 @@ export default function BudgetRequestMofPage() {
   const [data, setData] = useState<BudgetRequestMofData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [year, setYear] = usePersistedState<number | null>('budget-request-mof:year', null);
-  const [filters, setFilters] = useState<MofFilters>(INITIAL_MOF_FILTERS);
-  const [sortKey, setSortKey] = useState<MofSortKey>('diff');
-  const [sortDir, setSortDir] = useState<MofSortDir>(-1);
-  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  // フィルタ・並べ替え・選んだ項も、再読み込みで戻らないよう localStorage に保存する。
+  // フィルタは保存値を既定値の上に重ねる（項目が増えた後に、古い保存値を読んでも欠けないように）
+  const [storedFilters, setFilters] = usePersistedState<MofFilters>('budget-request-mof:filters', INITIAL_MOF_FILTERS);
+  const filters = useMemo(() => ({ ...INITIAL_MOF_FILTERS, ...storedFilters }), [storedFilters]);
+  const [sortKey, setSortKey] = usePersistedState<MofSortKey>('budget-request-mof:sortKey', 'diff');
+  const [sortDir, setSortDir] = usePersistedState<MofSortDir>('budget-request-mof:sortDir', -1);
+  const [selectedKey, setSelectedKey] = usePersistedState<string | null>('budget-request-mof:selected', null);
   const [filterWidth, setFilterWidth] = usePersistedState('budget-request-mof:filterWidth', FILTER_WIDTH.def);
   const [detailWidth, setDetailWidth] = usePersistedState('budget-request-mof:detailWidth', DETAIL_WIDTH.def);
   const [columnWidths, setColumnWidths] = usePersistedState<Record<string, number>>('budget-request-mof:columnWidths', {});

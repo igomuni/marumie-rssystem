@@ -98,6 +98,17 @@ for (const t of trees.values()) if (!ctxOf.has(t.slug)) {
 // 名称が変わった組織・項（MOF 側の呼び方に合わせる。FY2023 の厚労省 国立更生援護機関 → 国立障害者リハビリテーションセンター）
 const RENAMES: [string, string][] = [['国立更生援護機関', '国立障害者リハビリテーションセンター'], ['国立更生援護所', '国立障害者リハビリテーションセンター']];
 const ren = (s: string): string => RENAMES.reduce((x, [a, b]) => x.split(a).join(b), s);
+// 項名の対応（完全一致。所管|組織|概算要求の項名 → 予算書の項名）。原文と予算書の目で確かめたものだけ（docs/mof-budget-request-match.md）。
+// FY2023 のこども家庭庁（2023 年 4 月発足）は、概算要求（2022 年 8 月）が仮の項名で、予算書で確定した。2 つの項が 1 つになったもの（統合）もある
+const KOU_RENAMES = new Map<string, string>([
+  ['内閣府|こども家庭庁|保育等対策費', '保育対策費'], // 目の就学前教育・保育施設整備交付金は、予算書では児童福祉施設等整備費へ
+  ['内閣府|こども家庭庁|国立児童自立支援施設費', '国立児童自立支援施設'],
+  ['内閣府|こども家庭庁|国立児童自立支援施設運営費', '国立児童自立支援施設'],
+  ['内閣府|こども家庭庁|国立児童自立支援施設施設整備費', '国立児童自立支援施設整備費'],
+  ['内閣府|こども家庭庁|こども家庭推進費', 'こども政策推進費'],
+  ['内閣府|こども家庭庁|こども家庭調査研究等推進費', 'こども政策推進費'], // 目のこども家庭行政推進調査事業費補助金・こども家庭科学研究費補助金は、予算書ではこども政策推進費
+  ['内閣府|こども家庭庁|児童福祉施設整備費', '児童福祉施設等整備費'],
+]);
 const sources = [...new Set([...trees.keys(), ...detailV.keys(), ...totalV.keys()])].sort();
 
 // ---------------------------------------------------------------- M0
@@ -184,6 +195,8 @@ for (const s of sources) {
     if (links[i]?.amt === 0 && links[i]?.prev === 0) zeroKou.add(`${s}#${k.idx}`);
     let c: Cand = a === 'general' && sc.org === undefined ? (kouByMinName.get(`${sc.ministry}|${k.name}`) ?? []) : (kouIdx[a].get(a === 'general' ? [sc.ministry, sc.org, k.name].join('|') : [sc.account, sc.sub, k.name].join('|')) ?? []);
     if (c.length === 0 && a === 'general' && ren(k.name) !== k.name) c = kouIdx[a].get([sc.ministry, sc.org, ren(k.name)].join('|')) ?? []; // 名称の変更
+    let renamed = false;
+    if (c.length === 0 && a === 'general') { const to = KOU_RENAMES.get([sc.ministry, sc.org, k.name].join('|')); if (to) { c = kouIdx[a].get([sc.ministry, sc.org, to].join('|')) ?? []; renamed = c.length > 0; } }
     // 組織が分からない source（TOC なし）で、同名の項が複数の組織にあるときは、総表の行の並びから決めた組織で絞る
     const linkOrg = links[i]?.org;
     if (a === 'general' && sc.org === undefined && c.length > 1 && linkOrg) { const narrowed = c.filter(ci => ns(mofRaw['kou-general'][ci]['組織']) === linkOrg); if (narrowed.length >= 1) c = narrowed; }
@@ -193,7 +206,7 @@ for (const s of sources) {
     for (const ci of c) {
       const r = mofRaw[`kou-${a}`][ci]; refKou.add(id(`kou-${a}`, ci));
       const ma = mofAmountKou(r);
-      m1.push([...head, id(`kou-${a}`, ci), r['項名'], c.length, st, '', reqAmt, ma ?? '', typeof reqAmt === 'number' && ma !== null ? reqAmt - ma : '', scopeText(`${s}#${k.idx}`)]);
+      m1.push([...head, id(`kou-${a}`, ci), r['項名'], c.length, st, renamed ? 'kou_renamed' : '', reqAmt, ma ?? '', typeof reqAmt === 'number' && ma !== null ? reqAmt - ma : '', scopeText(`${s}#${k.idx}`)]);
     }
   });
 }

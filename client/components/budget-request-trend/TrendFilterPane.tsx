@@ -5,7 +5,7 @@ import type { BudgetRequestTrendRow } from '@/types/budget-request-trend';
 import { MultiSelectCombo } from '@/client/components/mof-kou/MultiSelectCombo';
 import { RegexTextFilter } from '@/client/components/mof-kou/RegexTextFilter';
 import { MAX_REGEX_PATTERN_LENGTH } from '@/app/lib/sankey-query';
-import { INITIAL_TREND_FILTERS, acctLabelOf, groupsOf, recordsOf, inAllYears, isGone, isNew, yearOf, type ChangeFilter, type PatternFilter, type TrendFilters } from '@/app/lib/budget-request-trend';
+import { INITIAL_TREND_FILTERS, MULTI_GROUP, acctLabelOf, groupsOf, isShares, isSharedBooks, recordsOf, inAllYears, isGone, isNew, yearOf, type ChangeFilter, type PatternFilter, type TrendFilters } from '@/app/lib/budget-request-trend';
 
 const section = 'flex flex-col gap-1.5 border-b border-neutral-200 px-3 py-2.5 dark:border-neutral-800';
 const heading = 'text-[11px] font-semibold tracking-wide text-neutral-500';
@@ -30,8 +30,11 @@ export function TrendFilterPane({
   const first = years[0];
   const groups = useMemo(() => {
     const m = new Map<string, number>();
-    for (const r of rows) if (yearOf(r, year)) for (const g of groupsOf(r, year, urls)) m.set(g, (m.get(g) ?? 0) + 1);
-    return [...m.entries()].sort((a, b) => b[1] - a[1]);
+    let multi = 0;
+    for (const r of rows) if (yearOf(r, year)) { const gs = groupsOf(r, year, urls); for (const g of gs) m.set(g, (m.get(g) ?? 0) + 1); if (gs.length > 1) multi++; }
+    // 府省ごと（件数はその府省が載せている項。複数所管の項も数える）と、末尾に「複数所管」
+    const list = [...m.entries()].sort((a, b) => b[1] - a[1]);
+    return multi > 0 ? [...list, [MULTI_GROUP, multi] as [string, number]] : list;
   }, [rows, year, urls]);
   // 会計の選択肢: 一般会計と、特別会計ごと（件数の多い順）。件数は選択年度に載る項
   const accts = useMemo(() => {
@@ -39,24 +42,25 @@ export function TrendFilterPane({
     for (const r of rows) if (yearOf(r, year)) m.set(acctLabelOf(r), (m.get(acctLabelOf(r)) ?? 0) + 1);
     return [...m.entries()].sort((a, b) => (a[0] === '一般会計' ? -1 : b[0] === '一般会計' ? 1 : b[1] - a[1]));
   }, [rows, year]);
-  // 頁の状態は所管（府省）ごとのレコードで数える
+  // 頁の状態は一覧のレコード（項）で数える
   const pdfStates = useMemo(() => rows.flatMap(r => (yearOf(r, year) ? recordsOf(r, year, urls) : [])), [rows, year, urls]);
   const counts = useMemo(
     () => ({
       all5: rows.filter(r => inAllYears(r, years)).length,
       isNew: rows.filter(r => isNew(r, year, first)).length,
       isGone: rows.filter(r => isGone(r, year, first)).length,
-      shared: rows.filter(r => (yearOf(r, year)?.src.length ?? 0) > 1).length,
-      mismatch: rows.filter(r => yearOf(r, year)?.mismatch).length,
+      shared: pdfStates.filter(isSharedBooks).length,
+      mismatch: rows.filter(r => yearOf(r, year)?.mismatch && !isShares(r, year, urls)).length,
+      shares: rows.filter(r => isShares(r, year, urls)).length,
       transfer: rows.filter(r => (yearOf(r, year)?.xfer?.length ?? 0) > 0).length,
       codeChange: rows.filter(r => yearOf(r, year)?.codeChanged).length,
       newAcct: rows.filter(r => yearOf(r, year)?.newAcct).length,
       moved: rows.filter(r => yearOf(r, year)?.moved).length,
-      imagePage: pdfStates.filter(x => x.imagePage).length,
-      noPdfPage: pdfStates.filter(x => x.noPdfPage).length,
+      imagePage: pdfStates.filter(x => x.imagePageBy.length > 0).length,
+      noPdfPage: pdfStates.filter(x => x.noPdfPageBy.length > 0).length,
       jikou: rows.filter(r => yearOf(r, year)?.jikou).length,
     }),
-    [rows, years, year, first, pdfStates]
+    [rows, years, year, first, pdfStates, urls]
   );
   const [open, setOpen] = useState<'group' | 'acct' | null>(null);
   // コンボの選択肢は「名称（件数）」。選択状態は名称で持つ（年度を替えて選択肢に無い名称は、そのまま残す）
@@ -142,13 +146,18 @@ export function TrendFilterPane({
           <h3 className={heading}>データの状態</h3>
           <label className={row}>
             <input type="checkbox" checked={filters.shared} onChange={e => set({ shared: e.target.checked })} />
-            複数書（複数の要求書に載る）
+            複数書（同じ所管の複数の要求書に載る）
             <span className={count}>{counts.shared}</span>
           </label>
           <label className={row}>
             <input type="checkbox" checked={filters.mismatch} onChange={e => set({ mismatch: e.target.checked })} />
-            額不一致（書によって金額が違う）
+            額不一致（持ち分以外で、書によって金額が違う）
             <span className={count}>{counts.mismatch}</span>
+          </label>
+          <label className={row}>
+            <input type="checkbox" checked={filters.shares} onChange={e => set({ shares: e.target.checked })} />
+            持ち分（各府省の持ち分と合計の書）
+            <span className={count}>{counts.shares}</span>
           </label>
           <label className={row}>
             <input type="checkbox" checked={filters.transfer} onChange={e => set({ transfer: e.target.checked })} />

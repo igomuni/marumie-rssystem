@@ -4,7 +4,7 @@
 export type BudgetRequestMofKind = 'matched' | 'mofOnly' | 'reqOnly' | 'zero';
 
 /** 差の理由の型（読み方の手がかり。理由を確定するものではない） */
-export type BudgetRequestMofType = '事項要求' | '組織に事項要求' | '要求額0' | '一括計上' | '一括計上の配分先' | '編成で決まる' | '複数書' | '持ち分' | '名前が近い';
+export type BudgetRequestMofType = '事項要求' | '組織に事項要求' | '要求額0' | '一括計上' | '一括計上の配分先' | '編成で決まる' | '複数書' | '持ち分' | '名前が近い' | '改称' | '統合';
 
 /** 1 行 = 年度 × MOF の項（MOF のみ・概算要求のみ・額0の項は、それぞれの側の項）。金額は千円 */
 export interface BudgetRequestMofRow {
@@ -13,7 +13,7 @@ export interface BudgetRequestMofRow {
   kind: BudgetRequestMofKind;
   /** 0 = 一般会計, 1 = 特別会計 */
   acct: 0 | 1;
-  /** 所管（一覧の「所管」。特別会計は MOF の所管、概算要求のみは要求書の所管） */
+  /** 予算書・要求書の所管（要求書の無い行の所管に使う）。特別会計の MOF のみの行は、共管所管名か、共管の会計なら「、」「及び」で列挙した所管 */
   grp: string;
   /** 一般会計は所管名、特別会計は特別会計名 */
   min: string;

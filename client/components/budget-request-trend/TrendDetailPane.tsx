@@ -2,7 +2,7 @@
 
 import type { BudgetRequestTrendRow } from '@/types/budget-request-trend';
 import { AccountBadge } from '@/client/components/mof-kou/Badge';
-import { assessmentGap, groupOf, orgOf, publisherOf, yearOf } from '@/app/lib/budget-request-trend';
+import { assessmentGap, groupOf, isShares, orgOf, publisherOf, yearOf } from '@/app/lib/budget-request-trend';
 import { changeColor, formatSen, formatSenSigned } from './format';
 
 const W = 380, H = 180, LEFT = 74, BOTTOM = 22, TOP = 10, BAR = 34;
@@ -40,7 +40,7 @@ export function TrendDetailPane({
   const notes: string[] = [];
   if (yearOf(row, last) && !yearOf(row, last - 1)) notes.push(`FY${last - 1} に同じキーが無く、FY${last} で初めて出ました。新設の項か、名称変更の可能性があります（紐づけは未対応）。`);
   if (!yearOf(row, last) && yearOf(row, last - 1)) notes.push(`FY${last} に同じキーが無い項です。廃止、名称変更、または FY${last} の未収録（例: 厚生労働省）の可能性があります。`);
-  if (present.some(y => (yearOf(row, y)?.src.length ?? 0) > 1)) notes.push('同じ項が複数の要求書に載っている年度があります。額が同じ書どうしは按分されておらず、所管をまたいだ合計では二重になります。');
+  if (present.some(y => (yearOf(row, y)?.src.length ?? 0) > 1)) notes.push('同じ項が複数の要求書に載っている年度があります（複数所管）。一覧ではまとめて 1 行で、金額は合計の書の額です。書ごとの内訳は、選択中の年度の「要求書」の表に出します。');
   for (const y of present) {
     const e = yearOf(row, y)!;
     if (e.moved) notes.push(`FY${y}: 前の項（${e.moved.from}）から${e.moved.kind === '移管' ? '移管された' : '改称・組織変更された'}項としてつないでいます（${e.moved.kind === '移管' ? '移管先の会計・勘定がこの年度に新設' : '所管・勘定は同じ'}、同名に近く、前年度予算額が前年の要求額に近い）。`);
@@ -61,7 +61,10 @@ export function TrendDetailPane({
   if (orgJikouYears.length > 0) notes.push(`${orgJikouYears.map(y => `FY${y}`).join('・')}: ${row.org}に組織の事項要求あり（どの項分かは記載なし）。`);
   const xfers = [...new Set(present.flatMap(y => yearOf(row, y)?.xfer ?? []))];
   if (xfers.length > 0) notes.push(`この項の目に繰入があります（${xfers.join('、')}）。受け側の会計にも載るため、会計をまたぐ合計では二重になりえます。`);
-  if (present.some(y => yearOf(row, y)?.mismatch)) notes.push('同じキーで、要求書によって額が違う年度があります（各書が取り分だけを載せている場合は、最も大きい額＝合計書の額を表示しています）。各書の額は PDF の右に示します。');
+  const shareYears = present.filter(y => isShares(row, y, urls));
+  if (shareYears.length > 0) notes.push(`${shareYears.map(y => `FY${y}`).join('・')}: 持ち分です（各府省が持ち分を載せ、最も大きい額の書が合計）。金額は合計の書の額です。各書の額は、選択中の年度の「要求書」の表に出します。`);
+  const mismatchYears = present.filter(y => yearOf(row, y)?.mismatch && !isShares(row, y, urls));
+  if (mismatchYears.length > 0) notes.push(`${mismatchYears.map(y => `FY${y}`).join('・')}: 要求書によって額が違います（最も大きい額を表示）。各書の額は、選択中の年度の「要求書」の表に出します。`);
 
   // 所管コードは年度で変わることがある（例: 年金特会 9207 → 2507）。年度順に、変わった所で区切って示す
   const codes = present.reduce<string[]>((acc, y) => { const c = yearOf(row, y)?.code ?? ''; if (c && acc[acc.length - 1] !== c) acc.push(c); return acc; }, []);
@@ -170,6 +173,7 @@ export function TrendDetailPane({
         </table>
       </div>
       <p className="text-[11px] text-neutral-500">査定差 = 翌年度の「前年度予算額」− その年度の要求額（負なら要求より予算が少ない）。選択中の年度は色付き。FY{first}〜FY{last}。</p>
+      <BooksOfYear row={row} year={year} urls={urls} />
       {links.length > 0 && (
         <div className="rounded border-l-[3px] border-sky-600 bg-sky-50 px-2.5 py-1.5 text-neutral-800 dark:bg-sky-950/40 dark:text-neutral-200">
           <p className="font-medium">紐づけの候補（キーは別の行のまま）</p>
@@ -185,6 +189,50 @@ export function TrendDetailPane({
           {notes.map(n => <p key={n}>{n}</p>)}
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * 選択中の年度の要求書ごとの内訳（複数の書に載るときだけ）。一覧は複数所管の項を 1 行（N所管）にまとめるので、府省ごとの書と額はここで見る。
+ * 額は書ごとの値（額が書で違うときだけ持つ srcAmt）。無ければどの書も年度の値と同じ。額が違う（東日本大震災復興の持ち分）ときは、最も大きい額の書を合計とする
+ */
+function BooksOfYear({ row, year, urls }: { row: BudgetRequestTrendRow; year: number; urls: readonly string[] }) {
+  const a = yearOf(row, year);
+  if (!a || a.src.length < 2) return null;
+  const amts = a.src.map((_, i) => a.srcAmt?.[i] ?? [a.prev, a.req]);
+  const maxReq = Math.max(...amts.map(x => x[1] ?? -Infinity));
+  const shares = isShares(row, year, urls);
+  const cell = 'whitespace-nowrap px-1.5 py-1 text-right tabular-nums';
+  return (
+    <div>
+      <h3 className="mb-1 text-[11px] font-semibold text-neutral-500">FY{year} の要求書（{new Set(a.src.map(([u]) => publisherOf(urls[u]))).size}所管・{a.src.length}書）{shares ? '。各書は持ち分で、最も大きい額の書が合計' : a.mismatch ? '。書によって額が違う' : '。どの書も同じ要求'}</h3>
+      <table className="w-full border-collapse">
+        <thead>
+          <tr className="text-[11px] text-neutral-500">
+            <th className="px-1.5 py-1 text-left font-medium">所管（要求書）</th>
+            <th className="px-1.5 py-1 text-left font-medium">頁</th>
+            <th className="px-1.5 py-1 text-right font-medium">前年度予算額</th>
+            <th className="px-1.5 py-1 text-right font-medium">要求額</th>
+          </tr>
+        </thead>
+        <tbody>
+          {a.src.map(([u, page, pdfPage, flag], i) => (
+            <tr key={`${u}-${page}`} className="border-t border-neutral-100 dark:border-neutral-800">
+              <td className="px-1.5 py-1">
+                <a href={pdfPage ? `${urls[u]}#page=${pdfPage}` : urls[u]} target="_blank" rel="noopener noreferrer" title={urls[u]} className="text-emerald-700 underline hover:text-emerald-900 dark:text-emerald-400">{publisherOf(urls[u])}</a>
+                {shares && amts[i][1] === maxReq && <span className="ml-1 text-[10px] text-neutral-500">合計</span>}
+              </td>
+              <td className="whitespace-nowrap px-1.5 py-1 text-neutral-500">
+                {page}
+                {!pdfPage ? <span className="ml-1 text-[10px]">（PDF頁なし）</span> : flag === 'i' ? <span className="ml-1 text-[10px]">（画像頁）</span> : flag === 'e' ? <span className="ml-1 text-[10px]">（推定）</span> : null}
+              </td>
+              <td className={cell}>{formatSen(amts[i][0])}</td>
+              <td className={cell}>{formatSen(amts[i][1])}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

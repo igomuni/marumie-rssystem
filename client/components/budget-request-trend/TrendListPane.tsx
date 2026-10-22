@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import type { BudgetRequestTrendRow } from '@/types/budget-request-trend';
-import { acctLabelOf, orgOf, patternOf, publisherOf, recordChange, recordRate, yearOf, type TrendRecord, type TrendSortDir, type TrendSortKey } from '@/app/lib/budget-request-trend';
+import { acctLabelOf, isShares, isSharedBooks, orgOf, patternOf, publisherOf, recordChange, recordRate, yearOf, type TrendRecord, type TrendSortDir, type TrendSortKey } from '@/app/lib/budget-request-trend';
 import { changeColor, formatRate, formatSen, formatSenSigned } from './format';
 
 const MAX_ROWS = 600;
@@ -91,7 +91,7 @@ export function TrendListPane({
         <span><b className="tabular-nums text-neutral-800 dark:text-neutral-100">{rows.length.toLocaleString()}</b> 件</span>
         <span>要求額 合計 <b className="tabular-nums text-neutral-800 dark:text-neutral-100">{formatSen(sum.req)}</b></span>
         <span>前年度予算額 合計 <b className="tabular-nums text-neutral-800 dark:text-neutral-100">{formatSen(sum.prev)}</b></span>
-        <span className="text-neutral-400">複数の府省の書に載る項は府省ごとに1行です（合計は二重に数えます）</span>
+        <span className="text-neutral-400">複数の府省の要求書に載る項（複数所管）も1行です（金額は合計の書の額）</span>
       </div>
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-auto">
         <table className="border-collapse text-xs" style={{ width: tableWidth, tableLayout: 'fixed' }}>
@@ -126,7 +126,7 @@ export function TrendListPane({
               const a = yearOf(r, year);
               const d = recordChange(x), t = recordRate(x);
               const rk = rowKey(r);
-              const key = `${rk}|${x.group}`;
+              const key = rk;
               const pattern = patternOf(r, year, firstYear);
               const selected = rk === selectedKey;
               return (
@@ -139,7 +139,7 @@ export function TrendListPane({
                   onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(x); } }}
                   className={`cursor-pointer border-b border-neutral-100 dark:border-neutral-800 ${selected ? 'bg-emerald-50 dark:bg-emerald-950/40' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/60'}`}
                 >
-                  <td className="break-words px-2 py-1 text-left">{x.group}</td>
+                  <td className={`break-words px-2 py-1 text-left ${x.groups.length > 1 ? 'text-neutral-500' : ''}`} title={x.groups.length > 1 ? x.groups.join('、') : undefined}>{x.group}</td>
                   <td className="break-words px-2 py-1 text-left">{acctLabelOf(r)}</td>
                   <td className="break-words px-2 py-1 text-left">
                     {orgOf(r)}
@@ -148,16 +148,18 @@ export function TrendListPane({
                   <td className="break-words px-2 py-1 text-left font-medium">
                     {r.name}
                     {r.kou && <span className="ml-1 text-[10px] text-neutral-400">({r.kou})</span>}
-                    {a && a.src.length > 1 && <span title={[...new Set(a.src.map(([u]) => publisherOf(urls[u])))].join('、')} className={`${chip} border-neutral-300 text-neutral-500 dark:border-neutral-600`}>複数書</span>}
+                    {a && isSharedBooks(x) && <span title={`同じ所管（${x.groups[0]}）の複数の要求書に載る（${a.src.length} 書）`} className={`${chip} border-neutral-300 text-neutral-500 dark:border-neutral-600`}>複数書</span>}
                     {a?.jikou && <span title={`項の中に事項要求（金額を示さない要求）あり: ${a.jikou.forms.join('、')}${a.jikou.text ? `（${a.jikou.text}）` : ''}`} className={`${chip} border-fuchsia-600 text-fuchsia-700 dark:text-fuchsia-400`}>事項要求</span>}
                     {a?.xfer && a.xfer.length > 0 && <span title={`${a.xfer.join('、')}（会計をまたぐ合計では二重になりえます）`} className={`${chip} border-sky-600 text-sky-700 dark:text-sky-400`}>繰入</span>}
                     {a?.from !== undefined && <span title="前年度に消えた同名の項と金額が近い。詳細で確認できます" className={`${chip} border-violet-600 text-violet-700 dark:text-violet-400`}>紐づけ候補</span>}
                     {a?.moved && <span title={`${a.moved.kind}: ${a.moved.from} から`} className={`${chip} border-violet-600 text-violet-700 dark:text-violet-400`}>{a.moved.kind}</span>}
                     {a?.newAcct && <span title="この会計・勘定は前年度に無く、この年度に初出です" className={`${chip} border-emerald-600 text-emerald-700 dark:text-emerald-400`}>会計新設</span>}
                     {a?.codeChanged && <span title="所管コードが前の年度から変わりました" className={`${chip} border-neutral-400 text-neutral-500`}>コード変更</span>}
-                    {x.imagePage && <span title="PDF の該当頁は画像で文字層がなく、明細表の目以下が取り込めていません。リンクの頁は推定です" className={`${chip} border-rose-500 text-rose-600 dark:text-rose-400`}>画像頁</span>}
-                    {x.noPdfPage && <span title="PDF の頁が引けなかったため、リンクは PDF の先頭を開きます" className={`${chip} border-neutral-400 text-neutral-500`}>PDF頁なし</span>}
-                    {a?.mismatch && <span className={`${chip} border-amber-600 text-amber-700 dark:text-amber-400`}>額不一致</span>}
+                    {x.imagePageBy.length > 0 && <span title={`${x.groups.length > 1 ? `${x.imagePageBy.join('、')}の書: ` : ''}PDF の該当頁は画像で文字層がなく、明細表の目以下が取り込めていません。リンクの頁は推定です`} className={`${chip} border-rose-500 text-rose-600 dark:text-rose-400`}>画像頁</span>}
+                    {x.noPdfPageBy.length > 0 && <span title={`${x.groups.length > 1 ? `${x.noPdfPageBy.join('、')}の書: ` : ''}PDF の頁が引けなかったため、リンクは PDF の先頭を開きます`} className={`${chip} border-neutral-400 text-neutral-500`}>PDF頁なし</span>}
+                    {a?.mismatch && (isShares(r, year, urls)
+                      ? <span title="各府省が持ち分を載せ、合計の書（最も大きい額）がある。金額は合計の書の額" className={`${chip} border-neutral-400 text-neutral-500`}>持ち分</span>
+                      : <span title="同じ項で、要求書によって額が違う" className={`${chip} border-amber-600 text-amber-700 dark:text-amber-400`}>額不一致</span>)}
                   </td>
                   <td className={`whitespace-nowrap px-2 py-1 text-left ${pattern === '新規' ? 'text-emerald-700 dark:text-emerald-400' : pattern === '消滅' ? 'text-orange-700 dark:text-orange-400' : 'text-neutral-500'}`}>{pattern ?? '–'}</td>
                   <td className="whitespace-nowrap px-2 py-1 text-right tabular-nums">{formatSen(x.prev)}</td>
