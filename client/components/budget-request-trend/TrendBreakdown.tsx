@@ -28,6 +28,8 @@ function Missing({ year }: { year: number }) {
  * 年度の表: 行 = 事項・目、列 = 年度の要求額。列の年度を押すと年度が切り替わる。最後に計（項の要求額と合わなければ色付き）。
  * value が undefined の年度は、その行がその年度に無い
  */
+// 名前の列の最小幅と、表の最小幅（名前 + 年度 5 列）。右ペインがこれより狭いときは横にスクロールする。名前の列は左に固定
+const NAME_COL = 'sticky left-0 z-[1] min-w-[11rem] bg-white dark:bg-neutral-900';
 function YearMatrix({ row, years, year, onSelectYear, head, keys, label, badge, value, has, totalLabel }: {
   row: BudgetRequestTrendRow; years: readonly number[]; year: number; onSelectYear: (y: number) => void;
   head: string; keys: string[]; label: (k: string) => string; badge?: (k: string) => React.ReactNode;
@@ -36,10 +38,10 @@ function YearMatrix({ row, years, year, onSelectYear, head, keys, label, badge, 
   const hl = (y: number) => (y === year ? 'bg-emerald-50 dark:bg-emerald-950/40' : '');
   return (
     <div className="overflow-x-auto">
-      <table className="w-full border-collapse">
+      <table className="w-full border-collapse" style={{ minWidth: `${11 + years.length * 4.75}rem` }}>
         <thead>
           <tr className="text-[11px] text-neutral-500">
-            <th className={`${th} text-left`}>{head}</th>
+            <th className={`${th} ${NAME_COL} text-left`}>{head}</th>
             {years.map(y => (
               <th key={y} onClick={() => onSelectYear(y)} className={`${th} cursor-pointer text-right ${y === year ? 'bg-emerald-50 text-neutral-900 dark:bg-emerald-950/40 dark:text-neutral-100' : ''}`}>{y}</th>
             ))}
@@ -48,12 +50,12 @@ function YearMatrix({ row, years, year, onSelectYear, head, keys, label, badge, 
         <tbody>
           {keys.map(k => (
             <tr key={k} className="border-t border-neutral-100 dark:border-neutral-800">
-              <td className="px-1.5 py-1">{label(k)}{badge?.(k)}</td>
+              <td className={`px-1.5 py-1 ${NAME_COL}`}>{label(k)}{badge?.(k)}</td>
               {years.map(y => { const v = value(y, k); return <td key={y} className={`${num} ${hl(y)}`}>{v === undefined ? <span className="text-neutral-400">–</span> : formatSen(v)}</td>; })}
             </tr>
           ))}
           <tr className="border-t border-neutral-300 font-medium dark:border-neutral-600">
-            <td className="px-1.5 py-1">{totalLabel}</td>
+            <td className={`px-1.5 py-1 ${NAME_COL}`}>{totalLabel}</td>
             {years.map(y => {
               if (!has(y)) return <td key={y} className={`${num} ${hl(y)}`}><span className="text-neutral-400">–</span></td>;
               const s = keys.reduce((t, k) => t + (value(y, k) ?? 0), 0); const kou = yearOf(row, y)?.req ?? null;
