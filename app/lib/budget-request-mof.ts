@@ -6,7 +6,7 @@
 import type { BudgetRequestMofKind, BudgetRequestMofRow, BudgetRequestMofType } from '@/types/budget-request-mof';
 import { publisherOf, textMatches } from '@/app/lib/budget-request-trend';
 
-export type MofSortKey = 'group' | 'acct' | 'org' | 'name' | 'req' | 'mof' | 'diff' | 'rate';
+export type MofSortKey = 'group' | 'acct' | 'org' | 'name' | 'nJikou' | 'nMoku' | 'req' | 'mof' | 'diff' | 'rate';
 export type MofSortDir = 1 | -1;
 /** 差の大きさ: abs1 / abs10 / abs100 = |差| が 1 億・10 億・100 億円以上、up10 / dn10 = 差率が +10% 以上・−10% 以下 */
 export type MofDiffFilter = '' | 'abs1' | 'abs10' | 'abs100' | 'up10' | 'dn10';
@@ -96,6 +96,8 @@ export function sortMofRows(rows: readonly BudgetRequestMofRow[], key: MofSortKe
       case 'acct': return acctLabelOf(r);
       case 'org': return orgOf(r);
       case 'name': return r.name;
+      case 'nJikou': return r.nJikou;
+      case 'nMoku': return r.nMoku;
       case 'req': return r.req;
       case 'mof': return r.mof;
       case 'diff': return diffOf(r);

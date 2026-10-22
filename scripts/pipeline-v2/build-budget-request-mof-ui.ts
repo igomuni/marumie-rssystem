@@ -1,19 +1,21 @@
 /**
  * /budget-request-mof（概算要求と MOF 当初予算の差）用のデータを作る。仕様: docs/budget-request-mof-ui.md
  *
- * 使い方: npx tsx scripts/pipeline-v2/build-budget-request-mof-ui.ts   # → public/data/v2/ui/budget-request-mof/kou.json.gz、tests/fixtures/budget-request-mof/summary.json
+ * 使い方: npx tsx scripts/pipeline-v2/build-budget-request-mof-ui.ts   # → public/data/v2/ui/budget-request-mof/{kou,detail}.json.gz、tests/fixtures/budget-request-mof/summary.json
  * 入力: tests/fixtures/mof-budget-request-match/{ver}/{m1-kou,unmatched-mof-kou}.csv（突合）、同 {year}/request-kou.csv（要求側の所属・前年度予算額）、
  *       tests/fixtures/mof-archive-csv/{ver}/kou-{general,special}.csv（MOF の項の所属・額）、tests/fixtures/budget-request-trend/kou.csv（PDF の頁）、
  *       tests/fixtures/budget-request-pdf-corpus/{year}/pdf-corpus-freeze.json（PDF の URL）、
- *       tests/fixtures/budget-request-jikou-youkyu/kou.csv と public/data/v2/ui/budget-request-trend/jikou.json.gz（事項要求・要求0・一括計上）
- * 年度推移 CSV と事項要求の検知（build-budget-request-jikou-youkyu.ts）の後に実行する。
+ *       tests/fixtures/budget-request-jikou-youkyu/kou.csv と public/data/v2/ui/budget-request-trend/jikou.json.gz（事項要求・要求0・一括計上）、
+ *       tests/fixtures/budget-request-trend/{jikou.csv,moku/{year}.csv} と tests/fixtures/mof-archive-csv/{ver}/{jikou,moku}-{general,special}.csv（詳細の事項・目）
+ * 年度推移 CSV・事項要求の検知（build-budget-request-jikou-youkyu.ts）・事項と目の年度推移（build-budget-request-trend-detail-csv.ts）の後に実行する。
  */
 import * as fs from 'fs';
 import * as path from 'path';
 import * as zlib from 'zlib';
 import { mofAmountKou, ns, readCsv, type Rec } from './lib/mof-budget-request-match';
+import { mofMokuCode, pairByName, reqMokuCode, type Side } from './lib/budget-request-mof-detail';
 import type { BudgetRequestJikouData } from '../../types/budget-request-trend';
-import type { BudgetRequestMofData, BudgetRequestMofRow, BudgetRequestMofType } from '../../types/budget-request-mof';
+import type { BudgetRequestMofData, BudgetRequestMofDetail, BudgetRequestMofRow, BudgetRequestMofType } from '../../types/budget-request-mof';
 
 /** 年度 → MOF の版（すべて国会への提出時の政府案。令和7年度は成立後の版もあるが提出時にそろえる） */
 const VERSIONS: [number, string][] = [[2023, '2023'], [2024, '2024'], [2025, '2025_teishutsu'], [2026, '2026']];
@@ -28,6 +30,13 @@ const jikouKou = rd(path.join('tests', 'fixtures', 'budget-request-jikou-youkyu'
 const jikouUi = JSON.parse(zlib.gunzipSync(fs.readFileSync(path.join('public', 'data', 'v2', 'ui', 'budget-request-trend', 'jikou.json.gz'))).toString('utf8')) as BudgetRequestJikouData;
 // 年度推移・事項要求の行の識別（会計区分 + 所管（特別会計は特別会計名）+ 勘定 + 組織 + 項名）
 const idOf = (r: Rec) => [r['年度'], r['会計区分'], r['会計区分'] === '特別' ? r['特別会計'] : r['所管'], r['勘定'], r['組織'], r['項名']].join('|');
+// 要求側の事項・目（年度推移の内訳。行の識別でまとめる）
+const groupBy = (rs: Rec[], key: (r: Rec) => string) => { const m = new Map<string, Rec[]>(); for (const r of rs) (m.get(key(r)) ?? m.set(key(r), []).get(key(r))!).push(r); return m; };
+const reqJikou = groupBy(rd(path.join('tests', 'fixtures', 'budget-request-trend', 'jikou.csv')), idOf);
+const reqMoku = groupBy(VERSIONS.flatMap(([y]) => rd(path.join('tests', 'fixtures', 'budget-request-trend', 'moku', `${y}.csv`))), idOf);
+/** 行のキー（app/lib/budget-request-mof.ts の mofRowKey と同じ並び。scripts は app/lib を import しないので複製） */
+const rowKey = (r: BudgetRequestMofRow) => [r.y, r.kind, r.acct, r.grp, r.min, r.sub, r.org, r.name].join('|');
+const details: Record<string, BudgetRequestMofDetail> = {};
 
 const urls: string[] = []; const urlIdx = new Map<string, number>();
 const urlIndex = (u: string) => { let i = urlIdx.get(u); if (i === undefined) { i = urls.length; urls.push(u); urlIdx.set(u, i); } return i; };
@@ -47,6 +56,30 @@ for (const [year, ver] of VERSIONS) {
   // 額の列名は版で違う（提出時の令和6・7年度は「…要求額の合計」で「(千円)」なし。単位はどれも千円）。突合と同じ関数で読む
   const mofAmt = mofAmountKou;
   const mofPrevOf = (r: Rec) => num(r[Object.keys(r).find(k => /^前年度予算額.*の合計$/.test(k)) ?? '']);
+  // MOF の事項・目を項の id へ（項の識別: 一般会計は所管＋組織＋項コード＋項名、特別会計は特別会計＋勘定＋項コード＋項名。どちらも項の CSV で一意）
+  const kouKey = (a: 'general' | 'special', r: Rec) => (a === 'general' ? [r['所管'], r['組織']] : [r['特別会計'], r['勘定']]).concat(r['項コード'], r['項名']).join('|');
+  const mofJikou = new Map<string, Side[]>(), mofMoku = new Map<string, Side[]>();
+  for (const a of ['general', 'special'] as const) {
+    const ids = new Map<string, string>();
+    for (const [id, r] of mof) if (id.startsWith(`kou-${a}:`)) { const k = kouKey(a, r); if (ids.has(k)) throw new Error(`${ver} ${a}: 項の識別が重複 ${k}`); ids.set(k, id); }
+    const amtOf = (r: Rec) => num(r[Object.keys(r).find(k => /^令和\d+年度(要求|予定)額/.test(k)) ?? '']);
+    const put = (m: Map<string, Side[]>, r: Rec, x: Side) => { const id = ids.get(kouKey(a, r)); if (!id) throw new Error(`${ver} ${a}: 項の無い行 ${kouKey(a, r)}`); (m.get(id) ?? m.set(id, []).get(id)!).push(x); };
+    for (const r of rd(path.join('tests', 'fixtures', 'mof-archive-csv', ver, `jikou-${a}.csv`))) put(mofJikou, r, { name: ns(r['事項名']), amt: amtOf(r) });
+    for (const r of rd(path.join('tests', 'fixtures', 'mof-archive-csv', ver, `moku-${a}.csv`))) put(mofMoku, r, { name: ns(r['目名']), code: mofMokuCode(r), amt: amtOf(r) });
+  }
+  // 詳細の事項・目。要求側は年度推移の行（統合は項ごと）の内訳を足す。req が null なら要求側の無い行（MOF のみ）、mofId が null なら MOF の無い行
+  const detailOf = (req: (Rec | undefined)[] | null, mofId: string | null): BudgetRequestMofDetail => {
+    // 同じ項が複数の府省の要求書に載ると（複数所管・持ち分）、年度推移の内訳は書ごとに行を持つ。行の要求書の公開元（slug の先頭のドメイン）で、
+    // 選んだ年度推移の行と同じ府省の行だけを取る（取らないと書の数だけ足してしまう）
+    const hostOf = (slug: string) => slug.split('__')[0];
+    const srcs = req === null ? [] : [...new Map(req.filter((t): t is Rec => !!t).map(t => [`${idOf(t)}#${hostOf(t['要求書'])}`, t])).values()];
+    const pick = (g: Map<string, Rec[]>) => srcs.flatMap(t => (g.get(idOf(t)) ?? []).filter(r => hostOf(r['要求書']) === hostOf(t['要求書'])));
+    const rj = pick(reqJikou).map(r => ({ name: ns(r['事項名']), amt: num(r['要求額_千円']) }));
+    const rm = pick(reqMoku).map(r => ({ name: ns(r['目名']), code: reqMokuCode(r['目コード(原文)']), amt: num(r['要求額_千円']) }));
+    const noReq = req !== null && rj.length === 0 && rm.length === 0;
+    const j = pairByName(rj, mofId ? mofJikou.get(mofId) ?? [] : []).map(([n, , a, b]) => [n, '', a, b] as [string, string, number | null, number | null]);
+    return { j, m: pairByName(rm, mofId ? mofMoku.get(mofId) ?? [] : []), ...(noReq ? { noReq: 1 as const } : {}) };
+  };
 
   // 要求側: request-kou.csv（要求の年度のディレクトリ。2025_teishutsu には無い）と、年度推移 CSV の行（PDF の頁・識別）
   const reqKou = new Map(rd(path.join(MATCH, Y, 'request-kou.csv')).map(r => [`${r['request_source']}#${r['toc_kou_idx']}`, r]));
@@ -86,7 +119,24 @@ for (const [year, ver] of VERSIONS) {
 
   const m1 = rd(path.join(MATCH, ver, 'm1-kou.csv'));
   const count: Record<string, number> = {};
-  const push = (r: BudgetRequestMofRow) => { rows.push(r); count[r.kind] = (count[r.kind] ?? 0) + 1; };
+  const cmp: Record<'jikou' | 'moku', Record<string, number>> = { jikou: {}, moku: {} };
+  const push = (r0: Omit<BudgetRequestMofRow, 'nJikou' | 'nMoku'>, d: BudgetRequestMofDetail) => {
+    const r: BudgetRequestMofRow = { ...r0, nJikou: d.j.length, nMoku: d.m.length };
+    rows.push(r); count[r.kind] = (count[r.kind] ?? 0) + 1;
+    const k = rowKey(r); if (details[k]) throw new Error(`行のキーが重複 ${k}`); details[k] = d;
+    if (r.kind !== 'matched') return;
+    // 対応ありの項の、事項・目の一致の数（要求側の内訳が取れない項は数えない）
+    for (const [what, ps] of [['jikou', d.j], ['moku', d.m]] as const) {
+      const c = cmp[what]; const inc = (n: string) => { c[n] = (c[n] ?? 0) + 1; };
+      if (d.noReq) { inc('noReq'); continue; }
+      inc('kou'); if (ps.every(p => p[2] !== null && p[3] !== null)) inc('sameSet');
+      for (const p of ps) {
+        if (p[2] !== null && p[3] !== null) inc(p[2] === p[3] ? 'bothEq' : 'bothNe');
+        else if (p[3] === null) inc(p[2] === 0 ? 'reqOnlyZero' : 'reqOnly');
+        else inc(p[3] === 0 ? 'mofOnlyZero' : 'mofOnly');
+      }
+    }
+  };
 
   // 対応あり: MOF の項ごとに、対応する要求行をまとめる
   const byMof = new Map<string, Req[]>();
@@ -106,9 +156,11 @@ for (const [year, ver] of VERSIONS) {
     const itemOf = (q: Req) => (sameBookCodes ? `${ns(q.m['request_name'])}|${q.m['request_code3']}` : ns(q.m['request_name']));
     const items = [...new Set(qs.map(itemOf))];
     let req = num(top.m['request_amount']), reqPrev = num(top.k?.['previous_amount']);
+    let detailReq = [top.t];
     if (items.length > 1) {
       types.add('統合');
       const tops = items.map(n => qs.filter(q => itemOf(q) === n).reduce((a, q) => ((num(q.m['request_amount']) ?? -Infinity) > (num(a.m['request_amount']) ?? -Infinity) ? q : a)));
+      detailReq = tops.map(q => q.t);
       req = tops.reduce((s, q) => s + (num(q.m['request_amount']) ?? 0), 0); reqPrev = tops.reduce((s, q) => s + (num(q.k?.['previous_amount']) ?? 0), 0);
     } else if (books.length > 1) {
       // 複数書: 同じ府省（公開元のドメイン）の要求書が複数あるときだけ（複数所管の項は、所管の列で分かるので付けない）。額が違えば持ち分
@@ -124,7 +176,7 @@ for (const [year, ver] of VERSIONS) {
       y: year, kind: 'matched', acct, grp: ns(r['所管']), min: acct === 0 ? ns(r['所管']) : ns(r['特別会計']), sub: acct === 1 ? ns(r['勘定']) : '', org: acct === 0 ? ns(r['組織']) : '',
       name: names.length > 1 ? names.join(' ＋ ') : ns(top.m['request_name']), mof: mofAmt(r), mofPrev: mofPrevOf(r), req, reqPrev, books, types: [...types],
       ...(jikouText ? { jikouText } : {}), ...(orgJikouText ? { orgJikouText } : {}), ...(mofName ? { mofName } : {}),
-    });
+    }, detailOf(detailReq, id));
   }
 
   // 概算要求のみ・額0の項: 要求側の所属ごとにまとめる（同じ項が複数の書に載ることがある）
@@ -148,7 +200,7 @@ for (const [year, ver] of VERSIONS) {
       org: acct === 0 ? (k?.['org'] || q0.t?.['組織'] || '') : '', name: ns(q0.m['request_name']),
       mof: null, mofPrev: null, req: num(top.m['request_amount']), reqPrev: num(top.k?.['previous_amount']), books, types: [...types],
       ...(jikouText ? { jikouText } : {}), ...(orgJikouText ? { orgJikouText } : {}),
-    });
+    }, detailOf([top.t], null));
   }
 
   // MOF のみ
@@ -159,17 +211,18 @@ for (const [year, ver] of VERSIONS) {
       // 所管: 特別会計で予算書に共管所管名があればそれ（東日本大震災復興は項ごとに復興庁・総務省・財務省）。無ければ予算書の所管（共管の会計は「、」「及び」で列挙）
       y: year, kind: 'mofOnly', acct, grp: acct === 1 && ns(r['共管所管名']) ? ns(r['共管所管名']) : ns(r['所管']), min: acct === 0 ? ns(r['所管']) : ns(r['特別会計']), sub: acct === 1 ? ns(r['勘定']) : '', org: acct === 0 ? ns(r['組織']) : '',
       name: ns(r['項名']), mof: mofAmt(r), mofPrev: mofPrevOf(r), req: null, reqPrev: null, books: [], types: PLACEHOLDER.test(ns(r['項名'])) ? ['編成で決まる'] : [],
-    });
+    }, detailOf(null, u['mof_row']));
   }
   const yearRows = rows.filter(x => x.y === year && (x.kind === 'matched' || x.kind === 'mofOnly'));
   if (yearRows.length > 0 && yearRows.every(x => x.mof === null)) throw new Error(`${ver}: MOF の額の列が読めない（列名を確認）`);
   const typeCount: Record<string, number> = {}; for (const r of rows.filter(x => x.y === year)) for (const t of r.types) typeCount[t] = (typeCount[t] ?? 0) + 1;
-  summary[Y] = { version: ver, rows: count, types: typeCount };
+  summary[Y] = { version: ver, rows: count, types: typeCount, jikou: cmp.jikou, moku: cmp.moku };
 }
 
 const data: BudgetRequestMofData = { years: VERSIONS.map(([y]) => y), versions: Object.fromEntries(VERSIONS.map(([y, v]) => [String(y), v])), urls, rows };
 const uiDir = path.join('public', 'data', 'v2', 'ui', 'budget-request-mof'); fs.mkdirSync(uiDir, { recursive: true });
 fs.writeFileSync(path.join(uiDir, 'kou.json.gz'), zlib.gzipSync(JSON.stringify(data), { level: 9, mtime: 0 } as zlib.ZlibOptions));
+fs.writeFileSync(path.join(uiDir, 'detail.json.gz'), zlib.gzipSync(JSON.stringify({ rows: details }), { level: 9, mtime: 0 } as zlib.ZlibOptions));
 const outDir = path.join('tests', 'fixtures', 'budget-request-mof'); fs.mkdirSync(outDir, { recursive: true });
 fs.writeFileSync(path.join(outDir, 'summary.json'), JSON.stringify(summary, null, 1) + '\n');
 console.log(JSON.stringify(summary));

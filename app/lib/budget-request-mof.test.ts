@@ -4,7 +4,7 @@ import { INITIAL_MOF_FILTERS, diffOf, filterMofRows, groupOf, isJoint, mofRowKey
 
 const URLS = ['https://www.mlit.go.jp/a.pdf', 'https://www.meti.go.jp/b.pdf', 'https://www.env.go.jp/c.pdf'];
 const R = (name: string, o: Partial<BudgetRequestMofRow> = {}): BudgetRequestMofRow =>
-  ({ y: 2026, kind: 'matched', acct: 0, grp: '国土交通省', min: '国土交通省', sub: '', org: '気象庁', name, mof: 110, mofPrev: 100, req: 100, reqPrev: 100, books: [[0, '1', '3', 100]], types: [], ...o });
+  ({ y: 2026, kind: 'matched', acct: 0, grp: '国土交通省', min: '国土交通省', sub: '', org: '気象庁', name, mof: 110, mofPrev: 100, req: 100, reqPrev: 100, books: [[0, '1', '3', 100]], types: [], nJikou: 1, nMoku: 3, ...o });
 const rows = [
   R('気象官署共通費', { types: ['組織に事項要求'] }),
   R('予備費', { mof: 1000, req: 500, types: ['編成で決まる'] }),
@@ -48,5 +48,9 @@ describe('budget-request-mof', () => {
     const sorted = sortMofRows(filterMofRows(rows, INITIAL_MOF_FILTERS, 2026, URLS), 'diff', -1, URLS).map(r => r.name);
     expect(sorted).toEqual(['予備費', '気象官署共通費', '特会の項', 'MOFのみの項']);
     expect(new Set(rows.map(mofRowKey)).size).toBe(rows.length);
+  });
+  it('sorts by the 事項・目 counts', () => {
+    const r2 = [R('A', { nMoku: 2 }), R('B', { nMoku: 9 }), R('C', { nMoku: 5 })];
+    expect(sortMofRows(r2, 'nMoku', -1, URLS).map(r => r.name)).toEqual(['B', 'C', 'A']);
   });
 });

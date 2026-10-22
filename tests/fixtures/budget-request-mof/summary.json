@@ -19,6 +19,26 @@
    "複数書": 1,
    "一括計上の配分先": 2,
    "一括計上": 1
+  },
+  "jikou": {
+   "kou": 956,
+   "sameSet": 894,
+   "bothNe": 1152,
+   "bothEq": 335,
+   "reqOnlyZero": 36,
+   "mofOnly": 43,
+   "mofOnlyZero": 5,
+   "reqOnly": 38
+  },
+  "moku": {
+   "kou": 956,
+   "sameSet": 735,
+   "bothNe": 4150,
+   "bothEq": 3173,
+   "mofOnlyZero": 83,
+   "mofOnly": 166,
+   "reqOnlyZero": 276,
+   "reqOnly": 122
   }
  },
  "2024": {
@@ -37,6 +57,26 @@
    "組織に事項要求": 154,
    "一括計上の配分先": 2,
    "一括計上": 1
+  },
+  "jikou": {
+   "kou": 968,
+   "bothNe": 1231,
+   "mofOnly": 16,
+   "sameSet": 929,
+   "reqOnly": 8,
+   "bothEq": 279,
+   "reqOnlyZero": 45,
+   "mofOnlyZero": 3
+  },
+  "moku": {
+   "kou": 968,
+   "sameSet": 763,
+   "bothEq": 3020,
+   "bothNe": 4338,
+   "reqOnly": 41,
+   "reqOnlyZero": 273,
+   "mofOnly": 67,
+   "mofOnlyZero": 69
   }
  },
  "2025": {
@@ -55,6 +95,26 @@
    "組織に事項要求": 154,
    "一括計上の配分先": 2,
    "一括計上": 1
+  },
+  "jikou": {
+   "kou": 1013,
+   "sameSet": 969,
+   "bothNe": 1288,
+   "bothEq": 291,
+   "reqOnlyZero": 36,
+   "mofOnly": 19,
+   "reqOnly": 19,
+   "mofOnlyZero": 5
+  },
+  "moku": {
+   "kou": 1013,
+   "sameSet": 757,
+   "bothNe": 4710,
+   "bothEq": 2989,
+   "reqOnly": 98,
+   "reqOnlyZero": 266,
+   "mofOnly": 170,
+   "mofOnlyZero": 71
   }
  },
  "2026": {
@@ -74,6 +134,26 @@
    "組織に事項要求": 197,
    "一括計上の配分先": 2,
    "一括計上": 1
+  },
+  "jikou": {
+   "kou": 1035,
+   "sameSet": 997,
+   "bothNe": 1306,
+   "bothEq": 299,
+   "reqOnlyZero": 47,
+   "mofOnly": 7,
+   "reqOnly": 11,
+   "mofOnlyZero": 2
+  },
+  "moku": {
+   "kou": 1035,
+   "sameSet": 801,
+   "bothNe": 4679,
+   "bothEq": 3089,
+   "mofOnlyZero": 88,
+   "reqOnlyZero": 376,
+   "mofOnly": 63,
+   "reqOnly": 78
   }
  }
 }

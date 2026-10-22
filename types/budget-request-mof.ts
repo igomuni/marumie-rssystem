@@ -39,6 +39,9 @@ export interface BudgetRequestMofRow {
   orgJikouText?: string;
   /** MOF の名前（概算要求の名前と違うとき。NEAR_NAME） */
   mofName?: string;
+  /** 事項・目の数（概算要求と予算書を名前でつないだ和集合。詳細のタブのラベルと同じ） */
+  nJikou: number;
+  nMoku: number;
 }
 
 export interface BudgetRequestMofData {
@@ -48,4 +51,17 @@ export interface BudgetRequestMofData {
   /** 元の PDF の URL */
   urls: string[];
   rows: BudgetRequestMofRow[];
+}
+
+/** 詳細の事項・目（行ごと）。名前でつなぐ。各行は [名前, 目のコード（主要経費＋目的別-目別。事項は空）, 要求額, 当初予算額]（千円）。無い側は null */
+export interface BudgetRequestMofDetail {
+  j: [string, string, number | null, number | null][];
+  m: [string, string, number | null, number | null][];
+  /** 要求側の内訳が取れていない（要求書に明細が無い・明細の項につながらない）。このとき要求の列は全部 null */
+  noReq?: 1;
+}
+
+/** /budget-request-mof の詳細の事項・目（scripts/pipeline-v2/build-budget-request-mof-ui.ts が出力。detail.json.gz）。行のキー（mofRowKey）→ 内訳 */
+export interface BudgetRequestMofDetailData {
+  rows: Record<string, BudgetRequestMofDetail>;
 }
