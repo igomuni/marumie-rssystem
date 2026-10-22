@@ -120,8 +120,8 @@ digital.go.jp__assets__contents__node__basic_page__field_ref_resources__e9b99425
 env.go.jp__content__000157010,0,005,環境本省共通費,17,general,環境省,環境本省,,,16838485,15543540,toc
 env.go.jp__content__000157010,1,010,環境本省施設費,29,general,環境省,環境本省,,,1699317,3503410,toc
 env.go.jp__content__000157010,2,017,地球温暖化対策推進費,31,general,環境省,環境本省,,,1319151,1311506,toc
-env.go.jp__content__000157010,3,018,脱炭素成長型経済構造移行費用財源脱炭素化産業成長促進対策費エネルギー対策特別会計へ繰入,,general,環境省,環境本省,,,43560,0,toc_total
-env.go.jp__content__000157010,4,019,石油石炭税財源エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入,,general,環境省,環境本省,,,166955940,129005000,toc_total
+env.go.jp__content__000157010,3,018,脱炭素成長型経済構造移行費用財源脱炭素化産業成長促進対策費エネルギー対策特別会計へ繰入,35,general,環境省,環境本省,,,43560,0,toc_total
+env.go.jp__content__000157010,4,019,石油石炭税財源エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入,35,general,環境省,環境本省,,,166955940,129005000,toc_total
 env.go.jp__content__000157010,5,020,地球環境保全費,36,general,環境省,環境本省,,,2813861,3060141,toc
 env.go.jp__content__000157010,6,050,大気・水・土壌環境等保全費,40,general,環境省,環境本省,,,5160528,5258473,toc
 env.go.jp__content__000157010,7,060,資源循環政策推進費,56,general,環境省,環境本省,,,14354698,6847293,toc
@@ -151,7 +151,7 @@ env.go.jp__content__000157010,30,510,原子力規制委員会共通費,160,gener
 env.go.jp__content__000157010,31,520,原子力規制委員会施設費,174,general,環境省,原子力規制委員会,,,1833030,3773816,toc
 env.go.jp__content__000157010,32,525,原子力安全確保費,175,general,環境省,原子力規制委員会,,,5646884,4744450,toc
 env.go.jp__content__000157010,33,530,放射能調査研究費,188,general,環境省,原子力規制委員会,,,1672138,1280502,toc
-env.go.jp__content__000157010,34,550,電源開発促進税財源電源利用対策及原子力安全規制対策費エネルギー対策特別会計へ繰入,,general,環境省,原子力規制委員会,,,40870750,33535000,toc_total
+env.go.jp__content__000157010,34,550,電源開発促進税財源電源利用対策及原子力安全規制対策費エネルギー対策特別会計へ繰入,189,general,環境省,原子力規制委員会,,,40870750,33535000,toc_total
 env.go.jp__content__000157012,0,010,燃料安定供給対策費,エ1,special,,,エネルギー対策,エネルギー需給勘定,279302823,279789807,toc
 env.go.jp__content__000157012,1,020,エネルギー需給構造高度化対策費,エ2,special,,,エネルギー対策,エネルギー需給勘定,417873431,316150868,toc
 env.go.jp__content__000157012,2,030,脱炭素成長型経済構造移行推進対策費,エ3,special,,,エネルギー対策,エネルギー需給勘定,1148583973,493054084,toc
@@ -322,7 +322,7 @@ maff.go.jp__j__budget__attach__pdf__230901-6,24,060,受託工事費及換地清�
 maff.go.jp__j__budget__attach__pdf__230901-6,25,070,土地改良事業工事諸費,24,special,,,食料安定供給,国営土地改良事業勘定,551185,775045,toc
 maff.go.jp__j__budget__attach__pdf__230901-6,26,090,土地改良事業費負担金等収入一般会計へ繰入,29,special,,,食料安定供給,国営土地改良事業勘定,711800,1480642,toc
 maff.go.jp__j__budget__attach__pdf__230901-6,27,095,東日本大震災復興土地改良事業費負担金等収入一般会計へ繰入,29,special,,,食料安定供給,国営土地改良事業勘定,1005,1005,toc
-maff.go.jp__j__budget__attach__pdf__230901-6,28,097,東日本大震災復興土地改良事業費負担金等収入東日本大震災復興特別会計へ繰入,,special,,,食料安定供給,国営土地改良事業勘定,25934,25934,toc_total
+maff.go.jp__j__budget__attach__pdf__230901-6,28,097,東日本大震災復興土地改良事業費負担金等収入東日本大震災復興特別会計へ繰入,29,special,,,食料安定供給,国営土地改良事業勘定,25934,25934,toc_total
 maff.go.jp__j__budget__attach__pdf__230901-6,29,100,国債整理基金特別会計へ繰入,29,special,,,食料安定供給,国営土地改良事業勘定,3185529,3993368,toc
 maff.go.jp__j__budget__attach__pdf__230901-6,30,150,予備費,30,special,,,食料安定供給,国営土地改良事業勘定,200000,200000,toc
 maff.go.jp__j__budget__attach__pdf__230901-8,0,010,国債整理基金特別会計へ繰入,3,special,,,国有林野事業債務管理,,340026020,344014372,toc
@@ -387,8 +387,8 @@ meti.go.jp__main__yosangaisan__fy2024__pdf__ippan_o,21,010,産業保安監督官
 meti.go.jp__main__yosangaisan__fy2024__pdf__ippan_o,22,010,資源エネルギー庁共通費,81,general,経済産業省,資源エネルギー庁,,,3929006,4329178,toc
 meti.go.jp__main__yosangaisan__fy2024__pdf__ippan_o,23,015,原子力損害賠償支援対策費エネルギー対策特別会計へ繰入,87,general,経済産業省,資源エネルギー庁,,,0,0,toc
 meti.go.jp__main__yosangaisan__fy2024__pdf__ippan_o,24,020,鉱物資源安定供給確保費,87,general,経済産業省,資源エネルギー庁,,,749697,727608,toc
-meti.go.jp__main__yosangaisan__fy2024__pdf__ippan_o,25,030,石油石炭税財源燃料安定供給対策及エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入,,general,経済産業省,資源エネルギー庁,,,383348847,386831000,toc_total
-meti.go.jp__main__yosangaisan__fy2024__pdf__ippan_o,26,040,電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ繰入,,general,経済産業省,資源エネルギー庁,,,155063500,144571000,toc_total
+meti.go.jp__main__yosangaisan__fy2024__pdf__ippan_o,25,030,石油石炭税財源燃料安定供給対策及エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入,88,general,経済産業省,資源エネルギー庁,,,383348847,386831000,toc_total
+meti.go.jp__main__yosangaisan__fy2024__pdf__ippan_o,26,040,電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ繰入,89,general,経済産業省,資源エネルギー庁,,,155063500,144571000,toc_total
 meti.go.jp__main__yosangaisan__fy2024__pdf__ippan_o,27,050,独立行政法人エネルギー・金属鉱物資源機構運営費,89,general,経済産業省,資源エネルギー庁,,,3600000,3910990,toc
 meti.go.jp__main__yosangaisan__fy2024__pdf__ippan_o,28,010,中小企業庁共通費,90,general,経済産業省,中小企業庁,,,2090556,2398048,toc
 meti.go.jp__main__yosangaisan__fy2024__pdf__ippan_o,29,030,中小企業政策推進費,94,general,経済産業省,中小企業庁,,,58478099,67936546,toc
@@ -431,7 +431,7 @@ mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,29,390,国立研究開
 mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,30,400,国立研究開発法人物質・材料研究機構施設整備費,815,general,文部科学省,文部科学本省,,,0,0,toc
 mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,31,420,国立研究開発法人量子科学技術研究開発機構運営費,815,general,文部科学省,文部科学本省,,,21771610,21762364,toc
 mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,32,430,国立研究開発法人量子科学技術研究開発機構施設整備費,816,general,文部科学省,文部科学本省,,,3409604,1566378,toc
-mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,33,440,電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ繰入,,general,文部科学省,文部科学本省,,,111589349,107857099,toc_total
+mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,33,440,電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ繰入,818,general,文部科学省,文部科学本省,,,111589349,107857099,toc_total
 mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,34,450,国立研究開発法人日本原子力研究開発機構運営費,819,general,文部科学省,文部科学本省,,,35188533,36426591,toc
 mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,35,470,国立研究開発法人宇宙航空研究開発機構運営費,820,general,文部科学省,文部科学本省,,,100233410,122689115,toc
 mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01,36,480,国立研究開発法人宇宙航空研究開発機構施設整備費,821,general,文部科学省,文部科学本省,,,5238184,6583560,toc
@@ -1006,7 +1006,7 @@ npa.go.jp__policies__budget__r6__gaisanyokyu__ippankaikei,2,030,生活安全警�
 npa.go.jp__policies__budget__r6__gaisanyokyu__ippankaikei,3,040,刑事警察費,28,general,内閣府,警察庁,,,333553,170263,toc
 npa.go.jp__policies__budget__r6__gaisanyokyu__ippankaikei,4,050,組織犯罪対策費,31,general,内閣府,警察庁,,,93762,95031,toc
 npa.go.jp__policies__budget__r6__gaisanyokyu__ippankaikei,5,060,交通警察費,33,general,内閣府,警察庁,,,17189606,17358664,toc
-npa.go.jp__policies__budget__r6__gaisanyokyu__ippankaikei,6,065,交通反則者納金財源交通安全対策特別交付金等交付税及び譲与税配付金特別会計へ繰入,,general,内閣府,警察庁,,,49447941,51556739,toc_total
+npa.go.jp__policies__budget__r6__gaisanyokyu__ippankaikei,6,065,交通反則者納金財源交通安全対策特別交付金等交付税及び譲与税配付金特別会計へ繰入,34,general,内閣府,警察庁,,,49447941,51556739,toc_total
 npa.go.jp__policies__budget__r6__gaisanyokyu__ippankaikei,7,070,警備警察費,35,general,内閣府,警察庁,,,10329685,9906560,toc
 npa.go.jp__policies__budget__r6__gaisanyokyu__ippankaikei,8,080,皇宮警察本部,42,general,内閣府,警察庁,,,8457542,7890379,toc
 npa.go.jp__policies__budget__r6__gaisanyokyu__ippankaikei,9,090,サイバー警察費,49,general,内閣府,警察庁,,,3086109,1699354,toc

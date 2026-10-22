@@ -124,7 +124,7 @@ export function totalTableKouHeads(rows: Rec[], listed: string[] | null): { inde
 
 /**
  * 目次から漏れた項を、総表から補う（目次に無い項の見出しのうち、`totalTableKouHeads` で項になるもの）。
- * 補った項は、総表で直前にある項の後ろに置き、所属（所管・組織・会計・勘定）はその項から取る。
+ * 補った項は、総表で直前にある項の後ろに置き、所属（所管・組織・会計・勘定）はその項から取る。頁は総表の `明細書頁数`（目次の頁と同じ紙面の印字）。
  * 目次がその項の事項を前の項の下に置いているとき（総表で補った項の範囲にある事項名と同じ名前）は、事項を補った項に付け替える。
  */
 export function supplementTocTree(t: TocTree, totalRows: Rec[]): TocKou[] {
@@ -138,7 +138,7 @@ export function supplementTocTree(t: TocTree, totalRows: Rec[]): TocKou[] {
     const base = t.kous[lastListed];
     const end = heads[n + 1]?.index ?? totalRows.length; const names = new Set<string>();
     for (let i = h.index + 1; i < end; i++) { const r = totalRows[i]; if (r['row_type'] === 'TOTAL' || r['row_type'] === 'HIER') break; const m = /^(\d{2})[\u2010-\u2015\u2212\uFF0D-](\d{2})\s*(.+)$/.exec(r['区分'] ?? ''); if (r['row_type'] === 'DETAIL' && m) names.add(ns(m[3])); }
-    added.push({ after: lastListed, kou: { idx: -1, slug: t.slug, code: h.code, name: h.name, page: '', ministry: base.ministry, org: base.org, account: base.account, sub: base.sub, fromTotal: true }, jikouNames: names });
+    added.push({ after: lastListed, kou: { idx: -1, slug: t.slug, code: h.code, name: h.name, page: totalRows[h.index]['明細書頁数'] ?? '', ministry: base.ministry, org: base.org, account: base.account, sub: base.sub, fromTotal: true }, jikouNames: names });
   });
   if (added.length === 0) return [];
   // 並べ直して添字を振り直す（同じ項の後ろに複数あれば総表の順）
