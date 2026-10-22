@@ -30,6 +30,8 @@ export interface TrendFilters {
   shared: boolean;
   /** その年度に金額が一致しない要求書がある行だけ */
   mismatch: boolean;
+  /** その年度に持ち分（複数の府省が持ち分を載せ、合計の書がある）の行だけ */
+  shares: boolean;
   /** その年度に、目に「繰入」を含む項だけ */
   transfer: boolean;
   /** その年度に所管コードが前の年度から変わった行だけ */
@@ -46,7 +48,7 @@ export interface TrendFilters {
   jikou: boolean;
 }
 
-export const INITIAL_TREND_FILTERS: TrendFilters = { name: '', nameRegex: false, org: '', orgRegex: false, accts: [], groups: [], pattern: 'all', change: '', shared: false, mismatch: false, transfer: false, codeChange: false, newAcct: false, moved: false, imagePage: false, noPdfPage: false, jikou: false };
+export const INITIAL_TREND_FILTERS: TrendFilters = { name: '', nameRegex: false, org: '', orgRegex: false, accts: [], groups: [], pattern: 'all', change: '', shared: false, mismatch: false, shares: false, transfer: false, codeChange: false, newAcct: false, moved: false, imagePage: false, noPdfPage: false, jikou: false };
 
 /**
  * 所管 = 載っている要求書の公開元（PDF のドメイン由来の府省庁名）。会計の区別は acct（一般 / 特別）の列で示す。
@@ -91,6 +93,21 @@ export interface TrendRecord {
   noPdfPageBy: string[];
   /** 推定した頁が画像（文字層なし）の書の府省（空なら無し） */
   imagePageBy: string[];
+}
+
+/**
+ * 持ち分: 複数の府省の要求書に載り、書によって額が違い、最も大きい額の書がほかの書の和以上（合計の書と、各省の持ち分の書）。
+ * 東日本大震災復興がこれにあたる（合計の書は復興庁。復興庁自身の持ち分もあるので、合計はほかの書の和以上になる）。
+ * 額不一致（mismatch）のうち、持ち分でないものだけを「額不一致」として出す（例: FY2023 金融庁共通費は、額の取れない分冊のため）
+ */
+export function isShares(r: BudgetRequestTrendRow, year: number, urls: readonly string[]): boolean {
+  const a = yearOf(r, year);
+  if (!a?.mismatch || !a.srcAmt) return false;
+  if (new Set(a.src.map(([u]) => publisherOf(urls[u] ?? ''))).size < 2) return false;
+  const reqs = a.srcAmt.map(x => x[1]).filter((v): v is number => v !== null);
+  if (reqs.length < 2) return false;
+  const max = Math.max(...reqs);
+  return max >= reqs.reduce((s, v) => s + v, 0) - max;
 }
 
 /** 複数書: 同じ府省の要求書が複数あり、同じ項が載る（例: FY2023 金融庁の分冊）。複数所管の項は、所管の列で分かるので含めない */
@@ -183,7 +200,8 @@ export function filterRows(rows: readonly BudgetRequestTrendRow[], f: TrendFilte
     if (!textMatches(`${r.org} ${r.sub}`, f.org, f.orgRegex)) return false;
     if (f.pattern === 'all5' && !inAllYears(r, years)) return false;
     if (f.pattern === 'new' && !isNew(r, year, first)) return false;
-    if (f.mismatch && !(a && a.mismatch)) return false;
+    if (f.mismatch && !(a && a.mismatch && !isShares(r, year, urls))) return false;
+    if (f.shares && !isShares(r, year, urls)) return false;
     if (f.transfer && !(a?.xfer && a.xfer.length > 0)) return false;
     if (f.codeChange && !a?.codeChanged) return false;
     if (f.newAcct && !a?.newAcct) return false;

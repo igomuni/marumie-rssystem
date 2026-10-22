@@ -5,7 +5,7 @@ import type { BudgetRequestTrendRow } from '@/types/budget-request-trend';
 import { MultiSelectCombo } from '@/client/components/mof-kou/MultiSelectCombo';
 import { RegexTextFilter } from '@/client/components/mof-kou/RegexTextFilter';
 import { MAX_REGEX_PATTERN_LENGTH } from '@/app/lib/sankey-query';
-import { INITIAL_TREND_FILTERS, MULTI_GROUP, acctLabelOf, groupsOf, isSharedBooks, recordsOf, inAllYears, isGone, isNew, yearOf, type ChangeFilter, type PatternFilter, type TrendFilters } from '@/app/lib/budget-request-trend';
+import { INITIAL_TREND_FILTERS, MULTI_GROUP, acctLabelOf, groupsOf, isShares, isSharedBooks, recordsOf, inAllYears, isGone, isNew, yearOf, type ChangeFilter, type PatternFilter, type TrendFilters } from '@/app/lib/budget-request-trend';
 
 const section = 'flex flex-col gap-1.5 border-b border-neutral-200 px-3 py-2.5 dark:border-neutral-800';
 const heading = 'text-[11px] font-semibold tracking-wide text-neutral-500';
@@ -50,7 +50,8 @@ export function TrendFilterPane({
       isNew: rows.filter(r => isNew(r, year, first)).length,
       isGone: rows.filter(r => isGone(r, year, first)).length,
       shared: pdfStates.filter(isSharedBooks).length,
-      mismatch: rows.filter(r => yearOf(r, year)?.mismatch).length,
+      mismatch: rows.filter(r => yearOf(r, year)?.mismatch && !isShares(r, year, urls)).length,
+      shares: rows.filter(r => isShares(r, year, urls)).length,
       transfer: rows.filter(r => (yearOf(r, year)?.xfer?.length ?? 0) > 0).length,
       codeChange: rows.filter(r => yearOf(r, year)?.codeChanged).length,
       newAcct: rows.filter(r => yearOf(r, year)?.newAcct).length,
@@ -59,7 +60,7 @@ export function TrendFilterPane({
       noPdfPage: pdfStates.filter(x => x.noPdfPageBy.length > 0).length,
       jikou: rows.filter(r => yearOf(r, year)?.jikou).length,
     }),
-    [rows, years, year, first, pdfStates]
+    [rows, years, year, first, pdfStates, urls]
   );
   const [open, setOpen] = useState<'group' | 'acct' | null>(null);
   // コンボの選択肢は「名称（件数）」。選択状態は名称で持つ（年度を替えて選択肢に無い名称は、そのまま残す）
@@ -150,8 +151,13 @@ export function TrendFilterPane({
           </label>
           <label className={row}>
             <input type="checkbox" checked={filters.mismatch} onChange={e => set({ mismatch: e.target.checked })} />
-            額不一致（書によって金額が違う）
+            額不一致（持ち分以外で、書によって金額が違う）
             <span className={count}>{counts.mismatch}</span>
+          </label>
+          <label className={row}>
+            <input type="checkbox" checked={filters.shares} onChange={e => set({ shares: e.target.checked })} />
+            持ち分（各府省の持ち分と合計の書）
+            <span className={count}>{counts.shares}</span>
           </label>
           <label className={row}>
             <input type="checkbox" checked={filters.transfer} onChange={e => set({ transfer: e.target.checked })} />

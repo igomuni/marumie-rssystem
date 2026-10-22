@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import type { BudgetRequestTrendRow } from '@/types/budget-request-trend';
-import { acctLabelOf, isSharedBooks, orgOf, patternOf, publisherOf, recordChange, recordRate, yearOf, type TrendRecord, type TrendSortDir, type TrendSortKey } from '@/app/lib/budget-request-trend';
+import { acctLabelOf, isShares, isSharedBooks, orgOf, patternOf, publisherOf, recordChange, recordRate, yearOf, type TrendRecord, type TrendSortDir, type TrendSortKey } from '@/app/lib/budget-request-trend';
 import { changeColor, formatRate, formatSen, formatSenSigned } from './format';
 
 const MAX_ROWS = 600;
@@ -157,7 +157,9 @@ export function TrendListPane({
                     {a?.codeChanged && <span title="所管コードが前の年度から変わりました" className={`${chip} border-neutral-400 text-neutral-500`}>コード変更</span>}
                     {x.imagePageBy.length > 0 && <span title={`${x.groups.length > 1 ? `${x.imagePageBy.join('、')}の書: ` : ''}PDF の該当頁は画像で文字層がなく、明細表の目以下が取り込めていません。リンクの頁は推定です`} className={`${chip} border-rose-500 text-rose-600 dark:text-rose-400`}>画像頁</span>}
                     {x.noPdfPageBy.length > 0 && <span title={`${x.groups.length > 1 ? `${x.noPdfPageBy.join('、')}の書: ` : ''}PDF の頁が引けなかったため、リンクは PDF の先頭を開きます`} className={`${chip} border-neutral-400 text-neutral-500`}>PDF頁なし</span>}
-                    {a?.mismatch && <span className={`${chip} border-amber-600 text-amber-700 dark:text-amber-400`}>額不一致</span>}
+                    {a?.mismatch && (isShares(r, year, urls)
+                      ? <span title="各府省が持ち分を載せ、合計の書（最も大きい額）がある。金額は合計の書の額" className={`${chip} border-neutral-400 text-neutral-500`}>持ち分</span>
+                      : <span title="同じ項で、要求書によって額が違う" className={`${chip} border-amber-600 text-amber-700 dark:text-amber-400`}>額不一致</span>)}
                   </td>
                   <td className={`whitespace-nowrap px-2 py-1 text-left ${pattern === '新規' ? 'text-emerald-700 dark:text-emerald-400' : pattern === '消滅' ? 'text-orange-700 dark:text-orange-400' : 'text-neutral-500'}`}>{pattern ?? '–'}</td>
                   <td className="whitespace-nowrap px-2 py-1 text-right tabular-nums">{formatSen(x.prev)}</td>

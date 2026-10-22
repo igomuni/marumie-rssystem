@@ -2,7 +2,7 @@
 
 import type { BudgetRequestTrendRow } from '@/types/budget-request-trend';
 import { AccountBadge } from '@/client/components/mof-kou/Badge';
-import { assessmentGap, groupOf, orgOf, publisherOf, yearOf } from '@/app/lib/budget-request-trend';
+import { assessmentGap, groupOf, isShares, orgOf, publisherOf, yearOf } from '@/app/lib/budget-request-trend';
 import { changeColor, formatSen, formatSenSigned } from './format';
 
 const W = 380, H = 180, LEFT = 74, BOTTOM = 22, TOP = 10, BAR = 34;
@@ -61,7 +61,10 @@ export function TrendDetailPane({
   if (orgJikouYears.length > 0) notes.push(`${orgJikouYears.map(y => `FY${y}`).join('・')}: ${row.org}に組織の事項要求あり（どの項分かは記載なし）。`);
   const xfers = [...new Set(present.flatMap(y => yearOf(row, y)?.xfer ?? []))];
   if (xfers.length > 0) notes.push(`この項の目に繰入があります（${xfers.join('、')}）。受け側の会計にも載るため、会計をまたぐ合計では二重になりえます。`);
-  if (present.some(y => yearOf(row, y)?.mismatch)) notes.push('同じキーで、要求書によって額が違う年度があります（各書が持ち分だけを載せている場合は、最も大きい額＝合計書の額を表示しています）。各書の額は、選択中の年度の「要求書」の表に出します。');
+  const shareYears = present.filter(y => isShares(row, y, urls));
+  if (shareYears.length > 0) notes.push(`${shareYears.map(y => `FY${y}`).join('・')}: 持ち分です（各府省が持ち分を載せ、最も大きい額の書が合計）。金額は合計の書の額です。各書の額は、選択中の年度の「要求書」の表に出します。`);
+  const mismatchYears = present.filter(y => yearOf(row, y)?.mismatch && !isShares(row, y, urls));
+  if (mismatchYears.length > 0) notes.push(`${mismatchYears.map(y => `FY${y}`).join('・')}: 要求書によって額が違います（最も大きい額を表示）。各書の額は、選択中の年度の「要求書」の表に出します。`);
 
   // 所管コードは年度で変わることがある（例: 年金特会 9207 → 2507）。年度順に、変わった所で区切って示す
   const codes = present.reduce<string[]>((acc, y) => { const c = yearOf(row, y)?.code ?? ''; if (c && acc[acc.length - 1] !== c) acc.push(c); return acc; }, []);
@@ -199,11 +202,11 @@ function BooksOfYear({ row, year, urls }: { row: BudgetRequestTrendRow; year: nu
   if (!a || a.src.length < 2) return null;
   const amts = a.src.map((_, i) => a.srcAmt?.[i] ?? [a.prev, a.req]);
   const maxReq = Math.max(...amts.map(x => x[1] ?? -Infinity));
-  const shares = !!a.srcAmt && new Set(amts.filter(x => x[1] !== null).map(x => x[1])).size > 1;
+  const shares = isShares(row, year, urls);
   const cell = 'whitespace-nowrap px-1.5 py-1 text-right tabular-nums';
   return (
     <div>
-      <h3 className="mb-1 text-[11px] font-semibold text-neutral-500">FY{year} の要求書（{new Set(a.src.map(([u]) => publisherOf(urls[u]))).size}所管・{a.src.length}書）{shares ? '。各書は持ち分で、最も大きい額の書が合計' : '。どの書も同じ要求'}</h3>
+      <h3 className="mb-1 text-[11px] font-semibold text-neutral-500">FY{year} の要求書（{new Set(a.src.map(([u]) => publisherOf(urls[u]))).size}所管・{a.src.length}書）{shares ? '。各書は持ち分で、最も大きい額の書が合計' : a.mismatch ? '。書によって額が違う' : '。どの書も同じ要求'}</h3>
       <table className="w-full border-collapse">
         <thead>
           <tr className="text-[11px] text-neutral-500">

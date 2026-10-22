@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { BudgetRequestTrendRow, BudgetRequestTrendYear } from '@/types/budget-request-trend';
-import { INITIAL_TREND_FILTERS, assessmentGap, groupOf, jikouKeyOf, jikouOrgKeyOf, mergeJikou, recordsOf, changeRate, filterRows, isGone, isNew, patternOf, publisherOf, sortRows, textMatches } from './budget-request-trend';
+import { INITIAL_TREND_FILTERS, assessmentGap, groupOf, isShares, jikouKeyOf, jikouOrgKeyOf, mergeJikou, recordsOf, changeRate, filterRows, isGone, isNew, patternOf, publisherOf, sortRows, textMatches } from './budget-request-trend';
 
 const URLS = ['https://www.env.go.jp/a.pdf', 'https://www.meti.go.jp/b.pdf'];
 const Y = (prev: number | null, req: number | null, extra: Partial<BudgetRequestTrendYear> = {}): BudgetRequestTrendYear => ({ code: '19', prev, req, src: [[0, '1', '3']], mismatch: false, mof: '', ...extra });
@@ -108,5 +108,14 @@ describe('budget-request-trend', () => {
     expect(merged.rows[1].y['2027'].orgJikou).toBe('国土強靱化…'); // 同じ組織（本府）の別の項
     expect(merged.rows[0].y['2027'].jikou).toBeUndefined();
     expect(merged.rows[3].y['2027'].orgJikou).toBeUndefined(); // 組織が空の特別会計の行には付けない
+  });
+  it('tells shares (a total book at least the sum of the others, several ministries) from other amount mismatches', () => {
+    const U = [...URLS, 'https://www.reconstruction.go.jp/x.pdf'];
+    const fukko = row('復興事業費', { '2027': Y(1, 30, { mismatch: true, src: [[0, '1', '3'], [1, '1', '3'], [3, '1', '3']], srcAmt: [[0, 3], [0, 7], [1, 30]] }) }, { acct: 1, min: '東日本大震災復興', sub: '', org: '' });
+    const split = row('分冊費', { '2027': Y(1, 20, { mismatch: true, src: [[0, '1', '3'], [0, '2', '']], srcAmt: [[1, 20], [null, null]] }) });
+    expect(isShares(fukko, 2027, U)).toBe(true);
+    expect(isShares(split, 2027, U)).toBe(false);
+    expect(filterRows([fukko, split], { ...INITIAL_TREND_FILTERS, shares: true }, 2027, YEARS, U).map(x => x.row.name)).toEqual(['復興事業費']);
+    expect(filterRows([fukko, split], { ...INITIAL_TREND_FILTERS, mismatch: true }, 2027, YEARS, U).map(x => x.row.name)).toEqual(['分冊費']);
   });
 });
