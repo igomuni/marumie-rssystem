@@ -8,7 +8,7 @@ import { TYPE_INFO } from './typeInfo';
 
 const MAX_ROWS = 600;
 const MIN_COLUMN_WIDTH = 48;
-export const DEFAULT_COLUMN_WIDTHS: Record<MofSortKey, number> = { group: 150, acct: 140, org: 130, name: 240, req: 100, mof: 100, diff: 100, rate: 76 };
+export const DEFAULT_COLUMN_WIDTHS: Record<MofSortKey, number> = { group: 150, acct: 140, org: 130, name: 240, nJikou: 56, nMoku: 56, req: 100, mof: 100, diff: 100, rate: 76 };
 const chip = 'ml-1 rounded-full border px-1.5 text-[10px] align-middle';
 
 export function MofListPane({
@@ -34,11 +34,13 @@ export function MofListPane({
   onWidthsChange: (updater: (prev: Record<string, number>) => Record<string, number>) => void;
 }) {
   const sum = rows.reduce((s, r) => ({ req: s.req + (r.req ?? 0), mof: s.mof + (r.mof ?? 0) }), { req: 0, mof: 0 });
-  const cols: { key: MofSortKey; label: string; left?: boolean }[] = [
+  const cols: { key: MofSortKey; label: string; left?: boolean; title?: string }[] = [
     { key: 'group', label: '所管', left: true },
     { key: 'acct', label: '会計', left: true },
     { key: 'org', label: '組織／勘定', left: true },
     { key: 'name', label: '項名', left: true },
+    { key: 'nJikou', label: '事項', title: '事項の数（概算要求と予算書を名前でつないだ和集合）' },
+    { key: 'nMoku', label: '目', title: '目の数（概算要求と予算書を名前でつないだ和集合。事項をまたいで数える）' },
     { key: 'req', label: '要求額' },
     { key: 'mof', label: '当初予算額' },
     { key: 'diff', label: '差' },
@@ -86,6 +88,7 @@ export function MofListPane({
                   aria-sort={sortKey === c.key ? (sortDir > 0 ? 'ascending' : 'descending') : undefined}
                   className={`sticky top-0 z-10 cursor-pointer select-none overflow-hidden whitespace-nowrap border-b border-neutral-200 bg-neutral-100 px-2 py-1.5 font-semibold text-neutral-500 dark:border-neutral-800 dark:bg-neutral-800 ${c.left ? 'text-left' : 'text-right'}`}
                   onClick={() => onSort(c.key)}
+                  title={c.title}
                 >
                   {c.label}
                   {sortKey === c.key ? (sortDir > 0 ? ' ▲' : ' ▼') : ''}
@@ -120,6 +123,8 @@ export function MofListPane({
                       <span key={x} title={x === '事項要求' && r.jikouText ? `${TYPE_INFO[x].text}（${r.jikouText}）` : TYPE_INFO[x].text} className={`${chip} ${TYPE_INFO[x].color}`}>{x}</span>
                     ))}
                   </td>
+                  <td className="whitespace-nowrap px-2 py-1 text-right tabular-nums text-neutral-500">{r.nJikou}</td>
+                  <td className="whitespace-nowrap px-2 py-1 text-right tabular-nums text-neutral-500">{r.nMoku}</td>
                   <td className="whitespace-nowrap px-2 py-1 text-right tabular-nums">{formatSen(r.req)}</td>
                   <td className="whitespace-nowrap px-2 py-1 text-right tabular-nums">{formatSen(r.mof)}</td>
                   <td className={`whitespace-nowrap px-2 py-1 text-right tabular-nums ${changeColor(d)}`}>{formatSenSigned(d)}</td>
@@ -127,8 +132,8 @@ export function MofListPane({
                 </tr>
               );
             })}
-            {rows.length > shown.length && <tr><td colSpan={8} className="px-2 py-2 text-neutral-500">上位 {shown.length.toLocaleString()} 件を表示（全 {rows.length.toLocaleString()} 件）。絞り込みで減らしてください。</td></tr>}
-            {rows.length === 0 && <tr><td colSpan={8} className="px-2 py-8 text-center text-neutral-500">条件に合う項がありません。</td></tr>}
+            {rows.length > shown.length && <tr><td colSpan={10} className="px-2 py-2 text-neutral-500">上位 {shown.length.toLocaleString()} 件を表示（全 {rows.length.toLocaleString()} 件）。絞り込みで減らしてください。</td></tr>}
+            {rows.length === 0 && <tr><td colSpan={10} className="px-2 py-8 text-center text-neutral-500">条件に合う項がありません。</td></tr>}
           </tbody>
         </table>
       </div>

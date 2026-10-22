@@ -120,7 +120,8 @@ for (const [year, ver] of VERSIONS) {
   const m1 = rd(path.join(MATCH, ver, 'm1-kou.csv'));
   const count: Record<string, number> = {};
   const cmp: Record<'jikou' | 'moku', Record<string, number>> = { jikou: {}, moku: {} };
-  const push = (r: BudgetRequestMofRow, d: BudgetRequestMofDetail) => {
+  const push = (r0: Omit<BudgetRequestMofRow, 'nJikou' | 'nMoku'>, d: BudgetRequestMofDetail) => {
+    const r: BudgetRequestMofRow = { ...r0, nJikou: d.j.length, nMoku: d.m.length };
     rows.push(r); count[r.kind] = (count[r.kind] ?? 0) + 1;
     const k = rowKey(r); if (details[k]) throw new Error(`行のキーが重複 ${k}`); details[k] = d;
     if (r.kind !== 'matched') return;

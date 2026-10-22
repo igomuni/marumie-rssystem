@@ -1,11 +1,11 @@
 'use client';
 
 import type { BudgetRequestMofDetail, BudgetRequestMofRow } from '@/types/budget-request-mof';
-import { changeColor, formatSen, formatSenSigned } from '@/client/components/budget-request-trend/format';
+import { changeColor, formatRate, formatSen, formatSenSigned } from '@/client/components/budget-request-trend/format';
 
-const th = 'px-1.5 py-1 font-medium';
-const num = 'whitespace-nowrap px-1.5 py-1 text-right tabular-nums';
-const NAME_COL = 'sticky left-0 z-[1] min-w-[8rem] bg-white dark:bg-neutral-900';
+const th = 'px-1 py-1 font-medium';
+const num = 'whitespace-nowrap px-1 py-1 text-right tabular-nums';
+const NAME_COL = 'sticky left-0 z-[1] min-w-[6rem] bg-white dark:bg-neutral-900';
 
 /** 名前で事項・目をつないだ表（要求額・当初予算額・差）。片側にしか無い行は、無い側を「—」にして印を付ける */
 export function MofBreakdown({ row, d, what }: { row: BudgetRequestMofRow; d: BudgetRequestMofDetail; what: 'jikou' | 'moku' }) {
@@ -14,6 +14,7 @@ export function MofBreakdown({ row, d, what }: { row: BudgetRequestMofRow; d: Bu
   if (ps.length === 0) return <p className="text-neutral-500">{label}が取れていません。</p>;
   const sum = (i: 2 | 3) => (ps.some(p => p[i] !== null) ? ps.reduce((s, p) => s + (p[i] ?? 0), 0) : null);
   const req = sum(2), mof = sum(3);
+  const total = req !== null && mof !== null ? mof - req : null;
   // 片側にしか無い印は、両側がそろう行（対応あり）で、要求側の内訳が取れているときだけ
   const onlyOf = (p: BudgetRequestMofDetail['m'][number]) => (d.noReq || row.req === null || row.mof === null ? null : p[2] === null ? '予算のみ' : p[3] === null ? '要求のみ' : null);
   const n = (k: string | null) => ps.filter(p => onlyOf(p) === k).length;
@@ -32,11 +33,13 @@ export function MofBreakdown({ row, d, what }: { row: BudgetRequestMofRow; d: Bu
               <th className={`${th} text-right`}>概算要求</th>
               <th className={`${th} text-right`}>当初予算</th>
               <th className={`${th} text-right`}>差</th>
+              <th className={`${th} text-right`} title="差 ÷ 要求額（一覧の差率と同じ）">差率</th>
             </tr>
           </thead>
           <tbody>
             {ps.map(([name, code, r, m]) => {
               const diff = r !== null && m !== null ? m - r : null;
+              const rate = diff !== null && r ? diff / r : null;
               const only = onlyOf([name, code, r, m]);
               return (
                 <tr key={`${name}|${code}`} className="border-t border-neutral-100 dark:border-neutral-800">
@@ -48,6 +51,7 @@ export function MofBreakdown({ row, d, what }: { row: BudgetRequestMofRow; d: Bu
                   <td className={num}>{r === null ? '—' : formatSen(r)}</td>
                   <td className={num}>{m === null ? '—' : formatSen(m)}</td>
                   <td className={`${num} ${changeColor(diff)}`}>{formatSenSigned(diff)}</td>
+                  <td className={`${num} ${changeColor(rate)}`}>{formatRate(rate)}</td>
                 </tr>
               );
             })}
@@ -55,7 +59,8 @@ export function MofBreakdown({ row, d, what }: { row: BudgetRequestMofRow; d: Bu
               <td className={`px-1.5 py-1 ${NAME_COL}`}>計</td>
               <td className={num}>{formatSen(req)}</td>
               <td className={num}>{formatSen(mof)}</td>
-              <td className={`${num} ${changeColor(req !== null && mof !== null ? mof - req : null)}`}>{formatSenSigned(req !== null && mof !== null ? mof - req : null)}</td>
+              <td className={`${num} ${changeColor(total)}`}>{formatSenSigned(total)}</td>
+              <td className={`${num} ${changeColor(total)}`}>{formatRate(total !== null && req ? total / req : null)}</td>
             </tr>
           </tbody>
         </table>

@@ -39,6 +39,9 @@ export interface BudgetRequestMofRow {
   orgJikouText?: string;
   /** MOF の名前（概算要求の名前と違うとき。NEAR_NAME） */
   mofName?: string;
+  /** 事項・目の数（概算要求と予算書を名前でつないだ和集合。詳細のタブのラベルと同じ） */
+  nJikou: number;
+  nMoku: number;
 }
 
 export interface BudgetRequestMofData {
