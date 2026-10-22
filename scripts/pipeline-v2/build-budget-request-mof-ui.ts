@@ -69,9 +69,13 @@ for (const [year, ver] of VERSIONS) {
   }
   // 詳細の事項・目。要求側は年度推移の行（統合は項ごと）の内訳を足す。req が null なら要求側の無い行（MOF のみ）、mofId が null なら MOF の無い行
   const detailOf = (req: (Rec | undefined)[] | null, mofId: string | null): BudgetRequestMofDetail => {
-    const ids = req === null ? [] : [...new Set(req.filter((t): t is Rec => !!t).map(idOf))];
-    const rj = ids.flatMap(i => reqJikou.get(i) ?? []).map(r => ({ name: ns(r['事項名']), amt: num(r['要求額_千円']) }));
-    const rm = ids.flatMap(i => reqMoku.get(i) ?? []).map(r => ({ name: ns(r['目名']), code: reqMokuCode(r['目コード(原文)']), amt: num(r['要求額_千円']) }));
+    // 同じ項が複数の府省の要求書に載ると（複数所管・持ち分）、年度推移の内訳は書ごとに行を持つ。行の要求書の公開元（slug の先頭のドメイン）で、
+    // 選んだ年度推移の行と同じ府省の行だけを取る（取らないと書の数だけ足してしまう）
+    const hostOf = (slug: string) => slug.split('__')[0];
+    const srcs = req === null ? [] : [...new Map(req.filter((t): t is Rec => !!t).map(t => [`${idOf(t)}#${hostOf(t['要求書'])}`, t])).values()];
+    const pick = (g: Map<string, Rec[]>) => srcs.flatMap(t => (g.get(idOf(t)) ?? []).filter(r => hostOf(r['要求書']) === hostOf(t['要求書'])));
+    const rj = pick(reqJikou).map(r => ({ name: ns(r['事項名']), amt: num(r['要求額_千円']) }));
+    const rm = pick(reqMoku).map(r => ({ name: ns(r['目名']), code: reqMokuCode(r['目コード(原文)']), amt: num(r['要求額_千円']) }));
     const noReq = req !== null && rj.length === 0 && rm.length === 0;
     const j = pairByName(rj, mofId ? mofJikou.get(mofId) ?? [] : []).map(([n, , a, b]) => [n, '', a, b] as [string, string, number | null, number | null]);
     return { j, m: pairByName(rm, mofId ? mofMoku.get(mofId) ?? [] : []), ...(noReq ? { noReq: 1 as const } : {}) };

@@ -71,7 +71,7 @@ function Check({ label, req, mof, row }: { label: string; req: number | null; mo
   if (!off(req, row.req) && !off(mof, row.mof)) return null;
   return (
     <p className="text-[11px] text-neutral-500">
-      {off(req, row.req) && `要求側の${label}の計は項の要求額と ${formatSenSigned((req ?? 0) - (row.req ?? 0))} 違う（明細表の読み取りの欠け・額の空き、または同じ項が複数の書に載る場合）。`}
+      {off(req, row.req) && `要求側の${label}の計は項の要求額と ${formatSenSigned((req ?? 0) - (row.req ?? 0))} 違う（要求書の明細表の読み取りの欠け: 額の空いた行・画像の頁・解決できない行など。年度推移の目タブと同じ）。`}
       {off(mof, row.mof) && `予算書の${label}の計は項の当初予算額と ${formatSenSigned((mof ?? 0) - (row.mof ?? 0))} 違う。`}
     </p>
   );
