@@ -5,11 +5,14 @@
  *   入力: tests/fixtures/budget-request-trend/kou.csv（項。キーの列をここから取る）、
  *         tests/fixtures/mof-budget-request-match/{year}/request-kou.csv（項の一覧。kou.csv と同じ順）、
  *         tests/fixtures/budget-request-csv/{year}/{total-table,detail-table}/sources/*.csv（総表＝事項の額、明細表＝事項・目）
- *   出力: <out-dir>/jikou.csv moku/{year}.csv detail-summary.json（既定 tests/fixtures/budget-request-trend）。目は大きいので年度ごとに分ける
+ *   出力: <out-dir>/jikou.csv moku/{year}.csv detail-summary.json（既定 tests/fixtures/budget-request-trend）。目は大きいので年度ごとに分ける。
+ *         public/data/v2/ui/budget-request-trend/detail.json.gz（/budget-request-trend の詳細の事項・目のタブ用）
  */
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as zlib from 'zlib';
+import type { BudgetRequestTrendDetailData, BudgetRequestTrendDetailKou } from '../../types/budget-request-trend';
 import { groupMoku, mokuReq, walkRows, type Jikou, type KouRef, type Moku, type Owner, type Walk } from './lib/budget-request-detail-tree';
 import { buildTocTree, ns, readCsv, type Rec } from './lib/mof-budget-request-match';
 
@@ -26,6 +29,8 @@ const KOU_COLS = ['年度', '会計区分', '所管', '特別会計', '勘定', 
 const jikouHeader = [...KOU_COLS, '要求番号', '事項コード', '事項名', '前年度予算額_千円', '要求額_千円', '目の要求額の合計_千円', '目の行数', '細分の合計を使った目', '目の額の空き', '検算', '要求書', 'PDF頁'];
 const mokuHeader = [...KOU_COLS, '事項名', '主要経費目的別コード', '目別コード', '目名', '目コード(原文)', '前年度予算額_千円', '要求額_千円', '行数', '細分の合計を使った行', '額の空き', '要求書', 'PDF頁'];
 const jikouRows: unknown[][] = [], mokuRows: unknown[][] = [];
+// UI 用: 年度 → 行のキー（UI の jikouKeyOf と同じ並び: 会計区分 | 所管（特別会計は特別会計名）| 勘定 | 組織 | 項名）→ 内訳。同じキーが複数の書にあれば最初の書
+const ui: BudgetRequestTrendDetailData = { years: {} };
 const summary: Record<string, unknown> = {};
 const trend = rd(path.join('tests', 'fixtures', 'budget-request-trend', 'kou.csv'));
 
@@ -115,6 +120,8 @@ for (const year of YEARS) {
   reqKou.forEach((r, i) => {
     const k = kouRows[i]; const kouReq = r['request_amount'] === '' ? null : Number(r['request_amount']); const image = k['画像頁'] === '1';
     const head = [year, k['会計区分'], k['所管'], k['特別会計'], k['勘定'], k['組織'], k['項名'], k['項コード']];
+    const acct = k['会計区分'] === '一般' ? 0 : 1; const uiKey = [acct, acct === 0 ? k['所管'] : k['特別会計'], k['勘定'], k['組織'], k['項名']].join('|');
+    const yUi = ui.years[String(year)] ??= {}; const kUi: BudgetRequestTrendDetailKou | null = yUi[uiKey] ? null : (yUi[uiKey] = { j: [], m: [] });
     // 事項: 総表の事項（額の正）に、明細表の事項（目の親）を、事項名で結ぶ。同じ項に同名の事項が複数あるときだけ要求番号で絞る
     // （内閣府の分冊は、明細表の要求番号が PDF ごとに 1 から振り直される）。明細表にだけある事項も出す
     const tj = totalOf.get(i) ?? [], dj = detailOf.get(i) ?? [];
@@ -134,11 +141,12 @@ for (const year of YEARS) {
       st.jikou[({ 一致: 'eq', 不一致: 'ne', 額の空きあり: 'blank', 目なし: 'no_moku', 画像の頁: 'no_moku_image', 事項の額なし: 'no_amount' } as const)[status]]++;
       const pg = pageOf.get(key);
       jikouRows.push([...head, j.reqNo, j.code, j.name, fromTotal ? j.prev ?? '' : '', req ?? '', ms.length ? msum : '', ms.length, fromSub, blanks, status, pg?.slug ?? k['要求書'], pg?.page ?? '']);
-      for (const g of groupMoku(ms)) { st.moku_groups++; mokuRows.push([...head, j.name, g.c1, g.yy, g.name, g.raws.join('、'), g.prev ?? '', g.req ?? '', g.rows, g.fromSub, g.blanks, pg?.slug ?? k['要求書'], g.page]); }
+      const ji = kUi ? kUi.j.push([j.reqNo, j.name, fromTotal ? j.prev : null, req, ms.length ? msum : null, status]) - 1 : -1;
+      for (const g of groupMoku(ms)) { kUi?.m.push([ji, g.name, g.yy, g.prev, g.req, g.fromSub, g.blanks]); st.moku_groups++; mokuRows.push([...head, j.name, g.c1, g.yy, g.name, g.raws.join('、'), g.prev ?? '', g.req ?? '', g.rows, g.fromSub, g.blanks, pg?.slug ?? k['要求書'], g.page]); }
       st.moku_rows += ms.length;
     }
     const loose = (noJikouMoku.get(i) ?? []).map(x => x.m); allMoku.push(...loose);
-    for (const g of groupMoku(loose)) { st.moku_groups++; mokuRows.push([...head, '', g.c1, g.yy, g.name, g.raws.join('、'), g.prev ?? '', g.req ?? '', g.rows, g.fromSub, g.blanks, (noJikouMoku.get(i) ?? [])[0]?.slug ?? k['要求書'], g.page]); }
+    for (const g of groupMoku(loose)) { kUi?.m.push([-1, g.name, g.yy, g.prev, g.req, g.fromSub, g.blanks]); st.moku_groups++; mokuRows.push([...head, '', g.c1, g.yy, g.name, g.raws.join('、'), g.prev ?? '', g.req ?? '', g.rows, g.fromSub, g.blanks, (noJikouMoku.get(i) ?? [])[0]?.slug ?? k['要求書'], g.page]); }
     st.moku_rows += loose.length;
     // 項の検算
     if (kouReq === null) { st.kou.kou_no_amount++; return; }
@@ -152,6 +160,8 @@ for (const year of YEARS) {
   summary[String(year)] = { ...st, orphan_moku: orphanMoku, kou_ne_moku_by_reason: Object.fromEntries([...new Set(kouNeMoku.map(x => String(x[4])))].map(r => [r, kouNeMoku.filter(x => x[4] === r).length])), kou_ne_moku: kouNeMoku, kou_ne_jikou: kouNeJikou, unlisted_kou: [...unlisted.values()].map(u => [u.book, u.code, u.name, u.req]) };
 }
 fs.mkdirSync(outDir, { recursive: true });
+const uiDir = path.join('public', 'data', 'v2', 'ui', 'budget-request-trend'); fs.mkdirSync(uiDir, { recursive: true });
+fs.writeFileSync(path.join(uiDir, 'detail.json.gz'), zlib.gzipSync(JSON.stringify(ui), { level: 9, mtime: 0 } as zlib.ZlibOptions));
 const sha = (s: string) => crypto.createHash('sha256').update(s).digest('hex');
 const jcsv = toCsv(jikouHeader, jikouRows); const hashes: Record<string, string> = { 'jikou.csv': sha(jcsv) };
 fs.writeFileSync(path.join(outDir, 'jikou.csv'), jcsv);

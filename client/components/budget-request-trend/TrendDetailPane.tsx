@@ -1,6 +1,7 @@
 'use client';
 
-import type { BudgetRequestTrendRow } from '@/types/budget-request-trend';
+import type { BudgetRequestTrendDetailData, BudgetRequestTrendRow } from '@/types/budget-request-trend';
+import { JikouTab, MokuTab } from './TrendBreakdown';
 import { AccountBadge } from '@/client/components/mof-kou/Badge';
 import { assessmentGap, groupOf, isShares, orgOf, publisherOf, yearOf } from '@/app/lib/budget-request-trend';
 import { changeColor, formatSen, formatSenSigned } from './format';
@@ -8,6 +9,9 @@ import { changeColor, formatSen, formatSenSigned } from './format';
 const W = 380, H = 180, LEFT = 74, BOTTOM = 22, TOP = 10, BAR = 34;
 // 事項要求の記載の形（docs/budget-request-jikou-youkyu.md）
 const JIKOU_FORM: Record<string, string> = { 印: '備考に「（事項要求）」', 文: '備考で事項要求に言及' };
+
+export type TrendDetailTab = 'trend' | 'jikou' | 'moku';
+const TABS: [TrendDetailTab, string][] = [['trend', '推移'], ['jikou', '事項'], ['moku', '目']];
 
 export function TrendDetailPane({
   row,
@@ -17,6 +21,10 @@ export function TrendDetailPane({
   rows,
   onSelectRow,
   onSelectYear,
+  tab,
+  onTab,
+  detail,
+  detailError,
 }: {
   row: BudgetRequestTrendRow | null;
   years: readonly number[];
@@ -27,6 +35,11 @@ export function TrendDetailPane({
   onSelectRow: (r: BudgetRequestTrendRow) => void;
   /** グラフの年度・年度の表の行をクリックしたとき、一覧の年度を切り替える */
   onSelectYear: (y: number) => void;
+  tab: TrendDetailTab;
+  onTab: (t: TrendDetailTab) => void;
+  /** 事項・目の内訳（detail.json.gz）。読み込み中は null */
+  detail: BudgetRequestTrendDetailData | null;
+  detailError: boolean;
 }) {
   if (!row) {
     return <p className="p-6 text-center text-xs text-neutral-500">一覧から項を選ぶと、全年度の推移とグラフ、元の PDF へのリンクが出ます。</p>;
@@ -86,6 +99,17 @@ export function TrendDetailPane({
         </div>
         <h2 className="mt-0.5 text-base font-semibold leading-snug">{row.name}{row.kou && <span className="ml-1 text-xs font-normal text-neutral-400">(項コード {row.kou})</span>}</h2>
       </div>
+      <div role="tablist" aria-label="詳細の表示" className="flex gap-1 border-b border-neutral-200 dark:border-neutral-800">
+        {TABS.map(([t, label]) => (
+          <button key={t} type="button" role="tab" aria-selected={tab === t} onClick={() => onTab(t)} className={`-mb-px border-b-2 px-2.5 py-1 text-xs ${tab === t ? 'border-emerald-700 font-semibold text-neutral-900 dark:border-emerald-400 dark:text-neutral-100' : 'border-transparent text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200'}`}>{label}</button>
+        ))}
+      </div>
+      {tab !== 'trend' ? (
+        detailError ? <p className="text-red-700">事項・目の内訳の読み込みに失敗しました。</p>
+          : !detail ? <p className="text-neutral-500">事項・目の内訳を読み込み中…</p>
+          : tab === 'jikou' ? <JikouTab row={row} years={years} year={year} detail={detail} onSelectYear={onSelectYear} />
+          : <MokuTab row={row} year={year} detail={detail} />
+      ) : (<>
       <div className="flex flex-wrap gap-x-4 text-[11px] text-neutral-500">
         <span><i className="mr-1 inline-block h-2.5 w-2.5 bg-emerald-700 align-[-1px] dark:bg-emerald-400" />要求額</span>
         <span><i className="mr-1 inline-block h-0.5 w-3 bg-neutral-400 align-middle" />前年度予算額（その年度の要求書が載せる値）</span>
@@ -189,6 +213,7 @@ export function TrendDetailPane({
           {notes.map(n => <p key={n}>{n}</p>)}
         </div>
       )}
+      </>)}
     </div>
   );
 }

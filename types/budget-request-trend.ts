@@ -73,3 +73,16 @@ export interface BudgetRequestJikouData {
   /** 組織の行の事項要求: 年度 → [組織のキー（jikouOrgKeyOf）, 備考の本文] */
   orgs?: Record<string, [string, string][]>;
 }
+
+/** 項の事項・目の内訳（1 年度・1 項）。金額は千円。仕様: docs/budget-request-trend-detail-csv.md */
+export interface BudgetRequestTrendDetailKou {
+  /** 事項: [要求番号, 事項名, 前年度予算額（総表）, 要求額（総表）, 目の要求額の合計（目が無ければ null）, 検算（一致 / 不一致 / 額の空きあり / 目なし / 画像の頁 / 事項の額なし）] */
+  j: [string, string, number | null, number | null, number | null, string][];
+  /** 目: [事項の添字（j の並び。事項の行より前の目は -1）, 目名, 目別 2 桁, 前年度予算額, 要求額, 細分の合計を使った行の数, 額の無い行の数] */
+  m: [number, string, string, number | null, number | null, number, number][];
+}
+
+/** /budget-request-trend の事項・目の内訳（scripts/pipeline-v2/build-budget-request-trend-detail-csv.ts が出力）。年度（西暦の文字列）→ 行のキー（jikouKeyOf）→ 内訳 */
+export interface BudgetRequestTrendDetailData {
+  years: Record<string, Record<string, BudgetRequestTrendDetailKou>>;
+}
