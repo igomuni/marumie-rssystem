@@ -3,8 +3,14 @@
  * 名称は空白を除いた完全一致だけ。階層は TOC の見出しだけで決める。金額は選択に使わない（診断の列のみ）。
  */
 
-/** 幅の統一（追補 B）: 全角の ASCII 相当（U+FF01〜FF5E）を ASCII に、半角のカナ・約物（U+FF61〜FF9F）を NFKC で全角に。それ以外の互換文字は変えない */
-export const fold = (s: string): string => s.replace(/[\uFF01-\uFF5E]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)).replace(/[\uFF61-\uFF9F]+/g, m => m.normalize('NFKC'));
+/**
+ * 要求書の PDF の外字（私用領域のコード）→ 字。PDF のフォントが私用領域に割り当てた字で、pdftotext はそのコードのまま出す（ブラウザでは表示されない）。
+ * MOF の予算書の同じ名前で字を確かめたものだけを置く。目次・総表・明細表の CSV は原文のまま（置き換えない）で、名前を比べる・出力するときにここで置き換える。
+ * - U+E5E3 → 填: 貨幣交換差減補[E5E3]金 / 償還差額補[E5E3]金 / …減収補[E5E3]特例交付金（予算書は「補填」）
+ */
+export const PDF_GAIJI: Readonly<Record<string, string>> = { '\uE5E3': '填' };
+/** 幅の統一（追補 B）: 全角の ASCII 相当（U+FF01〜FF5E）を ASCII に、半角のカナ・約物（U+FF61〜FF9F）を NFKC で全角に。それ以外の互換文字は変えない。PDF の外字は PDF_GAIJI で字にする */
+export const fold = (s: string): string => s.replace(/[\uFF01-\uFF5E]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)).replace(/[\uFF61-\uFF9F]+/g, m => m.normalize('NFKC')).replace(/[\uE000-\uF8FF]/g, c => PDF_GAIJI[c] ?? c);
 /** 名称の比較キー: 幅の統一のあと、空白（半角・全角）を除く */
 export const ns = (s: string | undefined): string => fold(s ?? '').replace(/[\s\u3000]+/g, '');
 /** コード中のハイフン類（U+2010〜2015, U+2212, U+FF0D, '-'）を '-' に揃える（コードの区切りの字形の違いだけを吸収する。名称には使わない） */
@@ -46,7 +52,8 @@ export function amount(s: string | undefined): number | null {
 // ---------------------------------------------------------------- 概算要求側の木（TOC）
 export type Label = '所管' | '会計' | '組織' | '勘定' | '項';
 const LABELS = new Set<string>(['所管', '会計', '組織', '勘定', '項']);
-export interface TocKou { idx: number; slug: string; code: string; name: string; page: string; ministry: string | null; org: string | null; account: string | null; sub: string | null }
+/** `fromTotal`: 目次に無く、総表の小計の構造から補った項（`supplementTocTree`） */
+export interface TocKou { idx: number; slug: string; code: string; name: string; page: string; ministry: string | null; org: string | null; account: string | null; sub: string | null; fromTotal?: boolean }
 export interface TocJikou { slug: string; reqNo: string; first: string; class2: string; name: string; page: string; kouIdx: number | null }
 export interface TocTree {
   slug: string;
@@ -83,13 +90,89 @@ export function buildTocTree(slug: string, rows: Rec[]): TocTree {
   return t;
 }
 
+const totalReq = (r: Rec): number | null => amount(r[Object.keys(r).find(k => /概算要求額_計$/.test(k)) ?? '']);
 /**
- * TOC のない source の木を、総表の行の並びから作る（追補 D）。項＝\`CODE3\` の次が \`DETAIL\`、事項＝その項に続く \`DETAIL\`、
+ * 総表の項の見出しの形の行（`CODE3` の次が `DETAIL`）を、総表の小計の構造で項か事項の下の見出しかに分ける。
+ * 総表の項の行の額は、次の項までの事項の額の合計（小計）。事項の下の見出しは、項の小計の途中にある。
+ * - `listed`（項の一覧のコード|名前。目次の項）にあるものは項（一覧の順に照合する）。
+ * - 一覧に無いもの（`listed` が null なら全部）は、直前の項の額が、その項からこの行までの事項の額の合計（間の `CODE3` は飛ばす）に等しいとき項。
+ *   一覧がある書では、さらに、この行の額が次の `CODE3` までの事項の額の合計に等しいこと。直前の項が無い（書・勘定の最初）ときも項。
+ * - `TOTAL`・`HIER` の行で、直前の項は切れる。額の空欄があれば項にしない。
+ */
+export function totalTableKouHeads(rows: Rec[], listed: string[] | null): { index: number; code: string; name: string; listed: boolean; isKou: boolean }[] {
+  const out: { index: number; code: string; name: string; listed: boolean; isKou: boolean }[] = [];
+  const detailSum = (from: number, to: number, stopAtCode3: boolean): number | null => {
+    let v = 0;
+    for (let i = from + 1; i < to; i++) {
+      const t = rows[i]['row_type'];
+      if (t === 'TOTAL' || t === 'HIER' || (stopAtCode3 && t === 'CODE3')) break;
+      if (t === 'DETAIL') { const a = totalReq(rows[i]); if (a === null) return null; v += a; }
+    }
+    return v;
+  };
+  let owner: number | null = null, p = 0;
+  rows.forEach((r, i) => {
+    if (r['row_type'] === 'TOTAL' || r['row_type'] === 'HIER') { owner = null; return; }
+    if (r['row_type'] !== 'CODE3' || rows[i + 1]?.['row_type'] !== 'DETAIL') return;
+    const m = /^(\d{3})\s*(.+)$/.exec(r['区分'] ?? ''); if (!m) return;
+    const key = `${m[1]}|${ns(m[2])}`;
+    const f = listed ? listed.indexOf(key, p) : -1;
+    if (f >= 0) { p = f + 1; owner = i; out.push({ index: i, code: m[1], name: ns(m[2]), listed: true, isKou: true }); return; }
+    const oa = owner === null ? null : totalReq(rows[owner]);
+    const closes = owner === null || (oa !== null && detailSum(owner, i, false) === oa);
+    const self = listed === null || (totalReq(r) !== null && detailSum(i, rows.length, true) === totalReq(r));
+    const isKou = closes && self;
+    if (isKou) owner = i;
+    out.push({ index: i, code: m[1], name: ns(m[2]), listed: false, isKou });
+  });
+  return out;
+}
+
+/**
+ * 目次から漏れた項を、総表から補う（目次に無い項の見出しのうち、`totalTableKouHeads` で項になるもの）。
+ * 補った項は、総表で直前にある項の後ろに置き、所属（所管・組織・会計・勘定）はその項から取る。頁は総表の `明細書頁数`（目次の頁と同じ紙面の印字）。
+ * 目次がその項の事項を前の項の下に置いているとき（総表で補った項の範囲にある事項名と同じ名前）は、事項を補った項に付け替える。
+ */
+export function supplementTocTree(t: TocTree, totalRows: Rec[]): TocKou[] {
+  const listed = t.kous.map(k => `${k.code}|${k.name}`);
+  const heads = totalTableKouHeads(totalRows, listed);
+  const added: { after: number; kou: TocKou; jikouNames: Set<string> }[] = [];
+  let lastListed = -1, p = 0;
+  heads.forEach((h, n) => {
+    if (h.listed) { lastListed = listed.indexOf(`${h.code}|${h.name}`, p); p = lastListed + 1; return; }
+    if (!h.isKou || lastListed < 0) return;
+    const base = t.kous[lastListed];
+    const end = heads[n + 1]?.index ?? totalRows.length; const names = new Set<string>();
+    for (let i = h.index + 1; i < end; i++) { const r = totalRows[i]; if (r['row_type'] === 'TOTAL' || r['row_type'] === 'HIER') break; const m = /^(\d{2})[\u2010-\u2015\u2212\uFF0D-](\d{2})\s*(.+)$/.exec(r['区分'] ?? ''); if (r['row_type'] === 'DETAIL' && m) names.add(ns(m[3])); }
+    added.push({ after: lastListed, kou: { idx: -1, slug: t.slug, code: h.code, name: h.name, page: totalRows[h.index]['明細書頁数'] ?? '', ministry: base.ministry, org: base.org, account: base.account, sub: base.sub, fromTotal: true }, jikouNames: names });
+  });
+  if (added.length === 0) return [];
+  // 並べ直して添字を振り直す（同じ項の後ろに複数あれば総表の順）
+  const order: { kou: TocKou; old: number | null; jikouNames?: Set<string> }[] = [];
+  t.kous.forEach((k, i) => { order.push({ kou: k, old: i }); for (const a of added.filter(x => x.after === i)) order.push({ kou: a.kou, old: null, jikouNames: a.jikouNames }); });
+  const remap = new Map<number, number>();
+  order.forEach((o, i) => { o.kou.idx = i; if (o.old !== null) remap.set(o.old, i); });
+  for (const j of t.jikous) {
+    if (j.kouIdx === null) continue;
+    const owner = remap.get(j.kouIdx)!;
+    // 目次で前の項の下に置かれた、補った項の事項: 同じ項の後ろに続けて補った項のどれかに、同名の事項がある
+    let cand: number | null = null;
+    for (let i = owner + 1; i < order.length && order[i].old === null; i++) if (order[i].jikouNames?.has(j.name)) { cand = i; break; }
+    j.kouIdx = cand ?? owner;
+  }
+  t.kous = order.map(o => o.kou);
+  return added.map(a => a.kou);
+}
+
+/**
+ * TOC のない source の木を、総表の行の並びから作る（追補 D）。項＝\`CODE3\` の次が \`DETAIL\` で、総表の小計の構造で項になるもの（`totalTableKouHeads`）、事項＝その項に続く \`DETAIL\`、
  * 勘定＝\`HIER\` の先頭が 1 桁、会計＝\`HIER\` の先頭が 2 桁で名称が MOF の特別会計名に一致するもの。組織は使わない。
  */
 export function buildPositionTree(slug: string, rows: Rec[], isAccountName: (name: string) => boolean): TocTree {
   const t: TocTree = { slug, labels: [], kous: [], jikous: [], unclassified: 0, hierarchy: 'position' };
   let account: string | null = null, sub: string | null = null, kouIdx: number | null = null;
+  // 項の見出しの形の行のうち、総表の小計の構造で項になるものだけを項にする（ほかは事項の下の見出しで、その下の事項は今の項のもの）
+  const kouRows = new Set(totalTableKouHeads(rows, null).filter(h => h.isKou).map(h => h.index));
   rows.forEach((r, i) => {
     const type = r['row_type'], next = rows[i + 1]?.['row_type'];
     const text = r['区分'] ?? '';
@@ -97,7 +180,7 @@ export function buildPositionTree(slug: string, rows: Rec[], isAccountName: (nam
       const m = /^(\d+)\s*(.+)$/.exec(text); if (!m) return;
       if (m[1].length === 1) sub = ns(m[2]);
       else if (m[1].length === 2 && isAccountName(ns(m[2]))) { account = ns(m[2]); sub = null; }
-    } else if (type === 'CODE3' && next === 'DETAIL') {
+    } else if (type === 'CODE3' && next === 'DETAIL' && kouRows.has(i)) {
       const m = /^(\d{3})\s*(.+)$/.exec(text); if (!m) return;
       kouIdx = t.kous.length; t.kous.push({ idx: kouIdx, slug, code: m[1], name: ns(m[2]), page: r['source_page'] ?? '', ministry: null, org: null, account, sub });
     } else if (type === 'DETAIL') {

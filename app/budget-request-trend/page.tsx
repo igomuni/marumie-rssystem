@@ -7,6 +7,7 @@
  * データは静的ファイル /data/v2/ui/budget-request-trend/kou.json.gz をブラウザが直接取得する（Vercel の関数には public/data を同梱しないため API を経由しない。
  * 他の v2 データと同じ方式）。仕様: docs/budget-request-trend-csv.md。
  * 事項要求の候補（jikou.json.gz、仕様: docs/budget-request-jikou-youkyu.md）は別に取得して年度の値に合流する。取得できなくても一覧は出す。
+ * 事項・目の内訳（detail.json.gz、仕様: docs/budget-request-trend-detail-csv.md）は詳細の「事項」「目」のタブ用で、一覧の表示を待たずに後から取得する。
  * MOF の予算書との突合には依存しない。名称が変わった項は別の行（新規・消滅）になる。
  */
 
@@ -15,11 +16,11 @@ import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
 import { usePersistedState } from '@/client/hooks/usePersistedState';
 import { fetchGzipJson } from '@/app/lib/v2-public-linkage';
-import type { BudgetRequestJikouData, BudgetRequestTrendData, BudgetRequestTrendRow } from '@/types/budget-request-trend';
-import { INITIAL_TREND_FILTERS, filterRows, mergeJikou, sortRows, type TrendFilters, type TrendSortDir, type TrendSortKey } from '@/app/lib/budget-request-trend';
+import type { BudgetRequestJikouData, BudgetRequestTrendData, BudgetRequestTrendDetailData, BudgetRequestTrendRow } from '@/types/budget-request-trend';
+import { INITIAL_TREND_FILTERS, filterRows, mergeDetailCounts, mergeJikou, sortRows, type TrendFilters, type TrendSortDir, type TrendSortKey } from '@/app/lib/budget-request-trend';
 import { TrendFilterPane } from '@/client/components/budget-request-trend/TrendFilterPane';
 import { TrendListPane } from '@/client/components/budget-request-trend/TrendListPane';
-import { TrendDetailPane } from '@/client/components/budget-request-trend/TrendDetailPane';
+import { TrendDetailPane, type TrendDetailTab } from '@/client/components/budget-request-trend/TrendDetailPane';
 
 const rowKey = (r: BudgetRequestTrendRow): string => [r.acct, r.min, r.sub, r.org, r.name, r.kou ?? ''].join('|');
 const FILTER_WIDTH = { def: 240, min: 180, max: 420 };
@@ -44,7 +45,7 @@ function Splitter({ label, width, limits, dir, onChange }: { label: string; widt
 }
 
 export default function BudgetRequestTrendPage() {
-  const [data, setData] = useState<BudgetRequestTrendData | null>(null);
+  const [baseData, setData] = useState<BudgetRequestTrendData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [year, setYear] = usePersistedState<number | null>('budget-request-trend:year', null);
   const [filters, setFilters] = useState<TrendFilters>(INITIAL_TREND_FILTERS);
@@ -54,6 +55,9 @@ export default function BudgetRequestTrendPage() {
   const [filterWidth, setFilterWidth] = usePersistedState('budget-request-trend:filterWidth', FILTER_WIDTH.def);
   const [detailWidth, setDetailWidth] = usePersistedState('budget-request-trend:detailWidth', DETAIL_WIDTH.def);
   const [columnWidths, setColumnWidths] = usePersistedState<Record<string, number>>('budget-request-trend:columnWidths', {});
+  const [detailTab, setDetailTab] = usePersistedState<TrendDetailTab>('budget-request-trend:detailTab', 'trend');
+  const [detail, setDetail] = useState<BudgetRequestTrendDetailData | null>(null);
+  const [detailError, setDetailError] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -61,9 +65,14 @@ export default function BudgetRequestTrendPage() {
     fetchGzipJson<BudgetRequestTrendData>('/data/v2/ui/budget-request-trend/kou.json.gz', controller.signal)
       .then(async d => { const jk = await jikou; setData(jk ? mergeJikou(d, jk) : d); })
       .catch(e => { if (!controller.signal.aborted) setError(e instanceof Error ? e.message : String(e)); });
+    fetchGzipJson<BudgetRequestTrendDetailData>('/data/v2/ui/budget-request-trend/detail.json.gz', controller.signal)
+      .then(setDetail)
+      .catch(() => { if (!controller.signal.aborted) setDetailError(true); });
     return () => controller.abort();
   }, []);
 
+  // 事項・目の数は、内訳（detail.json.gz）が届いたら行の年度の値に合流する（一覧の「事項」「目」の列と並べ替え）
+  const data = useMemo(() => (baseData && detail ? mergeDetailCounts(baseData, detail) : baseData), [baseData, detail]);
   const years = data?.years ?? [];
   const activeYear = data ? (year !== null && years.includes(year) ? year : years[years.length - 1]) : null;
 
@@ -92,7 +101,7 @@ export default function BudgetRequestTrendPage() {
   const lastYear = years[years.length - 1];
   const onSort = (k: TrendSortKey) => {
     if (k === sortKey) setSortDir(d => (d === 1 ? -1 : 1));
-    else { setSortKey(k); setSortDir(k === 'acct' || k === 'group' || k === 'org' || k === 'name' || k === 'pattern' ? 1 : -1); }
+    else { setSortKey(k); setSortDir(k === 'acct' || k === 'group' || k === 'org' || k === 'name' || k === 'pattern' ? 1 : -1); } // 事項・目の数は多い順から
   };
 
   return (
@@ -132,7 +141,7 @@ export default function BudgetRequestTrendPage() {
         </section>
         <Splitter label="詳細の幅" width={detailWidth} limits={DETAIL_WIDTH} dir={-1} onChange={setDetailWidth} />
         <section aria-label="詳細（全年度）" className={`${pane} overflow-auto lg:col-span-2 xl:col-span-1 xl:w-[var(--dw)] xl:shrink-0`} style={{ '--dw': `${detailWidth}px` } as React.CSSProperties}>
-          <TrendDetailPane row={selected} years={years} year={activeYear} urls={data.urls} rows={data.rows} onSelectRow={r => setSelectedKey(rowKey(r))} onSelectYear={setYear} />
+          <TrendDetailPane row={selected} years={years} year={activeYear} urls={data.urls} rows={data.rows} onSelectRow={r => setSelectedKey(rowKey(r))} onSelectYear={setYear} tab={detailTab} onTab={setDetailTab} detail={detail} detailError={detailError} />
         </section>
       </main>
     </div>

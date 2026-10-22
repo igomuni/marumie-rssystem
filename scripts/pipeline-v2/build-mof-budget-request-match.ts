@@ -8,7 +8,7 @@
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
-import { amount, buildPositionTree, buildPositionTreeFromDetail, buildTocTree, hy, mofAmountJikou, mofAmountKou, mofAmountMoku, ns, readCsv, type Rec, type TocTree } from './lib/mof-budget-request-match';
+import { amount, buildPositionTree, buildPositionTreeFromDetail, buildTocTree, hy, mofAmountJikou, mofAmountKou, mofAmountMoku, ns, readCsv, supplementTocTree, type Rec, type TocTree } from './lib/mof-budget-request-match';
 
 const [yearArg, ver, outDir] = process.argv.slice(2);
 if (!/^20(23|24|25|26|27)$/.test(yearArg ?? '') || !['2023', '2024', '2025', '2025_teishutsu', '2026'].includes(ver ?? '') || !outDir) throw new Error('usage: build-mof-budget-request-match.ts <2023|2024|2025|2026|2027> <2023|2024|2025|2025_teishutsu|2026> <out-dir>');
@@ -73,6 +73,9 @@ const suffixNo = (s: string) => Number(/(\d+)$/.exec(s)?.[1] ?? 0);
 const extrasOf = (t: string) => [...attach].filter(([, to]) => to === t).map(([x]) => x).sort((a, b) => suffixNo(a) - suffixNo(b) || (a < b ? -1 : 1));
 const concatV = (m: Map<string, Rec[]>) => { const v = new Map<string, Rec[]>(); for (const t of trees.keys()) { const rows = [...(m.get(t) ?? []), ...extrasOf(t).flatMap(x => m.get(x) ?? [])]; if (rows.length) v.set(t, rows); } for (const [s, rows] of m) if (!trees.has(s) && !attach.has(s)) v.set(s, rows); return v; };
 const detailV = concatV(detail), totalV = concatV(total);
+// 目次から漏れた項（目的税を財源にした繰入など）を、総表の小計の構造から補う（lib の supplementTocTree）。補った項の hierarchy は `toc_total`
+const kouFromTotal: string[] = [];
+for (const t of trees.values()) if (t.hierarchy === 'toc') for (const k of supplementTocTree(t, totalV.get(t.slug) ?? [])) kouFromTotal.push(`${t.slug}\t${k.code}\t${k.name}`);
 const ctxOf = new Map<string, { acct: Acct; key: string; raw: string }>();
 for (const [s, rows] of detailV) {
   const r = rows.find(x => x['row_type'] === 'CONTEXT'); if (!r) continue;
@@ -181,6 +184,9 @@ for (const s of sources) {
     if (r['row_type'] !== 'CODE3') return [];
     const m = /^(\d{3})\s*(.+)$/.exec(r['区分']);
     if (orgNow === null && totRows[i + 1]?.['row_type'] === 'CODE3') orgNow = ns(m?.[2]);
+    // 組織と項が同じ名前の機関（衆議院・会計検査院など）は、組織の行の直後に同じコード・名前の項の行が続く。組織の行（組織計）は項の候補にしない
+    const nx = totRows[i + 1]; const nm = nx?.['row_type'] === 'CODE3' ? /^(\d{3})\s*(.+)$/.exec(nx['区分']) : null;
+    if (m && nm && nm[1] === m[1] && ns(nm[2]) === ns(m[2])) return [];
     return [{ code: m?.[1] ?? '', name: ns(m?.[2]), amt: totAmt(r), prev: totPrev(r), org: orgNow }];
   });
   const links = seqLink(t.kous, tcode3, (k, r) => k.code === r.code && k.name === r.name);
@@ -188,7 +194,7 @@ for (const s of sources) {
     const sc = scopeOfKou.get(`${s}#${k.idx}`)!; linkStats.kou_total++; if (links[i]) linkStats.kou_total_table_linked++;
     const reqAmt = links[i]?.amt ?? '';
     const cx = ctxOf.get(s);
-    reqKou.push([s, k.idx, k.code, k.name, k.page, cx?.acct ?? '', k.ministry ?? (cx?.acct === 'general' ? cx.key : ''), k.org ?? (cx?.acct === 'general' && t.hierarchy !== 'toc' ? links[i]?.org ?? '' : ''), k.account ?? (cx?.acct === 'special' ? cx.key : ''), k.sub ?? '', reqAmt, links[i]?.prev ?? '', t.hierarchy]);
+    reqKou.push([s, k.idx, k.code, k.name, k.page, cx?.acct ?? '', k.ministry ?? (cx?.acct === 'general' ? cx.key : ''), k.org ?? (cx?.acct === 'general' && t.hierarchy !== 'toc' ? links[i]?.org ?? '' : ''), k.account ?? (cx?.acct === 'special' ? cx.key : ''), k.sub ?? '', reqAmt, links[i]?.prev ?? '', k.fromTotal ? 'toc_total' : t.hierarchy]);
     const head = [s, k.idx, k.code, k.name, k.page];
     if (!sc.ok) { m1.push([...head, '', '', 0, sc.reason === 'no_context' ? 'OUT_OF_SCOPE' : 'PARENT_UNMATCHED', sc.reason, reqAmt, '', '', '']); return; }
     const a = sc.acct!; kouAcct.set(`${s}#${k.idx}`, a);
@@ -355,7 +361,7 @@ const summary = {
   m0_status: tally(m0, 5), m1_status: tally(m1, 8), m2_status: tally(m2, 9), m3_status: tally(m3, 11),
   mof_rows: mofTotals, mof_rows_referenced: { kou: refKou.size, jikou: refJikou.size, moku: refMoku.size },
   unmatched_mof_reasons: { kou: uk.counts, jikou: uj.counts, moku: um.counts },
-  request_links: linkStats, attached_sources: setRows.length, no_toc_rows: noToc.length, no_toc_sources: new Set(noToc.map(r => r[0])).size, request_unclassified_toc_rows: [...trees.values()].reduce((n, t) => n + t.unclassified, 0), request_moku_rows_without_kou: orphanMoku,
+  request_links: linkStats, attached_sources: setRows.length, no_toc_rows: noToc.length, no_toc_sources: new Set(noToc.map(r => r[0])).size, request_unclassified_toc_rows: [...trees.values()].reduce((n, t) => n + t.unclassified, 0), request_moku_rows_without_kou: orphanMoku, request_kou_from_total: kouFromTotal.length,
 };
 fs.writeFileSync(path.join(outDir, 'summary.json'), JSON.stringify(summary, null, 1) + '\n');
 console.log(JSON.stringify(summary));

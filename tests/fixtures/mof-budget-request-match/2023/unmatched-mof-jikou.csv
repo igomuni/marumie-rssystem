@@ -10,7 +10,7 @@ jikou-general:102,general,286,生活支援臨時特別事業費,生活支援臨�
 jikou-general:113,general,291,科学技術・イノベーション推進事務局,研究開発の推進に必要な経費,kou_matched_no_request_row,内閣府,科学技術・イノベーション推進事務局,,
 jikou-general:115,general,293,中小企業イノベーション創出推進費,中小企業のイノベーション創出推進に必要な経費,kou_not_matched,内閣府,科学技術・イノベーション推進事務局,,
 jikou-general:145,general,121,公正取引委員会,公正な取引慣行の推進に必要な経費,kou_matched_no_request_row,内閣府,公正取引委員会,,
-jikou-general:157,general,145,交通反則者納金財源交通安全対策特別交付金等交付税及び譲与税配付金特別会計へ繰入,交通反則者納金財源の交通安全対策特別交付金等に係る交付税及び譲与税配付金特別会計へ繰入れに必要な経費,kou_not_matched,内閣府,警察庁,,
+jikou-general:157,general,145,交通反則者納金財源交通安全対策特別交付金等交付税及び譲与税配付金特別会計へ繰入,交通反則者納金財源の交通安全対策特別交付金等に係る交付税及び譲与税配付金特別会計へ繰入れに必要な経費,kou_matched_no_request_row,内閣府,警察庁,,
 jikou-general:162,general,141,サイバー警察費,サイバー事案対策の強化に必要な経費,kou_matched_no_request_row,内閣府,警察庁,,
 jikou-general:182,general,311,こども家庭庁共通費,こども家庭庁一般行政に必要な経費,kou_matched_no_request_row,内閣府,こども家庭庁,,
 jikou-general:183,general,311,こども家庭庁共通費,審議会等に必要な経費,kou_matched_no_request_row,内閣府,こども家庭庁,,
@@ -79,14 +79,13 @@ jikou-general:314,general,081,公安審査委員会,公安審査委員会に必�
 jikou-general:315,general,091,公安調査庁共通費,公安調査庁一般行政に必要な経費,kou_not_matched,法務省,公安調査庁,,
 jikou-general:316,general,091,公安調査庁共通費,公安調査庁研修所に必要な経費,kou_not_matched,法務省,公安調査庁,,
 jikou-general:317,general,092,破壊的団体等調査費,破壊的団体等の調査に必要な経費,kou_not_matched,法務省,公安調査庁,,
-jikou-general:373,general,001,財務本省共通費,貨幣交換差減補填金に必要な経費,kou_matched_no_request_row,財務省,財務本省,,
 jikou-general:387,general,008,国債費,社会資本整備事業特別会計整理収入等の国債整理基金特別会計へ繰入れに必要な経費,kou_matched_no_request_row,財務省,財務本省,,
 jikou-general:392,general,008,国債費,公債等に係る償還及び発行に関する諸費財源の国債整理基金特別会計へ繰入れに必要な経費,kou_matched_no_request_row,財務省,財務本省,,
 jikou-general:411,general,066,防衛力強化のための資金へ繰入,防衛力強化のための資金へ繰入れに必要な経費,kou_not_matched,財務省,財務本省,,
 jikou-general:412,general,065,貨幣回収準備資金へ繰入,貨幣回収準備資金へ繰入れに必要な経費,kou_not_matched,財務省,財務本省,,
 jikou-general:414,general,017,ウクライナ情勢経済緊急対応予備費,ウクライナ情勢経済緊急対応予備費,kou_not_matched,財務省,財務本省,,
 jikou-general:461,general,014,高等教育振興費,大学等における教育改革等に必要な経費,kou_matched_no_request_row,文部科学省,文部科学本省,,
-jikou-general:496,general,044,電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ繰入,電源開発促進税財源の電源立地対策及電源利用対策に係るエネルギー対策特別会計電源開発促進勘定へ繰入れに必要な経費,kou_not_matched,文部科学省,文部科学本省,,
+jikou-general:496,general,044,電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ繰入,電源開発促進税財源の電源立地対策及電源利用対策に係るエネルギー対策特別会計電源開発促進勘定へ繰入れに必要な経費,kou_matched_no_request_row,文部科学省,文部科学本省,,
 jikou-general:509,general,002,文部科学本省施設費,文部科学本省施設整備に必要な経費,kou_not_matched,文部科学省,文部科学本省,,
 jikou-general:510,general,010,独立行政法人教職員支援機構施設整備費,独立行政法人教職員支援機構施設整備に必要な経費,kou_not_matched,文部科学省,文部科学本省,,
 jikou-general:511,general,008,独立行政法人国立青少年教育振興機構施設整備費,独立行政法人国立青少年教育振興機構施設整備に必要な経費,kou_not_matched,文部科学省,文部科学本省,,
@@ -122,8 +121,8 @@ jikou-general:909,general,015,地域経済政策推進費,地域経済産業活�
 jikou-general:912,general,018,脱炭素化産業成長促進対策費,脱炭素化産業成長の促進に必要な経費,kou_not_matched,経済産業省,経済産業本省,,
 jikou-general:913,general,061,経済産業局,経済産業局一般行政に必要な経費,kou_not_matched,経済産業省,経済産業局,,
 jikou-general:915,general,071,産業保安監督官署,産業保安監督官署一般行政に必要な経費,kou_not_matched,経済産業省,産業保安監督官署,,
-jikou-general:920,general,083,石油石炭税財源燃料安定供給対策及エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入,石油石炭税財源の燃料安定供給対策及エネルギー需給構造高度化対策に係るエネルギー対策特別会計エネルギー需給勘定へ繰入れに必要な経費,kou_not_matched,経済産業省,資源エネルギー庁,,
-jikou-general:921,general,084,電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ繰入,電源開発促進税財源の電源立地対策及電源利用対策に係るエネルギー対策特別会計電源開発促進勘定へ繰入れに必要な経費,kou_not_matched,経済産業省,資源エネルギー庁,,
+jikou-general:920,general,083,石油石炭税財源燃料安定供給対策及エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入,石油石炭税財源の燃料安定供給対策及エネルギー需給構造高度化対策に係るエネルギー対策特別会計エネルギー需給勘定へ繰入れに必要な経費,kou_matched_no_request_row,経済産業省,資源エネルギー庁,,
+jikou-general:921,general,084,電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ繰入,電源開発促進税財源の電源立地対策及電源利用対策に係るエネルギー対策特別会計電源開発促進勘定へ繰入れに必要な経費,kou_matched_no_request_row,経済産業省,資源エネルギー庁,,
 jikou-general:923,general,086,脱炭素化産業成長促進対策費,脱炭素化産業成長の促進に必要な経費,kou_not_matched,経済産業省,資源エネルギー庁,,
 jikou-general:925,general,088,エネルギー需給構造高度化対策費,エネルギーの価格高騰対策に必要な経費,kou_not_matched,経済産業省,資源エネルギー庁,,
 jikou-general:929,general,102,中小企業政策推進費,中小企業政策の推進に必要な経費,kou_not_matched,経済産業省,中小企業庁,,
@@ -137,11 +136,11 @@ jikou-general:1103,general,075,独立行政法人海技教育機構施設整備�
 jikou-general:1158,general,225,国際観光旅客税財源観光振興費,国際観光旅客税財源輸出入貨物の通関及び関税等の徴収並びに監視取締りに必要な経費,kou_matched_no_request_row,国土交通省,観光庁,,
 jikou-general:1180,general,257,船舶交通安全基盤災害復旧事業費,船舶交通安全基盤災害復旧事業に必要な経費,kou_not_matched,国土交通省,海上保安庁,,
 jikou-general:1181,general,265,船舶交通安全基盤災害復旧事業工事諸費,船舶交通安全基盤災害復旧事業工事諸費に必要な経費,kou_not_matched,国土交通省,海上保安庁,,
-jikou-general:1187,general,003,石油石炭税財源エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入,石油石炭税財源のエネルギー需給構造高度化対策に係るエネルギー対策特別会計エネルギー需給勘定へ繰入れに必要な経費,kou_not_matched,環境省,環境本省,,
+jikou-general:1187,general,003,石油石炭税財源エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入,石油石炭税財源のエネルギー需給構造高度化対策に係るエネルギー対策特別会計エネルギー需給勘定へ繰入れに必要な経費,kou_matched_no_request_row,環境省,環境本省,,
 jikou-general:1205,general,018,独立行政法人環境再生保全機構運営費,独立行政法人環境再生保全機構環境保全研究・技術開発運営費交付金に必要な経費,kou_matched_no_request_row,環境省,環境本省,,
 jikou-general:1209,general,023,石綿健康被害救済事務費労働保険特別会計へ繰入,石綿健康被害救済事務の財源の労働保険特別会計徴収勘定へ繰入れに必要な経費,kou_matched_no_request_row,環境省,環境本省,,
 jikou-general:1213,general,029,脱炭素化産業成長促進対策費,脱炭素化産業成長の促進に必要な経費,kou_not_matched,環境省,環境本省,,
-jikou-general:1227,general,053,電源開発促進税財源電源利用対策及原子力安全規制対策費エネルギー対策特別会計へ繰入,電源開発促進税財源の電源利用対策及原子力安全規制対策に係るエネルギー対策特別会計電源開発促進勘定へ繰入れに必要な経費,kou_not_matched,環境省,原子力規制委員会,,
+jikou-general:1227,general,053,電源開発促進税財源電源利用対策及原子力安全規制対策費エネルギー対策特別会計へ繰入,電源開発促進税財源の電源利用対策及原子力安全規制対策に係るエネルギー対策特別会計電源開発促進勘定へ繰入れに必要な経費,kou_matched_no_request_row,環境省,原子力規制委員会,,
 jikou-general:1247,general,022,防衛力基盤強化施設整備費,運用基盤等の強化に必要な経費,kou_not_matched,防衛省,防衛本省,,
 jikou-general:1248,general,022,防衛力基盤強化施設整備費,衛生機能の強化に必要な経費,kou_not_matched,防衛省,防衛本省,,
 jikou-general:1250,general,004,武器車両等整備費,特定防衛調達武器車両等の購入に必要な経費,kou_matched_no_request_row,防衛省,防衛本省,,
@@ -179,7 +178,6 @@ jikou-special:70,special,13,脱炭素成長型経済構造移行推進電源開�
 jikou-special:73,special,14,脱炭素成長型経済構造移行推進公債事務取扱費一般会計へ繰入,脱炭素成長型経済構造移行推進に係る公債事務取扱費の財源の一般会計へ繰入れに必要な経費,kou_not_matched,内閣府、文部科学省、経済産業省及び環境省,,エネルギー対策,エネルギー需給勘定
 jikou-special:75,special,15,脱炭素成長型経済構造移行推進国債整理基金特別会計へ繰入,脱炭素成長型経済構造移行推進に係る国債整理基金特別会計へ繰入れに必要な経費,kou_not_matched,内閣府、文部科学省、経済産業省及び環境省,,エネルギー対策,エネルギー需給勘定
 jikou-special:79,special,11,脱炭素成長型経済構造移行推進対策費,脱炭素成長型経済構造の移行推進に必要な経費,kou_not_matched,内閣府、文部科学省、経済産業省及び環境省,,エネルギー対策,電源開発促進勘定
-jikou-special:211,special,14,東日本大震災復興土地改良事業費負担金等収入東日本大震災復興特別会計へ繰入,東日本大震災復興に係る東日本大震災復興特別会計へ繰入れに必要な経費,kou_not_matched,農林水産省,,食料安定供給,国営土地改良事業勘定
 jikou-special:221,special,04,被害者保護増進等事業費,被害者保護増進等事業に必要な経費,kou_matched_no_request_row,国土交通省,,自動車安全,自動車事故対策勘定
 jikou-special:224,special,01,自動車損害賠償保障事業費,自動車損害賠償保障事業に必要な経費,kou_not_matched,国土交通省,,自動車安全,自動車事故対策勘定
 jikou-special:254,special,05,原子力災害復興再生支援事業費,福島国際研究教育機構に必要な経費,kou_matched_no_request_row,復興庁,復興庁,東日本大震災復興,

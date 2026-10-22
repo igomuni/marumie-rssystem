@@ -3,12 +3,12 @@
  * データ: types/budget-request-trend.ts。仕様: docs/budget-request-trend-csv.md。
  * 増減・増減率は、その年度の「要求額 − 前年度予算額」（その年度の要求書が載せる値どうし）。
  */
-import type { BudgetRequestJikouData, BudgetRequestTrendData, BudgetRequestTrendRow, BudgetRequestTrendYear } from '@/types/budget-request-trend';
+import type { BudgetRequestJikouData, BudgetRequestTrendData, BudgetRequestTrendRow, BudgetRequestTrendYear, BudgetRequestTrendDetailData } from '@/types/budget-request-trend';
 import { MAX_REGEX_PATTERN_LENGTH } from '@/app/lib/sankey-query';
 
 export type PatternFilter = 'all' | 'all5' | 'new' | 'gone';
 export type ChangeFilter = '' | 'up10' | 'up50' | 'dn10' | 'dn50';
-export type TrendSortKey = 'acct' | 'group' | 'org' | 'name' | 'pattern' | 'prev' | 'req' | 'diff' | 'rate';
+export type TrendSortKey = 'acct' | 'group' | 'org' | 'name' | 'pattern' | 'prev' | 'req' | 'diff' | 'rate' | 'nJikou' | 'nMoku';
 /** 出現パターン（選択年度と前年度の比較）。最初の年度は判定しない */
 export type TrendPattern = '新規' | '継続' | '消滅';
 export type TrendSortDir = 1 | -1;
@@ -137,6 +137,19 @@ export const jikouKeyOf = (r: Pick<BudgetRequestTrendRow, 'acct' | 'min' | 'sub'
 /** 組織の行の事項要求のキー: 会計区分 + 所管（特別会計は特別会計名）+ 勘定 + 組織 */
 export const jikouOrgKeyOf = (r: Pick<BudgetRequestTrendRow, 'acct' | 'min' | 'sub' | 'org'>): string => [r.acct, r.min, r.sub, r.org].join('|');
 
+/** 事項・目の数を、行の年度の値に合流させる（キーは事項要求と同じ jikouKeyOf。目は事項をまたいで目名 + 目別で数える）。元のデータは変えない */
+export function mergeDetailCounts(data: BudgetRequestTrendData, detail: BudgetRequestTrendDetailData): BudgetRequestTrendData {
+  const rows = data.rows.map(r => {
+    const key = jikouKeyOf(r); let y: BudgetRequestTrendRow['y'] | null = null;
+    for (const [yr, v] of Object.entries(r.y)) {
+      const b = detail.years[yr]?.[key]; if (!b) continue;
+      y ??= { ...r.y }; y[yr] = { ...v, nJikou: b.j.length, nMoku: new Set(b.m.map(m => `${m[1]}|${m[2]}`)).size };
+    }
+    return y ? { ...r, y } : r;
+  });
+  return { ...data, rows };
+}
+
 /** 事項要求の記載を、行の年度の値に合流させる（項の記載は jikou、組織の行の記載は orgJikou）。元のデータは変えない */
 export function mergeJikou(data: BudgetRequestTrendData, jk: BudgetRequestJikouData): BudgetRequestTrendData {
   const byYear = new Map(Object.entries(jk.years).map(([y, list]) => [y, new Map(list.map(([k, forms, text]) => [k, { forms, text }]))]));
@@ -241,6 +254,8 @@ function sortValue(x: TrendRecord, key: TrendSortKey, year: number, firstYear: n
     case 'req': return x.req;
     case 'diff': return recordChange(x);
     case 'rate': return recordRate(x);
+    case 'nJikou': return yearOf(r, year)?.nJikou ?? null;
+    case 'nMoku': return yearOf(r, year)?.nMoku ?? null;
   }
 }
 

@@ -51,13 +51,13 @@
   "on_org_rows": 12,
   "orgs_with_marks": 7,
   "unplaced": 7,
-  "kou_with_forms": 71,
+  "kou_with_forms": 72,
   "kou_trend_rows_with_marks": 45,
   "forms": {
    "印": 40,
    "文": 5,
    "要求0": 23,
-   "要求0・場所ごと": 4,
+   "要求0・場所ごと": 5,
    "一括計上": 1
   }
  },
@@ -67,11 +67,11 @@
   "on_org_rows": 22,
   "orgs_with_marks": 11,
   "unplaced": 3,
-  "kou_with_forms": 63,
+  "kou_with_forms": 64,
   "kou_trend_rows_with_marks": 35,
   "forms": {
    "印": 34,
-   "要求0": 27,
+   "要求0": 28,
    "文": 3,
    "一括計上": 1
   }

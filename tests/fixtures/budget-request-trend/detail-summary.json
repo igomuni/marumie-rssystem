@@ -1,0 +1,617 @@
+{
+ "sha256": {
+  "jikou.csv": "b3ff8dc78dcdc581bb08203f339cba337e52be360794cf1de4aeaf59ae95207e",
+  "moku/2023.csv": "4e3bd390e3ef62917d3d38d1a9f0ad447d75d86ccc9244a0ed29e19979b3a06e",
+  "moku/2024.csv": "45f6a804c8e9f16c0ddb770ad5b7211461f57b45633360e244d69983079a14c7",
+  "moku/2025.csv": "a184b78179b6ba48ef11d3e52ee9bd9dca76806642fb7f70613e6b002647e621",
+  "moku/2026.csv": "f85fd423b3cfb7cc88056e5e92228b5a4933ae4128d0a67930ebb96f71ed58ee",
+  "moku/2027.csv": "1d976bbbbbfaa78d7f28b00d532200a54a6700aa13207cc56c62959773b05d53"
+ },
+ "years": {
+  "2023": {
+   "kou": {
+    "total": 1105,
+    "kou_eq_jikou": 1099,
+    "kou_ne_jikou": 3,
+    "kou_no_jikou": 2,
+    "kou_no_amount": 1,
+    "kou_eq_moku": 1032,
+    "kou_ne_moku": 15,
+    "kou_moku_blank": 45,
+    "kou_no_moku": 12,
+    "kou_no_moku_image": 0
+   },
+   "jikou": {
+    "total": 1775,
+    "from_detail_only": 8,
+    "eq": 1651,
+    "ne": 18,
+    "blank": 72,
+    "no_moku": 26,
+    "no_moku_image": 0,
+    "no_amount": 8
+   },
+   "moku_rows": 27516,
+   "moku_groups": 9624,
+   "gaiji_left_in_names": 0,
+   "orphan_moku": {
+    "no_kou_in_book": 0,
+    "before_first_kou": 0,
+    "after_context": 0,
+    "in_unlisted_kou": 0
+   },
+   "kou_ne_moku_by_reason": {
+    "位置で決めた項（目次なし）": 2,
+    "明細表の未解決の行あり": 11,
+    "明細表の無い分冊あり": 1,
+    "未分類": 1
+   },
+   "kou_ne_moku": [
+    [
+     "cao.go.jp__yosan__soshiki__r05__pdf__0",
+     "地方創生推進事務局",
+     1980509,
+     1979605,
+     "位置で決めた項（目次なし）"
+    ],
+    [
+     "cas.go.jp__jp__yosan__pdf__r5_01",
+     "情報収集衛星業務費",
+     54132555,
+     47249717,
+     "位置で決めた項（目次なし）"
+    ],
+    [
+     "cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__dbbae7f9__20230117_policies_budget_r5_ippan_gaisan_youkyuusho_01",
+     "こども家庭庁共通費",
+     4567357,
+     4551159,
+     "明細表の未解決の行あり"
+    ],
+    [
+     "cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__dbbae7f9__20230117_policies_budget_r5_ippan_gaisan_youkyuusho_01",
+     "国立児童自立支援施設運営費",
+     204156,
+     200205,
+     "明細表の未解決の行あり"
+    ],
+    [
+     "cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__dbbae7f9__20230117_policies_budget_r5_ippan_gaisan_youkyuusho_01",
+     "母子保健衛生対策費",
+     13921828,
+     13910901,
+     "明細表の未解決の行あり"
+    ],
+    [
+     "cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__dbbae7f9__20230117_policies_budget_r5_ippan_gaisan_youkyuusho_01",
+     "母子家庭等対策費",
+     173883929,
+     173880506,
+     "明細表の未解決の行あり"
+    ],
+    [
+     "cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__dbbae7f9__20230117_policies_budget_r5_ippan_gaisan_youkyuusho_01",
+     "こども家庭推進費",
+     5587269,
+     5575983,
+     "明細表の未解決の行あり"
+    ],
+    [
+     "cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__dbbae7f9__20230117_policies_budget_r5_ippan_gaisan_youkyuusho_01",
+     "障害児支援対策費",
+     470677348,
+     470676743,
+     "明細表の未解決の行あり"
+    ],
+    [
+     "cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__dbbae7f9__20230117_policies_budget_r5_ippan_gaisan_youkyuusho_01",
+     "こども安全対策費",
+     2037995,
+     2033907,
+     "明細表の未解決の行あり"
+    ],
+    [
+     "fsa.go.jp__common__budget__yosan__5youkyuu-2__01",
+     "金融庁共通費",
+     21803853,
+     43008192,
+     "明細表の無い分冊あり"
+    ],
+    [
+     "jcrc.go.jp__content__000001355",
+     "カジノ管理委員会",
+     3408541,
+     3401796,
+     "未分類"
+    ],
+    [
+     "mext.go.jp__content__20220915-mxt_kaikesou01-000024974_01",
+     "文部科学本省共通費",
+     97044140,
+     97029094,
+     "明細表の未解決の行あり"
+    ],
+    [
+     "mext.go.jp__content__20220915-mxt_kaikesou01-000024974_01",
+     "日本学士院",
+     640765,
+     639965,
+     "明細表の未解決の行あり"
+    ],
+    [
+     "mlit.go.jp__page__content__001514155",
+     "離島振興事業費",
+     50989718,
+     50879718,
+     "明細表の未解決の行あり"
+    ],
+    [
+     "mlit.go.jp__page__content__001514155",
+     "運輸安全委員会",
+     2195134,
+     2187970,
+     "明細表の未解決の行あり"
+    ]
+   ],
+   "kou_ne_jikou": [
+    [
+     "fsa.go.jp__common__budget__yosan__5youkyuu-2__01",
+     "金融庁共通費",
+     21803853,
+     43607706,
+     ""
+    ],
+    [
+     "fsa.go.jp__common__budget__yosan__5youkyuu-2__01",
+     "金融政策費",
+     911058,
+     1822116,
+     ""
+    ],
+    [
+     "mlit.go.jp__page__content__001514155",
+     "離島振興事業費",
+     50989718,
+     50879718,
+     ""
+    ]
+   ],
+   "unlisted_kou": []
+  },
+  "2024": {
+   "kou": {
+    "total": 1109,
+    "kou_eq_jikou": 1109,
+    "kou_ne_jikou": 0,
+    "kou_no_jikou": 0,
+    "kou_no_amount": 0,
+    "kou_eq_moku": 1039,
+    "kou_ne_moku": 13,
+    "kou_moku_blank": 46,
+    "kou_no_moku": 11,
+    "kou_no_moku_image": 0
+   },
+   "jikou": {
+    "total": 1753,
+    "from_detail_only": 0,
+    "eq": 1649,
+    "ne": 13,
+    "blank": 66,
+    "no_moku": 25,
+    "no_moku_image": 0,
+    "no_amount": 0
+   },
+   "moku_rows": 26690,
+   "moku_groups": 9424,
+   "gaiji_left_in_names": 0,
+   "orphan_moku": {
+    "no_kou_in_book": 0,
+    "before_first_kou": 0,
+    "after_context": 0,
+    "in_unlisted_kou": 0
+   },
+   "kou_ne_moku_by_reason": {
+    "位置で決めた項（目次なし）": 2,
+    "明細表の未解決の行あり": 10,
+    "未分類": 1
+   },
+   "kou_ne_moku": [
+    [
+     "cao.go.jp__yosan__soshiki__r06__pdf__0",
+     "地方創生支援費",
+     1247286,
+     1245496,
+     "位置で決めた項（目次なし）"
+    ],
+    [
+     "cao.go.jp__yosan__soshiki__r06__pdf__0",
+     "沖縄総合事務局",
+     5381051,
+     5385720,
+     "位置で決めた項（目次なし）"
+    ],
+    [
+     "cfa.go.jp__assets__contents__node__basic_page__field_ref_resources__88749a20-e454-4a5b-9da8-3a32e1788a23__585bb95a__20230907_policies_budget_04",
+     "こども家庭庁共通費",
+     7617566,
+     7611889,
+     "明細表の未解決の行あり"
+    ],
+    [
+     "mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01",
+     "日本学士院",
+     629228,
+     628428,
+     "明細表の未解決の行あり"
+    ],
+    [
+     "mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01",
+     "文化庁共通費",
+     4101493,
+     4098529,
+     "明細表の未解決の行あり"
+    ],
+    [
+     "mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01",
+     "文化振興費",
+     17256677,
+     16844887,
+     "明細表の未解決の行あり"
+    ],
+    [
+     "mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01",
+     "文化財保存事業費",
+     38255946,
+     37670354,
+     "明細表の未解決の行あり"
+    ],
+    [
+     "mext.go.jp__content__20230914-mxt_kaikesou01-000031817_01",
+     "文化振興基盤整備費",
+     2105031,
+     696250,
+     "明細表の未解決の行あり"
+    ],
+    [
+     "mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-1b-01",
+     "厚生労働本省共通費",
+     108969979,
+     108969913,
+     "明細表の未解決の行あり"
+    ],
+    [
+     "mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-1b-01",
+     "医療安全確保推進費",
+     1669129,
+     1667897,
+     "明細表の未解決の行あり"
+    ],
+    [
+     "mhlw.go.jp__wp__yosan__yosan__24syokan__dl__05-1b-01",
+     "医薬品適正使用推進費",
+     101371,
+     100793,
+     "明細表の未解決の行あり"
+    ],
+    [
+     "mlit.go.jp__page__content__001630995",
+     "運輸安全委員会",
+     2156673,
+     2149456,
+     "明細表の未解決の行あり"
+    ],
+    [
+     "ppc.go.jp__files__pdf__230831youkyu",
+     "個人情報保護委員会",
+     3318101,
+     3328822,
+     "未分類"
+    ]
+   ],
+   "kou_ne_jikou": [],
+   "unlisted_kou": []
+  },
+  "2025": {
+   "kou": {
+    "total": 1167,
+    "kou_eq_jikou": 1167,
+    "kou_ne_jikou": 0,
+    "kou_no_jikou": 0,
+    "kou_no_amount": 0,
+    "kou_eq_moku": 1113,
+    "kou_ne_moku": 6,
+    "kou_moku_blank": 38,
+    "kou_no_moku": 9,
+    "kou_no_moku_image": 1
+   },
+   "jikou": {
+    "total": 1845,
+    "from_detail_only": 0,
+    "eq": 1741,
+    "ne": 6,
+    "blank": 76,
+    "no_moku": 21,
+    "no_moku_image": 1,
+    "no_amount": 0
+   },
+   "moku_rows": 28036,
+   "moku_groups": 9977,
+   "gaiji_left_in_names": 0,
+   "orphan_moku": {
+    "no_kou_in_book": 0,
+    "before_first_kou": 0,
+    "after_context": 0,
+    "in_unlisted_kou": 14
+   },
+   "kou_ne_moku_by_reason": {
+    "位置で決めた項（目次なし）": 2,
+    "明細表の未解決の行あり": 3,
+    "未分類": 1
+   },
+   "kou_ne_moku": [
+    [
+     "cao.go.jp__yosan__soshiki__r07__pdf__0",
+     "宇宙開発戦略推進事務局",
+     14692791,
+     14586854,
+     "位置で決めた項（目次なし）"
+    ],
+    [
+     "cas.go.jp__jp__yosan__pdf__r7_01",
+     "情報収集衛星業務費",
+     53237195,
+     19844539,
+     "位置で決めた項（目次なし）"
+    ],
+    [
+     "mext.go.jp__content__20240911-mxt_kaikesou01-000038011_1",
+     "文化振興基盤整備費",
+     2213176,
+     2212500,
+     "明細表の未解決の行あり"
+    ],
+    [
+     "mhlw.go.jp__wp__yosan__yosan__25syokan__dl__05-1b-01",
+     "医療提供体制確保対策費",
+     23517996,
+     23517267,
+     "明細表の未解決の行あり"
+    ],
+    [
+     "mhlw.go.jp__wp__yosan__yosan__25syokan__dl__05-1b-01",
+     "医療安全確保推進費",
+     1392137,
+     1389276,
+     "明細表の未解決の行あり"
+    ],
+    [
+     "moj.go.jp__content__001424470",
+     "公安調査庁共通費",
+     14452105,
+     14428436,
+     "未分類"
+    ]
+   ],
+   "kou_ne_jikou": [],
+   "unlisted_kou": [
+    [
+     "cao.go.jp__yosan__soshiki__r07__pdf__",
+     "020",
+     "内閣本府施設費",
+     null
+    ]
+   ]
+  },
+  "2026": {
+   "kou": {
+    "total": 1188,
+    "kou_eq_jikou": 1188,
+    "kou_ne_jikou": 0,
+    "kou_no_jikou": 0,
+    "kou_no_amount": 0,
+    "kou_eq_moku": 1135,
+    "kou_ne_moku": 8,
+    "kou_moku_blank": 37,
+    "kou_no_moku": 7,
+    "kou_no_moku_image": 1
+   },
+   "jikou": {
+    "total": 1864,
+    "from_detail_only": 0,
+    "eq": 1771,
+    "ne": 8,
+    "blank": 64,
+    "no_moku": 20,
+    "no_moku_image": 1,
+    "no_amount": 0
+   },
+   "moku_rows": 28383,
+   "moku_groups": 10158,
+   "gaiji_left_in_names": 0,
+   "orphan_moku": {
+    "no_kou_in_book": 0,
+    "before_first_kou": 0,
+    "after_context": 0,
+    "in_unlisted_kou": 25
+   },
+   "kou_ne_moku_by_reason": {
+    "位置で決めた項（目次なし）": 3,
+    "明細表の未解決の行あり": 3,
+    "未分類": 1,
+    "画像の頁あり": 1
+   },
+   "kou_ne_moku": [
+    [
+     "cao.go.jp__yosan__soshiki__r08__pdf__00",
+     "国際平和協力本部",
+     696440,
+     696349,
+     "位置で決めた項（目次なし）"
+    ],
+    [
+     "cao.go.jp__yosan__soshiki__r08__pdf__00",
+     "日本学術会議",
+     680646,
+     684039,
+     "位置で決めた項（目次なし）"
+    ],
+    [
+     "cas.go.jp__jp__yosan__pdf__r8_01",
+     "情報収集衛星業務費",
+     60784431,
+     30414294,
+     "位置で決めた項（目次なし）"
+    ],
+    [
+     "mext.go.jp__content__20250909-mxt_kaikesou01-000044539_1",
+     "文化振興基盤整備費",
+     2432535,
+     2430829,
+     "明細表の未解決の行あり"
+    ],
+    [
+     "mlit.go.jp__page__content__001908433",
+     "地方整備局共通費",
+     35866570,
+     35719489,
+     "明細表の未解決の行あり"
+    ],
+    [
+     "mlit.go.jp__page__content__001908433",
+     "気象官署共通費",
+     36437405,
+     36435697,
+     "明細表の未解決の行あり"
+    ],
+    [
+     "mof.go.jp__about_mof__mof_budget__budget__fy2026__2026ippan_2",
+     "財務本省共通費",
+     127565578,
+     127516637,
+     "未分類"
+    ],
+    [
+     "moj.go.jp__content__001446299",
+     "公安調査庁共通費",
+     15442036,
+     17366156,
+     "画像の頁あり"
+    ]
+   ],
+   "kou_ne_jikou": [],
+   "unlisted_kou": [
+    [
+     "cao.go.jp__yosan__soshiki__r08__pdf__",
+     "020",
+     "内閣本府施設費",
+     null
+    ]
+   ]
+  },
+  "2027": {
+   "kou": {
+    "total": 987,
+    "kou_eq_jikou": 987,
+    "kou_ne_jikou": 0,
+    "kou_no_jikou": 0,
+    "kou_no_amount": 0,
+    "kou_eq_moku": 930,
+    "kou_ne_moku": 8,
+    "kou_moku_blank": 38,
+    "kou_no_moku": 11,
+    "kou_no_moku_image": 0
+   },
+   "jikou": {
+    "total": 1546,
+    "from_detail_only": 0,
+    "eq": 1463,
+    "ne": 10,
+    "blank": 55,
+    "no_moku": 18,
+    "no_moku_image": 0,
+    "no_amount": 0
+   },
+   "moku_rows": 22398,
+   "moku_groups": 8536,
+   "gaiji_left_in_names": 0,
+   "orphan_moku": {
+    "no_kou_in_book": 0,
+    "before_first_kou": 14,
+    "after_context": 0,
+    "in_unlisted_kou": 15
+   },
+   "kou_ne_moku_by_reason": {
+    "位置で決めた項（目次なし）": 3,
+    "画像の頁あり": 4,
+    "明細表の無い分冊あり": 1
+   },
+   "kou_ne_moku": [
+    [
+     "cao.go.jp__yosan__soshiki__r09__pdf__00",
+     "内閣本府共通費",
+     29961843,
+     29863340,
+     "位置で決めた項（目次なし）"
+    ],
+    [
+     "cao.go.jp__yosan__soshiki__r09__pdf__00",
+     "経済安全保障確保推進費",
+     609127,
+     75611,
+     "位置で決めた項（目次なし）"
+    ],
+    [
+     "cao.go.jp__yosan__soshiki__r09__pdf__00",
+     "地方創生推進事務局",
+     1784051,
+     1774478,
+     "位置で決めた項（目次なし）"
+    ],
+    [
+     "cas.go.jp__jp__yosan__pdf__r9_01",
+     "内閣官房共通費",
+     50980148,
+     33531813,
+     "画像の頁あり"
+    ],
+    [
+     "cas.go.jp__jp__yosan__pdf__r9_01",
+     "内閣官房施設費",
+     2800017,
+     1650967,
+     "明細表の無い分冊あり"
+    ],
+    [
+     "cas.go.jp__jp__yosan__pdf__r9_01",
+     "情報収集衛星業務費",
+     58514048,
+     39251076,
+     "画像の頁あり"
+    ],
+    [
+     "moj.go.jp__content__001470250",
+     "公安調査庁共通費",
+     15922925,
+     15493670,
+     "画像の頁あり"
+    ],
+    [
+     "moj.go.jp__content__001470250",
+     "破壊的団体等調査費",
+     2637398,
+     209714,
+     "画像の頁あり"
+    ]
+   ],
+   "kou_ne_jikou": [],
+   "unlisted_kou": [
+    [
+     "cao.go.jp__yosan__soshiki__r09__pdf__",
+     "020",
+     "内閣本府施設費",
+     null
+    ]
+   ]
+  }
+ }
+}

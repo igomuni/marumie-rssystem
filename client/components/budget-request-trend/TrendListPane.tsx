@@ -9,7 +9,7 @@ const MAX_ROWS = 600;
 const MIN_COLUMN_WIDTH = 48;
 
 /** 列幅の既定（px）。所管は「［特］子ども・子育て支援」が折り返さない幅 */
-export const DEFAULT_COLUMN_WIDTHS: Record<TrendSortKey, number> = { group: 184, acct: 150, org: 130, name: 220, pattern: 76, prev: 112, req: 100, diff: 100, rate: 76 };
+export const DEFAULT_COLUMN_WIDTHS: Record<TrendSortKey, number> = { group: 184, acct: 150, org: 130, name: 220, pattern: 76, prev: 112, req: 100, diff: 100, rate: 76, nJikou: 56, nMoku: 56 };
 
 const chip = 'ml-1 rounded-full border px-1.5 text-[10px] align-middle';
 
@@ -56,6 +56,8 @@ export function TrendListPane({
     { key: 'req', label: '要求額' },
     { key: 'diff', label: '増減' },
     { key: 'rate', label: '増減率' },
+    { key: 'nJikou', label: '事項' },
+    { key: 'nMoku', label: '目' },
   ];
   // 選択中の項が上位 MAX_ROWS 件の外にあっても表示に含め、年度の切り替え・選択の変更のときに一覧をそこまでスクロールする
   const selectedIdx = selectedKey === null ? -1 : rows.findIndex(x => rowKey(x.row) === selectedKey);
@@ -166,14 +168,16 @@ export function TrendListPane({
                   <td className="whitespace-nowrap px-2 py-1 text-right tabular-nums">{formatSen(x.req)}</td>
                   <td className={`whitespace-nowrap px-2 py-1 text-right tabular-nums ${changeColor(d)}`}>{formatSenSigned(d)}</td>
                   <td className={`whitespace-nowrap px-2 py-1 text-right tabular-nums ${changeColor(t)}`}>{formatRate(t)}</td>
+                  <td className="whitespace-nowrap px-2 py-1 text-right tabular-nums text-neutral-600 dark:text-neutral-300" title="事項の数（総表・明細表）">{a?.nJikou ?? '–'}</td>
+                  <td className="whitespace-nowrap px-2 py-1 text-right tabular-nums text-neutral-600 dark:text-neutral-300" title="目の数（事項をまたいで目名 + 目別で数える）">{a?.nMoku ?? '–'}</td>
                 </tr>
               );
             })}
             {rows.length > shown.length && (
-              <tr><td colSpan={9} className="px-2 py-2 text-neutral-500">上位 {shown.length.toLocaleString()} 件を表示（全 {rows.length.toLocaleString()} 項）。絞り込みで減らしてください。</td></tr>
+              <tr><td colSpan={11} className="px-2 py-2 text-neutral-500">上位 {shown.length.toLocaleString()} 件を表示（全 {rows.length.toLocaleString()} 項）。絞り込みで減らしてください。</td></tr>
             )}
             {rows.length === 0 && (
-              <tr><td colSpan={9} className="px-2 py-8 text-center text-neutral-500">条件に合う項がありません。</td></tr>
+              <tr><td colSpan={11} className="px-2 py-8 text-center text-neutral-500">条件に合う項がありません。</td></tr>
             )}
           </tbody>
         </table>

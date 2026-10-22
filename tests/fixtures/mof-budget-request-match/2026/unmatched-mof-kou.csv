@@ -1,5 +1,4 @@
 mof_row,account,kou_code,kou_name,item_name,reason,ministry,organization,special_account,sub_account
-kou-general:11,general,022,国立国会図書館施設費,,no_request_row,国会,国立国会図書館,,
 kou-general:30,general,002,内閣本府施設費,,no_request_row,内閣府,内閣本府,,
 kou-general:53,general,036,就職氷河期世代等支援推進費,,no_request_row,内閣府,内閣本府,,
 kou-general:66,general,059,独立行政法人国立公文書館施設整備費,,no_request_row,内閣府,内閣本府,,
@@ -7,14 +6,12 @@ kou-general:67,general,287,物価高騰対応地方創生推進費,,no_request_r
 kou-general:68,general,288,地方創生地域産業基盤整備事業推進費,,no_request_row,内閣府,内閣本府,,
 kou-general:69,general,289,地域経済活性化支援費,,no_request_row,内閣府,内閣本府,,
 kou-general:83,general,063,独立行政法人北方領土問題対策協会施設整備費,,no_request_row,内閣府,北方対策本部,,
-kou-general:112,general,145,交通反則者納金財源交通安全対策特別交付金等交付税及び譲与税配付金特別会計へ繰入,,no_request_row,内閣府,警察庁,,
 kou-general:121,general,331,サイバー通信情報監理委員会,,no_request_row,内閣府,サイバー通信情報監理委員会,,
 kou-general:145,general,001,防災庁,,no_request_row,防災庁,防災庁,,
 kou-general:164,general,032,特定高周波数無線局開設価額競争落札金財源特定高周波数対策費,,no_request_row,総務省,総務本省,,
 kou-general:251,general,015,産業投資支出財政投融資特別会計へ繰入,,no_request_row,財務省,財務本省,,
 kou-general:252,general,065,貨幣回収準備資金へ繰入,,no_request_row,財務省,財務本省,,
 kou-general:267,general,050,独立行政法人酒類総合研究所施設整備費,,no_request_row,財務省,国税庁,,
-kou-general:296,general,044,電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ繰入,,no_request_row,文部科学省,文部科学本省,,
 kou-general:307,general,008,独立行政法人国立青少年教育振興機構施設整備費,,no_request_row,文部科学省,文部科学本省,,
 kou-general:309,general,010,独立行政法人教職員支援機構施設整備費,,no_request_row,文部科学省,文部科学本省,,
 kou-general:310,general,012,独立行政法人国立特別支援教育総合研究所施設整備費,,no_request_row,文部科学省,文部科学本省,,
@@ -32,8 +29,6 @@ kou-general:491,general,034,食育推進費,,no_request_row,農林水産省,農�
 kou-general:555,general,128,漁港施設災害復旧事業工事諸費,,no_request_row,農林水産省,水産庁,,
 kou-general:573,general,021,独立行政法人日本貿易振興機構施設整備費,,no_request_row,経済産業省,経済産業本省,,
 kou-general:577,general,024,独立行政法人エネルギー・金属鉱物資源機構出資,,no_request_row,経済産業省,経済産業本省,,
-kou-general:583,general,083,石油石炭税財源燃料安定供給対策及エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入,,no_request_row,経済産業省,資源エネルギー庁,,
-kou-general:584,general,084,電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ繰入,,no_request_row,経済産業省,資源エネルギー庁,,
 kou-general:585,general,093,原子力損害賠償支援対策費エネルギー対策特別会計へ繰入,,no_request_row,経済産業省,資源エネルギー庁,,
 kou-general:586,general,082,鉱物資源安定供給確保費,,no_request_row,経済産業省,資源エネルギー庁,,
 kou-general:587,general,087,燃料安定供給対策費,,no_request_row,経済産業省,資源エネルギー庁,,
@@ -45,15 +40,11 @@ kou-general:740,general,227,国際観光旅客税財源独立行政法人国立�
 kou-general:741,general,228,国際観光旅客税財源独立行政法人日本芸術文化振興会施設整備費,,no_request_row,国土交通省,観光庁,,
 kou-general:742,general,229,国際観光旅客税財源独立行政法人国立文化財機構施設整備費,,no_request_row,国土交通省,観光庁,,
 kou-general:743,general,391,国際観光旅客税財源独立行政法人国立美術館施設整備費,,no_request_row,国土交通省,観光庁,,
-kou-general:762,general,003,石油石炭税財源エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰入,,no_request_row,環境省,環境本省,,
 kou-general:769,general,029,人と自然のふれあい推進費,,no_request_row,環境省,環境本省,,
-kou-general:795,general,053,電源開発促進税財源電源利用対策及原子力安全規制対策費エネルギー対策特別会計へ繰入,,no_request_row,環境省,原子力規制委員会,,
 kou-special:57,special,13,脱炭素成長型経済構造移行推進機構出資,,no_request_row,内閣府、文部科学省、経済産業省及び環境省,,エネルギー対策,電源開発促進勘定
-kou-special:70,special,04,エネルギー需給構造高度化対策国立研究開発法人新エネルギー・産業技術総合開発機構運営費,,no_request_row,内閣府、文部科学省、経済産業省及び環境省,,エネルギー対策,先端半導体・人工知能関連技術勘定
 kou-special:71,special,08,脱炭素成長型経済構造移行推進国立研究開発法人新エネルギー・産業技術総合開発機構運営費,,no_request_row,内閣府、文部科学省、経済産業省及び環境省,,エネルギー対策,先端半導体・人工知能関連技術勘定
 kou-special:73,special,06,先端半導体・人工知能関連技術対策公債事務取扱費一般会計へ繰入,,no_request_row,内閣府、文部科学省、経済産業省及び環境省,,エネルギー対策,先端半導体・人工知能関連技術勘定
 kou-special:74,special,07,国債整理基金特別会計へ繰入,,no_request_row,内閣府、文部科学省、経済産業省及び環境省,,エネルギー対策,先端半導体・人工知能関連技術勘定
 kou-special:151,special,04,乳児等のための支援給付費,,no_request_row,内閣府及び厚生労働省,,子ども・子育て支援,子ども・子育て支援勘定
 kou-special:159,special,13,一般会計へ繰入,,no_request_row,内閣府及び厚生労働省,,子ども・子育て支援,子ども・子育て支援勘定
-kou-special:192,special,14,東日本大震災復興土地改良事業費負担金等収入東日本大震災復興特別会計へ繰入,,no_request_row,農林水産省,,食料安定供給,国営土地改良事業勘定
 kou-special:235,special,19,防災行政復興政策費,,no_request_row,国会、裁判所、会計検査院、内閣、内閣府、デジタル庁、防災庁、復興庁、総務省、法務省、外務省、財務省、文部科学省、厚生労働省、農林水産省、経済産業省、国土交通省、環境省及び防衛省,復興庁,東日本大震災復興,
