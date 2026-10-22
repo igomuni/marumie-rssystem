@@ -2,6 +2,8 @@
 
 概算要求の項を、年度をまたいで並べるための 1 本の CSV。MOF の予算書との突合は参考情報で、キーにも出力の有無にも使わない。
 
+項の下の事項・目は、別の CSV（[budget-request-trend-detail-csv.md](budget-request-trend-detail-csv.md)）。
+
 ```bash
 npx tsx scripts/pipeline-v2/build-budget-request-trend-csv.ts   # → tests/fixtures/budget-request-trend/{kou.csv,summary.json}
 ```
