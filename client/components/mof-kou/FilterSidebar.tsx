@@ -14,6 +14,7 @@ import { useState } from 'react';
 import type { MOFBudgetType } from '@/types/mof-jikou';
 import { ACCOUNT_LABEL } from '@/client/components/mof-kou/columns';
 import { MultiSelectCombo } from '@/client/components/mof-kou/MultiSelectCombo';
+import { NONE_SELECTED } from '@/app/lib/filter-selection';
 import { RangeSlider } from '@/client/components/mof-kou/RangeSlider';
 import { RegexTextFilter } from '@/client/components/mof-kou/RegexTextFilter';
 import { formatYen } from '@/client/components/mof-jikou/format';
@@ -80,7 +81,7 @@ function formatCount(v: number): string {
 /** 上位の選択がまだ有効な選択肢だけに絞る（無効化されたものは黙って落とす） */
 function pruneToOptions(selected: string[], options: string[]): string[] {
   if (selected.length === 0) return selected;
-  const next = selected.filter(s => options.includes(s));
+  const next = selected.filter(s => s === NONE_SELECTED || options.includes(s)); // 「なし」は残す
   return next.length === selected.length ? selected : next;
 }
 
