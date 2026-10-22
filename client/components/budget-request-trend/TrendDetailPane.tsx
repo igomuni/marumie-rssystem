@@ -100,9 +100,15 @@ export function TrendDetailPane({
         <h2 className="mt-0.5 text-base font-semibold leading-snug">{row.name}{row.kou && <span className="ml-1 text-xs font-normal text-neutral-400">(項コード {row.kou})</span>}</h2>
       </div>
       <div role="tablist" aria-label="詳細の表示" className="flex gap-1 border-b border-neutral-200 dark:border-neutral-800">
-        {TABS.map(([t, label]) => (
-          <button key={t} type="button" role="tab" aria-selected={tab === t} onClick={() => onTab(t)} className={`-mb-px border-b-2 px-2.5 py-1 text-xs ${tab === t ? 'border-emerald-700 font-semibold text-neutral-900 dark:border-emerald-400 dark:text-neutral-100' : 'border-transparent text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200'}`}>{label}</button>
-        ))}
+        {TABS.map(([t, label]) => {
+          // 件数は選択中の年度の事項・目の数（目は事項をまたいで数える）。内訳が届くまでと、内訳の無い年度は出さない
+          const n = t === 'jikou' ? yearOf(row, year)?.nJikou : t === 'moku' ? yearOf(row, year)?.nMoku : undefined;
+          return (
+            <button key={t} type="button" role="tab" aria-selected={tab === t} onClick={() => onTab(t)} title={n !== undefined ? `FY${year} の${label}の数` : undefined} className={`-mb-px border-b-2 px-2.5 py-1 text-xs ${tab === t ? 'border-emerald-700 font-semibold text-neutral-900 dark:border-emerald-400 dark:text-neutral-100' : 'border-transparent text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200'}`}>
+              {label}{n !== undefined && <span className="ml-1 rounded-full bg-neutral-100 px-1.5 text-[10px] font-normal tabular-nums text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">{n}</span>}
+            </button>
+          );
+        })}
       </div>
       {tab !== 'trend' ? (
         detailError ? <p className="text-red-700">事項・目の内訳の読み込みに失敗しました。</p>
